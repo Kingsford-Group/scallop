@@ -7,7 +7,8 @@ hts_headers = $(hts)/htslib
 
 scallop_CPPFLAGS = -I$(hts) -I$(hts_headers) 
 scallop_LDFLAGS = -L$(samtools) -L$(hts)
-scallop_LDADD = -lbam -lhts -lz
+scallop_LDADD = -lbam -lhts
 
 scallop_SOURCES = main.cc \
-				  test_sam.h test_sam.cc
+				  test_sam.h test_sam.cc \
+				  scallop.h scallop.cc
