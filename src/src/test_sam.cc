@@ -28,8 +28,8 @@ int test(const char * sam)
 		printf("n_cigar     = %d\n", p->core.n_cigar);
 		for(int k = 0; k < p->core.n_cigar; k++)
 		{
-			uint32_t op = bam_cigar_op(cigar[k]);
-			uint32_t len = bam_cigar_oplen(cigar[k]);
+			int32_t op = bam_cigar_op(cigar[k]);
+			int32_t len = bam_cigar_oplen(cigar[k]);
 			printf("cigar %1d     = (type = %d, length = %d)\n", k, op, len);
 		}
 

@@ -11,4 +11,7 @@ scallop_LDADD = -lbam -lhts
 
 scallop_SOURCES = main.cc \
 				  test_sam.h test_sam.cc \
-				  scallop.h scallop.cc
+				  scallop.h scallop.cc \
+				  bundle.h bundle.cc \
+				  common.h common.cc \
+				  config.h config.cc

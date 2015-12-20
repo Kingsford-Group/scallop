@@ -2,12 +2,19 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "test_sam.h"
+#include "config.h"
+#include "scallop.h"
 
 int main(int argc, char **argv)
 {
-	if(argc != 2) return 0;
+	if(argc != 3) return 0;
 
-	test(argv[1]);
+	config *conf = new config(argv[1]);
+
+	scallop sc(conf);
+	sc.process(argv[2]);
+
+	delete conf;
+
     return 0;
 }
