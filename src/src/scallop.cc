@@ -21,10 +21,11 @@ int scallop::process(const char * bam_file)
 	bundle b;
     while(sam_read1(fn, header, p) >= 0)
 	{
-		if(b.size() > 0 && b.rpos + conf->min_bundle_gap < p->core.pos)
+		if(b.hits.size() > 0 && (b.rpos + conf->min_bundle_gap < p->core.pos || p->core.tid != b.tid))
 		{
 			bundles.push_back(b);
-			printf("bundle %8ld: %8ld hits [%8d,%8d]\n", bundles.size(), b.size(), b.lpos, b.rpos);
+			printf("bundle %8ld: ", bundles.size());
+			b.print();
 			b.clear();
 		}
 
