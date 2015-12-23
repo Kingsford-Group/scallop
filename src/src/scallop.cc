@@ -31,7 +31,7 @@ int scallop::process(const char * bam_file)
 		if(bd.hits.size() > 0 && (bd.rpos + conf->min_bundle_gap < p.pos || p.tid != bd.tid))
 		{
 			bundles.push_back(bd);
-			printf("bundle %8lu: ", bundles.size());
+			//printf("bundle %8lu: ", bundles.size());
 			bd.print();
 			bd.clear();
 		}

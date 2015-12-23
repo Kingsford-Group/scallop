@@ -3,6 +3,10 @@
 
 #include "sam.h"
 
+#define MAX_NUM_CIGAR 7
+#define MIN_LEN_FLANK 5
+
+
 class hit: public bam1_core_t
 {
 public:
@@ -10,9 +14,9 @@ public:
 	~hit();
 
 public:
-	uint32_t cigar[7];			// cigar, use samtools
-	int32_t spos[7];			// splice positions
-	int n_spos;					// number of splice positions
+	uint32_t cigar[MAX_NUM_CIGAR];			// cigar, use samtools
+	int32_t spos[MAX_NUM_CIGAR];			// splice positions
+	int n_spos;								// number of splice positions
 
 public:
 	int print();
