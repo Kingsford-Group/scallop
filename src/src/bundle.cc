@@ -1,11 +1,13 @@
 #include <cassert>
 #include <cstdio>
+#include <map>
 
 #include "kstring.h"
 #include "bundle.h"
 
-bundle::bundle()
+bundle::bundle(config * _conf)
 {
+	conf = _conf;
 	tid = -1;
 	chrm = "";
 	lpos = INT32_MAX;
@@ -14,6 +16,12 @@ bundle::bundle()
 
 bundle::~bundle()
 {
+}
+
+int bundle::solve()
+{
+	infer_splice_positions();
+	return 0;
 }
 
 int bundle::add_hit(bam_hdr_t *h, bam1_t *b)
@@ -57,13 +65,14 @@ int bundle::add_hit(bam_hdr_t *h, bam1_t *b)
 
 int bundle::print()
 {
-	//printf("tid = %4d, #hits = %7lu, range = %s:%d-%d\n", tid, hits.size(), chrm.c_str(), lpos, rpos);
+	printf("tid = %4d, #hits = %7lu, range = %s:%d-%d\n", tid, hits.size(), chrm.c_str(), lpos, rpos);
+	return 0;
+
 	for(int i = 0; i < hits.size(); i++)
 	{
-		//printf("hit %7d: ", i);
+		printf("hit %7d: ", i);
 		hits[i].print();
 	}
-
 	return 0;
 }
 
@@ -77,3 +86,24 @@ int bundle::clear()
 	return 0;
 }
 
+int bundle::infer_splice_positions()
+{
+	map<int32_t, int32_t> m;
+	for(int i = 0; i < hits.size(); i++)
+	{
+		if(hits[i].n_spos <= 0) continue;
+		for(int k = 0; k < hits[i].n_spos; k++)
+		{
+			int32_t p = hits[i].spos[k];
+			if(m.find(p) == m.end()) m.insert(pair<int32_t, int32_t>(p, 1));
+			else m[p]++;
+		}
+	}
+
+	map<int32_t, int32_t>::iterator it;
+	for(it = m.begin(); it != m.end(); it++)
+	{
+		printf("splice position %9d of %5d apperances\n", it->first, it->second);
+	}
+	return 0;
+}

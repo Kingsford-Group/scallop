@@ -16,7 +16,8 @@ public:
 
 public:
 	int process(const char *bam_file);
-
+	int load(const char *bam_file);
+	int solve();
 };
 
 #endif

@@ -14,13 +14,21 @@ scallop::~scallop()
 {
 }
 
-int scallop::process(const char * bam_file)
+
+int scallop::process(const char *bam_file)
+{
+	load(bam_file);
+	solve();
+	return 0;
+}
+
+int scallop::load(const char *bam_file)
 {
     samFile *fn = sam_open(bam_file, "r");
     bam_hdr_t *h= sam_hdr_read(fn);
     bam1_t *b = bam_init1();
 
-	bundle bd;
+	bundle bd(conf);
     while(sam_read1(fn, h, b) >= 0)
 	{
 		bam1_core_t &p = b->core;
@@ -32,7 +40,7 @@ int scallop::process(const char * bam_file)
 		{
 			bundles.push_back(bd);
 			//printf("bundle %8lu: ", bundles.size());
-			bd.print();
+			//bd.print();
 			bd.clear();
 		}
 		bd.add_hit(h, b);
@@ -42,5 +50,16 @@ int scallop::process(const char * bam_file)
     bam_hdr_destroy(h);
     sam_close(fn);
 
+	return 0;
+}
+
+int scallop::solve()
+{
+	for(int i = 0; i < bundles.size(); i++)
+	{
+		printf("bundle %6d: ", i + 1);
+		bundles[i].print();
+		bundles[i].solve();
+	}
 	return 0;
 }

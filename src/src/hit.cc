@@ -23,7 +23,8 @@ hit::~hit()
 
 int hit::print()
 {
-	if(n_cigar != MAX_NUM_CIGAR) return 0;
+	// DEBUG
+	if(n_cigar != 5) return 0;
 
 	// print cigar
 	for(int i = 0; i < n_cigar; i++)
@@ -34,14 +35,16 @@ int hit::print()
 	// print splice positions
 	for(int i = 0; i < n_spos; i++)
 	{
-		printf("splice position %d = %7d\n", i, spos[i]);
+		printf("splice position %d: start = %7d, offset = %7d, splice = %7d\n", i, pos, spos[i] - pos, spos[i]);
 	}
+
+	printf("\n");
 	return 0;
 }
 
 int hit::infer_splice_positions()
 {
-	int32_t p = 0;
+	int32_t p = pos;
     for(int k = 0; k < n_cigar; k++)
 	{
 		if (bam_cigar_type(bam_cigar_op(cigar[k]))&2)
