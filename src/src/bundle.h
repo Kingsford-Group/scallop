@@ -2,8 +2,8 @@
 #define __BUNDLE_H__
 
 #include <stdint.h>
-#include <vector>
 #include <cstring>
+#include <vector>
 #include <string>
 
 #include "sam.h"
@@ -13,6 +13,10 @@ using namespace std;
 class bundle
 {
 public:
+	bundle();
+	~bundle();
+
+public:
 	int32_t tid;				// chromosome ID
 	string chr;					// chromosome name
 	int32_t lpos;				// the leftmost position
@@ -20,12 +24,9 @@ public:
 	vector<bam1_core_t> hits;	// store hits
 
 public:
-	bundle();
-
-public:
 	int add_hit(bam_hdr_t *h, bam1_t *b);
-	int clear();
 	int print();
+	int clear();
 };
 
 #endif

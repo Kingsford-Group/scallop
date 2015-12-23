@@ -7,8 +7,13 @@
 bundle::bundle()
 {
 	tid = -1;
+	chr = "";
 	lpos = INT32_MAX;
 	rpos = 0;
+}
+
+bundle::~bundle()
+{
 }
 
 int bundle::add_hit(bam_hdr_t *h, bam1_t *b)
@@ -52,6 +57,7 @@ int bundle::clear()
 {
 	hits.clear();
 	tid = -1;
+	chr = "";
 	lpos = INT32_MAX;
 	rpos = 0;
 	return 0;
