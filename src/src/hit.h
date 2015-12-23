@@ -4,14 +4,11 @@
 #include "sam.h"
 
 // this class is a C++ closure of bam1_t
-class hit
+class hit: public bam1_core_t
 {
 public:
-	hit(bam1_t *_b);
+	hit(bam1_t *b);
 	~hit();
-
-private:
-	bam1_t *b;
 };
 
 #endif

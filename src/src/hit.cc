@@ -1,11 +1,10 @@
 #include "hit.h"
 
-hit::hit(bam1_t *_b)
+hit::hit(bam1_t *b)
+	:bam1_core_t(b->core)
 {
-	b = bam_dup1(_b);
 }
 
 hit::~hit()
 {
-	bam_destroy1(b);
 }
