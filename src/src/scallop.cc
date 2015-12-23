@@ -26,6 +26,8 @@ int scallop::process(const char * bam_file)
 		bam1_core_t &p = b->core;
 		if((p.flag & 0x4) >= 1) continue;		// read is not mapped
 		if((p.flag & 0x100) >= 1) continue;		// secondary alignment
+		if(p.n_cigar < 1) continue;				// should never happen
+		if(p.n_cigar > 7) continue;				// ignore hits with more than 7 cigar types
 		if(bd.hits.size() > 0 && (bd.rpos + conf->min_bundle_gap < p.pos || p.tid != bd.tid))
 		{
 			bundles.push_back(bd);

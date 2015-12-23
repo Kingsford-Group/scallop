@@ -19,9 +19,9 @@ public:
 
 public:
 	int32_t tid;				// chromosome ID
-	string chr;					// chromosome name
-	int32_t lpos;				// the leftmost position
-	int32_t rpos;				// the rightmost position
+	string chrm;				// chromosome name
+	int32_t lpos;				// the leftmost position on reference
+	int32_t rpos;				// the rightmost position on reference
 	vector<hit> hits;			// hits
 
 public:

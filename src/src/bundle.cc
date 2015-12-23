@@ -7,7 +7,7 @@
 bundle::bundle()
 {
 	tid = -1;
-	chr = "";
+	chrm = "";
 	lpos = INT32_MAX;
 	rpos = 0;
 }
@@ -35,10 +35,10 @@ int bundle::add_hit(bam_hdr_t *h, bam1_t *b)
 	if(tid == -1)
 	{
 		tid = p.tid;
-		assert(chr == "");
+		assert(chrm == "");
 		char buf[1024];
 		strcpy(buf, h->target_name[p.tid]);
-		chr = string(buf);
+		chrm = string(buf);
 	}
 	assert(tid == p.tid);
 
@@ -57,7 +57,13 @@ int bundle::add_hit(bam_hdr_t *h, bam1_t *b)
 
 int bundle::print()
 {
-	printf("tid = %4d, #hits = %7lu, range = %s:%d-%d\n", tid, hits.size(), chr.c_str(), lpos, rpos);
+	//printf("tid = %4d, #hits = %7lu, range = %s:%d-%d\n", tid, hits.size(), chrm.c_str(), lpos, rpos);
+	for(int i = 0; i < hits.size(); i++)
+	{
+		//printf("hit %7d: ", i);
+		hits[i].print();
+	}
+
 	return 0;
 }
 
@@ -65,7 +71,7 @@ int bundle::clear()
 {
 	hits.clear();
 	tid = -1;
-	chr = "";
+	chrm = "";
 	lpos = INT32_MAX;
 	rpos = 0;
 	return 0;
