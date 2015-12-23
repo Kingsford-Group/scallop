@@ -8,14 +8,18 @@ class scallop
 {
 public:
 	config *conf;
-	vector<bundle> bundles;
+	bundle **bundles;
+	int n_bundles;
+	int m_bundles;
 
 public:
 	scallop(config *_conf);
 	~scallop();
 
 public:
-	int process(const char * bam_file);
+	int process(const char *bam_file);
+	int add_bundle(bundle *bd);
+
 };
 
 #endif

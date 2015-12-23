@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 #include <cstring>
-#include <vector>
-#include <string>
 
 #include "sam.h"
 
@@ -18,15 +16,16 @@ public:
 
 public:
 	int32_t tid;				// chromosome ID
-	string chr;					// chromosome name
+	char chr[1024];					// chromosome name
 	int32_t lpos;				// the leftmost position
 	int32_t rpos;				// the rightmost position
-	vector<bam1_core_t> hits;	// store hits
+	bam1_t **hits;				// store hits
+	int n_hits;					// number of hits
+	int m_hits;					// size of the buffer
 
 public:
 	int add_hit(bam_hdr_t *h, bam1_t *b);
 	int print();
-	int clear();
 };
 
 #endif
