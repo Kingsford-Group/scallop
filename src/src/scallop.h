@@ -8,7 +8,6 @@ class scallop
 {
 public:
 	config *conf;
-
 	vector<bundle> bundles;
 
 public:
