@@ -7,32 +7,20 @@
 bundle::bundle()
 {
 	tid = -1;
+	chr = "";
 	lpos = INT32_MAX;
 	rpos = 0;
-	n_hits = 0;
-	m_hits = 1;
-	hits = (bam1_t**)malloc(sizeof(bam1_t*) * m_hits);
-	hits[0] = NULL;
 }
 
 bundle::~bundle()
 {
-	for(int i = 0; i < n_hits; i++) bam_destroy1(hits[i]);
-	free(hits);
 }
 
 int bundle::add_hit(bam_hdr_t *h, bam1_t *b)
 {
-	// realloc memory if necessary
-	assert(n_hits <= m_hits);
-	if(n_hits == m_hits)
-	{
-		m_hits = n_hits * 2;
-		hits = (bam1_t**)realloc(hits, m_hits * sizeof(bam1_t*)); 
-	}
-
-	// copy the hit
-	hits[n_hits++] = bam_dup1(b);		// deep copy
+	// create and store new hit
+	hit ht(b);
+	hits.push_back(ht);
 
 	// calcuate the boundaries on reference
 	bam1_core_t &p = b->core;
@@ -46,8 +34,11 @@ int bundle::add_hit(bam_hdr_t *h, bam1_t *b)
 	// set chromsome ID and name
 	if(tid == -1)
 	{
-		strcpy(chr, h->target_name[p.tid]);
 		tid = p.tid;
+		assert(chr == "");
+		char buf[1024];
+		strcpy(buf, h->target_name[p.tid]);
+		chr = string(buf);
 	}
 	assert(tid == p.tid);
 
@@ -66,6 +57,17 @@ int bundle::add_hit(bam_hdr_t *h, bam1_t *b)
 
 int bundle::print()
 {
-	printf("tid = %4d, #hits = (%7d / %7d), range = %s:%d-%d\n", tid, n_hits, m_hits, chr, lpos, rpos);
+	printf("tid = %4d, #hits = %7lu, range = %s:%d-%d\n", tid, hits.size(), chr.c_str(), lpos, rpos);
 	return 0;
 }
+
+int bundle::clear()
+{
+	hits.clear();
+	tid = -1;
+	chr = "";
+	lpos = INT32_MAX;
+	rpos = 0;
+	return 0;
+}
+
