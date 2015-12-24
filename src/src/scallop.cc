@@ -32,16 +32,18 @@ int scallop::load(const char *bam_file)
     while(sam_read1(fn, h, b) >= 0)
 	{
 		bam1_core_t &p = b->core;
-		if((p.flag & 0x4) >= 1) continue;		// read is not mapped
+		if((p.flag & 0x4) >= 1) continue;		// read is not mapped, TODO
 		if((p.flag & 0x100) >= 1) continue;		// secondary alignment
 		if(p.n_cigar < 1) continue;				// should never happen
 		if(p.n_cigar > 7) continue;				// ignore hits with more than 7 cigar types
+		//if(p.qual <= 4) continue;				// ignore hits with quality-score < 5
 		if(bd.hits.size() > 0 && (bd.rpos + conf->min_bundle_gap < p.pos || p.tid != bd.tid))
 		{
 			bundles.push_back(bd);
-			//printf("bundle %8lu: ", bundles.size());
-			//bd.print();
 			bd.clear();
+
+			// DEBUG
+			if(bundles.size() >= 10) break;
 		}
 		bd.add_hit(h, b);
     }
@@ -57,9 +59,8 @@ int scallop::solve()
 {
 	for(int i = 0; i < bundles.size(); i++)
 	{
-		printf("bundle %6d: ", i + 1);
-		bundles[i].print();
 		bundles[i].solve();
+		bundles[i].print();
 	}
 	return 0;
 }

@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "sposition.h"
 #include "config.h"
 #include "hit.h"
 #include "sam.h"
@@ -25,6 +26,7 @@ public:
 	int32_t lpos;				// the leftmost position on reference
 	int32_t rpos;				// the rightmost position on reference
 	vector<hit> hits;			// hits
+	vector<sposition> sps;		// splice positions
 
 public:
 	int solve();

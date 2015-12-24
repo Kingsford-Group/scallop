@@ -1,12 +1,20 @@
 #include <cstring>
 #include <cassert>
 #include <cstdio>
+#include <sstream>
 
 #include "hit.h"
 
 hit::hit(bam1_t *b)
 	:bam1_core_t(b->core)
 {
+	// fetch query name
+	char buf[1024];
+	memcpy(buf, bam_get_qname(b), l_qname);
+	buf[l_qname] = '\0';
+	qname = string(buf);
+
+
 	// copy cigar
 	assert(n_cigar <= MAX_NUM_CIGAR);
 	assert(n_cigar >= 1);
@@ -24,21 +32,25 @@ hit::~hit()
 int hit::print()
 {
 	// DEBUG
-	if(n_cigar != 5) return 0;
+	if(n_spos <= 0) return 0;
 
-	// print cigar
+	// get cigar string
+	ostringstream sstr;
 	for(int i = 0; i < n_cigar; i++)
 	{
-		printf("cigar %d: op = %c, length = %3d\n", i, bam_cigar_opchr(cigar[i]), bam_cigar_oplen(cigar[i]));
+		sstr << bam_cigar_opchr(cigar[i]) << bam_cigar_oplen(cigar[i]);
+		//printf("cigar %d: op = %c, length = %3d\n", i, bam_cigar_opchr(cigar[i]), bam_cigar_oplen(cigar[i]));
 	}
+
+	// print basic information
+	printf("Hit %s: cigar = %s, flag = %d, quality = %d\n", qname.c_str(), sstr.str().c_str(), flag, qual);
+
 
 	// print splice positions
 	for(int i = 0; i < n_spos; i++)
 	{
-		printf("splice position %d: start = %7d, offset = %7d, splice = %7d\n", i, pos, spos[i] - pos, spos[i]);
+		printf(" splice %d: start = %7d, offset = %7d, splice = %7d\n", i, pos, spos[i] - pos, spos[i]);
 	}
-
-	printf("\n");
 	return 0;
 }
 

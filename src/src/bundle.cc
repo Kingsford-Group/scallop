@@ -50,29 +50,26 @@ int bundle::add_hit(bam_hdr_t *h, bam1_t *b)
 	}
 	assert(tid == p.tid);
 
-	// DEBUG
-	/*
-	if(chr == "X" && l >= 21512338 && r <= 21513626)
-	{
-		kstring_t ks = {0, 0, 0};
-		sam_format1(h, b, &ks);
-		printf("flag = %d, read: %s\n", (p.flag & 0x100), ks_str(&ks));
-	}
-	*/
-
 	return 0;
 }
 
 int bundle::print()
 {
+	printf("Bundle: ");
+	// print hits
 	printf("tid = %4d, #hits = %7lu, range = %s:%d-%d\n", tid, hits.size(), chrm.c_str(), lpos, rpos);
-	return 0;
-
 	for(int i = 0; i < hits.size(); i++)
 	{
-		printf("hit %7d: ", i);
 		hits[i].print();
 	}
+
+	// print splice positions
+	for(int i = 0; i < sps.size(); i++)
+	{
+		sps[i].print();
+	}
+
+	printf("\n");
 	return 0;
 }
 
@@ -88,22 +85,32 @@ int bundle::clear()
 
 int bundle::infer_splice_positions()
 {
-	map<int32_t, int32_t> m;
+	map<int32_t, sposition> m;
 	for(int i = 0; i < hits.size(); i++)
 	{
 		if(hits[i].n_spos <= 0) continue;
 		for(int k = 0; k < hits[i].n_spos; k++)
 		{
 			int32_t p = hits[i].spos[k];
-			if(m.find(p) == m.end()) m.insert(pair<int32_t, int32_t>(p, 1));
-			else m[p]++;
+			if(m.find(p) == m.end()) 
+			{
+				sposition sp(p, 1, hits[i].qual, hits[i].qual);
+				m.insert(pair<int32_t, sposition>(p, sp));
+			}
+			else
+			{
+				assert(m[p].pos == p);
+				m[p].count++;
+				if(hits[i].qual < m[p].min_qual) m[p].min_qual = hits[i].qual;
+				if(hits[i].qual > m[p].max_qual) m[p].max_qual = hits[i].qual;
+			}
 		}
 	}
 
-	map<int32_t, int32_t>::iterator it;
+	map<int32_t, sposition>::iterator it;
 	for(it = m.begin(); it != m.end(); it++)
 	{
-		printf("splice position %9d of %5d apperances\n", it->first, it->second);
+		sps.push_back(it->second);
 	}
 	return 0;
 }

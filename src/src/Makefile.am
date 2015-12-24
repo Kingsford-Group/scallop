@@ -15,4 +15,5 @@ scallop_SOURCES = main.cc \
 				  bundle.h bundle.cc \
 				  common.h common.cc \
 				  config.h config.cc \
-				  hit.h hit.cc
+				  hit.h hit.cc \
+				  sposition.h sposition.cc
