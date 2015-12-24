@@ -2,19 +2,17 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "config.h"
 #include "scallop.h"
+#include "config.h"
 
 int main(int argc, char **argv)
 {
 	if(argc != 3) return 0;
 
-	config *conf = new config(argv[1]);
+	load_config(argv[1]);
 
-	scallop sc(conf);
+	scallop sc;
 	sc.process(argv[2]);
-
-	delete conf;
 
     return 0;
 }

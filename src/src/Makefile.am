@@ -15,4 +15,4 @@ scallop_SOURCES = main.cc \
 				  common.h common.cc \
 				  config.h config.cc \
 				  hit.h hit.cc \
-				  sposition.h sposition.cc
+				  position.h position.cc

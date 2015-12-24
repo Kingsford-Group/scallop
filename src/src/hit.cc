@@ -14,6 +14,8 @@ hit::hit(bam1_t *b)
 	buf[l_qname] = '\0';
 	qname = string(buf);
 
+	// compute rpos
+	rpos = pos + (int32_t)bam_cigar2rlen(n_cigar, bam_get_cigar(b));
 
 	// copy cigar
 	assert(n_cigar <= MAX_NUM_CIGAR);
@@ -75,4 +77,16 @@ int hit::infer_splice_positions()
 		spos[n_spos++] = p;
 	}
     return 0;
+}
+
+bool hit_compare_left(const hit &x, const hit &y)
+{
+	if(x.pos < y.pos) return true;
+	else return false;
+}
+
+bool hit_compare_right(const hit &x, const hit &y)
+{
+	if(x.rpos < y.rpos) return true;
+	return false;
 }

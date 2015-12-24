@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "config.h"
 #include "sam.h"
 
 #define MAX_NUM_CIGAR 7
@@ -17,6 +18,7 @@ public:
 	~hit();
 
 public:
+	int32_t rpos;							// right position mapped to reference [pos, rpos]
 	string qname;							// query name
 	uint32_t cigar[MAX_NUM_CIGAR];			// cigar, use samtools
 	int32_t spos[MAX_NUM_CIGAR];			// splice positions
@@ -26,5 +28,9 @@ public:
 	int print();
 	int infer_splice_positions();
 };
+
+// for sorting
+bool hit_compare_left(const hit &x, const hit &y);
+bool hit_compare_right(const hit &x, const hit &y);
 
 #endif

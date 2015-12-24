@@ -5,9 +5,8 @@
 #include "kstring.h"
 #include "bundle.h"
 
-bundle::bundle(config * _conf)
+bundle::bundle()
 {
-	conf = _conf;
 	tid = -1;
 	chrm = "";
 	lpos = INT32_MAX;
@@ -20,6 +19,7 @@ bundle::~bundle()
 
 int bundle::solve()
 {
+	check();
 	infer_splice_positions();
 	return 0;
 }
@@ -31,24 +31,19 @@ int bundle::add_hit(bam_hdr_t *h, bam1_t *b)
 	hits.push_back(ht);
 
 	// calcuate the boundaries on reference
-	bam1_core_t &p = b->core;
-	int32_t l = p.pos;
-	int32_t r = p.pos + (int32_t)bam_cigar2rlen(p.n_cigar, bam_get_cigar(b));
-
-	assert(r >= l);
-	if(l < lpos) lpos = l;
-	if(r > rpos) rpos = r;
+	if(ht.pos < lpos) lpos = ht.pos;
+	if(ht.rpos > rpos) rpos = ht.rpos;
 
 	// set chromsome ID and name
 	if(tid == -1)
 	{
-		tid = p.tid;
+		tid = ht.tid;
 		assert(chrm == "");
 		char buf[1024];
-		strcpy(buf, h->target_name[p.tid]);
+		strcpy(buf, h->target_name[ht.tid]);
 		chrm = string(buf);
 	}
-	assert(tid == p.tid);
+	assert(tid == ht.tid);
 
 	return 0;
 }
@@ -64,9 +59,9 @@ int bundle::print()
 	}
 
 	// print splice positions
-	for(int i = 0; i < sps.size(); i++)
+	for(int i = 0; i < splist.size(); i++)
 	{
-		sps[i].print();
+		splist[i]->print();
 	}
 
 	printf("\n");
@@ -85,7 +80,7 @@ int bundle::clear()
 
 int bundle::infer_splice_positions()
 {
-	map<int32_t, sposition> m;
+	map<int32_t, splice_pos*> m;
 	for(int i = 0; i < hits.size(); i++)
 	{
 		if(hits[i].n_spos <= 0) continue;
@@ -94,23 +89,35 @@ int bundle::infer_splice_positions()
 			int32_t p = hits[i].spos[k];
 			if(m.find(p) == m.end()) 
 			{
-				sposition sp(p, 1, hits[i].qual, hits[i].qual);
-				m.insert(pair<int32_t, sposition>(p, sp));
+				splice_pos *sp = new splice_pos(p, 1, hits[i].qual, hits[i].qual);
+				m.insert(pair<int32_t, splice_pos*>(p, sp));
 			}
 			else
 			{
-				assert(m[p].pos == p);
-				m[p].count++;
-				if(hits[i].qual < m[p].min_qual) m[p].min_qual = hits[i].qual;
-				if(hits[i].qual > m[p].max_qual) m[p].max_qual = hits[i].qual;
+				assert(m[p]->pos == p);
+				m[p]->count++;
+				if(hits[i].qual < m[p]->min_qual) m[p]->min_qual = hits[i].qual;
+				if(hits[i].qual > m[p]->max_qual) m[p]->max_qual = hits[i].qual;
 			}
 		}
 	}
 
-	map<int32_t, sposition>::iterator it;
+	map<int32_t, splice_pos*>::iterator it;
 	for(it = m.begin(); it != m.end(); it++)
 	{
-		sps.push_back(it->second);
+		splist.push_back(it->second);
+	}
+	return 0;
+}
+
+int bundle::check()
+{
+	// guarantee that all reads are sorted
+	for(int i = 1; i < hits.size(); i++)
+	{
+		int32_t p1 = hits[i - 1].pos;
+		int32_t p2 = hits[i].pos;
+		assert(p1 <= p2);
 	}
 	return 0;
 }

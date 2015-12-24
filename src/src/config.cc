@@ -8,12 +8,7 @@
 
 using namespace std;
 
-config::config(const char * conf_file)
-{
-	load_config(conf_file);
-}
-
-int config::load_config(const char * conf_file)
+int load_config(const char * conf_file)
 {
 	ifstream fin(conf_file);
 	if(fin.fail())
