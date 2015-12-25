@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "position.h"
+#include "boundary.h"
 #include "hit.h"
 #include "sam.h"
 
@@ -19,20 +19,27 @@ public:
 	~bundle();
 
 public:
-	int32_t tid;				// chromosome ID
-	string chrm;				// chromosome name
-	int32_t lpos;				// the leftmost position on reference
-	int32_t rpos;				// the rightmost position on reference
-	vector<hit> hits;			// hits
-	vector<position*> splist;	// splice positions
+	int32_t tid;					// chromosome ID
+	string chrm;					// chromosome name
+	int32_t lpos;					// the leftmost boundary on reference
+	int32_t rpos;					// the rightmost boundary on reference
+	vector<hit> hits;				// hits
+	vector<boundary> boundaries;	// all types of boundaries
 
 public:
 	int solve();
-	int infer_splice_positions();
-	int add_hit(bam_hdr_t *h, bam1_t *b);
-	int print();
 	int clear();
+	int print();
 	int check();
+
+	int add_hit(bam_hdr_t *h, bam1_t *b);
+
+	int count_prefix_hits();
+	int count_suffix_hits();
+
+	int infer_splice_boundaries();
+	int infer_start_boundaries();
+	int infer_end_boundaries();
 };
 
 #endif

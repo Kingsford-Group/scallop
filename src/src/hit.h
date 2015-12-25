@@ -18,11 +18,13 @@ public:
 	~hit();
 
 public:
-	int32_t rpos;							// right position mapped to reference [pos, rpos]
+	int32_t rpos;							// right position mapped to reference [pos, rpos)
 	string qname;							// query name
 	uint32_t cigar[MAX_NUM_CIGAR];			// cigar, use samtools
 	int32_t spos[MAX_NUM_CIGAR];			// splice positions
 	int n_spos;								// number of splice positions
+
+	int n_hits;								// number of hits in the window [pos - WINDOW_SIZE, pos + WINDOW_SIZE]
 
 public:
 	int print();

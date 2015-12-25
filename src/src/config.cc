@@ -8,6 +8,15 @@
 
 using namespace std;
 
+int32_t min_bundle_gap;
+int32_t min_splice_boundary_hits;
+int32_t min_start_boundary_hits;
+int32_t min_end_boundary_hits;
+uint32_t min_max_splice_boundary_qual;
+uint32_t min_max_start_boundary_qual;
+uint32_t min_max_end_boundary_qual;
+int32_t hits_window_size;
+
 int load_config(const char * conf_file)
 {
 	ifstream fin(conf_file);
@@ -29,6 +38,34 @@ int load_config(const char * conf_file)
 		if(strcmp(key, "min_bundle_gap")==0)
 		{
 			min_bundle_gap = (int32_t)atoi(value);
+		}
+		else if(strcmp(key, "min_splice_boundary_hits")==0)
+		{
+			min_splice_boundary_hits = (int32_t)atoi(value);
+		}
+		else if(strcmp(key, "min_start_boundary_hits")==0)
+		{
+			min_start_boundary_hits = (int32_t)atoi(value);
+		}
+		else if(strcmp(key, "min_end_boundary_hits")==0)
+		{
+			min_end_boundary_hits = (int32_t)atoi(value);
+		}
+		else if(strcmp(key, "min_max_splice_boundary_qual")==0)
+		{
+			min_max_splice_boundary_qual = (uint32_t)atoi(value);
+		}
+		else if(strcmp(key, "min_max_start_boundary_qual")==0)
+		{
+			min_max_start_boundary_qual = (uint32_t)atoi(value);
+		}
+		else if(strcmp(key, "min_max_end_boundary_qual")==0)
+		{
+			min_max_end_boundary_qual = (uint32_t)atoi(value);
+		}
+		else if(strcmp(key, "hits_window_size")==0)
+		{
+			hits_window_size = (int32_t)atoi(value);
 		}
 	}
 

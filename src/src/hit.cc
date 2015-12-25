@@ -25,6 +25,9 @@ hit::hit(bam1_t *b)
 	// infer splice positions 
 	n_spos = 0;
 	infer_splice_positions();
+
+	// init
+	n_hits = 1;
 }
 
 hit::~hit()
@@ -33,9 +36,6 @@ hit::~hit()
 
 int hit::print()
 {
-	// DEBUG
-	if(n_spos <= 0) return 0;
-
 	// get cigar string
 	ostringstream sstr;
 	for(int i = 0; i < n_cigar; i++)
@@ -45,8 +45,9 @@ int hit::print()
 	}
 
 	// print basic information
-	printf("Hit %s: cigar = %s, flag = %d, quality = %d\n", qname.c_str(), sstr.str().c_str(), flag, qual);
+	printf("Hit %s: [%d-%d), cigar = %s, flag = %d, quality = %d, n_hits = %d\n", qname.c_str(), pos, rpos, sstr.str().c_str(), flag, qual, n_hits);
 
+	return 0;
 
 	// print splice positions
 	for(int i = 0; i < n_spos; i++)

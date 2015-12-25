@@ -14,7 +14,6 @@ scallop::~scallop()
 {
 }
 
-
 int scallop::process(const char *bam_file)
 {
 	load(bam_file);
@@ -60,7 +59,6 @@ int scallop::solve()
 	for(int i = 0; i < bundles.size(); i++)
 	{
 		bundles[i].solve();
-		continue;
 
 		// DEBUG
 		if(bundles[i].chrm != "2L") continue;
