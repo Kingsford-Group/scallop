@@ -18,9 +18,7 @@ public:
 	uint32_t min_qual;	// minimum quality
 	uint32_t max_qual;	// maximum quality
 
-	int32_t total;		// total number of reads in [lpos - rpos]
-	int32_t lpos;		// left position of background interval
-	int32_t rpos;		// right position of background interval
+	uint32_t score;		// might be transfomred from pvalue (for start,end-boundary)
 
 public:
 	int print();

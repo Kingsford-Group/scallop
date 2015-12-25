@@ -16,6 +16,7 @@ uint32_t min_max_splice_boundary_qual;
 uint32_t min_max_start_boundary_qual;
 uint32_t min_max_end_boundary_qual;
 int32_t hits_window_size;
+double min_boundary_score;
 
 int load_config(const char * conf_file)
 {
@@ -66,6 +67,10 @@ int load_config(const char * conf_file)
 		else if(strcmp(key, "hits_window_size")==0)
 		{
 			hits_window_size = (int32_t)atoi(value);
+		}
+		else if(strcmp(key, "min_boundary_score")==0)
+		{
+			min_boundary_score = (int32_t)atoi(value);
 		}
 	}
 

@@ -4,9 +4,9 @@
 #include <stdint.h>
 
 // constants
-#define SPLICE_BOUNDARY 0
-#define START_BOUNDARY 1
-#define END_BOUNDARY 2
+#define SPLICE_BOUNDARY 1
+#define START_BOUNDARY 2
+#define END_BOUNDARY 3
 
 // pre-defined parameters
 #define MAX_NUM_CIGAR 7
@@ -22,6 +22,7 @@ extern uint32_t min_max_splice_boundary_qual;
 extern uint32_t min_max_start_boundary_qual;
 extern uint32_t min_max_end_boundary_qual;
 extern int32_t hits_window_size;
+extern double min_boundary_score;
 
 // load parameters
 int load_config(const char * conf_file);

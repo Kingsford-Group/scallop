@@ -5,6 +5,10 @@
 #include "kstring.h"
 #include "bundle.h"
 
+#include <boost/math/distributions/binomial.hpp>
+
+using namespace boost::math;
+
 bundle::bundle()
 {
 	tid = -1;
@@ -23,6 +27,7 @@ int bundle::solve()
 	count_prefix_hits();
 	count_suffix_hits();
 	infer_splice_boundaries();
+	infer_start_boundaries();
 	return 0;
 }
 
@@ -86,7 +91,7 @@ int bundle::count_suffix_hits()
 	int q = 0;
 	while(p < hits.size())
 	{
-		if(hits[p].pos + hits_window_size < hits[q].pos || q >= hits.size())
+		if(q >= hits.size() || hits[p].pos + hits_window_size < hits[q].pos)
 		{
 			//printf("B: p = %d, window = %d, q = %d\n", hits[p].pos, hits_window_size, hits[q].pos);
 			hits[p].n_hits += (int32_t)(q - p - 1);
@@ -106,7 +111,7 @@ int bundle::count_prefix_hits()
 	int q = hits.size() - 1;
 	while(p >= 0)
 	{
-		if(hits[q].pos + hits_window_size < hits[p].pos || q < 0)
+		if(q < 0 || hits[q].pos + hits_window_size < hits[p].pos)
 		{
 			hits[p].n_hits += (int32_t)(p - q - 1);
 			p--;
@@ -165,23 +170,35 @@ int bundle::infer_start_boundaries()
 			continue;
 		}
 
-		// check the validity of the previous position
-		if(cnt < min_start_boundary_hits) continue;
+		int32_t tpre = pre;
+		int tcnt = cnt;
+		
+		cnt = 1;
+		pre = hits[i].pos;
 
-		boundary sb(START_BOUNDARY, pre);
-		for(int k = 0; k < cnt; k++)
+		// check the validity of the previous position
+		if(tcnt < min_start_boundary_hits) continue;
+
+		boundary sb(START_BOUNDARY, tpre);
+		for(int k = 0; k < tcnt; k++)
 		{
 			int j = i - 1 - k;
 			if(hits[j].pos > hits[j].mpos) continue;		// consider boundary of a SEGMENT, not a read
 			sb.count++;
 			if(hits[j].qual < sb.min_qual) sb.min_qual = hits[j].qual;
-			if(hits[j].qual < sb.max_qual) sb.max_qual = hits[j].qual;
+			if(hits[j].qual > sb.max_qual) sb.max_qual = hits[j].qual;
 		}
-
+		
 		if(sb.count < min_start_boundary_hits) continue;
 		if(sb.max_qual < min_max_start_boundary_qual) continue;
 
-		// TODO
+		binomial_distribution<> b(hits[i].n_hits, 1.0/(2.0 * hits_window_size + 1.0));
+		double p = cdf(complement(b, sb.count - 1));
+
+		sb.score = (uint32_t)(-10.0 * log10(p));
+
+		if(sb.score < min_boundary_score) continue;
+
 		boundaries.push_back(sb);
 	}
 
