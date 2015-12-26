@@ -28,18 +28,22 @@ public:
 
 public:
 	int solve();
+
 	int clear();
 	int print();
-	int check();
+	int check_left_ascending();
+	int check_right_ascending();
 
 	int add_hit(bam_hdr_t *h, bam1_t *b);
 
-	int count_prefix_hits();
-	int count_suffix_hits();
+	int count_prefix_left_hits();
+	int count_suffix_left_hits();
+	int count_prefix_right_hits();
+	int count_suffix_right_hits();
 
 	int infer_splice_boundaries();
-	int infer_start_boundaries();
-	int infer_end_boundaries();
+	int infer_left_boundaries();
+	int infer_right_boundaries();
 };
 
 #endif

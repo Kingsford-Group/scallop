@@ -5,8 +5,8 @@
 
 // constants
 #define SPLICE_BOUNDARY 1
-#define START_BOUNDARY 2
-#define END_BOUNDARY 3
+#define LEFT_BOUNDARY 2
+#define RIGHT_BOUNDARY 3
 
 // pre-defined parameters
 #define MAX_NUM_CIGAR 7
@@ -16,11 +16,11 @@
 extern int32_t min_bundle_gap;
 
 extern int32_t min_splice_boundary_hits;
-extern int32_t min_start_boundary_hits;
-extern int32_t min_end_boundary_hits;
+extern int32_t min_left_boundary_hits;
+extern int32_t min_right_boundary_hits;
 extern uint32_t min_max_splice_boundary_qual;
-extern uint32_t min_max_start_boundary_qual;
-extern uint32_t min_max_end_boundary_qual;
+extern uint32_t min_max_left_boundary_qual;
+extern uint32_t min_max_right_boundary_qual;
 extern int32_t hits_window_size;
 extern double min_boundary_score;
 

@@ -27,7 +27,8 @@ hit::hit(bam1_t *b)
 	infer_splice_positions();
 
 	// init
-	n_hits = 1;
+	n_lhits = 1;
+	n_rhits = 1;
 }
 
 hit::~hit()
@@ -45,7 +46,8 @@ int hit::print()
 	}
 
 	// print basic information
-	printf("Hit %s: [%d-%d), cigar = %s, flag = %d, quality = %d, n_hits = %d\n", qname.c_str(), pos, rpos, sstr.str().c_str(), flag, qual, n_hits);
+	printf("Hit %s: [%d-%d), cigar = %s, flag = %d, quality = %d, n_lhits = %d, n_rhits = %d\n", 
+			qname.c_str(), pos, rpos, sstr.str().c_str(), flag, qual, n_lhits, n_rhits);
 
 	return 0;
 

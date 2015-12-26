@@ -42,7 +42,7 @@ int scallop::load(const char *bam_file)
 			bd.clear();
 
 			// DEBUG
-			if(bundles.size() >= 1000) break;
+			//if(bundles.size() >= 1000) break;
 		}
 		bd.add_hit(h, b);
     }
@@ -59,7 +59,6 @@ int scallop::solve()
 	for(int i = 0; i < bundles.size(); i++)
 	{
 		bundles[i].solve();
-		bundles[i].print();
 
 		/*
 		// DEBUG
@@ -67,6 +66,8 @@ int scallop::solve()
 		if(bundles[i].lpos < 870386) continue;
 		if(bundles[i].rpos > 877183) continue;
 		*/
+
+		//bundles[i].print();
 	}
 	return 0;
 }

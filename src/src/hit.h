@@ -6,9 +6,6 @@
 #include "config.h"
 #include "sam.h"
 
-#define MAX_NUM_CIGAR 7
-#define MIN_LEN_FLANK 1
-
 using namespace std;
 
 class hit: public bam1_core_t
@@ -24,7 +21,8 @@ public:
 	int32_t spos[MAX_NUM_CIGAR];			// splice positions
 	int n_spos;								// number of splice positions
 
-	int n_hits;								// number of hits in the window [pos - WINDOW_SIZE, pos + WINDOW_SIZE]
+	int n_lhits;							// number of hits in the window [pos - WINDOW_SIZE, pos + WINDOW_SIZE]
+	int n_rhits;							// number of hits in the window [rpos - WINDOW_SIZE, rpos + WINDOW_SIZE]
 
 public:
 	int print();

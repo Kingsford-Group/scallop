@@ -23,11 +23,28 @@ bundle::~bundle()
 
 int bundle::solve()
 {
-	check();
-	count_prefix_hits();
-	count_suffix_hits();
 	infer_splice_boundaries();
-	infer_start_boundaries();
+
+	//sort(hits.begin(), hits.end(), hit_compare_left);
+	check_left_ascending();
+	count_prefix_left_hits();
+	count_suffix_left_hits();
+
+	/*
+	sort(hits.begin(), hits.end(), hit_compare_right);
+	check_right_ascending();
+
+	count_prefix_right_hits();
+	count_suffix_right_hits();
+
+	infer_right_boundaries();
+
+	sort(hits.begin(), hits.end(), hit_compare_left);
+	check_left_ascending();
+	*/
+
+	infer_left_boundaries();
+
 	return 0;
 }
 
@@ -85,7 +102,7 @@ int bundle::clear()
 	return 0;
 }
 
-int bundle::count_suffix_hits()
+int bundle::count_suffix_left_hits()
 {
 	int p = 0;
 	int q = 0;
@@ -93,8 +110,7 @@ int bundle::count_suffix_hits()
 	{
 		if(q >= hits.size() || hits[p].pos + hits_window_size < hits[q].pos)
 		{
-			//printf("B: p = %d, window = %d, q = %d\n", hits[p].pos, hits_window_size, hits[q].pos);
-			hits[p].n_hits += (int32_t)(q - p - 1);
+			hits[p].n_lhits += (int32_t)(q - p - 1);
 			p++;
 		}
 		else
@@ -105,7 +121,7 @@ int bundle::count_suffix_hits()
 	return 0;
 }
 
-int bundle::count_prefix_hits()
+int bundle::count_prefix_left_hits()
 {
 	int p = hits.size() - 1;
 	int q = hits.size() - 1;
@@ -113,7 +129,46 @@ int bundle::count_prefix_hits()
 	{
 		if(q < 0 || hits[q].pos + hits_window_size < hits[p].pos)
 		{
-			hits[p].n_hits += (int32_t)(p - q - 1);
+			hits[p].n_lhits += (int32_t)(p - q - 1);
+			p--;
+		}
+		else
+		{
+			q--;
+		}
+	}
+	return 0;
+}
+
+
+int bundle::count_suffix_right_hits()
+{
+	int p = 0;
+	int q = 0;
+	while(p < hits.size())
+	{
+		if(q >= hits.size() || hits[p].rpos + hits_window_size < hits[q].rpos)
+		{
+			hits[p].n_rhits += (int32_t)(q - p - 1);
+			p++;
+		}
+		else
+		{
+			q++;
+		}
+	}
+	return 0;
+}
+
+int bundle::count_prefix_right_hits()
+{
+	int p = hits.size() - 1;
+	int q = hits.size() - 1;
+	while(p >= 0)
+	{
+		if(q < 0 || hits[q].rpos + hits_window_size < hits[p].rpos)
+		{
+			hits[p].n_rhits += (int32_t)(p - q - 1);
 			p--;
 		}
 		else
@@ -151,14 +206,14 @@ int bundle::infer_splice_boundaries()
 	map<int32_t, boundary>::iterator it;
 	for(it = m.begin(); it != m.end(); it++)
 	{
-		if(it->second.count < min_start_boundary_hits) continue;
-		if(it->second.max_qual < min_max_start_boundary_qual) continue;
+		if(it->second.count < min_left_boundary_hits) continue;
+		if(it->second.max_qual < min_max_left_boundary_qual) continue;
 		boundaries.push_back(it->second);
 	}
 	return 0;
 }
 
-int bundle::infer_start_boundaries()
+int bundle::infer_left_boundaries()
 {
 	int32_t pre = 0;
 	int cnt = 1;
@@ -177,22 +232,23 @@ int bundle::infer_start_boundaries()
 		pre = hits[i].pos;
 
 		// check the validity of the previous position
-		if(tcnt < min_start_boundary_hits) continue;
+		if(tcnt < min_left_boundary_hits) continue;
 
-		boundary sb(START_BOUNDARY, tpre);
+		boundary sb(LEFT_BOUNDARY, tpre);
 		for(int k = 0; k < tcnt; k++)
 		{
 			int j = i - 1 - k;
-			if(hits[j].pos > hits[j].mpos) continue;		// consider boundary of a SEGMENT, not a read
+			if(hits[j].pos > hits[j].mpos) continue;
+			if((hits[j].flag & 0x10) >= 1) continue;			
 			sb.count++;
 			if(hits[j].qual < sb.min_qual) sb.min_qual = hits[j].qual;
 			if(hits[j].qual > sb.max_qual) sb.max_qual = hits[j].qual;
 		}
 		
-		if(sb.count < min_start_boundary_hits) continue;
-		if(sb.max_qual < min_max_start_boundary_qual) continue;
+		if(sb.count < min_left_boundary_hits) continue;
+		if(sb.max_qual < min_max_left_boundary_qual) continue;
 
-		binomial_distribution<> b(hits[i].n_hits, 1.0/(2.0 * hits_window_size + 1.0));
+		binomial_distribution<> b(hits[i-1].n_lhits, 1.0/(2.0 * hits_window_size + 1.0));
 		double p = cdf(complement(b, sb.count - 1));
 
 		sb.score = (uint32_t)(-10.0 * log10(p));
@@ -205,13 +261,71 @@ int bundle::infer_start_boundaries()
 	return 0;
 }
 
-int bundle::check()
+int bundle::infer_right_boundaries()
 {
-	// guarantee that all reads are sorted
+	int32_t pre = 0;
+	int cnt = 1;
+	for(int i = 1; i < hits.size(); i++)
+	{
+		if(hits[i].rpos == pre)
+		{
+			cnt++;
+			continue;
+		}
+
+		int32_t tpre = pre;
+		int tcnt = cnt;
+		
+		cnt = 1;
+		pre = hits[i].rpos;
+
+		// check the validity of the previous position
+		if(tcnt < min_right_boundary_hits) continue;
+
+		boundary sb(RIGHT_BOUNDARY, tpre);
+		for(int k = 0; k < tcnt; k++)
+		{
+			int j = i - 1 - k;
+			if(hits[j].pos < hits[j].mpos) continue;
+			if((hits[j].flag & 0x10) == 0) continue;			
+			sb.count++;
+			if(hits[j].qual < sb.min_qual) sb.min_qual = hits[j].qual;
+			if(hits[j].qual > sb.max_qual) sb.max_qual = hits[j].qual;
+		}
+		
+		if(sb.count < min_right_boundary_hits) continue;
+		if(sb.max_qual < min_max_right_boundary_qual) continue;
+
+		binomial_distribution<> b(hits[i-1].n_rhits, 1.0/(2.0 * hits_window_size + 1.0));
+		double p = cdf(complement(b, sb.count - 1));
+
+		sb.score = (uint32_t)(-10.0 * log10(p));
+
+		if(sb.score < min_boundary_score) continue;
+
+		boundaries.push_back(sb);
+	}
+
+	return 0;
+}
+
+int bundle::check_left_ascending()
+{
 	for(int i = 1; i < hits.size(); i++)
 	{
 		int32_t p1 = hits[i - 1].pos;
 		int32_t p2 = hits[i].pos;
+		assert(p1 <= p2);
+	}
+	return 0;
+}
+
+int bundle::check_right_ascending()
+{
+	for(int i = 1; i < hits.size(); i++)
+	{
+		int32_t p1 = hits[i - 1].rpos;
+		int32_t p2 = hits[i].rpos;
 		assert(p1 <= p2);
 	}
 	return 0;
