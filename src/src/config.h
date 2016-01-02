@@ -4,9 +4,10 @@
 #include <stdint.h>
 
 // constants
-#define SPLICE_BOUNDARY 1
-#define LEFT_BOUNDARY 2
-#define RIGHT_BOUNDARY 3
+#define SPLICE_BOUNDARY_LEFT 1
+#define SPLICE_BOUNDARY_RIGHT 2
+#define LEFT_BOUNDARY 3
+#define RIGHT_BOUNDARY 4
 
 // pre-defined parameters
 #define MAX_NUM_CIGAR 7

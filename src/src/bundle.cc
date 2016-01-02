@@ -75,12 +75,14 @@ int bundle::add_hit(bam_hdr_t *h, bam1_t *b)
 int bundle::print()
 {
 	printf("Bundle: ");
-	// print hits
 	printf("tid = %4d, #hits = %7lu, range = %s:%d-%d\n", tid, hits.size(), chrm.c_str(), lpos, rpos);
+	// print hits
+	/*
 	for(int i = 0; i < hits.size(); i++)
 	{
 		hits[i].print();
 	}
+	*/
 
 	// print boundaries
 	for(int i = 0; i < boundaries.size(); i++)
@@ -190,12 +192,13 @@ int bundle::infer_splice_boundaries()
 			int32_t p = hits[i].spos[k];
 			if(m.find(p) == m.end()) 
 			{
-				boundary sp(SPLICE_BOUNDARY, p, 1, hits[i].qual, hits[i].qual);
+				int type = p > 0 ? SPLICE_BOUNDARY_LEFT : SPLICE_BOUNDARY_RIGHT;
+				int32_t pp = p > 0 ? p : 0 - p;
+				boundary sp(type, pp, 1, hits[i].qual, hits[i].qual);
 				m.insert(pair<int32_t, boundary>(p, sp));
 			}
 			else
 			{
-				assert(m[p].pos == p);
 				m[p].count++;
 				if(hits[i].qual < m[p].min_qual) m[p].min_qual = hits[i].qual;
 				if(hits[i].qual > m[p].max_qual) m[p].max_qual = hits[i].qual;
@@ -206,8 +209,8 @@ int bundle::infer_splice_boundaries()
 	map<int32_t, boundary>::iterator it;
 	for(it = m.begin(); it != m.end(); it++)
 	{
-		if(it->second.count < min_left_boundary_hits) continue;
-		if(it->second.max_qual < min_max_left_boundary_qual) continue;
+		if(it->second.count < min_splice_boundary_hits) continue;
+		if(it->second.max_qual < min_max_splice_boundary_qual) continue;
 		boundaries.push_back(it->second);
 	}
 	return 0;

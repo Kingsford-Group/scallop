@@ -67,7 +67,7 @@ int scallop::solve()
 		if(bundles[i].rpos > 877183) continue;
 		*/
 
-		//bundles[i].print();
+		bundles[i].print();
 	}
 	return 0;
 }

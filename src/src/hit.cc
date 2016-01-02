@@ -77,7 +77,7 @@ int hit::infer_splice_positions()
 		 
 		assert(n_spos < MAX_NUM_CIGAR - 2);
 		spos[n_spos++] = p - bam_cigar_oplen(cigar[k]);
-		spos[n_spos++] = p;
+		spos[n_spos++] = 0 - p;
 	}
     return 0;
 }
