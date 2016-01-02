@@ -11,6 +11,8 @@ public:
 	boundary(int _t, int32_t _p, int32_t _c, uint32_t _min, uint32_t _max);
 	boundary(const boundary &p);
 
+	bool operator<(const boundary &x) const;
+
 public:
 	int type;			// type
 	int32_t pos;		// position

@@ -44,6 +44,10 @@ int bundle::solve()
 	*/
 
 	infer_left_boundaries();
+	add_start_boundary();
+	add_end_boundary();
+
+	build_regions();
 
 	return 0;
 }
@@ -312,6 +316,34 @@ int bundle::infer_right_boundaries()
 	return 0;
 }
 
+int bundle::add_start_boundary()
+{
+	for(int i = 0; i < boundaries.size(); i++)
+	{
+		boundary &b = boundaries[i];
+		if(b.pos == lpos) return 0;
+	}
+
+	boundary b(START_BOUNDARY, lpos, 1, 100, 100);
+	boundaries.push_back(b);
+
+	return 0;
+}
+
+int bundle::add_end_boundary()
+{
+	for(int i = 0; i < boundaries.size(); i++)
+	{
+		boundary &b = boundaries[i];
+		if(b.pos == rpos) return 0;
+	}
+
+	boundary b(END_BOUNDARY, rpos, 1, 100, 100);
+	boundaries.push_back(b);
+
+	return 0;
+}
+
 int bundle::check_left_ascending()
 {
 	for(int i = 1; i < hits.size(); i++)
@@ -331,5 +363,11 @@ int bundle::check_right_ascending()
 		int32_t p2 = hits[i].rpos;
 		assert(p1 <= p2);
 	}
+	return 0;
+}
+
+int bundle::build_regions()
+{
+	sort(boundaries.begin(), boundaries.end());
 	return 0;
 }

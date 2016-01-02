@@ -8,6 +8,8 @@
 #define SPLICE_BOUNDARY_RIGHT 2
 #define LEFT_BOUNDARY 3
 #define RIGHT_BOUNDARY 4
+#define START_BOUNDARY 5
+#define END_BOUNDARY 6
 
 // pre-defined parameters
 #define MAX_NUM_CIGAR 7

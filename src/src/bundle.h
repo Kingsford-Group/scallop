@@ -31,10 +31,12 @@ public:
 
 	int clear();
 	int print();
-	int check_left_ascending();
-	int check_right_ascending();
 
 	int add_hit(bam_hdr_t *h, bam1_t *b);
+
+	// check whether hits are sorted
+	int check_left_ascending();
+	int check_right_ascending();
 
 	int count_prefix_left_hits();
 	int count_suffix_left_hits();
@@ -44,6 +46,10 @@ public:
 	int infer_splice_boundaries();
 	int infer_left_boundaries();
 	int infer_right_boundaries();
+	int add_start_boundary();
+	int add_end_boundary();
+
+	int build_regions();
 };
 
 #endif

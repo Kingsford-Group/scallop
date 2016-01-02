@@ -34,8 +34,15 @@ boundary::boundary(const boundary &sp)
 	score = sp.score;
 }
 
+bool boundary::operator<(const boundary &x) const
+{
+	if(pos <= x.pos) return true;
+	else return false;
+}
+
 int boundary::print()
 {
-	printf("boundary: type = %1d, pos = %9d, count = %6d, min-qual = %4d, max-qual = %4d, score = %4d\n", type, pos, count, min_qual, max_qual, score);
+	printf("boundary: type = %1d, pos = %9d, count = %6d, min-qual = %4d, max-qual = %4d, score = %4d\n", 
+			type, pos, count, min_qual, max_qual, score);
 	return 0;
 }
