@@ -28,7 +28,7 @@ int bundle::solve()
 
 	build_interval_map();
 
-	infer_splice_boundaries();
+	infer_bridges();
 	infer_left_boundaries();
 	//infer_right_boundaries();
 	add_start_boundary();
@@ -75,6 +75,12 @@ int bundle::print()
 	}
 	*/
 
+	// print bridges 
+	for(int i = 0; i < bridges.size(); i++)
+	{
+		bridges[i].print();
+	}
+
 	// print boundaries
 	for(int i = 0; i < boundaries.size(); i++)
 	{
@@ -119,13 +125,10 @@ int bundle::count_overlap_reads(int32_t p)
 	return it->second;
 }
 
-int bundle::infer_splice_boundaries()
+int bundle::infer_bridges()
 {
+	map<int64_t, bridge> m;
 	vector<int64_t> v;
-	map<int64_t, uint32_t> m_count;
-	map<int64_t, uint32_t> min_qual;
-	map<int64_t, uint32_t> max_qual;
-
 	for(int i = 0; i < hits.size(); i++)
 	{
 		hits[i].get_splice_positions(v);
@@ -133,71 +136,26 @@ int bundle::infer_splice_boundaries()
 		for(int k = 0; k < v.size(); k++)
 		{
 			int64_t p = v[k];
-			if(m_count.find(p) == m_count.end()) 
+			if(m.find(p) == m.end()) 
 			{
-				m_count.insert(pair<int64_t, uint32_t>(p, 1));
-				max_qual.insert(pair<int64_t, uint32_t>(p, hits[i].qual));
-				min_qual.insert(pair<int64_t, uint32_t>(p, hits[i].qual));
+				bridge sp(SPLICE, p, 1, hits[i].qual, hits[i].qual);
+				m.insert(pair<int64_t, bridge>(p, sp));
 			}
 			else
 			{
-				m_count[p]++;
-				if(hits[i].qual > max_qual[p]) max_qual[p] = hits[i].qual;
-				if(hits[i].qual < min_qual[p]) min_qual[p] = hits[i].qual;
+				m[p].count++;
+				if(hits[i].qual < m[p].min_qual) m[p].min_qual = hits[i].qual;
+				if(hits[i].qual > m[p].max_qual) m[p].max_qual = hits[i].qual;
 			}
 		}
 	}
 
-	map<int32_t, size_t> m;
-	map<int64_t, uint32_t>::iterator it;
-	for(it = m_count.begin(); it != m_count.end(); it++)
+	map<int64_t, bridge>::iterator it;
+	for(it = m.begin(); it != m.end(); it++)
 	{
-		int64_t p = it->first;
-		if(m_count[p] < min_splice_boundary_hits) continue;
-		if(max_qual[p] < min_max_splice_boundary_qual) continue;
-
-		int32_t s = high32(p);
-		int32_t t = low32(p);
-		size_t si = -1;
-		size_t ti = -1;
-
-		if(m.find(s) == m.end())
-		{
-			boundary b(SPLICE_BOUNDARY_LEFT, s, m_count[p], min_qual[p], max_qual[p]);
-			si = boundaries.size();
-			boundaries.push_back(b);
-			m.insert(pair<int32_t, size_t>(s, si));
-		}
-		else
-		{
-			si = m[s];
-			boundary &b = boundaries[si];
-			assert(b.pos == s);
-			b.count += m_count[p];
-			if(min_qual[p] < b.min_qual) b.min_qual = min_qual[p];
-			if(max_qual[p] > b.max_qual) b.max_qual = max_qual[p];
-		}
-
-		if(m.find(t) == m.end())
-		{
-			boundary b(SPLICE_BOUNDARY_RIGHT, t, m_count[p], min_qual[p], max_qual[p]);
-			ti = boundaries.size();
-			boundaries.push_back(b);
-			m.insert(pair<int32_t, size_t>(t, ti));
-		}
-		else
-		{
-			ti = m[t];
-			boundary &b = boundaries[ti];
-			assert(b.pos == t);
-			b.count += m_count[p];
-			if(min_qual[p] < b.min_qual) b.min_qual = min_qual[p];
-			if(max_qual[p] > b.max_qual) b.max_qual = max_qual[p];
-		}
-
-		assert(si != -1 && ti != -1);
-		bridges.push_back(PT(si, ti));
-
+		if(it->second.count < min_splice_boundary_hits) continue;
+		if(it->second.max_qual < min_max_splice_boundary_qual) continue;
+		bridges.push_back(it->second);
 	}
 	return 0;
 }

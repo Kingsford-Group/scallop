@@ -9,6 +9,7 @@
 #define low32(x) (int32_t)(((x) << 32) >> 32)
 
 // constants
+#define SPLICE 0
 #define SPLICE_BOUNDARY_LEFT 1
 #define SPLICE_BOUNDARY_RIGHT 2
 #define LEFT_BOUNDARY 3

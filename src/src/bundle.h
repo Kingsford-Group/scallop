@@ -8,6 +8,7 @@
 
 #include <boost/icl/interval_map.hpp>
 
+#include "bridge.h"
 #include "boundary.h"
 #include "hit.h"
 #include "sam.h"
@@ -32,8 +33,8 @@ public:
 	int32_t rpos;					// the rightmost boundary on reference
 	vector<hit> hits;				// hits
 	imap_t imap;					// interval map
+	vector<bridge> bridges;			// splice bridges
 	vector<boundary> boundaries;	// all types of boundaries
-	vector<PT> bridges;				// splice bridges
 
 public:
 	int solve();
@@ -49,7 +50,7 @@ public:
 	int count_overlap_reads(int32_t p);
 
 	// infer boundaries
-	int infer_splice_boundaries();
+	int infer_bridges();
 	int infer_left_boundaries();
 	int infer_right_boundaries();
 	int add_start_boundary();
