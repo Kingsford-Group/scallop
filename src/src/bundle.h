@@ -31,9 +31,7 @@ public:
 	int32_t rpos;					// the rightmost boundary on reference
 	vector<hit> hits;				// hits
 	vector<boundary> boundaries;	// all types of boundaries
-
 	imap_t imap;					// interval map
-
 
 public:
 	int solve();

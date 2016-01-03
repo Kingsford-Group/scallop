@@ -104,8 +104,8 @@ int bundle::build_interval_map()
 		hits[i].get_matched_intervals(v);
 		for(int k = 0; k < v.size(); k++)
 		{
-			int32_t s = (int32_t)(v[i] >> 32);
-			int32_t t = (int32_t)((v[i] << 32) >> 32);
+			int32_t s = (int32_t)(v[k] >> 32);
+			int32_t t = (int32_t)((v[k] << 32) >> 32);
 			imap += make_pair(ROI(s, t), 1);
 		}
 	}

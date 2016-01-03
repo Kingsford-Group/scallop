@@ -81,12 +81,18 @@ int hit::get_matched_intervals(vector<int64_t> & v)
 		if(bam_cigar_op(cigar[k]) != BAM_CMATCH) continue;
 
 		int64_t t = p;
-		int64_t s = t - bam_cigar_oplen(cigar[k]);
+		int64_t s = p - bam_cigar_oplen(cigar[k]);
 
 		int64_t x = (s << 32) | t;
+
+		int32_t ss = (int32_t)(x >> 32);
+		int32_t tt = (int32_t)((x << 32) >> 32);
+		assert(ss == s);
+		assert(tt == t);
 		
 		v.push_back(x);
 	}
+
     return 0;
 }
 
