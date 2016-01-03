@@ -313,6 +313,27 @@ int bundle::check_right_ascending()
 
 int bundle::build_regions()
 {
-	sort(boundaries.begin(), boundaries.end());
+	set<int32_t> s;
+	for(int i = 0; i < bridges.size(); i++)
+	{
+		s.insert(bridges[i].lpos);
+		s.insert(bridges[i].rpos);
+	}
+
+	for(int i = 0; i < boundaries.size(); i++)
+	{
+		s.insert(boundaries[i].pos);
+	}
+
+	vector<int32_t> v(s.begin(), s.end());
+	sort(v.begin(), v.end());
+
+	if(v.size() <= 1) return 0;
+
+	for(int i = 0; i < v.size() - 1; i++)
+	{
+		region r(v[i], v[i + 1], &imap);
+		regions.push_back(r);
+	}
 	return 0;
 }

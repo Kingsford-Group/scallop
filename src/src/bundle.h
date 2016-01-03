@@ -6,19 +6,13 @@
 #include <string>
 #include <vector>
 
-#include <boost/icl/interval_map.hpp>
-
+#include "region.h"
 #include "bridge.h"
 #include "boundary.h"
 #include "hit.h"
 #include "sam.h"
 
 using namespace std;
-using namespace boost;
-
-typedef pair<size_t, size_t> PT;
-typedef icl::right_open_interval<int32_t> ROI;
-typedef icl::interval_map<int32_t, int32_t, icl::partial_absorber, less, icl::inplace_plus, icl::inter_section, ROI> imap_t;
 
 class bundle
 {
@@ -35,6 +29,7 @@ public:
 	imap_t imap;					// interval map
 	vector<bridge> bridges;			// splice bridges
 	vector<boundary> boundaries;	// all types of boundaries
+	vector<region> regions;			// regions
 
 public:
 	int solve();
