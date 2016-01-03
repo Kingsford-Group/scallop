@@ -22,7 +22,7 @@ public:
 
 public:
 	int print();
-	int get_splice_positions(vector<int32_t> &v);
+	int get_splice_positions(vector<int64_t> &v);
 	int get_matched_intervals(vector<int64_t> &v);
 };
 

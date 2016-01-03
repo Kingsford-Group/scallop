@@ -44,7 +44,7 @@ int hit::print()
 	return 0;
 }
 
-int hit::get_splice_positions(vector<int32_t> &v)
+int hit::get_splice_positions(vector<int64_t> &v)
 {
 	v.clear();
 	int32_t p = pos;
@@ -60,9 +60,9 @@ int hit::get_splice_positions(vector<int32_t> &v)
 		if(bam_cigar_op(cigar[k+1]) != BAM_CMATCH) continue;
 		if(bam_cigar_oplen(cigar[k-1]) <= MIN_LEN_FLANK) continue;
 		if(bam_cigar_oplen(cigar[k+1]) <= MIN_LEN_FLANK) continue;
-		 
-		v.push_back(p - bam_cigar_oplen(cigar[k]));
-		v.push_back(0 - p);
+
+		int32_t s = p - bam_cigar_oplen(cigar[k]);
+		v.push_back(pack(s, p));
 	}
     return 0;
 }
@@ -70,7 +70,6 @@ int hit::get_splice_positions(vector<int32_t> &v)
 int hit::get_matched_intervals(vector<int64_t> & v)
 {
 	v.clear();
-
 	int32_t p = pos;
     for(int k = 0; k < n_cigar; k++)
 	{
@@ -80,17 +79,8 @@ int hit::get_matched_intervals(vector<int64_t> & v)
 		// must be flanked by matchings (with minimum length requirement of MIN_LEN_FLANK: TODO)
 		if(bam_cigar_op(cigar[k]) != BAM_CMATCH) continue;
 
-		int64_t t = p;
-		int64_t s = p - bam_cigar_oplen(cigar[k]);
-
-		int64_t x = (s << 32) | t;
-
-		int32_t ss = (int32_t)(x >> 32);
-		int32_t tt = (int32_t)((x << 32) >> 32);
-		assert(ss == s);
-		assert(tt == t);
-		
-		v.push_back(x);
+		int32_t s = p - bam_cigar_oplen(cigar[k]);
+		v.push_back(pack(s, p));
 	}
 
     return 0;

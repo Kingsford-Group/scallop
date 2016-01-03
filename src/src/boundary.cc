@@ -42,7 +42,7 @@ bool boundary::operator<(const boundary &x) const
 
 int boundary::print()
 {
-	printf("boundary: type = %1d, pos = %9d, count = %6d, min-qual = %4d, max-qual = %4d, score = %4d\n", 
+	printf("boundary: type = %d, pos = %d, count = %d, min-qual = %d, max-qual = %d, score = %d\n", 
 			type, pos, count, min_qual, max_qual, score);
 	return 0;
 }

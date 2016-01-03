@@ -3,6 +3,11 @@
 
 #include <stdint.h>
 
+// macros
+#define pack(x, y) (int64_t)((((int64_t)(x)) << 32) | ((int64_t)(y)))
+#define high32(x) (int32_t)((x) >> 32)
+#define low32(x) (int32_t)(((x) << 32) >> 32)
+
 // constants
 #define SPLICE_BOUNDARY_LEFT 1
 #define SPLICE_BOUNDARY_RIGHT 2

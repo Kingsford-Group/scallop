@@ -2,7 +2,6 @@
 #include <cassert>
 
 #include "config.h"
-#include "common.h"
 #include "scallop.h"
 #include "sam.h"
 

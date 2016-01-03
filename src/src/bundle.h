@@ -15,6 +15,7 @@
 using namespace std;
 using namespace boost;
 
+typedef pair<size_t, size_t> PT;
 typedef icl::right_open_interval<int32_t> ROI;
 typedef icl::interval_map<int32_t, int32_t, icl::partial_absorber, less, icl::inplace_plus, icl::inter_section, ROI> imap_t;
 
@@ -30,8 +31,9 @@ public:
 	int32_t lpos;					// the leftmost boundary on reference
 	int32_t rpos;					// the rightmost boundary on reference
 	vector<hit> hits;				// hits
-	vector<boundary> boundaries;	// all types of boundaries
 	imap_t imap;					// interval map
+	vector<boundary> boundaries;	// all types of boundaries
+	vector<PT> bridges;				// splice bridges
 
 public:
 	int solve();

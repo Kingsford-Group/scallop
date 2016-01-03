@@ -1,5 +1,5 @@
-#ifndef __POSITION_H__
-#define __POSITION_H__
+#ifndef __BOUNDARY_H__
+#define __BOUNDARY_H__
 
 #include <stdint.h>
 
@@ -19,7 +19,6 @@ public:
 	int32_t count;		// number of hits having this splice boundary
 	uint32_t min_qual;	// minimum quality
 	uint32_t max_qual;	// maximum quality
-
 	uint32_t score;		// might be transfomred from pvalue (for start,end-boundary)
 
 public:
