@@ -12,8 +12,8 @@ scallop_LDADD = -lbam -lhts -lz
 scallop_SOURCES = main.cc \
 				  scallop.h scallop.cc \
 				  bundle.h bundle.cc \
-				  common.h common.cc \
 				  config.h config.cc \
 				  hit.h hit.cc \
 				  boundary.h boundary.cc \
-				  region.h region.cc
+				  region.h region.cc \
+				  bridge.h bridge.cc

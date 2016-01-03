@@ -5,6 +5,11 @@
 
 #include "hit.h"
 
+hit::hit(int32_t p)
+{
+	bam1_core_t::pos = p;
+}
+
 hit::hit(bam1_t *b)
 	:bam1_core_t(b->core)
 {
@@ -25,6 +30,12 @@ hit::hit(bam1_t *b)
 
 hit::~hit()
 {
+}
+
+bool hit::operator<(const hit &h) const
+{
+	if(pos < h.pos) return true;
+	else return false;
 }
 
 int hit::print()
@@ -86,14 +97,16 @@ int hit::get_matched_intervals(vector<int64_t> & v)
     return 0;
 }
 
-bool hit_compare_left(const hit &x, const hit &y)
+/*
+inline bool hit_compare_left(const hit &x, const hit &y)
 {
 	if(x.pos < y.pos) return true;
 	else return false;
 }
 
-bool hit_compare_right(const hit &x, const hit &y)
+inline bool hit_compare_right(const hit &x, const hit &y)
 {
 	if(x.rpos < y.rpos) return true;
 	return false;
 }
+*/

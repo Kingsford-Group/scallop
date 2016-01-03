@@ -12,8 +12,10 @@ using namespace std;
 class hit: public bam1_core_t
 {
 public:
+	hit(int32_t p);
 	hit(bam1_t *b);
 	~hit();
+	bool operator<(const hit &h) const;
 
 public:
 	int32_t rpos;							// right position mapped to reference [pos, rpos)
@@ -27,7 +29,7 @@ public:
 };
 
 // for sorting
-bool hit_compare_left(const hit &x, const hit &y);
-bool hit_compare_right(const hit &x, const hit &y);
+//inline bool hit_compare_left(const hit &x, const hit &y);
+//inline bool hit_compare_right(const hit &x, const hit &y);
 
 #endif

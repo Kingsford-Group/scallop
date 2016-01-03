@@ -34,6 +34,8 @@ int bundle::solve()
 	add_start_boundary();
 	add_end_boundary();
 
+	remove_left_boundary_intervals();
+
 	build_regions();
 
 	return 0;
@@ -66,7 +68,7 @@ int bundle::add_hit(bam_hdr_t *h, bam1_t *b)
 int bundle::print()
 {
 	printf("Bundle: ");
-	printf("tid = %4d, #hits = %7lu, range = %s:%d-%d\n", tid, hits.size(), chrm.c_str(), lpos, rpos);
+	printf("tid = %d, #hits = %lu, range = %s:%d-%d\n", tid, hits.size(), chrm.c_str(), lpos, rpos);
 	// print hits
 	/*
 	for(int i = 0; i < hits.size(); i++)
@@ -123,6 +125,45 @@ int bundle::count_overlap_reads(int32_t p)
 	imap_t::const_iterator it = imap.find(p);
 	if(it == imap.end()) return 0;
 	return it->second;
+}
+
+int bundle::remove_left_boundary_intervals()
+{
+	vector<int64_t> v;
+	for(int i = 0; i < boundaries.size(); i++)
+	{
+		boundary &b = boundaries[i];
+		if(b.type != LEFT_BOUNDARY) continue;
+
+		int si = 0;
+		int cnt = locate_hits(b.pos, si);
+		if(cnt <= 0) continue;
+		for(int j = si; j < cnt + si; j++)
+		{
+			if(hits[j].pos > hits[j].mpos) continue;
+			if((hits[j].flag & 0x10) >= 1) continue;			
+
+			hits[j].get_matched_intervals(v);
+			for(int k = 0; k < v.size(); k++)
+			{
+				int32_t s = high32(v[k]);
+				int32_t t = low32(v[k]);
+				imap -= make_pair(ROI(s, t), 1);
+			}
+		}
+	}
+	return 0;
+}
+
+int bundle::locate_hits(int32_t p, int &li)
+{
+	li = -1;
+	hit h(p);
+	vector<hit>::iterator low = lower_bound(hits.begin(), hits.end(), h);
+	vector<hit>::iterator up = upper_bound(hits.begin(), hits.end(), h);
+	if(low == hits.end()) return 0;
+	li = low - hits.begin();
+	return (up - low);
 }
 
 int bundle::infer_bridges()

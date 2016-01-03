@@ -44,6 +44,12 @@ public:
 	int build_interval_map();
 	int count_overlap_reads(int32_t p);
 
+	// remove these intervals starting at a LEFT_BOUNDARY
+	int remove_left_boundary_intervals();
+
+	// search for a specific given starting point, return count
+	int locate_hits(int32_t p, int &li);
+
 	// infer boundaries
 	int infer_bridges();
 	int infer_left_boundaries();
