@@ -24,7 +24,7 @@ extern int32_t min_right_boundary_hits;
 extern uint32_t min_max_splice_boundary_qual;
 extern uint32_t min_max_left_boundary_qual;
 extern uint32_t min_max_right_boundary_qual;
-extern int32_t hits_window_size;
+extern int32_t average_read_length;
 extern double min_boundary_score;
 
 // load parameters

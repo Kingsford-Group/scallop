@@ -21,14 +21,6 @@ hit::hit(bam1_t *b)
 	assert(n_cigar <= MAX_NUM_CIGAR);
 	assert(n_cigar >= 1);
 	memcpy(cigar, bam_get_cigar(b), 4 * n_cigar);
-
-	// infer splice positions 
-	n_spos = 0;
-	infer_splice_positions();
-
-	// init
-	n_lhits = 1;
-	n_rhits = 1;
 }
 
 hit::~hit()
@@ -46,21 +38,15 @@ int hit::print()
 	}
 
 	// print basic information
-	printf("Hit %s: [%d-%d), cigar = %s, flag = %d, quality = %d, n_lhits = %d, n_rhits = %d\n", 
-			qname.c_str(), pos, rpos, sstr.str().c_str(), flag, qual, n_lhits, n_rhits);
+	printf("Hit %s: [%d-%d), cigar = %s, flag = %d, quality = %d\n", 
+			qname.c_str(), pos, rpos, sstr.str().c_str(), flag, qual);
 
-	return 0;
-
-	// print splice positions
-	for(int i = 0; i < n_spos; i++)
-	{
-		printf(" splice %d: start = %7d, offset = %7d, splice = %7d\n", i, pos, spos[i] - pos, spos[i]);
-	}
 	return 0;
 }
 
-int hit::infer_splice_positions()
+int hit::get_splice_positions(vector<int32_t> &v)
 {
+	v.clear();
 	int32_t p = pos;
     for(int k = 0; k < n_cigar; k++)
 	{
@@ -75,9 +61,31 @@ int hit::infer_splice_positions()
 		if(bam_cigar_oplen(cigar[k-1]) <= MIN_LEN_FLANK) continue;
 		if(bam_cigar_oplen(cigar[k+1]) <= MIN_LEN_FLANK) continue;
 		 
-		assert(n_spos < MAX_NUM_CIGAR - 2);
-		spos[n_spos++] = p - bam_cigar_oplen(cigar[k]);
-		spos[n_spos++] = 0 - p;
+		v.push_back(p - bam_cigar_oplen(cigar[k]));
+		v.push_back(0 - p);
+	}
+    return 0;
+}
+
+int hit::get_matched_intervals(vector<int64_t> & v)
+{
+	v.clear();
+
+	int32_t p = pos;
+    for(int k = 0; k < n_cigar; k++)
+	{
+		if (bam_cigar_type(bam_cigar_op(cigar[k]))&2)
+			p += bam_cigar_oplen(cigar[k]);
+
+		// must be flanked by matchings (with minimum length requirement of MIN_LEN_FLANK: TODO)
+		if(bam_cigar_op(cigar[k]) != BAM_CMATCH) continue;
+
+		int64_t t = p;
+		int64_t s = t - bam_cigar_oplen(cigar[k]);
+
+		int64_t x = (s << 32) | t;
+		
+		v.push_back(x);
 	}
     return 0;
 }

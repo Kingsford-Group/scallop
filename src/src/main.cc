@@ -10,6 +10,7 @@
 using namespace boost::icl;
 using namespace std;
 
+/*
 int test_interval_map()
 {
 	typedef interval_map<int, int, partial_absorber, less, inplace_plus, inter_section, closed_interval<int> > imap_t;
@@ -23,10 +24,11 @@ int test_interval_map()
 	it = imap.find(4); printf("[%d,%d] => %d\n", it->first.lower(), it->first.upper(), it->second);
 	return 0;
 }
+*/
 
 int main(int argc, char **argv)
 {
-	test_interval_map();
+	//test_interval_map();
 	return 0;
 
 	if(argc != 3) return 0;

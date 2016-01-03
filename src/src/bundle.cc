@@ -23,27 +23,14 @@ bundle::~bundle()
 
 int bundle::solve()
 {
+	// make sure all reads are sorted 
+	check_left_ascending();
+
+	build_interval_map();
+
 	infer_splice_boundaries();
-
-	//sort(hits.begin(), hits.end(), hit_compare_left);
-	check_left_ascending();
-	count_prefix_left_hits();
-	count_suffix_left_hits();
-
-	/*
-	sort(hits.begin(), hits.end(), hit_compare_right);
-	check_right_ascending();
-
-	count_prefix_right_hits();
-	count_suffix_right_hits();
-
-	infer_right_boundaries();
-
-	sort(hits.begin(), hits.end(), hit_compare_left);
-	check_left_ascending();
-	*/
-
 	infer_left_boundaries();
+	//infer_right_boundaries();
 	add_start_boundary();
 	add_end_boundary();
 
@@ -108,92 +95,41 @@ int bundle::clear()
 	return 0;
 }
 
-int bundle::count_suffix_left_hits()
+int bundle::build_interval_map()
 {
-	int p = 0;
-	int q = 0;
-	while(p < hits.size())
+	imap.clear();
+	vector<int64_t> v;
+	for(int i = 0; i < hits.size(); i++)
 	{
-		if(q >= hits.size() || hits[p].pos + hits_window_size < hits[q].pos)
+		hits[i].get_matched_intervals(v);
+		for(int k = 0; k < v.size(); k++)
 		{
-			hits[p].n_lhits += (int32_t)(q - p - 1);
-			p++;
-		}
-		else
-		{
-			q++;
+			int32_t s = (int32_t)(v[i] >> 32);
+			int32_t t = (int32_t)((v[i] << 32) >> 32);
+			imap += make_pair(ROI(s, t), 1);
 		}
 	}
 	return 0;
 }
 
-int bundle::count_prefix_left_hits()
+int bundle::count_overlap_reads(int32_t p)
 {
-	int p = hits.size() - 1;
-	int q = hits.size() - 1;
-	while(p >= 0)
-	{
-		if(q < 0 || hits[q].pos + hits_window_size < hits[p].pos)
-		{
-			hits[p].n_lhits += (int32_t)(p - q - 1);
-			p--;
-		}
-		else
-		{
-			q--;
-		}
-	}
-	return 0;
-}
-
-
-int bundle::count_suffix_right_hits()
-{
-	int p = 0;
-	int q = 0;
-	while(p < hits.size())
-	{
-		if(q >= hits.size() || hits[p].rpos + hits_window_size < hits[q].rpos)
-		{
-			hits[p].n_rhits += (int32_t)(q - p - 1);
-			p++;
-		}
-		else
-		{
-			q++;
-		}
-	}
-	return 0;
-}
-
-int bundle::count_prefix_right_hits()
-{
-	int p = hits.size() - 1;
-	int q = hits.size() - 1;
-	while(p >= 0)
-	{
-		if(q < 0 || hits[q].rpos + hits_window_size < hits[p].rpos)
-		{
-			hits[p].n_rhits += (int32_t)(p - q - 1);
-			p--;
-		}
-		else
-		{
-			q--;
-		}
-	}
-	return 0;
+	imap_t::const_iterator it = imap.find(p);
+	if(it == imap.end()) return 0;
+	return it->second;
 }
 
 int bundle::infer_splice_boundaries()
 {
+	vector<int32_t> v;
 	map<int32_t, boundary> m;
 	for(int i = 0; i < hits.size(); i++)
 	{
-		if(hits[i].n_spos <= 0) continue;
-		for(int k = 0; k < hits[i].n_spos; k++)
+		hits[i].get_splice_positions(v);
+		if(v.size() == 0) continue;
+		for(int k = 0; k < v.size(); k++)
 		{
-			int32_t p = hits[i].spos[k];
+			int32_t p = v[k];
 			if(m.find(p) == m.end()) 
 			{
 				int type = p > 0 ? SPLICE_BOUNDARY_LEFT : SPLICE_BOUNDARY_RIGHT;
@@ -255,7 +191,9 @@ int bundle::infer_left_boundaries()
 		if(sb.count < min_left_boundary_hits) continue;
 		if(sb.max_qual < min_max_left_boundary_qual) continue;
 
-		binomial_distribution<> b(hits[i-1].n_lhits, 1.0/(2.0 * hits_window_size + 1.0));
+		int r = count_overlap_reads(tpre);
+
+		binomial_distribution<> b(1.0 * r, 1.0 / average_read_length);
 		double p = cdf(complement(b, sb.count - 1));
 
 		sb.score = (uint32_t)(-10.0 * log10(p));
@@ -303,7 +241,10 @@ int bundle::infer_right_boundaries()
 		if(sb.count < min_right_boundary_hits) continue;
 		if(sb.max_qual < min_max_right_boundary_qual) continue;
 
-		binomial_distribution<> b(hits[i-1].n_rhits, 1.0/(2.0 * hits_window_size + 1.0));
+		int32_t r = count_overlap_reads(tpre);
+
+		binomial_distribution<> b(r, 1.0 / average_read_length);
+
 		double p = cdf(complement(b, sb.count - 1));
 
 		sb.score = (uint32_t)(-10.0 * log10(p));
