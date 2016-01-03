@@ -10,8 +10,7 @@ using namespace boost;
 
 typedef pair<size_t, size_t> PT;
 typedef icl::right_open_interval<int32_t> ROI;
-typedef icl::interval_map<int32_t, int32_t, icl::partial_absorber, less, icl::inplace_plus, icl::inter_section, ROI>::type imap_t;
-//typedef icl::interval_map<int32_t, int32_t, icl::partial_absorber, less, icl::inplace_plus, icl::inter_section, ROI>::const_reference imap_r;
+typedef icl::interval_map<int32_t, int32_t, icl::partial_absorber, less, icl::inplace_plus, icl::inter_section, ROI> imap_t;
 
 class region
 {

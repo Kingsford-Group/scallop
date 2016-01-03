@@ -1,6 +1,7 @@
 bin_PROGRAMS=scallop
 
 # add htslib library
+# SAMTOOS and HTSLIB MUST be defined through running configure
 samtools = $(SAMTOOLS)
 hts = $(HTSLIB)
 hts_headers = $(hts)/htslib
