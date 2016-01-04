@@ -3,11 +3,6 @@
 
 #include <stdint.h>
 
-// macros
-#define pack(x, y) (int64_t)((((int64_t)(x)) << 32) | ((int64_t)(y)))
-#define high32(x) (int32_t)((x) >> 32)
-#define low32(x) (int32_t)(((x) << 32) >> 32)
-
 // constants
 #define SPLICE 0
 #define SPLICE_BOUNDARY_LEFT 1
@@ -31,7 +26,11 @@ extern uint32_t min_max_splice_boundary_qual;
 extern uint32_t min_max_left_boundary_qual;
 extern uint32_t min_max_right_boundary_qual;
 extern int32_t average_read_length;
-extern double min_boundary_score;
+extern uint32_t min_boundary_score;
+extern int32_t ascending_step;
+extern int32_t descending_step;
+extern uint32_t min_ascending_score;
+extern uint32_t min_descending_score;
 
 // load parameters
 int load_config(const char * conf_file);

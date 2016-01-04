@@ -16,7 +16,11 @@ uint32_t min_max_splice_boundary_qual;
 uint32_t min_max_left_boundary_qual;
 uint32_t min_max_right_boundary_qual;
 int32_t average_read_length;
-double min_boundary_score;
+uint32_t min_boundary_score;
+int32_t ascending_step;
+int32_t descending_step;
+uint32_t min_ascending_score;
+uint32_t min_descending_score;
 
 int load_config(const char * conf_file)
 {
@@ -68,9 +72,25 @@ int load_config(const char * conf_file)
 		{
 			average_read_length = (int32_t)atoi(value);
 		}
+		else if(strcmp(key, "ascending_step")==0)
+		{
+			ascending_step = (int32_t)atoi(value);
+		}
+		else if(strcmp(key, "descending_step")==0)
+		{
+			descending_step = (int32_t)atoi(value);
+		}
 		else if(strcmp(key, "min_boundary_score")==0)
 		{
-			min_boundary_score = (int32_t)atoi(value);
+			min_boundary_score = (uint32_t)atoi(value);
+		}
+		else if(strcmp(key, "min_ascending_score")==0)
+		{
+			min_ascending_score = (uint32_t)atoi(value);
+		}
+		else if(strcmp(key, "min_descending_score")==0)
+		{
+			min_descending_score = (uint32_t)atoi(value);
 		}
 	}
 

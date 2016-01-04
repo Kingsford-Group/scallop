@@ -5,10 +5,6 @@
 #include "kstring.h"
 #include "bundle.h"
 
-#include <boost/math/distributions/binomial.hpp>
-
-using namespace boost::math;
-
 bundle::bundle()
 {
 	tid = -1;
@@ -89,6 +85,12 @@ int bundle::print()
 		boundaries[i].print();
 	}
 
+	// print regions
+	for(int i = 0; i < regions.size(); i++)
+	{
+		regions[i].print();
+	}
+
 	printf("\n");
 	return 0;
 }
@@ -118,13 +120,6 @@ int bundle::build_interval_map()
 		}
 	}
 	return 0;
-}
-
-int bundle::count_overlap_reads(int32_t p)
-{
-	imap_t::const_iterator it = imap.find(p);
-	if(it == imap.end()) return 0;
-	return it->second;
 }
 
 int bundle::remove_left_boundary_intervals()
@@ -236,12 +231,9 @@ int bundle::infer_left_boundaries()
 		if(sb.count < min_left_boundary_hits) continue;
 		if(sb.max_qual < min_max_left_boundary_qual) continue;
 
-		int r = count_overlap_reads(tpre);
+		int r = compute_overlap(imap, tpre);
 
-		binomial_distribution<> b(1.0 * r, 1.0 / average_read_length);
-		double p = cdf(complement(b, sb.count - 1));
-
-		sb.score = (uint32_t)(-10.0 * log10(p));
+		sb.score = compute_binomial_score(r, 1.0 / average_read_length, sb.count);
 
 		if(sb.score < min_boundary_score) continue;
 
@@ -286,13 +278,9 @@ int bundle::infer_right_boundaries()
 		if(sb.count < min_right_boundary_hits) continue;
 		if(sb.max_qual < min_max_right_boundary_qual) continue;
 
-		int32_t r = count_overlap_reads(tpre);
+		int r = compute_overlap(imap, tpre);
 
-		binomial_distribution<> b(r, 1.0 / average_read_length);
-
-		double p = cdf(complement(b, sb.count - 1));
-
-		sb.score = (uint32_t)(-10.0 * log10(p));
+		sb.score = compute_binomial_score(r, 1.0 / average_read_length, sb.count);
 
 		if(sb.score < min_boundary_score) continue;
 

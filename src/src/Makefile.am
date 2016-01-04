@@ -16,4 +16,5 @@ scallop_SOURCES = main.cc \
 				  hit.h hit.cc \
 				  boundary.h boundary.cc \
 				  region.h region.cc \
-				  bridge.h bridge.cc
+				  bridge.h bridge.cc \
+				  common.h common.cc

@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "common.h"
 #include "region.h"
 #include "bridge.h"
 #include "boundary.h"
@@ -42,7 +43,6 @@ public:
 
 	// build interval map
 	int build_interval_map();
-	int count_overlap_reads(int32_t p);
 
 	// remove these intervals starting at a LEFT_BOUNDARY
 	int remove_left_boundary_intervals();

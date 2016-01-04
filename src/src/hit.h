@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "config.h"
 #include "sam.h"
+#include "config.h"
 
 using namespace std;
 

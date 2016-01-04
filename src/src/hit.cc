@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include "hit.h"
+#include "common.h"
 
 hit::hit(int32_t p)
 {
