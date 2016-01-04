@@ -3,15 +3,9 @@
 
 #include <stdint.h>
 #include <vector>
-#include <boost/icl/interval_map.hpp>
+#include "common.h"
 
 using namespace std;
-using namespace boost;
-
-typedef pair<size_t, size_t> PT;
-typedef icl::right_open_interval<int32_t> ROI;
-typedef icl::interval_map<int32_t, int32_t, icl::partial_absorber, less, icl::inplace_plus, icl::inter_section, ROI> imap_t;
-
 class region
 {
 public:
@@ -24,6 +18,16 @@ public:
 	int32_t lpos;					// the leftmost boundary on reference
 	int32_t rpos;					// the rightmost boundary on reference
 	const imap_t *imap;				// pointer to a interval map
+
+	int32_t asc_pos;				// ascending position
+	int32_t desc_pos;				// descending position
+
+public:
+	int print();
+
+public:
+	int32_t locate_ascending_position();
+	int32_t locate_descending_position();
 };
 
 #endif
