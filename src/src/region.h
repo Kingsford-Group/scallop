@@ -19,6 +19,7 @@ public:
 	int32_t rpos;					// the rightmost boundary on reference
 	const imap_t *imap;				// pointer to a interval map
 
+	bool empty;						// whether this region is completely spliced
 	int32_t asc_pos;				// ascending position
 	int32_t desc_pos;				// descending position
 
@@ -26,8 +27,9 @@ public:
 	int print();
 
 public:
-	int32_t locate_ascending_position();
-	int32_t locate_descending_position();
+	int check_empty();
+	int locate_ascending_position();
+	int locate_descending_position();
 };
 
 #endif

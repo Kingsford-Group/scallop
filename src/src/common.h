@@ -18,8 +18,7 @@ typedef icl::right_open_interval<int32_t> ROI;
 typedef icl::interval_map<int32_t, int32_t, icl::partial_absorber, less, icl::inplace_plus, icl::inter_section, ROI> imap_t;
 
 int compute_overlap(const imap_t &imap, int32_t p);
-int cumulate_overlap(const imap_t &imap, int32_t p, int32_t q);
-
+int cumulate_overlap(const imap_t &imap, int32_t p, int32_t q, int32_t t);
 
 uint32_t compute_binomial_score(int n, double pr, int x);
 

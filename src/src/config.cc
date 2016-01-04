@@ -21,6 +21,8 @@ int32_t ascending_step;
 int32_t descending_step;
 uint32_t min_ascending_score;
 uint32_t min_descending_score;
+int num_sample_positions;
+double min_average_overlap;
 
 int load_config(const char * conf_file)
 {
@@ -92,6 +94,15 @@ int load_config(const char * conf_file)
 		{
 			min_descending_score = (uint32_t)atoi(value);
 		}
+		else if(strcmp(key, "num_sample_positions")==0)
+		{
+			num_sample_positions = (int)atoi(value);
+		}
+		else if(strcmp(key, "min_average_overlap")==0)
+		{
+			min_average_overlap = (int)atof(value);
+		}
+
 	}
 
 	return 0;

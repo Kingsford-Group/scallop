@@ -11,10 +11,10 @@ int compute_overlap(const imap_t &imap, int32_t p)
 	return it->second;
 }
 
-int cumulate_overlap(const imap_t &imap, int32_t x, int32_t y)
+int cumulate_overlap(const imap_t &imap, int32_t x, int32_t y, int32_t t)
 {
 	int s = 0;
-	for(int k = x; k < y; k++)
+	for(int k = x; k < y; k+=t)
 	{
 		s += compute_overlap(imap, k);
 	}
