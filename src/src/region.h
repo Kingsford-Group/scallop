@@ -20,8 +20,8 @@ public:
 	const imap_t *imap;				// pointer to a interval map
 
 	bool empty;						// whether this region is completely spliced
-	int32_t asc_pos;				// ascending position
-	int32_t desc_pos;				// descending position
+	int32_t asc_pos;				// ascending position, inclusive
+	int32_t desc_pos;				// descending position, exclusive
 
 public:
 	int print();
