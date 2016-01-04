@@ -4,9 +4,13 @@
 #include <stdint.h>
 
 // constants
-#define SPLICE_BOUNDARY 1
-#define LEFT_BOUNDARY 2
-#define RIGHT_BOUNDARY 3
+#define SPLICE 0
+#define SPLICE_BOUNDARY_LEFT 1
+#define SPLICE_BOUNDARY_RIGHT 2
+#define LEFT_BOUNDARY 3
+#define RIGHT_BOUNDARY 4
+#define START_BOUNDARY 5
+#define END_BOUNDARY 6
 
 // pre-defined parameters
 #define MAX_NUM_CIGAR 7
@@ -21,8 +25,14 @@ extern int32_t min_right_boundary_hits;
 extern uint32_t min_max_splice_boundary_qual;
 extern uint32_t min_max_left_boundary_qual;
 extern uint32_t min_max_right_boundary_qual;
-extern int32_t hits_window_size;
-extern double min_boundary_score;
+extern int32_t average_read_length;
+extern uint32_t min_boundary_score;
+extern int32_t ascending_step;
+extern int32_t descending_step;
+extern uint32_t min_ascending_score;
+extern uint32_t min_descending_score;
+extern int num_sample_positions;
+extern double min_average_overlap;
 
 // load parameters
 int load_config(const char * conf_file);

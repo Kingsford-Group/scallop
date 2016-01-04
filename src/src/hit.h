@@ -2,35 +2,34 @@
 #define __HIT_H__
 
 #include <string>
+#include <vector>
 
-#include "config.h"
 #include "sam.h"
+#include "config.h"
 
 using namespace std;
 
 class hit: public bam1_core_t
 {
 public:
+	hit(int32_t p);
 	hit(bam1_t *b);
 	~hit();
+	bool operator<(const hit &h) const;
 
 public:
 	int32_t rpos;							// right position mapped to reference [pos, rpos)
 	string qname;							// query name
 	uint32_t cigar[MAX_NUM_CIGAR];			// cigar, use samtools
-	int32_t spos[MAX_NUM_CIGAR];			// splice positions
-	int n_spos;								// number of splice positions
-
-	int n_lhits;							// number of hits in the window [pos - WINDOW_SIZE, pos + WINDOW_SIZE]
-	int n_rhits;							// number of hits in the window [rpos - WINDOW_SIZE, rpos + WINDOW_SIZE]
 
 public:
 	int print();
-	int infer_splice_positions();
+	int get_splice_positions(vector<int64_t> &v);
+	int get_matched_intervals(vector<int64_t> &v);
 };
 
 // for sorting
-bool hit_compare_left(const hit &x, const hit &y);
-bool hit_compare_right(const hit &x, const hit &y);
+//inline bool hit_compare_left(const hit &x, const hit &y);
+//inline bool hit_compare_right(const hit &x, const hit &y);
 
 #endif

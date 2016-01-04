@@ -4,6 +4,12 @@
 #include <sstream>
 
 #include "hit.h"
+#include "common.h"
+
+hit::hit(int32_t p)
+{
+	bam1_core_t::pos = p;
+}
 
 hit::hit(bam1_t *b)
 	:bam1_core_t(b->core)
@@ -21,18 +27,16 @@ hit::hit(bam1_t *b)
 	assert(n_cigar <= MAX_NUM_CIGAR);
 	assert(n_cigar >= 1);
 	memcpy(cigar, bam_get_cigar(b), 4 * n_cigar);
-
-	// infer splice positions 
-	n_spos = 0;
-	infer_splice_positions();
-
-	// init
-	n_lhits = 1;
-	n_rhits = 1;
 }
 
 hit::~hit()
 {
+}
+
+bool hit::operator<(const hit &h) const
+{
+	if(pos < h.pos) return true;
+	else return false;
 }
 
 int hit::print()
@@ -46,21 +50,15 @@ int hit::print()
 	}
 
 	// print basic information
-	printf("Hit %s: [%d-%d), cigar = %s, flag = %d, quality = %d, n_lhits = %d, n_rhits = %d\n", 
-			qname.c_str(), pos, rpos, sstr.str().c_str(), flag, qual, n_lhits, n_rhits);
+	printf("Hit %s: [%d-%d), cigar = %s, flag = %d, quality = %d\n", 
+			qname.c_str(), pos, rpos, sstr.str().c_str(), flag, qual);
 
-	return 0;
-
-	// print splice positions
-	for(int i = 0; i < n_spos; i++)
-	{
-		printf(" splice %d: start = %7d, offset = %7d, splice = %7d\n", i, pos, spos[i] - pos, spos[i]);
-	}
 	return 0;
 }
 
-int hit::infer_splice_positions()
+int hit::get_splice_positions(vector<int64_t> &v)
 {
+	v.clear();
 	int32_t p = pos;
     for(int k = 0; k < n_cigar; k++)
 	{
@@ -74,22 +72,42 @@ int hit::infer_splice_positions()
 		if(bam_cigar_op(cigar[k+1]) != BAM_CMATCH) continue;
 		if(bam_cigar_oplen(cigar[k-1]) <= MIN_LEN_FLANK) continue;
 		if(bam_cigar_oplen(cigar[k+1]) <= MIN_LEN_FLANK) continue;
-		 
-		assert(n_spos < MAX_NUM_CIGAR - 2);
-		spos[n_spos++] = p - bam_cigar_oplen(cigar[k]);
-		spos[n_spos++] = p;
+
+		int32_t s = p - bam_cigar_oplen(cigar[k]);
+		v.push_back(pack(s, p));
 	}
     return 0;
 }
 
-bool hit_compare_left(const hit &x, const hit &y)
+int hit::get_matched_intervals(vector<int64_t> & v)
+{
+	v.clear();
+	int32_t p = pos;
+    for(int k = 0; k < n_cigar; k++)
+	{
+		if (bam_cigar_type(bam_cigar_op(cigar[k]))&2)
+			p += bam_cigar_oplen(cigar[k]);
+
+		// must be flanked by matchings (with minimum length requirement of MIN_LEN_FLANK: TODO)
+		if(bam_cigar_op(cigar[k]) != BAM_CMATCH) continue;
+
+		int32_t s = p - bam_cigar_oplen(cigar[k]);
+		v.push_back(pack(s, p));
+	}
+
+    return 0;
+}
+
+/*
+inline bool hit_compare_left(const hit &x, const hit &y)
 {
 	if(x.pos < y.pos) return true;
 	else return false;
 }
 
-bool hit_compare_right(const hit &x, const hit &y)
+inline bool hit_compare_right(const hit &x, const hit &y)
 {
 	if(x.rpos < y.rpos) return true;
 	return false;
 }
+*/

@@ -1,0 +1,5 @@
+*.o
+*.Po
+Makefile.in
+Makefile
+scallop
