@@ -42,7 +42,11 @@ region::~region()
 
 int region::print()
 {
-	printf("region: [%d,%d), empty = %c, core = [%d, %d)\n", lpos, rpos, empty ? 'T' : 'F', asc_pos, desc_pos);
+	char em = empty ? 'T' : 'F';
+	char cl = lpos < asc_pos ? 'T' : 'F';
+	char cr = rpos > desc_pos ? 'T' : 'F';
+	printf("region: [%d-%d), empty = %c, check = (%c, %c), core = [%d-%d), origin-length = %d, core-length = %d\n",
+			lpos, rpos, em, cl, cr, asc_pos, desc_pos, rpos - lpos, desc_pos - asc_pos);
 	return 0;
 }
 
