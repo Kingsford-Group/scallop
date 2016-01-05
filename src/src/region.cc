@@ -17,14 +17,9 @@ region::region(int32_t _lpos, int32_t _rpos, const imap_t *_imap)
 region::region(const region &r)
 	:lpos(r.lpos), rpos(r.rpos), imap(r.imap)
 {
-	asc_pos = lpos;
-	desc_pos = rpos;
-	check_empty();
-	if(empty == false)
-	{
-		locate_ascending_position();
-		locate_descending_position();
-	}
+	asc_pos = r.asc_pos;
+	desc_pos = r.desc_pos;
+	empty = r.empty;
 }
 
 region& region::operator=(const region &r)
@@ -77,7 +72,7 @@ int region::locate_ascending_position()
 		int yz = cumulate_overlap(*imap, y, z, 1);
 
 		uint32_t score = compute_binomial_score(xy + yz, 0.5, yz);
-		if(score < min_ascending_score) break;
+		if(xy > 0 && score < min_ascending_score) break;
 		
 		asc_pos = y;
 
@@ -96,8 +91,7 @@ int region::locate_descending_position()
 	int32_t y = z - descending_step;
 	int yz = cumulate_overlap(*imap, y, z, 1);
 
-	printf("descending ");
-	print();
+	//printf("descending "); print();
 	while(true)
 	{
 		int32_t x =  y - descending_step;
@@ -107,9 +101,9 @@ int region::locate_descending_position()
 
 		uint32_t score = compute_binomial_score(xy + yz, 0.5, xy);
 
-		printf("(%d,%d,%d) xy = %d, yz = %d, score = %d, min_descending_score = %d\n", x, y, z, xy, yz, score, min_descending_score);
+		//printf("(%d,%d,%d) xy = %d, yz = %d, score = %d, min_descending_score = %d\n", x, y, z, xy, yz, score, min_descending_score);
 
-		if(score < min_descending_score) break;
+		if(yz > 0 && score < min_descending_score) break;
 		
 		desc_pos = y;
 
@@ -117,6 +111,7 @@ int region::locate_descending_position()
 		y = x;
 		yz = xy;
 	}
-	printf("\n");
+	//printf("\n");
+
 	return 0;
 }
