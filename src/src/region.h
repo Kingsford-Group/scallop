@@ -23,6 +23,9 @@ public:
 	int32_t asc_pos;				// ascending position, inclusive
 	int32_t desc_pos;				// descending position, exclusive
 
+	double ave_abd;					// average abundance
+	double std_abd;					// standard-deviation of abundance
+
 public:
 	int print();
 
@@ -30,6 +33,7 @@ public:
 	int check_empty();
 	int locate_ascending_position();
 	int locate_descending_position();
+	int estimate_abundance();
 };
 
 #endif
