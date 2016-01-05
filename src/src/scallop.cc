@@ -41,7 +41,7 @@ int scallop::load(const char *bam_file)
 			bd.clear();
 
 			// DEBUG
-			if(bundles.size() >= 1000) break;
+			//if(bundles.size() >= 1000) break;
 		}
 		bd.add_hit(h, b);
     }

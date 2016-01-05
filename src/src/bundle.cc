@@ -97,11 +97,17 @@ int bundle::print()
 
 int bundle::clear()
 {
-	hits.clear();
 	tid = -1;
 	chrm = "";
 	lpos = INT32_MAX;
 	rpos = 0;
+
+	hits.clear();
+	imap.clear();
+	bridges.clear();
+	boundaries.clear();
+	regions.clear();
+
 	return 0;
 }
 

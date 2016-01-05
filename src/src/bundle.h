@@ -26,6 +26,7 @@ public:
 	string chrm;					// chromosome name
 	int32_t lpos;					// the leftmost boundary on reference
 	int32_t rpos;					// the rightmost boundary on reference
+
 	vector<hit> hits;				// hits
 	imap_t imap;					// interval map
 	vector<bridge> bridges;			// splice bridges
@@ -41,13 +42,17 @@ public:
 	// add hit to hits
 	int add_hit(bam_hdr_t *h, bam1_t *b);
 
+	// check whether hits are sorted
+	int check_left_ascending();
+	int check_right_ascending();
+
 	// build interval map
 	int build_interval_map();
 
 	// remove these intervals starting at a LEFT_BOUNDARY
 	int remove_left_boundary_intervals();
 
-	// search for a specific given starting point, return count
+	// binary search for a specific given starting point, return count
 	int locate_hits(int32_t p, int &li);
 
 	// infer boundaries
@@ -59,10 +64,6 @@ public:
 
 	// build regions
 	int build_regions();
-
-	// check whether hits are sorted
-	int check_left_ascending();
-	int check_right_ascending();
 };
 
 #endif
