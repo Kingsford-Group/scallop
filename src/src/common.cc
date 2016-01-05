@@ -1,9 +1,5 @@
 #include "common.h"
 
-#include <boost/math/distributions/binomial.hpp>
-
-using namespace boost::math;
-
 int compute_overlap(const imap_t &imap, int32_t p)
 {
 	imap_t::const_iterator it = imap.find(p);
