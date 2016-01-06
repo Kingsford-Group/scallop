@@ -24,7 +24,7 @@ public:
 	int32_t desc_pos;				// descending position, exclusive
 
 	double ave_abd;					// average abundance
-	double std_abd;					// standard-deviation of abundance
+	double dev_abd;					// standard-deviation of abundance
 
 public:
 	int print();

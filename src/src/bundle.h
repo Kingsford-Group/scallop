@@ -6,12 +6,13 @@
 #include <string>
 #include <vector>
 
-#include "common.h"
-#include "region.h"
-#include "bridge.h"
-#include "boundary.h"
 #include "hit.h"
 #include "sam.h"
+#include "common.h"
+#include "bridge.h"
+#include "boundary.h"
+#include "region.h"
+#include "sgraph.h"
 
 using namespace std;
 
@@ -34,11 +35,12 @@ public:
 	vector<region> regions;			// regions
 
 public:
-	int solve();
-
+	int build_splice_graph(sgraph &sg);
 	int clear();
 	int print();
+	int solve();
 
+public:
 	// add hit to hits
 	int add_hit(bam_hdr_t *h, bam1_t *b);
 

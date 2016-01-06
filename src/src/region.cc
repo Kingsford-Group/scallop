@@ -7,7 +7,7 @@ region::region(int32_t _lpos, int32_t _rpos, const imap_t *_imap)
 	asc_pos = lpos;
 	desc_pos = rpos;
 	ave_abd = 0;
-	std_abd = 0;
+	dev_abd = 0;
 	check_empty();
 	if(empty == false)
 	{
@@ -23,7 +23,7 @@ region::region(const region &r)
 	asc_pos = r.asc_pos;
 	desc_pos = r.desc_pos;
 	ave_abd = r.ave_abd;
-	std_abd = r.std_abd;
+	dev_abd = r.dev_abd;
 	empty = r.empty;
 }
 
@@ -46,7 +46,7 @@ int region::print()
 	char cl = lpos < asc_pos ? 'T' : 'F';
 	char cr = rpos > desc_pos ? 'T' : 'F';
 	printf("region: [%d-%d), empty = %c, check = (%c, %c), core = [%d-%d), origin-length = %d, core-length = %d, ave-abundance = %.2lf, std-abundance = %.2lf\n",
-			lpos, rpos, em, cl, cr, asc_pos, desc_pos, rpos - lpos, desc_pos - asc_pos, ave_abd, std_abd);
+			lpos, rpos, em, cl, cr, asc_pos, desc_pos, rpos - lpos, desc_pos - asc_pos, ave_abd, dev_abd);
 	return 0;
 }
 
@@ -143,6 +143,6 @@ int region::estimate_abundance()
 		var += (v[i] - ave_abd) * (v[i] - ave_abd);	
 	}
 
-	std_abd = sqrt(var / v.size());
+	dev_abd = sqrt(var / v.size());
 	return 0;
 }

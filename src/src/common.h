@@ -1,6 +1,7 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
+#include <map>
 #include <stdint.h>
 using namespace std;
 
@@ -8,6 +9,11 @@ using namespace std;
 #define pack(x, y) (int64_t)((((int64_t)(x)) << 32) | ((int64_t)(y)))
 #define high32(x) (int32_t)((x) >> 32)
 #define low32(x) (int32_t)(((x) << 32) >> 32)
+
+
+// definitions
+typedef map<int32_t, int> MPI;
+typedef pair<int32_t, int> PPI;
 
 
 // boost::interval map
@@ -52,5 +58,7 @@ typedef graph_traits<dgraph>::edge_descriptor edge_descriptor;
 //typedef property_map<dgraph, edge_index_t>::type edge_index_map;
 
 //static vertex_descriptor VNULL = graph_traits<dgraph>::null_vertex();
+
+typedef map<edge_descriptor, double> MED;
 
 #endif
