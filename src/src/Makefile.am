@@ -17,4 +17,5 @@ scallop_SOURCES = main.cc \
 				  boundary.h boundary.cc \
 				  region.h region.cc \
 				  bridge.h bridge.cc \
-				  common.h common.cc
+				  common.h common.cc \
+				  sgraph.h sgraph.cc
