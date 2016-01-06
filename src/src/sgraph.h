@@ -18,6 +18,8 @@ public:
 	MEI e2b;				// edge-descriptor to bridge index
 
 public:
+	int solve();
+
 	int build();
 };
 

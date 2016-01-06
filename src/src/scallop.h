@@ -1,12 +1,12 @@
 #ifndef __SCALLOP_H__
 #define __SCALLOP_H__
 
-#include "bundle.h"
+#include "sgraph.h"
 
 class scallop
 {
 public:
-	vector<bundle> bundles;
+	vector<sgraph> sgraphs;
 
 public:
 	scallop();

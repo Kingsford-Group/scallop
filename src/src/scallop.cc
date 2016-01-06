@@ -26,7 +26,7 @@ int scallop::load(const char *bam_file)
     bam_hdr_t *h= sam_hdr_read(fn);
     bam1_t *b = bam_init1();
 
-	bundle bd;
+	sgraph bd;
     while(sam_read1(fn, h, b) >= 0)
 	{
 		bam1_core_t &p = b->core;
@@ -37,11 +37,11 @@ int scallop::load(const char *bam_file)
 		//if(p.qual <= 4) continue;				// ignore hits with quality-score < 5
 		if(bd.hits.size() > 0 && (bd.rpos + min_bundle_gap < p.pos || p.tid != bd.tid))
 		{
-			bundles.push_back(bd);
+			sgraphs.push_back(bd);
 			bd.clear();
 
 			// DEBUG
-			if(bundles.size() >= 1000) break;
+			if(sgraphs.size() >= 1000) break;
 		}
 		bd.add_hit(h, b);
     }
@@ -55,18 +55,18 @@ int scallop::load(const char *bam_file)
 
 int scallop::solve()
 {
-	for(int i = 0; i < bundles.size(); i++)
+	for(int i = 0; i < sgraphs.size(); i++)
 	{
-		bundles[i].solve();
+		sgraphs[i].solve();
 
 		/*
 		// DEBUG
-		if(bundles[i].chrm != "2L") continue;
-		if(bundles[i].lpos < 870386) continue;
-		if(bundles[i].rpos > 877183) continue;
+		if(sgraphs[i].chrm != "2L") continue;
+		if(sgraphs[i].lpos < 870386) continue;
+		if(sgraphs[i].rpos > 877183) continue;
 		*/
 
-		bundles[i].print();
+		sgraphs[i].print();
 	}
 	return 0;
 }

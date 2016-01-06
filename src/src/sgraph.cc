@@ -6,6 +6,12 @@ sgraph::sgraph()
 sgraph::~sgraph()
 {}
 
+int sgraph::solve()
+{
+	build();
+	return 0;
+}
+
 int sgraph::build()
 {
 	// vertices: each region, start, end
@@ -55,3 +61,38 @@ int sgraph::build()
 
 	return 0;
 }
+
+int sgraph::print()
+{
+	printf("Bundle: ");
+	printf("tid = %d, #hits = %lu, range = %s:%d-%d\n", tid, hits.size(), chrm.c_str(), lpos, rpos);
+	// print hits
+	/*
+	for(int i = 0; i < hits.size(); i++)
+	{
+		hits[i].print();
+	}
+	*/
+
+	// print bridges 
+	for(int i = 0; i < bridges.size(); i++)
+	{
+		bridges[i].print();
+	}
+
+	// print boundaries
+	for(int i = 0; i < boundaries.size(); i++)
+	{
+		boundaries[i].print();
+	}
+
+	// print regions
+	for(int i = 0; i < regions.size(); i++)
+	{
+		regions[i].print();
+	}
+
+	printf("\n");
+	return 0;
+}
+

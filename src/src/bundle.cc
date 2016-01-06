@@ -2,22 +2,10 @@
 #include <cstdio>
 #include <map>
 
-#include "kstring.h"
 #include "bundle.h"
 
-bundle::bundle()
-{
-	tid = -1;
-	chrm = "";
-	lpos = INT32_MAX;
-	rpos = 0;
-}
-
-bundle::~bundle()
-{
-}
-
-int bundle::solve()
+bundle::bundle(const bbase &bb)
+	bbase(bb)
 {
 	// make sure all reads are sorted 
 	check_left_ascending();
@@ -34,83 +22,11 @@ int bundle::solve()
 
 	build_regions();
 	link_regions();
-
-	return 0;
 }
 
-int bundle::add_hit(bam_hdr_t *h, bam1_t *b)
-{
-	// create and store new hit
-	hit ht(b);
-	hits.push_back(ht);
+bundle::~bundle()
+{}
 
-	// calcuate the boundaries on reference
-	if(ht.pos < lpos) lpos = ht.pos;
-	if(ht.rpos > rpos) rpos = ht.rpos;
-
-	// set chromsome ID and name
-	if(tid == -1)
-	{
-		tid = ht.tid;
-		assert(chrm == "");
-		char buf[1024];
-		strcpy(buf, h->target_name[ht.tid]);
-		chrm = string(buf);
-	}
-	assert(tid == ht.tid);
-
-	return 0;
-}
-
-int bundle::print()
-{
-	printf("Bundle: ");
-	printf("tid = %d, #hits = %lu, range = %s:%d-%d\n", tid, hits.size(), chrm.c_str(), lpos, rpos);
-	// print hits
-	/*
-	for(int i = 0; i < hits.size(); i++)
-	{
-		hits[i].print();
-	}
-	*/
-
-	// print bridges 
-	for(int i = 0; i < bridges.size(); i++)
-	{
-		bridges[i].print();
-	}
-
-	// print boundaries
-	for(int i = 0; i < boundaries.size(); i++)
-	{
-		boundaries[i].print();
-	}
-
-	// print regions
-	for(int i = 0; i < regions.size(); i++)
-	{
-		regions[i].print();
-	}
-
-	printf("\n");
-	return 0;
-}
-
-int bundle::clear()
-{
-	tid = -1;
-	chrm = "";
-	lpos = INT32_MAX;
-	rpos = 0;
-
-	hits.clear();
-	imap.clear();
-	bridges.clear();
-	boundaries.clear();
-	regions.clear();
-
-	return 0;
-}
 
 int bundle::build_interval_map()
 {

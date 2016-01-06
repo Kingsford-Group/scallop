@@ -1,13 +1,7 @@
 #ifndef __BUNDLE_H__
 #define __BUNDLE_H__
 
-#include <stdint.h>
-#include <cstring>
-#include <string>
-#include <vector>
-
-#include "hit.h"
-#include "sam.h"
+#include "bbase.h"
 #include "common.h"
 #include "bridge.h"
 #include "boundary.h"
@@ -15,33 +9,19 @@
 
 using namespace std;
 
-class bundle
+class bundle : public bbase
 {
 public:
-	bundle();
-	~bundle();
+	bundle(const bbase &bb);
+	virtual ~bundle();
 
-public:
-	int32_t tid;					// chromosome ID
-	string chrm;					// chromosome name
-	int32_t lpos;					// the leftmost boundary on reference
-	int32_t rpos;					// the rightmost boundary on reference
-
-	vector<hit> hits;				// hits
+protected:
 	imap_t imap;					// interval map
 	vector<bridge> bridges;			// splice bridges
 	vector<boundary> boundaries;	// all types of boundaries
 	vector<region> regions;			// regions
 
-public:
-	int clear();
-	int print();
-	int solve();
-
-public:
-	// add hit to hits
-	int add_hit(bam_hdr_t *h, bam1_t *b);
-
+private:
 	// check whether hits are sorted
 	int check_left_ascending();
 	int check_right_ascending();
