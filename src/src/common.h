@@ -60,5 +60,6 @@ typedef graph_traits<dgraph>::edge_descriptor edge_descriptor;
 //static vertex_descriptor VNULL = graph_traits<dgraph>::null_vertex();
 
 typedef map<edge_descriptor, double> MED;
+typedef map<edge_descriptor, int> MEI;
 
 #endif

@@ -22,6 +22,9 @@ public:
 	uint32_t max_qual;	// maximum quality
 	uint32_t score;		// score
 
+	int lrgn;						// region index corresponds to lpos
+	int rrgn;						// region index corresponds to rpos
+
 public:
 	int print();
 };

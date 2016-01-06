@@ -33,6 +33,7 @@ int bundle::solve()
 	remove_left_boundary_intervals();
 
 	build_regions();
+	link_regions();
 
 	return 0;
 }
@@ -373,18 +374,8 @@ int bundle::build_regions()
 	return 0;
 }
 
-int bundle::build_splice_graph(sgraph &sg)
+int bundle::link_regions()
 {
-	// vertices: each region, start, end
-	for(int i = 0; i < regions.size(); i++)
-	{
-		region &r = regions[i];
-		sg.add_node(r.ave_abd, r.dev_abd);
-	}
-	sg.add_node(-1, -1);
-	sg.add_node(-1, -1);
-
-	// edges for bridges
 	MPI lm;
 	MPI rm;
 	for(int i = 0; i < regions.size(); i++)
@@ -404,33 +395,8 @@ int bundle::build_splice_graph(sgraph &sg)
 		MPI::iterator ri = lm.find(b.rpos);
 		assert(li != rm.end());
 		assert(ri != lm.end());
-		sg.add_arc(li->second, ri->second, b.count);
+		b.lrgn = li->second;
+		b.rrgn = ri->second;
 	}
-
-	// edges connecting start and edge
-	MPI mb;
-	for(int i = 0; i < boundaries.size(); i++)
-	{
-		boundary &b = boundaries[i];
-		assert(mb.find(b.pos) == mb.end());
-		mb.insert(PPI(b.pos, b.type));
-	}
-
-	int ss = regions.size();
-	int tt = ss + 1;
-	for(int i = 0; i < regions.size(); i++)
-	{
-		region &r = regions[i];
-		int lt = mb[r.lpos];
-		int rt = mb[r.rpos];
-		if(lt == LEFT_BOUNDARY) sg.add_arc(ss, i, -1);
-		if(lt == START_BOUNDARY) sg.add_arc(ss, i, -1);
-		if(r.lpos < r.asc_pos) sg.add_arc(ss, i, -1);
-
-		if(rt == RIGHT_BOUNDARY) sg.add_arc(i, tt, -1);	
-		if(rt == END_BOUNDARY) sg.add_arc(i, tt, -1);	
-		if(r.rpos > r.desc_pos) sg.add_arc(i, tt, -1);
-	}
-
 	return 0;
 }

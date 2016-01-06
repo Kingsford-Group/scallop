@@ -12,7 +12,6 @@
 #include "bridge.h"
 #include "boundary.h"
 #include "region.h"
-#include "sgraph.h"
 
 using namespace std;
 
@@ -35,7 +34,6 @@ public:
 	vector<region> regions;			// regions
 
 public:
-	int build_splice_graph(sgraph &sg);
 	int clear();
 	int print();
 	int solve();
@@ -66,6 +64,9 @@ public:
 
 	// build regions
 	int build_regions();
+
+	// store the corresponding regions in each bridge
+	int link_regions();
 };
 
 #endif

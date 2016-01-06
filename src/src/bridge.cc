@@ -25,6 +25,8 @@ bridge::bridge(int _t, int64_t _p, int32_t _c, uint32_t _min, uint32_t _max)
 	min_qual = _min;
 	max_qual = _max;
 	score = 255;
+	lrgn = -1;
+	rrgn = -1;
 }
 
 bridge::bridge(const bridge &sp)
@@ -36,6 +38,9 @@ bridge::bridge(const bridge &sp)
 	min_qual = sp.min_qual;
 	max_qual = sp.max_qual;
 	score = sp.score;
+
+	lrgn = sp.lrgn;
+	rrgn = sp.rrgn;
 }
 
 bool bridge::operator<(const bridge &x) const
@@ -46,7 +51,7 @@ bool bridge::operator<(const bridge &x) const
 
 int bridge::print()
 {
-	printf("bridge: type = %d, region = [%d, %d), count = %d, min-qual = %d, max-qual = %d, score = %d\n", 
-			type, lpos, rpos, count, min_qual, max_qual, score);
+	printf("bridge: type = %d, region = [%d, %d), %d -> %d, count = %d, min-qual = %d, max-qual = %d, score = %d\n", 
+			type, lpos, rpos, lrgn, rrgn, count, min_qual, max_qual, score);
 	return 0;
 }
