@@ -17,6 +17,8 @@ scallop_SOURCES = main.cc \
 				  boundary.h boundary.cc \
 				  region.h region.cc \
 				  bridge.h bridge.cc \
-				  common.h common.cc \
 				  sgraph.h sgraph.cc \
-				  bbase.h bbase.cc
+				  bbase.h bbase.cc \
+				  dgraph.h dgraph.cc \
+				  imap.h imap.cc \
+				  binomial.h binomial.cc

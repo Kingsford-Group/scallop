@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "bundle.h"
+#include "dgraph.h"
 
 using namespace std;
 

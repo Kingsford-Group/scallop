@@ -1,8 +1,8 @@
 #ifndef __BUNDLE_H__
 #define __BUNDLE_H__
 
+#include "imap.h"
 #include "bbase.h"
-#include "common.h"
 #include "bridge.h"
 #include "boundary.h"
 #include "region.h"

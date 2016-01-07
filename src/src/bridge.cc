@@ -1,6 +1,6 @@
 #include <cstdio>
 #include "bridge.h"
-#include "common.h"
+#include "config.h"
 
 bridge::bridge()
 {}

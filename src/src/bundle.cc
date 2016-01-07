@@ -3,6 +3,7 @@
 #include <map>
 
 #include "bundle.h"
+#include "binomial.h"
 
 bundle::bundle(const bbase &bb)
 	: bbase(bb)

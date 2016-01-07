@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <vector>
-#include "common.h"
+#include "imap.h"
 
 using namespace std;
 class region

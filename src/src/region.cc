@@ -1,5 +1,6 @@
 #include "region.h"
 #include "config.h"
+#include "binomial.h"
 
 region::region(int32_t _lpos, int32_t _rpos, const imap_t *_imap)
 	:lpos(_lpos), rpos(_rpos), imap(_imap)

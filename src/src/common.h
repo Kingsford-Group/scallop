@@ -38,7 +38,6 @@ using namespace boost::math;
 // that >= x is observed
 uint32_t compute_binomial_score(int n, double pr, int x);
 
-
 // boost::graph
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
