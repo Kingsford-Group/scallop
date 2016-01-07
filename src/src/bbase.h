@@ -15,7 +15,7 @@ class bbase
 {
 public:
 	bbase();
-	~bbase();
+	virtual ~bbase();
 
 protected:
 	int32_t tid;					// chromosome ID
@@ -27,6 +27,10 @@ protected:
 public:
 	int add_hit(bam_hdr_t *h, bam1_t *b);
 	int clear();
+
+	int32_t get_tid();
+	int32_t get_rpos();
+	size_t get_num_hits();
 };
 
 #endif

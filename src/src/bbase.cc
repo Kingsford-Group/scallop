@@ -12,8 +12,7 @@ bbase::bbase()
 }
 
 bbase::~bbase()
-{
-}
+{}
 
 int bbase::add_hit(bam_hdr_t *h, bam1_t *b)
 {
@@ -47,4 +46,19 @@ int bbase::clear()
 	rpos = 0;
 	hits.clear();
 	return 0;
+}
+
+int32_t bbase::get_tid()
+{
+	return tid;
+}
+
+int32_t bbase::get_rpos()
+{
+	return rpos;
+}
+
+size_t bbase::get_num_hits()
+{
+	return hits.size();
 }

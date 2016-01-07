@@ -1,6 +1,7 @@
 #include "sgraph.h"
 
-sgraph::sgraph()
+sgraph::sgraph(const bbase &b)
+	:bundle(b)
 {}
 
 sgraph::~sgraph()
@@ -95,4 +96,3 @@ int sgraph::print()
 	printf("\n");
 	return 0;
 }
-

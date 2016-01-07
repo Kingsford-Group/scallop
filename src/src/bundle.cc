@@ -5,7 +5,7 @@
 #include "bundle.h"
 
 bundle::bundle(const bbase &bb)
-	bbase(bb)
+	: bbase(bb)
 {
 	// make sure all reads are sorted 
 	check_left_ascending();
@@ -26,7 +26,6 @@ bundle::bundle(const bbase &bb)
 
 bundle::~bundle()
 {}
-
 
 int bundle::build_interval_map()
 {

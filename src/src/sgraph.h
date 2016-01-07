@@ -10,7 +10,7 @@ using namespace std;
 class sgraph: public bundle
 {
 public:
-	sgraph();
+	sgraph(const bbase &bb);
 	~sgraph();
 
 public:
@@ -19,8 +19,8 @@ public:
 
 public:
 	int solve();
-
 	int build();
+	int print();
 };
 
 #endif

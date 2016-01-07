@@ -26,7 +26,7 @@ int scallop::load(const char *bam_file)
     bam_hdr_t *h= sam_hdr_read(fn);
     bam1_t *b = bam_init1();
 
-	sgraph bd;
+	bbase bb;
     while(sam_read1(fn, h, b) >= 0)
 	{
 		bam1_core_t &p = b->core;
@@ -35,15 +35,17 @@ int scallop::load(const char *bam_file)
 		if(p.n_cigar < 1) continue;				// should never happen
 		if(p.n_cigar > 7) continue;				// ignore hits with more than 7 cigar types
 		//if(p.qual <= 4) continue;				// ignore hits with quality-score < 5
-		if(bd.hits.size() > 0 && (bd.rpos + min_bundle_gap < p.pos || p.tid != bd.tid))
+		if(bb.get_num_hits() > 0 && (bb.get_rpos() + min_bundle_gap < p.pos || p.tid != bb.get_tid()))
 		{
-			sgraphs.push_back(bd);
-			bd.clear();
+			sgraph sg(bb);
+			sgraphs.push_back(sg);
+
+			bb.clear();
 
 			// DEBUG
 			if(sgraphs.size() >= 1000) break;
 		}
-		bd.add_hit(h, b);
+		bb.add_hit(h, b);
     }
 
     bam_destroy1(b);
