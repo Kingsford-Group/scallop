@@ -28,5 +28,6 @@ using namespace std;
 
 typedef map<edge_descriptor, double> MED;
 typedef map<edge_descriptor, int> MEI;
+typedef pair<edge_descriptor, int> PEI;
 
 #endif

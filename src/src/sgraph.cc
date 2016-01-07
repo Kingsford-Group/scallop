@@ -22,11 +22,18 @@ int sgraph::build()
 	for(int i = 0; i < bridges.size(); i++)
 	{
 		bridge &b = bridges[i];
+		
+		/*
+		printf("add edge for bridge %d: %d -> %d\n", i, b.lrgn, b.rrgn);
+		b.print();
+		printf("\n");
+		*/
+
 		pair<edge_descriptor, bool> p = add_edge(b.lrgn, b.rrgn, gr);
-		assert(p.second == false);
+		assert(p.second == true);
 		MEI::iterator it = e2b.find(p.first);
 		assert(it == e2b.end());
-		it->second = i;
+		e2b.insert(PEI(p.first, i));
 	}
 
 	// edges: connecting start/end and regions
