@@ -1,4 +1,5 @@
 #include "sgraph.h"
+#include "draw.h"
 
 sgraph::sgraph(const bbase &b)
 	:bundle(b)
@@ -101,5 +102,53 @@ int sgraph::print()
 	}
 
 	printf("\n");
+	return 0;
+}
+
+int sgraph::draw(const string &file)
+{
+	ofstream fout(file.c_str());
+	if(fout.fail())
+	{
+		printf("open file %s error.\n", file.c_str());
+		return 0;
+	}
+
+	draw_header(fout);
+
+	double len = 1.5;
+	fout<<"\\def\\len{"<<len<<"cm}\n";
+
+	// draw vertices
+	char sx[1024];
+	char sy[1024];
+	for(int i = 0; i < num_vertices(gr); i++)
+	{
+		sprintf(sx, "s%d", i);
+		double px = i * len;
+		double py = 0.0;
+		fout<<"\\node[mycircle, \\colx, draw] ("<<sx<<") at ("<<px<<", "<<py<<") {"<<i<<"};\n";
+	}
+
+	// draw edges
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = edges(gr); it1 != it2; it1++)
+	{
+		int s = source(*it1, gr);
+		int t = target(*it1, gr);
+		sprintf(sx, "s%d", s);
+		sprintf(sy, "s%d", t);
+		assert(s < t);
+		
+		double bend = 30;
+		if(s + 1 == t) bend = 0;
+		else if( (s + t) % 2 == 0 ) bend = -30;
+
+		fout<<"\\draw[thick, ->, \\colx, bend right = "<< bend <<"] ("<<sx<<") to ("<<sy<<");\n";
+	}
+
+	draw_footer(fout);
+
+	fout.close();
 	return 0;
 }

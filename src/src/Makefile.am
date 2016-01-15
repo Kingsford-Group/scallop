@@ -21,4 +21,5 @@ scallop_SOURCES = main.cc \
 				  bbase.h bbase.cc \
 				  dgraph.h dgraph.cc \
 				  imap.h imap.cc \
-				  binomial.h binomial.cc
+				  binomial.h binomial.cc \
+				  draw.h draw.cc

@@ -69,6 +69,7 @@ int scallop::solve()
 		*/
 
 		sgraphs[i].print();
+		sgraphs[i].draw("sgraph.tex");
 	}
 	return 0;
 }
