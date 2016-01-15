@@ -39,13 +39,30 @@ int sgraph::build()
 		region &r = regions[i];
 		if(r.empty == true) continue;
 
-		if(r.lpos < r.asc_pos) add_edge(ss, i + 1, gr);
+		if(r.left_break()) add_edge(ss, i + 1, gr);
 		else if(r.ltype == LEFT_BOUNDARY) add_edge(ss, i + 1, gr);
 		else if(r.ltype == START_BOUNDARY) add_edge(ss, i + 1, gr);
 
-		if(r.rpos > r.desc_pos) add_edge(i + 1, tt, gr);
+		if(r.right_break()) add_edge(i + 1, tt, gr);
 		else if(r.rtype == RIGHT_BOUNDARY) add_edge(i + 1, tt, gr);
 		else if(r.rtype == END_BOUNDARY) add_edge(i + 1, tt, gr);
+	}
+
+	// edges: connecting adjacent regions
+	for(int i = 0; i < regions.size() - 1; i++)
+	{
+		region &x = regions[i];
+		region &y = regions[i + 1];
+
+		if(x.empty || y.empty) continue;
+
+		if(x.right_break()) continue;
+		if(y.left_break()) continue;
+
+		if(x.rtype == RIGHT_BOUNDARY) continue;
+		if(y.ltype == LEFT_BOUNDARY) continue;
+
+		add_edge(i + 1, i + 2, gr);
 	}
 
 	return 0;
@@ -124,8 +141,9 @@ int sgraph::draw(const string &file)
 	v.push_back(0);
 	for(int i = 0; i < regions.size(); i++)
 	{
-		if(regions[i].empty == true) v.push_back(-1);
-		else v.push_back(vi++);
+		v.push_back(vi++);
+		//if(regions[i].empty == true) v.push_back(-1);
+		//else v.push_back(vi++);
 	}
 	v.push_back(vi);
 

@@ -36,6 +36,8 @@ public:
 	int locate_ascending_position();
 	int locate_descending_position();
 	int estimate_abundance();
+	bool left_break();
+	bool right_break();
 };
 
 #endif

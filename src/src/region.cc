@@ -157,3 +157,15 @@ int region::estimate_abundance()
 	dev_abd = sqrt(var / v.size());
 	return 0;
 }
+
+bool region::left_break()
+{
+	if(asc_pos > lpos) return true;
+	else return false;
+}
+
+bool region::right_break()
+{
+	if(desc_pos < rpos) return true;
+	else return false;
+}
