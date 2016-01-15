@@ -9,13 +9,12 @@ region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const imap_
 	desc_pos = rpos;
 	ave_abd = 0;
 	dev_abd = 0;
+
+	locate_ascending_position();
+	locate_descending_position();
+
 	check_empty();
-	if(empty == false)
-	{
-		locate_ascending_position();
-		locate_descending_position();
-		estimate_abundance();
-	}
+	if(empty == false) estimate_abundance();
 }
 
 region::region(const region &r)
@@ -58,6 +57,12 @@ int region::check_empty()
 	empty = false;
 	if(ltype == RIGHT_SPLICE) return 0;
 	if(rtype == LEFT_SPLICE) return 0;
+
+	if(desc_pos <= asc_pos)
+	{
+		empty = true;
+		return 0;
+	}
 
 	int n = (rpos - lpos < num_sample_positions) ? (rpos - lpos) : num_sample_positions;
 	int t = (rpos - lpos) / n;
@@ -134,6 +139,13 @@ int region::locate_descending_position()
 
 int region::estimate_abundance()
 {
+	if(desc_pos <= asc_pos)
+	{
+		ave_abd = 0;
+		dev_abd = 0;
+		return 0;
+	}
+
 	int n = (desc_pos - asc_pos < num_sample_positions) ? (desc_pos - asc_pos) : num_sample_positions;
 	int t = (desc_pos - asc_pos) / n;
 

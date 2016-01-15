@@ -15,8 +15,9 @@ typedef adjacency_list<vecS, vecS, bidirectionalS> dgraph;
 
 typedef graph_traits<dgraph>::vertex_iterator vertex_iterator;
 typedef graph_traits<dgraph>::vertex_descriptor vertex_descriptor;
-typedef graph_traits<dgraph>::edge_iterator edge_iterator;
+typedef graph_traits<dgraph>::in_edge_iterator in_edge_iterator;
 typedef graph_traits<dgraph>::out_edge_iterator out_edge_iterator;
+typedef graph_traits<dgraph>::edge_iterator edge_iterator;
 typedef graph_traits<dgraph>::edge_descriptor edge_descriptor;
 
 //typedef property_map<dgraph, vertex_index_t>::const_type const_vertex_index_map;
@@ -29,6 +30,10 @@ using namespace std;
 
 typedef map<edge_descriptor, double> MED;
 typedef map<edge_descriptor, int> MEI;
+typedef map<edge_descriptor, double> MED;
+
 typedef pair<edge_descriptor, int> PEI;
+typedef pair<edge_descriptor, double> PED;
+typedef pair<edge_descriptor, bool> PEB;
 
 #endif

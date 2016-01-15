@@ -5,8 +5,8 @@ samtools = $(SAMTOOLS)
 hts = $(HTSLIB)
 hts_headers = $(hts)/htslib
 
-scallop_CPPFLAGS = -I$(hts) -I$(hts_headers)
-scallop_LDFLAGS = -L$(samtools) -L$(hts) -pthread
+scallop_CPPFLAGS = -I$(hts) -I$(hts_headers) -pg
+scallop_LDFLAGS = -L$(samtools) -L$(hts) -pthread -pg
 scallop_LDADD = -lbam -lhts -lz
 
 scallop_SOURCES = main.cc \
