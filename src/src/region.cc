@@ -41,13 +41,13 @@ region& region::operator=(const region &r)
 region::~region()
 {}
 
-int region::print()
+int region::print(int index)
 {
 	char em = empty ? 'T' : 'F';
 	char cl = lpos < asc_pos ? 'T' : 'F';
 	char cr = rpos > desc_pos ? 'T' : 'F';
-	printf("region: [%d-%d), empty = %c, check = (%c, %c), core = [%d-%d), origin-length = %d, core-length = %d, ave-abundance = %.2lf, std-abundance = %.2lf\n",
-			lpos, rpos, em, cl, cr, asc_pos, desc_pos, rpos - lpos, desc_pos - asc_pos, ave_abd, dev_abd);
+	printf("region %d: [%d-%d), empty = %c, check = (%c, %c), core = [%d-%d), origin-length = %d, core-length = %d, ave-abundance = %.2lf, std-abundance = %.2lf\n",
+			index, lpos, rpos, em, cl, cr, asc_pos, desc_pos, rpos - lpos, desc_pos - asc_pos, ave_abd, dev_abd);
 	return 0;
 }
 
@@ -55,10 +55,14 @@ int region::check_empty()
 {
 	int n = (rpos - lpos < num_sample_positions) ? (rpos - lpos) : num_sample_positions;
 	int t = (rpos - lpos) / n;
-	int s = cumulate_overlap(*imap, lpos, rpos, t);
+	int s = maximum_overlap(*imap, lpos, rpos, t);
+
+	/*
 	int r = (rpos - lpos) / t;
 	double x = 1.0 * s / r;
-	if(x < min_average_overlap) empty = true;
+	*/
+
+	if(s < min_max_region_overlap) empty = true;
 	else empty = false;
 	return 0;
 }

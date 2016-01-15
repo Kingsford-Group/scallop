@@ -40,9 +40,9 @@ bool boundary::operator<(const boundary &x) const
 	else return false;
 }
 
-int boundary::print()
+int boundary::print(int index)
 {
-	printf("boundary: type = %d, pos = %d, count = %d, min-qual = %d, max-qual = %d, score = %d\n", 
-			type, pos, count, min_qual, max_qual, score);
+	printf("boundary %d: type = %d, pos = %d, count = %d, min-qual = %d, max-qual = %d, score = %d\n", 
+			index, type, pos, count, min_qual, max_qual, score);
 	return 0;
 }

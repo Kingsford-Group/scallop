@@ -22,6 +22,7 @@ public:
 	int solve();
 	int build();
 	int print();
+	int check();
 	int draw(const string &file);
 };
 

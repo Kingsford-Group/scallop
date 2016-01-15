@@ -13,5 +13,7 @@ typedef icl::interval_map<int32_t, int32_t, icl::partial_absorber, less, icl::in
 int compute_overlap(const imap_t &imap, int32_t p);
 // return the sum of overlap in [p,q)
 int cumulate_overlap(const imap_t &imap, int32_t p, int32_t q, int32_t t);
+// return the max of overlap in [p,q)
+int maximum_overlap(const imap_t &imap, int32_t p, int32_t q, int32_t t);
 
 #endif

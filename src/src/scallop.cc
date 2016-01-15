@@ -68,8 +68,8 @@ int scallop::solve()
 		if(sgraphs[i].rpos > 877183) continue;
 		*/
 
-		sgraphs[i].print();
-		sgraphs[i].draw("sgraph.tex");
+		//sgraphs[i].print();
+		//sgraphs[i].draw("sgraph.tex");
 	}
 	return 0;
 }

@@ -27,7 +27,7 @@ public:
 	double dev_abd;					// standard-deviation of abundance
 
 public:
-	int print();
+	int print(int index);
 
 public:
 	int check_empty();

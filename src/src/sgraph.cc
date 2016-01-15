@@ -11,6 +11,9 @@ sgraph::~sgraph()
 int sgraph::solve()
 {
 	build();
+	print();
+	draw("sgraph.tex");
+	//check();
 	return 0;
 }
 
@@ -51,21 +54,42 @@ int sgraph::build()
 	for(int i = 0; i < regions.size(); i++)
 	{
 		region &r = regions[i];
+
+		if(r.lpos < r.asc_pos) add_edge(ss, i + 1, gr);
 		if(mb.find(r.lpos) != mb.end())
 		{
 			int lt = mb[r.lpos];
 			if(lt == LEFT_BOUNDARY) add_edge(ss, i + 1, gr); 
-			else if(lt == START_BOUNDARY) add_edge(ss, i + 1, gr);
-			else if(r.lpos < r.asc_pos) add_edge(ss, i + 1, gr);
+			if(lt == START_BOUNDARY) add_edge(ss, i + 1, gr);
 		}
 
+		if(r.rpos > r.desc_pos) add_edge(i + 1, tt, gr);
 		if(mb.find(r.rpos) != mb.end())
 		{
 			int rt = mb[r.rpos];
 			if(rt == RIGHT_BOUNDARY) add_edge(i + 1, tt, gr);
-			else if(rt == END_BOUNDARY) add_edge(i + 1, tt, gr);
-			else if(r.rpos > r.desc_pos) add_edge(i + 1, tt, gr);
+			if(rt == END_BOUNDARY) add_edge(i + 1, tt, gr);
 		}
+	}
+
+	return 0;
+}
+
+int sgraph::check()
+{
+	// check
+	if(regions.size() == 1) return 0;
+	for(int i = 0; i < regions.size(); i++)
+	{
+		region &r = regions[i];
+		if(r.empty == false) continue;
+		assert(r.empty == true);
+
+		if(in_degree(i + 1, gr) != 0) printf("problem at region %d\n", i);
+		assert(in_degree(i + 1, gr) == 0);
+
+		if(out_degree(i + 1, gr) != 0) printf("problem at region %d\n", i);
+		assert(out_degree(i + 1, gr) == 0);
 	}
 
 	return 0;
@@ -86,19 +110,19 @@ int sgraph::print()
 	// print bridges 
 	for(int i = 0; i < bridges.size(); i++)
 	{
-		bridges[i].print();
+		bridges[i].print(i);
 	}
 
 	// print boundaries
 	for(int i = 0; i < boundaries.size(); i++)
 	{
-		boundaries[i].print();
+		boundaries[i].print(i);
 	}
 
 	// print regions
 	for(int i = 0; i < regions.size(); i++)
 	{
-		regions[i].print();
+		regions[i].print(i);
 	}
 
 	printf("\n");
@@ -152,3 +176,4 @@ int sgraph::draw(const string &file)
 	fout.close();
 	return 0;
 }
+

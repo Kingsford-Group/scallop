@@ -47,6 +47,7 @@ extern uint32_t min_ascending_score;
 extern uint32_t min_descending_score;
 extern int num_sample_positions;
 extern double min_average_overlap;
+extern int min_max_region_overlap;
 
 // load parameters
 int load_config(const char * conf_file);

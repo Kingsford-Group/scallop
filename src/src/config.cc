@@ -23,6 +23,7 @@ uint32_t min_ascending_score;
 uint32_t min_descending_score;
 int num_sample_positions;
 double min_average_overlap;
+int min_max_region_overlap;
 
 int load_config(const char * conf_file)
 {
@@ -100,9 +101,12 @@ int load_config(const char * conf_file)
 		}
 		else if(strcmp(key, "min_average_overlap")==0)
 		{
-			min_average_overlap = (int)atof(value);
+			min_average_overlap = (double)atof(value);
 		}
-
+		else if(strcmp(key, "min_max_region_overlap")==0)
+		{
+			min_max_region_overlap = (int)atoi(value);
+		}
 	}
 
 	return 0;
