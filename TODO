@@ -1,3 +1,4 @@
 1, How to use quality score to remove reads
 2, How to decide the existence or not of a splice position (use max-qual?)
 3, Whether or not to merge tiny regions to big ones
+4, How to decide a region is empty
