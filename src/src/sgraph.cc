@@ -11,9 +11,7 @@ sgraph::~sgraph()
 int sgraph::solve()
 {
 	build();
-	print();
-	draw("sgraph.tex");
-	//check();
+	check();
 	return 0;
 }
 
@@ -39,6 +37,7 @@ int sgraph::build()
 	for(int i = 0; i < regions.size(); i++)
 	{
 		region &r = regions[i];
+		if(r.empty == true) continue;
 
 		if(r.lpos < r.asc_pos) add_edge(ss, i + 1, gr);
 		else if(r.ltype == LEFT_BOUNDARY) add_edge(ss, i + 1, gr);
@@ -72,9 +71,9 @@ int sgraph::check()
 	return 0;
 }
 
-int sgraph::print()
+int sgraph::print(int index)
 {
-	printf("Bundle: ");
+	printf("Bundle %d: ", index);
 	printf("tid = %d, #hits = %lu, range = %s:%d-%d\n", tid, hits.size(), chrm.c_str(), lpos, rpos);
 	// print hits
 	/*
@@ -120,13 +119,26 @@ int sgraph::draw(const string &file)
 	double len = 1.5;
 	fout<<"\\def\\len{"<<len<<"cm}\n";
 
+	vector<int> v;
+	int vi = 1;
+	v.push_back(0);
+	for(int i = 0; i < regions.size(); i++)
+	{
+		if(regions[i].empty == true) v.push_back(-1);
+		else v.push_back(vi++);
+	}
+	v.push_back(vi);
+
+	assert(v.size() == num_vertices(gr));
+
 	// draw vertices
 	char sx[1024];
 	char sy[1024];
 	for(int i = 0; i < num_vertices(gr); i++)
 	{
+		if(v[i] == -1) continue;
 		sprintf(sx, "s%d", i);
-		double px = i * len;
+		double px = v[i] * len;
 		double py = 0.0;
 		fout<<"\\node[mycircle, \\colx, draw] ("<<sx<<") at ("<<px<<", "<<py<<") {"<<i<<"};\n";
 	}
@@ -137,13 +149,17 @@ int sgraph::draw(const string &file)
 	{
 		int s = source(*it1, gr);
 		int t = target(*it1, gr);
+
+		assert(v[s] != -1);
+		assert(v[t] != -1);
+
 		sprintf(sx, "s%d", s);
 		sprintf(sy, "s%d", t);
 		assert(s < t);
 		
 		double bend = 30;
-		if(s + 1 == t) bend = 0;
-		else if( (s + t) % 2 == 0 ) bend = -30;
+		if(v[s] + 1 == v[t]) bend = 0;
+		else if(v[s] % 2 == 0) bend = -30;
 
 		fout<<"\\draw[thick, ->, \\colx, bend right = "<< bend <<"] ("<<sx<<") to ("<<sy<<");\n";
 	}

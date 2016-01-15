@@ -57,6 +57,7 @@ int region::check_empty()
 {
 	empty = false;
 	if(ltype == RIGHT_SPLICE) return 0;
+	if(rtype == LEFT_SPLICE) return 0;
 
 	int n = (rpos - lpos < num_sample_positions) ? (rpos - lpos) : num_sample_positions;
 	int t = (rpos - lpos) / n;

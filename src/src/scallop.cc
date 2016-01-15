@@ -43,7 +43,7 @@ int scallop::load(const char *bam_file)
 			bb.clear();
 
 			// DEBUG
-			if(sgraphs.size() >= 1000) break;
+			if(sgraphs.size() >= 100) break;
 		}
 		bb.add_hit(h, b);
     }
@@ -59,17 +59,14 @@ int scallop::solve()
 {
 	for(int i = 0; i < sgraphs.size(); i++)
 	{
-		sgraphs[i].solve();
+		sgraph &sg = sgraphs[i];
+		sg.solve();
 
-		/*
-		// DEBUG
-		if(sgraphs[i].chrm != "2L") continue;
-		if(sgraphs[i].lpos < 870386) continue;
-		if(sgraphs[i].rpos > 877183) continue;
-		*/
+		sg.print(i);
 
-		//sgraphs[i].print();
-		//sgraphs[i].draw("sgraph.tex");
+		char s[1024];
+		sprintf(s, "sgraph%d.tex", i);
+		sg.draw(s);
 	}
 	return 0;
 }

@@ -21,8 +21,8 @@ public:
 public:
 	int solve();
 	int build();
-	int print();
 	int check();
+	int print(int index);
 	int draw(const string &file);
 };
 
