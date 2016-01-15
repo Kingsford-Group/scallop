@@ -19,7 +19,8 @@ bundle::bundle(const bbase &bb)
 	add_start_boundary();
 	add_end_boundary();
 
-	remove_left_boundary_intervals();
+	// TODO
+	//remove_left_boundary_intervals();
 
 	build_regions();
 	link_regions();
@@ -97,7 +98,7 @@ int bundle::infer_bridges()
 			int64_t p = v[k];
 			if(m.find(p) == m.end()) 
 			{
-				bridge sp(SPLICE, p, 1, hits[i].qual, hits[i].qual);
+				bridge sp(p, 1, hits[i].qual, hits[i].qual);
 				m.insert(pair<int64_t, bridge>(p, sp));
 			}
 			else
@@ -265,26 +266,31 @@ int bundle::check_right_ascending()
 
 int bundle::build_regions()
 {
-	set<int32_t> s;
+	typedef map<int32_t, int> MM;
+	typedef pair<int32_t, int> PP;
+
+	MM s;
 	for(int i = 0; i < bridges.size(); i++)
 	{
-		s.insert(bridges[i].lpos);
-		s.insert(bridges[i].rpos);
+		s.insert(PP(bridges[i].lpos, LEFT_SPLICE));
+		s.insert(PP(bridges[i].rpos, RIGHT_SPLICE));
 	}
 
 	for(int i = 0; i < boundaries.size(); i++)
 	{
-		s.insert(boundaries[i].pos);
+		s.insert(PP(boundaries[i].pos, boundaries[i].type));
 	}
 
-	vector<int32_t> v(s.begin(), s.end());
+	vector<int32_t> v;
+	MM::iterator it;
+	for(it = s.begin(); it != s.end(); it++) v.push_back(it->first);
 	sort(v.begin(), v.end());
 
 	if(v.size() <= 1) return 0;
 
 	for(int i = 0; i < v.size() - 1; i++)
 	{
-		region r(v[i], v[i + 1], &imap);
+		region r(v[i], v[i + 1], s[v[i]], s[v[i + 1]], &imap);
 		regions.push_back(r);
 	}
 	return 0;

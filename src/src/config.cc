@@ -24,6 +24,7 @@ uint32_t min_descending_score;
 int num_sample_positions;
 double min_average_overlap;
 int min_max_region_overlap;
+double min_region_coverage;
 
 int load_config(const char * conf_file)
 {
@@ -106,6 +107,10 @@ int load_config(const char * conf_file)
 		else if(strcmp(key, "min_max_region_overlap")==0)
 		{
 			min_max_region_overlap = (int)atoi(value);
+		}
+		else if(strcmp(key, "min_region_coverage")==0)
+		{
+			min_region_coverage = (double)atof(value);
 		}
 	}
 

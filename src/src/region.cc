@@ -2,8 +2,8 @@
 #include "config.h"
 #include "binomial.h"
 
-region::region(int32_t _lpos, int32_t _rpos, const imap_t *_imap)
-	:lpos(_lpos), rpos(_rpos), imap(_imap)
+region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const imap_t *_imap)
+	:lpos(_lpos), rpos(_rpos), imap(_imap), ltype(_ltype), rtype(_rtype)
 {
 	asc_pos = lpos;
 	desc_pos = rpos;
@@ -19,7 +19,7 @@ region::region(int32_t _lpos, int32_t _rpos, const imap_t *_imap)
 }
 
 region::region(const region &r)
-	:lpos(r.lpos), rpos(r.rpos), imap(r.imap)
+	:lpos(r.lpos), rpos(r.rpos), imap(r.imap), ltype(r.ltype), rtype(r.rtype)
 {
 	asc_pos = r.asc_pos;
 	desc_pos = r.desc_pos;
@@ -33,6 +33,8 @@ region& region::operator=(const region &r)
 	lpos = r.lpos;
 	rpos = r.rpos;
 	imap = r.imap;
+	ltype = r.ltype;
+	rtype = r.rtype;
 	asc_pos = r.asc_pos;
 	desc_pos = r.desc_pos;
 	return *this;
@@ -46,24 +48,27 @@ int region::print(int index)
 	char em = empty ? 'T' : 'F';
 	char cl = lpos < asc_pos ? 'T' : 'F';
 	char cr = rpos > desc_pos ? 'T' : 'F';
-	printf("region %d: [%d-%d), empty = %c, check = (%c, %c), core = [%d-%d), origin-length = %d, core-length = %d, ave-abundance = %.2lf, std-abundance = %.2lf\n",
-			index, lpos, rpos, em, cl, cr, asc_pos, desc_pos, rpos - lpos, desc_pos - asc_pos, ave_abd, dev_abd);
+	printf("region %d: [%d-%d), type = (%d, %d), empty = %c, check = (%c, %c), core = [%d-%d), len = %d, core-len = %d, ave-abd = %.1lf, std-abd = %.1lf\n",
+			index, lpos, rpos, ltype, rtype, em, cl, cr, asc_pos, desc_pos, rpos - lpos, desc_pos - asc_pos, ave_abd, dev_abd);
 	return 0;
 }
 
 int region::check_empty()
 {
+	empty = false;
+	if(ltype == RIGHT_SPLICE) return 0;
+
 	int n = (rpos - lpos < num_sample_positions) ? (rpos - lpos) : num_sample_positions;
 	int t = (rpos - lpos) / n;
-	int s = maximum_overlap(*imap, lpos, rpos, t);
-
-	/*
 	int r = (rpos - lpos) / t;
-	double x = 1.0 * s / r;
-	*/
 
-	if(s < min_max_region_overlap) empty = true;
-	else empty = false;
+	int x = compute_coverage(*imap, lpos, rpos, t);
+	if(1.0 * x / r >= min_region_coverage) return 0;
+
+	int s = maximum_overlap(*imap, lpos, rpos, t);
+	if(s >= min_max_region_overlap) return 0;
+
+	empty = true;
 	return 0;
 }
 

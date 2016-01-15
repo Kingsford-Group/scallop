@@ -5,9 +5,8 @@
 bridge::bridge()
 {}
 
-bridge::bridge(int _t, int64_t _p)
+bridge::bridge(int64_t _p)
 {
-	type = _t;
 	lpos = high32(_p);
 	rpos = low32(_p);
 	count = 0;
@@ -16,9 +15,8 @@ bridge::bridge(int _t, int64_t _p)
 	score = 255;
 }
 
-bridge::bridge(int _t, int64_t _p, int32_t _c, uint32_t _min, uint32_t _max)
+bridge::bridge(int64_t _p, int32_t _c, uint32_t _min, uint32_t _max)
 {
-	type = _t;
 	lpos = high32(_p);
 	rpos = low32(_p);
 	count = _c;
@@ -31,7 +29,6 @@ bridge::bridge(int _t, int64_t _p, int32_t _c, uint32_t _min, uint32_t _max)
 
 bridge::bridge(const bridge &sp)
 {
-	type = sp.type;
 	lpos = sp.lpos;
 	rpos = sp.rpos;
 	count = sp.count;
@@ -51,7 +48,7 @@ bool bridge::operator<(const bridge &x) const
 
 int bridge::print(int index)
 {
-	printf("bridge %d: type = %d, region = [%d, %d), %d -> %d, count = %d, min-qual = %d, max-qual = %d, score = %d\n", 
-			index, type, lpos, rpos, lrgn, rrgn, count, min_qual, max_qual, score);
+	printf("bridge %d: region = [%d, %d), %d -> %d, count = %d, min-qual = %d, max-qual = %d, score = %d\n", 
+			index, lpos, rpos, lrgn, rrgn, count, min_qual, max_qual, score);
 	return 0;
 }

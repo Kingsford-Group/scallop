@@ -9,7 +9,7 @@ using namespace std;
 class region
 {
 public:
-	region(int32_t _lpos, int32_t _rpos, const imap_t *_imap);
+	region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const imap_t *_imap);
 	region(const region &r);
 	region& operator=(const region &r);
 	~region();
@@ -17,6 +17,8 @@ public:
 public:
 	int32_t lpos;					// the leftmost boundary on reference
 	int32_t rpos;					// the rightmost boundary on reference
+	int ltype;						// type of the left boundary
+	int rtype;						// type of the right boundary
 	const imap_t *imap;				// pointer to a interval map
 
 	bool empty;						// whether this region is completely spliced

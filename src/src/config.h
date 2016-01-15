@@ -18,9 +18,8 @@ typedef pair<int32_t, int> PPI;
 
 
 // constants
-#define SPLICE 0
-#define SPLICE_BOUNDARY_LEFT 1
-#define SPLICE_BOUNDARY_RIGHT 2
+#define LEFT_SPLICE 1
+#define RIGHT_SPLICE 2
 #define LEFT_BOUNDARY 3
 #define RIGHT_BOUNDARY 4
 #define START_BOUNDARY 5
@@ -48,6 +47,7 @@ extern uint32_t min_descending_score;
 extern int num_sample_positions;
 extern double min_average_overlap;
 extern int min_max_region_overlap;
+extern double min_region_coverage;
 
 // load parameters
 int load_config(const char * conf_file);
