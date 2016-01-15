@@ -15,7 +15,7 @@ int sgraph::solve()
 
 int sgraph::build()
 {
-	// vertices: each region, start, end
+	// vertices: start, each region, end
 	for(int i = 0; i < regions.size() + 2; i++) add_vertex(gr);
 
 	// edges: each bridge
@@ -29,7 +29,7 @@ int sgraph::build()
 		printf("\n");
 		*/
 
-		pair<edge_descriptor, bool> p = add_edge(b.lrgn, b.rrgn, gr);
+		pair<edge_descriptor, bool> p = add_edge(b.lrgn + 1, b.rrgn + 1, gr);
 		assert(p.second == true);
 		MEI::iterator it = e2b.find(p.first);
 		assert(it == e2b.end());
@@ -45,25 +45,25 @@ int sgraph::build()
 		mb.insert(PPI(b.pos, b.type));
 	}
 
-	int ss = regions.size();
-	int tt = ss + 1;
+	int ss = 0;
+	int tt = regions.size() + 1;
 	for(int i = 0; i < regions.size(); i++)
 	{
 		region &r = regions[i];
 		if(mb.find(r.lpos) != mb.end())
 		{
 			int lt = mb[r.lpos];
-			if(lt == LEFT_BOUNDARY) add_edge(ss, i, gr); 
-			if(lt == START_BOUNDARY) add_edge(ss, i, gr);
-			if(r.lpos < r.asc_pos) add_edge(ss, i, gr);
+			if(lt == LEFT_BOUNDARY) add_edge(ss, i + 1, gr); 
+			else if(lt == START_BOUNDARY) add_edge(ss, i + 1, gr);
+			else if(r.lpos < r.asc_pos) add_edge(ss, i + 1, gr);
 		}
 
 		if(mb.find(r.rpos) != mb.end())
 		{
 			int rt = mb[r.rpos];
-			if(rt == RIGHT_BOUNDARY) add_edge(i, tt, gr);
-			if(rt == END_BOUNDARY) add_edge(i, tt, gr);
-			if(r.rpos > r.desc_pos) add_edge(i, tt, gr);
+			if(rt == RIGHT_BOUNDARY) add_edge(i + 1, tt, gr);
+			else if(rt == END_BOUNDARY) add_edge(i + 1, tt, gr);
+			else if(r.rpos > r.desc_pos) add_edge(i + 1, tt, gr);
 		}
 	}
 
