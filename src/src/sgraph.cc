@@ -12,6 +12,7 @@ int sgraph::solve()
 {
 	build_graph();
 	check();
+	//print(0);
 	build_in_out_edges();
 	return 0;
 }
@@ -29,11 +30,12 @@ int sgraph::build_graph()
 
 		if(x.empty || y.empty) continue;
 
+		/*
 		if(x.right_break()) continue;
 		if(y.left_break()) continue;
-
 		if(x.rtype == RIGHT_BOUNDARY) continue;
 		if(y.ltype == LEFT_BOUNDARY) continue;
+		*/
 
 		double w = x.ave_abd < y.ave_abd ? x.ave_abd : y.ave_abd;
 
@@ -65,7 +67,9 @@ int sgraph::build_graph()
 		region &r = regions[i];
 		if(r.empty == true) continue;
 
-		if(r.left_break() || r.ltype == LEFT_BOUNDARY || r.ltype == START_BOUNDARY)
+		// TODO
+		//if(r.left_break() || r.ltype == LEFT_BOUNDARY || r.ltype == START_BOUNDARY)
+		if(r.ltype == LEFT_BOUNDARY || r.ltype == START_BOUNDARY)
 		{
 			PEB p = add_edge(ss, i + 1, gr);
 			assert(p.second == true);
@@ -73,7 +77,9 @@ int sgraph::build_graph()
 			e2w.insert(PED(p.first, r.ave_abd));
 		}
 
-		if(r.right_break() || r.rtype == RIGHT_BOUNDARY || r.rtype == END_BOUNDARY) 
+		// TODO
+		//if(r.right_break() || r.rtype == RIGHT_BOUNDARY || r.rtype == END_BOUNDARY) 
+		if(r.rtype == RIGHT_BOUNDARY || r.rtype == END_BOUNDARY) 
 		{
 			PEB p = add_edge(i + 1, tt, gr);
 			assert(p.second == true);
@@ -110,7 +116,7 @@ int sgraph::build_in_out_edges()
 PEB sgraph::get_max_in_edge(int x)
 {
 	in_edge_iterator it1, it2;
-	double max = 0;
+	double max = -1;
 	PEB p;
 	p.second = false;
 	for(tie(it1, it2) = in_edges(x, gr); it1 != it2; it1++)
@@ -129,7 +135,7 @@ PEB sgraph::get_max_in_edge(int x)
 PEB sgraph::get_max_out_edge(int x)
 {
 	out_edge_iterator it1, it2;
-	double max = 0;
+	double max = -1;
 	PEB p;
 	p.second = false;
 	for(tie(it1, it2) = out_edges(x, gr); it1 != it2; it1++)

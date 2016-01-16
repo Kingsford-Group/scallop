@@ -58,11 +58,13 @@ int region::check_empty()
 	if(ltype == RIGHT_SPLICE) return 0;
 	if(rtype == LEFT_SPLICE) return 0;
 
+	/*
 	if(desc_pos <= asc_pos)
 	{
 		empty = true;
 		return 0;
 	}
+	*/
 
 	int n = (rpos - lpos < num_sample_positions) ? (rpos - lpos) : num_sample_positions;
 	int t = (rpos - lpos) / n;
@@ -139,19 +141,21 @@ int region::locate_descending_position()
 
 int region::estimate_abundance()
 {
+	/*
 	if(desc_pos <= asc_pos)
 	{
 		ave_abd = 0;
 		dev_abd = 0;
 		return 0;
 	}
+	*/
 
-	int n = (desc_pos - asc_pos < num_sample_positions) ? (desc_pos - asc_pos) : num_sample_positions;
-	int t = (desc_pos - asc_pos) / n;
+	int n = (rpos - lpos < num_sample_positions) ? (rpos - lpos) : num_sample_positions;
+	int t = (rpos - lpos) / n;
 
 	vector<int> v;
 	int sum = 0;
-	for(int32_t p = asc_pos; p < desc_pos; p += t)
+	for(int32_t p = lpos; p < rpos; p += t)
 	{
 		int a = compute_overlap(*imap, p);
 		sum += a;
