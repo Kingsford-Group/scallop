@@ -251,11 +251,6 @@ int sgraph::draw(const string &file)
 		int s = source(*it1, gr);
 		int t = target(*it1, gr);
 
-		string color = "colx";
-		if(ov[s] == t && iv[t] == s) color = "colc";
-		else if(ov[s] == t) color = "cola";
-		else if(iv[t] == s) color = "colb";
-
 		assert(v[s] != -1);
 		assert(v[t] != -1);
 
@@ -267,7 +262,23 @@ int sgraph::draw(const string &file)
 		if(v[s] + 1 == v[t]) bend = 0;
 		else if(v[s] % 2 == 0) bend = -30;
 
-		fout<<"\\draw[thick, ->, \\"<< color.c_str() <<", bend right = "<< bend <<"] ("<<sx<<") to ("<<sy<<");\n";
+		if(ov[s] == t && iv[t] == s)
+		{
+			fout<<"\\draw[line width = 0.10cm, ->, \\cola, bend right = "<< bend <<"] ("<<sx<<") to ("<<sy<<");\n";
+			fout<<"\\draw[line width = 0.04cm, ->, \\colb, bend right = "<< bend <<"] ("<<sx<<") to ("<<sy<<");\n";
+		}
+		else if(ov[s] == t)
+		{
+			fout<<"\\draw[line width = 0.05cm, ->, \\cola, bend right = "<< bend <<"] ("<<sx<<") to ("<<sy<<");\n";
+		}
+		else if(iv[t] == s)
+		{
+			fout<<"\\draw[line width = 0.05cm, ->, \\colb, bend right = "<< bend <<"] ("<<sx<<") to ("<<sy<<");\n";
+		}
+		else
+		{
+			fout<<"\\draw[line width = 0.05cm, ->, \\colx, bend right = "<< bend <<"] ("<<sx<<") to ("<<sy<<");\n";
+		}
 	}
 
 	draw_footer(fout);
