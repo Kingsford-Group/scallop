@@ -5,7 +5,8 @@ htslib = $(HTSLIB)
 
 scallop_CPPFLAGS = -I$(htslib) -I$(GUROBI_HOME)/include
 scallop_LDFLAGS = -L$(htslib) -L$(GUROBI_HOME)/lib -pthread
-scallop_LDADD = -lhts -lz -lgurobi_c++
+scallop_LDADD = -lhts -lz -lgurobi_c++ -lgurobi65
+#scallop_LDADD += $(GUROBI_HOME)/lib/libgurobi65.so
 
 scallop_SOURCES = main.cc \
 				  scallop.h scallop.cc \
