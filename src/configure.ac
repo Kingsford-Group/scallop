@@ -11,11 +11,13 @@ AC_CONFIG_HEADERS([config.h])
 AC_PROG_CXX
 AC_PROG_CC
 
-AC_ARG_WITH(samtools, [--with-samtools prefix for samtools], SAMTOOLS=$withval, SAMTOOLS=)
+## only htslib is enough
+#AC_ARG_WITH(samtools, [--with-samtools prefix for samtools], SAMTOOLS=$withval, SAMTOOLS=)
+#AC_SUBST(SAMTOOLS)
+#AS_IF([test "x$SAMTOOLS" = "x"],[AC_MSG_ERROR([*** Please use the --with-samtools to setup the prefix path for samtools ***])]) 
+
 AC_ARG_WITH(htslib, [--with-htslib prefix for htslib], HTSLIB=$withval, HTSLIB=)
-AC_SUBST(SAMTOOLS)
 AC_SUBST(HTSLIB)
-AS_IF([test "x$SAMTOOLS" = "x"],[AC_MSG_ERROR([*** Please use the --with-samtools to setup the prefix path for samtools ***])]) 
 AS_IF([test "x$HTSLIB" = "x"],[AC_MSG_ERROR([*** Please use the --with-htslib to setup the prefix path for htslib ***])]) 
 
 # Checks for libraries.
