@@ -1,7 +1,6 @@
 bin_PROGRAMS=scallop
 
 # add htslib library
-samtools = $(SAMTOOLS)
 htslib = $(HTSLIB)
 
 scallop_CPPFLAGS = -I$(htslib) -I$(GUROBI_HOME)/include
