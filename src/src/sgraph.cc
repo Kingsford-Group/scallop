@@ -113,6 +113,20 @@ int sgraph::build_in_out_edges()
 	return 0;
 }
 
+int sgraph::build_basis()
+{
+	basis.clear();
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = edges(gr); it1 != it2; it1++)
+	{
+		int s = source(*it1, gr);
+		int t = source(*it2, gr);
+		if(ov[s] == t) continue;
+		basis.push_back(*it1);
+	}
+	return 0;
+}
+
 PEB sgraph::get_max_in_edge(int x)
 {
 	in_edge_iterator it1, it2;

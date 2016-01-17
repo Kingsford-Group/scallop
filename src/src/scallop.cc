@@ -3,7 +3,6 @@
 
 #include "config.h"
 #include "scallop.h"
-#include "sam.h"
 
 scallop::scallop()
 {

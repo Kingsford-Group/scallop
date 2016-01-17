@@ -2,12 +2,11 @@ bin_PROGRAMS=scallop
 
 # add htslib library
 samtools = $(SAMTOOLS)
-hts = $(HTSLIB)
-hts_headers = $(hts)/htslib
+htslib = $(HTSLIB)
 
-scallop_CPPFLAGS = -I$(hts) -I$(hts_headers) -pg
-scallop_LDFLAGS = -L$(samtools) -L$(hts) -pthread -pg
-scallop_LDADD = -lbam -lhts -lz
+scallop_CPPFLAGS = -I$(htslib) -I$(GUROBI_HOME)/include
+scallop_LDFLAGS = -L$(htslib) -L$(GUROBI_HOME)/lib -pthread
+scallop_LDADD = -lhts -lz -lgurobi_c++
 
 scallop_SOURCES = main.cc \
 				  scallop.h scallop.cc \
@@ -22,4 +21,5 @@ scallop_SOURCES = main.cc \
 				  dgraph.h dgraph.cc \
 				  imap.h imap.cc \
 				  binomial.h binomial.cc \
-				  draw.h draw.cc
+				  draw.h draw.cc \
+				  lpsolver.h lpsolver.cc

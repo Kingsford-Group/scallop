@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "hit.h"
-#include "sam.h"
 
 using namespace std;
 

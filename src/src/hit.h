@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "sam.h"
+#include "htslib/sam.h"
 #include "config.h"
 
 using namespace std;
