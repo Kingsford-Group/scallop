@@ -1,10 +1,7 @@
 bin_PROGRAMS=scallop
 
-# add htslib library
-htslib = $(HTSLIB)
-
-scallop_CPPFLAGS = -I$(htslib) -I$(GUROBI_HOME)/include
-scallop_LDFLAGS = -L$(htslib) -L$(GUROBI_HOME)/lib -pthread
+scallop_CPPFLAGS = -I$(HTSLIB) -I$(GUROBI_HOME)/include
+scallop_LDFLAGS = -L$(HTSLIB) -L$(GUROBI_HOME)/lib -pthread
 scallop_LDADD = -lhts -lz -lgurobi_c++ -lgurobi
 
 scallop_SOURCES = main.cc \
