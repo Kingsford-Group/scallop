@@ -12,15 +12,15 @@ AC_PROG_CXX
 AC_PROG_CC
 
 ### require environment variables BOOST_HOME GUROBI_HOME GUROBI_LICENCE_FILE HTSLIB
+AS_IF([test "s$HTSLIB" = "s"],[AC_MSG_ERROR([*** Please set environment variable HTSLIB ***])]) 
+AS_IF([test "s$BOOST_HOME" = "s"],[AC_MSG_ERROR([*** Please set environment variable BOOST_HOME ***])]) 
+AS_IF([test "s$GUROBI_HOME" = "s"],[AC_MSG_ERROR([*** Please set environment variable GUROBI_HOME ***])]) 
+AS_IF([test "s$GRB_LICENSE_FILE" = "s"],[AC_MSG_ERROR([*** Please set environment variable GRB_LICENSE_FILE ***])]) 
 
-## only htslib is enough
 #AC_ARG_WITH(samtools, [--with-samtools prefix for samtools], SAMTOOLS=$withval, SAMTOOLS=)
 #AC_SUBST(SAMTOOLS)
 #AS_IF([test "x$SAMTOOLS" = "x"],[AC_MSG_ERROR([*** Please use the --with-samtools to setup the prefix path for samtools ***])]) 
 
-#AC_ARG_WITH(htslib, [--with-htslib prefix for htslib], HTSLIB=$withval, HTSLIB=)
-#AC_SUBST(HTSLIB)
-#AS_IF([test "x$HTSLIB" = "x"],[AC_MSG_ERROR([*** Please use the --with-htslib to setup the prefix path for htslib ***])]) 
 
 # Checks for libraries.
 # FIXME: Replace `main' with a function in `-lbam':
