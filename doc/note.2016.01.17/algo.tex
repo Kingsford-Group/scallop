@@ -70,10 +70,12 @@
 	\frametitle{Existing Method: Traph}
 	\begin{itemize}
 	\item {\bf Algorithm:} use a network flow formulation to compute a new
-		weight $w'(e)$ for $e\in E$ such that $\sum_{e\in E} |w(e) - w'(e)|$
-		is minimized and that there \emph{exists} a set of paths satisfying
-				$\sum_{e\in E} | w'(e) - \sum_{e\in P} c(P)| = 0$~(i.e.,
-		there exists a flow decompositions of the new DAG)
+		weight $w'(e)$ for $e\in E$ such that
+		\begin{itemize}
+		\item $\sum_{e\in E} |w(e) - w'(e)|$ is minimized, and that 
+		\item there exists a flow decompositions of the new DAG, i.e.,
+		there \emph{exists} a set of paths satisfying $\sum_{e\in E} | w'(e) - \sum_{e\in P} c(P)| = 0$
+		\end{itemize}
 	\vspace{0.4cm}
 	\item {\bf Disadvantage:} 
 		\begin{itemize}
