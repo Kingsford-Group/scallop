@@ -11,7 +11,7 @@ AC_CONFIG_HEADERS([config.h])
 AC_PROG_CXX
 AC_PROG_CC
 
-### require environment variables HTSLIB GUROBI_HOME GUROBI_LICENCE_FILE
+### require environment variables BOOST_HOME GUROBI_HOME GUROBI_LICENCE_FILE HTSLIB
 
 ## only htslib is enough
 #AC_ARG_WITH(samtools, [--with-samtools prefix for samtools], SAMTOOLS=$withval, SAMTOOLS=)
