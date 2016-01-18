@@ -1,6 +1,6 @@
 bin_PROGRAMS=scallop
 
-scallop_CPPFLAGS = -I$(HTSLIB) -I$(GUROBI_HOME)/include
+scallop_CPPFLAGS = -I$(HTSLIB) -I$(GUROBI_HOME)/include -I$(BOOST_HOME)
 scallop_LDFLAGS = -L$(HTSLIB) -L$(GUROBI_HOME)/lib
 scallop_LDADD = -lhts -lz -lgurobi_c++ -lgurobi
 

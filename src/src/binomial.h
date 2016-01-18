@@ -2,7 +2,7 @@
 #define __BINOMIAL_H__
 
 // boost::binomial distribution
-#include <boost/math/distributions/binomial.hpp>
+#include "boost/math/distributions/binomial.hpp"
 using namespace boost::math;
 
 // return the score(transformed from probability)
