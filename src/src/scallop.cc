@@ -42,7 +42,7 @@ int scallop::load(const char *bam_file)
 			bb.clear();
 
 			// DEBUG
-			if(sgraphs.size() >= 10) break;
+			if(sgraphs.size() >= 1000) break;
 		}
 		bb.add_hit(h, b);
     }
