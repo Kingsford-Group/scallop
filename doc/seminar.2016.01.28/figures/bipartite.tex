@@ -1,0 +1,53 @@
+\begin{center}
+
+\begin{tikzpicture}[font=\small,overlay,
+mycirclex/.style={draw, circle, minimum size=1.0em, inner sep = 0.2mm}, 
+mydiamond/.style={draw, diamond, minimum size=0.78em, inner sep = 0mm}, 
+myrectang/.style={draw, rectangle, minimum size=0.60em, inner sep = 0mm}, 
+>=stealth]
+
+\input{colors}
+
+\def\len{1.2cm}
+
+% G1
+\begin{scope}[local bounding box=bbox, xshift=-5.5cm]
+\path<2-> node[mycirclex] (x1) at (1.0 * \len, 0.0) {$e_1$};
+\path<2-> node[mycirclex] (x2) at (2.0 * \len, 0.0) {$e_2$};
+\path<2-> node[mycirclex] (x3) at (3.0 * \len, 0.0) {$e_3$};
+\path<2-> node[mycirclex] (x4) at (4.0 * \len, 0.0) {$e_4$};
+\path<2-> node[mycirclex] (x5) at (5.0 * \len, 0.0) {$e_5$};
+\path<2-> node[mycirclex] (x6) at (6.0 * \len, 0.0) {$e_6$};
+\path<2-> node[mycirclex] (x7) at (7.0 * \len, 0.0) {$e_7$};
+
+\path<2-> node[mycirclex] (y1) at (1.0 * \len, -2.0) {$e_1$};
+\path<2-> node[mycirclex] (y2) at (2.0 * \len, -2.0) {$e_2$};
+\path<2-> node[mycirclex] (y3) at (3.0 * \len, -2.0) {$e_3$};
+\path<2-> node[mycirclex] (y4) at (4.0 * \len, -2.0) {$e_4$};
+\path<2-> node[mycirclex] (y5) at (5.0 * \len, -2.0) {$e_5$};
+\path<2-> node[mycirclex] (y6) at (6.0 * \len, -2.0) {$e_6$};
+\path<2-> node[mycirclex] (y7) at (7.0 * \len, -2.0) {$e_7$};
+
+\path<3-> [draw, \cola, line width=0.08cm] (x1) -- (y2);
+\path<3-> [draw, \cola, line width=0.08cm] (x5) -- (y3);
+\path<3-> [draw, \cola, line width=0.08cm] (x6) -- (y4);
+
+\path<2-> [draw, \colx, line width=0.03cm] (x1) -- (y2);
+\path<2-> [draw, \colx, line width=0.03cm] (x1) -- (y3);
+\path<2-> [draw, \colx, line width=0.03cm] (x1) -- (y4);
+\path<2-> [draw, \colx, line width=0.03cm] (x1) -- (y6);
+\path<2-> [draw, \colx, line width=0.03cm] (x1) -- (y7);
+\path<2-> [draw, \colx, line width=0.03cm] (x2) -- (y3);
+\path<2-> [draw, \colx, line width=0.03cm] (x2) -- (y4);
+\path<2-> [draw, \colx, line width=0.03cm] (x3) -- (y4);
+\path<2-> [draw, \colx, line width=0.03cm] (x5) -- (y3);
+\path<2-> [draw, \colx, line width=0.03cm] (x5) -- (y4);
+\path<2-> [draw, \colx, line width=0.03cm] (x6) -- (y4);
+
+\end{scope}
+%\path<2-> [draw, rounded corners] ($(bbox.south west) - (0.00cm, 0.25cm)$) rectangle ($(bbox.north east) + (0.1cm, 0)$);
+%\node at ($(bbox.south) - (0.00cm, 0.2cm)$) [label=below:{$G_2 - G_1 = \{c\}$}]{};
+
+
+\end{tikzpicture}
+\end{center}

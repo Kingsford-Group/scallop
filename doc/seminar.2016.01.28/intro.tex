@@ -1,0 +1,79 @@
+\frame
+{
+	\frametitle{RNA-seq Experiments}
+
+	\vspace{-0.05cm}
+	\begin{columns}[c]
+	\column{0.48\textwidth} \includegraphics[width=\textwidth]{figures/seq1.pdf}
+	\column{0.48\textwidth} \includegraphics[width=\textwidth]{figures/seq2.pdf}
+	\end{columns}
+
+	\vspace{0.25cm}
+	\onslide<2->{{\bf Computational Task:} Determine the transcripts and their abundance from the (paired-end) reads.}
+}
+
+\frame
+{
+	\frametitle{Splice Graph}
+	\includegraphics[width=\textwidth]{figures/reference.pdf}
+	\vspace{0.2cm}
+	\input{figures/index}
+	\vspace{-0.4cm}
+	\input{figures/graph1}
+	\vspace{0.2cm}
+	\begin{itemize}
+	\item<3-> {\bf Nodes:} continuous regions not seperated by spliced reads
+	\item<3-> {\bf Edges:} adjacent regions or connected by spliced reads
+	\item<3-> {\bf Weight of Nodes:} estimated from the average coverage
+	\item<3-> {\bf Weight of Edges:} estimated from number of spliced reads
+	\end{itemize}
+}
+
+\frame
+{
+	\frametitle{Optimization Problem}
+
+	\begin{itemize}
+	\item {\bf Input:} Directed acyclic graph~(DAG) $G=(V,E)$ with a single source $s$ and a single sink $t$;
+		weight $w(e)$ for $e\in E$.
+
+	\vspace{0.2cm}
+
+	\item {\bf Output:} A set of paths $\mathcal{P}$ from $s$ to $t$ and abundance $a(P)$ for $P\in\mathcal{P}$, such that
+		\begin{enumerate}
+		\item each $e\in E$ is covered by at least one $P\in\mathcal{P}$, and that
+		\item $|\mathcal{P}|$ is as small as possible, and that
+		\item $\sum_{e\in E} \|w(e) - \sum_{e\in P} a(P)\|$ is as small as possible.
+		\end{enumerate}
+	\end{itemize}
+
+	\vspace{1.0cm}
+	\input{figures/graph2.tex}
+	\vspace{1.0cm}
+}
+
+\frame
+{
+	\frametitle{Outline}
+	\begin{enumerate}
+	\item Algorithmic results
+		\begin{itemize}
+		\item Hardness results
+		\item Polynomial-time algorithms
+		\item Approximation algorithms
+		\item Open problems
+		\end{itemize}
+	\item Existing Methods/Softwares
+		\begin{itemize}
+		\item Cufflinks
+		\item Scripture
+		\item IsoLasso
+		\item Traph
+		\item CLIIQ
+		\item StringTie
+		\end{itemize}
+	\item Our initial thoughts
+	\end{enumerate}
+}
+
+

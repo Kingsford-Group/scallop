@@ -1,23 +1,22 @@
 \frame
 {
-	\frametitle{Problem Statement}
+	\frametitle{Minimize the Number of Paths}
+	{\bf Problem:} Given a DAG $G=(V,E)$ with single source $s$ and single sink $t$, 
+		to compute a set of paths $\mathcal{P}$ with minimum cardinality
+		that can cover all edges.
 
-	\begin{itemize}
-	\item {\bf Input:} strongly connected DAG $G=(V,E)$ with a single source $s$ and a single sink $t$,
-		weight $w(e)$ for $e\in E$
+	\vspace{0.4cm}
 
-	\vspace{0.2cm}
+	\input{figures/graph3.tex}
 
-	\item {\bf Output:} a set of paths $\mathcal{P}$ from $s$ to $t$ and capacity $c(P)$ for $P\in\mathcal{P}$, such that
-		\begin{itemize}
-		\item $|\mathcal{P}|$ is minimized, and that
-		\item $\sum_{e\in E} | w(e) - \sum_{e\in P} c(P)|$ is minimized
-		\end{itemize}
-	\end{itemize}
+	\vspace{0.6cm}
 
-	\vspace{1.0cm}
-	\input{figures/graph.tex}
-	\vspace{1.0cm}
+	\onslide<2->{{\bf Polynomial-time Algorithm}}
+	\vspace{-0.2cm}
+	\input{figures/bipartite.tex}
+
+	\vspace{2.0cm}
+	\onslide<3->{$|\mathcal{P}| = |E| - M$, where $M$ is the size of one maximum matching.}
 }
 
 \frame
