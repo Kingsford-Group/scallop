@@ -1,216 +1,80 @@
 \frame
 {
-	\frametitle{Minimize the Number of Paths}
-	{\bf Problem:} Given DAG $G=(V,E)$ with source $s$ and sink $t$, 
-		to compute a set of paths $\mathcal{P}$ with minimum cardinality
-		that can cover all edges.
-
-	\vspace{0.4cm}
-
-	\input{figures/graph3.tex}
-
-	\vspace{0.6cm}
-
-	\onslide<2->{{\bf Polynomial-time Algorithm:}}
-	\vspace{-0.2cm}
-	\input{figures/bipartite.tex}
-
-	\vspace{2.0cm}
-	\onslide<3->{$|\mathcal{P}| = |E| - M$, where $M$ is the size of one maximum matching.}
-}
-
-\frame
-{
-	\frametitle{Minimize Abundance Error}
-	{\bf Problem:} Given DAG $G=(V,E)$ with source $s$, sink $t$, and weight $w(e)$
-	for $e\in E$, to compute a set of $s$-$t$ paths $\mathcal{P}$ so that all edges
-	are covered and that $\sum_{e\in E} |w(e) - \sum_{P\in\mathcal{P}:e\in P} a(P)|$ is minimized.
-
-	\vspace{0.3cm}
-	\onslide<2->{{\bf Fact:} There exists a set of paths satisfying $x(e) = \sum_{P\in\mathcal{P}:e\in P} a(P)$ 
-		for all $e\in E$ if and only if $x(e)$ forms a flow of $G$.}
-
-	\vspace{0.3cm}
-	\onslide<3->{{\bf Reformulation:} To compute $x(e)$ for $e\in E$ such that $x(e)$ forms a flow
-		and that $\sum_{e\in E} |w(e) - x(e)|$ is minimized.}
-
-	\vspace{0.3cm}
-	\onslide<4->{{\bf Polynomial-time Algorithm}~(using LP):
-	\begin{displaymath}
-	\displaystyle
-	\begin{array}{rl}
-	\min & \sum_{e\in E} |w(e) - x(e)| \\
-	\textrm{s.t.} & \left\{
-		\begin{array}{ll}
-			\sum_{e=(u,v)\in E} x(e) = \sum_{e=(v,w)\in E} x(e), \forall v \in V\\
-			x(e) \ge 0, \forall e\in E
-		\end{array}
-		\right.
-	\end{array}
-	\end{displaymath}}
-}
-
-\frame
-{
-	\frametitle{Minimize Abundance Error with $k$ Paths}
-	{\bf Problem:} Given DAG $G=(V,E)$ with source $s$, sink $t$, weight $w(e)$ for $e\in E$,
-		to compute a set of at most $k$ $s$-$t$ paths $\mathcal{P}$ such that
-			$\sum_{e\in E} \| w(e) - \sum_{P:e\in P} a(P)\|$ is minimized.
-
-	\vspace{0.3cm}
-	\onslide<2->{{\bf Maximum $k$-Splittable Flow Problem:} Given DAG $G=(V,E)$ with source
-	$s$, sink $t$, weight $w(e)$ for $e\in E$, to compute a set of at most $k$
-	$s$-$t$ paths $\mathcal{P}$ satisfying $\sum_{P:e\in P} a(P)\le w(e), \forall e\in E$~(capacity constraints) such that 
-	$\sum_{P\in\mathcal{P}} a(P)$ is maximized.}
-
-	\vspace{0.2cm}
+	\frametitle{Our Method}
 	\begin{enumerate}
-	\item<3-> {M$k$SF is {\bf NP}-hard for $2\le k \le |E| - |V| + 2$.}
-	\vspace{0.1cm}
-	\item<4-> A 1.5-approximation algorithm for $k=2$.
-	\vspace{0.1cm}
-	\item<5-> A 2-approximation algorithm for $3\le k \le |E| - |V| + 2$.
-	\vspace{0.1cm}
-	\item<6-> There exists polynomial-time algorithm for $G$ with constant tree-width.
+	\item Initialize a set of paths $\mathcal{P}$~(in polynomial size).
+	\vspace{0.2cm}
+	\item Use LP to estimate the abundance of the paths in $\mathcal{B}$ to minimize the estimation error.
+	\vspace{0.2cm}
+	\item Reduce the number of paths in $\mathcal{P}$:
+		\begin{itemize}
+		\vspace{0.1cm}
+		\item For two paths with (almost) identical abundance, try to merge them into one path;
+		\vspace{0.1cm}
+		\item Discard paths with very small abundance.
+		\end{itemize}
+	\vspace{0.2cm}
+	\item Iterate between step 2 and step 3.
 	\end{enumerate}
 }
 
 \frame
 {
-	\frametitle{Existing Method: Cufflinks}
-
-	\begin{itemize}
-	\item {\bf Algorithm:} compute a minimum number of paths to cover all edges using Dilworth's Theorem
-	\vspace{0.5cm}
-	\item {\bf Disadvantage:} do not consider the weights of edges
-	\end{itemize}
-}
-
-\frame
-{
-	\frametitle{Existing Method: Scripture}
-	\begin{itemize}
-	\item {\bf Algorithm:} output all possible paths
-	\vspace{0.5cm}
-	\item {\bf Disadvantage:} exponential number of paths
-	\end{itemize}
-}
-
-
-\frame
-{
-	\frametitle{Existing Method: IsoLasso}
-	\begin{itemize}
-	\item {\bf Algorithm:} use quadratic programming
-		\begin{displaymath}
-		\begin{array}{rl}
-		\min & \sum_{e\in E} | w(e) - \sum_{e\in P} c(P)|^2 \\
-		\textrm{s.t.} & \sum_{P\in\mathcal{P}} c(P) \le \lambda
-		\end{array}
-		\end{displaymath}
+	\frametitle{Bad Example for Greedy Algorithm}
 
 	\vspace{0.2cm}
-	\item {\bf Disadvantage:} 
-		\begin{itemize}
-		\item $|\mathcal{P}|$ is not bounded
-		\item exponential number of variables
-		\end{itemize}
+	\input{figures/greedy3.tex}
+	\vspace{0.8cm}
+	\onslide<6->{{\bf Solution by greedy algorithm:} $2n + 1$ paths.}
 
-	\end{itemize}
-}
-
-
-\frame
-{
-	\frametitle{Existing Method: Traph}
-	\begin{itemize}
-	\item {\bf Algorithm:} use a network flow formulation to compute a new
-		weight $w'(e)$ for $e\in E$ such that
-		\begin{itemize}
-		\item $\sum_{e\in E} |w(e) - w'(e)|$ is minimized, and that 
-		\item there exists a flow decompositions of the new DAG, i.e.,
-		there \emph{exists} a set of paths satisfying $\sum_{e\in E} | w'(e) - \sum_{e\in P} c(P)| = 0$
-		\end{itemize}
-	\vspace{0.4cm}
-	\item {\bf Disadvantage:} 
-		\begin{itemize}
-		\item only the weights are updated; the paths are not returned; actually
-			they use a greedy algorithm to compute paths~(the same as StringTie)
-		\vspace{0.2cm}
-		\item the number of paths is not considerred in this formulation
-		\end{itemize}
-	\end{itemize}
-}
-
-\frame
-{
-	\frametitle{Existing Method: CLIIQ}
-	\begin{itemize}
-	\item {\bf Algorithm:} use ILP to model this problem
-	\vspace{0.5cm}
-	\item {\bf Disadvantage:} 
-		\begin{itemize} 
-		\item ILP itself is NP-complete
-		\item exponential number of variables
-		\end{itemize}
-	\end{itemize}
-}
-
-\frame
-{
-	\frametitle{Existing Method: StringTie}
-	\begin{itemize}
-	\item {\bf Algorithm:} 
-		\begin{itemize}
-		\item use greedy algorithm to compute paths~(transcripts): iteratively
-			compute heaviest path
-		\item use network flow formulation to estimate abundance~(a sophisticated
-				way to handle reads spanning several vertices)
-		\end{itemize}
-	\vspace{0.5cm}
-	\item {\bf Disadvantage:} 
-		\begin{itemize} 
-		\item when compute the current path, the tradeoff between weights is
-			not considerred
-		\end{itemize}
-	\end{itemize}
-}
-
-\frame
-{
-	\frametitle{Our Algorithm}
-	\begin{enumerate}
-	\item compute a (good) basis $\mathcal{B}$~(with $|E|-|V|+2$ paths) of the path space
-	\vspace{0.2cm}
-	\item use an LP to estimate the capacities of the paths in $\mathcal{B}$
-	\vspace{0.2cm}
-	\item try to reduce the number of paths in $\mathcal{B}$
-		\begin{itemize}
-		\vspace{0.1cm}
-		\item for two paths with (almost) identical capacities, merge them into one path
-		\vspace{0.1cm}
-		\item discard paths with very small capacities
-		\end{itemize}
-	\vspace{0.2cm}
-	\item iterate between step 2 and step 3
-	\end{enumerate}
-}
-
-\frame
-{
-	\frametitle{Compute Basis of the Path Space}
-
-	\begin{enumerate}
-	\item for each vertex~(except $s$ and $t$), arbitrarily choose exactly an in-edge and an out-edge~(the one with maximum weight);
-	\vspace{1.2cm}
-	\input{figures/basis.tex}
 	\vspace{1.5cm}
-	\item for each vertex $v$~(except $s$ and $t$), there exists a unique path from $s$ to $v$, and a unique path from $v$ to $t$
-	\vspace{0.2cm}
-	\item output paths to cover all edges following these chosen edges 
-	\end{enumerate}
-
+	\input{figures/greedy4.tex}
+	\vspace{0.8cm}
+	\onslide<12->{{\bf Optimal solution:} $n + 3$ paths.}
 }
+
+\frame
+{
+	\frametitle{Use the Residual Graph}
+
+	\vspace{-3.4cm}
+	\input{figures/residual.tex}
+	%\onslide<5->{Compute the maximum bottleneck path in the {\bf residual graph}.}
+}
+
+\frame
+{
+	\frametitle{Resolve Path with Backward Edges}
+
+	\vspace{0.2cm}
+	\input{figures/resolve.tex}
+	\vspace{4.3cm}
+}
+
+\frame
+{
+	\frametitle{Algorithm to Initialize $\mathcal{P}$}
+
+	\begin{enumerate}
+	\item Initialize $\mathcal{P} = \emptyset$.
+	\vspace{0.2cm}
+	\item Compute a set of paths $\mathcal{P}'$~(paths in $\mathcal{P}'$ may contain backward edges) following the max-flow algorithm.
+	\vspace{0.2cm}
+	\item {\bf For} each $p\in\mathcal{P}'$ in its original order:
+		\begin{enumerate}
+		\vspace{0.1cm}
+		\item {\bf If} $p$ does not contain backward edges, let $\mathcal{P} = \mathcal{P}\cup\{p\}$;
+		\vspace{0.1cm}
+		\item {\bf else} resolve $p$ using $\mathcal{P}$ and put all resulting paths into $\mathcal{P}$.
+		\vspace{0.1cm}
+		\item {\bf If} $\mathcal{P}$ becomes a basis, or $|\mathcal{P}| \ge C$, {\bf break}.
+		\end{enumerate}
+	\vspace{0.2cm}
+	\item {\bf Return} $\mathcal{P}$.
+	\end{enumerate}
+}
+
+
 
 \frame
 {
@@ -240,4 +104,3 @@
 	\end{itemize}
 
 }
-

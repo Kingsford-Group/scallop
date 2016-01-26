@@ -77,3 +77,111 @@
 }
 
 
+\frame
+{
+	\frametitle{Minimize the Number of Paths}
+	{\bf Problem:} Given DAG $G=(V,E)$ with source $s$ and sink $t$, 
+		to compute a set of paths $\mathcal{P}$ with minimum cardinality
+		that can cover all edges.
+
+	\vspace{0.4cm}
+
+	\input{figures/graph3.tex}
+
+	\vspace{0.6cm}
+
+	\onslide<2->{{\bf Polynomial-time Algorithm:}}
+	\vspace{-0.2cm}
+	\input{figures/bipartite.tex}
+
+	\vspace{2.0cm}
+	\onslide<4->{{\bf Dilworth's Theorem:} $|\mathcal{P}| = |E| - M$.}
+}
+
+\frame
+{
+	\frametitle{Minimize Abundance Error}
+	{\bf Problem:} Given DAG $G=(V,E)$ with source $s$, sink $t$, and weight $w(e)$
+	for $e\in E$, to compute a set of $s$-$t$ paths $\mathcal{P}$ so that all edges
+	are covered and that $\sum_{e\in E} |w(e) - \sum_{P\in\mathcal{P}:e\in P} a(P)|$ is minimized.
+
+	\vspace{0.3cm}
+	\onslide<2->{{\bf Fact:} There exists a set of paths satisfying $x(e) = \sum_{P\in\mathcal{P}:e\in P} a(P)$ 
+		for all $e\in E$ if and only if $x(e)$ forms a flow of $G$.}
+
+	\vspace{0.3cm}
+	\onslide<3->{{\bf Reformulation:} To compute $x(e)$ for $e\in E$ such that $x(e)$ forms a flow
+		and that $\sum_{e\in E} |w(e) - x(e)|$ is minimized.}
+
+	\vspace{0.3cm}
+	\onslide<4->{{\bf Polynomial-time Algorithm}~(using LP):
+	\begin{displaymath}
+	\displaystyle
+	\begin{array}{rl}
+	\min & \sum_{e\in E} |w(e) - x(e)| \\
+	\textrm{s.t.} & \left\{
+		\begin{array}{ll}
+			\sum_{e=(u,v)\in E} x(e) = \sum_{e=(v,w)\in E} x(e), \forall v \in V\\
+			x(e) \ge 0, \forall e\in E
+		\end{array}
+		\right.
+	\end{array}
+	\end{displaymath}}
+}
+
+\frame
+{
+	\frametitle{Minimize Abundance Error with $k$ Paths}
+	{\bf Problem:} Given DAG $G=(V,E)$ with source $s$, sink $t$, weight $w(e)$ for $e\in E$,
+		to compute a set of at most $k$ $s$-$t$ paths $\mathcal{P}$ such that
+			$\sum_{e\in E} \| w(e) - \sum_{P:e\in P} a(P)\|$ is minimized.
+
+	\vspace{0.3cm}
+	\onslide<2->{{\bf Maximum $k$-Splittable Flow Problem:} Given DAG $G=(V,E)$ with source
+	$s$, sink $t$, weight $w(e)$ for $e\in E$, to compute a set of at most $k$
+	$s$-$t$ paths $\mathcal{P}$ satisfying $\sum_{P:e\in P} a(P)\le w(e), \forall e\in E$~(capacity constraints) such that 
+	$\sum_{P\in\mathcal{P}} a(P)$ is maximized.}
+
+	\vspace{0.2cm}
+	\begin{enumerate}
+	\item<3-> {M$k$SF is {\bf NP}-hard for $2\le k \le |E| - |V| + 2$.}
+	\vspace{0.1cm}
+	\item<4-> A 1.5-approximation algorithm for $k=2$.
+	\vspace{0.1cm}
+	\item<5-> A 2-approximation algorithm for $3\le k \le |E| - |V| + 2$.
+	\vspace{0.1cm}
+	\item<6-> There exists polynomial-time algorithm for $G$ with constant tree-width.
+	\end{enumerate}
+}
+
+\frame
+{
+	\frametitle{Regularization Methods}
+
+	{\bf Optimization Formulation:}
+	\begin{displaymath}
+	\min  \sum_{e\in E} \|w(e) - \sum_{P:e\in P} a(P)\| + \lambda \sum_{P\in\mathcal{P}} \|a(P)\|^q
+	\end{displaymath}
+
+	\vspace{0.2cm}
+	\onslide<2->{
+	\begin{enumerate}
+	\item Initialize $\mathcal{P}$ as all possible paths~(exponential size).
+	\item Parameter $\lambda$ needs to be trained.
+	\item Use continuous optimization techniques~(Lasso, Newton–Raphson, etc) to compute a local optimal solution.
+	\end{enumerate}}
+
+	\vspace{0.2cm}
+	\onslide<3->{{\bf Existing Softwares:} IsoLasso~(Li \emph{et al.}, 2011), SLIDE~(Li \emph{et al.}, 2011), MITIE~(Behr \emph{et al.}, 2013)}
+}
+
+\frame
+{
+	\frametitle{Heuristic---Greedy Algorithm}
+
+	{\bf Algorithm:} Iteratively compute the path with maximum bottleneck weight, and then update the graph.
+	\vspace{0.7cm}
+	\input{figures/greedy1.tex}
+	\vspace{3.5cm}
+	\onslide<5->{{\bf Existing Softwares:} Traph~(Tomescu \emph{et al.}, 2013), StringTie~(Pertea \emph{et al.}, 2015)}
+}
