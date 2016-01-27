@@ -3,15 +3,15 @@
 \begin{tikzpicture}[font=\small,overlay,
 mycirclex/.style={draw, circle, minimum size=1.0em, inner sep = 0.2mm}, 
 mydiamond/.style={draw, diamond, minimum size=0.78em, inner sep = 0mm}, 
-myrectang/.style={draw, rectangle, minimum size=0.60em, inner sep = 0mm}, 
+myrectang/.style={rounded corners, draw, rectangle, minimum size=0.60em, inner sep = 0.8mm, line width = 0.03cm}, 
 >=stealth]
 
 \input{colors}
 
-\def\len{1.8cm}
+\def\len{1.65cm}
 
 % G1
-\begin{scope}[local bounding box=bbox, xshift=-6.4cm, yscale=1.2]
+\begin{scope}[local bounding box=bbox, xshift=-6.9cm, yscale=1.2]
 \path<2-> node[mycirclex] (v1) at (1.0 * \len, 0) {$s$};
 \path<2-> node[mycirclex] (v2) at (2.0 * \len, 0) {$a$};
 \path<2-> node[mycirclex] (v3) at (3.0 * \len, 0) {$b$};
@@ -24,12 +24,17 @@ myrectang/.style={draw, rectangle, minimum size=0.60em, inner sep = 0mm},
 \path<3-> [draw, opacity = 1.0, \cola, ->, line width=0.082cm] (v3) -- (v4);
 \path<3-> [draw, opacity = 1.0, \cola, ->, line width=0.082cm] (v4) -- (v5);
 \path<3-> [draw, opacity = 1.0, \cola, ->, line width=0.082cm] (v5) -- (v6);
+\path<3-> node[myrectang, rounded corners, \cola] at (7.03 * \len, 0.6cm) {$a(P_1) = 2n~(\times 1)$};
+
 \path<4-> [draw, \colb, opacity = 1.0, ->, line width=0.082cm, bend left = 50] (v1) to (v2);
 \path<4-> [draw, \colb, opacity = 1.0, ->, line width=0.082cm, bend left = 30] (v3) to (v6);
 \path<4-> [draw, \colb, opacity = 1.0, ->, line width=0.082cm, bend left =-20] (v2) to (v3);
+\path<4-> node[myrectang, rounded corners, \colb] at (7 * \len, 0) {$a(P_2) = 1~(\times n)$};
+
 \path<5-> [draw, \colc, opacity = 1.0, ->, line width=0.082cm, bend left = 50] (v5) to (v6);
 \path<5-> [draw, \colc, opacity = 1.0, ->, line width=0.082cm, bend left = 30] (v1) to (v4);
 \path<5-> [draw, \colc, opacity = 1.0, ->, line width=0.082cm, bend left =-20] (v4) to (v5);
+\path<5-> node[myrectang, rounded corners, \colc] at (7 * \len, -0.6cm) {$a(P_3) = 1~(\times n)$};
 
 \path<2-> [draw, \colx, ->, line width=0.02cm] (v1) -- (v2);
 \path<2-> [draw, \colx, ->, line width=0.02cm] (v2) -- (v3);

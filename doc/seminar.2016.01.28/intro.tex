@@ -9,7 +9,51 @@
 	\end{columns}
 
 	\vspace{0.25cm}
-	\onslide<2->{{\bf Computational Task:} Determine the transcripts and their abundance from the (paired-end) reads.}
+	\onslide<2->{{\bf Transcriptome Assembly:} To determine the transcripts and their abundance from the (paired-end) reads.}
+}
+
+\frame
+{
+	\frametitle{Existing Softwares/Methods}
+	\begin{itemize}
+	\item {\bf Reference-based} methods:
+		\vspace{0.05cm}
+		\begin{itemize}
+		\item Cufflinks~(Trapnell \emph{et al.}, 2010) \hspace{0.7cm}\onslide<2->{{\bf use overlap graph}}
+		\vspace{-0.05cm}
+		\[\left.\hspace{-0.98cm}\parbox{0.5\textwidth}{%
+		\item Scripture~(Guttman \emph{et al.}, 2010)
+		\vspace{0.05cm}
+		\item IsoLasso~(Li \emph{et al.}, 2011)
+		\vspace{0.05cm}
+		\item SLIDE~(Li \emph{et al.}, 2011)
+		\vspace{0.05cm}
+		\item CLIIQ~(Lin \emph{et al.}, 2012)
+		\vspace{0.05cm}
+		\item CEM~(Li \emph{et al.}, 2012)
+		\vspace{0.05cm}
+		\item MITIE~(Behr \emph{et al.}, 2013)
+		\vspace{0.05cm}
+		\item Traph~(Tomescu \emph{et al.}, 2013)
+		\vspace{0.05cm}
+		\item StringTie~(Pertea \emph{et al.}, 2015)}
+		\onslide<2->{\right\} \textsf{\bf use splice graph}}\]
+		\vspace{-0.2cm}
+		\item {\bf ...}
+		\end{itemize}
+	\vspace{0.2cm}
+	\item {\bf\emph{De novo}} methods:
+		\vspace{0.05cm}
+		\begin{itemize}
+		\item Trans-ABySS~(Robertson \emph{et al.}, 2010)
+		\vspace{0.05cm}
+		\item Trinity~(Grabherr \emph{et al.}, 2011)
+		\vspace{0.05cm}
+		\item Oases~(Schulz \emph{et al.}, 2012)
+		\vspace{0.05cm}
+		\item {\bf ...}
+		\end{itemize}
+	\end{itemize}
 }
 
 \frame
@@ -24,8 +68,8 @@
 	\begin{itemize}
 	\item<3-> {\bf Nodes:} continuous regions not seperated by spliced reads
 	\item<3-> {\bf Edges:} adjacent regions or connected by spliced reads
-	\item<3-> {\bf Weight of Nodes:} estimated from the average coverage
-	\item<3-> {\bf Weight of Edges:} estimated from number of spliced reads
+	\item<4-> {\bf Weight of nodes:} estimated from the average coverage
+	\item<4-> {\bf Weight of edges:} estimated from number of spanning reads
 	\end{itemize}
 }
 
@@ -39,11 +83,14 @@
 
 	\vspace{0.2cm}
 
-	\item {\bf Output:} A set of paths $\mathcal{P}$ from $s$ to $t$ and abundance $a(P)$ for $P\in\mathcal{P}$, such that
+	\item {\bf Output:} A set of $s$-$t$ paths $\mathcal{P}$ and abundance $a(P)$ for $P\in\mathcal{P}$, such that
 		\begin{enumerate}
-		\item each $e\in E$ is covered by at least one $P\in\mathcal{P}$, and that
+		\vspace{0.1cm}
+		\item each $e\in E$ is covered by at least one path $P\in\mathcal{P}$, and that
+		\vspace{0.1cm}
 		\item $|\mathcal{P}|$ is as small as possible, and that
-		\item $\sum_{e\in E} \|w(e) - \sum_{e\in P} a(P)\|$ is as small as possible.
+		\vspace{0.1cm}
+		\item $\sum_{e\in E} \|w(e) - \sum_{P:e\in P} a(P)\|$ is as small as possible.
 		\end{enumerate}
 	\end{itemize}
 
@@ -54,35 +101,9 @@
 
 \frame
 {
-	\frametitle{Outline}
-	\begin{enumerate}
-	\item Algorithmic results
-		\begin{itemize}
-		\item Hardness results
-		\item Polynomial-time algorithms
-		\item Approximation algorithms
-		\item Open problems
-		\end{itemize}
-	\item Existing Methods/Softwares
-		\begin{itemize}
-		\item Cufflinks
-		\item Scripture
-		\item IsoLasso
-		\item Traph
-		\item CLIIQ
-		\item StringTie
-		\end{itemize}
-	\item Our initial thoughts
-	\end{enumerate}
-}
-
-
-\frame
-{
 	\frametitle{Minimize the Number of Paths}
 	{\bf Problem:} Given DAG $G=(V,E)$ with source $s$ and sink $t$, 
-		to compute a set of paths $\mathcal{P}$ with minimum cardinality
-		that can cover all edges.
+		to compute minimum number of paths that can cover all edges.
 
 	\vspace{0.4cm}
 
@@ -96,6 +117,9 @@
 
 	\vspace{2.0cm}
 	\onslide<4->{{\bf Dilworth's Theorem:} $|\mathcal{P}| = |E| - M$.}
+	
+	\vspace{0.2cm}
+	\onslide<5->{{\bf Existing Software:} Cufflinks~(Trapnell \emph{et al.}, 2010)}
 }
 
 \frame
@@ -103,17 +127,17 @@
 	\frametitle{Minimize Abundance Error}
 	{\bf Problem:} Given DAG $G=(V,E)$ with source $s$, sink $t$, and weight $w(e)$
 	for $e\in E$, to compute a set of $s$-$t$ paths $\mathcal{P}$ so that all edges
-	are covered and that $\sum_{e\in E} |w(e) - \sum_{P\in\mathcal{P}:e\in P} a(P)|$ is minimized.
+	are covered and that $\sum_{e\in E} |w(e) - \sum_{P:e\in P} a(P)|$ is minimized.
 
-	\vspace{0.3cm}
+	\vspace{0.2cm}
 	\onslide<2->{{\bf Fact:} There exists a set of paths satisfying $x(e) = \sum_{P\in\mathcal{P}:e\in P} a(P)$ 
 		for all $e\in E$ if and only if $x(e)$ forms a flow of $G$.}
 
-	\vspace{0.3cm}
+	\vspace{0.2cm}
 	\onslide<3->{{\bf Reformulation:} To compute $x(e)$ for $e\in E$ such that $x(e)$ forms a flow
 		and that $\sum_{e\in E} |w(e) - x(e)|$ is minimized.}
 
-	\vspace{0.3cm}
+	\vspace{0.2cm}
 	\onslide<4->{{\bf Polynomial-time Algorithm}~(using LP):
 	\begin{displaymath}
 	\displaystyle
@@ -127,6 +151,12 @@
 		\right.
 	\end{array}
 	\end{displaymath}}
+
+	\onslide<5->{Based on $x(e)$, {\bf greedy algorithm} can be used to retrieve $\mathcal{P}$
+	with at most $|E| - |V| + 2$ paths.}
+
+	\vspace{0.2cm}
+	\onslide<6->{{\bf Existing Software:} Traph~(Tomescu \emph{et al.}, 2013)}
 }
 
 \frame
@@ -144,13 +174,13 @@
 
 	\vspace{0.2cm}
 	\begin{enumerate}
-	\item<3-> {M$k$SF is {\bf NP}-hard for $2\le k \le |E| - |V| + 2$.}
+	\item<3-> {M$k$SF is {\bf NP}-hard for $2\le k < |E| - |V| + 2$.}
 	\vspace{0.1cm}
-	\item<4-> A 1.5-approximation algorithm for $k=2$.
+	\item<4-> 1.5-approximation algorithm for $k=2$ and $k=3$.
 	\vspace{0.1cm}
-	\item<5-> A 2-approximation algorithm for $3\le k \le |E| - |V| + 2$.
+	\item<5-> 2-approximation algorithm for $4\le k < |E| - |V| + 2$.
 	\vspace{0.1cm}
-	\item<6-> There exists polynomial-time algorithm for $G$ with constant tree-width.
+	\item<6-> Polynomial-time algorithm for $G$ with constant treewidth.
 	\end{enumerate}
 }
 
@@ -172,7 +202,8 @@
 	\end{enumerate}}
 
 	\vspace{0.2cm}
-	\onslide<3->{{\bf Existing Softwares:} IsoLasso~(Li \emph{et al.}, 2011), SLIDE~(Li \emph{et al.}, 2011), MITIE~(Behr \emph{et al.}, 2013)}
+	\onslide<3->{{\bf Existing Softwares:} IsoLasso~(Li \emph{et al.}, 2011), SLIDE~(Li \emph{et al.}, 2011),
+		CEM~(Li \emph{et al.}, 2012), MITIE~(Behr \emph{et al.}, 2013)}
 }
 
 \frame
@@ -183,5 +214,5 @@
 	\vspace{0.7cm}
 	\input{figures/greedy1.tex}
 	\vspace{3.5cm}
-	\onslide<5->{{\bf Existing Softwares:} Traph~(Tomescu \emph{et al.}, 2013), StringTie~(Pertea \emph{et al.}, 2015)}
+	\onslide<6->{{\bf Existing Softwares:} Traph~(Tomescu \emph{et al.}, 2013), StringTie~(Pertea \emph{et al.}, 2015)}
 }

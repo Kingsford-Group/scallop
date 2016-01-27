@@ -3,15 +3,15 @@
 \begin{tikzpicture}[font=\small,overlay,
 mycirclex/.style={draw, circle, minimum size=1.0em, inner sep = 0.2mm}, 
 mydiamond/.style={draw, diamond, minimum size=0.78em, inner sep = 0mm}, 
-myrectang/.style={draw, rectangle, minimum size=0.60em, inner sep = 0mm}, 
+myrectang/.style={rounded corners, draw, rectangle, minimum size=0.60em, inner sep = 0.8mm, line width = 0.03cm}, 
 >=stealth]
 
 \input{colors}
 
-\def\len{1.8cm}
+\def\len{1.6cm}
 
 % G1
-\begin{scope}[local bounding box=bbox, xshift=-6.4cm, yscale=1.2]
+\begin{scope}[local bounding box=bbox, xshift=-6.6cm, yscale=1.2]
 \path<2-> node[mycirclex] (v1) at (1.0 * \len, 0) {$s$};
 \path<2-> node[mycirclex] (v2) at (2.0 * \len, 0) {$a$};
 \path<2-> node[mycirclex] (v3) at (3.0 * \len, 0) {$b$};
@@ -31,11 +31,12 @@ myrectang/.style={draw, rectangle, minimum size=0.60em, inner sep = 0mm},
 \path<2-> [draw, \cola, ->, line width=0.05cm] (v4) -- (v5);
 \path<2-> [draw, \cola, ->, line width=0.05cm] (v5) -- (v6);
 
+\path<2-> node[myrectang, rounded corners, \colc] at (7.03 * \len, 0.0cm) {$a(P_1) = a(P_2)$};
 \path<3-> [draw, line width = 0.08cm, <->] (3.5 * \len, -0.4cm) to node[label=right:{$P_1 + P_2 = P_1' + P_2'$}]{} (3.5 * \len, -1.5cm);
 \end{scope}
 
 % G2
-\begin{scope}[local bounding box=bbox, xshift=-6.4cm, yscale=1.2, yshift = -2.0cm]
+\begin{scope}[local bounding box=bbox, xshift=-6.6cm, yscale=1.2, yshift = -2.0cm]
 \path<3-> node[mycirclex] (v1) at (1.0 * \len, 0) {$s$};
 \path<3-> node[mycirclex] (v2) at (2.0 * \len, 0) {$a$};
 \path<3-> node[mycirclex] (v3) at (3.0 * \len, 0) {$b$};
@@ -55,6 +56,7 @@ myrectang/.style={draw, rectangle, minimum size=0.60em, inner sep = 0mm},
 \path<3-> [draw, \colb, ->, line width=0.10cm] (v4) -- (v5);
 \path<3-> [draw, \cola, ->, line width=0.05cm] (v5) -- (v6);
 
+\path<3-> node[myrectang, rounded corners, \colc] at (7.03 * \len, 0.0cm) {$a(P_1') = a(P_2')$};
 \end{scope}
 
 

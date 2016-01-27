@@ -1,10 +1,10 @@
 \frame
 {
-	\frametitle{Our Method}
+	\frametitle{Our Method---Framework}
 	\begin{enumerate}
 	\item Initialize a set of paths $\mathcal{P}$~(in polynomial size).
 	\vspace{0.2cm}
-	\item Use LP to estimate the abundance of the paths in $\mathcal{B}$ to minimize the estimation error.
+	\item Use LP to compute $a(P)$ for $P\in\mathcal{P}$ so as to minimize the estimation error.
 	\vspace{0.2cm}
 	\item Reduce the number of paths in $\mathcal{P}$:
 		\begin{itemize}
@@ -20,7 +20,7 @@
 
 \frame
 {
-	\frametitle{Bad Example for Greedy Algorithm}
+	\frametitle{Example for Greedy Algorithm}
 
 	\vspace{0.2cm}
 	\input{figures/greedy3.tex}
@@ -60,12 +60,12 @@
 	\vspace{0.2cm}
 	\item Compute a set of paths $\mathcal{P}'$~(paths in $\mathcal{P}'$ may contain backward edges) following the max-flow algorithm.
 	\vspace{0.2cm}
-	\item {\bf For} each $p\in\mathcal{P}'$ in its original order:
+	\item {\bf For} each $P\in\mathcal{P}'$ in its original order:
 		\begin{enumerate}
 		\vspace{0.1cm}
-		\item {\bf If} $p$ does not contain backward edges, let $\mathcal{P} = \mathcal{P}\cup\{p\}$;
+		\item {\bf If} $P$ does not contain backward edges, let $\mathcal{P} = \mathcal{P}\cup\{P\}$;
 		\vspace{0.1cm}
-		\item {\bf else} resolve $p$ using $\mathcal{P}$ and put all resulting paths into $\mathcal{P}$.
+		\item {\bf else} resolve $P$ using $\mathcal{P}$ and put all resulting paths into $\mathcal{P}$.
 		\vspace{0.1cm}
 		\item {\bf If} $\mathcal{P}$ becomes a basis, or $|\mathcal{P}| \ge C$, {\bf break}.
 		\end{enumerate}
@@ -74,7 +74,25 @@
 	\end{enumerate}
 }
 
-
+\frame
+{
+	\frametitle{Our Method---Framework}
+	\begin{enumerate}
+	\item Initialize a set of paths $\mathcal{P}$~(in polynomial size).
+	\vspace{0.2cm}
+	\item Use LP to compute $a(P)$ for $P\in\mathcal{P}$ so as to minimize the estimation error.
+	\vspace{0.2cm}
+	\item Reduce the number of paths in $\mathcal{P}$:
+		\begin{itemize}
+		\vspace{0.1cm}
+		\item For two paths with (almost) identical abundance, try to merge them into one path;
+		\vspace{0.1cm}
+		\item Discard paths with very small abundance.
+		\end{itemize}
+	\vspace{0.2cm}
+	\item Iterate between step 2 and step 3.
+	\end{enumerate}
+}
 
 \frame
 {
@@ -82,12 +100,24 @@
 
 	\vspace{0.1cm}
 	\input{figures/merge.tex}
-	\vspace{3.0cm}
+	\vspace{2.6cm}
 
-	\onslide<4->{If we have $a(P_1) = a(P_2)$~($a(P_1) \approx a(P_2)$ in practice) for $P_1, P_2\in\mathcal{P}$,
-			and we also have that $P_1'\in\mathcal{P}$~(resp.\ $P_2'\in\mathcal{P}$),
-	then we can remove $P_1$ and $P_2$ from $\mathcal{P}$, add $P_2'$~(resp.\ $P_1'$) into $\mathcal{P}$,
-	and also double the abundance of $P_1'$~(resp.\ $P_2'$). In this case, the size
-	of $|\mathcal{P}|$ has reduced by one.}
-	
+	\onslide<4->{
+	\begin{displaymath}
+	\mathcal{P} = \left\{
+		\begin{array}{rccl}
+		P_1: & a(P_1) & = & p\\
+		P_2: & a(P_2) & = & p\\
+		P_1': & a(P_1') & = &q\\
+		\cdots &&&
+		\end{array}
+	\right. \Longrightarrow
+	\mathcal{P'} = \left\{
+		\begin{array}{rccl}
+		P_1': & a(P_1') & = &q + p\\
+		P_2': & a(P_2') & = &p\\
+		\cdots &&&
+		\end{array}
+	\right.
+	\end{displaymath}}
 }

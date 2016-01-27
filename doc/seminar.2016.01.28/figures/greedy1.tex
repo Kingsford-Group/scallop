@@ -3,15 +3,15 @@
 \begin{tikzpicture}[font=\small,overlay,
 mycirclex/.style={draw, circle, minimum size=1.0em, inner sep = 0.2mm}, 
 mydiamond/.style={draw, diamond, minimum size=0.78em, inner sep = 0mm}, 
-myrectang/.style={draw, rectangle, minimum size=0.60em, inner sep = 0mm}, 
+myrectang/.style={rounded corners, draw, rectangle, minimum size=0.60em, inner sep = 0.8mm, line width = 0.03cm}, 
 >=stealth]
 
 \input{colors}
 
-\def\len{1.5cm}
+\def\len{1.6cm}
 
 % G1
-\begin{scope}[local bounding box=bbox, xshift=-6cm]
+\begin{scope}[local bounding box=bbox, xshift=-6.4cm]
 \path<2-> node[mycirclex] (v1) at (1.0 * \len, 0) {$s$};
 \path<2-> node[mycirclex] (v2) at (2.0 * \len, 0) {$a$};
 \path<2-> node[mycirclex] (v3) at (3.0 * \len, 0) {$b$};
@@ -23,6 +23,7 @@ myrectang/.style={draw, rectangle, minimum size=0.60em, inner sep = 0mm},
 \path<3-> [draw, \cola, ->, line width=0.09cm] (v3) -- (v4);
 \path<3-> [draw, \cola, ->, line width=0.09cm] (v4) -- (v5);
 \path<3-> [draw, \cola, ->, line width=0.09cm] (v5) -- (v6);
+\path<3-> node[myrectang, rounded corners, \cola] at (6.8 * \len, 0) {$a(P_1) = 4$};
 
 \path<2-> [draw, \colx, ->, line width=0.04cm] (v1) -- (v2);
 \path<2-> [draw, \colx, ->, line width=0.04cm] (v2) -- (v3);
@@ -55,13 +56,18 @@ myrectang/.style={draw, rectangle, minimum size=0.60em, inner sep = 0mm},
 
 
 % G2
-\begin{scope}[local bounding box=bbox, xshift=-6cm, yshift = -2.6cm]
+\begin{scope}[local bounding box=bbox, xshift=-6.4cm, yshift = -2.6cm]
 \path<4-> node[mycirclex] (v1) at (1.0 * \len, 0) {$s$};
 \path<4-> node[mycirclex] (v2) at (2.0 * \len, 0) {$a$};
 \path<4-> node[mycirclex] (v3) at (3.0 * \len, 0) {$b$};
 \path<4-> node[mycirclex] (v4) at (4.0 * \len, 0) {$c$};
 \path<4-> node[mycirclex] (v5) at (5.0 * \len, 0) {$d$};
 \path<4-> node[mycirclex] (v6) at (6.0 * \len, 0) {$t$};
+
+\path<5-> [draw, \colb, ->, line width=0.09cm] (v1) -- (v2);
+\path<5-> [draw, \colb, ->, line width=0.09cm, bend left =-27] (v2) to (v5);
+\path<5-> [draw, \colb, ->, line width=0.09cm] (v5) -- (v6);
+\path<5-> node[myrectang, rounded corners, \colb] at (6.8 * \len, 0) {$a(P_2) = 3$};
 
 \path<4-> [draw, \colx, ->, line width=0.04cm] (v1) -- (v2);
 \path<4-> [draw, \colx, ->, line width=0.04cm] (v2) -- (v3);
