@@ -5,6 +5,7 @@ scallop_LDFLAGS = -L$(HTSLIB) -L$(GUROBI_HOME)/lib -pthread
 scallop_LDADD = -lhts -lz -lgurobi_c++ -lgurobi
 
 scallop_SOURCES = main.cc \
+				  dgraph.h dgraph.cc \
 				  scallop.h scallop.cc \
 				  bundle.h bundle.cc \
 				  config.h config.cc \
@@ -14,7 +15,6 @@ scallop_SOURCES = main.cc \
 				  bridge.h bridge.cc \
 				  sgraph.h sgraph.cc \
 				  bbase.h bbase.cc \
-				  dgraph.h dgraph.cc \
 				  imap.h imap.cc \
 				  binomial.h binomial.cc \
 				  draw.h draw.cc \

@@ -1,6 +1,8 @@
 #include "sgraph.h"
 #include "draw.h"
 
+#include <iomanip>
+
 sgraph::sgraph(const bbase &b)
 	:bundle(b)
 {}
@@ -19,7 +21,15 @@ int sgraph::solve()
 int sgraph::build_graph()
 {
 	// vertices: start, each region, end
-	for(int i = 0; i < regions.size() + 2; i++) add_vertex(gr);
+	add_vertex(gr);
+	put(get(vertex_weight, gr), 0, 0);
+	for(int i = 0; i < regions.size(); i++)
+	{
+		add_vertex(gr);
+		put(get(vertex_weight, gr), i + 1, regions[i].ave_abd);
+	}
+	add_vertex(gr);
+	put(get(vertex_weight, gr), regions.size() + 1, 0);
 
 	// edges: connecting adjacent regions => e2w
 	for(int i = 0; i < regions.size() - 1; i++)
@@ -40,22 +50,19 @@ int sgraph::build_graph()
 
 		PEB p = add_edge(i + 1, i + 2, gr);
 		assert(p.second == true);
-		assert(e2w.find(p.first) == e2w.end());
-		e2w.insert(PED(p.first, w));
+		put(get(edge_weight, gr), p.first, w);
 	}
 
-	// edges: each bridge => e2b and e2w
+	// edges: each bridge => and e2w
 	for(int i = 0; i < bridges.size(); i++)
 	{
 		bridge &b = bridges[i];
 		PEB p = add_edge(b.lrgn + 1, b.rrgn + 1, gr);
 		assert(p.second == true);
+		put(get(edge_weight, gr), p.first, b.count);
 
-		assert(e2b.find(p.first) == e2b.end());
-		e2b.insert(PEI(p.first, i));
-
-		assert(e2w.find(p.first) == e2w.end());
-		e2w.insert(PED(p.first, b.count));
+		//assert(e2b.find(p.first) == e2b.end());
+		//e2b.insert(PEI(p.first, i));
 	}
 
 	// edges: connecting start/end and regions
@@ -72,8 +79,7 @@ int sgraph::build_graph()
 		{
 			PEB p = add_edge(ss, i + 1, gr);
 			assert(p.second == true);
-			assert(e2w.find(p.first) == e2w.end());
-			e2w.insert(PED(p.first, r.ave_abd));
+			put(get(edge_weight, gr), p.first, r.ave_abd);
 		}
 
 		// TODO
@@ -82,8 +88,7 @@ int sgraph::build_graph()
 		{
 			PEB p = add_edge(i + 1, tt, gr);
 			assert(p.second == true);
-			assert(e2w.find(p.first) == e2w.end());
-			e2w.insert(PED(p.first, r.ave_abd));
+			put(get(edge_weight, gr), p.first, r.ave_abd);
 		}
 	}
 
@@ -98,7 +103,7 @@ PEB sgraph::get_max_in_edge(int x)
 	p.second = false;
 	for(tie(it1, it2) = in_edges(x, gr); it1 != it2; it1++)
 	{
-		double w = e2w[*it1];
+		double w =get(get(edge_weight, gr), *it1);
 		if(w > max)
 		{
 			p.first = *it1;
@@ -117,7 +122,7 @@ PEB sgraph::get_max_out_edge(int x)
 	p.second = false;
 	for(tie(it1, it2) = out_edges(x, gr); it1 != it2; it1++)
 	{
-		double w = e2w[*it1];
+		double w = get(get(edge_weight, gr), *it1);
 		if(w > max)
 		{
 			p.first = *it1;
@@ -218,7 +223,9 @@ int sgraph::draw(const string &file)
 		sprintf(sx, "s%d", i);
 		double px = v[i] * len;
 		double py = 0.0;
-		fout<<"\\node[mycircle, \\colx, draw] ("<<sx<<") at ("<<px<<", "<<py<<") {"<<i<<"};\n";
+		fout.precision(1);
+		fout<<fixed;
+		fout<<"\\node[mycircle, \\colx, draw, label = below:{"<< get(get(vertex_weight, gr), i) << "}] ("<<sx<<") at ("<<px<<", "<<py<<") {"<<i<<"};\n";
 	}
 
 	// draw edges
@@ -235,11 +242,11 @@ int sgraph::draw(const string &file)
 		sprintf(sy, "s%d", t);
 		assert(s < t);
 		
-		double bend = 30;
+		double bend = -40;
 		if(v[s] + 1 == v[t]) bend = 0;
-		else if(v[s] % 2 == 0) bend = -30;
+		//else if(v[s] % 2 == 0) bend = -30;
 
-		fout<<"\\draw[line width = 0.05cm, ->, \\colx, bend right = "<< bend <<"] ("<<sx<<") to ("<<sy<<");\n";
+		fout<<"\\draw[line width = 0.02cm, ->, \\colx, bend right = "<< bend <<"] ("<<sx<<") to node {"<< get(get(edge_weight, gr), *it1) <<"} ("<<sy<<");\n";
 	}
 
 	draw_footer(fout);

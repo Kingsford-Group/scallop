@@ -13,8 +13,6 @@ public:
 
 public:
 	dgraph gr;						// splice graph
-	MEI e2b;						// edge-descriptor to bridge index
-	MED e2w;						// edge-descriptor to weight
 
 public:
 	int solve();
