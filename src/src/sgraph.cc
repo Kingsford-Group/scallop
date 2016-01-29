@@ -13,7 +13,6 @@ int sgraph::solve()
 	build_graph();
 	check();
 	//print(0);
-	build_in_out_edges();
 	return 0;
 }
 
@@ -88,42 +87,6 @@ int sgraph::build_graph()
 		}
 	}
 
-	return 0;
-}
-
-int sgraph::build_in_out_edges()
-{
-	iv.resize(regions.size() + 2, -1);
-	ov.resize(regions.size() + 2, -1);
-
-	for(int i = 0; i < regions.size(); i++)
-	{
-		region &r = regions[i];
-		if(r.empty) continue;
-
-		PEB pi = get_max_in_edge(i + 1);
-		PEB po = get_max_out_edge(i + 1);
-
-		assert(pi.second);
-		assert(po.second);
-
-		iv[i + 1] = source(pi.first, gr);
-		ov[i + 1] = target(po.first, gr);
-	}
-	return 0;
-}
-
-int sgraph::build_basis()
-{
-	basis.clear();
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = edges(gr); it1 != it2; it1++)
-	{
-		int s = source(*it1, gr);
-		int t = source(*it2, gr);
-		if(ov[s] == t) continue;
-		basis.push_back(*it1);
-	}
 	return 0;
 }
 
@@ -276,23 +239,7 @@ int sgraph::draw(const string &file)
 		if(v[s] + 1 == v[t]) bend = 0;
 		else if(v[s] % 2 == 0) bend = -30;
 
-		if(ov[s] == t && iv[t] == s)
-		{
-			fout<<"\\draw[line width = 0.10cm, ->, \\cola, bend right = "<< bend <<"] ("<<sx<<") to ("<<sy<<");\n";
-			fout<<"\\draw[line width = 0.04cm, ->, \\colb, bend right = "<< bend <<"] ("<<sx<<") to ("<<sy<<");\n";
-		}
-		else if(ov[s] == t)
-		{
-			fout<<"\\draw[line width = 0.05cm, ->, \\cola, bend right = "<< bend <<"] ("<<sx<<") to ("<<sy<<");\n";
-		}
-		else if(iv[t] == s)
-		{
-			fout<<"\\draw[line width = 0.05cm, ->, \\colb, bend right = "<< bend <<"] ("<<sx<<") to ("<<sy<<");\n";
-		}
-		else
-		{
-			fout<<"\\draw[line width = 0.05cm, ->, \\colx, bend right = "<< bend <<"] ("<<sx<<") to ("<<sy<<");\n";
-		}
+		fout<<"\\draw[line width = 0.05cm, ->, \\colx, bend right = "<< bend <<"] ("<<sx<<") to ("<<sy<<");\n";
 	}
 
 	draw_footer(fout);
@@ -300,4 +247,3 @@ int sgraph::draw(const string &file)
 	fout.close();
 	return 0;
 }
-
