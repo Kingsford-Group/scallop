@@ -8,8 +8,15 @@ using namespace std;
 class path
 {
 public:
+	path();
+	~path();
+
+public:
 	vector<int> v;
 	double abd;
+
+public:
+	int print(int index);
 };
 
 #endif

@@ -2,6 +2,7 @@
 #include "draw.h"
 
 #include <iomanip>
+#include <cfloat>
 
 sgraph::sgraph(const bbase &b)
 	:bundle(b)
@@ -14,7 +15,7 @@ int sgraph::solve()
 {
 	build_graph();
 	check();
-	//print(0);
+	build_paths();
 	return 0;
 }
 
@@ -91,6 +92,66 @@ int sgraph::build_graph()
 			put(get(edge_weight, gr), p.first, r.ave_abd);
 		}
 	}
+
+	return 0;
+}
+
+int sgraph::build_paths()
+{
+	path p;
+	compute_maximum_path(p);
+	paths.push_back(p);
+	return 0;
+}
+
+int sgraph::compute_maximum_path(path &p)
+{
+	// TODO: use the weight on vertices right now
+	vector<double> table;		// dynamic programming table
+	vector<int> back;			// back pointers
+	table.resize(num_vertices(gr), 0);
+	back.resize(num_vertices(gr), -1);
+	table[0] = DBL_MAX;
+	int n = num_vertices(gr);
+	for(int i = 1; i < n; i++)
+	{
+		double abd = get(get(vertex_weight, gr), i);
+		if(i == n - 1) abd = DBL_MAX;
+
+		double max_abd = 0;
+		int max_idx = -1;
+		in_edge_iterator it1, it2;
+		for(tie(it1, it2) = in_edges(i, gr); it1 != it2; it1++)
+		{
+			int s = source(*it1, gr);
+			int t = target(*it1, gr);
+			assert(t == i);
+			assert(s < i);
+			if(table[s] >= max_abd)
+			{
+				max_abd = table[s];
+				max_idx = s;
+			}
+		}
+
+		back[i] = max_idx;
+		table[i] = max_abd < abd ? max_abd : abd;
+	}
+
+	if(table[n - 1] <= 0) return 0;
+
+	p.abd = table[n - 1];
+	p.v.clear();
+
+	int b = n - 1;
+	while(true)
+	{
+		p.v.push_back(b);
+		if(b == 0) break;
+		b = back[b];
+		assert(b != -1);
+	}
+	reverse(p.v.begin(), p.v.end());
 
 	return 0;
 }
@@ -181,6 +242,12 @@ int sgraph::print(int index)
 	for(int i = 0; i < regions.size(); i++)
 	{
 		regions[i].print(i);
+	}
+
+	// print paths
+	for(int i = 0; i < paths.size(); i++)
+	{
+		paths[i].print(i);
 	}
 
 	printf("\n");
