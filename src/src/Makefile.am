@@ -18,4 +18,5 @@ scallop_SOURCES = main.cc \
 				  imap.h imap.cc \
 				  binomial.h binomial.cc \
 				  draw.h draw.cc \
-				  lpsolver.h lpsolver.cc
+				  lpsolver.h lpsolver.cc \
+				  path.h path.cc
