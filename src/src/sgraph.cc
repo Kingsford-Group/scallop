@@ -49,7 +49,13 @@ int sgraph::build_graph()
 		if(y.ltype == LEFT_BOUNDARY) continue;
 		*/
 
-		double w = x.ave_abd < y.ave_abd ? x.ave_abd : y.ave_abd;
+		assert(x.rpos == y.lpos);
+
+		int32_t xr = compute_overlap(imap, x.rpos - 1);
+		int32_t yl = compute_overlap(imap, y.lpos);
+
+		double w = xr < yl ? xr : yl;
+		//double w = x.ave_abd < y.ave_abd ? x.ave_abd : y.ave_abd;
 
 		PEB p = add_edge(i + 1, i + 2, gr);
 		assert(p.second == true);

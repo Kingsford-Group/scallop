@@ -44,9 +44,10 @@ private:
 
 	// build regions
 	int build_regions();
-
 	// store the corresponding regions in each bridge
 	int link_regions();
+	// run create_split on the boundaries of all regions
+	int split_region_boundaries();
 };
 
 #endif

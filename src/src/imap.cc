@@ -1,64 +1,98 @@
 #include "imap.h"
 
+int create_split(imap_t &imap, int32_t p)
+{
+	ICI it = imap.find(p);
+	if(it == imap.end()) return 0;
+	int32_t l = lower(it->first);
+	int32_t r = upper(it->first);
+	int32_t w = it->second;
+	assert(l <= p);
+	assert(r >= p);
+	if(l == p || r == p) return 0;
+	imap -= make_pair(ROI(l, r), w);
+	imap += make_pair(ROI(l, p), w);
+	imap += make_pair(ROI(p, r), w);
+	return 0;
+}
+
 int compute_overlap(const imap_t &imap, int32_t p)
 {
-	imap_t::const_iterator it = imap.find(p);
+	ICI it = imap.find(p);
 	if(it == imap.end()) return 0;
 	return it->second;
 }
 
-int cumulate_overlap(const imap_t &imap, int32_t x, int32_t y, int32_t t)
+ICI locate_right_iterator(const imap_t &imap, int32_t x)
 {
-	int s = 0;
-	for(int k = x; k < y; k+=t)
-	{
-		s += compute_overlap(imap, k);
-	}
-	return s;
+	return imap.upper_bound(ROI(x - 1, x));
 }
 
-int maximum_overlap(const imap_t &imap, int32_t x, int32_t y, int32_t t)
+ICI locate_left_iterator(const imap_t &imap, int32_t x)
 {
-	int s = 0;
-	for(int k = x; k < y; k+=t)
+	ICI it = imap.lower_bound(ROI(x - 1, x));
+	if(it == imap.end() && it == imap.begin()) return it;
+	if(it == imap.end()) it--;
+
+	while(upper(it->first) > x)
 	{
-		int z = compute_overlap(imap, k);
-		if(z > s) s = z;
+		if(it == imap.begin()) return imap.end();
+		it--;
 	}
-	return s;
+	return it;
 }
 
-int32_t compute_coverage(const imap_t &imap, int32_t x, int32_t y)
+PICI locate_boundary_iterators(const imap_t &imap, int32_t x, int32_t y)
 {
-	assert(x < y);
+	ICI lit, rit;
+	lit = locate_right_iterator(imap, x);
+	if(lit == imap.end() || upper(lit->first) > y) lit = imap.end();
 
-	ROI rx(x, x + 1);
-	ROI ry(y - 1, y);
+	rit = locate_left_iterator(imap, y);
+	if(rit == imap.end() || lower(rit->first) < x) rit = imap.end();
 
-	imap_t::const_iterator xi = imap.upper_bound(ROI(x - 1, x));
+	if(lit == imap.end()) assert(rit == imap.end());
+	if(rit == imap.end() && lit != imap.end()) 
+	{
+		printf("x = %d, y = %d, lit = [%d, %d)\n", x, y, lower(lit->first), upper(lit->first));
+		assert(lit == imap.end());
+	}
 
-	if(xi == imap.end()) return 0;
+	return PICI(lit, rit); 
+}
+
+int32_t compute_coverage(const imap_t &imap, ICI &p, ICI &q)
+{
+	if(p == imap.end()) return 0;
 
 	int32_t s = 0;
-	while(upper(xi->first) <= y)
+	for(ICI it = p; it != q; it++)
 	{
-		//printf(" current = [%d, %d), y = %d\n", lower(xi->first), upper(xi->first), y);
-		s += upper(xi->first) - lower(xi->first);
-		xi++;
-		if(xi == imap.end()) break;
+		s += upper(it->first) - lower(it->first);
 	}
+
+	if(q != imap.end()) s += upper(q->first) - lower(q->first);
+
 	return s;
 }
 
 int test_imap()
 {
 	imap_t imap;
+	/*
+	imap += make_pair(ROI(1, 2), 3);
+	imap += make_pair(ROI(2, 3), 3);
+	imap += make_pair(ROI(3, 4), 3);
+	*/
+
 	imap += make_pair(ROI(6, 7), 3);
 	imap += make_pair(ROI(1, 3), 3);
 	imap += make_pair(ROI(1, 2), 1);
 	imap += make_pair(ROI(2, 5), 2);
 
-	imap_t::const_iterator it;
+	create_split(imap, 4);
+
+	ICI it;
 	
 	for(it = imap.begin(); it != imap.end(); it++)
 	{
@@ -106,11 +140,12 @@ int test_imap()
 		}
 	}
 
-	for(int i = 1; i <= 7; i++)
+	for(int i = 0; i <= 8; i++)
 	{
-		for(int j = i + 1; j <= 7; j++)
+		for(int j = i; j <= 8; j++)
 		{
-			int s = compute_coverage(imap, i, j);
+			pair<ICI, ICI> p = locate_boundary_iterators(imap, i, j);
+			int s = compute_coverage(imap, p.first, p.second);
 			printf("coverage [%d,%d) = %d\n", i, j, s);
 		}
 	}

@@ -24,6 +24,7 @@ bundle::bundle(const bbase &bb)
 
 	build_regions();
 	link_regions();
+	split_region_boundaries();
 }
 
 bundle::~bundle()
@@ -322,3 +323,14 @@ int bundle::link_regions()
 	}
 	return 0;
 }
+
+int bundle::split_region_boundaries()
+{
+	for(int i = 0; i < regions.size(); i++)
+	{
+		create_split(imap, regions[i].lpos);
+		create_split(imap, regions[i].rpos);
+	}
+	return 0;
+}
+
