@@ -14,10 +14,12 @@ int compute_overlap(const imap_t &imap, int32_t p);
 
 // return the sum of overlap in [p,q)
 int cumulate_overlap(const imap_t &imap, int32_t p, int32_t q, int32_t t);
+
 // return the max of overlap in [p,q)
 int maximum_overlap(const imap_t &imap, int32_t p, int32_t q, int32_t t);
-// return the number of positions with positive overlap in [p,q)
-int compute_coverage(const imap_t &imap, int32_t p, int32_t q, int32_t t);
+
+// return the sum of the lengths of intervals inside [p, q)
+int compute_coverage(const imap_t &imap, int32_t p, int32_t q);
 
 
 // testing

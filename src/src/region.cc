@@ -66,15 +66,8 @@ int region::check_empty()
 	}
 	*/
 
-	int n = (rpos - lpos < num_sample_positions) ? (rpos - lpos) : num_sample_positions;
-	int t = (rpos - lpos) / n;
-	int r = (rpos - lpos) / t;
-
-	int x = compute_coverage(*imap, lpos, rpos, t);
-	if(1.0 * x / r >= min_region_coverage) return 0;
-
-	int s = maximum_overlap(*imap, lpos, rpos, t);
-	if(s >= min_max_region_overlap) return 0;
+	int32_t s = compute_coverage(*imap, lpos, rpos);
+	if(1.0 * s / (rpos - lpos) >= min_region_coverage) return 0;
 
 	empty = true;
 	return 0;

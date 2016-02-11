@@ -21,6 +21,9 @@ public:
 	int rtype;						// type of the right boundary
 	const imap_t *imap;				// pointer to a interval map
 
+	//imap_t::const_iterator lit;		// left most interval, imap.end() if not valid
+	//imap_t::const_iterator rit;		// right most interval, imap.end() if not valid
+
 	bool empty;						// whether this region is completely spliced
 	int32_t asc_pos;				// ascending position, inclusive
 	int32_t desc_pos;				// descending position, exclusive

@@ -40,6 +40,8 @@ int sgraph::build_graph()
 
 		if(x.empty || y.empty) continue;
 
+		assert(x.rpos == y.lpos);
+
 		/*
 		if(x.right_break()) continue;
 		if(y.left_break()) continue;

@@ -5,10 +5,15 @@
 #include "scallop.h"
 #include "config.h"
 
+#include "imap.h"
+
 using namespace std;
 
 int main(int argc, char **argv)
 {
+	//test_imap();
+	//return 0;
+
 	if(argc != 3) return 0;
 
 	load_config(argv[1]);
