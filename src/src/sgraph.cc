@@ -24,9 +24,11 @@ int sgraph::build(const bundle &bd)
 	{
 		add_vertex(gr);
 		put(get(vertex_weight, gr), i + 1, bd.regions[i].ave_abd);
+		put(get(vertex_stddev, gr), i + 1, bd.regions[i].dev_abd);
 	}
 	add_vertex(gr);
 	put(get(vertex_weight, gr), bd.regions.size() + 1, 0);
+	put(get(vertex_stddev, gr), bd.regions.size() + 1, 0);
 
 	// edges: connecting adjacent regions => e2w
 	for(int i = 0; i < bd.regions.size() - 1; i++)
@@ -44,20 +46,28 @@ int sgraph::build(const bundle &bd)
 		assert(x.rpos == y.lpos);
 		int32_t xr = compute_overlap(bd.imap, x.rpos - 1);
 		int32_t yl = compute_overlap(bd.imap, y.lpos);
-		double w = xr < yl ? xr : yl;
+		double wt = xr < yl ? xr : yl;
+		double sd = 0.5 * x.dev_abd + 0.5 * y.dev_abd;
 
 		PEB p = add_edge(i + 1, i + 2, gr);
 		assert(p.second == true);
-		put(get(edge_weight, gr), p.first, w);
+		put(get(edge_weight, gr), p.first, wt);
+		put(get(edge_stddev, gr), p.first, sd);
 	}
 
 	// edges: each bridge => and e2w
 	for(int i = 0; i < bd.bridges.size(); i++)
 	{
 		const bridge &b = bd.bridges[i];
+		const region &x = bd.regions[b.lrgn];
+		const region &y = bd.regions[b.rrgn];
+
+		double sd = 0.5 * x.dev_abd + 0.5 * y.dev_abd;
+
 		PEB p = add_edge(b.lrgn + 1, b.rrgn + 1, gr);
 		assert(p.second == true);
 		put(get(edge_weight, gr), p.first, b.count);
+		put(get(edge_stddev, gr), p.first, sd);
 
 		//assert(e2b.find(p.first) == e2b.end());
 		//e2b.insert(PEI(p.first, i));
@@ -78,6 +88,7 @@ int sgraph::build(const bundle &bd)
 			PEB p = add_edge(ss, i + 1, gr);
 			assert(p.second == true);
 			put(get(edge_weight, gr), p.first, r.ave_abd);
+			put(get(edge_stddev, gr), p.first, r.dev_abd);
 		}
 
 		// TODO
@@ -87,6 +98,7 @@ int sgraph::build(const bundle &bd)
 			PEB p = add_edge(i + 1, tt, gr);
 			assert(p.second == true);
 			put(get(edge_weight, gr), p.first, r.ave_abd);
+			put(get(edge_stddev, gr), p.first, r.dev_abd);
 		}
 	}
 
@@ -217,7 +229,7 @@ int sgraph::draw(const string &file)
 
 	draw_header(fout);
 
-	double len = 1.5;
+	double len = 1.8;
 	fout<<"\\def\\len{"<<len<<"cm}\n";
 
 	// draw vertices
@@ -226,11 +238,11 @@ int sgraph::draw(const string &file)
 	for(int i = 0; i < num_vertices(gr); i++)
 	{
 		sprintf(sx, "s%d", i);
-		double px = i * len;
-		double py = 0.0;
-		fout.precision(1);
+		fout.precision(0);
 		fout<<fixed;
-		fout<<"\\node[mycircle, \\colx, draw, label = below:{"<< get(get(vertex_weight, gr), i) << "}] ("<<sx<<") at ("<<px<<", "<<py<<") {"<<i<<"};\n";
+		fout<<"\\node[mycircle, \\colx, draw, label = below:{";
+		fout<< get(get(vertex_weight, gr), i) << "," << get(get(vertex_stddev, gr), i);
+		fout<< "}] ("<<sx<<") at ("<<i<<" *\\len, 0.0) {"<<i<<"};\n";
 	}
 
 	// draw edges
@@ -248,7 +260,9 @@ int sgraph::draw(const string &file)
 		if(s + 1 == t) bend = 0;
 		//else if(v[s] % 2 == 0) bend = -30;
 
-		fout<<"\\draw[line width = 0.02cm, ->, \\colx, bend right = "<< bend <<"] ("<<sx<<") to node {"<< get(get(edge_weight, gr), *it1) <<"} ("<<sy<<");\n";
+		fout<<"\\draw[line width = 0.02cm, ->, \\colx, bend right = "<< bend <<"] ("<<sx<<") to node {";
+		fout<< get(get(edge_weight, gr), *it1) <<",";
+		fout<< get(get(edge_stddev, gr), *it1) <<"} ("<<sy<<");\n";
 	}
 
 	draw_footer(fout);
