@@ -12,35 +12,6 @@ region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const imap_
 	estimate_abundance();
 }
 
-/*
-region::region(const region &r)
-	:lpos(r.lpos), rpos(r.rpos), imap(r.imap), ltype(r.ltype), rtype(r.rtype)
-{
-	ave_abd = r.ave_abd;
-	dev_abd = r.dev_abd;
-	empty = r.empty;
-	//lit = r.lit;
-	//rit = r.rit;
-	tie(lit, rit) = locate_boundary_iterators(*imap, lpos, rpos);
-}
-
-region& region::operator=(const region &r)
-{
-	lpos = r.lpos;
-	rpos = r.rpos;
-	imap = r.imap;
-	ltype = r.ltype;
-	rtype = r.rtype;
-	ave_abd = r.ave_abd;
-	dev_abd = r.dev_abd;
-	lit = r.lit;
-	rit = r.rit;
-	empty = r.empty;
-	//tie(lit, rit) = locate_boundary_iterators(*imap, lpos, rpos);
-	return *this;
-}
-*/
-
 region::~region()
 {}
 

@@ -10,8 +10,6 @@ class region
 {
 public:
 	region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const imap_t *_imap);
-	//region(const region &r);
-	//region& operator=(const region &r);
 	~region();
 
 public:
