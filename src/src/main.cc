@@ -5,14 +5,14 @@
 #include "scallop.h"
 #include "config.h"
 
-#include "imap.h"
+#include "fheap.h"
 
 using namespace std;
 
 int main(int argc, char **argv)
 {
-	//test_imap();
-	//return 0;
+	test_fheap();
+	return 0;
 
 	if(argc != 3) return 0;
 

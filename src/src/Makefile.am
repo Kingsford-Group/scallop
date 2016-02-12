@@ -19,4 +19,5 @@ scallop_SOURCES = main.cc \
 				  binomial.h binomial.cc \
 				  draw.h draw.cc \
 				  lpsolver.h lpsolver.cc \
-				  path.h path.cc
+				  path.h path.cc \
+				  fheap.h fheap.cc
