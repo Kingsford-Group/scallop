@@ -6,10 +6,10 @@
 #include "path.h"
 
 // class for splice graph
-class sgraph: public bundle
+class sgraph
 {
 public:
-	sgraph(const bbase &bb);
+	sgraph();
 	virtual ~sgraph();
 
 public:
@@ -18,10 +18,8 @@ public:
 	vector<path> paths;				// transcripts
 
 public:
+	int build(const bundle &bd);
 	int solve();
-	int build_graph();
-	int check();
-	int print(int index);
 	int draw(const string &file);
 
 	int build_paths();

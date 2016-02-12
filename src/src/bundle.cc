@@ -334,3 +334,36 @@ int bundle::split_region_boundaries()
 	return 0;
 }
 
+int bundle::print(int index)
+{
+	printf("Bundle %d: ", index);
+	printf("tid = %d, #hits = %lu, range = %s:%d-%d\n", tid, hits.size(), chrm.c_str(), lpos, rpos);
+	// print hits
+	/*
+	for(int i = 0; i < hits.size(); i++)
+	{
+		hits[i].print();
+	}
+	*/
+
+	// print bridges 
+	for(int i = 0; i < bridges.size(); i++)
+	{
+		bridges[i].print(i);
+	}
+
+	// print boundaries
+	for(int i = 0; i < boundaries.size(); i++)
+	{
+		boundaries[i].print(i);
+	}
+
+	// print regions
+	for(int i = 0; i < regions.size(); i++)
+	{
+		regions[i].print(i);
+	}
+
+	printf("\n");
+	return 0;
+}

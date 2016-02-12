@@ -15,16 +15,6 @@ region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const imap_
 region::~region()
 {}
 
-int region::print(int index)
-{
-	char em = empty ? 'T' : 'F';
-	char cl = left_break() ? 'T' : 'F';
-	char cr = right_break() ? 'T' : 'F';
-	printf("region %d: [%d-%d), type = (%d, %d), empty = %c, break = (%c, %c), core = [%d-%d), ave-abd = %.1lf, std-abd = %.1lf\n",
-			index, lpos, rpos, ltype, rtype, em, cl, cr, lcore, rcore, ave_abd, dev_abd);
-	return 0;
-}
-
 int region::estimate_abundance()
 {
 	ICI lit, rit;
@@ -71,7 +61,7 @@ int region::estimate_abundance()
 	return 0;
 }
 
-bool region::left_break()
+bool region::left_break() const
 {
 	if(ltype == RIGHT_SPLICE) return false;
 	if(empty == true) return true;
@@ -79,10 +69,22 @@ bool region::left_break()
 	else return false;
 }
 
-bool region::right_break()
+bool region::right_break() const
 {
 	if(rtype == LEFT_SPLICE) return false;
 	if(empty == true) return true;
 	if(rcore < rpos - 9) return true;
 	else return false;
 }
+
+int region::print(int index) const
+{
+	char em = empty ? 'T' : 'F';
+	char cl = left_break() ? 'T' : 'F';
+	char cr = right_break() ? 'T' : 'F';
+	printf("region %d: [%d-%d), type = (%d, %d), empty = %c, break = (%c, %c), core = [%d-%d), ave-abd = %.1lf, std-abd = %.1lf\n",
+			index, lpos, rpos, ltype, rtype, em, cl, cr, lcore, rcore, ave_abd, dev_abd);
+	return 0;
+}
+
+

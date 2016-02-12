@@ -1,7 +1,7 @@
 #include "lpsolver.h"
 
-lpsolver::lpsolver(const bbase &bb)
-	: sgraph(bb)
+lpsolver::lpsolver(const dgraph &g)
+	: gr(g)
 {
 	env = new GRBEnv();
 	model = new GRBModel(*env);

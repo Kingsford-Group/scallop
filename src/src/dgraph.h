@@ -16,11 +16,17 @@ using namespace boost;
 
 namespace boost {
 	enum vertex_weight_t { vertex_weight };
+	enum vertex_stddev_t { vertex_stddev };
+	enum edge_stddev_t { edge_stddev };
+	//enum edge_weight_t { edge_weight };
 	BOOST_INSTALL_PROPERTY(vertex, weight);
+	BOOST_INSTALL_PROPERTY(vertex, stddev);
+	BOOST_INSTALL_PROPERTY(edge, stddev);
+	//BOOST_INSTALL_PROPERTY(edge, weight);
 }
 
-typedef property<vertex_weight_t, double> vertex_properties;
-typedef property<edge_weight_t, double> edge_properties;
+typedef property< vertex_stddev_t, double, property<vertex_weight_t, double> > vertex_properties;
+typedef property< edge_stddev_t, double, property<edge_weight_t, double> > edge_properties;
 typedef adjacency_list<vecS, vecS, bidirectionalS, vertex_properties, edge_properties> dgraph;
 
 typedef graph_traits<dgraph>::vertex_iterator vertex_iterator;
@@ -41,7 +47,6 @@ using namespace std;
 //typedef map<edge_descriptor, double> MED;
 //typedef map<edge_descriptor, int> MEI;
 //typedef map<edge_descriptor, bool> MEB;
-//
 //typedef pair<edge_descriptor, int> PEI;
 //typedef pair<edge_descriptor, double> PED;
 typedef pair<edge_descriptor, bool> PEB;

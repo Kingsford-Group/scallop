@@ -3,6 +3,7 @@
 
 #include "config.h"
 #include "scallop.h"
+#include "sgraph.h"
 
 scallop::scallop()
 {
@@ -36,13 +37,13 @@ int scallop::load(const char *bam_file)
 		//if(p.qual <= 4) continue;				// ignore hits with quality-score < 5
 		if(bb.get_num_hits() > 0 && (bb.get_rpos() + min_bundle_gap < p.pos || p.tid != bb.get_tid()))
 		{
-			sgraph sg(bb);
-			sgraphs.push_back(sg);
+			bundle bd(bb);
+			bundles.push_back(bb);
 
 			bb.clear();
 
 			// DEBUG
-			if(sgraphs.size() >= 10) break;
+			if(bundles.size() >= 10) break;
 		}
 		bb.add_hit(h, b);
     }
@@ -56,12 +57,13 @@ int scallop::load(const char *bam_file)
 
 int scallop::solve()
 {
-	for(int i = 0; i < sgraphs.size(); i++)
+	for(int i = 0; i < bundles.size(); i++)
 	{
-		sgraph &sg = sgraphs[i];
-		sg.solve();
+		bundles[i].print(i);
 
-		sg.print(i);
+		sgraph sg;
+		sg.build(bundles[i]);
+		sg.solve();
 
 		char s[1024];
 		sprintf(s, "sgraph%d.tex", i);

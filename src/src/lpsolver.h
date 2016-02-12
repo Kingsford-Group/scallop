@@ -2,17 +2,22 @@
 #define __LPSOLVER_H__
 
 #include "gurobi_c++.h"
-#include "sgraph.h"
+#include "dgraph.h"
 
-class lpsolver : public sgraph
+class lpsolver
 {
 public:
-	lpsolver(const bbase &bb);
+	lpsolver(const dgraph &g);
 	virtual ~lpsolver();
 
 public:
-	// members for ILP
-	vector<GRBVar> vars;					// gene variables
+	const dgraph &gr;			// splice graph
+
+	vector<GRBVar> vnwt;		// new weights for nodes
+	vector<GRBVar> enwt;		// new weights for 
+	vector<GRBVar> verr;		// error for nodes
+	vector<GRBVar> eerr;		// error for edges
+
 	GRBModel * model;
 	GRBEnv * env;
 

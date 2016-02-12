@@ -15,11 +15,14 @@ public:
 	bundle(const bbase &bb);
 	virtual ~bundle();
 
-protected:
+public:
 	imap_t imap;					// interval map
 	vector<bridge> bridges;			// splice bridges
 	vector<boundary> boundaries;	// all types of boundaries
 	vector<region> regions;			// regions
+
+public:
+	int print(int index);
 
 private:
 	// check whether hits are sorted

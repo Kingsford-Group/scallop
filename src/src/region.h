@@ -29,9 +29,9 @@ public:
 
 public:
 	int estimate_abundance();
-	bool left_break();
-	bool right_break();
-	int print(int index);
+	bool left_break() const;
+	bool right_break() const;
+	int print(int index) const;
 };
 
 #endif
