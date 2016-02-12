@@ -45,10 +45,10 @@ typedef graph_traits<dgraph>::edge_descriptor edge_descriptor;
 using namespace std;
 
 //typedef map<edge_descriptor, double> MED;
-//typedef map<edge_descriptor, int> MEI;
 //typedef map<edge_descriptor, bool> MEB;
-//typedef pair<edge_descriptor, int> PEI;
 //typedef pair<edge_descriptor, double> PED;
 typedef pair<edge_descriptor, bool> PEB;
+typedef map<edge_descriptor, int> MEI;
+typedef pair<edge_descriptor, int> PEI;
 
 #endif

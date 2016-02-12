@@ -1,5 +1,6 @@
 #include "sgraph.h"
 #include "draw.h"
+#include "lpsolver.h"
 
 #include <iomanip>
 #include <cfloat>
@@ -12,6 +13,7 @@ sgraph::~sgraph()
 
 int sgraph::solve()
 {
+	update_weights();
 	return 0;
 }
 
@@ -20,15 +22,24 @@ int sgraph::build(const bundle &bd)
 	// vertices: start, each region, end
 	add_vertex(gr);
 	put(get(vertex_weight, gr), 0, 0);
+	put(get(vertex_stddev, gr), 0, 1);
 	for(int i = 0; i < bd.regions.size(); i++)
 	{
+		const region &r = bd.regions[i];
+		double ave = 0;
+		double dev = 1;
+		if(r.empty == false)
+		{
+			ave = r.ave_abd;
+			dev = r.dev_abd / sqrt(r.rcore - r.lcore);
+		}
 		add_vertex(gr);
-		put(get(vertex_weight, gr), i + 1, bd.regions[i].ave_abd);
-		put(get(vertex_stddev, gr), i + 1, bd.regions[i].dev_abd);
+		put(get(vertex_weight, gr), i + 1, ave);
+		put(get(vertex_stddev, gr), i + 1, dev);
 	}
 	add_vertex(gr);
 	put(get(vertex_weight, gr), bd.regions.size() + 1, 0);
-	put(get(vertex_stddev, gr), bd.regions.size() + 1, 0);
+	put(get(vertex_stddev, gr), bd.regions.size() + 1, 1);
 
 	// edges: connecting adjacent regions => e2w
 	for(int i = 0; i < bd.regions.size() - 1; i++)
@@ -40,8 +51,9 @@ int sgraph::build(const bundle &bd)
 
 		if(x.right_break()) continue;
 		if(y.left_break()) continue;
-		if(x.rtype == RIGHT_BOUNDARY) continue;
-		if(y.ltype == LEFT_BOUNDARY) continue;
+
+		//if(x.rtype == RIGHT_BOUNDARY) continue;
+		//if(y.ltype == LEFT_BOUNDARY) continue;
 
 		assert(x.rpos == y.lpos);
 		int32_t xr = compute_overlap(bd.imap, x.rpos - 1);
@@ -119,6 +131,13 @@ int sgraph::build(const bundle &bd)
 	return 0;
 }
 
+int sgraph::update_weights()
+{
+	lpsolver lp(gr);
+	lp.solve();
+	return 0;
+}
+
 int sgraph::build_paths()
 {
 	path p;
@@ -187,7 +206,7 @@ PEB sgraph::get_max_in_edge(int x)
 	p.second = false;
 	for(tie(it1, it2) = in_edges(x, gr); it1 != it2; it1++)
 	{
-		double w =get(get(edge_weight, gr), *it1);
+		double w = get(get(edge_weight, gr), *it1);
 		if(w > max)
 		{
 			p.first = *it1;
@@ -229,7 +248,7 @@ int sgraph::draw(const string &file)
 
 	draw_header(fout);
 
-	double len = 1.8;
+	double len = 2.4;
 	fout<<"\\def\\len{"<<len<<"cm}\n";
 
 	// draw vertices
@@ -238,7 +257,7 @@ int sgraph::draw(const string &file)
 	for(int i = 0; i < num_vertices(gr); i++)
 	{
 		sprintf(sx, "s%d", i);
-		fout.precision(0);
+		fout.precision(1);
 		fout<<fixed;
 		fout<<"\\node[mycircle, \\colx, draw, label = below:{";
 		fout<< get(get(vertex_weight, gr), i) << "," << get(get(vertex_stddev, gr), i);

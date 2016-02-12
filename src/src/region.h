@@ -28,6 +28,7 @@ public:
 	double dev_abd;					// standard-deviation of abundance
 
 public:
+	int check_empty();
 	int estimate_abundance();
 	bool left_break() const;
 	bool right_break() const;

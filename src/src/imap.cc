@@ -61,6 +61,36 @@ PICI locate_boundary_iterators(const imap_t &imap, int32_t x, int32_t y)
 	return PICI(lit, rit); 
 }
 
+int32_t compute_max_overlap(const imap_t &imap, ICI &p, ICI &q)
+{
+	if(p == imap.end()) return 0;
+
+	int32_t s = 0;
+	for(ICI it = p; it != q; it++)
+	{
+		int32_t x = it->second;
+		if(x > s) s = x;
+	}
+
+	if(q != imap.end())
+	{
+		int32_t x = q->second;
+		if(x > s) s = x;
+	}
+
+	return s;
+}
+
+int32_t compute_sum_overlap(const imap_t &imap, ICI &p, ICI &q)
+{
+	if(p == imap.end()) return 0;
+
+	int32_t s = 0;
+	for(ICI it = p; it != q; it++) s += it->second;
+	if(q != imap.end()) s += q->second;
+	return s;
+}
+
 int32_t compute_coverage(const imap_t &imap, ICI &p, ICI &q)
 {
 	if(p == imap.end()) return 0;

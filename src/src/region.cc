@@ -6,16 +6,18 @@ region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const imap_
 	:lpos(_lpos), rpos(_rpos), imap(_imap), ltype(_ltype), rtype(_rtype)
 {
 	ave_abd = 0;
-	dev_abd = 0;
+	dev_abd = 1;
 	lcore = lpos;
 	rcore = rpos;
+
+	check_empty();
 	estimate_abundance();
 }
 
 region::~region()
 {}
 
-int region::estimate_abundance()
+int region::check_empty()
 {
 	ICI lit, rit;
 	tie(lit, rit) = locate_boundary_iterators(*imap, lpos, rpos);
@@ -23,31 +25,36 @@ int region::estimate_abundance()
 	if(lit == imap->end() || rit == imap->end())
 	{
 		empty = true;
+		return 0;
 	}
-	else
+
+	lcore = lower(lit->first);
+	rcore = upper(rit->first);
+	assert(rcore > lcore);
+
+	if(ltype == RIGHT_SPLICE || rtype == LEFT_SPLICE) 
 	{
-		lcore = lower(lit->first);
-		rcore = upper(rit->first);
-		int32_t s = compute_coverage(*imap, lit, rit);
-		if(1.0 * s / (rpos - lpos) < min_region_coverage) empty = true;
-		else empty = false;
+		empty = false;
+		return 0;
 	}
 
-	if(ltype == RIGHT_SPLICE || rtype == LEFT_SPLICE) empty = false;
+	empty = true;
+	int32_t m = compute_max_overlap(*imap, lit, rit);
+	int32_t s = compute_sum_overlap(*imap, lit, rit);
+	if(m > min_max_region_overlap) empty = false;
+	if(1.0 * s / (rcore - lcore) > min_average_overlap) empty = false;
 
-	// estimate abundance
+	return 0;
+}
+
+int region::estimate_abundance()
+{
 	if(empty == true) return 0;
 
-	int sum = 0;
-	for(ICI it = lit; ; it++)
-	{
-		assert(upper(it->first) > lower(it->first));
-		sum += it->second * (upper(it->first) - lower(it->first));
-		if(it == rit) break;
-	}
+	ICI lit, rit;
+	tie(lit, rit) = locate_boundary_iterators(*imap, lpos, rpos);
 
-	int len = upper(rit->first) - lower(lit->first);
-	ave_abd = 1.0 * sum / len;
+	ave_abd = 1.0 * compute_sum_overlap(*imap, lit, rit) / (rcore - lcore);
 
 	double var = 0;
 	for(ICI it = lit; ; it++)
@@ -57,7 +64,9 @@ int region::estimate_abundance()
 		if(it == rit) break;
 	}
 
-	dev_abd = sqrt(var / len);
+	dev_abd = sqrt(var / (rcore - lcore));
+	if(dev_abd < 0.1) dev_abd = 0.1;
+
 	return 0;
 }
 
@@ -86,5 +95,3 @@ int region::print(int index) const
 			index, lpos, rpos, ltype, rtype, em, cl, cr, lcore, rcore, ave_abd, dev_abd);
 	return 0;
 }
-
-

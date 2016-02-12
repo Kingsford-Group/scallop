@@ -18,9 +18,12 @@ public:
 	vector<path> paths;				// transcripts
 
 public:
-	int build(const bundle &bd);
 	int solve();
+	int build(const bundle &bd);
 	int draw(const string &file);
+
+private:
+	int update_weights();
 
 	int build_paths();
 	int compute_maximum_path(path &p);

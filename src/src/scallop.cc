@@ -59,15 +59,19 @@ int scallop::solve()
 {
 	for(int i = 0; i < bundles.size(); i++)
 	{
+		char sa[1024];
+		char sb[1024];
+		sprintf(sa, "sgraph%da.tex", i);
+		sprintf(sb, "sgraph%db.tex", i);
+
 		bundles[i].print(i);
 
 		sgraph sg;
 		sg.build(bundles[i]);
-		sg.solve();
+		sg.draw(sa);
 
-		char s[1024];
-		sprintf(s, "sgraph%d.tex", i);
-		sg.draw(s);
+		sg.solve();
+		sg.draw(sb);
 	}
 	return 0;
 }

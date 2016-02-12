@@ -30,6 +30,12 @@ PICI locate_boundary_iterators(const imap_t &imap, int32_t x, int32_t y);
 // return the sum of the lengths of intervals from p to q (include q)
 int compute_coverage(const imap_t &imap, ICI &p, ICI &q);
 
+// return the maximum overlap of the intervals from p to q (include q)
+int compute_max_overlap(const imap_t &imap, ICI &p, ICI &q);
+
+// return the sum of the overlap of the intervals from p to q (include q)
+int compute_sum_overlap(const imap_t &imap, ICI &p, ICI &q);
+
 
 // testing
 int test_imap();
