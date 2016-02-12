@@ -10,8 +10,8 @@ class region
 {
 public:
 	region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const imap_t *_imap);
-	region(const region &r);
-	region& operator=(const region &r);
+	//region(const region &r);
+	//region& operator=(const region &r);
 	~region();
 
 public:
@@ -21,16 +21,15 @@ public:
 	int rtype;						// type of the right boundary
 
 	const imap_t *imap;				// pointer to a interval map
-	ICI lit;						// left most interval, imap.end() if not valid
-	ICI rit;						// right most interval, imap.end() if not valid
 
+	int32_t lcore;					// left core position
+	int32_t rcore;					// right core position
 	bool empty;						// whether this region is completely spliced
 
 	double ave_abd;					// average abundance
 	double dev_abd;					// standard-deviation of abundance
 
 public:
-	int check_empty();
 	int estimate_abundance();
 	bool left_break();
 	bool right_break();

@@ -7,24 +7,21 @@ region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const imap_
 {
 	ave_abd = 0;
 	dev_abd = 0;
-
-	lit = imap->end();
-	rit = imap->end();
-
-	tie(lit, rit) = locate_boundary_iterators(*imap, lpos, rpos);
-
-	check_empty();
+	lcore = lpos;
+	rcore = rpos;
 	estimate_abundance();
 }
 
+/*
 region::region(const region &r)
 	:lpos(r.lpos), rpos(r.rpos), imap(r.imap), ltype(r.ltype), rtype(r.rtype)
 {
 	ave_abd = r.ave_abd;
 	dev_abd = r.dev_abd;
 	empty = r.empty;
-	lit = r.lit;
-	rit = r.rit;
+	//lit = r.lit;
+	//rit = r.rit;
+	tie(lit, rit) = locate_boundary_iterators(*imap, lpos, rpos);
 }
 
 region& region::operator=(const region &r)
@@ -34,10 +31,15 @@ region& region::operator=(const region &r)
 	imap = r.imap;
 	ltype = r.ltype;
 	rtype = r.rtype;
+	ave_abd = r.ave_abd;
+	dev_abd = r.dev_abd;
 	lit = r.lit;
 	rit = r.rit;
+	empty = r.empty;
+	//tie(lit, rit) = locate_boundary_iterators(*imap, lpos, rpos);
 	return *this;
 }
+*/
 
 region::~region()
 {}
@@ -47,38 +49,33 @@ int region::print(int index)
 	char em = empty ? 'T' : 'F';
 	char cl = left_break() ? 'T' : 'F';
 	char cr = right_break() ? 'T' : 'F';
-	printf("region %d: [%d-%d), type = (%d, %d), empty = %c, break = (%c, %c), ave-abd = %.1lf, std-abd = %.1lf\n",
-			index, lpos, rpos, ltype, rtype, em, cl, cr, ave_abd, dev_abd);
+	printf("region %d: [%d-%d), type = (%d, %d), empty = %c, break = (%c, %c), core = [%d-%d), ave-abd = %.1lf, std-abd = %.1lf\n",
+			index, lpos, rpos, ltype, rtype, em, cl, cr, lcore, rcore, ave_abd, dev_abd);
 	return 0;
 }
 
-int region::check_empty()
+int region::estimate_abundance()
 {
-	if(ltype == RIGHT_SPLICE || rtype == LEFT_SPLICE)
-	{
-		empty = false;
-		return 0;
-	}
+	ICI lit, rit;
+	tie(lit, rit) = locate_boundary_iterators(*imap, lpos, rpos);
 
 	if(lit == imap->end() || rit == imap->end())
 	{
 		empty = true;
-		return 0;
+	}
+	else
+	{
+		lcore = lower(lit->first);
+		rcore = upper(rit->first);
+		int32_t s = compute_coverage(*imap, lit, rit);
+		if(1.0 * s / (rpos - lpos) < min_region_coverage) empty = true;
+		else empty = false;
 	}
 
-	int32_t s = compute_coverage(*imap, lit, rit);
+	if(ltype == RIGHT_SPLICE || rtype == LEFT_SPLICE) empty = false;
 
-	if(1.0 * s / (rpos - lpos) >= min_region_coverage) empty = false;
-	else empty = true;
-
-	return 0;
-}
-
-
-int region::estimate_abundance()
-{
+	// estimate abundance
 	if(empty == true) return 0;
-	if(lit == imap->end() || rit == imap->end()) return 0;
 
 	int sum = 0;
 	for(ICI it = lit; ; it++)
@@ -100,7 +97,6 @@ int region::estimate_abundance()
 	}
 
 	dev_abd = sqrt(var / len);
-
 	return 0;
 }
 
@@ -108,8 +104,7 @@ bool region::left_break()
 {
 	if(ltype == RIGHT_SPLICE) return false;
 	if(empty == true) return true;
-	assert(lit != imap->end());
-	if(lower(lit->first) > lpos) return true;
+	if(lcore > lpos + 9) return true;
 	else return false;
 }
 
@@ -117,6 +112,6 @@ bool region::right_break()
 {
 	if(rtype == LEFT_SPLICE) return false;
 	if(empty == true) return true;
-	if(upper(rit->first) < rpos) return true;
-	else false;
+	if(rcore < rpos - 9) return true;
+	else return false;
 }

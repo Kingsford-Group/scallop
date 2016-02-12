@@ -40,17 +40,12 @@ int sgraph::build_graph()
 
 		if(x.empty || y.empty) continue;
 
-		assert(x.rpos == y.lpos);
-
-		/*
 		if(x.right_break()) continue;
 		if(y.left_break()) continue;
 		if(x.rtype == RIGHT_BOUNDARY) continue;
 		if(y.ltype == LEFT_BOUNDARY) continue;
-		*/
 
 		assert(x.rpos == y.lpos);
-
 		int32_t xr = compute_overlap(imap, x.rpos - 1);
 		int32_t yl = compute_overlap(imap, y.lpos);
 
@@ -83,8 +78,8 @@ int sgraph::build_graph()
 		if(r.empty == true) continue;
 
 		// TODO
-		//if(r.left_break() || r.ltype == LEFT_BOUNDARY || r.ltype == START_BOUNDARY)
-		if(r.ltype == LEFT_BOUNDARY || r.ltype == START_BOUNDARY)
+		//if(r.ltype == LEFT_BOUNDARY || r.ltype == START_BOUNDARY)
+		if(r.left_break() || r.ltype == LEFT_BOUNDARY || r.ltype == START_BOUNDARY)
 		{
 			PEB p = add_edge(ss, i + 1, gr);
 			assert(p.second == true);
@@ -92,8 +87,8 @@ int sgraph::build_graph()
 		}
 
 		// TODO
-		//if(r.right_break() || r.rtype == RIGHT_BOUNDARY || r.rtype == END_BOUNDARY) 
-		if(r.rtype == RIGHT_BOUNDARY || r.rtype == END_BOUNDARY) 
+		//if(r.rtype == RIGHT_BOUNDARY || r.rtype == END_BOUNDARY) 
+		if(r.right_break() || r.rtype == RIGHT_BOUNDARY || r.rtype == END_BOUNDARY) 
 		{
 			PEB p = add_edge(i + 1, tt, gr);
 			assert(p.second == true);
