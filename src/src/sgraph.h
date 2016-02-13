@@ -14,23 +14,21 @@ public:
 
 public:
 	dgraph gr;						// splice graph
-
 	vector<path> paths;				// transcripts
 
 public:
 	int solve();
 	int build(const bundle &bd);
 	int draw(const string &file);
+	int print();
 
 private:
 	int update_weights();
 
 	int build_paths();
-	int compute_maximum_path_dag(path &p);
+	int compute_maximum_forward_path(path &p);
 	int compute_maximum_path(path &p);
-
-	PEB get_max_in_edge(int x);
-	PEB get_max_out_edge(int x);
+	int subtract_path(const path &p);
 };
 
 #endif

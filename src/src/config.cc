@@ -25,6 +25,7 @@ int num_sample_positions;
 double min_average_overlap;
 int min_max_region_overlap;
 double min_region_coverage;
+int max_num_bundles;
 
 int load_config(const char * conf_file)
 {
@@ -111,6 +112,10 @@ int load_config(const char * conf_file)
 		else if(strcmp(key, "min_region_coverage")==0)
 		{
 			min_region_coverage = (double)atof(value);
+		}
+		else if(strcmp(key, "max_num_bundles")==0)
+		{
+			max_num_bundles = (int)atoi(value);
 		}
 	}
 

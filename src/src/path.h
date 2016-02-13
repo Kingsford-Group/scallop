@@ -17,6 +17,7 @@ public:
 
 public:
 	int print(int index);
+	int clear();
 };
 
 #endif

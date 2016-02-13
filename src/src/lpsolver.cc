@@ -27,7 +27,10 @@ int lpsolver::solve()
 
 	add_conservation_constraints();
 
+	model->getEnv().set(GRB_IntParam_OutputFlag, 0);
+
 	model->optimize();
+
 	update();
 
 	return 0;

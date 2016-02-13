@@ -15,6 +15,8 @@ sgraph::~sgraph()
 int sgraph::solve()
 {
 	update_weights();
+	build_paths();
+	print();
 	return 0;
 }
 
@@ -139,14 +141,20 @@ int sgraph::update_weights()
 int sgraph::build_paths()
 {
 	path p;
-	compute_maximum_path(p);
-	paths.push_back(p);
+	while(true)
+	{
+		p.clear();
+		compute_maximum_forward_path(p);
+		subtract_path(p);
+		p.print(0);
+		paths.push_back(p);
+		if(p.abd < 1) break;
+	}
 	return 0;
 }
 
-int sgraph::compute_maximum_path_dag(path &p)
+int sgraph::compute_maximum_forward_path(path &p)
 {
-	// TODO: use the weight on vertices right now
 	vector<double> table;		// dynamic programming table
 	vector<int> back;			// back pointers
 	table.resize(num_vertices(gr), 0);
@@ -167,9 +175,12 @@ int sgraph::compute_maximum_path_dag(path &p)
 			int t = target(*it1, gr);
 			assert(t == i);
 			assert(s < i);
-			if(table[s] >= max_abd)
+			//if(s >= i) continue;
+			double xw = get(get(edge_weight, gr), *it1);
+			double ww = xw < table[s] ? xw : table[s];
+			if(ww >= max_abd)
 			{
-				max_abd = table[s];
+				max_abd = ww;
 				max_idx = s;
 			}
 		}
@@ -202,20 +213,26 @@ int sgraph::compute_maximum_path(path &p)
 	vector<handle_t> handles;		// handles for nodes
 	vector<bool> reached;			// whether each node is reached
 	vector<bool> visited;			// whether each node is visited
+	vector<int> backptr;			// backward pointers
+
 	handles.resize(num_vertices(gr));
 	reached.resize(num_vertices(gr), false);
 	visited.resize(num_vertices(gr), false);
+	backptr.resize(num_vertices(gr), -1);
 
 	handle_t h = f.push(fnode(0, DBL_MAX));
 	handles[0] = h;
 	reached[0] = true;
+	backptr[0] = -1;
 
 	while(f.empty() == false)
 	{
 		fnode fx = f.top();
 		visited[fx.v] = true;
-		f.pop();
+
+		if(fx.v == num_vertices(gr) - 1) break;
 		
+		f.pop();
 		out_edge_iterator it1, it2;
 		for(tie(it1, it2) = out_edges(fx.v, gr); it1 != it2; it1++)
 		{
@@ -226,59 +243,56 @@ int sgraph::compute_maximum_path(path &p)
 			double ww = xw < fx.w ? xw : fx.w;
 			if(reached[y] == false) 
 			{
-				h = f.push(fnode(y, xw));
+				//printf("create (%d, %.2lf) from (%d, %.2lf) -> %.2lf\n", y, ww, fx.v, fx.w, xw);
+				h = f.push(fnode(y, ww));
 				handles[y] = h;
 				reached[y] = true;
+				backptr[y] = fx.v;
 			}
 			else
 			{
 				double yw = (*handles[y]).w;
-				if(ww > yw) f.increase(handles[y], fnode(y, ww));
+				if(ww > yw) 
+				{
+					//printf("update (%d, %.2lf) from (%d, %.2lf) -> %.2lf\n", y, ww, fx.v, fx.w, xw);
+					f.increase(handles[y], fnode(y, ww));
+					backptr[y] = fx.v;
+				}
 			}
 		}
 	}
 
+	if(f.empty() == true) return 0;
+
+	p.abd = f.top().w;
+	p.v.clear();
+	int b = num_vertices(gr) - 1;
+	while(true)
+	{
+		p.v.push_back(b);
+		if(b == 0) break;
+		b = backptr[b];
+		assert(b != -1);
+	}
+	reverse(p.v.begin(), p.v.end());
+
 	return 0;
 }
 
-PEB sgraph::get_max_in_edge(int x)
+int sgraph::subtract_path(const path &p)
 {
-	in_edge_iterator it1, it2;
-	double max = -1;
-	PEB p;
-	p.second = false;
-	for(tie(it1, it2) = in_edges(x, gr); it1 != it2; it1++)
+	if(p.v.size() <= 2) return 0;
+	for(int i = 0; i < p.v.size() - 1; i++)
 	{
-		double w = get(get(edge_weight, gr), *it1);
-		if(w > max)
-		{
-			p.first = *it1;
-			p.second = true;
-			max = w;
-		}
+		PEB e = edge(p.v[i], p.v[i + 1], gr);
+		assert(e.second == true);
+		double w0 = get(get(edge_weight, gr), e.first);
+		double w1 = w0 - p.abd;
+		assert(w1 >= 0);
+		put(get(edge_weight, gr), e.first, w1);
 	}
-	return p;
+	return 0;
 }
-
-PEB sgraph::get_max_out_edge(int x)
-{
-	out_edge_iterator it1, it2;
-	double max = -1;
-	PEB p;
-	p.second = false;
-	for(tie(it1, it2) = out_edges(x, gr); it1 != it2; it1++)
-	{
-		double w = get(get(edge_weight, gr), *it1);
-		if(w > max)
-		{
-			p.first = *it1;
-			p.second = true;
-			max = w;
-		}
-	}
-	return p;
-}
-
 
 int sgraph::draw(const string &file)
 {
@@ -330,5 +344,15 @@ int sgraph::draw(const string &file)
 	draw_footer(fout);
 
 	fout.close();
+	return 0;
+}
+
+int sgraph::print()
+{
+	// print paths
+	for(int i = 0; i < paths.size(); i++)
+	{
+		paths[i].print(i);
+	}
 	return 0;
 }

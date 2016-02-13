@@ -8,6 +8,13 @@ path::path()
 	abd = 0;
 }
 
+int path::clear()
+{
+	v.clear();
+	abd = 0;
+	return 0;
+}
+	
 path::~path()
 {}
 
