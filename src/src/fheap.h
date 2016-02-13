@@ -4,9 +4,16 @@
 #include "boost/heap/fibonacci_heap.hpp"
 
 using namespace boost;
-using namespace std;
 
-typedef heap::fibonacci_heap<double, heap::compare<std::greater<double> > > fheap;
+struct fnode
+{
+	fnode(int _v, double _w) : v(_v), w(_w) {}
+	bool operator<(const fnode & x) const { return w < x.w; }
+	int v;
+	double w;
+};
+
+typedef heap::fibonacci_heap<fnode> fheap;
 typedef fheap::handle_type handle_t;
 
 int test_fheap();

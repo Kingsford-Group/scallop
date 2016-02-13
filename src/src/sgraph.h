@@ -26,6 +26,7 @@ private:
 	int update_weights();
 
 	int build_paths();
+	int compute_maximum_path_dag(path &p);
 	int compute_maximum_path(path &p);
 
 	PEB get_max_in_edge(int x);

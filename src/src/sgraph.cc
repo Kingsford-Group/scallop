@@ -1,6 +1,7 @@
 #include "sgraph.h"
 #include "draw.h"
 #include "lpsolver.h"
+#include "fheap.h"
 
 #include <iomanip>
 #include <cfloat>
@@ -80,9 +81,6 @@ int sgraph::build(const bundle &bd)
 		assert(p.second == true);
 		put(get(edge_weight, gr), p.first, b.count);
 		put(get(edge_stddev, gr), p.first, sd);
-
-		//assert(e2b.find(p.first) == e2b.end());
-		//e2b.insert(PEI(p.first, i));
 	}
 
 	// edges: connecting start/end and regions
@@ -146,7 +144,7 @@ int sgraph::build_paths()
 	return 0;
 }
 
-int sgraph::compute_maximum_path(path &p)
+int sgraph::compute_maximum_path_dag(path &p)
 {
 	// TODO: use the weight on vertices right now
 	vector<double> table;		// dynamic programming table
@@ -194,6 +192,51 @@ int sgraph::compute_maximum_path(path &p)
 		assert(b != -1);
 	}
 	reverse(p.v.begin(), p.v.end());
+
+	return 0;
+}
+
+int sgraph::compute_maximum_path(path &p)
+{
+	fheap f;						// fibonacci heap
+	vector<handle_t> handles;		// handles for nodes
+	vector<bool> reached;			// whether each node is reached
+	vector<bool> visited;			// whether each node is visited
+	handles.resize(num_vertices(gr));
+	reached.resize(num_vertices(gr), false);
+	visited.resize(num_vertices(gr), false);
+
+	handle_t h = f.push(fnode(0, DBL_MAX));
+	handles[0] = h;
+	reached[0] = true;
+
+	while(f.empty() == false)
+	{
+		fnode fx = f.top();
+		visited[fx.v] = true;
+		f.pop();
+		
+		out_edge_iterator it1, it2;
+		for(tie(it1, it2) = out_edges(fx.v, gr); it1 != it2; it1++)
+		{
+			int y = target(*it1, gr);
+			if(visited[y] == true) continue;
+
+			double xw = get(get(edge_weight, gr), *it1);
+			double ww = xw < fx.w ? xw : fx.w;
+			if(reached[y] == false) 
+			{
+				h = f.push(fnode(y, xw));
+				handles[y] = h;
+				reached[y] = true;
+			}
+			else
+			{
+				double yw = (*handles[y]).w;
+				if(ww > yw) f.increase(handles[y], fnode(y, ww));
+			}
+		}
+	}
 
 	return 0;
 }
