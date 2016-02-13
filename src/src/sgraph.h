@@ -14,7 +14,8 @@ public:
 
 public:
 	dgraph gr;						// splice graph
-	vector<path> paths;				// transcripts
+	vector<path> paths0;			// paths from greedy algorithm
+	vector<path> paths1;			// paths from our algorithm
 
 public:
 	int solve();
@@ -24,11 +25,17 @@ public:
 
 private:
 	int update_weights();
+	int backup_edge_weights(MED &med);
+	int recover_edge_weights(const MED &med);
 
-	int build_paths();
 	int compute_maximum_forward_path(path &p);
 	int compute_maximum_path(path &p);
-	int subtract_path(const path &p);
+	int reduce_path(const path &p);
+	int add_backward_path(const path &p);
+	int remove_backward_path(const path &p);
+
+	int greedy();
+	int iterate();
 };
 
 #endif

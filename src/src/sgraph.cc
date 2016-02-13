@@ -15,7 +15,7 @@ sgraph::~sgraph()
 int sgraph::solve()
 {
 	update_weights();
-	build_paths();
+	greedy();
 	print();
 	return 0;
 }
@@ -120,11 +120,7 @@ int sgraph::build(const bundle &bd)
 	{
 		const region &r = bd.regions[i];
 		if(r.empty == false) continue;
-
-		if(in_degree(i + 1, gr) != 0) printf("problem at region %d\n", i);
 		assert(in_degree(i + 1, gr) == 0);
-
-		if(out_degree(i + 1, gr) != 0) printf("problem at region %d\n", i);
 		assert(out_degree(i + 1, gr) == 0);
 	}
 
@@ -138,18 +134,41 @@ int sgraph::update_weights()
 	return 0;
 }
 
-int sgraph::build_paths()
+int sgraph::greedy()
 {
-	path p;
+	MED med;
+	backup_edge_weights(med);
 	while(true)
 	{
-		p.clear();
+		path p;
 		compute_maximum_forward_path(p);
-		subtract_path(p);
-		p.print(0);
-		paths.push_back(p);
+		reduce_path(p);
+		if(p.v.size() <= 1) break;
+		paths0.push_back(p);
 		if(p.abd < 1) break;
 	}
+	recover_edge_weights(med);
+	return 0;
+}
+
+int sgraph::iterate()
+{
+	MED med;
+	backup_edge_weights(med);
+	while(true)
+	{
+		path p0;
+		compute_maximum_forward_path(p0);
+		
+		vector<path> pv;
+		pv.resize(paths1.size());
+		for(int k = 0; k < paths1.size(); k++)
+		{
+			add_backward_path(paths1[k]);
+			compute_maximum_path(pv[k]);
+		}
+	}
+	recover_edge_weights(med);
 	return 0;
 }
 
@@ -243,7 +262,6 @@ int sgraph::compute_maximum_path(path &p)
 			double ww = xw < fx.w ? xw : fx.w;
 			if(reached[y] == false) 
 			{
-				//printf("create (%d, %.2lf) from (%d, %.2lf) -> %.2lf\n", y, ww, fx.v, fx.w, xw);
 				h = f.push(fnode(y, ww));
 				handles[y] = h;
 				reached[y] = true;
@@ -254,7 +272,6 @@ int sgraph::compute_maximum_path(path &p)
 				double yw = (*handles[y]).w;
 				if(ww > yw) 
 				{
-					//printf("update (%d, %.2lf) from (%d, %.2lf) -> %.2lf\n", y, ww, fx.v, fx.w, xw);
 					f.increase(handles[y], fnode(y, ww));
 					backptr[y] = fx.v;
 				}
@@ -279,9 +296,9 @@ int sgraph::compute_maximum_path(path &p)
 	return 0;
 }
 
-int sgraph::subtract_path(const path &p)
+int sgraph::reduce_path(const path &p)
 {
-	if(p.v.size() <= 2) return 0;
+	if(p.v.size() < 2) return 0;
 	for(int i = 0; i < p.v.size() - 1; i++)
 	{
 		PEB e = edge(p.v[i], p.v[i + 1], gr);
@@ -291,6 +308,70 @@ int sgraph::subtract_path(const path &p)
 		assert(w1 >= 0);
 		put(get(edge_weight, gr), e.first, w1);
 	}
+	return 0;
+}
+
+int sgraph::add_backward_path(const path &p)
+{
+	if(p.v.size() < 2) return 0;
+	for(int i = 0; i < p.v.size() - 1; i++)
+	{
+		PEB e = add_edge(p.v[i + 1], p.v[i], gr);
+		assert(e.second == true);
+		put(get(edge_weight, gr), e.first, p.abd);
+	}
+	return 0;
+}
+
+int sgraph::remove_backward_path(const path &p)
+{
+	if(p.v.size() < 2) return 0;
+	for(int i = 0; i < p.v.size() - 1; i++)
+	{
+		remove_edge(p.v[i + 1], p.v[i], gr);
+	}
+	return 0;
+}
+
+int sgraph::backup_edge_weights(MED &med)
+{
+	med.clear();
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = edges(gr); it1 != it2; it1++)
+	{
+		double w = get(get(edge_weight, gr), *it1);
+		med.insert(PED(*it1, w));
+	}
+	return 0;
+}
+
+int sgraph::recover_edge_weights(const MED &med)
+{
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = edges(gr); it1 != it2; it1++)
+	{
+		MED::const_iterator it = med.find(*it1);
+		put(get(edge_weight, gr), *it1, it->second);
+	}
+	return 0;
+}
+
+int sgraph::print()
+{
+	// print paths0
+	for(int i = 0; i < paths0.size(); i++)
+	{
+		printf("greedy  ");
+		paths0[i].print(i);
+	}
+
+	// print paths1
+	for(int i = 0; i < paths1.size(); i++)
+	{
+		printf("iterate ");
+		paths1[i].print(i);
+	}
+
 	return 0;
 }
 
@@ -347,12 +428,3 @@ int sgraph::draw(const string &file)
 	return 0;
 }
 
-int sgraph::print()
-{
-	// print paths
-	for(int i = 0; i < paths.size(); i++)
-	{
-		paths[i].print(i);
-	}
-	return 0;
-}
