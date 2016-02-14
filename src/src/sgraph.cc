@@ -21,6 +21,52 @@ int sgraph::solve()
 	return 0;
 }
 
+int sgraph::load(const string &file)
+{
+	ifstream fin(file.c_str());
+	if(fin.fail()) 
+	{
+		printf("open file %s error\n", file.c_str());
+		return 0;
+	}
+
+	char line[10240];
+	// get the number of vertices
+	fin.getline(line, 10240, '\n');	
+	int n = atoi(line);
+
+	for(int i = 0; i < n; i++)
+	{
+		double weight, stddev;
+		fin.getline(line, 10240, '\n');	
+		stringstream sstr(line);
+		sstr>>weight>>stddev;
+
+		add_vertex(gr);
+		put(get(vertex_weight, gr), i, weight);
+		put(get(vertex_stddev, gr), i, stddev);
+	}
+
+	while(fin.getline(line, 10240, '\n'))
+	{
+		int x, y;
+		double weight, stddev;
+		stringstream sstr(line);
+		sstr>>x>>y>>weight>>stddev;
+
+		assert(x != y);
+		assert(x >= 0 && x < num_vertices(gr));
+		assert(y >= 0 && y < num_vertices(gr));
+
+		PEB p = add_edge(x, y, gr);
+		put(get(edge_weight, gr), p.first, weight);
+		put(get(edge_stddev, gr), p.first, stddev);
+	}
+
+	fin.close();
+	return 0;
+}
+
 int sgraph::build(const bundle &bd)
 {
 	// vertices: start, each region, end
@@ -168,28 +214,29 @@ int sgraph::iterate()
 			if(px.abd <= p0.abd) continue;
 			add_backward_path(px);
 			path py = compute_maximum_path();
+			remove_backward_path(px);
 			if(2 * py.abd - p0.abd - px.abd < max_gain) continue; 
 			max_index = k;
 			max_gain = 2 * py.abd - p0.abd - px.abd;
 			resolve(px, py, qx, qy);
-			remove_backward_path(px);
 		}
 
 		if(max_index == -1)
 		{
+			if(p0.v.size() < 2) break;
 			decrease_path(p0);
 			paths1.push_back(p0);
 		}
 		else
 		{
+			printf("MAX GAIN = %.2lf\n", max_gain);
 			increase_path(paths1[max_index]);
 			decrease_path(qx);
 			decrease_path(qy);
 			paths1[max_index] = qx;
 			paths1.push_back(qy);
 		}
-
-		if(p0.abd < 1) break;
+		if(max_gain + p0.abd < 1) break;
 	}
 	recover_edge_weights(med);
 	return 0;
@@ -446,18 +493,24 @@ int sgraph::recover_edge_weights(const MED &med)
 int sgraph::print()
 {
 	// print paths0
+	double w0 = 0.0;
 	for(int i = 0; i < paths0.size(); i++)
 	{
 		printf("greedy  ");
 		paths0[i].print(i);
+		w0 += paths0[i].abd;	
 	}
 
 	// print paths1
+	double w1 = 0.0;
 	for(int i = 0; i < paths1.size(); i++)
 	{
 		printf("iterate ");
 		paths1[i].print(i);
+		w1 += paths1[i].abd;	
 	}
+	printf("greedy  summary: %ld paths, %.2lf total abundance\n", paths0.size(), w0);
+	printf("iterate summary: %ld paths, %.2lf total abundance\n", paths1.size(), w1);
 
 	return 0;
 }

@@ -19,14 +19,13 @@ public:
 
 public:
 	int solve();
+	int load(const string &file);
 	int build(const bundle &bd);
 	int draw(const string &file);
 	int print();
 
 private:
 	int update_weights();
-	int backup_edge_weights(MED &med);
-	int recover_edge_weights(const MED &med);
 
 	int greedy();
 	int iterate();
@@ -38,6 +37,10 @@ private:
 	int add_backward_path(const path &p);
 	int remove_backward_path(const path &p);
 	int resolve(const path &px, const path &py, path &qx, path &qy);
+
+	int backup_edge_weights(MED &med);
+	int recover_edge_weights(const MED &med);
+
 };
 
 #endif

@@ -13,10 +13,36 @@ scallop::~scallop()
 {
 }
 
-int scallop::process(const char *bam_file)
+int scallop::process(const string &file)
 {
-	load(bam_file);
-	solve();
+	string s = file.substr(file.size() - 3, 3);
+	if(s == "bam" || s == "sam")
+	{
+		load(file.c_str());
+		for(int i = 0; i < bundles.size(); i++)
+		{
+			char sa[1024];
+			char sb[1024];
+			sprintf(sa, "sgraph%da.tex", i);
+			sprintf(sb, "sgraph%db.tex", i);
+
+			bundles[i].print(i);
+
+			sgraph sg;
+			sg.build(bundles[i]);
+			sg.draw(sa);
+
+			sg.solve();
+			sg.draw(sb);
+		}
+	}
+	else
+	{
+		sgraph sg;
+		sg.load(file);
+		sg.draw("sgraph.tex");
+		sg.solve();
+	}
 	return 0;
 }
 
@@ -52,23 +78,3 @@ int scallop::load(const char *bam_file)
 	return 0;
 }
 
-int scallop::solve()
-{
-	for(int i = 0; i < bundles.size(); i++)
-	{
-		char sa[1024];
-		char sb[1024];
-		sprintf(sa, "sgraph%da.tex", i);
-		sprintf(sb, "sgraph%db.tex", i);
-
-		bundles[i].print(i);
-
-		sgraph sg;
-		sg.build(bundles[i]);
-		sg.draw(sa);
-
-		sg.solve();
-		sg.draw(sb);
-	}
-	return 0;
-}

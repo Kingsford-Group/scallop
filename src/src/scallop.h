@@ -13,9 +13,8 @@ public:
 	~scallop();
 
 public:
-	int process(const char *bam_file);
+	int process(const string &file);
 	int load(const char *bam_file);
-	int solve();
 };
 
 #endif

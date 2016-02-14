@@ -23,7 +23,7 @@ int path::print(int index) const
 {
 	if(v.size() == 0) return 0;
 	printf("path %d: abundance = %.2lf, vertices = ", index, abd);
-	for(int i = 0; i < v.size(); i++)
+	for(int i = 0; i < v.size() - 1; i++)
 	{
 		printf("%d, ", v[i]);
 	}
