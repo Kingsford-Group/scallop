@@ -28,16 +28,16 @@ private:
 	int backup_edge_weights(MED &med);
 	int recover_edge_weights(const MED &med);
 
-	int compute_maximum_forward_path(path &p);
-	int compute_maximum_path(path &p);
+	int greedy();
+	int iterate();
+
+	path compute_maximum_forward_path();
+	path compute_maximum_path();
 	int decrease_path(const path &p);
 	int increase_path(const path &p);
 	int add_backward_path(const path &p);
 	int remove_backward_path(const path &p);
 	int resolve(const path &px, const path &py, path &qx, path &qy);
-
-	int greedy();
-	int iterate();
 };
 
 #endif

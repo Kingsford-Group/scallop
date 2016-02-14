@@ -16,6 +16,7 @@ int sgraph::solve()
 {
 	update_weights();
 	greedy();
+	iterate();
 	print();
 	return 0;
 }
@@ -140,8 +141,7 @@ int sgraph::greedy()
 	backup_edge_weights(med);
 	while(true)
 	{
-		path p;
-		compute_maximum_forward_path(p);
+		path p = compute_maximum_forward_path();
 		decrease_path(p);
 		if(p.v.size() <= 1) break;
 		paths0.push_back(p);
@@ -157,8 +157,7 @@ int sgraph::iterate()
 	backup_edge_weights(med);
 	while(true)
 	{
-		path p0;
-		compute_maximum_forward_path(p0);
+		path p0 = compute_maximum_forward_path();
 		
 		path qx, qy;
 		double max_gain = 0;
@@ -168,8 +167,7 @@ int sgraph::iterate()
 			path &px = paths1[k];
 			if(px.abd <= p0.abd) continue;
 			add_backward_path(px);
-			path py;
-			compute_maximum_path(py);
+			path py = compute_maximum_path();
 			if(2 * py.abd - p0.abd - px.abd < max_gain) continue; 
 			max_index = k;
 			max_gain = 2 * py.abd - p0.abd - px.abd;
@@ -190,13 +188,16 @@ int sgraph::iterate()
 			paths1[max_index] = qx;
 			paths1.push_back(qy);
 		}
+
+		if(p0.abd < 1) break;
 	}
 	recover_edge_weights(med);
 	return 0;
 }
 
-int sgraph::compute_maximum_forward_path(path &p)
+path sgraph::compute_maximum_forward_path()
 {
+	path p;
 	vector<double> table;		// dynamic programming table
 	vector<int> back;			// back pointers
 	table.resize(num_vertices(gr), 0);
@@ -231,7 +232,7 @@ int sgraph::compute_maximum_forward_path(path &p)
 		table[i] = max_abd < abd ? max_abd : abd;
 	}
 
-	if(table[n - 1] <= 0) return 0;
+	if(table[n - 1] <= 0) return p;
 
 	p.abd = table[n - 1];
 	p.v.clear();
@@ -246,11 +247,12 @@ int sgraph::compute_maximum_forward_path(path &p)
 	}
 	reverse(p.v.begin(), p.v.end());
 
-	return 0;
+	return p;
 }
 
-int sgraph::compute_maximum_path(path &p)
+path sgraph::compute_maximum_path()
 {
+	path p;
 	fheap f;						// fibonacci heap
 	vector<handle_t> handles;		// handles for nodes
 	vector<bool> reached;			// whether each node is reached
@@ -302,7 +304,7 @@ int sgraph::compute_maximum_path(path &p)
 		}
 	}
 
-	if(f.empty() == true) return 0;
+	if(f.empty() == true) return p;
 
 	p.abd = f.top().w;
 	p.v.clear();
@@ -316,7 +318,7 @@ int sgraph::compute_maximum_path(path &p)
 	}
 	reverse(p.v.begin(), p.v.end());
 
-	return 0;
+	return p;
 }
 
 int sgraph::decrease_path(const path &p)
