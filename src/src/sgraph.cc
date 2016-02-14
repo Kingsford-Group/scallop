@@ -205,7 +205,7 @@ int sgraph::iterate()
 	{
 		path p0 = compute_maximum_forward_path();
 		
-		path qx, qy;
+		path max_qx, max_qy;
 		double max_gain = 0;
 		int max_index = -1;
 		for(int k = 0; k < paths1.size(); k++)
@@ -215,10 +215,50 @@ int sgraph::iterate()
 			add_backward_path(px);
 			path py = compute_maximum_path();
 			remove_backward_path(px);
-			if(2 * py.abd - p0.abd - px.abd < max_gain) continue; 
-			max_index = k;
-			max_gain = 2 * py.abd - p0.abd - px.abd;
+			if(2 * py.abd - p0.abd - px.abd < 0) continue; 
+
+			path qx, qy;
 			resolve(px, py, qx, qy);
+
+			double a1 = compute_bottleneck_weight(qx);
+			qx.abd = a1;
+			decrease_path(qx);
+			double a2 = compute_bottleneck_weight(qy);
+			increase_path(qx);
+
+			double b1 = compute_bottleneck_weight(qy);
+			qy.abd = b1;
+			decrease_path(qy);
+			double b2 = compute_bottleneck_weight(qx);
+			increase_path(qy);
+		
+			double a = a1 + a2 - p0.abd - px.abd;
+			double b = b1 + b2 - p0.abd - px.abd;
+			double c = 2 * py.abd - p0.abd - px.abd;
+
+			double w = (a > b && a > c) ? a : (b > c ? b : c);
+			if(w < max_gain) continue;
+			
+			if(a > b && a > c)
+			{
+				qx.abd = a1;
+				qy.abd = a2;
+			}
+			else if(b > c)
+			{
+				qx.abd = b1;
+				qy.abd = b2;
+			}
+			else
+			{
+				qx.abd = py.abd;
+				qy.abd = py.abd;
+			}
+
+			max_index = k;
+			max_gain = w;
+			max_qx = qx;
+			max_qy = qy;
 		}
 
 		if(max_index == -1)
@@ -231,11 +271,12 @@ int sgraph::iterate()
 		{
 			printf("MAX GAIN = %.2lf\n", max_gain);
 			increase_path(paths1[max_index]);
-			decrease_path(qx);
-			decrease_path(qy);
-			paths1[max_index] = qx;
-			paths1.push_back(qy);
+			decrease_path(max_qx);
+			decrease_path(max_qy);
+			paths1[max_index] = max_qx;
+			paths1.push_back(max_qy);
 		}
+
 		if(max_gain + p0.abd < 1) break;
 	}
 	recover_edge_weights(med);
@@ -418,6 +459,18 @@ int sgraph::remove_backward_path(const path &p)
 		remove_edge(p.v[i + 1], p.v[i], gr);
 	}
 	return 0;
+}
+
+double sgraph::compute_bottleneck_weight(const path &p)
+{
+	double ww = DBL_MAX;
+	for(int i = 0; i < p.v.size() - 1; i++)
+	{
+		PEB e = edge(p.v[i], p.v[i + 1], gr);
+		double w = get(get(edge_weight, gr), e.first);
+		if(w < ww) ww = w;
+	}
+	return ww;
 }
 
 int sgraph::resolve(const path &px, const path &py, path &qx, path &qy)
