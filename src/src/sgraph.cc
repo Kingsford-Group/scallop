@@ -142,7 +142,7 @@ int sgraph::greedy()
 	{
 		path p;
 		compute_maximum_forward_path(p);
-		reduce_path(p);
+		decrease_path(p);
 		if(p.v.size() <= 1) break;
 		paths0.push_back(p);
 		if(p.abd < 1) break;
@@ -160,12 +160,35 @@ int sgraph::iterate()
 		path p0;
 		compute_maximum_forward_path(p0);
 		
-		vector<path> pv;
-		pv.resize(paths1.size());
+		path qx, qy;
+		double max_gain = 0;
+		int max_index = -1;
 		for(int k = 0; k < paths1.size(); k++)
 		{
-			add_backward_path(paths1[k]);
-			compute_maximum_path(pv[k]);
+			path &px = paths1[k];
+			if(px.abd <= p0.abd) continue;
+			add_backward_path(px);
+			path py;
+			compute_maximum_path(py);
+			if(2 * py.abd - p0.abd - px.abd < max_gain) continue; 
+			max_index = k;
+			max_gain = 2 * py.abd - p0.abd - px.abd;
+			resolve(px, py, qx, qy);
+			remove_backward_path(px);
+		}
+
+		if(max_index == -1)
+		{
+			decrease_path(p0);
+			paths1.push_back(p0);
+		}
+		else
+		{
+			increase_path(paths1[max_index]);
+			decrease_path(qx);
+			decrease_path(qy);
+			paths1[max_index] = qx;
+			paths1.push_back(qy);
 		}
 	}
 	recover_edge_weights(med);
@@ -296,7 +319,7 @@ int sgraph::compute_maximum_path(path &p)
 	return 0;
 }
 
-int sgraph::reduce_path(const path &p)
+int sgraph::decrease_path(const path &p)
 {
 	if(p.v.size() < 2) return 0;
 	for(int i = 0; i < p.v.size() - 1; i++)
@@ -310,6 +333,21 @@ int sgraph::reduce_path(const path &p)
 	}
 	return 0;
 }
+
+int sgraph::increase_path(const path &p)
+{
+	if(p.v.size() < 2) return 0;
+	for(int i = 0; i < p.v.size() - 1; i++)
+	{
+		PEB e = edge(p.v[i], p.v[i + 1], gr);
+		assert(e.second == true);
+		double w0 = get(get(edge_weight, gr), e.first);
+		double w1 = w0 + p.abd;
+		put(get(edge_weight, gr), e.first, w1);
+	}
+	return 0;
+}
+
 
 int sgraph::add_backward_path(const path &p)
 {
@@ -330,6 +368,53 @@ int sgraph::remove_backward_path(const path &p)
 	{
 		remove_edge(p.v[i + 1], p.v[i], gr);
 	}
+	return 0;
+}
+
+int sgraph::resolve(const path &px, const path &py, path &qx, path &qy)
+{
+	assert(px.abd >= py.abd);
+	vector< vector<int> > vv;
+	vv.resize(2);
+	vv[0] = px.index(num_vertices(gr));
+	vv[1] = py.index(num_vertices(gr));
+
+	int k = 0;
+	int s = 0;
+	qx.clear();
+	qx.v.push_back(s);
+	while(true)
+	{
+		int t = vv[k][s];
+		if(vv[1 - k][t] == s)
+		{
+			k = 1 - k;
+			t = vv[k][s];
+		}
+		qx.v.push_back(t);
+		if(t == num_vertices(gr) - 1) break;
+		s = t;
+	}
+
+	k = 1;
+	s = 0;
+	qy.clear();
+	qy.v.push_back(s);
+	while(true)
+	{
+		int t = vv[k][s];
+		if(vv[1 - k][t] == s)
+		{
+			k = 1 - k;
+			t = vv[k][s];
+		}
+		qy.v.push_back(t);
+		if(t == num_vertices(gr) - 1) break;
+		s = t;
+	}
+
+	qx.abd = py.abd;
+	qy.abd = py.abd;
 	return 0;
 }
 

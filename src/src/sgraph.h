@@ -15,7 +15,7 @@ public:
 public:
 	dgraph gr;						// splice graph
 	vector<path> paths0;			// paths from greedy algorithm
-	vector<path> paths1;			// paths from our algorithm
+	vector<path> paths1;			// paths from (our) iterate algorithm
 
 public:
 	int solve();
@@ -30,9 +30,11 @@ private:
 
 	int compute_maximum_forward_path(path &p);
 	int compute_maximum_path(path &p);
-	int reduce_path(const path &p);
+	int decrease_path(const path &p);
+	int increase_path(const path &p);
 	int add_backward_path(const path &p);
 	int remove_backward_path(const path &p);
+	int resolve(const path &px, const path &py, path &qx, path &qy);
 
 	int greedy();
 	int iterate();

@@ -16,8 +16,9 @@ public:
 	double abd;
 
 public:
-	int print(int index);
 	int clear();
+	int print(int index) const;
+	vector<int> index(int n) const;
 };
 
 #endif
