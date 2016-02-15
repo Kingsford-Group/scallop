@@ -6,15 +6,13 @@
 class scallop
 {
 public:
-	vector<bundle> bundles;
-
-public:
 	scallop();
 	~scallop();
 
 public:
 	int process(const string &file);
-	int load(const char *bam_file);
+	int solve(const char *bam_file);
+	int solve_bundle(const bundle &bd, int index);
 };
 
 #endif

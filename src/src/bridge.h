@@ -25,7 +25,7 @@ public:
 	int rrgn;						// region index corresponds to rpos
 
 public:
-	int print(int index);
+	int print(int index) const;
 };
 
 #endif

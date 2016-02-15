@@ -334,7 +334,7 @@ int bundle::split_region_boundaries()
 	return 0;
 }
 
-int bundle::print(int index)
+int bundle::print(int index) const
 {
 	printf("\nBundle %d: ", index);
 	printf("tid = %d, #hits = %lu, range = %s:%d-%d\n", tid, hits.size(), chrm.c_str(), lpos, rpos);

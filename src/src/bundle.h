@@ -22,7 +22,7 @@ public:
 	vector<region> regions;			// regions
 
 public:
-	int print(int index);
+	int print(int index) const;
 
 private:
 	// check whether hits are sorted

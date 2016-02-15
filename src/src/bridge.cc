@@ -46,7 +46,7 @@ bool bridge::operator<(const bridge &x) const
 	else return false;
 }
 
-int bridge::print(int index)
+int bridge::print(int index) const
 {
 	printf("bridge %d: region = [%d, %d), %d -> %d, count = %d, min-qual = %d, max-qual = %d, score = %d\n", 
 			index, lpos, rpos, lrgn, rrgn, count, min_qual, max_qual, score);

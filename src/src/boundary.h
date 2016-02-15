@@ -22,7 +22,7 @@ public:
 	uint32_t score;		// might be transfomred from pvalue (for start,end-boundary)
 
 public:
-	int print(int index);
+	int print(int index) const;
 };
 
 #endif
