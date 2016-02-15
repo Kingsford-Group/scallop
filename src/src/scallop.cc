@@ -33,12 +33,14 @@ int scallop::process(const string &file)
 int scallop::solve_bundle(const bundle &bd, int index, ofstream &fout1, ofstream &fout2)
 {
 	bd.print(index);
-	//sg.draw(sb);
 
 	sgraph sg;
 	sg.build(bd);
+	//sg.draw("sgraph1.tex");
+
 	sg.solve();
 
+	//sg.draw("sgraph2.tex");
 	bd.output_gtf(fout1, sg.paths0, index);
 	bd.output_gtf(fout2, sg.paths1, index);
 

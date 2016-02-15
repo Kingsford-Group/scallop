@@ -388,6 +388,7 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, int index) con
 			fout<<"exon\t";					// feature
 			fout<<r.lpos<<"\t";				// left position
 			fout<<r.rpos<<"\t";				// right position
+			fout<<abd<<"\t";				// score, now as abundance
 			fout<<"+\t";					// strand
 			fout<<".\t";					// frame
 			fout<<"exon_number \""<<k<<"\"; ";

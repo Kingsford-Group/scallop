@@ -81,7 +81,8 @@ int sgraph::build(const bundle &bd)
 		if(r.empty == false)
 		{
 			ave = r.ave_abd;
-			dev = r.dev_abd / sqrt(r.rcore - r.lcore);
+			dev = r.dev_abd;					
+			//dev = r.dev_abd / sqrt(r.rcore - r.lcore); // TODO
 		}
 		add_vertex(gr);
 		put(get(vertex_weight, gr), i + 1, ave);
@@ -215,45 +216,36 @@ int sgraph::iterate()
 			add_backward_path(px);
 			path py = compute_maximum_path();
 			remove_backward_path(px);
-			if(2 * py.abd - p0.abd - px.abd < 0) continue; 
+
+			//if(2 * py.abd - p0.abd - px.abd < 0) continue; 
 
 			path qx, qy;
 			resolve(px, py, qx, qy);
+			assert(qx.abd == py.abd);
+			assert(qy.abd == py.abd);
 
-			double a1 = compute_bottleneck_weight(qx);
-			qx.abd = a1;
+			increase_path(px);
+
 			decrease_path(qx);
-			double a2 = compute_bottleneck_weight(qy);
+			double ay = compute_bottleneck_weight(qy);
 			increase_path(qx);
 
-			double b1 = compute_bottleneck_weight(qy);
-			qy.abd = b1;
 			decrease_path(qy);
-			double b2 = compute_bottleneck_weight(qx);
+			double bx = compute_bottleneck_weight(qx);
 			increase_path(qy);
-		
-			double a = a1 + a2 - p0.abd - px.abd;
-			double b = b1 + b2 - p0.abd - px.abd;
-			double c = 2 * py.abd - p0.abd - px.abd;
 
-			double w = (a > b && a > c) ? a : (b > c ? b : c);
-			if(w < max_gain) continue;
+			decrease_path(px);
+
+			double a = qx.abd + ay - px.abd - p0.abd;
+			double b = bx + qy.abd - px.abd - p0.abd;
+			double w = (a > b) ? a : b;
+
+			if(w <= max_gain + 0.01) continue;
+
+			assert(qx.abd == qy.abd);
 			
-			if(a > b && a > c)
-			{
-				qx.abd = a1;
-				qy.abd = a2;
-			}
-			else if(b > c)
-			{
-				qx.abd = b1;
-				qy.abd = b2;
-			}
-			else
-			{
-				qx.abd = py.abd;
-				qy.abd = py.abd;
-			}
+			if(a > b) qy.abd = ay;
+			else qx.abd = bx;
 
 			max_index = k;
 			max_gain = w;
@@ -269,7 +261,7 @@ int sgraph::iterate()
 		}
 		else
 		{
-			printf("MAX GAIN = %.2lf\n", max_gain);
+			printf("MAX GAIN = %.4lf\n", max_gain);
 			increase_path(paths1[max_index]);
 			decrease_path(max_qx);
 			decrease_path(max_qy);
@@ -418,7 +410,9 @@ int sgraph::decrease_path(const path &p)
 		assert(e.second == true);
 		double w0 = get(get(edge_weight, gr), e.first);
 		double w1 = w0 - p.abd;
-		assert(w1 >= 0);
+		
+		assert(w1 >= -0.000001);
+		if(w1 <= 0) w1 = 0;
 		put(get(edge_weight, gr), e.first, w1);
 	}
 	return 0;
@@ -467,13 +461,14 @@ double sgraph::compute_bottleneck_weight(const path &p)
 	for(int i = 0; i < p.v.size() - 1; i++)
 	{
 		PEB e = edge(p.v[i], p.v[i + 1], gr);
+		assert(e.second == true);
 		double w = get(get(edge_weight, gr), e.first);
 		if(w < ww) ww = w;
 	}
 	return ww;
 }
 
-int sgraph::resolve(const path &px, const path &py, path &qx, path &qy)
+int sgraph::resolve(const path &px, const path &py, path &qx, path &qy) const
 {
 	assert(px.abd >= py.abd);
 	vector< vector<int> > vv;

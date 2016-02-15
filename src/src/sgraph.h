@@ -36,7 +36,7 @@ private:
 	int increase_path(const path &p);
 	int add_backward_path(const path &p);
 	int remove_backward_path(const path &p);
-	int resolve(const path &px, const path &py, path &qx, path &qy);
+	int resolve(const path &px, const path &py, path &qx, path &qy) const;
 	double compute_bottleneck_weight(const path &p);
 
 	int backup_edge_weights(MED &med);
