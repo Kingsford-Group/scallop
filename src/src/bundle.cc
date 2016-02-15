@@ -378,6 +378,18 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, int index) con
 		const vector<int> &v = paths[i].v;
 		double abd = paths[i].abd;
 		if(v.size() < 2) continue;
+
+		fout<<chrm.c_str()<<"\t";		// chromosome name
+		fout<<"scallop\t";				// source
+		fout<<"transcript\t";			// feature
+		fout<<lpos<<"\t";				// left position
+		fout<<rpos<<"\t";				// right position
+		fout<<1000<<"\t";				// score, now as abundance
+		fout<<"+\t";					// strand
+		fout<<".\t";					// frame
+		fout<<"abundance \""<<abd<<"\"; ";
+		fout<<"transcript_id \"scallop_"<<index<<"_"<<i + 1<<"\";"<<endl;
+
 		assert(v[0] == 0);
 		assert(v[v.size() - 1] == regions.size() + 1);
 		for(int k = 1; k < v.size() - 1; k++)
@@ -388,7 +400,7 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, int index) con
 			fout<<"exon\t";					// feature
 			fout<<r.lpos<<"\t";				// left position
 			fout<<r.rpos<<"\t";				// right position
-			fout<<abd<<"\t";				// score, now as abundance
+			fout<<1000<<"\t";				// score, now as abundance
 			fout<<"+\t";					// strand
 			fout<<".\t";					// frame
 			fout<<"exon_number \""<<k<<"\"; ";
