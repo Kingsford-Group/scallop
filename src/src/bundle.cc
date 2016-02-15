@@ -1,6 +1,8 @@
 #include <cassert>
 #include <cstdio>
 #include <map>
+#include <iomanip>
+#include <fstream>
 
 #include "bundle.h"
 #include "binomial.h"
@@ -362,6 +364,35 @@ int bundle::print(int index) const
 	for(int i = 0; i < regions.size(); i++)
 	{
 		regions[i].print(i);
+	}
+	return 0;
+}
+
+int bundle::output_gtf(ofstream &fout, const vector<path> &paths, int index) const
+{
+	fout.precision(2);
+	fout<<fixed;
+
+	for(int i = 0; i < paths.size(); i++)
+	{
+		const vector<int> &v = paths[i].v;
+		double abd = paths[i].abd;
+		if(v.size() < 2) continue;
+		assert(v[0] == 0);
+		assert(v[v.size() - 1] == regions.size() + 1);
+		for(int k = 1; k < v.size() - 1; k++)
+		{
+			const region &r = regions[v[k] - 1];
+			fout<<chrm.c_str()<<"\t";		// chromosome name
+			fout<<"scallop\t";				// source
+			fout<<"exon\t";					// feature
+			fout<<r.lpos<<"\t";				// left position
+			fout<<r.rpos<<"\t";				// right position
+			fout<<"+\t";					// strand
+			fout<<".\t";					// frame
+			fout<<"exon_number \""<<k<<"\"; ";
+			fout<<"transcript_id \"scallop_"<<index<<"_"<<i + 1<<"\";"<<endl;
+		}
 	}
 	return 0;
 }

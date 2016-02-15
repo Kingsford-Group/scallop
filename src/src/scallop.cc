@@ -30,19 +30,18 @@ int scallop::process(const string &file)
 	return 0;
 }
 
-int scallop::solve_bundle(const bundle &bd, int index)
+int scallop::solve_bundle(const bundle &bd, int index, ofstream &fout1, ofstream &fout2)
 {
-	char sa[1024];
-	char sb[1024];
-	sprintf(sa, "sgraph%da.tex", index);
-	sprintf(sb, "sgraph%db.tex", index);
-
 	bd.print(index);
+	//sg.draw(sb);
 
 	sgraph sg;
 	sg.build(bd);
 	sg.solve();
-	//sg.draw(sb);
+
+	bd.output_gtf(fout1, sg.paths0, index);
+	bd.output_gtf(fout2, sg.paths1, index);
+
 	return 0;
 }
 
@@ -52,7 +51,10 @@ int scallop::solve(const char *bam_file)
     bam_hdr_t *h= sam_hdr_read(fn);
     bam1_t *b = bam_init1();
 
-	int count;
+	ofstream fout1("greedy.gtf");
+	ofstream fout2("iterat.gtf");
+
+	int count = 0;
 	bbase bb;
     while(sam_read1(fn, h, b) >= 0)
 	{
@@ -64,7 +66,7 @@ int scallop::solve(const char *bam_file)
 		//if(p.qual <= 4) continue;				// ignore hits with quality-score < 5
 		if(bb.get_num_hits() > 0 && (bb.get_rpos() + min_bundle_gap < p.pos || p.tid != bb.get_tid()))
 		{
-			solve_bundle(bundle(bb), count);
+			solve_bundle(bundle(bb), count, fout1, fout2);
 			bb.clear();
 			count++;
 			if(max_num_bundles > 0 && count > max_num_bundles) break;
@@ -75,6 +77,8 @@ int scallop::solve(const char *bam_file)
     bam_destroy1(b);
     bam_hdr_destroy(h);
     sam_close(fn);
+	fout1.close();
+	fout2.close();
 
 	return 0;
 }

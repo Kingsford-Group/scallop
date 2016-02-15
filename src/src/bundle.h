@@ -6,6 +6,7 @@
 #include "bridge.h"
 #include "boundary.h"
 #include "region.h"
+#include "path.h"
 
 using namespace std;
 
@@ -23,6 +24,7 @@ public:
 
 public:
 	int print(int index) const;
+	int output_gtf(ofstream &fout, const vector<path> &paths, int index) const;	
 
 private:
 	// check whether hits are sorted
