@@ -387,8 +387,9 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, int index) con
 		fout<<1000<<"\t";				// score, now as abundance
 		fout<<"+\t";					// strand
 		fout<<".\t";					// frame
-		fout<<"abundance \""<<abd<<"\"; ";
-		fout<<"transcript_id \"scallop_"<<index<<"_"<<i + 1<<"\";"<<endl;
+		fout<<"gene_id \"scallop."<<index<<"\"; ";
+		fout<<"transcript_id \"scallop."<<index<<"."<<i + 1<<"\"; ";
+		fout<<"abundance \""<<abd<<"\";"<<endl;
 
 		assert(v[0] == 0);
 		assert(v[v.size() - 1] == regions.size() + 1);
@@ -404,7 +405,7 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, int index) con
 			fout<<"+\t";					// strand
 			fout<<".\t";					// frame
 			fout<<"exon_number \""<<k<<"\"; ";
-			fout<<"transcript_id \"scallop_"<<index<<"_"<<i + 1<<"\";"<<endl;
+			fout<<"transcript_id \"scallop."<<index<<"."<<i + 1<<"\";"<<endl;
 		}
 	}
 	return 0;
