@@ -404,8 +404,9 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, int index) con
 			fout<<1000<<"\t";				// score, now as abundance
 			fout<<"+\t";					// strand
 			fout<<".\t";					// frame
-			fout<<"exon_number \""<<k<<"\"; ";
-			fout<<"transcript_id \"scallop."<<index<<"."<<i + 1<<"\";"<<endl;
+			fout<<"gene_id \"scallop."<<index<<"\"; ";
+			fout<<"transcript_id \"scallop."<<index<<"."<<i + 1<<"\"; ";
+			fout<<"exon_number \""<<k<<"\";"<<endl;
 		}
 	}
 	return 0;
