@@ -8,6 +8,7 @@
 
 using namespace std;
 
+int min_num_hits_in_bundle;
 int32_t min_bundle_gap;
 int32_t min_splice_boundary_hits;
 int32_t min_left_boundary_hits;
@@ -45,7 +46,11 @@ int load_config(const char * conf_file)
 		stringstream sstr(buf);
 		sstr>>key>>value;
 
-		if(strcmp(key, "min_bundle_gap")==0)
+		if(strcmp(key, "min_num_hits_in_bundle")==0)
+		{
+			min_num_hits_in_bundle = (int)atoi(value);
+		}
+		else if(strcmp(key, "min_bundle_gap")==0)
 		{
 			min_bundle_gap = (int32_t)atoi(value);
 		}

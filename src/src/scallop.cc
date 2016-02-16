@@ -68,6 +68,12 @@ int scallop::solve(const char *bam_file)
 		//if(p.qual <= 4) continue;				// ignore hits with quality-score < 5
 		if(bb.get_num_hits() > 0 && (bb.get_rpos() + min_bundle_gap < p.pos || p.tid != bb.get_tid()))
 		{
+			if(bb.get_num_hits() < min_num_hits_in_bundle) 
+			{
+				bb.clear();
+				continue;
+			}
+
 			solve_bundle(bundle(bb), count, fout1, fout2);
 			bb.clear();
 			count++;

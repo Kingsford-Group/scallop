@@ -32,6 +32,7 @@ typedef pair<int32_t, int> PPI;
 // user-defined parameters
 extern int32_t min_bundle_gap;
 
+extern int min_num_hits_in_bundle;
 extern int32_t min_splice_boundary_hits;
 extern int32_t min_left_boundary_hits;
 extern int32_t min_right_boundary_hits;
