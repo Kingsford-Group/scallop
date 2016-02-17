@@ -275,7 +275,7 @@ int sgraph::iterate()
 	return 0;
 }
 
-path sgraph::compute_maximum_forward_path()
+path sgraph::compute_maximum_forward_path() const
 {
 	path p;
 	vector<double> table;		// dynamic programming table
@@ -330,7 +330,7 @@ path sgraph::compute_maximum_forward_path()
 	return p;
 }
 
-path sgraph::compute_maximum_path()
+path sgraph::compute_maximum_path() const
 {
 	path p;
 	fheap f;						// fibonacci heap
@@ -455,7 +455,7 @@ int sgraph::remove_backward_path(const path &p)
 	return 0;
 }
 
-double sgraph::compute_bottleneck_weight(const path &p)
+double sgraph::compute_bottleneck_weight(const path &p) const
 {
 	double ww = DBL_MAX;
 	for(int i = 0; i < p.v.size() - 1; i++)
@@ -515,7 +515,7 @@ int sgraph::resolve(const path &px, const path &py, path &qx, path &qy) const
 	return 0;
 }
 
-int sgraph::backup_edge_weights(MED &med)
+int sgraph::backup_edge_weights(MED &med) const
 {
 	med.clear();
 	edge_iterator it1, it2;
@@ -538,7 +538,7 @@ int sgraph::recover_edge_weights(const MED &med)
 	return 0;
 }
 
-int sgraph::print()
+int sgraph::print() const
 {
 	// print paths0
 	double w0 = 0.0;
@@ -563,7 +563,7 @@ int sgraph::print()
 	return 0;
 }
 
-int sgraph::draw(const string &file)
+int sgraph::draw(const string &file) const
 {
 	ofstream fout(file.c_str());
 	if(fout.fail())

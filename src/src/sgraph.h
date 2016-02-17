@@ -21,8 +21,8 @@ public:
 	int solve();
 	int load(const string &file);
 	int build(const bundle &bd);
-	int draw(const string &file);
-	int print();
+	int draw(const string &file) const;
+	int print() const;
 
 private:
 	int update_weights();
@@ -30,16 +30,16 @@ private:
 	int greedy();
 	int iterate();
 
-	path compute_maximum_forward_path();
-	path compute_maximum_path();
+	path compute_maximum_forward_path() const;
+	path compute_maximum_path() const;
 	int decrease_path(const path &p);
 	int increase_path(const path &p);
 	int add_backward_path(const path &p);
 	int remove_backward_path(const path &p);
 	int resolve(const path &px, const path &py, path &qx, path &qy) const;
-	double compute_bottleneck_weight(const path &p);
+	double compute_bottleneck_weight(const path &p) const;
 
-	int backup_edge_weights(MED &med);
+	int backup_edge_weights(MED &med) const;
 	int recover_edge_weights(const MED &med);
 };
 
