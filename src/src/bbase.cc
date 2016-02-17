@@ -9,6 +9,8 @@ bbase::bbase()
 	chrm = "";
 	lpos = INT32_MAX;
 	rpos = 0;
+	phits = 0;
+	qhits = 0;
 }
 
 bbase::~bbase()
@@ -35,6 +37,11 @@ int bbase::add_hit(bam_hdr_t *h, bam1_t *b)
 	}
 	assert(tid == ht.tid);
 
+	//if((ht.flag & 0x10) <= 0 && ht.isize < 0) phits++;
+	//if((ht.flag & 0x10) >= 1 && ht.isize > 0) qhits++;
+	if((ht.flag & 0x10) <= 0) phits++;
+	if((ht.flag & 0x10) >= 1) qhits++;
+
 	return 0;
 }
 
@@ -45,6 +52,8 @@ int bbase::clear()
 	lpos = INT32_MAX;
 	rpos = 0;
 	hits.clear();
+	phits = 0; 
+	qhits = 0;
 	return 0;
 }
 

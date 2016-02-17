@@ -339,7 +339,9 @@ int bundle::split_region_boundaries()
 int bundle::print(int index) const
 {
 	printf("\nBundle %d: ", index);
-	printf("tid = %d, #hits = %lu, range = %s:%d-%d\n", tid, hits.size(), chrm.c_str(), lpos, rpos);
+	char o = phits > qhits ? '+' : '-';
+	printf("tid = %d, #hits = %lu (%d, %d), range = %s:%d-%d, orient = %c\n",
+			tid, hits.size(), phits, qhits, chrm.c_str(), lpos, rpos, o);
 	// print hits
 	/*
 	for(int i = 0; i < hits.size(); i++)

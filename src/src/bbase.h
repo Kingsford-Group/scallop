@@ -22,6 +22,8 @@ protected:
 	int32_t lpos;					// the leftmost boundary on reference
 	int32_t rpos;					// the rightmost boundary on reference
 	vector<hit> hits;				// hits
+	int phits;						// number of hits mapped to the positive strand
+	int qhits;						// number of hits mapped to the reverse strand
 
 public:
 	int add_hit(bam_hdr_t *h, bam1_t *b);
