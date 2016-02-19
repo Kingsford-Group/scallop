@@ -22,4 +22,5 @@ scallop_SOURCES = main.cc \
 				  fibonacci_heap.h fibonacci_heap.cc \
 				  assembler.h assembler.cc \
 				  stringtie.h stringtie.cc \
-				  scallop.h scallop.cc
+				  scallop.h scallop.cc \
+				  gtf.h gtf.cc

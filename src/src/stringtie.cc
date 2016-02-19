@@ -16,8 +16,6 @@ int stringtie::assemble()
 
 int stringtie::greedy()
 {
-	MED med;
-	backup_edge_weights(med);
 	while(true)
 	{
 		path p = compute_maximum_forward_path();
@@ -26,7 +24,6 @@ int stringtie::greedy()
 		paths.push_back(p);
 		if(p.abd < 1) break;
 	}
-	recover_edge_weights(med);
 	return 0;
 }
 

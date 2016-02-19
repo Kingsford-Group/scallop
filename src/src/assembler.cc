@@ -211,29 +211,6 @@ double assembler::compute_bottleneck_weight(const path &p) const
 	return ww;
 }
 
-int assembler::backup_edge_weights(MED &med) const
-{
-	med.clear();
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = edges(gr); it1 != it2; it1++)
-	{
-		double w = get(get(edge_weight, gr), *it1);
-		med.insert(PED(*it1, w));
-	}
-	return 0;
-}
-
-int assembler::recover_edge_weights(const MED &med)
-{
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = edges(gr); it1 != it2; it1++)
-	{
-		MED::const_iterator it = med.find(*it1);
-		put(get(edge_weight, gr), *it1, it->second);
-	}
-	return 0;
-}
-
 int assembler::print(const string &prefix) const
 {
 	// print paths

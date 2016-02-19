@@ -17,8 +17,6 @@ int scallop::assemble()
 
 int scallop::iterate()
 {
-	MED med;
-	backup_edge_weights(med);
 	while(true)
 	{
 		path p0 = compute_maximum_forward_path();
@@ -88,7 +86,6 @@ int scallop::iterate()
 
 		if(max_gain + p0.abd < 1) break;
 	}
-	recover_edge_weights(med);
 	return 0;
 }
 
