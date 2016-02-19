@@ -1,11 +1,13 @@
 #include <cstdio>
 #include <cassert>
+#include <sstream>
 
 #include "config.h"
 #include "manager.h"
 #include "bundle.h"
 #include "stringtie.h"
 #include "scallop.h"
+#include "gtf.h"
 
 manager::manager()
 {
@@ -85,7 +87,19 @@ int manager::assemble_bam(const string &file)
 
 int manager::assemble_gtf(const string &file)
 {
-	//  TODO
+	ifstream fin(file.c_str());
+	if(fin.fail())
+	{
+		printf("open file %s error\n", file.c_str());
+		return 0;
+	}
+
+	char line[102400];
+	while(fin.getline(line, 102400, '\n'))
+	{
+		gtf_line gl(line);
+		gl.print();
+	}
 	return 0;
 }
 
