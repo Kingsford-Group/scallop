@@ -20,4 +20,4 @@ scallop_SOURCES = main.cc \
 				  lpsolver.h lpsolver.cc \
 				  path.h path.cc \
 				  fibonacci_heap.h fibonacci_heap.cc \
-				  assember.h assember.cc
+				  assembler.h assembler.cc

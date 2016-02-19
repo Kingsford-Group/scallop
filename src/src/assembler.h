@@ -1,14 +1,14 @@
-#ifndef __ASSEMBER_BASE_H__
-#define __ASSEMBER_BASE_H__
+#ifndef __ASSEMBLER_BASE_H__
+#define __ASSEMBLER_BASE_H__
 
 #include "splice_graph.h"
 #include "path.h"
 
-class assember
+class assembler
 {
 public:
-	assember(splice_graph &g);
-	virtual ~assember();
+	assembler(splice_graph &g);
+	virtual ~assembler();
 
 public:
 	splice_graph &gr;				// splice graph

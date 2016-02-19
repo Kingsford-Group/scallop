@@ -3,7 +3,7 @@
 
 #include "config.h"
 #include "scallop.h"
-#include "assember.h"
+#include "assembler.h"
 
 scallop::scallop()
 {
@@ -73,7 +73,7 @@ int scallop::solve_bundle(const bundle &bd, int index, ofstream &fout1, ofstream
 	splice_graph gr;
 	bd.build_splice_graph(gr);
 
-	assember asmb(gr);
+	assembler asmb(gr);
 
 	asmb.solve();
 
@@ -92,7 +92,7 @@ int scallop::solve_example(const string &file)
 {
 	splice_graph gr;
 	build_splice_graph(file, gr);
-	assember asmb(gr);
+	assembler asmb(gr);
 	asmb.draw("splice_graph.tex");
 	asmb.solve();
 	return 0;

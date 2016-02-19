@@ -1,4 +1,4 @@
-#include "assember.h"
+#include "assembler.h"
 #include "draw.h"
 #include "lpsolver.h"
 #include "fibonacci_heap.h"
@@ -6,14 +6,14 @@
 #include <iomanip>
 #include <cfloat>
 
-assember::assember(splice_graph &g)
+assembler::assembler(splice_graph &g)
 	: gr(g)
 {}
 
-assember::~assember()
+assembler::~assembler()
 {}
 
-int assember::solve()
+int assembler::solve()
 {
 	update_weights();
 	greedy();
@@ -22,14 +22,14 @@ int assember::solve()
 	return 0;
 }
 
-int assember::update_weights()
+int assembler::update_weights()
 {
 	lpsolver lp(gr);
 	lp.solve();
 	return 0;
 }
 
-int assember::greedy()
+int assembler::greedy()
 {
 	MED med;
 	backup_edge_weights(med);
@@ -45,7 +45,7 @@ int assember::greedy()
 	return 0;
 }
 
-int assember::iterate()
+int assembler::iterate()
 {
 	MED med;
 	backup_edge_weights(med);
@@ -122,7 +122,7 @@ int assember::iterate()
 	return 0;
 }
 
-path assember::compute_maximum_forward_path() const
+path assembler::compute_maximum_forward_path() const
 {
 	path p;
 	vector<double> table;		// dynamic programming table
@@ -177,7 +177,7 @@ path assember::compute_maximum_forward_path() const
 	return p;
 }
 
-path assember::compute_maximum_path() const
+path assembler::compute_maximum_path() const
 {
 	path p;
 	fibonacci_heap f;						// fibonacci heap
@@ -248,7 +248,7 @@ path assember::compute_maximum_path() const
 	return p;
 }
 
-int assember::decrease_path(const path &p)
+int assembler::decrease_path(const path &p)
 {
 	if(p.v.size() < 2) return 0;
 	for(int i = 0; i < p.v.size() - 1; i++)
@@ -265,7 +265,7 @@ int assember::decrease_path(const path &p)
 	return 0;
 }
 
-int assember::increase_path(const path &p)
+int assembler::increase_path(const path &p)
 {
 	if(p.v.size() < 2) return 0;
 	for(int i = 0; i < p.v.size() - 1; i++)
@@ -280,7 +280,7 @@ int assember::increase_path(const path &p)
 }
 
 
-int assember::add_backward_path(const path &p)
+int assembler::add_backward_path(const path &p)
 {
 	if(p.v.size() < 2) return 0;
 	for(int i = 0; i < p.v.size() - 1; i++)
@@ -292,7 +292,7 @@ int assember::add_backward_path(const path &p)
 	return 0;
 }
 
-int assember::remove_backward_path(const path &p)
+int assembler::remove_backward_path(const path &p)
 {
 	if(p.v.size() < 2) return 0;
 	for(int i = 0; i < p.v.size() - 1; i++)
@@ -302,7 +302,7 @@ int assember::remove_backward_path(const path &p)
 	return 0;
 }
 
-double assember::compute_bottleneck_weight(const path &p) const
+double assembler::compute_bottleneck_weight(const path &p) const
 {
 	double ww = DBL_MAX;
 	for(int i = 0; i < p.v.size() - 1; i++)
@@ -315,7 +315,7 @@ double assember::compute_bottleneck_weight(const path &p) const
 	return ww;
 }
 
-int assember::resolve(const path &px, const path &py, path &qx, path &qy) const
+int assembler::resolve(const path &px, const path &py, path &qx, path &qy) const
 {
 	assert(px.abd >= py.abd);
 	vector< vector<int> > vv;
@@ -362,7 +362,7 @@ int assember::resolve(const path &px, const path &py, path &qx, path &qy) const
 	return 0;
 }
 
-int assember::backup_edge_weights(MED &med) const
+int assembler::backup_edge_weights(MED &med) const
 {
 	med.clear();
 	edge_iterator it1, it2;
@@ -374,7 +374,7 @@ int assember::backup_edge_weights(MED &med) const
 	return 0;
 }
 
-int assember::recover_edge_weights(const MED &med)
+int assembler::recover_edge_weights(const MED &med)
 {
 	edge_iterator it1, it2;
 	for(tie(it1, it2) = edges(gr); it1 != it2; it1++)
@@ -385,7 +385,7 @@ int assember::recover_edge_weights(const MED &med)
 	return 0;
 }
 
-int assember::print() const
+int assembler::print() const
 {
 	// print paths0
 	double w0 = 0.0;
@@ -410,7 +410,7 @@ int assember::print() const
 	return 0;
 }
 
-int assember::draw(const string &file) const
+int assembler::draw(const string &file) const
 {
 	ofstream fout(file.c_str());
 	if(fout.fail())
