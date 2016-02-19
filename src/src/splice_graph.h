@@ -52,5 +52,6 @@ typedef map<edge_descriptor, int> MEI;
 typedef pair<edge_descriptor, int> PEI;
 
 int build_splice_graph(const string &file, splice_graph &gr);
+int draw_splice_graph(const string &file, const splice_graph &gr);
 
 #endif

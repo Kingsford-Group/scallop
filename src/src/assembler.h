@@ -12,31 +12,27 @@ public:
 
 public:
 	splice_graph &gr;				// splice graph
-	vector<path> paths0;			// paths from greedy algorithm
-	vector<path> paths1;			// paths from (our) iterate algorithm
+	vector<path> paths;				// transcripts
 
 public:
-	int solve();
-	int draw(const string &file) const;
-	int print() const;
+	virtual int assemble() = 0;
+	int print(const string &prefix) const;
 
-private:
-	int greedy();
-	int iterate();
-
+protected:
 	int update_weights();
 
+	double compute_bottleneck_weight(const path &p) const;
 	path compute_maximum_forward_path() const;
 	path compute_maximum_path() const;
+
 	int decrease_path(const path &p);
 	int increase_path(const path &p);
 	int add_backward_path(const path &p);
 	int remove_backward_path(const path &p);
-	int resolve(const path &px, const path &py, path &qx, path &qy) const;
-	double compute_bottleneck_weight(const path &p) const;
 
 	int backup_edge_weights(MED &med) const;
 	int recover_edge_weights(const MED &med);
+
 };
 
 #endif

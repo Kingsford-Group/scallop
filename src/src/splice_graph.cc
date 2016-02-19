@@ -1,4 +1,6 @@
 #include "splice_graph.h"
+#include "draw.h"
+
 #include <fstream>
 
 int build_splice_graph(const string &file, splice_graph &gr)
@@ -47,3 +49,55 @@ int build_splice_graph(const string &file, splice_graph &gr)
 	return 0;
 }
 
+int draw_splice_graph(const string &file, const splice_graph &gr)
+{
+	ofstream fout(file.c_str());
+	if(fout.fail())
+	{
+		printf("open file %s error.\n", file.c_str());
+		return 0;
+	}
+
+	draw_header(fout);
+
+	double len = 2.4;
+	fout<<"\\def\\len{"<<len<<"cm}\n";
+
+	// draw vertices
+	char sx[1024];
+	char sy[1024];
+	for(int i = 0; i < num_vertices(gr); i++)
+	{
+		sprintf(sx, "s%d", i);
+		fout.precision(1);
+		fout<<fixed;
+		fout<<"\\node[mycircle, \\colx, draw, label = below:{";
+		fout<< get(get(vertex_weight, gr), i) << "," << get(get(vertex_stddev, gr), i);
+		fout<< "}] ("<<sx<<") at ("<<i<<" *\\len, 0.0) {"<<i<<"};\n";
+	}
+
+	// draw edges
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = edges(gr); it1 != it2; it1++)
+	{
+		int s = source(*it1, gr);
+		int t = target(*it1, gr);
+
+		sprintf(sx, "s%d", s);
+		sprintf(sy, "s%d", t);
+		assert(s < t);
+		
+		double bend = -40;
+		if(s + 1 == t) bend = 0;
+		//else if(v[s] % 2 == 0) bend = -30;
+
+		fout<<"\\draw[line width = 0.02cm, ->, \\colx, bend right = "<< bend <<"] ("<<sx<<") to node {";
+		fout<< get(get(edge_weight, gr), *it1) <<",";
+		fout<< get(get(edge_stddev, gr), *it1) <<"} ("<<sy<<");\n";
+	}
+
+	draw_footer(fout);
+
+	fout.close();
+	return 0;
+}

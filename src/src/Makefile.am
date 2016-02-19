@@ -5,7 +5,7 @@ scallop_LDFLAGS = -L$(HTSLIB) -L$(GUROBI_HOME)/lib -pthread
 scallop_LDADD = -lhts -lz -lgurobi_c++ -lgurobi
 
 scallop_SOURCES = main.cc \
-				  scallop.h scallop.cc \
+				  manager.h manager.cc \
 				  bundle.h bundle.cc \
 				  config.h config.cc \
 				  hit.h hit.cc \
@@ -20,4 +20,6 @@ scallop_SOURCES = main.cc \
 				  lpsolver.h lpsolver.cc \
 				  path.h path.cc \
 				  fibonacci_heap.h fibonacci_heap.cc \
-				  assembler.h assembler.cc
+				  assembler.h assembler.cc \
+				  stringtie.h stringtie.cc \
+				  scallop.h scallop.cc

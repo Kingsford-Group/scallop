@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "scallop.h"
+#include "manager.h"
 #include "config.h"
 
 using namespace std;
@@ -13,7 +13,7 @@ int main(int argc, char **argv)
 
 	load_config(argv[1]);
 
-	scallop sc;
+	manager sc;
 	sc.process(argv[2]);
 
     return 0;

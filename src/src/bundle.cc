@@ -382,15 +382,15 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, int index) con
 		if(v.size() < 2) continue;
 
 		fout<<chrm.c_str()<<"\t";		// chromosome name
-		fout<<"scallop\t";				// source
+		fout<<"manager\t";				// source
 		fout<<"transcript\t";			// feature
 		fout<<lpos<<"\t";				// left position
 		fout<<rpos<<"\t";				// right position
 		fout<<1000<<"\t";				// score, now as abundance
 		fout<<"+\t";					// strand
 		fout<<".\t";					// frame
-		fout<<"gene_id \"scallop."<<index<<"\"; ";
-		fout<<"transcript_id \"scallop."<<index<<"."<<i + 1<<"\"; ";
+		fout<<"gene_id \"manager."<<index<<"\"; ";
+		fout<<"transcript_id \"manager."<<index<<"."<<i + 1<<"\"; ";
 		fout<<"abundance \""<<abd<<"\";"<<endl;
 
 		assert(v[0] == 0);
@@ -399,15 +399,15 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, int index) con
 		{
 			const region &r = regions[v[k] - 1];
 			fout<<chrm.c_str()<<"\t";		// chromosome name
-			fout<<"scallop\t";				// source
+			fout<<"manager\t";				// source
 			fout<<"exon\t";					// feature
 			fout<<r.lpos<<"\t";				// left position
 			fout<<r.rpos<<"\t";				// right position
 			fout<<1000<<"\t";				// score, now as abundance
 			fout<<"+\t";					// strand
 			fout<<".\t";					// frame
-			fout<<"gene_id \"scallop."<<index<<"\"; ";
-			fout<<"transcript_id \"scallop."<<index<<"."<<i + 1<<"\"; ";
+			fout<<"gene_id \"manager."<<index<<"\"; ";
+			fout<<"transcript_id \"manager."<<index<<"."<<i + 1<<"\"; ";
 			fout<<"exon_number \""<<k<<"\";"<<endl;
 		}
 	}

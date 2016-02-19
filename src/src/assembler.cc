@@ -1,5 +1,4 @@
 #include "assembler.h"
-#include "draw.h"
 #include "lpsolver.h"
 #include "fibonacci_heap.h"
 
@@ -13,112 +12,10 @@ assembler::assembler(splice_graph &g)
 assembler::~assembler()
 {}
 
-int assembler::solve()
-{
-	update_weights();
-	greedy();
-	iterate();
-	print();
-	return 0;
-}
-
 int assembler::update_weights()
 {
 	lpsolver lp(gr);
 	lp.solve();
-	return 0;
-}
-
-int assembler::greedy()
-{
-	MED med;
-	backup_edge_weights(med);
-	while(true)
-	{
-		path p = compute_maximum_forward_path();
-		decrease_path(p);
-		if(p.v.size() <= 1) break;
-		paths0.push_back(p);
-		if(p.abd < 1) break;
-	}
-	recover_edge_weights(med);
-	return 0;
-}
-
-int assembler::iterate()
-{
-	MED med;
-	backup_edge_weights(med);
-	while(true)
-	{
-		path p0 = compute_maximum_forward_path();
-		
-		path max_qx, max_qy;
-		double max_gain = 0;
-		int max_index = -1;
-		for(int k = 0; k < paths1.size(); k++)
-		{
-			path &px = paths1[k];
-			if(px.abd <= p0.abd) continue;
-			add_backward_path(px);
-			path py = compute_maximum_path();
-			remove_backward_path(px);
-
-			//if(2 * py.abd - p0.abd - px.abd < 0) continue; 
-
-			path qx, qy;
-			resolve(px, py, qx, qy);
-			assert(qx.abd == py.abd);
-			assert(qy.abd == py.abd);
-
-			increase_path(px);
-
-			decrease_path(qx);
-			double ay = compute_bottleneck_weight(qy);
-			increase_path(qx);
-
-			decrease_path(qy);
-			double bx = compute_bottleneck_weight(qx);
-			increase_path(qy);
-
-			decrease_path(px);
-
-			double a = qx.abd + ay - px.abd - p0.abd;
-			double b = bx + qy.abd - px.abd - p0.abd;
-			double w = (a > b) ? a : b;
-
-			if(w <= max_gain + 0.01) continue;
-
-			assert(qx.abd == qy.abd);
-			
-			if(a > b) qy.abd = ay;
-			else qx.abd = bx;
-
-			max_index = k;
-			max_gain = w;
-			max_qx = qx;
-			max_qy = qy;
-		}
-
-		if(max_index == -1)
-		{
-			if(p0.v.size() < 2) break;
-			decrease_path(p0);
-			paths1.push_back(p0);
-		}
-		else
-		{
-			printf("MAX GAIN = %.4lf\n", max_gain);
-			increase_path(paths1[max_index]);
-			decrease_path(max_qx);
-			decrease_path(max_qy);
-			paths1[max_index] = max_qx;
-			paths1.push_back(max_qy);
-		}
-
-		if(max_gain + p0.abd < 1) break;
-	}
-	recover_edge_weights(med);
 	return 0;
 }
 
@@ -279,7 +176,6 @@ int assembler::increase_path(const path &p)
 	return 0;
 }
 
-
 int assembler::add_backward_path(const path &p)
 {
 	if(p.v.size() < 2) return 0;
@@ -315,53 +211,6 @@ double assembler::compute_bottleneck_weight(const path &p) const
 	return ww;
 }
 
-int assembler::resolve(const path &px, const path &py, path &qx, path &qy) const
-{
-	assert(px.abd >= py.abd);
-	vector< vector<int> > vv;
-	vv.resize(2);
-	vv[0] = px.index(num_vertices(gr));
-	vv[1] = py.index(num_vertices(gr));
-
-	int k = 0;
-	int s = 0;
-	qx.clear();
-	qx.v.push_back(s);
-	while(true)
-	{
-		int t = vv[k][s];
-		if(vv[1 - k][t] == s)
-		{
-			k = 1 - k;
-			t = vv[k][s];
-		}
-		qx.v.push_back(t);
-		if(t == num_vertices(gr) - 1) break;
-		s = t;
-	}
-
-	k = 1;
-	s = 0;
-	qy.clear();
-	qy.v.push_back(s);
-	while(true)
-	{
-		int t = vv[k][s];
-		if(vv[1 - k][t] == s)
-		{
-			k = 1 - k;
-			t = vv[k][s];
-		}
-		qy.v.push_back(t);
-		if(t == num_vertices(gr) - 1) break;
-		s = t;
-	}
-
-	qx.abd = py.abd;
-	qy.abd = py.abd;
-	return 0;
-}
-
 int assembler::backup_edge_weights(MED &med) const
 {
 	med.clear();
@@ -385,81 +234,17 @@ int assembler::recover_edge_weights(const MED &med)
 	return 0;
 }
 
-int assembler::print() const
+int assembler::print(const string &prefix) const
 {
-	// print paths0
-	double w0 = 0.0;
-	for(int i = 0; i < paths0.size(); i++)
+	// print paths
+	double w = 0.0;
+	printf("%s ", prefix.c_str());
+	for(int i = 0; i < paths.size(); i++)
 	{
-		printf("greedy  ");
-		paths0[i].print(i);
-		w0 += paths0[i].abd;	
+		paths[i].print(i);
+		w += paths[i].abd;
 	}
-
-	// print paths1
-	double w1 = 0.0;
-	for(int i = 0; i < paths1.size(); i++)
-	{
-		printf("iterate ");
-		paths1[i].print(i);
-		w1 += paths1[i].abd;	
-	}
-	printf("greedy  summary: %ld paths, %.2lf total abundance\n", paths0.size(), w0);
-	printf("iterate summary: %ld paths, %.2lf total abundance\n", paths1.size(), w1);
+	printf("%s summary: %ld paths, %.2lf total abundance\n", prefix.c_str(), paths.size(), w);
 
 	return 0;
 }
-
-int assembler::draw(const string &file) const
-{
-	ofstream fout(file.c_str());
-	if(fout.fail())
-	{
-		printf("open file %s error.\n", file.c_str());
-		return 0;
-	}
-
-	draw_header(fout);
-
-	double len = 2.4;
-	fout<<"\\def\\len{"<<len<<"cm}\n";
-
-	// draw vertices
-	char sx[1024];
-	char sy[1024];
-	for(int i = 0; i < num_vertices(gr); i++)
-	{
-		sprintf(sx, "s%d", i);
-		fout.precision(1);
-		fout<<fixed;
-		fout<<"\\node[mycircle, \\colx, draw, label = below:{";
-		fout<< get(get(vertex_weight, gr), i) << "," << get(get(vertex_stddev, gr), i);
-		fout<< "}] ("<<sx<<") at ("<<i<<" *\\len, 0.0) {"<<i<<"};\n";
-	}
-
-	// draw edges
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = edges(gr); it1 != it2; it1++)
-	{
-		int s = source(*it1, gr);
-		int t = target(*it1, gr);
-
-		sprintf(sx, "s%d", s);
-		sprintf(sy, "s%d", t);
-		assert(s < t);
-		
-		double bend = -40;
-		if(s + 1 == t) bend = 0;
-		//else if(v[s] % 2 == 0) bend = -30;
-
-		fout<<"\\draw[line width = 0.02cm, ->, \\colx, bend right = "<< bend <<"] ("<<sx<<") to node {";
-		fout<< get(get(edge_weight, gr), *it1) <<",";
-		fout<< get(get(edge_stddev, gr), *it1) <<"} ("<<sy<<");\n";
-	}
-
-	draw_footer(fout);
-
-	fout.close();
-	return 0;
-}
-
