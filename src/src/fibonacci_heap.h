@@ -13,9 +13,9 @@ struct fnode
 	double w;
 };
 
-typedef heap::fibonacci_heap<fnode> fheap;
-typedef fheap::handle_type handle_t;
+typedef heap::fibonacci_heap<fnode> fibonacci_heap;
+typedef fibonacci_heap::handle_type handle_t;
 
-int test_fheap();
+int test_fibonacci_heap();
 
 #endif

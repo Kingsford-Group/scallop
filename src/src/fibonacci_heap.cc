@@ -1,12 +1,12 @@
-#include "fheap.h"
+#include "fibonacci_heap.h"
 #include <cstdio>
 #include <vector>
 
 using namespace std;
 
-int test_fheap()
+int test_fibonacci_heap()
 {
-	fheap f;
+	fibonacci_heap f;
 	handle_t h;
 	vector<handle_t> v;
 	h = f.push(fnode(0, 0)); v.push_back(h);

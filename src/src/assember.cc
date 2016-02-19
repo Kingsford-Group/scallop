@@ -1,24 +1,19 @@
-#include "sgraph.h"
+#include "assember.h"
 #include "draw.h"
 #include "lpsolver.h"
-#include "fheap.h"
+#include "fibonacci_heap.h"
 
 #include <iomanip>
 #include <cfloat>
 
-sgraph::sgraph(const dgraph &g)
+assember::assember(splice_graph &g)
 	: gr(g)
 {}
 
-sgraph::sgraph(const string &file)
-{
-	load(file);
-}
-
-sgraph::~sgraph()
+assember::~assember()
 {}
 
-int sgraph::solve()
+int assember::solve()
 {
 	update_weights();
 	greedy();
@@ -27,60 +22,14 @@ int sgraph::solve()
 	return 0;
 }
 
-int sgraph::load(const string &file)
-{
-	ifstream fin(file.c_str());
-	if(fin.fail()) 
-	{
-		printf("open file %s error\n", file.c_str());
-		return 0;
-	}
-
-	char line[10240];
-	// get the number of vertices
-	fin.getline(line, 10240, '\n');	
-	int n = atoi(line);
-
-	for(int i = 0; i < n; i++)
-	{
-		double weight, stddev;
-		fin.getline(line, 10240, '\n');	
-		stringstream sstr(line);
-		sstr>>weight>>stddev;
-
-		add_vertex(gr);
-		put(get(vertex_weight, gr), i, weight);
-		put(get(vertex_stddev, gr), i, stddev);
-	}
-
-	while(fin.getline(line, 10240, '\n'))
-	{
-		int x, y;
-		double weight, stddev;
-		stringstream sstr(line);
-		sstr>>x>>y>>weight>>stddev;
-
-		assert(x != y);
-		assert(x >= 0 && x < num_vertices(gr));
-		assert(y >= 0 && y < num_vertices(gr));
-
-		PEB p = add_edge(x, y, gr);
-		put(get(edge_weight, gr), p.first, weight);
-		put(get(edge_stddev, gr), p.first, stddev);
-	}
-
-	fin.close();
-	return 0;
-}
-
-int sgraph::update_weights()
+int assember::update_weights()
 {
 	lpsolver lp(gr);
 	lp.solve();
 	return 0;
 }
 
-int sgraph::greedy()
+int assember::greedy()
 {
 	MED med;
 	backup_edge_weights(med);
@@ -96,7 +45,7 @@ int sgraph::greedy()
 	return 0;
 }
 
-int sgraph::iterate()
+int assember::iterate()
 {
 	MED med;
 	backup_edge_weights(med);
@@ -173,7 +122,7 @@ int sgraph::iterate()
 	return 0;
 }
 
-path sgraph::compute_maximum_forward_path() const
+path assember::compute_maximum_forward_path() const
 {
 	path p;
 	vector<double> table;		// dynamic programming table
@@ -228,10 +177,10 @@ path sgraph::compute_maximum_forward_path() const
 	return p;
 }
 
-path sgraph::compute_maximum_path() const
+path assember::compute_maximum_path() const
 {
 	path p;
-	fheap f;						// fibonacci heap
+	fibonacci_heap f;						// fibonacci heap
 	vector<handle_t> handles;		// handles for nodes
 	vector<bool> reached;			// whether each node is reached
 	vector<bool> visited;			// whether each node is visited
@@ -299,7 +248,7 @@ path sgraph::compute_maximum_path() const
 	return p;
 }
 
-int sgraph::decrease_path(const path &p)
+int assember::decrease_path(const path &p)
 {
 	if(p.v.size() < 2) return 0;
 	for(int i = 0; i < p.v.size() - 1; i++)
@@ -316,7 +265,7 @@ int sgraph::decrease_path(const path &p)
 	return 0;
 }
 
-int sgraph::increase_path(const path &p)
+int assember::increase_path(const path &p)
 {
 	if(p.v.size() < 2) return 0;
 	for(int i = 0; i < p.v.size() - 1; i++)
@@ -331,7 +280,7 @@ int sgraph::increase_path(const path &p)
 }
 
 
-int sgraph::add_backward_path(const path &p)
+int assember::add_backward_path(const path &p)
 {
 	if(p.v.size() < 2) return 0;
 	for(int i = 0; i < p.v.size() - 1; i++)
@@ -343,7 +292,7 @@ int sgraph::add_backward_path(const path &p)
 	return 0;
 }
 
-int sgraph::remove_backward_path(const path &p)
+int assember::remove_backward_path(const path &p)
 {
 	if(p.v.size() < 2) return 0;
 	for(int i = 0; i < p.v.size() - 1; i++)
@@ -353,7 +302,7 @@ int sgraph::remove_backward_path(const path &p)
 	return 0;
 }
 
-double sgraph::compute_bottleneck_weight(const path &p) const
+double assember::compute_bottleneck_weight(const path &p) const
 {
 	double ww = DBL_MAX;
 	for(int i = 0; i < p.v.size() - 1; i++)
@@ -366,7 +315,7 @@ double sgraph::compute_bottleneck_weight(const path &p) const
 	return ww;
 }
 
-int sgraph::resolve(const path &px, const path &py, path &qx, path &qy) const
+int assember::resolve(const path &px, const path &py, path &qx, path &qy) const
 {
 	assert(px.abd >= py.abd);
 	vector< vector<int> > vv;
@@ -413,7 +362,7 @@ int sgraph::resolve(const path &px, const path &py, path &qx, path &qy) const
 	return 0;
 }
 
-int sgraph::backup_edge_weights(MED &med) const
+int assember::backup_edge_weights(MED &med) const
 {
 	med.clear();
 	edge_iterator it1, it2;
@@ -425,7 +374,7 @@ int sgraph::backup_edge_weights(MED &med) const
 	return 0;
 }
 
-int sgraph::recover_edge_weights(const MED &med)
+int assember::recover_edge_weights(const MED &med)
 {
 	edge_iterator it1, it2;
 	for(tie(it1, it2) = edges(gr); it1 != it2; it1++)
@@ -436,7 +385,7 @@ int sgraph::recover_edge_weights(const MED &med)
 	return 0;
 }
 
-int sgraph::print() const
+int assember::print() const
 {
 	// print paths0
 	double w0 = 0.0;
@@ -461,7 +410,7 @@ int sgraph::print() const
 	return 0;
 }
 
-int sgraph::draw(const string &file) const
+int assember::draw(const string &file) const
 {
 	ofstream fout(file.c_str());
 	if(fout.fail())

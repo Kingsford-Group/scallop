@@ -14,7 +14,11 @@ public:
 
 public:
 	int process(const string &file);
-	int solve(const char *bam_file);
+
+	int solve_bam(const string &file);
+	int solve_gtf(const string &file);
+	int solve_example(const string &file);
+
 	int solve_bundle(const bundle &bd, int index, ofstream &fout1, ofstream &fout2);
 };
 

@@ -1,6 +1,6 @@
-#include "imap.h"
+#include "interval_map.h"
 
-int create_split(imap_t &imap, int32_t p)
+int create_split(interval_map &imap, int32_t p)
 {
 	ICI it = imap.find(p);
 	if(it == imap.end()) return 0;
@@ -16,19 +16,19 @@ int create_split(imap_t &imap, int32_t p)
 	return 0;
 }
 
-int compute_overlap(const imap_t &imap, int32_t p)
+int compute_overlap(const interval_map &imap, int32_t p)
 {
 	ICI it = imap.find(p);
 	if(it == imap.end()) return 0;
 	return it->second;
 }
 
-ICI locate_right_iterator(const imap_t &imap, int32_t x)
+ICI locate_right_iterator(const interval_map &imap, int32_t x)
 {
 	return imap.upper_bound(ROI(x - 1, x));
 }
 
-ICI locate_left_iterator(const imap_t &imap, int32_t x)
+ICI locate_left_iterator(const interval_map &imap, int32_t x)
 {
 	ICI it = imap.lower_bound(ROI(x - 1, x));
 	if(it == imap.end() && it == imap.begin()) return it;
@@ -42,7 +42,7 @@ ICI locate_left_iterator(const imap_t &imap, int32_t x)
 	return it;
 }
 
-PICI locate_boundary_iterators(const imap_t &imap, int32_t x, int32_t y)
+PICI locate_boundary_iterators(const interval_map &imap, int32_t x, int32_t y)
 {
 	ICI lit, rit;
 	lit = locate_right_iterator(imap, x);
@@ -61,7 +61,7 @@ PICI locate_boundary_iterators(const imap_t &imap, int32_t x, int32_t y)
 	return PICI(lit, rit); 
 }
 
-int32_t compute_max_overlap(const imap_t &imap, ICI &p, ICI &q)
+int32_t compute_max_overlap(const interval_map &imap, ICI &p, ICI &q)
 {
 	if(p == imap.end()) return 0;
 
@@ -81,7 +81,7 @@ int32_t compute_max_overlap(const imap_t &imap, ICI &p, ICI &q)
 	return s;
 }
 
-int32_t compute_sum_overlap(const imap_t &imap, ICI &p, ICI &q)
+int32_t compute_sum_overlap(const interval_map &imap, ICI &p, ICI &q)
 {
 	if(p == imap.end()) return 0;
 
@@ -91,7 +91,7 @@ int32_t compute_sum_overlap(const imap_t &imap, ICI &p, ICI &q)
 	return s;
 }
 
-int32_t compute_coverage(const imap_t &imap, ICI &p, ICI &q)
+int32_t compute_coverage(const interval_map &imap, ICI &p, ICI &q)
 {
 	if(p == imap.end()) return 0;
 
@@ -106,14 +106,9 @@ int32_t compute_coverage(const imap_t &imap, ICI &p, ICI &q)
 	return s;
 }
 
-int test_imap()
+int test_interval_map()
 {
-	imap_t imap;
-	/*
-	imap += make_pair(ROI(1, 2), 3);
-	imap += make_pair(ROI(2, 3), 3);
-	imap += make_pair(ROI(3, 4), 3);
-	*/
+	interval_map imap;
 
 	imap += make_pair(ROI(6, 7), 3);
 	imap += make_pair(ROI(1, 3), 3);

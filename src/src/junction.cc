@@ -1,11 +1,11 @@
 #include <cstdio>
-#include "bridge.h"
+#include "junction.h"
 #include "config.h"
 
-bridge::bridge()
+junction::junction()
 {}
 
-bridge::bridge(int64_t _p)
+junction::junction(int64_t _p)
 {
 	lpos = high32(_p);
 	rpos = low32(_p);
@@ -15,7 +15,7 @@ bridge::bridge(int64_t _p)
 	score = 255;
 }
 
-bridge::bridge(int64_t _p, int32_t _c, uint32_t _min, uint32_t _max)
+junction::junction(int64_t _p, int32_t _c, uint32_t _min, uint32_t _max)
 {
 	lpos = high32(_p);
 	rpos = low32(_p);
@@ -27,7 +27,7 @@ bridge::bridge(int64_t _p, int32_t _c, uint32_t _min, uint32_t _max)
 	rrgn = -1;
 }
 
-bridge::bridge(const bridge &sp)
+junction::junction(const junction &sp)
 {
 	lpos = sp.lpos;
 	rpos = sp.rpos;
@@ -40,15 +40,15 @@ bridge::bridge(const bridge &sp)
 	rrgn = sp.rrgn;
 }
 
-bool bridge::operator<(const bridge &x) const
+bool junction::operator<(const junction &x) const
 {
 	if(lpos <= x.lpos) return true;
 	else return false;
 }
 
-int bridge::print(int index) const
+int junction::print(int index) const
 {
-	printf("bridge %d: region = [%d, %d), %d -> %d, count = %d, min-qual = %d, max-qual = %d, score = %d\n", 
+	printf("junction %d: region = [%d, %d), %d -> %d, count = %d, min-qual = %d, max-qual = %d, score = %d\n", 
 			index, lpos, rpos, lrgn, rrgn, count, min_qual, max_qual, score);
 	return 0;
 }

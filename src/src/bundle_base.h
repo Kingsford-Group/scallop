@@ -1,5 +1,5 @@
-#ifndef __BBASE_H__
-#define __BBASE_H__
+#ifndef __BUNDLE_BASE_H__
+#define __BUNDLE_BASE_H__
 
 #include <stdint.h>
 #include <cstring>
@@ -10,11 +10,11 @@
 
 using namespace std;
 
-class bbase
+class bundle_base
 {
 public:
-	bbase();
-	virtual ~bbase();
+	bundle_base();
+	virtual ~bundle_base();
 
 protected:
 	int32_t tid;					// chromosome ID

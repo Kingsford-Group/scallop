@@ -3,7 +3,7 @@
 
 #include "config.h"
 #include "scallop.h"
-#include "sgraph.h"
+#include "assember.h"
 
 scallop::scallop()
 {
@@ -16,41 +16,15 @@ scallop::~scallop()
 int scallop::process(const string &file)
 {
 	string s = file.substr(file.size() - 3, 3);
-	if(s == "bam" || s == "sam")
-	{
-		solve(file.c_str());
-	}
-	else
-	{
-		sgraph sg(file);
-		sg.draw("sgraph.tex");
-		sg.solve();
-	}
+	if(s == "bam" || s == "sam") solve_bam(file);
+	else if(s == "gtf") solve_gtf(file);
+	else solve_example(file);
 	return 0;
 }
 
-int scallop::solve_bundle(const bundle &bd, int index, ofstream &fout1, ofstream &fout2)
+int scallop::solve_bam(const string &file)
 {
-	bd.print(index);
-
-	dgraph gr;
-	bd.build_splice_graph(gr);
-
-	sgraph sg(gr);
-	//sg.draw("sgraph1.tex");
-
-	sg.solve();
-
-	//sg.draw("sgraph2.tex");
-	bd.output_gtf(fout1, sg.paths0, index);
-	bd.output_gtf(fout2, sg.paths1, index);
-
-	return 0;
-}
-
-int scallop::solve(const char *bam_file)
-{
-    samFile *fn = sam_open(bam_file, "r");
+    samFile *fn = sam_open(file.c_str(), "r");
     bam_hdr_t *h= sam_hdr_read(fn);
     bam1_t *b = bam_init1();
 
@@ -58,7 +32,7 @@ int scallop::solve(const char *bam_file)
 	ofstream fout2("iterat.gtf");
 
 	int count = 0;
-	bbase bb;
+	bundle_base bb;
     while(sam_read1(fn, h, b) >= 0)
 	{
 		bam1_core_t &p = b->core;
@@ -91,3 +65,37 @@ int scallop::solve(const char *bam_file)
 
 	return 0;
 }
+
+int scallop::solve_bundle(const bundle &bd, int index, ofstream &fout1, ofstream &fout2)
+{
+	bd.print(index);
+
+	splice_graph gr;
+	bd.build_splice_graph(gr);
+
+	assember asmb(gr);
+
+	asmb.solve();
+
+	bd.output_gtf(fout1, asmb.paths0, index);
+	bd.output_gtf(fout2, asmb.paths1, index);
+
+	return 0;
+}
+
+int scallop::solve_gtf(const string &file)
+{
+	return 0;
+}
+
+int scallop::solve_example(const string &file)
+{
+	splice_graph gr;
+	build_splice_graph(file, gr);
+	assember asmb(gr);
+	asmb.draw("splice_graph.tex");
+	asmb.solve();
+	return 0;
+}
+
+

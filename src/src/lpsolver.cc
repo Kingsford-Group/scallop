@@ -1,6 +1,6 @@
 #include "lpsolver.h"
 
-lpsolver::lpsolver(dgraph &g)
+lpsolver::lpsolver(splice_graph &g)
 	: gr(g)
 {
 	env = new GRBEnv();

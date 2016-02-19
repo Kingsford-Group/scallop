@@ -1,5 +1,5 @@
-#ifndef __DGRAPH_H__
-#define __DGRAPH_H__
+#ifndef __SPLICE_GRAPH_H__
+#define __SPLICE_GRAPH_H__
 
 // boost::graph
 #include "boost/graph/graph_traits.hpp"
@@ -10,7 +10,7 @@ using namespace boost;
 
 //typedef property<vertex_index_t, int> vertex_properties;
 //typedef property<edge_index_t, int> edge_properties;
-//typedef adjacency_list<vecS, vecS, directedS> dgraph;
+//typedef adjacency_list<vecS, vecS, directedS> splice_graph;
 
 //struct vertex_weight_t { typedef vertex_property_tag kind; };
 
@@ -27,19 +27,19 @@ namespace boost {
 
 typedef property< vertex_stddev_t, double, property<vertex_weight_t, double> > vertex_properties;
 typedef property< edge_stddev_t, double, property<edge_weight_t, double> > edge_properties;
-typedef adjacency_list<vecS, vecS, bidirectionalS, vertex_properties, edge_properties> dgraph;
+typedef adjacency_list<vecS, vecS, bidirectionalS, vertex_properties, edge_properties> splice_graph;
 
-typedef graph_traits<dgraph>::vertex_iterator vertex_iterator;
-typedef graph_traits<dgraph>::vertex_descriptor vertex_descriptor;
-typedef graph_traits<dgraph>::in_edge_iterator in_edge_iterator;
-typedef graph_traits<dgraph>::out_edge_iterator out_edge_iterator;
-typedef graph_traits<dgraph>::edge_iterator edge_iterator;
-typedef graph_traits<dgraph>::edge_descriptor edge_descriptor;
+typedef graph_traits<splice_graph>::vertex_iterator vertex_iterator;
+typedef graph_traits<splice_graph>::vertex_descriptor vertex_descriptor;
+typedef graph_traits<splice_graph>::in_edge_iterator in_edge_iterator;
+typedef graph_traits<splice_graph>::out_edge_iterator out_edge_iterator;
+typedef graph_traits<splice_graph>::edge_iterator edge_iterator;
+typedef graph_traits<splice_graph>::edge_descriptor edge_descriptor;
 
-typedef property_map<dgraph, edge_weight_t>::type edge_weight_map;
-//typedef property_map<dgraph, vertex_index_t>::const_type const_vertex_index_map;
+typedef property_map<splice_graph, edge_weight_t>::type edge_weight_map;
+//typedef property_map<splice_graph, vertex_index_t>::const_type const_vertex_index_map;
 
-//static vertex_descriptor VNULL = graph_traits<dgraph>::null_vertex();
+//static vertex_descriptor VNULL = graph_traits<splice_graph>::null_vertex();
 
 #include <map>
 using namespace std;
@@ -50,5 +50,7 @@ typedef pair<edge_descriptor, double> PED;
 typedef pair<edge_descriptor, bool> PEB;
 typedef map<edge_descriptor, int> MEI;
 typedef pair<edge_descriptor, int> PEI;
+
+int build_splice_graph(const string &file, splice_graph &gr);
 
 #endif

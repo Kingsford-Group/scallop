@@ -1,19 +1,17 @@
-#ifndef __SGRAPH_H__
-#define __SGRAPH_H__
+#ifndef __ASSEMBER_BASE_H__
+#define __ASSEMBER_BASE_H__
 
-#include "dgraph.h"
+#include "splice_graph.h"
 #include "path.h"
 
-// class for splice graph
-class sgraph
+class assember
 {
 public:
-	sgraph(const dgraph &g);
-	sgraph(const string &file);
-	virtual ~sgraph();
+	assember(splice_graph &g);
+	virtual ~assember();
 
 public:
-	dgraph gr;						// splice graph
+	splice_graph &gr;				// splice graph
 	vector<path> paths0;			// paths from greedy algorithm
 	vector<path> paths1;			// paths from (our) iterate algorithm
 
@@ -23,11 +21,10 @@ public:
 	int print() const;
 
 private:
-	int load(const string &file);
-	int update_weights();
-
 	int greedy();
 	int iterate();
+
+	int update_weights();
 
 	path compute_maximum_forward_path() const;
 	path compute_maximum_path() const;

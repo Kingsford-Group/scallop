@@ -7,15 +7,15 @@
 #include "bundle.h"
 #include "binomial.h"
 
-bundle::bundle(const bbase &bb)
-	: bbase(bb)
+bundle::bundle(const bundle_base &bb)
+	: bundle_base(bb)
 {
 	// make sure all reads are sorted 
 	check_left_ascending();
 
 	build_interval_map();
 
-	infer_bridges();
+	infer_junctions();
 	infer_left_boundaries();
 	//infer_right_boundaries();
 	add_start_boundary();
@@ -88,9 +88,9 @@ int bundle::locate_hits(int32_t p, int &li)
 	return (up - low);
 }
 
-int bundle::infer_bridges()
+int bundle::infer_junctions()
 {
-	map<int64_t, bridge> m;
+	map<int64_t, junction> m;
 	vector<int64_t> v;
 	for(int i = 0; i < hits.size(); i++)
 	{
@@ -101,8 +101,8 @@ int bundle::infer_bridges()
 			int64_t p = v[k];
 			if(m.find(p) == m.end()) 
 			{
-				bridge sp(p, 1, hits[i].qual, hits[i].qual);
-				m.insert(pair<int64_t, bridge>(p, sp));
+				junction sp(p, 1, hits[i].qual, hits[i].qual);
+				m.insert(pair<int64_t, junction>(p, sp));
 			}
 			else
 			{
@@ -113,12 +113,12 @@ int bundle::infer_bridges()
 		}
 	}
 
-	map<int64_t, bridge>::iterator it;
+	map<int64_t, junction>::iterator it;
 	for(it = m.begin(); it != m.end(); it++)
 	{
 		if(it->second.count < min_splice_boundary_hits) continue;
 		if(it->second.max_qual < min_max_splice_boundary_qual) continue;
-		bridges.push_back(it->second);
+		junctions.push_back(it->second);
 	}
 	return 0;
 }
@@ -273,10 +273,10 @@ int bundle::build_regions()
 	typedef pair<int32_t, int> PP;
 
 	MM s;
-	for(int i = 0; i < bridges.size(); i++)
+	for(int i = 0; i < junctions.size(); i++)
 	{
-		s.insert(PP(bridges[i].lpos, LEFT_SPLICE));
-		s.insert(PP(bridges[i].rpos, RIGHT_SPLICE));
+		s.insert(PP(junctions[i].lpos, LEFT_SPLICE));
+		s.insert(PP(junctions[i].rpos, RIGHT_SPLICE));
 	}
 
 	for(int i = 0; i < boundaries.size(); i++)
@@ -313,9 +313,9 @@ int bundle::link_regions()
 		rm.insert(PPI(r, i));
 	}
 
-	for(int i = 0; i < bridges.size(); i++)
+	for(int i = 0; i < junctions.size(); i++)
 	{
-		bridge &b = bridges[i];
+		junction &b = junctions[i];
 		MPI::iterator li = rm.find(b.lpos);
 		MPI::iterator ri = lm.find(b.rpos);
 		assert(li != rm.end());
@@ -350,10 +350,10 @@ int bundle::print(int index) const
 	}
 	*/
 
-	// print bridges 
-	for(int i = 0; i < bridges.size(); i++)
+	// print junctions 
+	for(int i = 0; i < junctions.size(); i++)
 	{
-		bridges[i].print(i);
+		junctions[i].print(i);
 	}
 
 	// print boundaries
@@ -414,7 +414,7 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, int index) con
 	return 0;
 }
 
-int bundle::build_splice_graph(dgraph &gr) const
+int bundle::build_splice_graph(splice_graph &gr) const
 {
 	// vertices: start, each region, end
 	add_vertex(gr);
@@ -465,10 +465,10 @@ int bundle::build_splice_graph(dgraph &gr) const
 		put(get(edge_stddev, gr), p.first, sd);
 	}
 
-	// edges: each bridge => and e2w
-	for(int i = 0; i < bridges.size(); i++)
+	// edges: each junction => and e2w
+	for(int i = 0; i < junctions.size(); i++)
 	{
-		const bridge &b = bridges[i];
+		const junction &b = junctions[i];
 		const region &x = regions[b.lrgn];
 		const region &y = regions[b.rrgn];
 
