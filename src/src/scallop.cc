@@ -22,8 +22,7 @@ int scallop::process(const string &file)
 	}
 	else
 	{
-		sgraph sg;
-		sg.load(file);
+		sgraph sg(file);
 		sg.draw("sgraph.tex");
 		sg.solve();
 	}
@@ -34,8 +33,10 @@ int scallop::solve_bundle(const bundle &bd, int index, ofstream &fout1, ofstream
 {
 	bd.print(index);
 
-	sgraph sg;
-	sg.build(bd);
+	dgraph gr;
+	bd.build_splice_graph(gr);
+
+	sgraph sg(gr);
 	//sg.draw("sgraph1.tex");
 
 	sg.solve();

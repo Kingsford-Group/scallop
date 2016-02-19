@@ -7,6 +7,7 @@
 #include "boundary.h"
 #include "region.h"
 #include "path.h"
+#include "dgraph.h"
 
 using namespace std;
 
@@ -25,6 +26,7 @@ public:
 public:
 	int print(int index) const;
 	int output_gtf(ofstream &fout, const vector<path> &paths, int index) const;	
+	int build_splice_graph(dgraph &gr) const;
 
 private:
 	// check whether hits are sorted

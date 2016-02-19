@@ -6,8 +6,14 @@
 #include <iomanip>
 #include <cfloat>
 
-sgraph::sgraph()
+sgraph::sgraph(const dgraph &g)
+	: gr(g)
 {}
+
+sgraph::sgraph(const string &file)
+{
+	load(file);
+}
 
 sgraph::~sgraph()
 {}
@@ -64,114 +70,6 @@ int sgraph::load(const string &file)
 	}
 
 	fin.close();
-	return 0;
-}
-
-int sgraph::build(const bundle &bd)
-{
-	// vertices: start, each region, end
-	add_vertex(gr);
-	put(get(vertex_weight, gr), 0, 0);
-	put(get(vertex_stddev, gr), 0, 1);
-	for(int i = 0; i < bd.regions.size(); i++)
-	{
-		const region &r = bd.regions[i];
-		double ave = 0;
-		double dev = 1;
-		if(r.empty == false)
-		{
-			ave = r.ave_abd;
-			dev = r.dev_abd;					
-			//dev = r.dev_abd / sqrt(r.rcore - r.lcore); // TODO
-		}
-		add_vertex(gr);
-		put(get(vertex_weight, gr), i + 1, ave);
-		put(get(vertex_stddev, gr), i + 1, dev);
-	}
-	add_vertex(gr);
-	put(get(vertex_weight, gr), bd.regions.size() + 1, 0);
-	put(get(vertex_stddev, gr), bd.regions.size() + 1, 1);
-
-	// edges: connecting adjacent regions => e2w
-	for(int i = 0; i < bd.regions.size() - 1; i++)
-	{
-		const region &x = bd.regions[i];
-		const region &y = bd.regions[i + 1];
-
-		if(x.empty || y.empty) continue;
-
-		if(x.right_break()) continue;
-		if(y.left_break()) continue;
-
-		//if(x.rtype == RIGHT_BOUNDARY) continue;
-		//if(y.ltype == LEFT_BOUNDARY) continue;
-
-		assert(x.rpos == y.lpos);
-		int32_t xr = compute_overlap(bd.imap, x.rpos - 1);
-		int32_t yl = compute_overlap(bd.imap, y.lpos);
-		double wt = xr < yl ? xr : yl;
-		double sd = 0.5 * x.dev_abd + 0.5 * y.dev_abd;
-
-		PEB p = add_edge(i + 1, i + 2, gr);
-		assert(p.second == true);
-		put(get(edge_weight, gr), p.first, wt);
-		put(get(edge_stddev, gr), p.first, sd);
-	}
-
-	// edges: each bridge => and e2w
-	for(int i = 0; i < bd.bridges.size(); i++)
-	{
-		const bridge &b = bd.bridges[i];
-		const region &x = bd.regions[b.lrgn];
-		const region &y = bd.regions[b.rrgn];
-
-		double sd = 0.5 * x.dev_abd + 0.5 * y.dev_abd;
-
-		PEB p = add_edge(b.lrgn + 1, b.rrgn + 1, gr);
-		assert(p.second == true);
-		put(get(edge_weight, gr), p.first, b.count);
-		put(get(edge_stddev, gr), p.first, sd);
-	}
-
-	// edges: connecting start/end and regions
-	int ss = 0;
-	int tt = bd.regions.size() + 1;
-	for(int i = 0; i < bd.regions.size(); i++)
-	{
-		const region &r = bd.regions[i];
-		if(r.empty == true) continue;
-
-		// TODO
-		//if(r.ltype == LEFT_BOUNDARY || r.ltype == START_BOUNDARY)
-		if(r.left_break() || r.ltype == LEFT_BOUNDARY || r.ltype == START_BOUNDARY)
-		{
-			PEB p = add_edge(ss, i + 1, gr);
-			assert(p.second == true);
-			put(get(edge_weight, gr), p.first, r.ave_abd);
-			put(get(edge_stddev, gr), p.first, r.dev_abd);
-		}
-
-		// TODO
-		//if(r.rtype == RIGHT_BOUNDARY || r.rtype == END_BOUNDARY) 
-		if(r.right_break() || r.rtype == RIGHT_BOUNDARY || r.rtype == END_BOUNDARY) 
-		{
-			PEB p = add_edge(i + 1, tt, gr);
-			assert(p.second == true);
-			put(get(edge_weight, gr), p.first, r.ave_abd);
-			put(get(edge_stddev, gr), p.first, r.dev_abd);
-		}
-	}
-
-	// check
-	if(bd.regions.size() == 1) return 0;
-	for(int i = 0; i < bd.regions.size(); i++)
-	{
-		const region &r = bd.regions[i];
-		if(r.empty == false) continue;
-		assert(in_degree(i + 1, gr) == 0);
-		assert(out_degree(i + 1, gr) == 0);
-	}
-
 	return 0;
 }
 

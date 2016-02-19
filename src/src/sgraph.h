@@ -1,7 +1,6 @@
 #ifndef __SGRAPH_H__
 #define __SGRAPH_H__
 
-#include "bundle.h"
 #include "dgraph.h"
 #include "path.h"
 
@@ -9,7 +8,8 @@
 class sgraph
 {
 public:
-	sgraph();
+	sgraph(const dgraph &g);
+	sgraph(const string &file);
 	virtual ~sgraph();
 
 public:
@@ -19,12 +19,11 @@ public:
 
 public:
 	int solve();
-	int load(const string &file);
-	int build(const bundle &bd);
 	int draw(const string &file) const;
 	int print() const;
 
 private:
+	int load(const string &file);
 	int update_weights();
 
 	int greedy();
