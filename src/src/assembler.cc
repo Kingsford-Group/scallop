@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <cfloat>
 
-assembler::assembler(splice_graph &g)
+assembler::assembler(const splice_graph &g)
 	: gr(g)
 {}
 
@@ -238,9 +238,9 @@ int assembler::print(const string &prefix) const
 {
 	// print paths
 	double w = 0.0;
-	printf("%s ", prefix.c_str());
 	for(int i = 0; i < paths.size(); i++)
 	{
+		printf("%s ", prefix.c_str());
 		paths[i].print(i);
 		w += paths[i].abd;
 	}

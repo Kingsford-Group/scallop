@@ -1,5 +1,5 @@
-#ifndef __ASSEMBLER_BASE_H__
-#define __ASSEMBLER_BASE_H__
+#ifndef __ASSEMBLER_H__
+#define __ASSEMBLER_H__
 
 #include "splice_graph.h"
 #include "path.h"
@@ -7,11 +7,11 @@
 class assembler
 {
 public:
-	assembler(splice_graph &g);
+	assembler(const splice_graph &g);
 	virtual ~assembler();
 
 public:
-	splice_graph &gr;				// splice graph
+	splice_graph gr;				// splice graph
 	vector<path> paths;				// transcripts
 
 public:

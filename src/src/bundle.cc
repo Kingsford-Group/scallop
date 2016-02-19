@@ -370,7 +370,7 @@ int bundle::print(int index) const
 	return 0;
 }
 
-int bundle::output_gtf(ofstream &fout, const vector<path> &paths, int index) const
+int bundle::output_gtf(ofstream &fout, const vector<path> &paths, const string &prefix, int index) const
 {
 	fout.precision(2);
 	fout<<fixed;
@@ -382,7 +382,7 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, int index) con
 		if(v.size() < 2) continue;
 
 		fout<<chrm.c_str()<<"\t";		// chromosome name
-		fout<<"manager\t";				// source
+		fout<<prefix.c_str()<<"\t";		// source
 		fout<<"transcript\t";			// feature
 		fout<<lpos<<"\t";				// left position
 		fout<<rpos<<"\t";				// right position
@@ -399,7 +399,7 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, int index) con
 		{
 			const region &r = regions[v[k] - 1];
 			fout<<chrm.c_str()<<"\t";		// chromosome name
-			fout<<"manager\t";				// source
+			fout<<prefix.c_str()<<"\t";		// source
 			fout<<"exon\t";					// feature
 			fout<<r.lpos<<"\t";				// left position
 			fout<<r.rpos<<"\t";				// right position

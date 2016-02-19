@@ -66,8 +66,8 @@ int manager::assemble_bam(const string &file)
 			sc.assemble();
 			sc.print("scallop");
 
-			bd.output_gtf(stringtie_fout, st.paths, index);
-			bd.output_gtf(scallop_fout, sc.paths, index);
+			bd.output_gtf(stringtie_fout, st.paths, "stringtie", index);
+			bd.output_gtf(scallop_fout, sc.paths, "scallop", index);
 
 			index++;
 			bb.clear();
