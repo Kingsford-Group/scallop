@@ -97,7 +97,7 @@ int manager::assemble_gtf(const string &file)
 	char line[102400];
 	while(fin.getline(line, 102400, '\n'))
 	{
-		gtf_line gl(line);
+		gtf_exon gl(line);
 		gl.print();
 	}
 	return 0;

@@ -5,7 +5,7 @@
 #include <sstream>
 #include <cstdio>
 
-gtf_line::gtf_line(const string &s)
+gtf_exon::gtf_exon(const string &s)
 {
 	char buf[10240];
 	stringstream sstr(s);
@@ -42,7 +42,7 @@ gtf_line::gtf_line(const string &s)
 	}
 }
 
-int gtf_line::print()
+int gtf_exon::print()
 {
 	printf("%s\t%s\t%s\t%d\t%d\t%.1lf\t%c\t%c\ttranscript_id \"%s\"; gene_id \"%s\";\n",
 			seqname.c_str(), source.c_str(), feature.c_str(), start, end, score, strand, frame, transcript_id.c_str(), gene_id.c_str());
