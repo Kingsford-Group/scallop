@@ -11,6 +11,7 @@ public:
 	vector<gtf_exon> exons;	// all exons
 
 public:
+	int print();
 	int add_exon(const gtf_exon &ge);
 };
 

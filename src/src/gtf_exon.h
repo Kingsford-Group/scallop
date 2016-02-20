@@ -12,6 +12,7 @@ class gtf_exon
 public:
 	gtf_exon(const string &s);
 	int print();
+	bool operator<(const gtf_exon &ge);
 
 public:
 	string seqname;
@@ -24,6 +25,7 @@ public:
 	int frame;
 	string transcript_id;
 	string gene_id;
+	double expression;
 };
 
 #endif

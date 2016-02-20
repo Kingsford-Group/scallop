@@ -114,6 +114,12 @@ int manager::assemble_gtf(const string &file)
 			genes[m[ge.gene_id]].add_exon(ge);
 		}
 	}
+
+	for(int i = 0; i < genes.size(); i++)
+	{
+		genes[i].print();
+	}
+
 	return 0;
 }
 

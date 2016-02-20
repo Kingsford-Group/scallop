@@ -39,13 +39,24 @@ gtf_exon::gtf_exon(const string &s)
 			string ss(buf2);
 			gene_id = ss.substr(1, ss.size() - 2);
 		}
+		else if(string(buf) == "expression")
+		{
+			string ss(buf2);
+			expression = atof(ss.substr(1, ss.size() - 2).c_str());
+		}
 	}
 }
 
 int gtf_exon::print()
 {
-	printf("%s\t%s\t%s\t%d\t%d\t%.1lf\t%c\t%c\ttranscript_id \"%s\"; gene_id \"%s\";\n",
-			seqname.c_str(), source.c_str(), feature.c_str(), start, end, score, strand, frame, transcript_id.c_str(), gene_id.c_str());
+	printf("%s\t%s\t%s\t%d\t%d\t%.1lf\t%c\t%c\ttranscript_id \"%s\"; gene_id \"%s\"; expression \"%.0lf\"\n",
+			seqname.c_str(), source.c_str(), feature.c_str(), start, end, score, strand, frame,
+			transcript_id.c_str(), gene_id.c_str(), expression);
 	return 0;
 }
 
+bool gtf_exon::operator<(const gtf_exon &ge)
+{
+	if(start < ge.start) return true;
+	else return false;
+}
