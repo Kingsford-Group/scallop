@@ -48,3 +48,4 @@ int gtf_exon::print()
 			seqname.c_str(), source.c_str(), feature.c_str(), start, end, score, strand, frame, transcript_id.c_str(), gene_id.c_str());
 	return 0;
 }
+

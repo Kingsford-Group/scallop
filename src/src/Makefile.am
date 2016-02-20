@@ -23,4 +23,5 @@ scallop_SOURCES = main.cc \
 				  assembler.h assembler.cc \
 				  stringtie.h stringtie.cc \
 				  scallop.h scallop.cc \
-				  gtf.h gtf.cc
+				  gtf_exon.h gtf_exon.cc \
+				  gtf_gene.h gtf_gene.cc

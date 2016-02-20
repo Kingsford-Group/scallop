@@ -1,5 +1,5 @@
-#ifndef __GTF_H__
-#define __GTF_H__
+#ifndef __GTF_EXON_H__
+#define __GTF_EXON_H__
 
 #include "path.h"
 #include <string>
@@ -24,13 +24,6 @@ public:
 	int frame;
 	string transcript_id;
 	string gene_id;
-};
-
-class gtf_gene
-{
-public:
-	vector<gtf_exon> exons;	// all exons
-	vector<path> paths;		// transcripts
 };
 
 #endif
