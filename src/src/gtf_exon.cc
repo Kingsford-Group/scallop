@@ -1,4 +1,4 @@
-#include "gtf.h"
+#include "gtf_exon.h"
 
 #include <cstdlib>
 #include <iostream>

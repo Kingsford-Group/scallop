@@ -7,7 +7,7 @@
 #include "bundle.h"
 #include "stringtie.h"
 #include "scallop.h"
-#include "gtf.h"
+#include "gtf_gene.h"
 
 manager::manager()
 {
