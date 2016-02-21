@@ -123,12 +123,21 @@ int manager::assemble_gtf(const string &file)
 		gg.build_splice_graph(gr);
 		int p = compute_num_paths(gr);
 		string s;	
-		if(p <= num_edges(gr) - num_vertices(gr) + 2) s = "EASY";
+		assert(p >= num_edges(gr) - num_vertices(gr) + 2);
+		if(p == num_edges(gr) - num_vertices(gr) + 2) s = "EASY";
 		else s = "HARD";
 
+		draw_splice_graph("splice_graph.tex", gr);
+		gg.print();
 		printf("gene %d, %lu transcipts, total %lu exons, %lu vertices, %lu edges %d paths, %s\n",
 				i, gg.transcripts.size(), gg.exons.size(),
 				num_vertices(gr), num_edges(gr), p, s.c_str());
+
+		scallop sc(gr);
+		sc.assemble();
+		gg.output_gtf(scallop_fout, sc.paths, "scallop");
+
+		break;
 	}
 
 	return 0;

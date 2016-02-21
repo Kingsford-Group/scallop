@@ -1,6 +1,8 @@
 #ifndef __GTF_GENE_H__
 #define __GTF_GENE_H__
 
+#include <fstream>
+
 #include "gtf_exon.h"
 #include "interval_map.h"
 #include "splice_graph.h"
@@ -16,6 +18,7 @@ public:
 
 public:
 	int build_splice_graph(splice_graph &gr);
+	int output_gtf(ofstream &fout, const vector<path> &paths, const string &prefix) const;	
 	int add_exon(const gtf_exon &ge);
 	int print();
 

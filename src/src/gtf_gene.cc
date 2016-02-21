@@ -133,5 +133,64 @@ int gtf_gene::print()
 	{
 		exons[i].print();
 	}
+
+	for(ICI it = imap.begin(); it != imap.end(); it++)
+	{
+		printf("%lu vertex: [%d, %d)\n", distance((ICI)(imap.begin()), it), lower(it->first), upper(it->first));
+	}
+	return 0;
+}
+
+
+int gtf_gene::output_gtf(ofstream &fout, const vector<path> &paths, const string &prefix) const
+{
+	fout.precision(2);
+	fout<<fixed;
+
+	if(exons.size() == 0) return 0;
+
+	string chrm = exons[0].seqname;
+	string gene = exons[0].gene_id;
+
+	for(int i = 0; i < paths.size(); i++)
+	{
+		const vector<int> &v = paths[i].v;
+		double abd = paths[i].abd;
+		if(v.size() < 2) continue;
+
+		ICI si = imap.begin();
+		ICI ti = imap.end();
+		ti--;
+
+		fout<<chrm.c_str()<<"\t";					// chromosome name
+		fout<<prefix.c_str()<<"\t";					// source
+		fout<<"transcript\t";						// feature
+		fout<<lower(si->first)<<"\t";				// left position
+		fout<<upper(ti->first)<<"\t";				// right position
+		fout<<1000<<"\t";							// score, now as abundance
+		fout<<"+\t";								// strand
+		fout<<".\t";								// frame
+		fout<<"gene_id \""<<gene.c_str()<<"\"; ";
+		fout<<"transcript_id \""<<gene.c_str()<<"."<<i + 1<<"\"; ";
+		fout<<"abundance \""<<abd<<"\";"<<endl;
+
+		assert(v[0] == 0);
+		for(int k = 1; k < v.size() - 1; k++)
+		{
+			ICI it = imap.begin();
+			advance(it, v[k] - 1);
+			fout<<chrm.c_str()<<"\t";			// chromosome name
+			fout<<prefix.c_str()<<"\t";			// source
+			fout<<"exon\t";						// feature
+			fout<<lower(it->first)<<"\t";		// left position
+			fout<<upper(it->first) - 1<<"\t";	// right position
+			fout<<1000<<"\t";					// score, now as abundance
+			fout<<"+\t";						// strand
+			fout<<".\t";						// frame
+			fout<<"gene_id \""<<gene.c_str()<<"\"; ";
+			fout<<"transcript_id \""<<gene.c_str()<<"."<<i + 1<<"\"; ";
+			fout<<"vertex \""<<v[k]<<"\";"<<endl;
+		}
+	}
 	return 0;
 }

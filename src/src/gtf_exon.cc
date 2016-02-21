@@ -43,7 +43,7 @@ int gtf_exon::parse(const string &s)
 		else if(string(buf) == "gene_id")
 		{
 			string ss(buf2);
-			gene_id = ss.substr(1, ss.size() - 2);
+			gene_id = ss.substr(1, ss.size() - 3);
 		}
 		else if(string(buf) == "expression")
 		{
