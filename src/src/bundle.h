@@ -18,7 +18,7 @@ public:
 	virtual ~bundle();
 
 private:
-	interval_map imap;				// interval map
+	split_interval_map imap;				// interval map
 	vector<junction> junctions;		// splice junctions
 	vector<boundary> boundaries;	// all types of boundaries
 	vector<region> regions;			// regions
@@ -34,7 +34,7 @@ private:
 	int check_right_ascending();
 
 	// build interval map
-	int build_interval_map();
+	int build_split_interval_map();
 
 	// remove these intervals starting at a LEFT_BOUNDARY
 	int remove_left_boundary_intervals();

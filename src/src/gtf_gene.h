@@ -14,7 +14,7 @@ class gtf_gene
 public:
 	vector<gtf_exon> exons;	
 	vector< vector<int> > transcripts;			
-	interval_map imap;
+	split_interval_map imap;
 
 public:
 	int build_splice_graph(splice_graph &gr);
@@ -24,7 +24,7 @@ public:
 
 private:
 	int build_transcripts();
-	int build_interval_map();
+	int build_split_interval_map();
 	int32_t compute_sum_expression();
 	int add_vertices(splice_graph &gr);
 	int add_edges(splice_graph &gr);

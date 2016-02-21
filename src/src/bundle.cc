@@ -13,7 +13,7 @@ bundle::bundle(const bundle_base &bb)
 	// make sure all reads are sorted 
 	check_left_ascending();
 
-	build_interval_map();
+	build_split_interval_map();
 
 	infer_junctions();
 	infer_left_boundaries();
@@ -32,7 +32,7 @@ bundle::bundle(const bundle_base &bb)
 bundle::~bundle()
 {}
 
-int bundle::build_interval_map()
+int bundle::build_split_interval_map()
 {
 	imap.clear();
 	vector<int64_t> v;

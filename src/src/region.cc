@@ -2,7 +2,7 @@
 #include "config.h"
 #include "binomial.h"
 
-region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const interval_map *_imap)
+region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_imap)
 	:lpos(_lpos), rpos(_rpos), imap(_imap), ltype(_ltype), rtype(_rtype)
 {
 	ave_abd = 0;

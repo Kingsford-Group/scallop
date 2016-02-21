@@ -9,7 +9,7 @@ using namespace std;
 class region
 {
 public:
-	region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const interval_map *_imap);
+	region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_imap);
 	~region();
 
 public:
@@ -18,7 +18,7 @@ public:
 	int ltype;						// type of the left boundary
 	int rtype;						// type of the right boundary
 
-	const interval_map *imap;		// pointer to a interval map
+	const split_interval_map *imap;		// pointer to a interval map
 
 	int32_t lcore;					// left core position
 	int32_t rcore;					// right core position

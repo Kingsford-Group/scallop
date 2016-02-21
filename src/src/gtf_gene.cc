@@ -5,7 +5,7 @@ int gtf_gene::build_splice_graph(splice_graph &gr)
 {
 	sort(exons.begin(), exons.end());
 	build_transcripts();
-	build_interval_map();
+	build_split_interval_map();
 	add_vertices(gr);
 	add_edges(gr);
 	return 0;
@@ -77,7 +77,7 @@ int gtf_gene::add_single_edge(int s, int t, double w, splice_graph &gr)
 	return 0;
 }
 
-int gtf_gene::build_interval_map()
+int gtf_gene::build_split_interval_map()
 {
 	imap.clear();
 	for(int i = 0; i < exons.size(); i++)
@@ -175,10 +175,17 @@ int gtf_gene::output_gtf(ofstream &fout, const vector<path> &paths, const string
 		fout<<"abundance \""<<abd<<"\";"<<endl;
 
 		assert(v[0] == 0);
+		join_interval_map jmap;
 		for(int k = 1; k < v.size() - 1; k++)
 		{
 			SIMI it = imap.begin();
 			advance(it, v[k] - 1);
+			jmap += make_pair(ROI(lower(it->first), upper(it->first)), 1);
+		}
+
+		int cnt = 0;
+		for(JIMI it = jmap.begin(); it != jmap.end(); it++)
+		{
 			fout<<chrm.c_str()<<"\t";			// chromosome name
 			fout<<prefix.c_str()<<"\t";			// source
 			fout<<"exon\t";						// feature
@@ -189,7 +196,7 @@ int gtf_gene::output_gtf(ofstream &fout, const vector<path> &paths, const string
 			fout<<".\t";						// frame
 			fout<<"gene_id \""<<gene.c_str()<<"\"; ";
 			fout<<"transcript_id \""<<gene.c_str()<<"."<<i + 1<<"\"; ";
-			fout<<"vertex \""<<v[k]<<"\";"<<endl;
+			fout<<"exon \""<<++cnt<<"\";"<<endl;
 		}
 	}
 	return 0;
