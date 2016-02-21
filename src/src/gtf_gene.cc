@@ -18,7 +18,7 @@ int gtf_gene::add_vertices(splice_graph &gr)
 	put(get(vertex_weight, gr), 0, s);
 	put(get(vertex_stddev, gr), 0, 1.0);
 
-	ICI it;
+	SIMI it;
 	for(it = imap.begin(); it != imap.end(); it++)
 	{
 		add_vertex(gr);
@@ -43,11 +43,11 @@ int gtf_gene::add_edges(splice_graph &gr)
 		for(int k = 0; k < v.size(); k++)
 		{
 			gtf_exon &ge = exons[v[k]];
-			ICI it = imap.find(ge.start);
+			SIMI it = imap.find(ge.start);
 			assert(it != imap.end());
 			while(true)
 			{
-				int uu = distance((ICI)(imap.begin()), it) + 1;
+				int uu = distance((SIMI)(imap.begin()), it) + 1;
 				add_single_edge(u, uu, expr, gr);
 				u = uu;
 				if(upper(it->first) >= ge.end) break;
@@ -134,9 +134,9 @@ int gtf_gene::print()
 		exons[i].print();
 	}
 
-	for(ICI it = imap.begin(); it != imap.end(); it++)
+	for(SIMI it = imap.begin(); it != imap.end(); it++)
 	{
-		printf("%lu vertex: [%d, %d)\n", distance((ICI)(imap.begin()), it), lower(it->first), upper(it->first));
+		printf("%lu vertex: [%d, %d)\n", distance((SIMI)(imap.begin()), it), lower(it->first), upper(it->first));
 	}
 	return 0;
 }
@@ -158,8 +158,8 @@ int gtf_gene::output_gtf(ofstream &fout, const vector<path> &paths, const string
 		double abd = paths[i].abd;
 		if(v.size() < 2) continue;
 
-		ICI si = imap.begin();
-		ICI ti = imap.end();
+		SIMI si = imap.begin();
+		SIMI ti = imap.end();
 		ti--;
 
 		fout<<chrm.c_str()<<"\t";					// chromosome name
@@ -177,7 +177,7 @@ int gtf_gene::output_gtf(ofstream &fout, const vector<path> &paths, const string
 		assert(v[0] == 0);
 		for(int k = 1; k < v.size() - 1; k++)
 		{
-			ICI it = imap.begin();
+			SIMI it = imap.begin();
 			advance(it, v[k] - 1);
 			fout<<chrm.c_str()<<"\t";			// chromosome name
 			fout<<prefix.c_str()<<"\t";			// source

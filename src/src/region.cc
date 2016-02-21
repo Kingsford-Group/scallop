@@ -19,7 +19,7 @@ region::~region()
 
 int region::check_empty()
 {
-	ICI lit, rit;
+	SIMI lit, rit;
 	tie(lit, rit) = locate_boundary_iterators(*imap, lpos, rpos);
 
 	if(lit == imap->end() || rit == imap->end())
@@ -51,13 +51,13 @@ int region::estimate_abundance()
 {
 	if(empty == true) return 0;
 
-	ICI lit, rit;
+	SIMI lit, rit;
 	tie(lit, rit) = locate_boundary_iterators(*imap, lpos, rpos);
 
 	ave_abd = 1.0 * compute_sum_overlap(*imap, lit, rit) / (rcore - lcore);
 
 	double var = 0;
-	for(ICI it = lit; ; it++)
+	for(SIMI it = lit; ; it++)
 	{
 		assert(upper(it->first) > lower(it->first));
 		var += (it->second - ave_abd) * (it->second - ave_abd) * (upper(it->first) - lower(it->first));
