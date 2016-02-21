@@ -19,6 +19,7 @@ public:
 public:
 	int build_splice_graph(splice_graph &gr);
 	int output_gtf(ofstream &fout, const vector<path> &paths, const string &prefix) const;	
+	int output_gtf(ofstream &fout) const;	
 	int add_exon(const gtf_exon &ge);
 	int print();
 

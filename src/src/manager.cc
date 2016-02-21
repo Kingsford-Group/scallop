@@ -14,12 +14,14 @@ manager::manager()
 {
 	stringtie_fout.open("stringtie.gtf");
 	scallop_fout.open("scallop.gtf");
+	standard_fout.open("standard.gtf");
 }
 
 manager::~manager()
 {
 	stringtie_fout.close();
 	scallop_fout.close();
+	standard_fout.close();
 }
 
 int manager::process(const string &file)
@@ -127,8 +129,13 @@ int manager::assemble_gtf(const string &file)
 		if(p == num_edges(gr) - num_vertices(gr) + 2) s = "EASY";
 		else s = "HARD";
 
-		draw_splice_graph("splice_graph.tex", gr);
-		gg.print();
+		if(s == "EASY") continue;
+
+		char buf[1024];
+		sprintf(buf, "%s.tex", gg.exons[0].gene_id.c_str());
+		draw_splice_graph(buf, gr);
+
+		gg.output_gtf(standard_fout);
 		printf("gene %d, %lu transcipts, total %lu exons, %lu vertices, %lu edges %d paths, %s\n",
 				i, gg.transcripts.size(), gg.exons.size(),
 				num_vertices(gr), num_edges(gr), p, s.c_str());
@@ -136,8 +143,6 @@ int manager::assemble_gtf(const string &file)
 		scallop sc(gr);
 		sc.assemble();
 		gg.output_gtf(scallop_fout, sc.paths, "scallop");
-
-		break;
 	}
 
 	return 0;

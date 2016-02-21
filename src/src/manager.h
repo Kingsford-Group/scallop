@@ -12,6 +12,7 @@ public:
 	~manager();
 
 public:
+	ofstream standard_fout;
 	ofstream stringtie_fout;
 	ofstream scallop_fout;
 

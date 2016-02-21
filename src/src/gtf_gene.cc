@@ -201,3 +201,55 @@ int gtf_gene::output_gtf(ofstream &fout, const vector<path> &paths, const string
 	}
 	return 0;
 }
+
+int gtf_gene::output_gtf(ofstream &fout) const
+{
+	fout.precision(2);
+	fout<<fixed;
+
+	if(exons.size() == 0) return 0;
+
+	string chrm = exons[0].seqname;
+	string gene = exons[0].gene_id;
+	string src = exons[0].source;
+
+	for(int i = 0; i < transcripts.size(); i++)
+	{
+		const vector<int> &v = transcripts[i];
+		if(v.size() == 0) continue;
+
+		double abd = exons[v[0]].expression;
+
+		int lpos = exons[v[0]].start;
+		int rpos = exons[v[v.size() - 1]].end;
+
+		fout<<chrm.c_str()<<"\t";					// chromosome name
+		fout<<src.c_str()<<"\t";					// source
+		fout<<"transcript\t";						// feature
+		fout<<lpos<<"\t";							// left position
+		fout<<rpos<<"\t";							// right position
+		fout<<1000<<"\t";							// score, now as abundance
+		fout<<"+\t";								// strand
+		fout<<".\t";								// frame
+		fout<<"gene_id \""<<gene.c_str()<<"\"; ";
+		fout<<"transcript_id \""<<gene.c_str()<<"."<<i + 1<<"\"; ";
+		fout<<"abundance \""<<abd<<"\";"<<endl;
+
+		for(int k = 0; k < v.size(); k++)
+		{
+			const gtf_exon &ge = exons[v[k]];
+			fout<<chrm.c_str()<<"\t";			// chromosome name
+			fout<<src.c_str()<<"\t";			// source
+			fout<<"exon\t";						// feature
+			fout<<ge.start<<"\t";				// left position
+			fout<<ge.end - 1<<"\t";					// right position
+			fout<<1000<<"\t";					// score, now as abundance
+			fout<<"+\t";						// strand
+			fout<<".\t";						// frame
+			fout<<"gene_id \""<<gene.c_str()<<"\"; ";
+			fout<<"transcript_id \""<<gene.c_str()<<"."<<i + 1<<"\"; ";
+			fout<<"exon \""<<k + 1<<"\";"<<endl;
+		}
+	}
+	return 0;
+}
