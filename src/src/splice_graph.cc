@@ -69,7 +69,7 @@ int draw_splice_graph(const string &file, const splice_graph &gr)
 	for(int i = 0; i < num_vertices(gr); i++)
 	{
 		sprintf(sx, "s%d", i);
-		fout.precision(1);
+		fout.precision(0);
 		fout<<fixed;
 		fout<<"\\node[mycircle, \\colx, draw, label = below:{";
 		//fout<< get(get(vertex_weight, gr), i) << ",";
