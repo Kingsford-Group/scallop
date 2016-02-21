@@ -60,7 +60,7 @@ int draw_splice_graph(const string &file, const splice_graph &gr)
 
 	draw_header(fout);
 
-	double len = 2.4;
+	double len = 1.6;
 	fout<<"\\def\\len{"<<len<<"cm}\n";
 
 	// draw vertices
@@ -72,7 +72,8 @@ int draw_splice_graph(const string &file, const splice_graph &gr)
 		fout.precision(1);
 		fout<<fixed;
 		fout<<"\\node[mycircle, \\colx, draw, label = below:{";
-		fout<< get(get(vertex_weight, gr), i) << "," << get(get(vertex_stddev, gr), i);
+		//fout<< get(get(vertex_weight, gr), i) << ",";
+		fout<< get(get(vertex_weight, gr), i);
 		fout<< "}] ("<<sx<<") at ("<<i<<" *\\len, 0.0) {"<<i<<"};\n";
 	}
 
@@ -92,8 +93,8 @@ int draw_splice_graph(const string &file, const splice_graph &gr)
 		//else if(v[s] % 2 == 0) bend = -30;
 
 		fout<<"\\draw[line width = 0.02cm, ->, \\colx, bend right = "<< bend <<"] ("<<sx<<") to node {";
-		fout<< get(get(edge_weight, gr), *it1) <<",";
-		fout<< get(get(edge_stddev, gr), *it1) <<"} ("<<sy<<");\n";
+		//fout<< get(get(edge_weight, gr), *it1) <<",";
+		fout<< get(get(edge_weight, gr), *it1) <<"} ("<<sy<<");\n";
 	}
 
 	draw_footer(fout);
@@ -101,3 +102,25 @@ int draw_splice_graph(const string &file, const splice_graph &gr)
 	fout.close();
 	return 0;
 }
+
+int compute_num_paths(const splice_graph &gr)
+{
+	vector<int> table;
+	table.resize(num_vertices(gr), 0);
+	table[0] = 1;
+	int n = num_vertices(gr);
+	for(int i = 1; i < n; i++)
+	{
+		in_edge_iterator it1, it2;
+		for(tie(it1, it2) = in_edges(i, gr); it1 != it2; it1++)
+		{
+			int s = source(*it1, gr);
+			int t = target(*it1, gr);
+			assert(t == i);
+			assert(s < i);
+			table[t] += table[s];
+		}
+	}
+	return table[n - 1];
+}
+

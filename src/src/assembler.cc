@@ -19,6 +19,7 @@ int assembler::update_weights()
 	return 0;
 }
 
+
 path assembler::compute_maximum_forward_path() const
 {
 	path p;

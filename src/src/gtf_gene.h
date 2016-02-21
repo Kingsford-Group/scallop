@@ -25,6 +25,7 @@ private:
 	int32_t compute_sum_expression();
 	int add_vertices(splice_graph &gr);
 	int add_edges(splice_graph &gr);
+	int add_single_edge(int s, int t, double w, splice_graph &gr);
 };
 
 #endif

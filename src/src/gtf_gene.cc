@@ -44,20 +44,34 @@ int gtf_gene::add_edges(splice_graph &gr)
 		{
 			gtf_exon &ge = exons[v[k]];
 			ICI it = imap.find(ge.start);
-			while(upper(it->first) <= ge.end)
+			assert(it != imap.end());
+			while(true)
 			{
 				int uu = distance((ICI)(imap.begin()), it) + 1;
-				PEB p = add_edge(u, uu, gr);
-				assert(p.second == true);
-				put(get(edge_weight, gr), p.first, expr);
-				put(get(edge_stddev, gr), p.first, 1.0);
+				add_single_edge(u, uu, expr, gr);
 				u = uu;
+				if(upper(it->first) >= ge.end) break;
 				it++;
 			}
 		}
-		PEB p = add_edge(u, num_vertices(gr) - 1, gr);
+		add_single_edge(u, num_vertices(gr) -1, expr, gr);
+	}
+	return 0;
+}
+
+int gtf_gene::add_single_edge(int s, int t, double w, splice_graph &gr)
+{
+	PEB p = edge(s, t, gr);
+	if(p.second == true)
+	{
+		double w0 = get(get(edge_weight, gr), p.first);	
+		put(get(edge_weight, gr), p.first, w + w0);
+	}
+	else
+	{
+		PEB p = add_edge(s, t, gr);
 		assert(p.second == true);
-		put(get(edge_weight, gr), p.first, expr);
+		put(get(edge_weight, gr), p.first, w);
 		put(get(edge_stddev, gr), p.first, 1.0);
 	}
 	return 0;
