@@ -155,7 +155,6 @@ int assembler::decrease_path(const path &p)
 		assert(e.second == true);
 		double w0 = get(get(edge_weight, gr), e.first);
 		double w1 = w0 - p.abd;
-		
 		assert(w1 >= -0.000001);
 		if(w1 <= 0) w1 = 0;
 		put(get(edge_weight, gr), e.first, w1);

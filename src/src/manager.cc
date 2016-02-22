@@ -7,6 +7,7 @@
 #include "bundle.h"
 #include "stringtie.h"
 #include "scallop1.h"
+#include "scallop2.h"
 #include "gtf_gene.h"
 #include "splice_graph.h"
 
@@ -14,6 +15,7 @@ manager::manager()
 {
 	stringtie_fout.open("stringtie.gtf");
 	scallop1_fout.open("scallop1.gtf");
+	scallop2_fout.open("scallop2.gtf");
 	standard_fout.open("standard.gtf");
 }
 
@@ -21,6 +23,7 @@ manager::~manager()
 {
 	stringtie_fout.close();
 	scallop1_fout.close();
+	scallop2_fout.close();
 	standard_fout.close();
 }
 
@@ -141,9 +144,9 @@ int manager::assemble_gtf(const string &file)
 
 		gg.output_gtf(standard_fout);
 
-		scallop1 sc(gr);
+		scallop2 sc(gr);
 		sc.assemble();
-		gg.output_gtf(scallop1_fout, sc.paths, "scallop1");
+		gg.output_gtf(scallop2_fout, sc.paths, "scallop2");
 
 		stringtie st(gr);
 		st.assemble();
@@ -159,13 +162,9 @@ int manager::assemble_example(const string &file)
 	build_splice_graph(file, gr);
 	draw_splice_graph("splice_graph.tex", gr);
 
-	stringtie st(gr);
-	st.assemble();
-	st.print("stringtie");
-
-	scallop1 sc(gr);
+	scallop2 sc(gr);
 	sc.assemble();
-	sc.print("scallop1");
+	sc.print("scallop2");
 
 	return 0;
 }

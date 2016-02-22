@@ -4,8 +4,8 @@
 scallop2::scallop2(splice_graph &gr)
 	: assembler(gr)
 {
-	GRBEnv * env = new GRBEnv();
-	GRBModel * model = new GRBModel(*env);
+	env = new GRBEnv();
+	model = new GRBModel(*env);
 }
 
 scallop2::~scallop2()
@@ -17,7 +17,13 @@ scallop2::~scallop2()
 int scallop2::assemble()
 {
 	smooth_weights();
-	iterate();
+
+	while(true)
+	{
+		path p = compute_maximum_forward_path();
+		if(p.abd <= 0.1) break;
+		iterate();
+	}
 	return 0;
 }
 
@@ -28,13 +34,15 @@ int scallop2::iterate()
 	{
 		assign_weights();
 		path p = compute_maximum_forward_path();
-		cpaths.push_back(p);
 		update_counters(p);
 		update_lpsolver(p);
 		double w = optimize();
 		if(w <= cabd) break;
+		cpaths.push_back(p);
+		assign_abundance();
 		cabd = w;
 	}
+	collect();
 	return 0;
 }
 
@@ -56,6 +64,7 @@ int scallop2::init()
 
 	// GRBLinExpr
 	vars.clear();
+	obj = 0;
 	for(tie(it1, it2) = edges(gr); it1 != it2; it1++)
 	{
 		eexprs.insert(PEG(*it1, 0));
@@ -93,6 +102,7 @@ int scallop2::update_lpsolver(const path &p)
 	// add new variable for p
 	GRBVar var = model->addVar(0, GRB_INFINITY, 1,  GRB_CONTINUOUS);
 	vars.push_back(var);
+	obj += var;
 	model->update();
 
 	// update GRBLinExpr and constraints
@@ -109,17 +119,28 @@ int scallop2::update_lpsolver(const path &p)
 
 double scallop2::optimize()
 {
+	model->getEnv().set(GRB_IntParam_OutputFlag, 0);
+	model->setObjective(obj, GRB_MAXIMIZE);
 	model->optimize();
+	return model->get(GRB_DoubleAttr_ObjVal);
+}
+
+int scallop2::assign_abundance()
+{
+	assert(vars.size() == cpaths.size());
 	for(int i = 0; i < vars.size(); i++)
 	{
 		double w = vars[i].get(GRB_DoubleAttr_X);
 		cpaths[i].abd = w;
 	}
-	return model->get(GRB_DoubleAttr_ObjVal);
+	return 0;
 }
 
 int scallop2::collect()
 {
+	// recover weights
+	set_edge_weights(gr, ewrt);
+
 	// collect paths
 	for(int i = 0; i < cpaths.size(); i++)
 	{

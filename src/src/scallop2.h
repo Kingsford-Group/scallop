@@ -8,7 +8,7 @@ class scallop2 : public assembler
 {
 public:
 	scallop2(splice_graph &gr);
-	virtual ~scallop2();
+	~scallop2();
 
 public:
 	MED ewrt;						// edge weights
@@ -23,6 +23,7 @@ public:
 	GRBEnv *env;					// GRBEnv
 	GRBModel *model;				// GRBModel
 	vector<GRBVar> vars;			// vars for paths
+	GRBLinExpr obj;					// objective function
 	MEG eexprs;						// sum of paths covering e
 
 public:
@@ -36,6 +37,7 @@ private:
 	int update_counters(const path &p);
 	int update_lpsolver(const path &p);
 	double optimize();
+	int assign_abundance();
 	int collect();
 };
 
