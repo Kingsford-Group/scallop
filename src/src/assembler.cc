@@ -1,5 +1,5 @@
 #include "assembler.h"
-#include "lpsolver.h"
+#include "smoother.h"
 #include "fibonacci_heap.h"
 
 #include <iomanip>
@@ -12,9 +12,9 @@ assembler::assembler(const splice_graph &g)
 assembler::~assembler()
 {}
 
-int assembler::update_weights()
+int assembler::smooth_weights()
 {
-	lpsolver lp(gr);
+	smoother lp(gr);
 	lp.solve();
 	return 0;
 }

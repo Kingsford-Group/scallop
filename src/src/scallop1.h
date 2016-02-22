@@ -1,13 +1,13 @@
-#ifndef __SCALLOP_H__
-#define __SCALLOP_H__
+#ifndef __SCALLOP1_H__
+#define __SCALLOP1_H__
 
 #include "assembler.h"
 
-class scallop : public assembler
+class scallop1 : public assembler
 {
 public:
-	scallop(splice_graph &gr);
-	virtual ~scallop();
+	scallop1(splice_graph &gr);
+	virtual ~scallop1();
 
 public:
 	int assemble();

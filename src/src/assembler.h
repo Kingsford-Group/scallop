@@ -19,7 +19,7 @@ public:
 	int print(const string &prefix) const;
 
 protected:
-	int update_weights();
+	int smooth_weights();
 
 	double compute_bottleneck_weight(const path &p) const;
 	path compute_maximum_forward_path() const;

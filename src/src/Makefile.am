@@ -17,12 +17,12 @@ scallop_SOURCES = main.cc \
 				  interval_map.h interval_map.cc \
 				  binomial.h binomial.cc \
 				  draw.h draw.cc \
-				  lpsolver.h lpsolver.cc \
 				  path.h path.cc \
 				  fibonacci_heap.h fibonacci_heap.cc \
+				  smoother.h smoother.cc \
 				  assembler.h assembler.cc \
 				  stringtie.h stringtie.cc \
-				  scallop.h scallop.cc \
+				  scallop1.h scallop1.cc \
+				  scallop2.h scallop2.cc \
 				  gtf_exon.h gtf_exon.cc \
-				  gtf_gene.h gtf_gene.cc \
-				  shannon.h shannon.cc
+				  gtf_gene.h gtf_gene.cc 

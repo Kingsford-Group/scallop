@@ -124,3 +124,61 @@ int compute_num_paths(const splice_graph &gr)
 	return table[n - 1];
 }
 
+int get_edge_weights(const splice_graph &gr, MED &med)
+{
+	med.clear();
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = edges(gr); it1 != it2; it1++)
+	{
+		double w = get(get(edge_weight, gr), *it1);
+		med.insert(PED(*it1, w));
+	}
+	return 0;
+}
+
+int set_edge_weights(splice_graph &gr, const MED &med)
+{
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = edges(gr); it1 != it2; it1++)
+	{
+		MED::const_iterator it = med.find(*it1);
+		put(get(edge_weight, gr), *it1, it->second);
+	}
+	return 0;
+}
+
+int get_vertex_weights(const splice_graph &gr, vector<double> &v)
+{
+	v.resize(num_vertices(gr), 0);
+	for(int i = 0; i < v.size(); i++)
+	{
+		double w = get(get(vertex_weight, gr), i);
+		v[i] = w;
+	}
+	return 0;
+}
+
+int set_vertex_weights(splice_graph &gr, const vector<double> &v)
+{
+	assert(v.size() == num_vertices(gr));
+	for(int i = 0; i < v.size(); i++)
+	{
+		put(get(vertex_weight, gr), i, v[i]);
+	}
+	return 0;
+}
+
+int get_edge_indices(const splice_graph &gr, VE &i2e, MEI &e2i)
+{
+	i2e.clear();
+	e2i.clear();
+	int index = 0;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = edges(gr); it1 != it2; it1++)
+	{
+		e2i.insert(PEI(*it1, index));
+		i2e.push_back(*it1);
+		index++;
+	}
+	return 0;
+}

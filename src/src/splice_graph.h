@@ -50,9 +50,17 @@ typedef pair<edge_descriptor, double> PED;
 typedef pair<edge_descriptor, bool> PEB;
 typedef map<edge_descriptor, int> MEI;
 typedef pair<edge_descriptor, int> PEI;
+typedef vector<edge_descriptor> VE;
 
 int build_splice_graph(const string &file, splice_graph &gr);
 int draw_splice_graph(const string &file, const splice_graph &gr);
 int compute_num_paths(const splice_graph &gr);
+
+int get_edge_weights(const splice_graph &gr, MED &med);
+int set_edge_weights(splice_graph &gr, const MED & med);
+int get_vertex_weights(const splice_graph &gr, vector<double> &v);
+int set_vertex_weights(splice_graph &gr, const vector<double> &v);
+
+int get_edge_indices(VE &i2e, MEI &e2i);
 
 #endif

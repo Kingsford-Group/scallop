@@ -6,21 +6,21 @@
 #include "manager.h"
 #include "bundle.h"
 #include "stringtie.h"
-#include "scallop.h"
+#include "scallop1.h"
 #include "gtf_gene.h"
 #include "splice_graph.h"
 
 manager::manager()
 {
 	stringtie_fout.open("stringtie.gtf");
-	scallop_fout.open("scallop.gtf");
+	scallop1_fout.open("scallop1.gtf");
 	standard_fout.open("standard.gtf");
 }
 
 manager::~manager()
 {
 	stringtie_fout.close();
-	scallop_fout.close();
+	scallop1_fout.close();
 	standard_fout.close();
 }
 
@@ -67,12 +67,12 @@ int manager::assemble_bam(const string &file)
 			st.assemble();
 			st.print("stringtie");
 
-			scallop sc(gr);
+			scallop1 sc(gr);
 			sc.assemble();
-			sc.print("scallop");
+			sc.print("scallop1");
 
 			bd.output_gtf(stringtie_fout, st.paths, "stringtie", index);
-			bd.output_gtf(scallop_fout, sc.paths, "scallop", index);
+			bd.output_gtf(scallop1_fout, sc.paths, "scallop1", index);
 
 			index++;
 			bb.clear();
@@ -129,6 +129,10 @@ int manager::assemble_gtf(const string &file)
 		if(p == num_edges(gr) - num_vertices(gr) + 2) s = "EASY";
 		else s = "HARD";
 
+		printf("gene %d, %lu transcipts, total %lu exons, %lu vertices, %lu edges %d paths, %s\n",
+				i, gg.transcripts.size(), gg.exons.size(),
+				num_vertices(gr), num_edges(gr), p, s.c_str());
+
 		if(s == "EASY") continue;
 
 		char buf[1024];
@@ -136,13 +140,14 @@ int manager::assemble_gtf(const string &file)
 		draw_splice_graph(buf, gr);
 
 		gg.output_gtf(standard_fout);
-		printf("gene %d, %lu transcipts, total %lu exons, %lu vertices, %lu edges %d paths, %s\n",
-				i, gg.transcripts.size(), gg.exons.size(),
-				num_vertices(gr), num_edges(gr), p, s.c_str());
 
-		scallop sc(gr);
+		scallop1 sc(gr);
 		sc.assemble();
-		gg.output_gtf(scallop_fout, sc.paths, "scallop");
+		gg.output_gtf(scallop1_fout, sc.paths, "scallop1");
+
+		stringtie st(gr);
+		st.assemble();
+		gg.output_gtf(stringtie_fout, st.paths, "stringtie");
 	}
 
 	return 0;
@@ -158,9 +163,9 @@ int manager::assemble_example(const string &file)
 	st.assemble();
 	st.print("stringtie");
 
-	scallop sc(gr);
+	scallop1 sc(gr);
 	sc.assemble();
-	sc.print("scallop");
+	sc.print("scallop1");
 
 	return 0;
 }

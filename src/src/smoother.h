@@ -4,11 +4,11 @@
 #include "gurobi_c++.h"
 #include "splice_graph.h"
 
-class lpsolver
+class smoother
 {
 public:
-	lpsolver(splice_graph &g);
-	virtual ~lpsolver();
+	smoother(splice_graph &g);
+	virtual ~smoother();
 
 private:
 	splice_graph &gr;						// splice graph

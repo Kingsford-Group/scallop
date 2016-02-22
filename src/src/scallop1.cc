@@ -1,21 +1,21 @@
-#include "scallop.h"
+#include "scallop1.h"
 #include <cstdio>
 
-scallop::scallop(splice_graph &gr)
+scallop1::scallop1(splice_graph &gr)
 	: assembler(gr)
 {}
 
-scallop::~scallop()
+scallop1::~scallop1()
 {}
 
-int scallop::assemble()
+int scallop1::assemble()
 {
-	update_weights();
+	smooth_weights();
 	iterate();
 	return 0;
 }
 
-int scallop::iterate()
+int scallop1::iterate()
 {
 	while(true)
 	{
@@ -84,12 +84,12 @@ int scallop::iterate()
 			paths.push_back(max_qy);
 		}
 
-		if(max_gain + p0.abd < 1) break;
+		if(max_gain + p0.abd < 0.1) break;
 	}
 	return 0;
 }
 
-int scallop::resolve(const path &px, const path &py, path &qx, path &qy) const
+int scallop1::resolve(const path &px, const path &py, path &qx, path &qy) const
 {
 	assert(px.abd >= py.abd);
 	vector< vector<int> > vv;

@@ -1,19 +1,19 @@
-#include "lpsolver.h"
+#include "smoother.h"
 
-lpsolver::lpsolver(splice_graph &g)
+smoother::smoother(splice_graph &g)
 	: gr(g)
 {
 	env = new GRBEnv();
 	model = new GRBModel(*env);
 }
 
-lpsolver::~lpsolver()
+smoother::~smoother()
 {
 	delete model;
 	delete env;
 }
 
-int lpsolver::solve()
+int smoother::solve()
 {
 	build_edge_map();
 
@@ -36,7 +36,7 @@ int lpsolver::solve()
 	return 0;
 }
 
-int lpsolver::build_edge_map()
+int smoother::build_edge_map()
 {
 	int index = 0;
 	edge_iterator it1, it2;
@@ -49,7 +49,7 @@ int lpsolver::build_edge_map()
 	return 0;
 }
 
-int lpsolver::add_vertex_weight_variables()
+int smoother::add_vertex_weight_variables()
 {
 	vnwt.clear();
 	for(int i = 0; i < num_vertices(gr); i++)
@@ -61,7 +61,7 @@ int lpsolver::add_vertex_weight_variables()
 	return 0;
 }
 
-int lpsolver::add_vertex_error_variables()
+int smoother::add_vertex_error_variables()
 {
 	verr.clear();
 	for(int i = 0; i < num_vertices(gr); i++)
@@ -74,7 +74,7 @@ int lpsolver::add_vertex_error_variables()
 	return 0;
 }
 
-int lpsolver::add_edge_weight_variables()
+int smoother::add_edge_weight_variables()
 {
 	enwt.clear();
 	for(int i = 0; i < num_edges(gr); i++)
@@ -86,7 +86,7 @@ int lpsolver::add_edge_weight_variables()
 	return 0;
 }
 
-int lpsolver::add_edge_error_variables()
+int smoother::add_edge_error_variables()
 {
 	eerr.clear();
 	for(int i = 0; i < i2e.size(); i++)
@@ -99,7 +99,7 @@ int lpsolver::add_edge_error_variables()
 	return 0;
 }
 
-int lpsolver::add_vertex_error_constraints()
+int smoother::add_vertex_error_constraints()
 {
 	for(int i = 0; i < num_vertices(gr); i++)
 	{
@@ -110,7 +110,7 @@ int lpsolver::add_vertex_error_constraints()
 	return 0;
 }
 
-int lpsolver::add_edge_error_constraints()
+int smoother::add_edge_error_constraints()
 {
 	for(int i = 0; i < num_edges(gr); i++)
 	{
@@ -121,7 +121,7 @@ int lpsolver::add_edge_error_constraints()
 	return 0;
 }
 
-int lpsolver::add_conservation_constraints()
+int smoother::add_conservation_constraints()
 {
 	for(int i = 1; i < num_vertices(gr) - 1; i++)
 	{
@@ -155,7 +155,7 @@ int lpsolver::add_conservation_constraints()
 	return 0;
 }
 
-int lpsolver::update()
+int smoother::update()
 {
 	for(int i = 0; i < vnwt.size(); i++)
 	{

@@ -9,7 +9,7 @@ stringtie::~stringtie()
 
 int stringtie::assemble()
 {
-	update_weights();
+	smooth_weights();
 	greedy();
 	return 0;
 }

@@ -14,7 +14,7 @@ public:
 public:
 	ofstream standard_fout;
 	ofstream stringtie_fout;
-	ofstream scallop_fout;
+	ofstream scallop1_fout;
 
 public:
 	int process(const string &file);
