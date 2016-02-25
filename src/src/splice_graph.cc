@@ -182,3 +182,98 @@ int get_edge_indices(const splice_graph &gr, VE &i2e, MEI &e2i)
 	}
 	return 0;
 }
+
+bool decide_nested_splice_graph(const splice_graph &gr)
+{
+	for(int i = 0; i < num_vertices(gr); i++)
+	{
+		out_edge_iterator it1, it2;
+		for(tie(it1, it2) = out_edges(i, gr); it1 != it2; it1++)
+		{
+			int j = target(*it1, gr);
+			assert(j > i);
+			for(int k = i + 1; k < j; k++)
+			{
+				if(exist_direct_path(gr, i, k) == false) continue;
+				if(exist_direct_path(gr, k, j) == false) continue;
+				out_edge_iterator it3, it4;
+				for(tie(it3, it4) = out_edges(k, gr); it3 != it4; it3++)
+				{
+					int l = target(*it3, gr);
+					assert(l > k);
+					if(l <= j) continue;
+					
+					if(exist_direct_path(gr, j, l) == false) continue;
+					
+					// cross edge found: (i, j) and (k, l)
+					bool b1 = unique_path_end(gr, i, k);
+					bool b2 = unique_path_start(gr, j, l);
+					if(b1 == false && b2 == false) return false;
+				}
+			}
+		}
+	}
+	return true;
+}
+
+bool unique_path_start(const splice_graph &gr, int s, int t)
+{
+	// assume DAG
+	assert(s < t);
+	int x = s;
+	while(x < t)
+	{
+		if(out_degree(x, gr) != 1) return false;
+		out_edge_iterator it1, it2;
+		tie(it1, it2) = out_edges(x, gr);
+		int y = target(*it1, gr);
+		assert(y > x);
+		x = y;
+	}
+	return true;
+}
+
+bool unique_path_end(const splice_graph &gr, int s, int t)
+{
+	// assume DAG
+	assert(s < t);
+	int y = t;
+	while(y > s)
+	{
+		if(in_degree(y, gr) != 1) return false;
+		in_edge_iterator it1, it2;
+		tie(it1, it2) = in_edges(y, gr);
+		int x = source(*it1, gr);
+		assert(x < y);
+		y = x;
+	}
+	return true;
+}
+
+bool exist_direct_path(const splice_graph &gr, int s, int t)
+{
+	// assume DAG
+	assert(s < t);
+	vector<bool> closed;
+	closed.resize(num_vertices(gr), false);
+	vector<int> open;
+	open.push_back(s);
+	int p = 0;
+
+	while(p < open.size())
+	{
+		int x = open[p];
+		p++;
+		if(closed[x] == true) continue;
+		closed[x] = true;
+
+		out_edge_iterator it1, it2;
+		for(tie(it1, it2) = out_edges(x, gr); it1 != it2; it1++)
+		{
+			int y = target(*it1, gr);
+			if(y == t) return true;
+			if(y < t) open.push_back(y);
+		}
+	}
+	return false;
+}

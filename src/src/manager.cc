@@ -123,24 +123,31 @@ int manager::assemble_gtf(const string &file)
 
 	for(int i = 0; i < genes.size(); i++)
 	{
-		splice_graph gr;
 		gtf_gene &gg = genes[i];
+		if(gg.exons.size() <= 0) continue;
+
+		splice_graph gr;
 		gg.build_splice_graph(gr);
-		int p = compute_num_paths(gr);
+
 		string s;	
+		int p = compute_num_paths(gr);
 		assert(p >= num_edges(gr) - num_vertices(gr) + 2);
 		if(p == num_edges(gr) - num_vertices(gr) + 2) s = "EASY";
 		else s = "HARD";
 
-		printf("gene %d, %lu transcipts, total %lu exons, %lu vertices, %lu edges %d paths, %s\n",
-				i, gg.transcripts.size(), gg.exons.size(),
-				num_vertices(gr), num_edges(gr), p, s.c_str());
+		bool b = decide_nested_splice_graph(gr);
+		
+		printf("gene %s, %lu transcipts, total %lu exons, %lu vertices, %lu edges %d paths, %s, %s\n",
+				gg.exons[0].gene_id.c_str(), gg.transcripts.size(), gg.exons.size(),
+				num_vertices(gr), num_edges(gr), p, s.c_str(), b ? "NESTED" : "GENERAL");
 
-		if(s == "EASY") continue;
+		//if(s == "EASY") continue;
 
 		char buf[1024];
 		sprintf(buf, "%s.tex", gg.exons[0].gene_id.c_str());
 		draw_splice_graph(buf, gr);
+
+		continue;
 
 		gg.output_gtf(standard_fout);
 

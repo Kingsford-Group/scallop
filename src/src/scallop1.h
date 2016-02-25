@@ -3,6 +3,7 @@
 
 #include "assembler.h"
 
+// algorithm: using backward edges
 class scallop1 : public assembler
 {
 public:

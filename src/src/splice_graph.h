@@ -62,5 +62,9 @@ int get_vertex_weights(const splice_graph &gr, vector<double> &v);
 int set_vertex_weights(splice_graph &gr, const vector<double> &v);
 
 int get_edge_indices(VE &i2e, MEI &e2i);
+bool decide_nested_splice_graph(const splice_graph &gr);
+bool unique_path_start(const splice_graph &gr, int s, int t);
+bool unique_path_end(const splice_graph &gr, int s, int t);
+bool exist_direct_path(const splice_graph &gr, int s, int t);
 
 #endif

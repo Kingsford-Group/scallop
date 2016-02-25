@@ -4,6 +4,7 @@
 #include "gurobi_c++.h"
 #include "assembler.h"
 
+// algorithm: using uniform-splitting algorithm
 class scallop2 : public assembler
 {
 public:
