@@ -13,18 +13,10 @@
 
 manager::manager()
 {
-	stringtie_fout.open("stringtie.gtf");
-	scallop1_fout.open("scallop1.gtf");
-	scallop2_fout.open("scallop2.gtf");
-	standard_fout.open("standard.gtf");
 }
 
 manager::~manager()
 {
-	stringtie_fout.close();
-	scallop1_fout.close();
-	scallop2_fout.close();
-	standard_fout.close();
 }
 
 int manager::process(const string &file)
@@ -41,6 +33,9 @@ int manager::assemble_bam(const string &file)
     samFile *fn = sam_open(file.c_str(), "r");
     bam_hdr_t *h= sam_hdr_read(fn);
     bam1_t *b = bam_init1();
+
+	ofstream stringtie_fout("stringtie.gtf");
+	ofstream scallop1_fout("scallop1.gtf");
 
 	int index = 0;
 	bundle_base bb;
@@ -84,6 +79,9 @@ int manager::assemble_bam(const string &file)
 		bb.add_hit(h, b);
     }
 
+	stringtie_fout.close();
+	scallop1_fout.close();
+
     bam_destroy1(b);
     bam_hdr_destroy(h);
     sam_close(fn);
@@ -121,6 +119,14 @@ int manager::assemble_gtf(const string &file)
 		}
 	}
 
+	/*
+	ofstream stringtie_fout("stringtie.gtf");
+	ofstream scallop1_fout("scallop1.gtf");
+	ofstream scallop2_fout("scallop2.gtf");
+	ofstream standard_fout("standard.gtf");
+	*/
+
+
 	for(int i = 0; i < genes.size(); i++)
 	{
 		gtf_gene &gg = genes[i];
@@ -147,8 +153,7 @@ int manager::assemble_gtf(const string &file)
 		sprintf(buf, "%s.tex", gg.exons[0].gene_id.c_str());
 		draw_splice_graph(buf, gr);
 
-		continue;
-
+		/*
 		gg.output_gtf(standard_fout);
 
 		scallop2 sc(gr);
@@ -158,7 +163,15 @@ int manager::assemble_gtf(const string &file)
 		stringtie st(gr);
 		st.assemble();
 		gg.output_gtf(stringtie_fout, st.paths, "stringtie");
+		*/
 	}
+
+	/*
+	stringtie_fout.close();
+	scallop1_fout.close();
+	scallop2_fout.close();
+	standard_fout.close();
+	*/
 
 	return 0;
 }
