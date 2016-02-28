@@ -16,12 +16,15 @@ public:
 
 	vector<int> ss;
 	vector<int> tt;
+	int ssi;
+	int tti;
+
 	int dist;
 
 public:
 	int print();
-	int augment();
 	int compute_closest_pair();
+	int enumerate_subsets(const vector<int> &x, vector<int> &xx);
 	int augment(const vector<int> &r, vector<int> &x, vector<int> &vi, int &start);
 };
 
