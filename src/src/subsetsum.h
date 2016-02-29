@@ -18,26 +18,21 @@ public:
 	// output two subsets
 	vector<int> subs;
 	vector<int> subt;
-
-	// internal variables
-	vector<int> ss;
-	vector<int> tt;
-	vector<int> sf;
-	vector<int> tf;
-	vector<int> sb;
-	vector<int> tb;
-	int ssi;
-	int tti;
 	int dist;
+	double ratio;
 
 public:
-	int print();
+	int solve();
+	static int test();
+
+private:
 	int enumerate_subsets(const vector<int> &x, vector<int> &xx, vector<int> &xf, vector<int> &xb);
 	int augment(const vector<int> &x, vector<int> &xx, vector<int> &xf, vector<int> &xb, int &start);
-	int compute_closest_pair();
+	int compute_closest_pair(int &ssi, int &tti, const vector<int> &ss, const vector<int> &tt);
 	int recover_subset(vector<int> &sub, int xxi, const vector<int> &xf, const vector<int> &xb);
+	int compute_ratio();
+	int print();
 
-	static int test();
 };
 
 #endif

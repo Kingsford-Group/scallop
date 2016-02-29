@@ -8,11 +8,32 @@
 subsetsum::subsetsum(const vector<int> &_s, const vector<int> &_t)
 	: s(_s), t(_t)
 {
+}
+
+int subsetsum::solve()
+{
+	vector<int> ss;
+	vector<int> tt;
+	vector<int> sf;
+	vector<int> tf;
+	vector<int> sb;
+	vector<int> tb;
 	enumerate_subsets(s, ss, sf, sb);
 	enumerate_subsets(t, tt, tf, tb);
-	compute_closest_pair();
+
+	int ssi;
+	int tti;
+	compute_closest_pair(ssi, tti, ss, tt);
+
 	recover_subset(subs, ssi, sf, sb);
 	recover_subset(subt, tti, tf, tb);
+
+	sort(subs.begin(), subs.end());
+	sort(subt.begin(), subt.end());
+
+	compute_ratio();
+
+	return 0;
 }
 
 int subsetsum::enumerate_subsets(const vector<int> &x, vector<int> &xx, vector<int> &xf, vector<int> &xb)
@@ -23,7 +44,7 @@ int subsetsum::enumerate_subsets(const vector<int> &x, vector<int> &xx, vector<i
 	xb.clear();
 	for(int i = 0; i < x.size(); i++) xf.push_back(i + 1);
 	for(int i = 0; i < x.size(); i++) xb.push_back(-1);
-	for(int k = 0; k < x.size() - 1; k++) augment(x, xx, xf, xb, start);
+	for(int k = 0; k < x.size() - 2; k++) augment(x, xx, xf, xb, start);
 	return 0;
 }
 
@@ -43,7 +64,7 @@ int subsetsum::augment(const vector<int> &x, vector<int> &xx, vector<int> &xf, v
 	return 0;
 }
 
-int subsetsum::compute_closest_pair()
+int subsetsum::compute_closest_pair(int &ssi, int &tti, const vector<int> &ss, const vector<int> &tt)
 {
 	typedef pair<int, int> PI;
 	vector<PI> sss;
@@ -81,7 +102,8 @@ int subsetsum::recover_subset(vector<int> &sub, int xxi, const vector<int> &xf, 
 	int x = xxi;
 	while(true)
 	{
-		assert(x >= 1 && x <= xf.size());
+		assert(x >= 0 && x < xf.size());
+		assert(xf[x] >= 1);
 		sub.push_back(xf[x] - 1);
 		if(xb[x] == -1) break;
 		x = xb[x];
@@ -89,68 +111,48 @@ int subsetsum::recover_subset(vector<int> &sub, int xxi, const vector<int> &xf, 
 	return 0;
 }
 
+int subsetsum::compute_ratio()
+{
+	int ss = 0, tt = 0;
+	for(int i = 0; i < s.size(); i++) ss += s[i];
+	for(int i = 0; i < t.size(); i++) tt += t[i];
+	double x0 = ss < tt ? ss : tt;
+
+	int ss1 = 0, tt1 = 0;
+	for(int i = 0; i < subs.size(); i++) ss1 += s[subs[i]];
+	for(int i = 0; i < subt.size(); i++) tt1 += t[subt[i]];
+
+	int ss2 = ss - ss1;
+	int tt2 = tt - tt1;
+
+	assert(ss1 > 0 && ss2 > 0);
+	assert(tt1 > 0 && tt2 > 0);
+
+	double x1 = ss1 < tt1 ? ss1 : tt1;
+	double x2 = ss2 < tt2 ? ss2 : tt2;
+
+	ratio = (x1 + x2) / x0;
+
+	return 0;
+}
+
 int subsetsum::print()
 {
-	printf("input  first: ");
+	printf("input   first: ");
 	for(int i = 0; i < s.size(); i++) printf("%5d ", s[i]);
 	printf("\n");
-	printf("input second: ");
+	printf("input  second: ");
 	for(int i = 0; i < t.size(); i++) printf("%5d ", t[i]);
 	printf("\n");
 
-	printf("augment  first: ");
-	for(int i = 0; i < ss.size(); i++)
-	{
-		if(i > 0 && i % 20 == 0) printf("\n");
-		printf("%5d ", ss[i]);
-	}
-	printf("\n");
-	printf("forward  first: ");
-	for(int i = 0; i < sf.size(); i++)
-	{
-		if(i > 0 && i % 20 == 0) printf("\n");
-		printf("%5d ", sf[i]);
-	}
-	printf("\n");
-	printf("backward first: ");
-	for(int i = 0; i < sb.size(); i++)
-	{
-		if(i > 0 && i % 20 == 0) printf("\n");
-		printf("%5d ", sb[i]);
-	}
-	printf("\n");
-
-
-	printf("augment  second: ");
-	for(int i = 0; i < tt.size(); i++)
-	{
-		if(i > 0 && i % 20 == 0) printf("\n");
-		printf("%5d ", tt[i]);
-	}
-	printf("\n");
-	printf("forward  second: ");
-	for(int i = 0; i < tf.size(); i++)
-	{
-		if(i > 0 && i % 20 == 0) printf("\n");
-		printf("%5d ", tf[i]);
-	}
-	printf("\n");
-	printf("backward second: ");
-	for(int i = 0; i < tb.size(); i++)
-	{
-		if(i > 0 && i % 20 == 0) printf("\n");
-		printf("%5d ", tb[i]);
-	}
-	printf("\n");
-
-
-	printf("distance = %5d from (%5d, %5d)\n", dist, ssi, tti);
 	printf("first  subset: ");
 	for(int i = 0; i < subs.size(); i++) printf("%3d:%5d ", subs[i], s[subs[i]]);
 	printf("\n");
 	printf("second subset: ");
 	for(int i = 0; i < subt.size(); i++) printf("%3d:%5d ", subt[i], t[subt[i]]);
 	printf("\n");
+
+	printf("distance = %5d, ratio = %.4lf\n", dist, ratio);
 
 	return 0;
 }
@@ -163,7 +165,7 @@ int subsetsum::test()
 	s.push_back(1105);
 
 	vector<int> t;
-	t.push_back(440);
+	t.push_back(443);
 	t.push_back(637);
 	t.push_back(319);
 	t.push_back(851);
