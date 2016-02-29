@@ -55,7 +55,7 @@ typedef pair<edge_descriptor, int> PEI;
 typedef vector<edge_descriptor> VE;
 
 int build_splice_graph(const string &file, splice_graph &gr);
-int draw_splice_graph(const string &file, const splice_graph &gr);
+int draw_splice_graph(const string &file, const splice_graph &gr, double len = 1.2);
 int compute_num_paths(const splice_graph &gr);
 
 int get_edge_weights(const splice_graph &gr, MED &med);

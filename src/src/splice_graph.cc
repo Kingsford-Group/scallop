@@ -49,7 +49,7 @@ int build_splice_graph(const string &file, splice_graph &gr)
 	return 0;
 }
 
-int draw_splice_graph(const string &file, const splice_graph &gr)
+int draw_splice_graph(const string &file, const splice_graph &gr, double len)
 {
 	ofstream fout(file.c_str());
 	if(fout.fail())
@@ -60,21 +60,26 @@ int draw_splice_graph(const string &file, const splice_graph &gr)
 
 	draw_header(fout);
 
-	double len = 1.6;
 	fout<<"\\def\\len{"<<len<<"cm}\n";
 
 	// draw vertices
 	char sx[1024];
 	char sy[1024];
+	double pos = 0;
 	for(int i = 0; i < num_vertices(gr); i++)
 	{
+		int d = in_degree(i, gr) + out_degree(i, gr);
+		if(d == 0) continue;
+
+		pos++;
+
 		sprintf(sx, "s%d", i);
 		fout.precision(0);
 		fout<<fixed;
 		fout<<"\\node[mycircle, \\colx, draw, label = below:{";
 		//fout<< get(get(vertex_weight, gr), i) << ",";
 		fout<< get(get(vertex_weight, gr), i);
-		fout<< "}] ("<<sx<<") at ("<<i<<" *\\len, 0.0) {"<<i<<"};\n";
+		fout<< "}] ("<<sx<<") at ("<<pos<<" *\\len, 0.0) {"<<i<<"};\n";
 	}
 
 	// draw edges
@@ -89,13 +94,14 @@ int draw_splice_graph(const string &file, const splice_graph &gr)
 			string s;
 			char buf[1024];
 			out_edge_iterator oi1, oi2;
+			int cnt = 0;
 			for(tie(oi1, oi2) = edge_range(i, j, gr); oi1 != oi2; oi1++)
 			{
 				double w = get(get(edge_weight, gr), *oi1);
-				if(distance(oi1, oi2) == 1) sprintf(buf, "%.0lf", w);
-				else sprintf(buf, "%.0lf,", w);
-
+				if(cnt == 0) sprintf(buf, "%.0lf", w);
+				else sprintf(buf, ",%.0lf", w);
 				s.append(buf);
+				cnt++;
 			}
 
 			sprintf(sx, "s%d", i);
@@ -104,32 +110,14 @@ int draw_splice_graph(const string &file, const splice_graph &gr)
 			double bend = -40;
 			if(i + 1 == j) bend = 0;
 
-			fout<<"\\draw[line width = 0.02cm, ->, \\colx, bend right = "<< bend <<"] ("<<sx<<") to node {";
+			string line = "";
+			if(cnt == 1) line = "line width = 0.02cm,";
+			else line = "thin, double,";
+			fout<<"\\draw[->,"<< line.c_str() <<"\\colx, bend right = "<< bend <<"] ("<<sx<<") to node {";
 			//fout<< get(get(edge_weight, gr), *it1) <<",";
 			fout<< s.c_str() <<"} ("<<sy<<");\n";
-
 		}
 	}
-
-	/*
-	for(tie(it1, it2) = edges(gr); it1 != it2; it1++)
-	{
-		int s = source(*it1, gr);
-		int t = target(*it1, gr);
-
-		sprintf(sx, "s%d", s);
-		sprintf(sy, "s%d", t);
-		assert(s < t);
-		
-		double bend = -40;
-		if(s + 1 == t) bend = 0;
-		//else if(v[s] % 2 == 0) bend = -30;
-
-		fout<<"\\draw[line width = 0.02cm, ->, \\colx, bend right = "<< bend <<"] ("<<sx<<") to node {";
-		//fout<< get(get(edge_weight, gr), *it1) <<",";
-		fout<< get(get(edge_weight, gr), *it1) <<"} ("<<sy<<");\n";
-	}
-	*/
 
 	draw_footer(fout);
 

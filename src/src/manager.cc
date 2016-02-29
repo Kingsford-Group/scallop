@@ -143,24 +143,24 @@ int manager::assemble_gtf(const string &file)
 
 		if(s == "EASY") continue;
 
-		bool b = decide_nested_splice_graph(gr);
+		scallop3 sc(gr);
+		sc.assemble();
+		//gg.output_gtf(scallop2_fout, sc.paths, "scallop2");
+
+		bool b = sc.decide_nested();
 		
 		printf("gene %s, %lu transcipts, total %lu exons, %lu vertices, %lu edges %d paths, %s, %s\n",
 				gg.exons[0].gene_id.c_str(), gg.transcripts.size(), gg.exons.size(),
 				num_vertices(gr), num_edges(gr), p, s.c_str(), b ? "NESTED" : "GENERAL");
 
-		scallop3 sc(gr);
-		sc.assemble();
-		//gg.output_gtf(scallop2_fout, sc.paths, "scallop2");
-
-		/*
 		char buf[1024];
 		sprintf(buf, "%s.0.tex", gg.exons[0].gene_id.c_str());
-		draw_splice_graph(buf, gr);
+		draw_splice_graph(buf, gr, 1.4);
 
 		sprintf(buf, "%s.1.tex", gg.exons[0].gene_id.c_str());
-		draw_splice_graph(buf, sc.gr);
+		draw_splice_graph(buf, sc.gr, 2.4);
 
+		/*
 		gg.output_gtf(standard_fout);
 
 		scallop2 sc(gr);

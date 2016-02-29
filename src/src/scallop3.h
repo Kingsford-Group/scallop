@@ -18,6 +18,7 @@ public:
 
 public:
 	int assemble();
+	bool decide_nested();
 
 private:
 	int print();

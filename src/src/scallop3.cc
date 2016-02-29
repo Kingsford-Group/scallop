@@ -100,3 +100,35 @@ int scallop3::print()
 	}
 	return 0;
 }
+
+bool scallop3::decide_nested()
+{
+	for(int i = 0; i < num_vertices(gr); i++)
+	{
+		out_edge_iterator it1, it2;
+		for(tie(it1, it2) = out_edges(i, gr); it1 != it2; it1++)
+		{
+			int j = target(*it1, gr);
+			assert(j > i);
+			for(int k = i + 1; k < j; k++)
+			{
+				if(exist_direct_path(gr, i, k) == false) continue;
+				if(exist_direct_path(gr, k, j) == false) continue;
+				out_edge_iterator it3, it4;
+				for(tie(it3, it4) = out_edges(k, gr); it3 != it4; it3++)
+				{
+					int l = target(*it3, gr);
+					assert(l > k);
+					if(l <= j) continue;
+					
+					if(exist_direct_path(gr, j, l) == false) continue;
+
+					return false;
+				}
+			}
+		}
+	}
+	return true;
+}
+
+
