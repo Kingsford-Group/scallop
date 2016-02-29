@@ -78,7 +78,40 @@ int draw_splice_graph(const string &file, const splice_graph &gr)
 	}
 
 	// draw edges
-	edge_iterator it1, it2;
+	adj_iterator ai1, ai2;
+	for(int i = 0; i < num_vertices(gr); i++)
+	{
+		for(tie(ai1, ai2) = adjacent_vertices(i, gr); ai1 != ai2; ai1++)
+		{
+			int j = *ai1;
+			assert(i < j);
+
+			string s;
+			char buf[1024];
+			out_edge_iterator oi1, oi2;
+			for(tie(oi1, oi2) = edge_range(i, j, gr); oi1 != oi2; oi1++)
+			{
+				double w = get(get(edge_weight, gr), *oi1);
+				if(distance(oi1, oi2) == 1) sprintf(buf, "%.0lf", w);
+				else sprintf(buf, "%.0lf,", w);
+
+				s.append(buf);
+			}
+
+			sprintf(sx, "s%d", i);
+			sprintf(sy, "s%d", j);
+
+			double bend = -40;
+			if(i + 1 == j) bend = 0;
+
+			fout<<"\\draw[line width = 0.02cm, ->, \\colx, bend right = "<< bend <<"] ("<<sx<<") to node {";
+			//fout<< get(get(edge_weight, gr), *it1) <<",";
+			fout<< s.c_str() <<"} ("<<sy<<");\n";
+
+		}
+	}
+
+	/*
 	for(tie(it1, it2) = edges(gr); it1 != it2; it1++)
 	{
 		int s = source(*it1, gr);
@@ -96,6 +129,7 @@ int draw_splice_graph(const string &file, const splice_graph &gr)
 		//fout<< get(get(edge_weight, gr), *it1) <<",";
 		fout<< get(get(edge_weight, gr), *it1) <<"} ("<<sy<<");\n";
 	}
+	*/
 
 	draw_footer(fout);
 

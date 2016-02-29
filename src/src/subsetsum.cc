@@ -154,3 +154,22 @@ int subsetsum::print()
 
 	return 0;
 }
+
+int subsetsum::test()
+{
+	vector<int> s;
+	s.push_back(189);
+	s.push_back(958);
+	s.push_back(1105);
+
+	vector<int> t;
+	t.push_back(440);
+	t.push_back(637);
+	t.push_back(319);
+	t.push_back(851);
+
+	subsetsum sss(s, t);
+	sss.print();
+
+	return 0;
+}

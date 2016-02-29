@@ -5,6 +5,7 @@
 #include "boost/graph/graph_traits.hpp"
 #include "boost/graph/adjacency_list.hpp"
 #include "boost/graph/properties.hpp"
+#include "boost/graph/adjacency_iterator.hpp"
 
 using namespace boost;
 
@@ -27,7 +28,7 @@ namespace boost {
 
 typedef property< vertex_stddev_t, double, property<vertex_weight_t, double> > vertex_properties;
 typedef property< edge_stddev_t, double, property<edge_weight_t, double> > edge_properties;
-typedef adjacency_list<vecS, vecS, bidirectionalS, vertex_properties, edge_properties> splice_graph;
+typedef adjacency_list<multisetS, vecS, bidirectionalS, vertex_properties, edge_properties> splice_graph;
 
 typedef graph_traits<splice_graph>::vertex_iterator vertex_iterator;
 typedef graph_traits<splice_graph>::vertex_descriptor vertex_descriptor;
@@ -35,6 +36,7 @@ typedef graph_traits<splice_graph>::in_edge_iterator in_edge_iterator;
 typedef graph_traits<splice_graph>::out_edge_iterator out_edge_iterator;
 typedef graph_traits<splice_graph>::edge_iterator edge_iterator;
 typedef graph_traits<splice_graph>::edge_descriptor edge_descriptor;
+typedef graph_traits<splice_graph>::adjacency_iterator adj_iterator;
 
 typedef property_map<splice_graph, edge_weight_t>::type edge_weight_map;
 //typedef property_map<splice_graph, vertex_index_t>::const_type const_vertex_index_map;

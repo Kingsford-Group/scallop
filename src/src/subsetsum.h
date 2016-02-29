@@ -36,6 +36,8 @@ public:
 	int augment(const vector<int> &x, vector<int> &xx, vector<int> &xf, vector<int> &xb, int &start);
 	int compute_closest_pair();
 	int recover_subset(vector<int> &sub, int xxi, const vector<int> &xf, const vector<int> &xb);
+
+	static int test();
 };
 
 #endif
