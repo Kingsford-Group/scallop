@@ -23,6 +23,7 @@ public:
 
 public:
 	int solve();
+	int print();
 	static int test();
 
 private:
@@ -31,7 +32,6 @@ private:
 	int compute_closest_pair(int &ssi, int &tti, const vector<int> &ss, const vector<int> &tt);
 	int recover_subset(vector<int> &sub, int xxi, const vector<int> &xf, const vector<int> &xb);
 	int compute_ratio();
-	int print();
 
 };
 

@@ -8,10 +8,14 @@
 subsetsum::subsetsum(const vector<int> &_s, const vector<int> &_t)
 	: s(_s), t(_t)
 {
+	dist = -1;
+	ratio = 0;
 }
 
 int subsetsum::solve()
 {
+	if(s.size() <= 1 || t.size() <= 1) return 0;
+
 	vector<int> ss;
 	vector<int> tt;
 	vector<int> sf;
@@ -160,15 +164,22 @@ int subsetsum::print()
 int subsetsum::test()
 {
 	vector<int> s;
+	vector<int> t;
+	s.push_back(100);
+	
+	t.push_back(80);
+	t.push_back(20);
+
+	/*
 	s.push_back(189);
 	s.push_back(958);
 	s.push_back(1105);
 
-	vector<int> t;
 	t.push_back(443);
 	t.push_back(637);
 	t.push_back(319);
 	t.push_back(851);
+	*/
 
 	subsetsum sss(s, t);
 	sss.print();

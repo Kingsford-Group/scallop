@@ -6,12 +6,13 @@
 #include "manager.h"
 #include "config.h"
 #include "subsetsum.h"
+#include "decomposer.h"
 
 using namespace std;
 
 int main(int argc, char **argv)
 {
-	subsetsum::test();
+	decomposer::test();
 	return 0;
 
 	if(argc < 3) return 0;
