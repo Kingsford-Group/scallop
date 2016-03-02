@@ -51,6 +51,7 @@ int gtf_exon::parse(const string &s)
 			expression = (int32_t)(atoi(ss.substr(1, ss.size() - 2).c_str()));
 		}
 	}
+	return 0;
 }
 
 int gtf_exon::print()
