@@ -1,5 +1,5 @@
-#ifndef __SUBSEintSUM_H__
-#define __SUBSEintSUB_H__
+#ifndef __SUBSETSUM_H__
+#define __SUBSETSUM_H__
 
 #include <vector>
 
