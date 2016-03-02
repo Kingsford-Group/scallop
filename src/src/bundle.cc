@@ -7,15 +7,15 @@
 #include "bundle.h"
 #include "binomial.h"
 
-bundle::bundle(const bbase &bb)
-	: bbase(bb)
+bundle::bundle(const bundle_base &bb)
+	: bundle_base(bb)
 {
 	// make sure all reads are sorted 
 	check_left_ascending();
 
-	build_interval_map();
+	build_split_interval_map();
 
-	infer_bridges();
+	infer_junctions();
 	infer_left_boundaries();
 	//infer_right_boundaries();
 	add_start_boundary();
@@ -32,7 +32,7 @@ bundle::bundle(const bbase &bb)
 bundle::~bundle()
 {}
 
-int bundle::build_interval_map()
+int bundle::build_split_interval_map()
 {
 	imap.clear();
 	vector<int64_t> v;
@@ -88,9 +88,9 @@ int bundle::locate_hits(int32_t p, int &li)
 	return (up - low);
 }
 
-int bundle::infer_bridges()
+int bundle::infer_junctions()
 {
-	map<int64_t, bridge> m;
+	map<int64_t, junction> m;
 	vector<int64_t> v;
 	for(int i = 0; i < hits.size(); i++)
 	{
@@ -101,8 +101,8 @@ int bundle::infer_bridges()
 			int64_t p = v[k];
 			if(m.find(p) == m.end()) 
 			{
-				bridge sp(p, 1, hits[i].qual, hits[i].qual);
-				m.insert(pair<int64_t, bridge>(p, sp));
+				junction sp(p, 1, hits[i].qual, hits[i].qual);
+				m.insert(pair<int64_t, junction>(p, sp));
 			}
 			else
 			{
@@ -113,12 +113,12 @@ int bundle::infer_bridges()
 		}
 	}
 
-	map<int64_t, bridge>::iterator it;
+	map<int64_t, junction>::iterator it;
 	for(it = m.begin(); it != m.end(); it++)
 	{
 		if(it->second.count < min_splice_boundary_hits) continue;
 		if(it->second.max_qual < min_max_splice_boundary_qual) continue;
-		bridges.push_back(it->second);
+		junctions.push_back(it->second);
 	}
 	return 0;
 }
@@ -273,10 +273,10 @@ int bundle::build_regions()
 	typedef pair<int32_t, int> PP;
 
 	MM s;
-	for(int i = 0; i < bridges.size(); i++)
+	for(int i = 0; i < junctions.size(); i++)
 	{
-		s.insert(PP(bridges[i].lpos, LEFT_SPLICE));
-		s.insert(PP(bridges[i].rpos, RIGHT_SPLICE));
+		s.insert(PP(junctions[i].lpos, LEFT_SPLICE));
+		s.insert(PP(junctions[i].rpos, RIGHT_SPLICE));
 	}
 
 	for(int i = 0; i < boundaries.size(); i++)
@@ -313,9 +313,9 @@ int bundle::link_regions()
 		rm.insert(PPI(r, i));
 	}
 
-	for(int i = 0; i < bridges.size(); i++)
+	for(int i = 0; i < junctions.size(); i++)
 	{
-		bridge &b = bridges[i];
+		junction &b = junctions[i];
 		MPI::iterator li = rm.find(b.lpos);
 		MPI::iterator ri = lm.find(b.rpos);
 		assert(li != rm.end());
@@ -350,10 +350,10 @@ int bundle::print(int index) const
 	}
 	*/
 
-	// print bridges 
-	for(int i = 0; i < bridges.size(); i++)
+	// print junctions 
+	for(int i = 0; i < junctions.size(); i++)
 	{
-		bridges[i].print(i);
+		junctions[i].print(i);
 	}
 
 	// print boundaries
@@ -370,7 +370,7 @@ int bundle::print(int index) const
 	return 0;
 }
 
-int bundle::output_gtf(ofstream &fout, const vector<path> &paths, int index) const
+int bundle::output_gtf(ofstream &fout, const vector<path> &paths, const string &prefix, int index) const
 {
 	fout.precision(2);
 	fout<<fixed;
@@ -382,15 +382,15 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, int index) con
 		if(v.size() < 2) continue;
 
 		fout<<chrm.c_str()<<"\t";		// chromosome name
-		fout<<"scallop\t";				// source
+		fout<<prefix.c_str()<<"\t";		// source
 		fout<<"transcript\t";			// feature
 		fout<<lpos<<"\t";				// left position
 		fout<<rpos<<"\t";				// right position
 		fout<<1000<<"\t";				// score, now as abundance
 		fout<<"+\t";					// strand
 		fout<<".\t";					// frame
-		fout<<"gene_id \"scallop."<<index<<"\"; ";
-		fout<<"transcript_id \"scallop."<<index<<"."<<i + 1<<"\"; ";
+		fout<<"gene_id \"manager."<<index<<"\"; ";
+		fout<<"transcript_id \"manager."<<index<<"."<<i + 1<<"\"; ";
 		fout<<"abundance \""<<abd<<"\";"<<endl;
 
 		assert(v[0] == 0);
@@ -399,17 +399,127 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, int index) con
 		{
 			const region &r = regions[v[k] - 1];
 			fout<<chrm.c_str()<<"\t";		// chromosome name
-			fout<<"scallop\t";				// source
+			fout<<prefix.c_str()<<"\t";		// source
 			fout<<"exon\t";					// feature
 			fout<<r.lpos<<"\t";				// left position
 			fout<<r.rpos<<"\t";				// right position
 			fout<<1000<<"\t";				// score, now as abundance
 			fout<<"+\t";					// strand
 			fout<<".\t";					// frame
-			fout<<"gene_id \"scallop."<<index<<"\"; ";
-			fout<<"transcript_id \"scallop."<<index<<"."<<i + 1<<"\"; ";
+			fout<<"gene_id \"manager."<<index<<"\"; ";
+			fout<<"transcript_id \"manager."<<index<<"."<<i + 1<<"\"; ";
 			fout<<"exon_number \""<<k<<"\";"<<endl;
 		}
 	}
 	return 0;
 }
+
+int bundle::build_splice_graph(splice_graph &gr) const
+{
+	// vertices: start, each region, end
+	add_vertex(gr);
+	put(get(vertex_weight, gr), 0, 0);
+	put(get(vertex_stddev, gr), 0, 1);
+	for(int i = 0; i < regions.size(); i++)
+	{
+		const region &r = regions[i];
+		double ave = 0;
+		double dev = 1;
+		if(r.empty == false)
+		{
+			ave = r.ave_abd;
+			dev = r.dev_abd;					
+			//dev = r.dev_abd / sqrt(r.rcore - r.lcore); // TODO
+		}
+		add_vertex(gr);
+		put(get(vertex_weight, gr), i + 1, ave);
+		put(get(vertex_stddev, gr), i + 1, dev);
+	}
+	add_vertex(gr);
+	put(get(vertex_weight, gr), regions.size() + 1, 0);
+	put(get(vertex_stddev, gr), regions.size() + 1, 1);
+
+	// edges: connecting adjacent regions => e2w
+	for(int i = 0; i < regions.size() - 1; i++)
+	{
+		const region &x = regions[i];
+		const region &y = regions[i + 1];
+
+		if(x.empty || y.empty) continue;
+
+		if(x.right_break()) continue;
+		if(y.left_break()) continue;
+
+		//if(x.rtype == RIGHT_BOUNDARY) continue;
+		//if(y.ltype == LEFT_BOUNDARY) continue;
+
+		assert(x.rpos == y.lpos);
+		int32_t xr = compute_overlap(imap, x.rpos - 1);
+		int32_t yl = compute_overlap(imap, y.lpos);
+		double wt = xr < yl ? xr : yl;
+		double sd = 0.5 * x.dev_abd + 0.5 * y.dev_abd;
+
+		PEB p = add_edge(i + 1, i + 2, gr);
+		assert(p.second == true);
+		put(get(edge_weight, gr), p.first, wt);
+		put(get(edge_stddev, gr), p.first, sd);
+	}
+
+	// edges: each junction => and e2w
+	for(int i = 0; i < junctions.size(); i++)
+	{
+		const junction &b = junctions[i];
+		const region &x = regions[b.lrgn];
+		const region &y = regions[b.rrgn];
+
+		double sd = 0.5 * x.dev_abd + 0.5 * y.dev_abd;
+
+		PEB p = add_edge(b.lrgn + 1, b.rrgn + 1, gr);
+		assert(p.second == true);
+		put(get(edge_weight, gr), p.first, b.count);
+		put(get(edge_stddev, gr), p.first, sd);
+	}
+
+	// edges: connecting start/end and regions
+	int ss = 0;
+	int tt = regions.size() + 1;
+	for(int i = 0; i < regions.size(); i++)
+	{
+		const region &r = regions[i];
+		if(r.empty == true) continue;
+
+		// TODO
+		//if(r.ltype == LEFT_BOUNDARY || r.ltype == START_BOUNDARY)
+		if(r.left_break() || r.ltype == LEFT_BOUNDARY || r.ltype == START_BOUNDARY)
+		{
+			PEB p = add_edge(ss, i + 1, gr);
+			assert(p.second == true);
+			put(get(edge_weight, gr), p.first, r.ave_abd);
+			put(get(edge_stddev, gr), p.first, r.dev_abd);
+		}
+
+		// TODO
+		//if(r.rtype == RIGHT_BOUNDARY || r.rtype == END_BOUNDARY) 
+		if(r.right_break() || r.rtype == RIGHT_BOUNDARY || r.rtype == END_BOUNDARY) 
+		{
+			PEB p = add_edge(i + 1, tt, gr);
+			assert(p.second == true);
+			put(get(edge_weight, gr), p.first, r.ave_abd);
+			put(get(edge_stddev, gr), p.first, r.dev_abd);
+		}
+	}
+
+	// check
+	if(regions.size() == 1) return 0;
+	for(int i = 0; i < regions.size(); i++)
+	{
+		const region &r = regions[i];
+		if(r.empty == false) continue;
+		assert(in_degree(i + 1, gr) == 0);
+		assert(out_degree(i + 1, gr) == 0);
+	}
+
+	return 0;
+}
+
+

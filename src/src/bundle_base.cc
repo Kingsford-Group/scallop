@@ -1,9 +1,9 @@
 #include <cassert>
 #include <cstdio>
 
-#include "bbase.h"
+#include "bundle_base.h"
 
-bbase::bbase()
+bundle_base::bundle_base()
 {
 	tid = -1;
 	chrm = "";
@@ -13,10 +13,10 @@ bbase::bbase()
 	qhits = 0;
 }
 
-bbase::~bbase()
+bundle_base::~bundle_base()
 {}
 
-int bbase::add_hit(bam_hdr_t *h, bam1_t *b)
+int bundle_base::add_hit(bam_hdr_t *h, bam1_t *b)
 {
 	// create and store new hit
 	hit ht(b);
@@ -45,7 +45,7 @@ int bbase::add_hit(bam_hdr_t *h, bam1_t *b)
 	return 0;
 }
 
-int bbase::clear()
+int bundle_base::clear()
 {
 	tid = -1;
 	chrm = "";
@@ -57,17 +57,17 @@ int bbase::clear()
 	return 0;
 }
 
-int32_t bbase::get_tid()
+int32_t bundle_base::get_tid()
 {
 	return tid;
 }
 
-int32_t bbase::get_rpos()
+int32_t bundle_base::get_rpos()
 {
 	return rpos;
 }
 
-size_t bbase::get_num_hits()
+size_t bundle_base::get_num_hits()
 {
 	return hits.size();
 }

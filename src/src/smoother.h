@@ -2,16 +2,16 @@
 #define __LPSOLVER_H__
 
 #include "gurobi_c++.h"
-#include "dgraph.h"
+#include "splice_graph.h"
 
-class lpsolver
+class smoother
 {
 public:
-	lpsolver(dgraph &g);
-	virtual ~lpsolver();
+	smoother(splice_graph &g);
+	virtual ~smoother();
 
 private:
-	dgraph &gr;						// splice graph
+	splice_graph &gr;						// splice graph
 	vector<edge_descriptor> i2e;	// edge map
 	MEI e2i;						// edge map
 

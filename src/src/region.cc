@@ -2,7 +2,7 @@
 #include "config.h"
 #include "binomial.h"
 
-region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const imap_t *_imap)
+region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_imap)
 	:lpos(_lpos), rpos(_rpos), imap(_imap), ltype(_ltype), rtype(_rtype)
 {
 	ave_abd = 0;
@@ -19,7 +19,7 @@ region::~region()
 
 int region::check_empty()
 {
-	ICI lit, rit;
+	SIMI lit, rit;
 	tie(lit, rit) = locate_boundary_iterators(*imap, lpos, rpos);
 
 	if(lit == imap->end() || rit == imap->end())
@@ -51,13 +51,13 @@ int region::estimate_abundance()
 {
 	if(empty == true) return 0;
 
-	ICI lit, rit;
+	SIMI lit, rit;
 	tie(lit, rit) = locate_boundary_iterators(*imap, lpos, rpos);
 
 	ave_abd = 1.0 * compute_sum_overlap(*imap, lit, rit) / (rcore - lcore);
 
 	double var = 0;
-	for(ICI it = lit; ; it++)
+	for(SIMI it = lit; ; it++)
 	{
 		assert(upper(it->first) > lower(it->first));
 		var += (it->second - ave_abd) * (it->second - ave_abd) * (upper(it->first) - lower(it->first));

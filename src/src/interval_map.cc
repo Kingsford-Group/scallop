@@ -1,8 +1,8 @@
-#include "imap.h"
+#include "interval_map.h"
 
-int create_split(imap_t &imap, int32_t p)
+int create_split(split_interval_map &imap, int32_t p)
 {
-	ICI it = imap.find(p);
+	SIMI it = imap.find(p);
 	if(it == imap.end()) return 0;
 	int32_t l = lower(it->first);
 	int32_t r = upper(it->first);
@@ -16,21 +16,21 @@ int create_split(imap_t &imap, int32_t p)
 	return 0;
 }
 
-int compute_overlap(const imap_t &imap, int32_t p)
+int compute_overlap(const split_interval_map &imap, int32_t p)
 {
-	ICI it = imap.find(p);
+	SIMI it = imap.find(p);
 	if(it == imap.end()) return 0;
 	return it->second;
 }
 
-ICI locate_right_iterator(const imap_t &imap, int32_t x)
+SIMI locate_right_iterator(const split_interval_map &imap, int32_t x)
 {
 	return imap.upper_bound(ROI(x - 1, x));
 }
 
-ICI locate_left_iterator(const imap_t &imap, int32_t x)
+SIMI locate_left_iterator(const split_interval_map &imap, int32_t x)
 {
-	ICI it = imap.lower_bound(ROI(x - 1, x));
+	SIMI it = imap.lower_bound(ROI(x - 1, x));
 	if(it == imap.end() && it == imap.begin()) return it;
 	if(it == imap.end()) it--;
 
@@ -42,9 +42,9 @@ ICI locate_left_iterator(const imap_t &imap, int32_t x)
 	return it;
 }
 
-PICI locate_boundary_iterators(const imap_t &imap, int32_t x, int32_t y)
+PSIMI locate_boundary_iterators(const split_interval_map &imap, int32_t x, int32_t y)
 {
-	ICI lit, rit;
+	SIMI lit, rit;
 	lit = locate_right_iterator(imap, x);
 	if(lit == imap.end() || upper(lit->first) > y) lit = imap.end();
 
@@ -58,15 +58,15 @@ PICI locate_boundary_iterators(const imap_t &imap, int32_t x, int32_t y)
 		assert(lit == imap.end());
 	}
 
-	return PICI(lit, rit); 
+	return PSIMI(lit, rit); 
 }
 
-int32_t compute_max_overlap(const imap_t &imap, ICI &p, ICI &q)
+int32_t compute_max_overlap(const split_interval_map &imap, SIMI &p, SIMI &q)
 {
 	if(p == imap.end()) return 0;
 
 	int32_t s = 0;
-	for(ICI it = p; it != q; it++)
+	for(SIMI it = p; it != q; it++)
 	{
 		int32_t x = it->second;
 		if(x > s) s = x;
@@ -81,22 +81,22 @@ int32_t compute_max_overlap(const imap_t &imap, ICI &p, ICI &q)
 	return s;
 }
 
-int32_t compute_sum_overlap(const imap_t &imap, ICI &p, ICI &q)
+int32_t compute_sum_overlap(const split_interval_map &imap, SIMI &p, SIMI &q)
 {
 	if(p == imap.end()) return 0;
 
 	int32_t s = 0;
-	for(ICI it = p; it != q; it++) s += it->second;
+	for(SIMI it = p; it != q; it++) s += it->second;
 	if(q != imap.end()) s += q->second;
 	return s;
 }
 
-int32_t compute_coverage(const imap_t &imap, ICI &p, ICI &q)
+int32_t compute_coverage(const split_interval_map &imap, SIMI &p, SIMI &q)
 {
 	if(p == imap.end()) return 0;
 
 	int32_t s = 0;
-	for(ICI it = p; it != q; it++)
+	for(SIMI it = p; it != q; it++)
 	{
 		s += upper(it->first) - lower(it->first);
 	}
@@ -106,14 +106,9 @@ int32_t compute_coverage(const imap_t &imap, ICI &p, ICI &q)
 	return s;
 }
 
-int test_imap()
+int test_split_interval_map()
 {
-	imap_t imap;
-	/*
-	imap += make_pair(ROI(1, 2), 3);
-	imap += make_pair(ROI(2, 3), 3);
-	imap += make_pair(ROI(3, 4), 3);
-	*/
+	split_interval_map imap;
 
 	imap += make_pair(ROI(6, 7), 3);
 	imap += make_pair(ROI(1, 3), 3);
@@ -122,7 +117,7 @@ int test_imap()
 
 	create_split(imap, 4);
 
-	ICI it;
+	SIMI it;
 	
 	for(it = imap.begin(); it != imap.end(); it++)
 	{
@@ -174,7 +169,7 @@ int test_imap()
 	{
 		for(int j = i; j <= 8; j++)
 		{
-			pair<ICI, ICI> p = locate_boundary_iterators(imap, i, j);
+			pair<SIMI, SIMI> p = locate_boundary_iterators(imap, i, j);
 			int s = compute_coverage(imap, p.first, p.second);
 			printf("coverage [%d,%d) = %d\n", i, j, s);
 		}
