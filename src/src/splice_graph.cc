@@ -49,6 +49,41 @@ int build_splice_graph(const string &file, splice_graph &gr)
 	return 0;
 }
 
+int write_splice_graph(const string &file, const splice_graph &gr)
+{
+	ofstream fin(file.c_str());
+	if(fin.fail()) 
+	{
+		printf("open file %s error\n", file.c_str());
+		return 0;
+	}
+	
+	fin<<fixed;
+	fin.precision(2);
+	int n = num_vertices(gr);
+	
+	fin<<n<<endl;
+	for(int i = 0; i < n; i++)
+	{
+		double weight = get(get(vertex_weight, gr), i);
+		double stddev = get(get(vertex_stddev, gr), i);
+		fin<<weight<<" "<<stddev<<endl;
+	}
+
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = edges(gr); it1 != it2; it1++)
+	{
+		int s = source(*it1, gr);
+		int t = target(*it1, gr);
+		double weight = get(get(edge_weight, gr), *it1);
+		double stddev = get(get(edge_stddev, gr), *it1);
+		fin<<s<<" "<<t<<" "<<weight<<" "<<stddev<<endl;
+	}
+
+	fin.close();
+	return 0;
+}
+
 int draw_splice_graph(const string &file, const splice_graph &gr, double len)
 {
 	ofstream fout(file.c_str());
@@ -298,4 +333,99 @@ bool exist_direct_path(const splice_graph &gr, int s, int t)
 		}
 	}
 	return false;
+}
+
+int simulate_splice_graph(splice_graph &gr, int n, int m)
+{
+	gr.clear();
+	for(int i = 0; i < n; i++)
+	{
+		add_vertex(gr);
+		put(get(vertex_weight, gr), i, 1);
+		put(get(vertex_stddev, gr), i, 1);
+	}
+
+	for(int i = 0; i < m; i++)
+	{
+		int s = rand() % (n - 1);
+		int t = s + 1 + rand() % (n - s - 1);
+		PEB p = add_edge(s, t, gr);
+		put(get(edge_weight, gr), p.first, 1);
+		put(get(edge_stddev, gr), p.first, 1);
+	}
+	return 0;
+}
+
+bool check_fully_reachable_from_start(const splice_graph &gr)
+{
+	// assume DAG
+	vector<bool> closed;
+	closed.resize(num_vertices(gr), false);
+	vector<int> open;
+	open.push_back(0);
+	int p = 0;
+
+	while(p < open.size())
+	{
+		int x = open[p];
+		p++;
+		if(closed[x] == true) continue;
+		closed[x] = true;
+
+		out_edge_iterator it1, it2;
+		for(tie(it1, it2) = out_edges(x, gr); it1 != it2; it1++)
+		{
+			int y = target(*it1, gr);
+			if(closed[y] == true) continue;
+			open.push_back(y);
+		}
+	}
+
+	for(int i = 0; i < closed.size(); i++)
+	{
+		if(closed[i] == false) return false;
+	}
+
+	return true;
+}
+
+bool check_fully_reachable_to_end(const splice_graph &gr)
+{
+	// assume DAG
+	vector<bool> closed;
+	closed.resize(num_vertices(gr), false);
+	vector<int> open;
+	open.push_back(num_vertices(gr) - 1);
+	int p = 0;
+
+	while(p < open.size())
+	{
+		int x = open[p];
+		p++;
+		if(closed[x] == true) continue;
+		closed[x] = true;
+
+		in_edge_iterator it1, it2;
+		for(tie(it1, it2) = in_edges(x, gr); it1 != it2; it1++)
+		{
+			int y = source(*it1, gr);
+			if(closed[y] == true) continue;
+			open.push_back(y);
+		}
+	}
+
+	for(int i = 0; i < closed.size(); i++)
+	{
+		if(closed[i] == false) return false;
+	}
+
+	return true;
+}
+
+bool check_fully_connected(const splice_graph &gr)
+{
+	bool b1 = check_fully_reachable_from_start(gr);
+	bool b2 = check_fully_reachable_to_end(gr);
+	if(b1 && b2) return true;
+	else return false;
 }

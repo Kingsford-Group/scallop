@@ -55,6 +55,7 @@ typedef pair<edge_descriptor, int> PEI;
 typedef vector<edge_descriptor> VE;
 
 int build_splice_graph(const string &file, splice_graph &gr);
+int write_splice_graph(const string &file, const splice_graph &gr);
 int draw_splice_graph(const string &file, const splice_graph &gr, double len = 1.2);
 int compute_num_paths(const splice_graph &gr);
 
@@ -63,10 +64,16 @@ int set_edge_weights(splice_graph &gr, const MED & med);
 int get_vertex_weights(const splice_graph &gr, vector<double> &v);
 int set_vertex_weights(splice_graph &gr, const vector<double> &v);
 
-int get_edge_indices(VE &i2e, MEI &e2i);
+int get_edge_indices(const splice_graph &gr, VE &i2e, MEI &e2i);
 bool decide_nested_splice_graph(const splice_graph &gr);
 bool unique_path_start(const splice_graph &gr, int s, int t);
 bool unique_path_end(const splice_graph &gr, int s, int t);
 bool exist_direct_path(const splice_graph &gr, int s, int t);
+
+int simulate_splice_graph(splice_graph &gr, int n, int m);
+bool check_fully_connected(const splice_graph &gr);
+bool check_fully_reachable_from_start(const splice_graph &gr);
+bool check_fully_reachable_to_end(const splice_graph &gr);
+
 
 #endif
