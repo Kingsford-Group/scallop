@@ -29,4 +29,4 @@ scallop_SOURCES = main.cc \
 				  gtf_gene.h gtf_gene.cc \
 				  subsetsum.h subsetsum.cc \
 				  decomposer.h decomposer.cc \
-				  algebra.h algebra.cc
+				  algebra.h algebra.cc 

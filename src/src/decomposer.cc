@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <cassert>
 
+using namespace subsetsum;
+
 decomposer::decomposer(const vector<int> &_s, const vector<int> &_t)
 	: s(_s), t(_t)
 {
@@ -42,19 +44,20 @@ int decomposer::build_subsets()
 		for(int i = 0; i < xi.size(); i++) x.push_back(s[xi[i]]);
 		for(int i = 0; i < yi.size(); i++) y.push_back(t[yi[i]]);
 
-		subsetsum sss(x, y);
-		sss.solve();
+		vector<int> subx;
+		vector<int> suby;
+		double ratio = compute_closest_subsets(x, y, subx, suby);
 
-		if(sss.ratio < 0.99)
+		if(ratio < 0.99)
 		{
 			subsets.push_back(v[k]);
 		}
 		else
 		{
-			vector<int> s1 = decipher(sss.subs, xi);
-			vector<int> t1 = decipher(sss.subt, yi);
-			vector<int> s2 = decipher(complement(sss.subs, x.size()), xi);
-			vector<int> t2 = decipher(complement(sss.subt, y.size()), yi);
+			vector<int> s1 = decipher(subx, xi);
+			vector<int> t1 = decipher(suby, yi);
+			vector<int> s2 = decipher(complement(subx, x.size()), xi);
+			vector<int> t2 = decipher(complement(suby, y.size()), yi);
 			v.push_back(PVV(s1, t1));
 			v.push_back(PVV(s2, t2));
 		}
