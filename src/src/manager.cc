@@ -157,10 +157,10 @@ int manager::assemble_gtf(const string &file)
 
 		char buf[1024];
 		sprintf(buf, "%s.0.tex", gg.exons[0].gene_id.c_str());
-		draw_splice_graph(buf, gr, 1.4);
+		draw_splice_graph(gr, buf, 1.4);
 
 		sprintf(buf, "%s.1.tex", gg.exons[0].gene_id.c_str());
-		draw_splice_graph(buf, sc.gr, 2.4);
+		draw_splice_graph(sc.gr, buf, 2.4);
 
 		/*
 		gg.output_gtf(standard_fout);
@@ -188,8 +188,8 @@ int manager::assemble_gtf(const string &file)
 int manager::assemble_example(const string &file)
 {
 	splice_graph gr;
-	build_splice_graph(file, gr);
-	draw_splice_graph("splice_graph.tex", gr);
+	build_splice_graph(gr, file);
+	draw_splice_graph(gr, "splice_graph.tex");
 
 	scallop2 sc(gr);
 	sc.assemble();

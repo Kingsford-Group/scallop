@@ -14,15 +14,15 @@ int algebra::solve(int n, int m)
 {
 	srand(time(0));
 	simulate(n, m);
-	write_splice_graph("sgraph.gr", gr);
-	draw_splice_graph("sgraph.tex", gr);
+	write_splice_graph(gr, "sgraph.gr");
+	draw_splice_graph(gr, "sgraph.tex");
 	process();
 	return 0;
 }
 
 int algebra::solve(const string &file)
 {
-	build_splice_graph(file, gr);
+	build_splice_graph(gr, file);
 	process();
 	return 0;
 }

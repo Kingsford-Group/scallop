@@ -112,8 +112,8 @@ bool scallop3::decide_nested()
 			assert(j > i);
 			for(int k = i + 1; k < j; k++)
 			{
-				if(exist_direct_path(gr, i, k) == false) continue;
-				if(exist_direct_path(gr, k, j) == false) continue;
+				if(check_directed_path(gr, i, k) == false) continue;
+				if(check_directed_path(gr, k, j) == false) continue;
 				out_edge_iterator it3, it4;
 				for(tie(it3, it4) = out_edges(k, gr); it3 != it4; it3++)
 				{
@@ -121,7 +121,7 @@ bool scallop3::decide_nested()
 					assert(l > k);
 					if(l <= j) continue;
 					
-					if(exist_direct_path(gr, j, l) == false) continue;
+					if(check_directed_path(gr, j, l) == false) continue;
 
 					return false;
 				}

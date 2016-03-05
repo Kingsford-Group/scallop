@@ -3,7 +3,7 @@
 
 #include <fstream>
 
-int build_splice_graph(const string &file, splice_graph &gr)
+int build_splice_graph(splice_graph &gr, const string &file)
 {
 	ifstream fin(file.c_str());
 	if(fin.fail()) 
@@ -49,7 +49,7 @@ int build_splice_graph(const string &file, splice_graph &gr)
 	return 0;
 }
 
-int write_splice_graph(const string &file, const splice_graph &gr)
+int write_splice_graph(const splice_graph &gr, const string &file)
 {
 	ofstream fin(file.c_str());
 	if(fin.fail()) 
@@ -84,7 +84,7 @@ int write_splice_graph(const string &file, const splice_graph &gr)
 	return 0;
 }
 
-int draw_splice_graph(const string &file, const splice_graph &gr, double len)
+int draw_splice_graph(const splice_graph &gr, const string &file, double len)
 {
 	ofstream fout(file.c_str());
 	if(fout.fail())
@@ -157,6 +157,27 @@ int draw_splice_graph(const string &file, const splice_graph &gr, double len)
 	draw_footer(fout);
 
 	fout.close();
+	return 0;
+}
+
+int simulate_splice_graph(splice_graph &gr, int n, int m)
+{
+	gr.clear();
+	for(int i = 0; i < n; i++)
+	{
+		add_vertex(gr);
+		put(get(vertex_weight, gr), i, 1);
+		put(get(vertex_stddev, gr), i, 1);
+	}
+
+	for(int i = 0; i < m; i++)
+	{
+		int s = rand() % (n - 1);
+		int t = s + 1 + rand() % (n - s - 1);
+		PEB p = add_edge(s, t, gr);
+		put(get(edge_weight, gr), p.first, 1);
+		put(get(edge_stddev, gr), p.first, 1);
+	}
 	return 0;
 }
 
@@ -240,74 +261,7 @@ int get_edge_indices(const splice_graph &gr, VE &i2e, MEI &e2i)
 	return 0;
 }
 
-bool decide_nested_splice_graph(const splice_graph &gr)
-{
-	for(int i = 0; i < num_vertices(gr); i++)
-	{
-		out_edge_iterator it1, it2;
-		for(tie(it1, it2) = out_edges(i, gr); it1 != it2; it1++)
-		{
-			int j = target(*it1, gr);
-			assert(j > i);
-			for(int k = i + 1; k < j; k++)
-			{
-				if(exist_direct_path(gr, i, k) == false) continue;
-				if(exist_direct_path(gr, k, j) == false) continue;
-				out_edge_iterator it3, it4;
-				for(tie(it3, it4) = out_edges(k, gr); it3 != it4; it3++)
-				{
-					int l = target(*it3, gr);
-					assert(l > k);
-					if(l <= j) continue;
-					
-					if(exist_direct_path(gr, j, l) == false) continue;
-					
-					// cross edge found: (i, j) and (k, l)
-					bool b1 = unique_path_end(gr, i, k);
-					bool b2 = unique_path_start(gr, j, l);
-					if(b1 == false && b2 == false) return false;
-				}
-			}
-		}
-	}
-	return true;
-}
-
-bool unique_path_start(const splice_graph &gr, int s, int t)
-{
-	// assume DAG
-	assert(s < t);
-	int x = s;
-	while(x < t)
-	{
-		if(out_degree(x, gr) != 1) return false;
-		out_edge_iterator it1, it2;
-		tie(it1, it2) = out_edges(x, gr);
-		int y = target(*it1, gr);
-		assert(y > x);
-		x = y;
-	}
-	return true;
-}
-
-bool unique_path_end(const splice_graph &gr, int s, int t)
-{
-	// assume DAG
-	assert(s < t);
-	int y = t;
-	while(y > s)
-	{
-		if(in_degree(y, gr) != 1) return false;
-		in_edge_iterator it1, it2;
-		tie(it1, it2) = in_edges(y, gr);
-		int x = source(*it1, gr);
-		assert(x < y);
-		y = x;
-	}
-	return true;
-}
-
-bool exist_direct_path(const splice_graph &gr, int s, int t)
+bool check_directed_path(const splice_graph &gr, int s, int t)
 {
 	// assume DAG
 	assert(s < t);
@@ -333,27 +287,6 @@ bool exist_direct_path(const splice_graph &gr, int s, int t)
 		}
 	}
 	return false;
-}
-
-int simulate_splice_graph(splice_graph &gr, int n, int m)
-{
-	gr.clear();
-	for(int i = 0; i < n; i++)
-	{
-		add_vertex(gr);
-		put(get(vertex_weight, gr), i, 1);
-		put(get(vertex_stddev, gr), i, 1);
-	}
-
-	for(int i = 0; i < m; i++)
-	{
-		int s = rand() % (n - 1);
-		int t = s + 1 + rand() % (n - s - 1);
-		PEB p = add_edge(s, t, gr);
-		put(get(edge_weight, gr), p.first, 1);
-		put(get(edge_stddev, gr), p.first, 1);
-	}
-	return 0;
 }
 
 bool check_fully_reachable_from_start(const splice_graph &gr)
