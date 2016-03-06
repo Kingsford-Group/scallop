@@ -1,8 +1,11 @@
 #include "scallop3.h"
+#include "subsetsum.h"
 #include <cstdio>
 
-scallop3::scallop3(splice_graph &gr)
-	: assembler(gr)
+using namespace subsetsum;
+
+scallop3::scallop3(const string &name, splice_graph &gr)
+	: assembler(name, gr)
 {}
 
 scallop3::~scallop3()
@@ -15,6 +18,15 @@ int scallop3::assemble()
 	reconstruct_splice_graph();
 	get_edge_indices(gr, i2e, e2i);
 	build_null_space();
+	iterate();
+	return 0;
+}
+
+int scallop3::iterate()
+{
+	int ei;
+	vector<int> sub;
+	identify_equation(ei, sub);
 	return 0;
 }
 
@@ -126,4 +138,96 @@ int scallop3::build_null_space()
 	assert(rank == ns.size());
 
 	return 0;
+}
+
+int scallop3::identify_equation(int &ei, vector<int> &sub)
+{
+	if(num_edges(gr) >= 11) return 0;
+
+	vector<int> x;
+	for(int i = 0; i < i2e.size(); i++)
+	{
+		double w = get(get(edge_weight, gr), i2e[i]);
+		x.push_back((int)(w));
+	}
+
+	vector<int> xx;
+	vector<int> xf;
+	vector<int> xb;
+	enumerate_subsets(x, xx, xf, xb);
+
+	vector<PI> xxp;
+	for(int i = 0; i < xx.size(); i++) xxp.push_back(PI(xx[i], i));
+
+	sort(xxp.begin(), xxp.end());
+
+	// sort all edges? TODO
+	vector<PI> xp;
+	for(int i = 0; i < x.size(); i++) xp.push_back(PI(x[i], i));
+
+	sort(xp.begin(), xp.end());
+
+	ei = -1;
+	int xxpi = -1;
+	int minw = INT_MAX;
+	for(int i = 0; i < xp.size(); i++)
+	{
+		int k = locate_closest_subset(xp[i].second, xp[i].first, xxp);
+		double ww = (int)fabs(xp[i].first - xxp[k].first);
+		if(ww < minw)
+		{
+			minw = ww;
+			xxpi = k;
+			ei = xp[i].second;
+		}
+	}
+
+	assert(ei != -1);
+
+	recover_subset(sub, xxp[xxpi].second, xf, xb);
+
+	printf("%s closest subset for edge %d:%d has %lu edges, error = %d, subset = (", name.c_str(), ei, x[ei], sub.size(), minw);
+	for(int i = 0; i < sub.size() - 1; i++) printf("%d:%d, ", sub[i], x[sub[i]]);
+	printf("%d:%d)\n", sub[sub.size() - 1], x[sub[sub.size() - 1]]);
+	
+	return 0;
+}
+
+int scallop3::locate_closest_subset(int xi, int w, const vector<PI> &xxp)
+{
+	if(xxp.size() == 0) return -1;
+
+	int s = 0; 
+	int t = xxp.size() - 1;
+	int m = -1;
+	while(s < t)
+	{
+		m = (s + t) / 2;
+		if(w == xxp[m].first) break;
+		else if(w > xxp[m].first) s = m;
+		else t = m;
+	}
+
+	int si = -1;
+	for(si = m; si >= 0; si--)
+	{
+		if(xxp[si].second != xi) break;
+	}
+
+	int ti = -1;
+	for(ti = m + 1; ti < xxp.size(); ti++)
+	{
+		if(xxp[ti].second != xi) break;
+	}
+
+	assert(si != -1 || ti != -1);
+	
+	if(si == -1) return ti;
+	if(ti == -1) return si;
+
+	int sw = (int)(fabs(xxp[si].first - w));
+	int tw = (int)(fabs(xxp[ti].first - w));
+
+	if(sw <= tw) return si;
+	else return ti;
 }

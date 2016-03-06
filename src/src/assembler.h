@@ -8,9 +8,11 @@ class assembler
 {
 public:
 	assembler(const splice_graph &g);
+	assembler(const string &s, const splice_graph &g);
 	virtual ~assembler();
 
 public:
+	string name;					// name for this gene
 	splice_graph gr;				// splice graph
 	vector<path> paths;				// transcripts
 

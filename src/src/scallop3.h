@@ -6,12 +6,13 @@
 
 typedef map< edge_descriptor, vector<int> > MEV;
 typedef pair< edge_descriptor, vector<int> > PEV;
+typedef pair<int, int> PI;
 
 // algorithm: identify subsetsum signal
 class scallop3 : public assembler
 {
 public:
-	scallop3(splice_graph &gr);
+	scallop3(const string &name, splice_graph &gr);
 	virtual ~scallop3();
 
 public:
@@ -29,6 +30,9 @@ private:
 	int reconstruct_splice_graph();
 	bool decompose_trivial_vertex(int x);
 	int build_null_space();
+	int iterate();
+	int identify_equation(int &ei, vector<int> &sub);
+	int locate_closest_subset(int xi, int w, const vector<PI> & xxp);
 };
 
 #endif
