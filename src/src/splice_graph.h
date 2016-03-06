@@ -69,6 +69,7 @@ int get_edge_indices(const splice_graph &gr, VE &i2e, MEI &e2i);
 
 // analysis the structure of splice graph
 int compute_num_paths(const splice_graph &gr);
+bool check_nested_splice_graph(const splice_graph &gr);
 bool check_directed_path(const splice_graph &gr, int s, int t);
 bool check_fully_connected(const splice_graph &gr);
 bool check_fully_reachable_from_start(const splice_graph &gr);

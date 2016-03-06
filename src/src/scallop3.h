@@ -6,7 +6,7 @@
 typedef map< edge_descriptor, vector<int> > MEV;
 typedef pair< edge_descriptor, vector<int> > PEV;
 
-// dynamic programming for nested graph
+// algorithm: identify subsetsum signal
 class scallop3 : public assembler
 {
 public:
@@ -18,10 +18,9 @@ public:
 
 public:
 	int assemble();
-	bool decide_nested();
+	int print();
 
 private:
-	int print();
 	int init_super_edges();
 	int reconstruct_splice_graph();
 	bool decompose_trivial_vertex(int x);

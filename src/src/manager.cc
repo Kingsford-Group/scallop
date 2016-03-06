@@ -147,7 +147,7 @@ int manager::assemble_gtf(const string &file)
 		sc.assemble();
 		//gg.output_gtf(scallop2_fout, sc.paths, "scallop2");
 
-		bool b = sc.decide_nested();
+		bool b = check_nested_splice_graph(sc.gr);
 		
 		printf("gene %s, %lu transcipts, total %lu exons, %lu vertices, %lu edges %d paths, %s, %s\n",
 				gg.exons[0].gene_id.c_str(), gg.transcripts.size(), gg.exons.size(),

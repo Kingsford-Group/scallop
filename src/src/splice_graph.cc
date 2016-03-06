@@ -261,6 +261,36 @@ int get_edge_indices(const splice_graph &gr, VE &i2e, MEI &e2i)
 	return 0;
 }
 
+bool check_nested_splice_graph(const splice_graph &gr)
+{
+	for(int i = 0; i < num_vertices(gr); i++)
+	{
+		out_edge_iterator it1, it2;
+		for(tie(it1, it2) = out_edges(i, gr); it1 != it2; it1++)
+		{
+			int j = target(*it1, gr);
+			assert(j > i);
+			for(int k = i + 1; k < j; k++)
+			{
+				if(check_directed_path(gr, i, k) == false) continue;
+				if(check_directed_path(gr, k, j) == false) continue;
+				out_edge_iterator it3, it4;
+				for(tie(it3, it4) = out_edges(k, gr); it3 != it4; it3++)
+				{
+					int l = target(*it3, gr);
+					assert(l > k);
+					if(l <= j) continue;
+					
+					if(check_directed_path(gr, j, l) == false) continue;
+
+					return false;
+				}
+			}
+		}
+	}
+	return true;
+}
+
 bool check_directed_path(const splice_graph &gr, int s, int t)
 {
 	// assume DAG

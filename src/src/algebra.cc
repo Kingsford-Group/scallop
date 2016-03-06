@@ -1,239 +1,120 @@
 #include "algebra.h"
 
-#include <iomanip>
 #include <cstdio>
 #include <cfloat>
+#include <cmath>
+#include <cassert>
 
-algebra::algebra()
+algebra::algebra(const VVD &m)
+	:mat(m)
 {}
 
 algebra::~algebra()
 {}
 
-int algebra::solve(int n, int m)
+int algebra::full_eliminate()
 {
-	srand(time(0));
-	simulate(n, m);
-	write_splice_graph(gr, "sgraph.gr");
-	draw_splice_graph(gr, "sgraph.tex");
-	process();
-	return 0;
-}
-
-int algebra::solve(const string &file)
-{
-	build_splice_graph(gr, file);
-	process();
-	return 0;
-}
-
-int algebra::process()
-{
-	get_edge_indices(gr, i2e, e2i);
-	build_path_edge_matrix();
-	pem0 = pem;
-	sample_valid_paths();
-
-	print();
-	gaussian_elimination();
-	print();
-
-	check();
-	return 0;
-}
-
-int algebra::simulate(int n, int m)
-{
-	while(true)
+	for(int i = 0; i < mat.size(); i++)
 	{
-		simulate_splice_graph(gr, n, m);
-		bool b = check_fully_connected(gr);
-		if(b == true) break;
+		int f = full_eliminate(i, i);
+		if(f == -1) return i;
 	}
-	return 0;
+	return mat.size();
 }
 
-int algebra::sample_valid_paths()
+int algebra::partial_eliminate()
 {
-	for(int i = 0; i < 100; i++)
+	int i = 0;
+	int j = 0;
+	int rank = 0;
+	while(i < mat.size() && j < mat[0].size())
 	{
-		sample_paths();
-		bool b = check_edges_cover();
-		if(b == true) return 0;
-	}
-	return 0;
-}
-
-int algebra::sample_paths()
-{
-	vector<int> v;
-	for(int i = 0; i < pem0.size(); i++) v.push_back(i);
-
-	pem.clear();
-	int r = num_edges(gr) - num_vertices(gr) + 1;
-	for(int i = 0; i < r; i++)
-	{
-		int p = rand() % (v.size() - i);
-		pem.push_back(pem0[v[p]]);
-		int x = v[p];
-		v[p] = v[v.size() - i - 1];
-		v[v.size() - i - 1] = x;
-	}
-
-	return 0;
-}
-
-int algebra::check_edges_cover()
-{
-	for(int j = 0; j < pem[0].size(); j++)
-	{
-		bool b = false;
-		for(int i = 0; i < pem.size(); i++)
+		int f = partial_eliminate(i, j);
+		if(f == -1) j++;
+		else
 		{
-			if(fabs(pem[i][j]) > SMIN) b = true;
-		}
-		if(b == false) return false;
-	}
-	return true;
-}
-
-int algebra::build_path_edge_matrix()
-{
-	vector<int> v;
-	build_path_edge_matrix(0, v);
-	return 0;
-}
-
-int algebra::build_path_edge_matrix(int s, vector<int> &v)
-{
-	if(s == num_vertices(gr) - 1)
-	{
-		vector<double> p;
-		p.resize(num_edges(gr));
-		for(int i = 0; i < v.size(); i++)
-		{
-			p[v[i]] = 1;
-		}
-		pem.push_back(p);
-		return 0;
-	}
-
-	out_edge_iterator it1, it2;
-	for(tie(it1, it2) = out_edges(s, gr); it1 != it2; it1++)
-	{
-		int t = target(*it1, gr);
-		v.push_back(e2i[*it1]);
-		build_path_edge_matrix(t, v);
-		v.pop_back();
-	}
-	return 0;
-}
-
-int algebra::gaussian_elimination()
-{
-	rank = pem.size();
-	for(int i = 0; i < pem.size(); i++)
-	{
-		int f = gaussian_elimination(i);
-		if(f == -1) 
-		{
-			rank = i;
-			return 0;
+			rank++;
+			i++;
+			j++;
 		}
 	}
-	return 0;
+	return rank;
 }
 
-int algebra::gaussian_elimination(int r)
+int algebra::full_eliminate(int r, int l)
 {
-	int f = choose_main_element(r);
+	int f = choose_main_element(r, l);
 	if(f == -1) return -1;
-	normalize_row(r);
-	eliminate_column(r);
-	return 0;
-}
-
-int algebra::eliminate_column(int r)
-{
-	for(int k = 0; k < pem.size(); k++)
+	normalize_row(r, l);
+	for(int k = 0; k < mat.size(); k++)
 	{
 		if(k == r) continue;
-		if(fabs(pem[k][r]) < SMIN) continue;
-		add_to_row(r, k, 0 - pem[k][r]);
+		if(fabs(mat[k][l]) < SMIN) continue;
+		add_to_row(r, k, l, 0 - mat[k][l] / mat[r][l]);
 	}
 	return 0;
 }
 
-int algebra::add_to_row(int s, int t, double c)
+int algebra::partial_eliminate(int r, int l)
 {
-	for(int i = 0; i < pem[0].size(); i++)
+	int f = choose_main_row(r, l);
+	if(f == -1) return -1;
+	for(int k = r + 1; k < mat.size(); k++)
 	{
-		pem[t][i] += pem[s][i] * c;
+		if(fabs(mat[k][l]) < SMIN) continue;
+		add_to_row(r, k, l, 0 - mat[k][l] / mat[r][l]);
 	}
 	return 0;
 }
 
-int algebra::normalize_row(int r)
+int algebra::add_to_row(int s, int t, int l, double c)
 {
-	assert(fabs(pem[r][r]) >= SMIN);
-	for(int i = 0; i < r; i++) assert(fabs(pem[r][i]) < SMIN);
-
-	for(int i = r + 1; i < pem[0].size(); i++)
+	for(int i = l; i < mat[0].size(); i++)
 	{
-		pem[r][i] = pem[r][i] / pem[r][r];
+		mat[t][i] += mat[s][i] * c;
 	}
-	pem[r][r] = 1;
 	return 0;
 }
 
-int algebra::choose_main_row(int r)
+int algebra::normalize_row(int r, int l)
 {
-	if(pem[r][r] != 0) return 0;
+	assert(fabs(mat[r][l]) >= SMIN);
+	for(int i = 0; i < l; i++) assert(fabs(mat[r][i]) < SMIN);
+
+	for(int i = l + 1; i < mat[0].size(); i++)
+	{
+		mat[r][i] = mat[r][i] / mat[r][l];
+	}
+	mat[r][l] = 1;
+	return 0;
+}
+
+int algebra::choose_main_row(int r, int l)
+{
+	if(fabs(mat[r][l]) > SMIN) return 0;
 	int k = -1;
-	for(int i = r + 1; i < pem.size(); i++)
+	for(int i = r + 1; i < mat.size(); i++)
 	{
-		if(pem[i][r] != 0)
+		if(fabs(mat[i][l]) > SMIN)
 		{
 			k = i;
 			break;
 		}
 	}
 	if(k == -1) return -1;
-	vector<double> v = pem[r];
-	pem[r] = pem[k];
-	pem[k] = v;
+	exchange_row(r, k);
 	return 0;
 }
 
-int algebra::choose_main_column(int r)
-{
-	if(pem[r][r] != 0) return 0;
-	int k = -1;
-	for(int i = r + 1; i < pem[0].size(); i++)
-	{
-		if(pem[r][i] != 0)
-		{
-			k = i;
-			break;
-		}
-	}
-	if(k == -1) return -1;
-	vector<double> v;
-	for(int i = 0; i < pem.size(); i++) v.push_back(pem[i][r]);
-	for(int i = 0; i < pem.size(); i++) pem[i][r] = pem[i][k];
-	for(int i = 0; i < pem.size(); i++) pem[i][k] = v[i];
-	return 0;
-}
-
-int algebra::choose_main_element(int r)
+int algebra::choose_main_element(int r, int l)
 {
 	int ii = -1;
 	int jj = -1;
-	for(int j = r; j < pem[0].size(); j++)
+	for(int j = l; j < mat[0].size(); j++)
 	{
-		for(int i = r; i < pem.size(); i++)
+		for(int i = r; i < mat.size(); i++)
 		{
-			if(fabs(pem[i][j]) > SMIN)
+			if(fabs(mat[i][j]) > SMIN)
 			{
 				ii = i;
 				jj = j;
@@ -243,65 +124,45 @@ int algebra::choose_main_element(int r)
 	}
 	if(ii == -1) return -1;
 	if(ii != r) exchange_row(r, ii);
-	if(jj != r) exchange_column(r, jj);
+	if(jj != l) exchange_column(l, jj);
 	return 0;
 }
 
 int algebra::exchange_row(int s, int t)
 {
-	vector<double> v = pem[s];
-	pem[s] = pem[t];
-	pem[t] = v;
+	vector<double> v = mat[s];
+	mat[s] = mat[t];
+	mat[t] = v;
 	return 0;
 }
 
 int algebra::exchange_column(int s, int t)
 {
 	vector<double> v;
-	for(int i = 0; i < pem.size(); i++) v.push_back(pem[i][s]);
-	for(int i = 0; i < pem.size(); i++) pem[i][s] = pem[i][t];
-	for(int i = 0; i < pem.size(); i++) pem[i][t] = v[i];
+	for(int i = 0; i < mat.size(); i++) v.push_back(mat[i][s]);
+	for(int i = 0; i < mat.size(); i++) mat[i][s] = mat[i][t];
+	for(int i = 0; i < mat.size(); i++) mat[i][t] = v[i];
 	return 0;
 }
-
-int algebra::check()
-{
-	for(int j = rank; j < pem[0].size(); j++)
-	{
-		for(int i = 0; i < pem.size(); i++)
-		{
-			bool b1 = fabs(pem[i][j]) < SMIN ? true : false;
-			bool b2 = fabs(fabs(pem[i][j]) - 1) < SMIN ? true : false;
-			if(b1 || b2) continue;
-			printf("EXAMPLE\n");
-		}
-	}
-	return 0;
-}	
-
 
 int algebra::print()
 {
 	printf("     ");
-	for(int j = 0; j < pem[0].size(); j++)
+	for(int j = 0; j < mat[0].size(); j++)
 	{
 		printf("[%2d] ", j + 1);
 	}
 	printf("\n");
 
-	for(int i = 0; i < pem.size(); i++)
+	for(int i = 0; i < mat.size(); i++)
 	{
 		printf("[%2d] ", i + 1);
-		for(int j = 0; j < pem[i].size(); j++)
+		for(int j = 0; j < mat[i].size(); j++)
 		{
-			if(fabs(pem[i][j]) < SMIN) printf("%4.1lf ", 0.0);
-			else printf("%4.1lf ", pem[i][j]);
+			if(fabs(mat[i][j]) < SMIN) printf("%4.1lf ", 0.0);
+			else printf("%4.1lf ", mat[i][j]);
 		}
 		printf("\n");
 	}
-	int m = num_edges(gr);
-	int n = num_vertices(gr);
-	int r = m - n + 2;
-	printf("edges = %d, vertices = %d, rank = %d\n\n", m, n, rank);
 	return 0;
 }
