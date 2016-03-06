@@ -13,6 +13,16 @@ int scallop3::assemble()
 	smooth_weights();
 	init_super_edges();
 	reconstruct_splice_graph();
+	get_edge_indices(gr, i2e, e2i);
+	build_null_space();
+	return 0;
+}
+
+int scallop3::print()
+{
+	if(ns.size() == 0) return 0;
+	printf("null space:\n");
+	algebra::print_matrix(ns);
 	return 0;
 }
 
@@ -88,16 +98,32 @@ bool scallop3::decompose_trivial_vertex(int x)
 	return true;
 }
 
-int scallop3::print()
+int scallop3::build_null_space()
 {
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = edges(gr); it1 != it2; it1++)
+	ns.clear();
+	for(int i = 1; i < num_vertices(gr) - 1; i++)
 	{
-		int s = source(*it1, gr);
-		int t = target(*it1, gr);
-		double w = get(get(edge_weight, gr), *it1);
-		printf("edge: (%5d -> %5d), weight = %.0lf\n", s, t, w);
+		if(degree(i, gr) == 0) continue;
+		vector<double> v;
+		v.resize(num_edges(gr), 0);
+		in_edge_iterator i1, i2;
+		for(tie(i1, i2) = in_edges(i, gr); i1 != i2; i1++)
+		{
+			int e = e2i[*i1];
+			v[e] = 1;
+		}
+		out_edge_iterator o1, o2;
+		for(tie(o1, o2) = out_edges(i, gr); o1 != o2; o1++)
+		{
+			int e = e2i[*o1];
+			v[e] = -1;
+		}
+		ns.push_back(v);
 	}
+
+	algebra ab(ns);
+	int rank = ab.partial_eliminate();
+	assert(rank == ns.size());
+
 	return 0;
 }
-

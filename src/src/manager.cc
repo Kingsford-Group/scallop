@@ -141,7 +141,7 @@ int manager::assemble_gtf(const string &file)
 		if(p == num_edges(gr) - num_vertices(gr) + 2) s = "EASY";
 		else s = "HARD";
 
-		//if(s == "EASY") continue;
+		if(s == "EASY") continue;
 
 		scallop3 sc(gr);
 		sc.assemble();
@@ -152,6 +152,8 @@ int manager::assemble_gtf(const string &file)
 		printf("gene %s, %lu transcipts, total %lu exons, %lu vertices, %lu edges %d paths, %s, %s\n",
 				gg.exons[0].gene_id.c_str(), gg.transcripts.size(), gg.exons.size(),
 				num_vertices(gr), num_edges(gr), p, s.c_str(), b ? "NESTED" : "GENERAL");
+
+		sc.print();
 
 		continue;
 

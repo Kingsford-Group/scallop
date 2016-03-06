@@ -145,22 +145,22 @@ int algebra::exchange_column(int s, int t)
 	return 0;
 }
 
-int algebra::print()
+int algebra::print_matrix(const VVD &m)
 {
 	printf("     ");
-	for(int j = 0; j < mat[0].size(); j++)
+	for(int j = 0; j < m[0].size(); j++)
 	{
 		printf("[%2d] ", j + 1);
 	}
 	printf("\n");
 
-	for(int i = 0; i < mat.size(); i++)
+	for(int i = 0; i < m.size(); i++)
 	{
 		printf("[%2d] ", i + 1);
-		for(int j = 0; j < mat[i].size(); j++)
+		for(int j = 0; j < m[i].size(); j++)
 		{
-			if(fabs(mat[i][j]) < SMIN) printf("%4.1lf ", 0.0);
-			else printf("%4.1lf ", mat[i][j]);
+			if(fabs(m[i][j]) < SMIN) printf("%4.1lf ", 0.0);
+			else printf("%4.1lf ", m[i][j]);
 		}
 		printf("\n");
 	}

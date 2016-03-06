@@ -22,7 +22,7 @@ public:
 public:
 	int partial_eliminate();
 	int full_eliminate();
-	int print();
+	static int print_matrix(const VVD &m);
 
 private:
 	int partial_eliminate(int r, int l);
