@@ -142,7 +142,8 @@ int scallop3::build_null_space()
 
 int scallop3::identify_equation(int &ei, vector<int> &sub)
 {
-	if(num_edges(gr) >= 11) return 0;
+	// TODO DEBUG
+	//if(num_edges(gr) >= 11) return 0;
 
 	vector<int> x;
 	for(int i = 0; i < i2e.size(); i++)
@@ -188,7 +189,7 @@ int scallop3::identify_equation(int &ei, vector<int> &sub)
 
 	printf("%s closest subset for edge %d:%d has %lu edges, error = %d, subset = (", name.c_str(), ei, x[ei], sub.size(), minw);
 	for(int i = 0; i < sub.size() - 1; i++) printf("%d:%d, ", sub[i], x[sub[i]]);
-	printf("%d:%d)\n", sub[sub.size() - 1], x[sub[sub.size() - 1]]);
+	printf("%d:%d), total %lu combinations\n", sub[sub.size() - 1], x[sub[sub.size() - 1]], xx.size());
 	
 	return 0;
 }

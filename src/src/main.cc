@@ -5,7 +5,6 @@
 
 #include "manager.h"
 #include "config.h"
-#include "subsetsum.h"
 
 using namespace std;
 

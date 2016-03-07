@@ -1,6 +1,7 @@
 #ifndef __SCALLOP3_H__
 #define __SCALLOP3_H__
 
+#include "disjoint_sets.h"
 #include "assembler.h"
 #include "algebra.h"
 
@@ -16,10 +17,11 @@ public:
 	virtual ~scallop3();
 
 public:
-	MEI e2i;		// edge map
-	VE i2e;			// edge map
-	MEV mev;		// super edges
-	VVD ns;			// null space from nodes
+	MEI e2i;				// edge map
+	VE i2e;					// edge map
+	MEV mev;				// super edges
+	VVD ns;					// null space from nodes
+	disjoint_sets_t ds;		// classify edges
 
 public:
 	int assemble();
@@ -27,6 +29,7 @@ public:
 
 private:
 	int init_super_edges();
+	int init_disjoint_sets();
 	int reconstruct_splice_graph();
 	bool decompose_trivial_vertex(int x);
 	int build_null_space();

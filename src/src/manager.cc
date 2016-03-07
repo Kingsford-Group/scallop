@@ -132,6 +132,9 @@ int manager::assemble_gtf(const string &file)
 		gtf_gene &gg = genes[i];
 		if(gg.exons.size() <= 0) continue;
 
+		// DEBUG
+		if(gg.exons[0].gene_id != "ABI3BP") continue;
+
 		splice_graph gr;
 		gg.build_splice_graph(gr);
 

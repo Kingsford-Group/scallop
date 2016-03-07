@@ -30,4 +30,5 @@ scallop_SOURCES = main.cc \
 				  subsetsum.h subsetsum.cc \
 				  decomposer.h decomposer.cc \
 				  algebra.h algebra.cc \
-				  path_space.h path_space.cc 
+				  path_space.h path_space.cc \
+				  disjoint_sets.h disjoint_sets.cc
