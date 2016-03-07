@@ -132,6 +132,9 @@ int manager::assemble_gtf(const string &file)
 		gtf_gene &gg = genes[i];
 		if(gg.exons.size() <= 0) continue;
 
+		// DEBUG
+		if(gg.exons[0].gene_id != "ABI3BP") continue;
+
 		splice_graph gr;
 		gg.build_splice_graph(gr);
 
@@ -141,26 +144,27 @@ int manager::assemble_gtf(const string &file)
 		if(p == num_edges(gr) - num_vertices(gr) + 2) s = "EASY";
 		else s = "HARD";
 
-		//if(s == "EASY") continue;
+		if(s == "EASY") continue;
 
-		scallop3 sc(gr);
+		scallop3 sc(gg.exons[0].gene_id, gr);
 		sc.assemble();
 		//gg.output_gtf(scallop2_fout, sc.paths, "scallop2");
 
-		bool b = sc.decide_nested();
-		
+		continue;
+
+		bool b = check_nested_splice_graph(sc.gr);
+
 		printf("gene %s, %lu transcipts, total %lu exons, %lu vertices, %lu edges %d paths, %s, %s\n",
 				gg.exons[0].gene_id.c_str(), gg.transcripts.size(), gg.exons.size(),
-				num_vertices(gr), num_edges(gr), p, s.c_str(), b ? "NESTED" : "GENERAL");
+				num_vertices(sc.gr), num_edges(sc.gr), p, s.c_str(), b ? "NESTED" : "GENERAL");
 
-		continue;
 
 		char buf[1024];
 		sprintf(buf, "%s.0.tex", gg.exons[0].gene_id.c_str());
-		draw_splice_graph(buf, gr, 1.4);
+		draw_splice_graph(gr, buf, 1.4);
 
 		sprintf(buf, "%s.1.tex", gg.exons[0].gene_id.c_str());
-		draw_splice_graph(buf, sc.gr, 2.4);
+		draw_splice_graph(sc.gr, buf, 2.4);
 
 		/*
 		gg.output_gtf(standard_fout);
@@ -188,8 +192,8 @@ int manager::assemble_gtf(const string &file)
 int manager::assemble_example(const string &file)
 {
 	splice_graph gr;
-	build_splice_graph(file, gr);
-	draw_splice_graph("splice_graph.tex", gr);
+	build_splice_graph(gr, file);
+	draw_splice_graph(gr, "splice_graph.tex");
 
 	scallop2 sc(gr);
 	sc.assemble();

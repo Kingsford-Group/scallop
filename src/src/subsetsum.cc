@@ -5,14 +5,7 @@
 #include <algorithm>
 #include <cassert>
 
-subsetsum::subsetsum(const vector<int> &_s, const vector<int> &_t)
-	: s(_s), t(_t)
-{
-	dist = -1;
-	ratio = 0;
-}
-
-int subsetsum::solve()
+double subsetsum::compute_closest_subsets(const vector<int> &s, const vector<int> &t, vector<int> &subs, vector<int> &subt)
 {
 	if(s.size() <= 1 || t.size() <= 1) return 0;
 
@@ -27,7 +20,7 @@ int subsetsum::solve()
 
 	int ssi;
 	int tti;
-	compute_closest_pair(ssi, tti, ss, tt);
+	int dist = compute_closest_pair(ssi, tti, ss, tt);
 
 	recover_subset(subs, ssi, sf, sb);
 	recover_subset(subt, tti, tf, tb);
@@ -35,8 +28,16 @@ int subsetsum::solve()
 	sort(subs.begin(), subs.end());
 	sort(subt.begin(), subt.end());
 
-	compute_ratio();
+	compute_subset_ratio(s, t, subs, subt);
 
+	return 0;
+}
+
+int subsetsum::enumerate_subsets(const vector<int> &x, vector<int> &xx)
+{
+	vector<int> xf;
+	vector<int> xb;
+	enumerate_subsets(x, xx, xf, xb);
 	return 0;
 }
 
@@ -81,23 +82,23 @@ int subsetsum::compute_closest_pair(int &ssi, int &tti, const vector<int> &ss, c
 
 	int si = 0;
 	int ti = 0;
-	dist = INT_MAX;
+	int dd = INT_MAX;
 
 	while(si < sss.size() && ti < ttt.size())
 	{
 		int d = (int)(fabs(sss[si].first - ttt[ti].first));
-		if(d < dist)
+		if(d < dd)
 		{
-			dist = d;
+			dd = d;
 			ssi = sss[si].second;
 			tti = ttt[ti].second;
 		}
 
-		if(dist == 0) break;
+		if(dd == 0) break;
 		if(sss[si].first < ttt[ti].first) si++;
 		else ti++;
 	}
-	return 0;
+	return dd;
 }
 
 int subsetsum::recover_subset(vector<int> &sub, int xxi, const vector<int> &xf, const vector<int> &xb)
@@ -115,7 +116,7 @@ int subsetsum::recover_subset(vector<int> &sub, int xxi, const vector<int> &xf, 
 	return 0;
 }
 
-int subsetsum::compute_ratio()
+double subsetsum::compute_subset_ratio(const vector<int> &s, const vector<int> &t, const vector<int> &subs, const vector<int> &subt)
 {
 	int ss = 0, tt = 0;
 	for(int i = 0; i < s.size(); i++) ss += s[i];
@@ -135,54 +136,6 @@ int subsetsum::compute_ratio()
 	double x1 = ss1 < tt1 ? ss1 : tt1;
 	double x2 = ss2 < tt2 ? ss2 : tt2;
 
-	ratio = (x1 + x2) / x0;
-
-	return 0;
+	return (x1 + x2) / x0;
 }
 
-int subsetsum::print()
-{
-	printf("input   first: ");
-	for(int i = 0; i < s.size(); i++) printf("%5d ", s[i]);
-	printf("\n");
-	printf("input  second: ");
-	for(int i = 0; i < t.size(); i++) printf("%5d ", t[i]);
-	printf("\n");
-
-	printf("first  subset: ");
-	for(int i = 0; i < subs.size(); i++) printf("%3d:%5d ", subs[i], s[subs[i]]);
-	printf("\n");
-	printf("second subset: ");
-	for(int i = 0; i < subt.size(); i++) printf("%3d:%5d ", subt[i], t[subt[i]]);
-	printf("\n");
-
-	printf("distance = %5d, ratio = %.4lf\n", dist, ratio);
-
-	return 0;
-}
-
-int subsetsum::test()
-{
-	vector<int> s;
-	vector<int> t;
-	s.push_back(100);
-	
-	t.push_back(80);
-	t.push_back(20);
-
-	/*
-	s.push_back(189);
-	s.push_back(958);
-	s.push_back(1105);
-
-	t.push_back(443);
-	t.push_back(637);
-	t.push_back(319);
-	t.push_back(851);
-	*/
-
-	subsetsum sss(s, t);
-	sss.print();
-
-	return 0;
-}

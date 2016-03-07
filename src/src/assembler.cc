@@ -9,6 +9,10 @@ assembler::assembler(const splice_graph &g)
 	: gr(g)
 {}
 
+assembler::assembler(const string &s, const splice_graph &g)
+	: gr(g), name(s)
+{}
+
 assembler::~assembler()
 {}
 
@@ -18,7 +22,6 @@ int assembler::smooth_weights()
 	lp.solve();
 	return 0;
 }
-
 
 path assembler::compute_maximum_forward_path() const
 {
