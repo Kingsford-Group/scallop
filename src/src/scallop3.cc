@@ -17,24 +17,56 @@ int scallop3::assemble()
 	init_super_edges();
 	reconstruct_splice_graph();
 	get_edge_indices(gr, i2e, e2i);
+	init_disjoint_sets();
 	build_null_space();
 	iterate();
+	draw_splice_graph(gr, name + ".tex", 5.0);
 	return 0;
 }
 
 int scallop3::iterate()
 {
-	int ei;
-	vector<int> sub;
-	identify_equation(ei, sub);
+	while(true)
+	{
+		int ei;
+		vector<int> sub;
+		int error = identify_equation(ei, sub);
+		if(error >= 1) break;
+		process_equation(ei, sub);
+		print();
+	}
 	return 0;
 }
 
 int scallop3::print()
 {
+	// print null space
+	/*
 	if(ns.size() == 0) return 0;
 	printf("null space:\n");
 	algebra::print_matrix(ns);
+	*/
+
+	// print edge disjoint sets
+	vector< vector<int> > vv = get_disjoint_sets(ds, i2e.size());
+	for(int i = 0; i < vv.size(); i++)
+	{
+		if(vv[i].size() <= 1) continue;
+
+		vector<int> v;
+		for(int j = 0; j < vv[i].size(); j++)
+		{
+			if(e2i[i2e[vv[i][j]]] == -1) continue;
+			v.push_back(vv[i][j]);
+		}
+		assert(v.size() >= 1);
+		
+		int w = (int)(get(get(edge_weight, gr), i2e[v[0]]));
+
+		printf("edge set %d, weight = %d, edges = (%d", i, w, v[0]);
+		for(int j = 1; j < v.size(); j++) printf(", %d", v[j]);
+		printf(")\n");
+	}
 	return 0;
 }
 
@@ -110,6 +142,16 @@ bool scallop3::decompose_trivial_vertex(int x)
 	return true;
 }
 
+int scallop3::init_disjoint_sets()
+{
+	ds = disjoint_sets_t(num_edges(gr) * num_vertices(gr));
+	for(int i = 0; i < num_edges(gr); i++)
+	{
+		ds.make_set(i);
+	}
+	return 0;
+}
+
 int scallop3::build_null_space()
 {
 	ns.clear();
@@ -140,15 +182,137 @@ int scallop3::build_null_space()
 	return 0;
 }
 
+vector<int> scallop3::compute_representatives()
+{
+	vector<int> v;
+	vector< vector<int> > vv = get_disjoint_sets(ds, i2e.size());
+	for(int i = 0; i < vv.size(); i++)
+	{
+		if(vv[i].size() == 0) continue;
+		int k = -1;
+		for(int j = 0; j < vv[i].size(); j++)
+		{
+			int e = vv[i][j];
+			if(e2i[i2e[e]] == -1) continue;
+			k = e;
+			break;
+		}
+		assert(k != -1);
+		v.push_back(k);
+	}
+	return v;
+}
+
+bool scallop3::connect_edges(int x, int y)
+{
+	return false;
+
+	edge_descriptor xx = i2e[x];
+	edge_descriptor yy = i2e[y];
+
+	if(e2i[xx] == -1) return false;
+	if(e2i[yy] == -1) return false;
+
+	int xs = source(xx, gr);
+	int xt = target(xx, gr);
+	int ys = source(yy, gr);
+	int yt = target(yy, gr);
+
+	if(xt != ys && yt != xs) return false;
+	if(yt == xs) return connect_edges(y, x);
+	
+	assert(xt == ys);
+
+	PEB p = add_edge(xs, yt, gr);
+	assert(p.second == true);
+
+	int n = i2e.size();
+	e2i.insert(PEI(p.first, n));
+	i2e.push_back(p.first);
+
+	double wx0 = get(get(edge_weight, gr), xx);
+	double wy0 = get(get(edge_weight, gr), yy);
+	double wx1 = get(get(edge_stddev, gr), xx);
+	double wy1 = get(get(edge_stddev, gr), yy);
+
+	assert(fabs(wx0 - wy0) <= SMIN);
+
+	put(get(edge_weight, gr), p.first, wx0);
+	put(get(edge_stddev, gr), p.first, wx1);
+
+	vector<int> v = mev[xx];
+	v.push_back(xt);
+	v.insert(v.end(), mev[yy].begin(), mev[yy].end());
+
+	mev.insert(PEV(p.first, v));
+
+	ds.make_set(n);
+	ds.union_set(n, e2i[xx]);
+
+	e2i[xx] = -1;
+	e2i[yy] = -1;
+	remove_edge(xx, gr);
+	remove_edge(yy, gr);
+
+	return 0;
+}
+
+int scallop3::process_equation(int ei, const vector<int> &sub)
+{
+	assert(sub.size() >= 1);
+	assert(e2i[i2e[ei]] != -1);
+	for(int i = 0; i < sub.size(); i++) assert(e2i[i2e[sub[i]]] != -1);
+
+	edge_descriptor ex = i2e[ei];
+	edge_descriptor ey = i2e[sub[0]];
+	double w0 = get(get(edge_weight, gr), ey);
+	double w1 = get(get(edge_stddev, gr), ey);
+	put(get(edge_weight, gr), ex, w0);
+	put(get(edge_stddev, gr), ex, w1);
+	ds.union_set(ei, sub[0]);
+	connect_edges(ei, sub[0]);
+
+	int s = source(ex, gr);
+	int t = target(ex, gr);
+	for(int i = 1; i < sub.size(); i++)
+	{
+		PEB p = add_edge(s, t, gr);
+		assert(p.second == true);
+
+		int n = i2e.size();
+		e2i.insert(PEI(p.first, n));
+		i2e.push_back(p.first);
+
+		ey = i2e[sub[i]];
+		w0 = get(get(edge_weight, gr), ey);
+		w1 = get(get(edge_stddev, gr), ey);
+
+		put(get(edge_weight, gr), p.first, w0);
+		put(get(edge_stddev, gr), p.first, w1);
+
+		mev.insert(PEV(p.first, mev[ex]));
+
+		ds.make_set(n);
+		ds.union_set(n, sub[i]);
+
+		connect_edges(n, sub[i]);
+	}
+
+	// TODO, update null space
+	return 0;
+}
+
 int scallop3::identify_equation(int &ei, vector<int> &sub)
 {
 	// TODO DEBUG
 	//if(num_edges(gr) >= 11) return 0;
 
+	vector<int> r = compute_representatives();
+
 	vector<int> x;
-	for(int i = 0; i < i2e.size(); i++)
+	for(int i = 0; i < r.size(); i++)
 	{
-		double w = get(get(edge_weight, gr), i2e[i]);
+		double w = get(get(edge_weight, gr), i2e[r[i]]);
 		x.push_back((int)(w));
 	}
 
@@ -168,7 +332,7 @@ int scallop3::identify_equation(int &ei, vector<int> &sub)
 
 	sort(xp.begin(), xp.end());
 
-	ei = -1;
+	int ri = -1;
 	int xxpi = -1;
 	int minw = INT_MAX;
 	for(int i = 0; i < xp.size(); i++)
@@ -179,19 +343,24 @@ int scallop3::identify_equation(int &ei, vector<int> &sub)
 		{
 			minw = ww;
 			xxpi = k;
-			ei = xp[i].second;
+			ri = xp[i].second;
 		}
 	}
 
-	assert(ei != -1);
+	assert(ri >= 0 && ri < r.size());
 
-	recover_subset(sub, xxp[xxpi].second, xf, xb);
+	ei = r[ri];
 
-	printf("%s closest subset for edge %d:%d has %lu edges, error = %d, subset = (", name.c_str(), ei, x[ei], sub.size(), minw);
-	for(int i = 0; i < sub.size() - 1; i++) printf("%d:%d, ", sub[i], x[sub[i]]);
-	printf("%d:%d), total %lu combinations\n", sub[sub.size() - 1], x[sub[sub.size() - 1]], xx.size());
+	vector<int> rsub;
+	recover_subset(rsub, xxp[xxpi].second, xf, xb);
+
+	for(int i = 0; i < rsub.size(); i++) sub.push_back(r[rsub[i]]);
+
+	printf("%s closest subset for edge %d:%d has %lu edges, error = %d, subset = (", name.c_str(), ei, x[ri], sub.size(), minw);
+	for(int i = 0; i < sub.size() - 1; i++) printf("%d:%d, ", sub[i], x[rsub[i]]);
+	printf("%d:%d), total %lu combinations\n", sub[sub.size() - 1], x[rsub[sub.size() - 1]], xx.size());
 	
-	return 0;
+	return minw;
 }
 
 int scallop3::locate_closest_subset(int xi, int w, const vector<PI> &xxp)

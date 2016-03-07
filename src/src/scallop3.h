@@ -17,8 +17,8 @@ public:
 	virtual ~scallop3();
 
 public:
-	MEI e2i;				// edge map
-	VE i2e;					// edge map
+	MEI e2i;				// edge map, from edge to index (if index == -1, means this edge is deleted)
+	VE i2e;					// edge map, from index to edge
 	MEV mev;				// super edges
 	VVD ns;					// null space from nodes
 	disjoint_sets_t ds;		// classify edges
@@ -35,6 +35,9 @@ private:
 	int build_null_space();
 	int iterate();
 	int identify_equation(int &ei, vector<int> &sub);
+	int process_equation(int ei, const vector<int> &sub);
+	bool connect_edges(int x, int y);
+	vector<int> compute_representatives();
 	int locate_closest_subset(int xi, int w, const vector<PI> & xxp);
 };
 
