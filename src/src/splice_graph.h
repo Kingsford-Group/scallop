@@ -26,7 +26,7 @@ namespace boost {
 	//BOOST_INSTALL_PROPERTY(edge, weight);
 }
 
-typedef property< vertex_stddev_t, double, property<vertex_weight_t, double> > vertex_properties;
+typedef property< vertex_stddev_t, double, property<vertex_weight_t, double, property<vertex_color_t, default_color_type> > > vertex_properties;
 typedef property< edge_stddev_t, double, property<edge_weight_t, double> > edge_properties;
 typedef adjacency_list<multisetS, vecS, bidirectionalS, vertex_properties, edge_properties> splice_graph;
 
@@ -74,5 +74,11 @@ bool check_directed_path(const splice_graph &gr, int s, int t);
 bool check_fully_connected(const splice_graph &gr);
 bool check_fully_reachable_from_start(const splice_graph &gr);
 bool check_fully_reachable_to_end(const splice_graph &gr);
+int bfs_distance(const splice_graph &gr, int s, vector<int> &v);
+
+
+// tests
+int test_bfs_distance();
+int test_remove_edge();
 
 #endif
