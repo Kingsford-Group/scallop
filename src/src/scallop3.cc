@@ -205,8 +205,6 @@ vector<int> scallop3::compute_representatives()
 
 bool scallop3::connect_edges(int x, int y)
 {
-	return false;
-
 	edge_descriptor xx = i2e[x];
 	edge_descriptor yy = i2e[y];
 
