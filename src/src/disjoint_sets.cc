@@ -1,9 +1,31 @@
 #include "disjoint_sets.h"
 
-#include <vector>
 #include <cstdio>
 
 using namespace std;
+
+vector<int> get_representatives(disjoint_sets_t &ds, int n)
+{
+	vector<int> v;
+	for(int i = 0; i < n; i++)
+	{
+		if(ds.find_set(i) != i) continue;
+		v.push_back(i);
+	}
+	return v;
+}
+
+vector< vector<int> > get_disjoint_sets(disjoint_sets_t &ds, int n)
+{
+	vector< vector<int> > v;
+	v.resize(n);
+	for(int i = 0; i < n; i++)
+	{
+		int r = ds.find_set(i);
+		v[r].push_back(i);
+	}
+	return v;
+}
 
 int test_disjoint_sets()
 {

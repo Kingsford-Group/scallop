@@ -2,9 +2,11 @@
 #include <cstdlib>
 #include <cstring>
 #include <vector>
+#include <iostream>
 
 #include "manager.h"
 #include "config.h"
+#include "splice_graph.h"
 
 using namespace std;
 
