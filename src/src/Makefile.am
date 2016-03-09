@@ -4,21 +4,22 @@ scallop_CPPFLAGS = -I$(HTSLIB) -I$(GUROBI_HOME)/include -I$(BOOST_HOME)
 scallop_LDFLAGS = -L$(HTSLIB) -L$(GUROBI_HOME)/lib -pthread
 scallop_LDADD = -lhts -lz -lgurobi_c++ -lgurobi
 
-scallop_SOURCES = main.cc \
-				  manager.h manager.cc \
-				  bundle.h bundle.cc \
+scallop_SOURCES = splice_graph.h splice_graph.cc \
+				  interval_map.h interval_map.cc \
+				  binomial.h binomial.cc \
+				  fibonacci_heap.h fibonacci_heap.cc \
+				  subsetsum.h subsetsum.cc \
+				  algebra.h algebra.cc \
+				  disjoint_sets.h disjoint_sets.cc \
 				  config.h config.cc \
 				  hit.h hit.cc \
 				  boundary.h boundary.cc \
 				  region.h region.cc \
 				  junction.h junction.cc \
-				  splice_graph.h splice_graph.cc \
 				  bundle_base.h bundle_base.cc \
-				  interval_map.h interval_map.cc \
-				  binomial.h binomial.cc \
+				  bundle.h bundle.cc \
 				  draw.h draw.cc \
 				  path.h path.cc \
-				  fibonacci_heap.h fibonacci_heap.cc \
 				  smoother.h smoother.cc \
 				  assembler.h assembler.cc \
 				  stringtie.h stringtie.cc \
@@ -27,8 +28,7 @@ scallop_SOURCES = main.cc \
 				  scallop3.h scallop3.cc \
 				  gtf_exon.h gtf_exon.cc \
 				  gtf_gene.h gtf_gene.cc \
-				  subsetsum.h subsetsum.cc \
 				  decomposer.h decomposer.cc \
-				  algebra.h algebra.cc \
 				  path_space.h path_space.cc \
-				  disjoint_sets.h disjoint_sets.cc
+				  manager.h manager.cc \
+				  main.cc
