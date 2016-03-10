@@ -17,7 +17,7 @@ public:
 	virtual ~scallop3();
 
 public:
-	MEI e2i;				// edge map, from edge to index (if index == -1, means this edge is deleted)
+	MEI e2i;				// edge map, from edge to index
 	VE i2e;					// edge map, from index to edge
 	vector<bool> i2b;		// indicate whether this edge has been deleted
 	MEV mev;				// super edges
