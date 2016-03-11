@@ -4,7 +4,7 @@
 #include "splice_graph.h"
 #include "algebra.h"
 
-using namespace boost_splice_graph;
+using namespace boost_graph;
 
 class path_space
 {

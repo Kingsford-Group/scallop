@@ -4,9 +4,9 @@
 #include <boost/graph/breadth_first_search.hpp>
 #include <fstream>
 
-using namespace boost_splice_graph;
+using namespace boost_graph;
 
-int boost_splice_graph::build_splice_graph(splice_graph &gr, const string &file)
+int boost_graph::build_splice_graph(splice_graph &gr, const string &file)
 {
 	ifstream fin(file.c_str());
 	if(fin.fail()) 
@@ -52,7 +52,7 @@ int boost_splice_graph::build_splice_graph(splice_graph &gr, const string &file)
 	return 0;
 }
 
-int boost_splice_graph::write_splice_graph(const splice_graph &gr, const string &file)
+int boost_graph::write_splice_graph(const splice_graph &gr, const string &file)
 {
 	ofstream fin(file.c_str());
 	if(fin.fail()) 
@@ -87,7 +87,7 @@ int boost_splice_graph::write_splice_graph(const splice_graph &gr, const string 
 	return 0;
 }
 
-int boost_splice_graph::draw_splice_graph(const splice_graph &gr, const string &file, double len)
+int boost_graph::draw_splice_graph(const splice_graph &gr, const string &file, double len)
 {
 	ofstream fout(file.c_str());
 	if(fout.fail())
@@ -163,7 +163,7 @@ int boost_splice_graph::draw_splice_graph(const splice_graph &gr, const string &
 	return 0;
 }
 
-int boost_splice_graph::simulate_splice_graph(splice_graph &gr, int n, int m)
+int boost_graph::simulate_splice_graph(splice_graph &gr, int n, int m)
 {
 	gr.clear();
 	for(int i = 0; i < n; i++)
@@ -184,7 +184,7 @@ int boost_splice_graph::simulate_splice_graph(splice_graph &gr, int n, int m)
 	return 0;
 }
 
-int boost_splice_graph::compute_num_paths(const splice_graph &gr)
+int boost_graph::compute_num_paths(const splice_graph &gr)
 {
 	vector<int> table;
 	table.resize(num_vertices(gr), 0);
@@ -205,7 +205,7 @@ int boost_splice_graph::compute_num_paths(const splice_graph &gr)
 	return table[n - 1];
 }
 
-int boost_splice_graph::get_edge_weights(const splice_graph &gr, MED &med)
+int boost_graph::get_edge_weights(const splice_graph &gr, MED &med)
 {
 	med.clear();
 	edge_iterator it1, it2;
@@ -217,7 +217,7 @@ int boost_splice_graph::get_edge_weights(const splice_graph &gr, MED &med)
 	return 0;
 }
 
-int boost_splice_graph::set_edge_weights(splice_graph &gr, const MED &med)
+int boost_graph::set_edge_weights(splice_graph &gr, const MED &med)
 {
 	edge_iterator it1, it2;
 	for(tie(it1, it2) = edges(gr); it1 != it2; it1++)
@@ -228,7 +228,7 @@ int boost_splice_graph::set_edge_weights(splice_graph &gr, const MED &med)
 	return 0;
 }
 
-int boost_splice_graph::get_vertex_weights(const splice_graph &gr, vector<double> &v)
+int boost_graph::get_vertex_weights(const splice_graph &gr, vector<double> &v)
 {
 	v.resize(num_vertices(gr), 0);
 	for(int i = 0; i < v.size(); i++)
@@ -239,7 +239,7 @@ int boost_splice_graph::get_vertex_weights(const splice_graph &gr, vector<double
 	return 0;
 }
 
-int boost_splice_graph::set_vertex_weights(splice_graph &gr, const vector<double> &v)
+int boost_graph::set_vertex_weights(splice_graph &gr, const vector<double> &v)
 {
 	assert(v.size() == num_vertices(gr));
 	for(int i = 0; i < v.size(); i++)
@@ -249,7 +249,7 @@ int boost_splice_graph::set_vertex_weights(splice_graph &gr, const vector<double
 	return 0;
 }
 
-int boost_splice_graph::get_edge_indices(const splice_graph &gr, VE &i2e, MEI &e2i)
+int boost_graph::get_edge_indices(const splice_graph &gr, VE &i2e, MEI &e2i)
 {
 	i2e.clear();
 	e2i.clear();
@@ -264,7 +264,7 @@ int boost_splice_graph::get_edge_indices(const splice_graph &gr, VE &i2e, MEI &e
 	return 0;
 }
 
-bool boost_splice_graph::check_nested_splice_graph(const splice_graph &gr)
+bool boost_graph::check_nested_splice_graph(const splice_graph &gr)
 {
 	for(int i = 0; i < num_vertices(gr); i++)
 	{
@@ -294,7 +294,7 @@ bool boost_splice_graph::check_nested_splice_graph(const splice_graph &gr)
 	return true;
 }
 
-bool boost_splice_graph::check_directed_path(const splice_graph &gr, int s, int t)
+bool boost_graph::check_directed_path(const splice_graph &gr, int s, int t)
 {
 	// assume DAG
 	assert(s < t);
@@ -322,7 +322,7 @@ bool boost_splice_graph::check_directed_path(const splice_graph &gr, int s, int 
 	return false;
 }
 
-bool boost_splice_graph::check_fully_reachable_from_start(const splice_graph &gr)
+bool boost_graph::check_fully_reachable_from_start(const splice_graph &gr)
 {
 	// assume DAG
 	vector<bool> closed;
@@ -355,7 +355,7 @@ bool boost_splice_graph::check_fully_reachable_from_start(const splice_graph &gr
 	return true;
 }
 
-bool boost_splice_graph::check_fully_reachable_to_end(const splice_graph &gr)
+bool boost_graph::check_fully_reachable_to_end(const splice_graph &gr)
 {
 	// assume DAG
 	vector<bool> closed;
@@ -388,7 +388,7 @@ bool boost_splice_graph::check_fully_reachable_to_end(const splice_graph &gr)
 	return true;
 }
 
-bool boost_splice_graph::check_fully_connected(const splice_graph &gr)
+bool boost_graph::check_fully_connected(const splice_graph &gr)
 {
 	bool b1 = check_fully_reachable_from_start(gr);
 	bool b2 = check_fully_reachable_to_end(gr);
@@ -396,14 +396,14 @@ bool boost_splice_graph::check_fully_connected(const splice_graph &gr)
 	else return false;
 }
 
-int boost_splice_graph::bfs_distance(const splice_graph &gr, int s, vector<int> &v)
+int boost_graph::bfs_distance(const splice_graph &gr, int s, vector<int> &v)
 {
 	v.assign(num_vertices(gr), 0);
 	breadth_first_search(gr, s, visitor(make_bfs_visitor(record_distances(&v[0], on_tree_edge()))));
 	return 0;
 }
 
-int boost_splice_graph::test_bfs_distance()
+int boost_graph::test_bfs_distance()
 {
 	splice_graph gr;
 	int N = 5;
@@ -429,7 +429,7 @@ int boost_splice_graph::test_bfs_distance()
 	return 0;
 }
 
-int boost_splice_graph::test_remove_edge()
+int boost_graph::test_remove_edge()
 {
 	splice_graph gr;
 	add_vertex(gr);

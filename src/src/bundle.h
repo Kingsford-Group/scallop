@@ -10,7 +10,7 @@
 #include "path.h"
 
 using namespace std;
-using namespace boost_splice_graph;
+using namespace boost_graph;
 
 class bundle : public bundle_base
 {

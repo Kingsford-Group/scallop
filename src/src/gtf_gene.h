@@ -8,7 +8,7 @@
 #include "splice_graph.h"
 
 using namespace std;
-using namespace boost_splice_graph;
+using namespace boost_graph;
 
 class gtf_gene
 {

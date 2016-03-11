@@ -31,7 +31,7 @@ namespace boost
 	//BOOST_INSTALL_PROPERTY(edge, weight);
 }
 
-namespace boost_splice_graph
+namespace boost_graph
 {
 	typedef property< vertex_stddev_t, double, property<vertex_weight_t, double, property<vertex_color_t, default_color_type> > > vertex_properties;
 	typedef property< edge_stddev_t, double, property<edge_weight_t, double> > edge_properties;
