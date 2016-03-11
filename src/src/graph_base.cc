@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <cassert>
+#include <tuple>
 
 using namespace std;
 
@@ -86,10 +87,10 @@ int graph_b::test()
 
 	gr.print();
 
-	PEE_b pb = gr.edges();
-	for(edge_iterator_b it = pb.first; it != pb.second; it++)
+	edge_iterator_b it1, it2;
+	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
 	{
-		gr.remove_edge(*it);
+		gr.remove_edge(*it1);
 	}
 
 	gr.print();

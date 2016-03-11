@@ -4,6 +4,8 @@
 #include "splice_graph.h"
 #include "path.h"
 
+using namespace boost_splice_graph;
+
 class assembler
 {
 public:

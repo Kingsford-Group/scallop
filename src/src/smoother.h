@@ -4,6 +4,8 @@
 #include "gurobi_c++.h"
 #include "splice_graph.h"
 
+using namespace boost_splice_graph;
+
 class smoother
 {
 public:
