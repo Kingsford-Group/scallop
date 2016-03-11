@@ -6,13 +6,13 @@
 
 #include "manager.h"
 #include "config.h"
-#include "graph_base.h"
+#include "dynamic_graph.h"
 
 using namespace std;
 
 int main(int argc, char **argv)
 {
-	graph_b::test();
+	dynamic_graph::test_bfs_distance();
 	return 0;
 
 	if(argc < 3) return 0;

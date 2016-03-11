@@ -69,6 +69,30 @@ int dynamic_graph::splice_graph::set_edge_stddev(edge_b* e, double w)
 	return 0;
 }
 
+int dynamic_graph::add_vertex(splice_graph &gr) { return gr.add_vertex(); }
+PEB dynamic_graph::add_edge(int s, int t, splice_graph &gr) { return PEB(gr.add_edge(s, t), true); }
+int dynamic_graph::remove_edge(edge_descriptor e, splice_graph &gr) { return gr.remove_edge(e); }
+size_t dynamic_graph::num_vertices(const splice_graph &gr) { return gr.num_vertices(); }
+size_t dynamic_graph::num_edges(const splice_graph &gr) { return gr.num_edges(); }
+int dynamic_graph::source(edge_descriptor e, const splice_graph &gr) { return e->source(); }
+int dynamic_graph::target(edge_descriptor e, const splice_graph &gr) { return e->target(); }
+PEE dynamic_graph::in_edges(int v, const splice_graph &gr) { return gr.in_edges(v); }
+PEE dynamic_graph::out_edges(int v, const splice_graph &gr) { return gr.out_edges(v); }
+PEE dynamic_graph::edges(const splice_graph &gr) { return gr.edges(); }
+int dynamic_graph::clear(splice_graph &gr) { return gr.clear(); }
+int dynamic_graph::degree(int v, const splice_graph &gr) { return gr.degree(v); }
+int dynamic_graph::in_degree(int v, const splice_graph &gr) { return gr.in_degree(v); }
+int dynamic_graph::out_degree(int v, const splice_graph &gr) { return gr.out_degree(v); }
+PAA dynamic_graph::adjacent_vertices(int v, const splice_graph &gr) { return gr.adjacent_vertices(v); }
+double dynamic_graph::get_vertex_weight(int v, const splice_graph &gr) { return gr.get_vertex_weight(v); }
+double dynamic_graph::get_vertex_stddev(int v, const splice_graph &gr) { return gr.get_vertex_stddev(v); }
+double dynamic_graph::get_edge_weight(edge_b *e, const splice_graph &gr) { return gr.get_edge_weight(e); }
+double dynamic_graph::get_edge_stddev(edge_b *e, const splice_graph &gr) { return gr.get_edge_stddev(e); }
+int dynamic_graph::set_vertex_weight(int v, double w, splice_graph &gr) { return gr.set_vertex_weight(v, w); }
+int dynamic_graph::set_vertex_stddev(int v, double w, splice_graph &gr) { return gr.set_vertex_stddev(v, w); }
+int dynamic_graph::set_edge_weight(edge_b *e, double w, splice_graph &gr) { return gr.set_edge_weight(e, w); }
+int dynamic_graph::set_edge_stddev(edge_b *e, double w, splice_graph &gr) { return gr.set_edge_stddev(e, w); }
+
 int dynamic_graph::build_splice_graph(splice_graph &gr, const string &file)
 {
 	ifstream fin(file.c_str());
@@ -460,11 +484,35 @@ bool dynamic_graph::check_fully_connected(const splice_graph &gr)
 	else return false;
 }
 
-/*
 int dynamic_graph::bfs_distance(const splice_graph &gr, int s, vector<int> &v)
 {
-	v.assign(num_vertices(gr), 0);
-	breadth_first_search(gr, s, visitor(make_bfs_visitor(record_distances(&v[0], on_tree_edge()))));
+	// assume DAG?
+	v.assign(num_vertices(gr), -1);
+	vector<bool> closed;
+	closed.resize(num_vertices(gr), false);
+	vector<int> open;
+	open.push_back(s);
+	v[s] = 0;
+	int p = 0;
+
+	while(p < open.size())
+	{
+		int x = open[p];
+		assert(v[x] >= 0);
+
+		p++;
+		if(closed[x] == true) continue;
+		closed[x] = true;
+
+		out_edge_iterator it1, it2;
+		for(tie(it1, it2) = out_edges(x, gr); it1 != it2; it1++)
+		{
+			int y = target(*it1, gr);
+			if(v[y] == -1 || v[y] > 1 + v[x]) v[y] = 1 + v[x];
+			if(closed[y] == true) continue;
+			open.push_back(y);
+		}
+	}
 	return 0;
 }
 
@@ -485,15 +533,14 @@ int dynamic_graph::test_bfs_distance()
 	add_edge(1, 0, gr);
 
 	vector<int> v;
-	bfs_distance(gr, 1, v);
+	bfs_distance(gr, 3, v);
 
 	for(int i = 0; i < v.size(); i++)
 	{
-		printf("from %d to %d, distance = %d\n", 1, i, v[i]);
+		printf("from %d to %d, distance = %d\n", 3, i, v[i]);
 	}
 	return 0;
 }
-*/
 
 int dynamic_graph::test_remove_edge()
 {

@@ -50,29 +50,29 @@ namespace dynamic_graph
 	};
 
 	// wrappers
-	int add_vertex(splice_graph &gr) { return gr.add_vertex(); }
-	PEB add_edge(int s, int t, splice_graph &gr) { return PEB(gr.add_edge(s, t), true); }
-	int remove_edge(edge_descriptor e, splice_graph &gr) { return gr.remove_edge(e); }
-	size_t num_vertices(const splice_graph &gr) { return gr.num_vertices(); }
-	size_t num_edges(const splice_graph &gr) { return gr.num_edges(); }
-	int source(edge_descriptor e, const splice_graph &gr) { return e->source(); }
-	int target(edge_descriptor e, const splice_graph &gr) { return e->target(); }
-	PEE in_edges(int v, const splice_graph &gr) { return gr.in_edges(v); }
-	PEE out_edges(int v, const splice_graph &gr) { return gr.out_edges(v); }
-	PEE edges(const splice_graph &gr) { return gr.edges(); }
-	int clear(splice_graph &gr) { return gr.clear(); }
-	int degree(int v, const splice_graph &gr) { return gr.degree(v); }
-	int in_degree(int v, const splice_graph &gr) { return gr.in_degree(v); }
-	int out_degree(int v, const splice_graph &gr) { return gr.out_degree(v); }
-	PAA adjacent_vertices(int v, const splice_graph &gr) { return gr.adjacent_vertices(v); }
-	double get_vertex_weight(int v, const splice_graph &gr) { return gr.get_vertex_weight(v); }
-	double get_vertex_stddev(int v, const splice_graph &gr) { return gr.get_vertex_stddev(v); }
-	double get_edge_weight(edge_b *e, const splice_graph &gr) { return gr.get_edge_weight(e); }
-	double get_edge_stddev(edge_b *e, const splice_graph &gr) { return gr.get_edge_stddev(e); }
-	int set_vertex_weight(int v, double w, splice_graph &gr) { return gr.set_vertex_weight(v, w); }
-	int set_vertex_stddev(int v, double w, splice_graph &gr) { return gr.set_vertex_stddev(v, w); }
-	int set_edge_weight(edge_b *e, double w, splice_graph &gr) { return gr.set_edge_weight(e, w); }
-	int set_edge_stddev(edge_b *e, double w, splice_graph &gr) { return gr.set_edge_stddev(e, w); }
+	int add_vertex(splice_graph &gr);
+	PEB add_edge(int s, int t, splice_graph &gr);
+	int remove_edge(edge_descriptor e, splice_graph &gr);
+	size_t num_vertices(const splice_graph &gr);
+	size_t num_edges(const splice_graph &gr);
+	int source(edge_descriptor e, const splice_graph &gr);
+	int target(edge_descriptor e, const splice_graph &gr);
+	PEE in_edges(int v, const splice_graph &gr);
+	PEE out_edges(int v, const splice_graph &gr);
+	PEE edges(const splice_graph &gr);
+	int clear(splice_graph &gr);
+	int degree(int v, const splice_graph &gr);
+	int in_degree(int v, const splice_graph &gr);
+	int out_degree(int v, const splice_graph &gr);
+	PAA adjacent_vertices(int v, const splice_graph &gr);
+	double get_vertex_weight(int v, const splice_graph &gr);
+	double get_vertex_stddev(int v, const splice_graph &gr);
+	double get_edge_weight(edge_b *e, const splice_graph &gr);
+	double get_edge_stddev(edge_b *e, const splice_graph &gr);
+	int set_vertex_weight(int v, double w, splice_graph &gr);
+	int set_vertex_stddev(int v, double w, splice_graph &gr);
+	int set_edge_weight(edge_b *e, double w, splice_graph &gr);
+	int set_edge_stddev(edge_b *e, double w, splice_graph &gr);
 
 	// read, write, draw and simulate splice graph
 	int build_splice_graph(splice_graph &gr, const string &file);
