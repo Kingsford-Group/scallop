@@ -4,7 +4,7 @@ scallop_CPPFLAGS = -std=c++11 -I$(HTSLIB) -I$(GUROBI_HOME)/include -I$(BOOST_HOM
 scallop_LDFLAGS = -L$(HTSLIB) -L$(GUROBI_HOME)/lib -pthread
 scallop_LDADD = -lhts -lz -lgurobi_c++ -lgurobi
 
-scallop_SOURCES = splice_graph.h splice_graph.cc \
+scallop_SOURCES = boost_graph.h boost_graph.cc \
 				  interval_map.h interval_map.cc \
 				  binomial.h binomial.cc \
 				  fibonacci_heap.h fibonacci_heap.cc \
@@ -34,4 +34,5 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  edge_base.h edge_base.cc \
 				  vertex_base.h vertex_base.cc \
 				  graph_base.h graph_base.cc \
+				  dynamic_graph.h dynamic_graph.cc \
 				  main.cc
