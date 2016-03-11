@@ -31,4 +31,7 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  decomposer.h decomposer.cc \
 				  path_space.h path_space.cc \
 				  manager.h manager.cc \
+				  edge_base.h edge_base.cc \
+				  vertex_base.h vertex_base.cc \
+				  graph_base.h graph_base.cc \
 				  main.cc
