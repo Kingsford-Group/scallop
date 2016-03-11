@@ -1,7 +1,7 @@
 #ifndef __PATH_SPACE_H__
 #define __PATH_SPACE_H__
 
-#include "splice_graph.h"
+#include "boost_graph.h"
 #include "algebra.h"
 
 using namespace boost_graph;

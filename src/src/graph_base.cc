@@ -25,7 +25,7 @@ int graph_b::add_vertex()
 	return 0;
 }
 
-int graph_b::add_edge(int s, int t)
+edge_b* graph_b::add_edge(int s, int t)
 {
 	assert(s >= 0 && s < vv.size());
 	assert(t >= 0 && t < vv.size());
@@ -34,7 +34,7 @@ int graph_b::add_edge(int s, int t)
 	se.insert(e);
 	vv[s]->add_out_edge(e);
 	vv[t]->add_in_edge(e);
-	return 0;
+	return e;
 }
 
 int graph_b::remove_edge(edge_b *e)
@@ -47,9 +47,62 @@ int graph_b::remove_edge(edge_b *e)
 	return 0;
 }
 
-PEE_b graph_b::edges()
+int graph_b::clear()
+{
+	for(int i = 0; i < vv.size(); i++) delete vv[i];
+	for(edge_iterator_b it = se.begin(); it != se.end(); it++)
+	{
+		delete (*it);
+	}
+	vv.clear();
+	se.clear();
+	return 0;
+}
+
+int graph_b::degree(int v) const
+{
+	return vv[v]->degree();
+}
+
+int graph_b::in_degree(int v) const
+{
+	return vv[v]->in_degree();
+}
+
+int graph_b::out_degree(int v) const
+{
+	return vv[v]->out_degree();
+}
+
+PEE_b graph_b::in_edges(int v) const
+{
+	return vv[v]->in_edges();
+}
+
+PEE_b graph_b::out_edges(int v) const
+{
+	return vv[v]->out_edges();
+}
+
+PEE_b graph_b::edges() const
 {
 	return PEE_b(se.begin(), se.end());
+}
+
+
+size_t graph_b::num_vertices() const
+{
+	return vv.size();
+}
+
+size_t graph_b::num_edges() const
+{
+	return se.size();
+}
+
+PAA_b graph_b::adjacent_vertices(int v) const
+{
+	return vv[v]->adjacent_vertices();
 }
 
 int graph_b::print() const

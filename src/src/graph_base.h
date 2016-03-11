@@ -20,11 +20,20 @@ protected:
 
 public:
 	virtual int add_vertex();
-	virtual int add_edge(int s, int t);
+	virtual edge_b* add_edge(int s, int t);
 	virtual int remove_edge(edge_b *e);
-	virtual PEE_b edges();
+	virtual int clear();
 
-public:
+	virtual size_t num_vertices() const;
+	virtual size_t num_edges() const;
+	virtual int degree(int v) const;
+	virtual int in_degree(int v) const;
+	virtual int out_degree(int v) const;
+	virtual PEE_b edges() const;
+	virtual PEE_b in_edges(int v) const;
+	virtual PEE_b out_edges(int v) const;
+	virtual PAA_b adjacent_vertices(int v) const;
+
 	virtual int print() const;
 	static int test();
 };

@@ -1,7 +1,7 @@
 #ifndef __BUNDLE_H__
 #define __BUNDLE_H__
 
-#include "splice_graph.h"
+#include "boost_graph.h"
 #include "interval_map.h"
 #include "bundle_base.h"
 #include "junction.h"

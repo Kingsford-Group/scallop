@@ -1,7 +1,7 @@
 #ifndef __ASSEMBLER_H__
 #define __ASSEMBLER_H__
 
-#include "splice_graph.h"
+#include "boost_graph.h"
 #include "path.h"
 
 using namespace boost_graph;

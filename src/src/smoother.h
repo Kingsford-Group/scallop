@@ -2,7 +2,7 @@
 #define __LPSOLVER_H__
 
 #include "gurobi_c++.h"
-#include "splice_graph.h"
+#include "boost_graph.h"
 
 using namespace boost_graph;
 

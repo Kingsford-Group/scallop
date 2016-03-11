@@ -5,7 +5,7 @@
 
 #include "gtf_exon.h"
 #include "interval_map.h"
-#include "splice_graph.h"
+#include "boost_graph.h"
 
 using namespace std;
 using namespace boost_graph;
