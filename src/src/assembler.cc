@@ -34,7 +34,7 @@ path assembler::compute_maximum_forward_path() const
 	int n = num_vertices(gr);
 	for(int i = 1; i < n; i++)
 	{
-		double abd = get(get(vertex_weight, gr), i);
+		double abd = get_vertex_weight(i, gr);
 		if(i == n - 1) abd = DBL_MAX;
 
 		double max_abd = 0;
@@ -47,7 +47,7 @@ path assembler::compute_maximum_forward_path() const
 			assert(t == i);
 			assert(s < i);
 			//if(s >= i) continue;
-			double xw = get(get(edge_weight, gr), *it1);
+			double xw = get_edge_weight(*it1, gr);
 			double ww = xw < table[s] ? xw : table[s];
 			if(ww >= max_abd)
 			{
@@ -111,7 +111,7 @@ path assembler::compute_maximum_path() const
 			int y = target(*it1, gr);
 			if(visited[y] == true) continue;
 
-			double xw = get(get(edge_weight, gr), *it1);
+			double xw = get_edge_weight(*it1, gr);
 			double ww = xw < fx.w ? xw : fx.w;
 			if(reached[y] == false) 
 			{
@@ -156,11 +156,11 @@ int assembler::decrease_path(const path &p)
 	{
 		PEB e = edge(p.v[i], p.v[i + 1], gr);
 		assert(e.second == true);
-		double w0 = get(get(edge_weight, gr), e.first);
+		double w0 = get_edge_weight(e.first, gr);
 		double w1 = w0 - p.abd;
 		assert(w1 >= -0.000001);
 		if(w1 <= 0) w1 = 0;
-		put(get(edge_weight, gr), e.first, w1);
+		set_edge_weight(e.first, w1, gr);
 	}
 	return 0;
 }
@@ -172,9 +172,9 @@ int assembler::increase_path(const path &p)
 	{
 		PEB e = edge(p.v[i], p.v[i + 1], gr);
 		assert(e.second == true);
-		double w0 = get(get(edge_weight, gr), e.first);
+		double w0 = get_edge_weight(e.first, gr);
 		double w1 = w0 + p.abd;
-		put(get(edge_weight, gr), e.first, w1);
+		set_edge_weight(e.first, w1, gr);
 	}
 	return 0;
 }
@@ -186,7 +186,7 @@ int assembler::add_backward_path(const path &p)
 	{
 		PEB e = add_edge(p.v[i + 1], p.v[i], gr);
 		assert(e.second == true);
-		put(get(edge_weight, gr), e.first, p.abd);
+		set_edge_weight(e.first, p.abd, gr);
 	}
 	return 0;
 }
@@ -208,7 +208,7 @@ double assembler::compute_bottleneck_weight(const path &p) const
 	{
 		PEB e = edge(p.v[i], p.v[i + 1], gr);
 		assert(e.second == true);
-		double w = get(get(edge_weight, gr), e.first);
+		double w = get_edge_weight(e.first, gr);
 		if(w < ww) ww = w;
 	}
 	return ww;

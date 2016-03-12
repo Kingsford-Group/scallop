@@ -1,10 +1,10 @@
 #ifndef __ASSEMBLER_H__
 #define __ASSEMBLER_H__
 
-#include "boost_graph.h"
+#include "dynamic_graph.h"
 #include "path.h"
 
-using namespace boost_graph;
+using namespace dynamic_graph;
 
 class assembler
 {
