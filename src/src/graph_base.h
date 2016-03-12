@@ -38,6 +38,8 @@ public:
 	virtual PEE_b out_edges(int v) const;
 	virtual set<int> adjacent_vertices(int v) const;
 
+	virtual int move_edge(edge_b *e, int x, int y);
+
 	virtual int print() const;
 	static int test();
 };

@@ -15,6 +15,7 @@ protected:
 	int t;					// target
 
 public:
+	virtual int move(int x, int y);
 	virtual int source() const;
 	virtual int target() const;
 	virtual int print() const;

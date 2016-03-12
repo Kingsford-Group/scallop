@@ -7,6 +7,13 @@ edge_b::edge_b(int _s, int _t)
 	:s(_s), t(_t)
 {}
 
+int edge_b::move(int x, int y)
+{
+	s = x;
+	t = y;
+	return 0;
+}
+
 int edge_b::source() const
 {
 	return s;

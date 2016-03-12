@@ -164,6 +164,27 @@ set<int> graph_b::adjacent_vertices(int v) const
 	return vv[v]->adjacent_vertices();
 }
 
+int graph_b::move_edge(edge_b *e, int x, int y)
+{
+	int s = e->source();
+	int t = e->target();
+
+	if(s != x)
+	{
+		vv[s]->remove_out_edge(e);
+		vv[x]->add_out_edge(e);
+	}
+
+	if(t != y)
+	{
+		vv[t]->remove_in_edge(e);
+		vv[y]->add_in_edge(e);
+	}
+
+	e->move(x, y);
+	return 0;
+}
+
 int graph_b::print() const
 {
 	printf("total %lu vertices, %lu edges\n", vv.size(), se.size());
