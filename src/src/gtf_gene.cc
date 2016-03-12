@@ -15,20 +15,20 @@ int gtf_gene::add_vertices(splice_graph &gr)
 {
 	add_vertex(gr);
 	int32_t s = compute_sum_expression();
-	put(get(vertex_weight, gr), 0, s);
-	put(get(vertex_stddev, gr), 0, 1.0);
+	set_vertex_weight(0, s, gr);
+	set_vertex_stddev(0, 1.0, gr);
 
 	SIMI it;
 	for(it = imap.begin(); it != imap.end(); it++)
 	{
 		add_vertex(gr);
-		put(get(vertex_weight, gr), num_vertices(gr) - 1, it->second);
-		put(get(vertex_stddev, gr), num_vertices(gr) - 1, 1.0);
+		set_vertex_weight(num_vertices(gr) - 1, it->second, gr);
+		set_vertex_stddev(num_vertices(gr) - 1, 1.0, gr);
 	}
 
 	add_vertex(gr);
-	put(get(vertex_weight, gr), num_vertices(gr) - 1, s);
-	put(get(vertex_stddev, gr), num_vertices(gr) - 1, 1.0);
+	set_vertex_weight(num_vertices(gr) - 1, s, gr);
+	set_vertex_stddev(num_vertices(gr) - 1, 1.0, gr);
 	return 0;
 }
 
@@ -64,15 +64,15 @@ int gtf_gene::add_single_edge(int s, int t, double w, splice_graph &gr)
 	PEB p = edge(s, t, gr);
 	if(p.second == true)
 	{
-		double w0 = get(get(edge_weight, gr), p.first);	
-		put(get(edge_weight, gr), p.first, w + w0);
+		double w0 = get_edge_weight(p.first, gr);	
+		set_edge_weight(p.first, w + w0, gr);
 	}
 	else
 	{
 		PEB p = add_edge(s, t, gr);
 		assert(p.second == true);
-		put(get(edge_weight, gr), p.first, w);
-		put(get(edge_stddev, gr), p.first, 1.0);
+		set_edge_weight(p.first, w, gr);
+		set_edge_stddev(p.first, 1.0, gr);
 	}
 	return 0;
 }

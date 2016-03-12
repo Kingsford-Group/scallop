@@ -3,6 +3,8 @@
 #include <iomanip>
 #include <cstdio>
 #include <cfloat>
+#include <cstdio>
+#include <cmath>
 
 path_space::path_space()
 {

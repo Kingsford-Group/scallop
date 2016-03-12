@@ -20,6 +20,8 @@ public:
 	virtual int print() const;
 };
 
+typedef edge_b* edge_descriptor_b;
+typedef pair<edge_descriptor_b, bool> PEB_b;
 typedef set<edge_b*>::iterator edge_iterator_b;
 typedef pair<edge_iterator_b, edge_iterator_b> PEE_b;
 

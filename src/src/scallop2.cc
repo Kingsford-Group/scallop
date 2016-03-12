@@ -81,7 +81,7 @@ int scallop2::assign_weights()
 		assert(ecnt.find(*it1) != ecnt.end());
 		assert(ewrt.find(*it1) != ewrt.end());
 		double w = ewrt[*it1] / (1.0 + ecnt[*it1]);
-		put(get(edge_weight, gr), *it1, w);
+		set_edge_weight(*it1, w, gr);
 	}
 	return 0;
 }

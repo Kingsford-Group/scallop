@@ -10,7 +10,7 @@
 #include "scallop2.h"
 #include "scallop3.h"
 #include "gtf_gene.h"
-#include "boost_graph.h"
+#include "dynamic_graph.h"
 
 manager::manager()
 {

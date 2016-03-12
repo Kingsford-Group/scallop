@@ -1,10 +1,10 @@
 #ifndef __PATH_SPACE_H__
 #define __PATH_SPACE_H__
 
-#include "boost_graph.h"
+#include "dynamic_graph.h"
 #include "algebra.h"
 
-using namespace boost_graph;
+using namespace dynamic_graph;
 
 class path_space
 {

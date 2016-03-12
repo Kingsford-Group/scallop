@@ -12,9 +12,6 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-	dynamic_graph::test_bfs_distance();
-	return 0;
-
 	if(argc < 3) return 0;
 
 	load_config(argv[1]);

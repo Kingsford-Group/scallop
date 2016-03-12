@@ -5,10 +5,10 @@
 
 #include "gtf_exon.h"
 #include "interval_map.h"
-#include "boost_graph.h"
+#include "dynamic_graph.h"
 
 using namespace std;
-using namespace boost_graph;
+using namespace dynamic_graph;
 
 class gtf_gene
 {

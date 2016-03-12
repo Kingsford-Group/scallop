@@ -70,8 +70,11 @@ int dynamic_graph::splice_graph::set_edge_stddev(edge_b* e, double w)
 }
 
 int dynamic_graph::add_vertex(splice_graph &gr) { return gr.add_vertex(); }
-PEB dynamic_graph::add_edge(int s, int t, splice_graph &gr) { return PEB(gr.add_edge(s, t), true); }
+PEB dynamic_graph::add_edge(int s, int t, splice_graph &gr) { return gr.add_edge(s, t); }
+PEB dynamic_graph::edge(int s, int t, const splice_graph &gr) { return gr.edge(s, t); }
 int dynamic_graph::remove_edge(edge_descriptor e, splice_graph &gr) { return gr.remove_edge(e); }
+int dynamic_graph::remove_edge(int s, int t, splice_graph &gr) { return gr.remove_edge(s, t); }
+int dynamic_graph::clear_vertex(int v, splice_graph &gr) { return gr.clear_vertex(v); }
 size_t dynamic_graph::num_vertices(const splice_graph &gr) { return gr.num_vertices(); }
 size_t dynamic_graph::num_edges(const splice_graph &gr) { return gr.num_edges(); }
 int dynamic_graph::source(edge_descriptor e, const splice_graph &gr) { return e->source(); }

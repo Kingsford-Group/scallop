@@ -25,7 +25,7 @@ int graph_b::add_vertex()
 	return 0;
 }
 
-edge_b* graph_b::add_edge(int s, int t)
+PEB_b graph_b::add_edge(int s, int t)
 {
 	assert(s >= 0 && s < vv.size());
 	assert(t >= 0 && t < vv.size());
@@ -34,7 +34,21 @@ edge_b* graph_b::add_edge(int s, int t)
 	se.insert(e);
 	vv[s]->add_out_edge(e);
 	vv[t]->add_in_edge(e);
-	return e;
+	return PEB_b(e, true);
+}
+
+PEB_b graph_b::edge(int s, int t) const
+{
+	assert(s >= 0 && s < vv.size());
+	assert(t >= 0 && t < vv.size());
+	PEE_b p = vv[s]->out_edges();
+	for(edge_iterator_b it = p.first; it != p.second; it++)
+	{
+		int x = (*it)->target();
+		if(x != t) continue;
+		return PEB_b(*it, true);
+	}
+	return PEB_b(NULL, false);
 }
 
 int graph_b::remove_edge(edge_b *e)
@@ -44,6 +58,42 @@ int graph_b::remove_edge(edge_b *e)
 	vv[e->target()]->remove_in_edge(e);
 	delete e;
 	se.erase(e);
+	return 0;
+}
+
+int graph_b::remove_edge(int s, int t)
+{
+	vector<edge_b*> v;
+	PEE_b p = vv[s]->out_edges();
+	for(edge_iterator_b it = p.first; it != p.second; it++)
+	{
+		if((*it)->target() != t) continue;
+		v.push_back(*it);
+	}
+	for(int i = 0; i < v.size(); i++)
+	{
+		remove_edge(v[i]);
+	}
+	return 0;
+}
+
+int graph_b::clear_vertex(int x)
+{
+	vector<edge_b*> v;
+	PEE_b pi = vv[x]->in_edges();
+	PEE_b po = vv[x]->out_edges();
+	for(edge_iterator_b it = pi.first; it != pi.second; it++)
+	{
+		v.push_back(*it);
+	}
+	for(edge_iterator_b it = po.first; it != po.second; it++)
+	{
+		v.push_back(*it);
+	}
+	for(int i = 0; i < v.size(); i++)
+	{
+		remove_edge(v[i]);
+	}
 	return 0;
 }
 

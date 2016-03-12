@@ -10,21 +10,22 @@ using namespace std;
 
 namespace dynamic_graph
 {
-	typedef edge_b* edge_descriptor;
-	typedef map<edge_descriptor, bool> MEB;
-	typedef map<edge_descriptor, double> MED;
-	typedef pair<edge_descriptor, double> PED;
-	typedef pair<edge_descriptor, bool> PEB;
-	typedef map<edge_descriptor, int> MEI;
-	typedef pair<edge_descriptor, int> PEI;
-	typedef vector<edge_descriptor> VE;
-
-	typedef PEE_b PEE;
+	typedef edge_descriptor_b edge_descriptor;
 	typedef edge_iterator_b edge_iterator;
 	typedef edge_iterator_b in_edge_iterator;
 	typedef edge_iterator_b out_edge_iterator;
 	typedef adj_iterator_b adj_iterator;
 	typedef PAA_b PAA;
+	typedef PEE_b PEE;
+	typedef PEB_b PEB;
+
+	typedef map<edge_descriptor, bool> MEB;
+	typedef map<edge_descriptor, double> MED;
+	typedef pair<edge_descriptor, double> PED;
+	typedef map<edge_descriptor, int> MEI;
+	typedef pair<edge_descriptor, int> PEI;
+	typedef vector<edge_descriptor> VE;
+
 
 	class splice_graph : public graph_b
 	{
@@ -52,7 +53,10 @@ namespace dynamic_graph
 	// wrappers
 	int add_vertex(splice_graph &gr);
 	PEB add_edge(int s, int t, splice_graph &gr);
+	PEB edge(int s, int t, const splice_graph &gr);
 	int remove_edge(edge_descriptor e, splice_graph &gr);
+	int remove_edge(int s, int t, splice_graph &gr);
+	int clear_vertex(int x, splice_graph &gr);
 	size_t num_vertices(const splice_graph &gr);
 	size_t num_edges(const splice_graph &gr);
 	int source(edge_descriptor e, const splice_graph &gr);

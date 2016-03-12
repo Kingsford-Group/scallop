@@ -66,7 +66,7 @@ int smoother::add_vertex_error_variables()
 	verr.clear();
 	for(int i = 0; i < num_vertices(gr); i++)
 	{
-		double sd = get(get(vertex_stddev, gr), i);
+		double sd = get_vertex_stddev(i, gr);
 		GRBVar var = model->addVar(0, GRB_INFINITY, 1.0 / sd, GRB_CONTINUOUS);
 		verr.push_back(var);
 	}
@@ -91,7 +91,7 @@ int smoother::add_edge_error_variables()
 	eerr.clear();
 	for(int i = 0; i < i2e.size(); i++)
 	{
-		double sd = get(get(edge_stddev, gr), i2e[i]);
+		double sd = get_edge_stddev(i2e[i], gr);
 		GRBVar var = model->addVar(0, GRB_INFINITY, 1.0 / sd, GRB_CONTINUOUS);
 		eerr.push_back(var);
 	}
@@ -103,7 +103,7 @@ int smoother::add_vertex_error_constraints()
 {
 	for(int i = 0; i < num_vertices(gr); i++)
 	{
-		double w = get(get(vertex_weight, gr), i);
+		double w = get_vertex_weight(i, gr);
 		model->addConstr(vnwt[i], GRB_LESS_EQUAL, w + verr[i]);
 		model->addConstr(vnwt[i], GRB_GREATER_EQUAL, w - verr[i]);
 	}
@@ -114,7 +114,7 @@ int smoother::add_edge_error_constraints()
 {
 	for(int i = 0; i < num_edges(gr); i++)
 	{
-		double w = get(get(edge_weight, gr), i2e[i]);
+		double w = get_edge_weight(i2e[i], gr);
 		model->addConstr(enwt[i], GRB_LESS_EQUAL, w + eerr[i]);
 		model->addConstr(enwt[i], GRB_GREATER_EQUAL, w - eerr[i]);
 	}
@@ -160,15 +160,15 @@ int smoother::update()
 	for(int i = 0; i < vnwt.size(); i++)
 	{
 		double w1 = vnwt[i].get(GRB_DoubleAttr_X);
-		double w0 = get(get(vertex_weight, gr), i);
-		put(get(vertex_weight, gr), i, w1);
+		double w0 = get_vertex_weight(i, gr);
+		set_vertex_weight(i, w1, gr);
 	}
 
 	for(int i = 0; i < enwt.size(); i++)
 	{
 		double w1 = enwt[i].get(GRB_DoubleAttr_X);
-		double w0 = get(get(edge_weight, gr), i2e[i]);
-		put(get(edge_weight, gr), i2e[i], w1);
+		double w0 = get_edge_weight(i2e[i], gr);
+		set_edge_weight(i2e[i], w1, gr);
 	}
 
 	return 0;

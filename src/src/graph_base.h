@@ -20,10 +20,13 @@ protected:
 
 public:
 	virtual int add_vertex();
-	virtual edge_b* add_edge(int s, int t);
+	virtual PEB_b add_edge(int s, int t);
 	virtual int remove_edge(edge_b *e);
+	virtual int remove_edge(int s, int t);
+	virtual int clear_vertex(int v);
 	virtual int clear();
 
+	virtual PEB_b edge(int s, int t) const;
 	virtual size_t num_vertices() const;
 	virtual size_t num_edges() const;
 	virtual int degree(int v) const;

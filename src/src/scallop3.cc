@@ -70,7 +70,7 @@ int scallop3::print()
 		vector<int> v = vv[i];
 		assert(v.size() >= 1);
 
-		int w = (int)(get(get(edge_weight, gr), i2e[v[0]]));
+		int w = (int)(get_edge_weight(i2e[v[0]], gr));
 
 		printf("edge set %d, weight = %d, #edges = %lu, set = (%d", i, w, v.size(), v[0]);
 		for(int j = 1; j < v.size(); j++) printf(", %d", v[j]);
@@ -125,17 +125,17 @@ bool scallop3::decompose_trivial_vertex(int x)
 			int s = source(*it1, gr);
 			int t = target(*ot1, gr);
 
-			double w1 = get(get(edge_weight, gr), *it1);
-			double a1 = get(get(edge_stddev, gr), *it1);
-			double w2 = get(get(edge_weight, gr), *ot1);
-			double a2 = get(get(edge_stddev, gr), *ot1);
+			double w1 = get_edge_weight(*it1, gr);
+			double a1 = get_edge_stddev(*it1, gr);
+			double w2 = get_edge_weight(*ot1, gr);
+			double a2 = get_edge_stddev(*ot1, gr);
 
 			double w = w1 < w2 ? w1 : w2;
 			double a = w1 < w2 ? a1 : a2;
 
 			PEB p = add_edge(s, t, gr);
-			put(get(edge_weight, gr), p.first, w);
-			put(get(edge_stddev, gr), p.first, a);
+			set_edge_weight(p.first, w, gr);
+			set_edge_stddev(p.first, a, gr);
 
 			assert(mev.find(*it1) != mev.end());
 			assert(mev.find(*ot1) != mev.end());
@@ -259,15 +259,15 @@ bool scallop3::connect_adjacent_edges(int x, int y)
 	assert(e2i.find(p.first) == e2i.end());
 	e2i.insert(PEI(p.first, n));
 
-	double wx0 = get(get(edge_weight, gr), xx);
-	double wy0 = get(get(edge_weight, gr), yy);
-	double wx1 = get(get(edge_stddev, gr), xx);
-	double wy1 = get(get(edge_stddev, gr), yy);
+	double wx0 = get_edge_weight(xx, gr);
+	double wy0 = get_edge_weight(yy, gr);
+	double wx1 = get_edge_stddev(xx, gr);
+	double wy1 = get_edge_stddev(yy, gr);
 
 	assert(fabs(wx0 - wy0) <= SMIN);
 
-	put(get(edge_weight, gr), p.first, wx0);
-	put(get(edge_stddev, gr), p.first, wx1);
+	set_edge_weight(p.first, wx0, gr);
+	set_edge_stddev(p.first, wx1, gr);
 
 	vector<int> v = mev[xx];
 	v.push_back(xt);
@@ -300,19 +300,19 @@ int scallop3::split_edge(int ei, const vector<int> &sub)
 	assert(sub.size() >= 1);
 	for(int i = 0; i < sub.size(); i++) assert(i2b[sub[i]] == true);
 
-	double w = get(get(edge_weight, gr), i2e[ei]);
+	double w = get_edge_weight(i2e[ei], gr);
 	for(int i = 0; i < sub.size(); i++)
 	{
-		w -= get(get(edge_weight, gr), i2e[sub[i]]);
+		w -= get_edge_weight(i2e[sub[i]], gr);
 	}
 	assert(fabs(w) <= SMIN);
 
 	edge_descriptor ex = i2e[ei];
 	edge_descriptor ey = i2e[sub[0]];
-	double w0 = get(get(edge_weight, gr), ey);
-	double w1 = get(get(edge_stddev, gr), ey);
-	put(get(edge_weight, gr), ex, w0);
-	put(get(edge_stddev, gr), ex, w1);
+	double w0 = get_edge_weight(ey, gr);
+	double w1 = get_edge_stddev(ey, gr);
+	set_edge_weight(ex, w0, gr);
+	set_edge_stddev(ex, w1, gr);
 	ds.union_set(ei, sub[0]);
 
 	int s = source(ex, gr);
@@ -329,11 +329,11 @@ int scallop3::split_edge(int ei, const vector<int> &sub)
 		e2i.insert(PEI(p.first, n));
 
 		ey = i2e[sub[i]];
-		w0 = get(get(edge_weight, gr), ey);
-		w1 = get(get(edge_stddev, gr), ey);
+		w0 = get_edge_weight(ey, gr);
+		w1 = get_edge_stddev(ey, gr);
 
-		put(get(edge_weight, gr), p.first, w0);
-		put(get(edge_stddev, gr), p.first, w1);
+		set_edge_weight(p.first, w0, gr);
+		set_edge_stddev(p.first, w1, gr);
 
 		mev.insert(PEV(p.first, mev[ex]));
 
@@ -355,7 +355,7 @@ int scallop3::identify_equation(int &ei, vector<int> &sub)
 	vector<int> x;
 	for(int i = 0; i < r.size(); i++)
 	{
-		double w = get(get(edge_weight, gr), i2e[r[i]]);
+		double w = get_edge_weight(i2e[r[i]], gr);
 		x.push_back((int)(w));
 	}
 
