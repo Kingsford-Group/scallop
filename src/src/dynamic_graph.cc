@@ -10,6 +10,25 @@ using namespace dynamic_graph;
 dynamic_graph::splice_graph::splice_graph()
 {}
 
+dynamic_graph::splice_graph::splice_graph(const splice_graph &gr)
+{
+	clear();
+	for(int i = 0; i < gr.num_vertices(); i++)
+	{
+		add_vertex();
+		set_vertex_weight(i, gr.get_vertex_weight(i));
+		set_vertex_stddev(i, gr.get_vertex_stddev(i));
+	}
+
+	PEE_b p = gr.edges();
+	for(edge_iterator_b it = p.first; it != p.second; it++)
+	{
+		PEB_b e = add_edge((*it)->source(), (*it)->target());
+		set_edge_weight(e.first, gr.get_edge_weight(*it));
+		set_edge_stddev(e.first, gr.get_edge_stddev(*it));
+	}
+}
+
 dynamic_graph::splice_graph::~splice_graph()
 {}
 
@@ -69,6 +88,16 @@ int dynamic_graph::splice_graph::set_edge_stddev(edge_b* e, double w)
 	return 0;
 }
 
+int dynamic_graph::splice_graph::clear()
+{
+	graph_b::clear();
+	vwrt.clear();
+	vdev.clear();
+	ewrt.clear();
+	edev.clear();
+	return 0;
+}
+
 int dynamic_graph::add_vertex(splice_graph &gr) { return gr.add_vertex(); }
 PEB dynamic_graph::add_edge(int s, int t, splice_graph &gr) { return gr.add_edge(s, t); }
 PEB dynamic_graph::edge(int s, int t, const splice_graph &gr) { return gr.edge(s, t); }
@@ -86,7 +115,7 @@ int dynamic_graph::clear(splice_graph &gr) { return gr.clear(); }
 int dynamic_graph::degree(int v, const splice_graph &gr) { return gr.degree(v); }
 int dynamic_graph::in_degree(int v, const splice_graph &gr) { return gr.in_degree(v); }
 int dynamic_graph::out_degree(int v, const splice_graph &gr) { return gr.out_degree(v); }
-PAA dynamic_graph::adjacent_vertices(int v, const splice_graph &gr) { return gr.adjacent_vertices(v); }
+set<int> dynamic_graph::adjacent_vertices(int v, const splice_graph &gr) { return gr.adjacent_vertices(v); }
 double dynamic_graph::get_vertex_weight(int v, const splice_graph &gr) { return gr.get_vertex_weight(v); }
 double dynamic_graph::get_vertex_stddev(int v, const splice_graph &gr) { return gr.get_vertex_stddev(v); }
 double dynamic_graph::get_edge_weight(edge_b *e, const splice_graph &gr) { return gr.get_edge_weight(e); }
@@ -211,12 +240,13 @@ int dynamic_graph::draw_splice_graph(const splice_graph &gr, const string &file,
 	}
 
 	// draw edges
-	adj_iterator ai1, ai2;
 	for(int i = 0; i < num_vertices(gr); i++)
 	{
-		for(tie(ai1, ai2) = adjacent_vertices(i, gr); ai1 != ai2; ai1++)
+		set<int> ss = adjacent_vertices(i, gr);
+		for(set<int>::iterator it = ss.begin(); it != ss.end(); it++)
 		{
-			int j = *ai1;
+			// TODO
+			int j = (*it);
 			assert(i < j);
 
 			string s;

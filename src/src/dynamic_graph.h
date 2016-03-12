@@ -14,8 +14,6 @@ namespace dynamic_graph
 	typedef edge_iterator_b edge_iterator;
 	typedef edge_iterator_b in_edge_iterator;
 	typedef edge_iterator_b out_edge_iterator;
-	typedef adj_iterator_b adj_iterator;
-	typedef PAA_b PAA;
 	typedef PEE_b PEE;
 	typedef PEB_b PEB;
 
@@ -31,6 +29,7 @@ namespace dynamic_graph
 	{
 	public:
 		splice_graph();
+		splice_graph(const splice_graph &gr);
 		virtual ~splice_graph();
 
 	public:
@@ -48,6 +47,7 @@ namespace dynamic_graph
 		int set_vertex_stddev(int v, double w);
 		int set_edge_weight(edge_b *e, double w);
 		int set_edge_stddev(edge_b *e, double w);
+		int clear();
 	};
 
 	// wrappers
@@ -68,7 +68,7 @@ namespace dynamic_graph
 	int degree(int v, const splice_graph &gr);
 	int in_degree(int v, const splice_graph &gr);
 	int out_degree(int v, const splice_graph &gr);
-	PAA adjacent_vertices(int v, const splice_graph &gr);
+	set<int> adjacent_vertices(int v, const splice_graph &gr);
 	double get_vertex_weight(int v, const splice_graph &gr);
 	double get_vertex_stddev(int v, const splice_graph &gr);
 	double get_edge_weight(edge_b *e, const splice_graph &gr);

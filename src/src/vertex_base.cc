@@ -66,7 +66,7 @@ PEE_b vertex_b::out_edges() const
 	return PEE_b(so.begin(), so.end());
 }
 
-PAA_b vertex_b::adjacent_vertices() const
+set<int> vertex_b::adjacent_vertices() const
 {
 	set<int> x;
 	/*
@@ -81,7 +81,7 @@ PAA_b vertex_b::adjacent_vertices() const
 		int s = (*it)->target();
 		if(x.find(s) == x.end()) x.insert(s);
 	}
-	return PAA_b(x.begin(), x.end());
+	return x;
 }
 
 int vertex_b::print() const

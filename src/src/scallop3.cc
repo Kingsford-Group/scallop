@@ -481,7 +481,7 @@ int scallop3::compute_closest_equal_edges(int &ex, int &ey)
 			bfs_distance(gr, tt[j], v);
 			for(int k = 0; k < ss.size(); k++)
 			{
-				if(v[ss[k]] == 0) continue;
+				if(v[ss[k]] <= 0) continue;
 				if(v[ss[k]] < dist)
 				{
 					dist = v[ss[k]];

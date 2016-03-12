@@ -9,18 +9,27 @@ using namespace std;
 graph_b::graph_b()
 {}
 
+graph_b::graph_b(const graph_b &gr)
+{
+	clear();
+	for(int i = 0; i < gr.num_vertices(); i++) add_vertex();
+
+	PEE_b p = gr.edges();
+	for(edge_iterator_b it = p.first; it != p.second; it++)
+	{
+		add_edge((*it)->source(), (*it)->target());
+	}
+}
+
 graph_b::~graph_b()
 {
 	for(int i = 0; i < vv.size(); i++) delete vv[i];
-	for(edge_iterator_b it = se.begin(); it != se.end(); it++)
-	{
-		delete (*it);
-	}
+	for(edge_iterator_b it = se.begin(); it != se.end(); it++) delete (*it);
 }
 
 int graph_b::add_vertex()
 {
-	vertex_b *v = new vertex_b;
+	vertex_b *v = new vertex_b();
 	vv.push_back(v);
 	return 0;
 }
@@ -150,7 +159,7 @@ size_t graph_b::num_edges() const
 	return se.size();
 }
 
-PAA_b graph_b::adjacent_vertices(int v) const
+set<int> graph_b::adjacent_vertices(int v) const
 {
 	return vv[v]->adjacent_vertices();
 }

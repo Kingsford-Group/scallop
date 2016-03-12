@@ -6,9 +6,6 @@
 
 using namespace std;
 
-typedef set<int>::iterator adj_iterator_b;
-typedef pair<adj_iterator_b, adj_iterator_b> PAA_b;
-
 class vertex_b
 {
 public:
@@ -29,7 +26,7 @@ public:
 	virtual int out_degree() const;
 	virtual PEE_b in_edges() const;
 	virtual PEE_b out_edges() const;
-	virtual PAA_b adjacent_vertices() const;
+	virtual set<int> adjacent_vertices() const;
 	virtual int print() const;
 };
 

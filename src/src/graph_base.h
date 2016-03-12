@@ -12,6 +12,7 @@ class graph_b
 {
 public:
 	graph_b();
+	graph_b(const graph_b &gr);
 	virtual ~graph_b();
 
 protected:
@@ -35,7 +36,7 @@ public:
 	virtual PEE_b edges() const;
 	virtual PEE_b in_edges(int v) const;
 	virtual PEE_b out_edges(int v) const;
-	virtual PAA_b adjacent_vertices(int v) const;
+	virtual set<int> adjacent_vertices(int v) const;
 
 	virtual int print() const;
 	static int test();
