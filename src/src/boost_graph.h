@@ -78,12 +78,7 @@ namespace boost_graph
 	bool check_fully_connected(const splice_graph &gr);
 	bool check_fully_reachable_from_start(const splice_graph &gr);
 	bool check_fully_reachable_to_end(const splice_graph &gr);
-	int bfs_distance(const splice_graph &gr, int s, vector<int> &v);
-
-
-	// tests
-	int test_bfs_distance();
-	int test_remove_edge();
+	int bfs_splice_graph(const splice_graph &gr, int s, vector<int> &v);
 }
 
 #endif

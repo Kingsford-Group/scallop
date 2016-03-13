@@ -396,49 +396,10 @@ bool boost_graph::check_fully_connected(const splice_graph &gr)
 	else return false;
 }
 
-int boost_graph::bfs_distance(const splice_graph &gr, int s, vector<int> &v)
+int boost_graph::bfs_splice_graph(const splice_graph &gr, int s, vector<int> &v)
 {
 	v.assign(num_vertices(gr), 0);
 	breadth_first_search(gr, s, visitor(make_bfs_visitor(record_distances(&v[0], on_tree_edge()))));
 	return 0;
 }
 
-int boost_graph::test_bfs_distance()
-{
-	splice_graph gr;
-	int N = 5;
-	for(int i = 0; i < N; i++) add_vertex(gr);
-	add_edge(0, 1, gr);
-	add_edge(0, 2, gr);
-	add_edge(1, 2, gr);
-	add_edge(1, 3, gr);
-	add_edge(1, 4, gr);
-	add_edge(2, 3, gr);
-	add_edge(3, 4, gr);
-	add_edge(3, 4, gr);
-	add_edge(2, 1, gr);
-	add_edge(1, 0, gr);
-
-	vector<int> v;
-	bfs_distance(gr, 1, v);
-
-	for(int i = 0; i < v.size(); i++)
-	{
-		printf("from %d to %d, distance = %d\n", 1, i, v[i]);
-	}
-	return 0;
-}
-
-int boost_graph::test_remove_edge()
-{
-	splice_graph gr;
-	add_vertex(gr);
-	add_vertex(gr);
-	PEB p1 = add_edge(0, 1, gr);
-	PEB p2 = add_edge(0, 1, gr);
-	PEB p3 = add_edge(0, 1, gr);
-	remove_edge(p1.first, gr);
-	remove_edge(p2.first, gr);
-	remove_edge(p3.first, gr);
-	return 0;
-}

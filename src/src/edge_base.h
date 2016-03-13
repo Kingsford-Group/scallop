@@ -5,10 +5,10 @@
 
 using namespace std;
 
-class edge_b
+class edge_base
 {
 public:
-	edge_b(int _s, int _t);
+	edge_base(int _s, int _t);
 
 protected:
 	int s;					// source
@@ -21,9 +21,9 @@ public:
 	virtual int print() const;
 };
 
-typedef edge_b* edge_descriptor_b;
-typedef pair<edge_descriptor_b, bool> PEB_b;
-typedef set<edge_b*>::iterator edge_iterator_b;
-typedef pair<edge_iterator_b, edge_iterator_b> PEE_b;
+typedef edge_base* edge_descriptor;
+typedef set<edge_base*>::iterator edge_iterator;
+typedef pair<edge_descriptor, bool> PEB;
+typedef pair<edge_iterator, edge_iterator> PEE;
 
 #endif

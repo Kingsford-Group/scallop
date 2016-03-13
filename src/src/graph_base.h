@@ -8,38 +8,44 @@
 
 using namespace std;
 
-class graph_b
+class graph_base
 {
 public:
-	graph_b();
-	graph_b(const graph_b &gr);
-	virtual ~graph_b();
+	graph_base();
+	graph_base(const graph_base &gr);
+	virtual ~graph_base();
 
 protected:
-	vector<vertex_b*> vv;
-	set<edge_b*> se;
+	vector<vertex_base*> vv;
+	set<edge_base*> se;
 
 public:
+	// modify the graph
 	virtual int add_vertex();
-	virtual PEB_b add_edge(int s, int t);
-	virtual int remove_edge(edge_b *e);
+	virtual PEB add_edge(int s, int t);
+	virtual int remove_edge(edge_base *e);
 	virtual int remove_edge(int s, int t);
+	virtual int move_edge(edge_base *e, int x, int y);
 	virtual int clear_vertex(int v);
 	virtual int clear();
 
-	virtual PEB_b edge(int s, int t) const;
+	// access functions
+	virtual PEB edge(int s, int t) const;
 	virtual size_t num_vertices() const;
 	virtual size_t num_edges() const;
 	virtual int degree(int v) const;
 	virtual int in_degree(int v) const;
 	virtual int out_degree(int v) const;
-	virtual PEE_b edges() const;
-	virtual PEE_b in_edges(int v) const;
-	virtual PEE_b out_edges(int v) const;
+	virtual PEE edges() const;
+	virtual PEE in_edges(int v) const;
+	virtual PEE out_edges(int v) const;
 	virtual set<int> adjacent_vertices(int v) const;
 
-	virtual int move_edge(edge_b *e, int x, int y);
+	// algorithms
+	virtual int bfs(int s, vector<int> &v) const;
+	virtual int bfs_reverse(int t, vector<int> &v) const;
 
+	// test
 	virtual int print() const;
 	static int test();
 };

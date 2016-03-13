@@ -264,6 +264,8 @@ bool scallop3::connect_adjacent_edges(int x, int y)
 	double wx1 = get_edge_stddev(xx, gr);
 	double wy1 = get_edge_stddev(yy, gr);
 
+	printf("wx0 = %lf, wy0 = %lf, SMIN = %lf\n", wx0, wy0, SMIN);
+
 	assert(fabs(wx0 - wy0) <= SMIN);
 
 	set_edge_weight(p.first, wx0, gr);
@@ -478,7 +480,7 @@ int scallop3::compute_closest_equal_edges(int &ex, int &ey)
 		for(int j = 0; j < tt.size(); j++)
 		{
 			vector<int> v;
-			bfs_distance(gr, tt[j], v);
+			bfs_splice_graph(gr, tt[j], v);
 			for(int k = 0; k < ss.size(); k++)
 			{
 				if(v[ss[k]] <= 0) continue;
