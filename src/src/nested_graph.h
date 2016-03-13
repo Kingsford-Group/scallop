@@ -14,7 +14,8 @@ public:
 	nested_graph();
 	virtual ~nested_graph();
 
-
+public:
+	virtual edge_descriptor add_edge(int s, int t);
 };
 
 #endif
