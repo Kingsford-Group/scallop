@@ -264,7 +264,7 @@ bool scallop3::connect_adjacent_edges(int x, int y)
 	double wx1 = get_edge_stddev(xx, gr);
 	double wy1 = get_edge_stddev(yy, gr);
 
-	printf("wx0 = %lf, wy0 = %lf, SMIN = %lf\n", wx0, wy0, SMIN);
+	//printf("wx0 = %lf, wy0 = %lf, SMIN = %lf\n", wx0, wy0, SMIN);
 
 	assert(fabs(wx0 - wy0) <= SMIN);
 

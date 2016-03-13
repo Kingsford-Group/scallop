@@ -9,7 +9,7 @@ using namespace dynamic_graph;
 
 // basic operations
 int dynamic_graph::add_vertex(splice_graph &gr) { return gr.add_vertex(); }
-PEB dynamic_graph::add_edge(int s, int t, splice_graph &gr) { return gr.add_edge(s, t); }
+PEB dynamic_graph::add_edge(int s, int t, splice_graph &gr) { return PEB(gr.add_edge(s, t), true); }
 PEB dynamic_graph::edge(int s, int t, const splice_graph &gr) { return gr.edge(s, t); }
 int dynamic_graph::remove_edge(edge_descriptor e, splice_graph &gr) { return gr.remove_edge(e); }
 int dynamic_graph::remove_edge(int s, int t, splice_graph &gr) { return gr.remove_edge(s, t); }

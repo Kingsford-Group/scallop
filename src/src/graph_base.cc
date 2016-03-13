@@ -34,7 +34,7 @@ int graph_base::add_vertex()
 	return 0;
 }
 
-PEB graph_base::add_edge(int s, int t)
+edge_descriptor graph_base::add_edge(int s, int t)
 {
 	assert(s >= 0 && s < vv.size());
 	assert(t >= 0 && t < vv.size());
@@ -43,7 +43,7 @@ PEB graph_base::add_edge(int s, int t)
 	se.insert(e);
 	vv[s]->add_out_edge(e);
 	vv[t]->add_in_edge(e);
-	return PEB(e, true);
+	return e;
 }
 
 PEB graph_base::edge(int s, int t) const

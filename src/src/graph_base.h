@@ -2,6 +2,7 @@
 #define __GRAPH_BASE_H__
 
 #include <vector>
+#include <map>
 
 #include "vertex_base.h"
 #include "edge_base.h"
@@ -22,7 +23,7 @@ protected:
 public:
 	// modify the graph
 	virtual int add_vertex();
-	virtual PEB add_edge(int s, int t);
+	virtual edge_descriptor add_edge(int s, int t);
 	virtual int remove_edge(edge_base *e);
 	virtual int remove_edge(int s, int t);
 	virtual int move_edge(edge_base *e, int x, int y);
@@ -49,5 +50,12 @@ public:
 	virtual int print() const;
 	static int test();
 };
+
+typedef map<edge_descriptor, bool> MEB;
+typedef map<edge_descriptor, double> MED;
+typedef pair<edge_descriptor, double> PED;
+typedef map<edge_descriptor, int> MEI;
+typedef pair<edge_descriptor, int> PEI;
+typedef vector<edge_descriptor> VE;
 
 #endif

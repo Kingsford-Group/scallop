@@ -8,13 +8,6 @@
 
 using namespace std;
 
-typedef map<edge_descriptor, bool> MEB;
-typedef map<edge_descriptor, double> MED;
-typedef pair<edge_descriptor, double> PED;
-typedef map<edge_descriptor, int> MEI;
-typedef pair<edge_descriptor, int> PEI;
-typedef vector<edge_descriptor> VE;
-
 class splice_graph : public graph_base
 {
 public:

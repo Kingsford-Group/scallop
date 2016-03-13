@@ -21,9 +21,9 @@ splice_graph::splice_graph(const splice_graph &gr)
 	PEE p = gr.edges();
 	for(edge_iterator it = p.first; it != p.second; it++)
 	{
-		PEB e = add_edge((*it)->source(), (*it)->target());
-		set_edge_weight(e.first, gr.get_edge_weight(*it));
-		set_edge_stddev(e.first, gr.get_edge_stddev(*it));
+		edge_descriptor e = add_edge((*it)->source(), (*it)->target());
+		set_edge_weight(e, gr.get_edge_weight(*it));
+		set_edge_stddev(e, gr.get_edge_stddev(*it));
 	}
 }
 
@@ -170,9 +170,9 @@ int splice_graph::build(const string &file)
 		assert(x >= 0 && x < num_vertices());
 		assert(y >= 0 && y < num_vertices());
 
-		PEB p = add_edge(x, y);
-		set_edge_weight(p.first, weight);
-		set_edge_stddev(p.first, stddev);
+		edge_descriptor p = add_edge(x, y);
+		set_edge_weight(p, weight);
+		set_edge_stddev(p, stddev);
 	}
 
 	fin.close();
@@ -303,9 +303,9 @@ int splice_graph::simulate(int n, int m)
 	{
 		int s = rand() % (n - 1);
 		int t = s + 1 + rand() % (n - s - 1);
-		PEB p = add_edge(s, t);
-		set_edge_weight(p.first, 1);
-		set_edge_stddev(p.first, 1);
+		edge_descriptor p = add_edge(s, t);
+		set_edge_weight(p, 1);
+		set_edge_stddev(p, 1);
 	}
 	return 0;
 }
