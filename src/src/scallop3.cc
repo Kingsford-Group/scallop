@@ -22,6 +22,8 @@ int scallop3::assemble()
 	init_disjoint_sets();
 	build_null_space();
 
+	return 0;
+
 	draw_splice_graph(gr, name + ".0.tex", 5.0);
 	iterate();
 	draw_splice_graph(gr, name + ".1.tex", 5.0);

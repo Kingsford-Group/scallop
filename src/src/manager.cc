@@ -11,6 +11,7 @@
 #include "scallop3.h"
 #include "gtf_gene.h"
 #include "dynamic_graph.h"
+#include "nested_graph.h"
 
 manager::manager()
 {
@@ -133,7 +134,7 @@ int manager::assemble_gtf(const string &file)
 		if(gg.exons.size() <= 0) continue;
 
 		// DEBUG
-		if(gg.exons[0].gene_id != "ABI3BP") continue;
+		//if(gg.exons[0].gene_id != "ABI3BP") continue;
 
 		splice_graph gr;
 		gg.build_splice_graph(gr);
@@ -149,6 +150,12 @@ int manager::assemble_gtf(const string &file)
 		scallop3 sc(gg.exons[0].gene_id, gr);
 		sc.assemble();
 		//gg.output_gtf(scallop2_fout, sc.paths, "scallop2");
+	
+		sc.gr.draw(gg.exons[0].gene_id + ".0.tex", 5.0);
+
+		nested_graph nt(gr);
+
+		nt.draw(gg.exons[0].gene_id + ".1.tex", 5.0);
 
 		continue;
 
@@ -157,7 +164,6 @@ int manager::assemble_gtf(const string &file)
 		printf("gene %s, %lu transcipts, total %lu exons, %lu vertices, %lu edges %d paths, %s, %s\n",
 				gg.exons[0].gene_id.c_str(), gg.transcripts.size(), gg.exons.size(),
 				num_vertices(sc.gr), num_edges(sc.gr), p, s.c_str(), b ? "NESTED" : "GENERAL");
-
 
 		char buf[1024];
 		sprintf(buf, "%s.0.tex", gg.exons[0].gene_id.c_str());
