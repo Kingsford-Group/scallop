@@ -134,7 +134,7 @@ int manager::assemble_gtf(const string &file)
 		if(gg.exons.size() <= 0) continue;
 
 		// DEBUG
-		//if(gg.exons[0].gene_id != "ABI3BP") continue;
+		if(gg.exons[0].gene_id != "ABI3BP") continue;
 
 		splice_graph gr;
 		gg.build_splice_graph(gr);
@@ -153,7 +153,7 @@ int manager::assemble_gtf(const string &file)
 	
 		sc.gr.draw(gg.exons[0].gene_id + ".0.tex", 5.0);
 
-		nested_graph nt(gr);
+		nested_graph nt(sc.gr);
 
 		nt.draw(gg.exons[0].gene_id + ".1.tex", 5.0);
 

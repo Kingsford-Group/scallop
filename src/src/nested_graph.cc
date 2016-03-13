@@ -54,6 +54,7 @@ bool nested_graph::intersect(edge_descriptor &ex, edge_descriptor &ey) const
 	if(xs == ys) return false;
 	if(xs > ys) return intersect(ey, ex);
 	if(ys >= xt) return false;
+	if(yt <= xt) return false;
 	// TODO, right now this is a over-strong condition
 	return true;
 }
