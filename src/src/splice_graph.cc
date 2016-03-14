@@ -254,39 +254,6 @@ int splice_graph::compute_num_paths() const
 	return table[n - 1];
 }
 
-bool splice_graph::check_nested() const
-{
-	vector< vector<int> > vv;
-	vv.resize(num_vertices());
-	for(int i = 0; i < vv.size(); i++) bfs(i, vv[i]);
-
-	for(int i = 0; i < num_vertices(); i++)
-	{
-		edge_iterator it1, it2;
-		for(tie(it1, it2) = out_edges(i); it1 != it2; it1++)
-		{
-			int j = (*it1)->target();
-			assert(j > i);
-			for(int k = i + 1; k < j; k++)
-			{
-				if(vv[i][k] == -1) continue;
-				if(vv[k][j] == -1) continue;
-				edge_iterator it3, it4;
-				for(tie(it3, it4) = out_edges(k); it3 != it4; it3++)
-				{
-					int l = (*it3)->target();
-					assert(l > k);
-					if(l <= j) continue;
-					
-					if(vv[j][l] == -1) continue;
-					return false;
-				}
-			}
-		}
-	}
-	return true;
-}
-
 bool splice_graph::check_fully_connected() const
 {
 	if(num_vertices() <= 1) return true;

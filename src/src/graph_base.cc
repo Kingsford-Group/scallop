@@ -263,6 +263,43 @@ bool graph_base::check_directed_path(edge_descriptor ex, edge_descriptor ey) con
 	return check_directed_path(s, t);
 }
 
+bool graph_base::intersect(edge_descriptor ex, edge_descriptor ey) const
+{
+	int xs = ex->source();
+	int xt = ex->target();
+	int ys = ey->source();
+	int yt = ey->target();
+	if(check_directed_path(xs, ys) == true)
+	{
+		if(check_directed_path(ys, xt) == false) return false;
+		if(check_directed_path(xt, yt) == false) return false;
+		return true;
+	}
+	if(check_directed_path(ys, xs) == true)
+	{
+		if(check_directed_path(xs, yt) == false) return false;
+		if(check_directed_path(yt, xt) == false) return false;
+		return true;
+	}
+	return false;
+}
+
+bool graph_base::check_nested() const
+{
+	PEE p = edges();
+	for(edge_iterator i = p.first; i != p.second; i++)
+	{
+		edge_iterator j = i;
+		j++;
+		for(; j != p.second; j++)
+		{
+			bool b = intersect(*i, *j);
+			if(b == true) return false;
+		}
+	}
+	return true;
+}
+
 int graph_base::draw(const string &file, const MIS &mis, const MES &mes, double len) const
 {
 	ofstream fout(file.c_str());

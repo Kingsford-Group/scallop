@@ -49,7 +49,6 @@ public:
 	// analysis the structure of splice graph
 	int compute_num_paths() const;
 	bool check_fully_connected() const;
-	bool check_nested() const;
 };
 
 #endif

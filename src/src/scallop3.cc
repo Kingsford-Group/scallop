@@ -540,7 +540,7 @@ bool scallop3::identify_linkable_edges(int &ex, int &ey)
 		if(flag == true) break;
 	}
 	if(flag == false) return false;
-	return false;
+	return true;
 }
 
 int scallop3::print()

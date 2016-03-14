@@ -52,6 +52,8 @@ public:
 	virtual int bfs_reverse(int t, vector<int> &v) const;
 	virtual bool check_directed_path(int s, int t) const;
 	virtual bool check_directed_path(edge_descriptor ex, edge_descriptor ey) const;
+	virtual bool intersect(edge_descriptor ex, edge_descriptor ey) const;
+	virtual bool check_nested() const;
 
 	// draw
 	int draw(const string &file, const MIS &mis, const MES &mes, double len) const;
