@@ -47,7 +47,7 @@ private:
 	bool verify_equation(int ei, const vector<int> &sub);
 	int split_edge(int ei, const vector<int> &sub);
 	int build_nested_graph();
-	bool identify_linkable_edges(int &ex, int &ey);
+	bool identify_linkable_edges(int &ex, int &ey, vector<int> &p);
 	bool connect_adjacent_edges(int x, int y);
 	int compute_closest_subset(int xi, int w, const vector<PI> & xxp);
 	int compute_closest_equal_edges(int &ex, int &ey);

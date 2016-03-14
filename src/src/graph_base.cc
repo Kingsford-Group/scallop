@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <cassert>
 #include <tuple>
+#include <algorithm>
 
 using namespace std;
 
@@ -186,9 +187,10 @@ int graph_base::move_edge(edge_base *e, int x, int y)
 	return 0;
 }
 
-int graph_base::bfs(int s, vector<int> &v) const
+int graph_base::bfs(int s, vector<int> &v, vector<int> &b) const
 {
 	v.assign(num_vertices(), -1);
+	b.assign(num_vertices(), -1);
 	vector<bool> closed;
 	closed.resize(num_vertices(), false);
 	vector<int> open;
@@ -209,7 +211,12 @@ int graph_base::bfs(int s, vector<int> &v) const
 		for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
 		{
 			int y = (*it1)->target();
-			if(v[y] == -1 || v[y] > 1 + v[x]) v[y] = 1 + v[x];
+			if(v[y] == -1) 
+			{
+				v[y] = 1 + v[x];
+				b[y] = x;
+			}
+			assert(v[y] <= 1 + v[x]);
 			if(closed[y] == true) continue;
 			open.push_back(y);
 		}
@@ -217,9 +224,11 @@ int graph_base::bfs(int s, vector<int> &v) const
 	return 0;
 }
 
-int graph_base::bfs_reverse(int t, vector<int> &v) const
+
+int graph_base::bfs_reverse(int t, vector<int> &v, vector<int> &b) const
 {
 	v.assign(num_vertices(), -1);
+	b.assign(num_vertices(), -1);
 	vector<bool> closed;
 	closed.resize(num_vertices(), false);
 	vector<int> open;
@@ -240,12 +249,29 @@ int graph_base::bfs_reverse(int t, vector<int> &v) const
 		for(tie(it1, it2) = in_edges(x); it1 != it2; it1++)
 		{
 			int y = (*it1)->target();
-			if(v[y] == -1 || v[y] > 1 + v[x]) v[y] = 1 + v[x];
+			if(v[y] == -1) 
+			{
+				v[y] = 1 + v[x];
+				b[y] = x;
+			}
+			assert(v[y] <= 1 + v[x]);
 			if(closed[y] == true) continue;
 			open.push_back(y);
 		}
 	}
 	return 0;
+}
+
+int graph_base::bfs(int t, vector<int> &v) const
+{
+	vector<int> b;
+	return bfs(t, v, b);
+}
+
+int graph_base::bfs_reverse(int t, vector<int> &v) const
+{
+	vector<int> b;
+	return bfs_reverse(t, v, b);
 }
 
 bool graph_base::check_directed_path(int s, int t) const
@@ -261,6 +287,31 @@ bool graph_base::check_directed_path(edge_descriptor ex, edge_descriptor ey) con
 	int s = ex->target();
 	int t = ey->source();
 	return check_directed_path(s, t);
+}
+
+bool graph_base::compute_shortest_path(int s, int t, vector<int> &p) const
+{
+	p.clear();
+	vector<int> v;
+	vector<int> b;
+	bfs(s, v, b);
+	if(v[t] == -1) return false;
+	int x = t;
+	while(true)
+	{
+		p.push_back(x);
+		if(x == s) break;
+		x = b[x];
+	}
+	reverse(p.begin(), p.end());
+	return true;
+}
+
+bool graph_base::compute_shortest_path(edge_descriptor ex, edge_descriptor ey, vector<int> &p) const
+{
+	int s = ex->target();
+	int t = ey->source();
+	return compute_shortest_path(s, t, p);
 }
 
 bool graph_base::intersect(edge_descriptor ex, edge_descriptor ey) const

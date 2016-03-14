@@ -43,9 +43,13 @@ int scallop3::iterate()
 	{
 		build_nested_graph();
 		int ex, ey;
-		bool b = identify_linkable_edges(ex, ey);
+		vector<int> p;
+		bool b = identify_linkable_edges(ex, ey, p);
 		if(b == false) break;
-		printf("linkable edges = (%d, %d)\n\n", ex, ey);
+		assert(p.size() >= 1);
+		printf("linkable edges = (%d, %d), path = (%d", ex, ey, p[0]);
+		for(int i = 1; i < p.size(); i++) printf(", %d", p[i]);
+		printf(")\n");
 		assert(ex >= 0 && ey >= 0);
 		//connect_adjacent_edges(ex, ey);
 		break;
@@ -502,9 +506,10 @@ int scallop3::build_nested_graph()
 	return 0;
 }
 
-bool scallop3::identify_linkable_edges(int &ex, int &ey)
+bool scallop3::identify_linkable_edges(int &ex, int &ey, vector<int> &p)
 {
 	ex = ey = -1;
+	p.clear();
 	vector< vector<int> > vv = compute_disjoint_sets();
 	bool flag = false;
 	for(int i = 0; i < vv.size(); i++)
@@ -526,11 +531,13 @@ bool scallop3::identify_linkable_edges(int &ex, int &ey)
 				{
 					ex = v[j];
 					ey = v[k];
+					nt.compute_shortest_path(ej, ek, p);
 				}
 				else
 				{
 					ex = v[k];
 					ey = v[j];
+					nt.compute_shortest_path(ek, ej, p);
 				}
 				flag = true;
 				break;

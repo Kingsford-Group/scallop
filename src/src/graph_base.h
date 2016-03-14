@@ -49,7 +49,11 @@ public:
 
 	// algorithms
 	virtual int bfs(int s, vector<int> &v) const;
+	virtual int bfs(int s, vector<int> &v, vector<int> &b) const;
 	virtual int bfs_reverse(int t, vector<int> &v) const;
+	virtual int bfs_reverse(int t, vector<int> &v, vector<int> &b) const;
+	virtual bool compute_shortest_path(int s, int t, vector<int> &p) const;
+	virtual bool compute_shortest_path(edge_descriptor ex, edge_descriptor ey, vector<int> &p) const;
 	virtual bool check_directed_path(int s, int t) const;
 	virtual bool check_directed_path(edge_descriptor ex, edge_descriptor ey) const;
 	virtual bool intersect(edge_descriptor ex, edge_descriptor ey) const;
