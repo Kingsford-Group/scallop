@@ -9,6 +9,11 @@
 
 using namespace std;
 
+typedef map<int, string> MIS;
+typedef pair<int, string> PIS;
+typedef map<edge_descriptor, string> MES;
+typedef pair<edge_descriptor, string> PES;
+
 class graph_base
 {
 public:
@@ -45,6 +50,11 @@ public:
 	// algorithms
 	virtual int bfs(int s, vector<int> &v) const;
 	virtual int bfs_reverse(int t, vector<int> &v) const;
+	virtual bool check_directed_path(int s, int t) const;
+	virtual bool check_directed_path(edge_descriptor ex, edge_descriptor ey) const;
+
+	// draw
+	int draw(const string &file, const MIS &mis, const MES &mes, double len) const;
 
 	// test
 	virtual int print() const;

@@ -5,6 +5,8 @@
 
 using namespace std;
 
+#define null_edge NULL
+
 class edge_base
 {
 public:

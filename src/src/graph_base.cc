@@ -1,4 +1,5 @@
 #include "graph_base.h"
+#include "draw.h"
 
 #include <cstdio>
 #include <cassert>
@@ -57,7 +58,7 @@ PEB graph_base::edge(int s, int t) const
 		if(x != t) continue;
 		return PEB(*it, true);
 	}
-	return PEB(NULL, false);
+	return PEB(null_edge, false);
 }
 
 int graph_base::remove_edge(edge_base *e)
@@ -244,6 +245,99 @@ int graph_base::bfs_reverse(int t, vector<int> &v) const
 			open.push_back(y);
 		}
 	}
+	return 0;
+}
+
+bool graph_base::check_directed_path(int s, int t) const
+{
+	vector<int> v;
+	bfs(s, v);
+	if(v[t] == -1) return false;
+	else return true;
+}
+
+bool graph_base::check_directed_path(edge_descriptor ex, edge_descriptor ey) const
+{
+	int s = ex->target();
+	int t = ey->source();
+	return check_directed_path(s, t);
+}
+
+int graph_base::draw(const string &file, const MIS &mis, const MES &mes, double len) const
+{
+	ofstream fout(file.c_str());
+	if(fout.fail())
+	{
+		printf("open file %s error.\n", file.c_str());
+		return 0;
+	}
+
+	draw_header(fout);
+
+	fout<<"\\def\\len{"<<len<<"cm}\n";
+
+	// draw vertices
+	char sx[1024];
+	char sy[1024];
+	double pos = 0;
+	for(int i = 0; i < num_vertices(); i++)
+	{
+		int d = degree(i);
+		if(d == 0) continue;
+
+		pos++;
+
+		sprintf(sx, "s%d", i);
+		string s = "";
+		MIS::const_iterator it = mis.find(i);
+		if(it != mis.end()) s = it->second;
+		fout.precision(0);
+		fout<<fixed;
+		fout<<"\\node[mycircle, \\colx, draw, label = below:{";
+		fout<<s.c_str() <<"}] ("<<sx<<") at ("<<pos<<" *\\len, 0.0) {"<<i<<"};\n";
+	}
+
+	// draw edges
+	for(int i = 0; i < num_vertices(); i++)
+	{
+		set<int> ss = adjacent_vertices(i);
+		for(set<int>::iterator it = ss.begin(); it != ss.end(); it++)
+		{
+			// TODO
+			int j = (*it);
+			assert(i < j);
+
+			string s;
+			char buf[1024];
+			edge_iterator oi1, oi2;
+			int cnt = 0;
+			for(tie(oi1, oi2) = out_edges(i); oi1 != oi2; oi1++)
+			{
+				if((*oi1)->target() != j) continue;
+				cnt++;
+				MES::const_iterator it = mes.find(*oi1);
+				if(it == mes.end()) continue;
+				if(cnt == 1) s.append(it->second);
+				else s.append("," + it->second);
+			}
+
+			sprintf(sx, "s%d", i);
+			sprintf(sy, "s%d", j);
+
+			double bend = -40;
+			if(i + 1 == j) bend = 0;
+
+			string line = "";
+			if(cnt == 1) line = "line width = 0.02cm,";
+			else line = "thin, double,";
+			fout<<"\\draw[->,"<< line.c_str() <<"\\colx, bend right = "<< bend <<"] ("<<sx<<") to node {";
+			fout<< s.c_str() <<"} ("<<sy<<");\n";
+		}
+	}
+
+	draw_footer(fout);
+
+	fout.close();
 	return 0;
 }
 

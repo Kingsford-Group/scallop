@@ -149,14 +149,7 @@ int manager::assemble_gtf(const string &file)
 
 		scallop3 sc(gg.exons[0].gene_id, gr);
 		sc.assemble();
-		//gg.output_gtf(scallop2_fout, sc.paths, "scallop2");
 	
-		sc.gr.draw(gg.exons[0].gene_id + ".0.tex", 5.0);
-
-		nested_graph nt(sc.gr);
-
-		nt.draw(gg.exons[0].gene_id + ".1.tex", 5.0);
-
 		continue;
 
 		bool b = check_nested_splice_graph(sc.gr);

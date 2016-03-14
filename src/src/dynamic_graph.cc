@@ -37,7 +37,7 @@ int dynamic_graph::set_edge_stddev(edge_base *e, double w, splice_graph &gr) { r
 
 int dynamic_graph::build_splice_graph(splice_graph &gr, const string &file) { return gr.build(file); }
 int dynamic_graph::write_splice_graph(const splice_graph &gr, const string &file) { return gr.write(file); }
-int dynamic_graph::draw_splice_graph(const splice_graph &gr, const string &file, double len) { return gr.draw(file, len); }
+int dynamic_graph::draw_splice_graph(const splice_graph &gr, const string &file, double len) { MIS mis; MES mes; return gr.draw(file, mis, mes, len); }
 int dynamic_graph::simulate_splice_graph(splice_graph &gr, int n, int m) { return gr.simulate(n, m); }
 int dynamic_graph::compute_num_paths(const splice_graph &gr) { return gr.compute_num_paths(); }
 

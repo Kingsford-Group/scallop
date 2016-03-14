@@ -15,8 +15,6 @@ public:
 	nested_graph(const graph_base &gr);
 	virtual ~nested_graph();
 
-	int draw(const string &file, double len) const;
-
 public:
 	virtual edge_descriptor add_edge(int s, int t);
 

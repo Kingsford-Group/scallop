@@ -1,5 +1,4 @@
 #include "nested_graph.h"
-#include "draw.h"
 
 nested_graph::nested_graph()
 {}
@@ -37,7 +36,8 @@ edge_descriptor nested_graph::add_edge(int s, int t)
 		int tt = e->target() > ee->target() ? e->target() : ee->target();
 		remove_edge(e);
 		remove_edge(ee);
-		return add_edge(ss, tt);
+		add_edge(ss, tt);
+		return null_edge;
 	}
 	return e;
 }
@@ -57,75 +57,5 @@ bool nested_graph::intersect(edge_descriptor &ex, edge_descriptor &ey) const
 	if(yt <= xt) return false;
 	// TODO, right now this is a over-strong condition
 	return true;
-}
-
-int nested_graph::draw(const string &file, double len) const
-{
-	ofstream fout(file.c_str());
-	if(fout.fail())
-	{
-		printf("open file %s error.\n", file.c_str());
-		return 0;
-	}
-
-	draw_header(fout);
-
-	fout<<"\\def\\len{"<<len<<"cm}\n";
-
-	// draw vertices
-	char sx[1024];
-	char sy[1024];
-	double pos = 0;
-	for(int i = 0; i < num_vertices(); i++)
-	{
-		int d = degree(i);
-		if(d == 0) continue;
-
-		pos++;
-
-		sprintf(sx, "s%d", i);
-		fout.precision(0);
-		fout<<fixed;
-		fout<<"\\node[mycircle, \\colx, draw] ("<<sx<<") at ("<<pos<<" *\\len, 0.0) {"<<i<<"};\n";
-	}
-
-	// draw edges
-	for(int i = 0; i < num_vertices(); i++)
-	{
-		set<int> ss = adjacent_vertices(i);
-		for(set<int>::iterator it = ss.begin(); it != ss.end(); it++)
-		{
-			// TODO
-			int j = (*it);
-			assert(i < j);
-
-			int cnt = 0;
-			edge_iterator oi1, oi2;
-			for(tie(oi1, oi2) = out_edges(i); oi1 != oi2; oi1++)
-			{
-				if((*oi1)->target() != j) continue;
-				cnt++;
-			}
-
-			char buf[1024];
-			sprintf(buf, "%d", cnt);
-
-			sprintf(sx, "s%d", i);
-			sprintf(sy, "s%d", j);
-
-			double bend = -40;
-			if(i + 1 == j) bend = 0;
-
-			string line = "line width = 0.02cm,";
-
-			fout<<"\\draw[->,"<< line.c_str() <<"\\colx, bend right = "<< bend <<"] ("<<sx<<") to node {";
-			fout<< buf <<"} ("<<sy<<");\n";
-		}
-	}
-
-	draw_footer(fout);
-
-	fout.close();
-	return 0;
 }
 

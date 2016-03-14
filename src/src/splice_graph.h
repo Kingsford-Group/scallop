@@ -44,7 +44,6 @@ public:
 	// read, write, draw and simulate splice graph
 	int build(const string &file);
 	int write(const string &file) const;
-	int draw(const string &file, double len = 1.2) const;
 	int simulate(int n, int m);
 
 	// analysis the structure of splice graph

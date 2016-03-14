@@ -18,16 +18,9 @@ int scallop3::assemble()
 	init_super_edges();
 	reconstruct_splice_graph();
 	get_edge_indices(gr, i2e, e2i);
-	i2b.assign(e2i.size(), true);
 	init_disjoint_sets();
 	build_null_space();
-
-	return 0;
-
-	draw_splice_graph(gr, name + ".0.tex", 5.0);
 	iterate();
-	draw_splice_graph(gr, name + ".1.tex", 5.0);
-
 	return 0;
 }
 
@@ -39,45 +32,27 @@ int scallop3::iterate()
 		vector<int> sub;
 		int error = identify_equation(ei, sub);
 		if(error >= 1) break;
+		bool b = verify_equation(ei, sub);
+		if(b == false) break;
 		split_edge(ei, sub);
 	}
 
+	this->draw_splice_graph(name + ".gr.tex");
+
 	while(true)
 	{
-		print();
+		build_nested_graph();
 		int ex, ey;
-		int dist = compute_closest_equal_edges(ex, ey);
-		printf("closest equal distance = %d, edges = (%d, %d)\n\n", dist, ex, ey);
-		if(dist >= 1) break;
+		bool b = identify_linkable_edges(ex, ey);
+		if(b == false) break;
+		printf("linkable edges = (%d, %d)\n\n", ex, ey);
 		assert(ex >= 0 && ey >= 0);
-		connect_adjacent_edges(ex, ey);
+		//connect_adjacent_edges(ex, ey);
+		break;
 	}
 
-	return 0;
-}
+	this->draw_nested_graph(name + ".nt.tex");
 
-int scallop3::print()
-{
-	// print null space
-	/*
-	if(ns.size() == 0) return 0;
-	printf("null space:\n");
-	algebra::print_matrix(ns);
-	*/
-
-	// print edge disjoint sets
-	vector< vector<int> > vv = compute_disjoint_sets();
-	for(int i = 0; i < vv.size(); i++)
-	{
-		vector<int> v = vv[i];
-		assert(v.size() >= 1);
-
-		int w = (int)(get_edge_weight(i2e[v[0]], gr));
-
-		printf("edge set %d, weight = %d, #edges = %lu, set = (%d", i, w, v.size(), v[0]);
-		for(int j = 1; j < v.size(); j++) printf(", %d", v[j]);
-		printf(")\n");
-	}
 	return 0;
 }
 
@@ -204,7 +179,7 @@ vector<int> scallop3::compute_representatives()
 		for(int j = 0; j < vv[i].size(); j++)
 		{
 			int e = vv[i][j];
-			if(i2b[e] == false) continue;
+			if(i2e[e] == null_edge) continue;
 			k = e;
 			break;
 		}
@@ -225,7 +200,7 @@ vector< vector<int> > scallop3::compute_disjoint_sets()
 		for(int j = 0; j < vv[i].size(); j++)
 		{
 			int e = vv[i][j];
-			if(i2b[e] == false) continue;
+			if(i2e[e] == null_edge) continue;
 			v.push_back(e);
 		}
 		assert(v.size() >= 1);
@@ -236,8 +211,8 @@ vector< vector<int> > scallop3::compute_disjoint_sets()
 
 bool scallop3::connect_adjacent_edges(int x, int y)
 {
-	if(i2b[x] == false) return false;
-	if(i2b[y] == false) return false;
+	if(i2e[x] == null_edge) return false;
+	if(i2e[y] == null_edge) return false;
 
 	edge_descriptor xx = i2e[x];
 	edge_descriptor yy = i2e[y];
@@ -257,7 +232,6 @@ bool scallop3::connect_adjacent_edges(int x, int y)
 
 	int n = i2e.size();
 	i2e.push_back(p.first);
-	i2b.push_back(true);
 	assert(e2i.find(p.first) == e2i.end());
 	e2i.insert(PEI(p.first, n));
 
@@ -290,8 +264,8 @@ bool scallop3::connect_adjacent_edges(int x, int y)
 
 	e2i.erase(xx);
 	e2i.erase(yy);
-	i2b[x] = false;
-	i2b[y] = false;
+	i2e[x] = null_edge;
+	i2e[y] = null_edge;
 	remove_edge(xx, gr);
 	remove_edge(yy, gr);
 
@@ -300,9 +274,9 @@ bool scallop3::connect_adjacent_edges(int x, int y)
 
 int scallop3::split_edge(int ei, const vector<int> &sub)
 {
-	assert(i2b[ei] == true);
+	assert(i2e[ei] != null_edge);
 	assert(sub.size() >= 1);
-	for(int i = 0; i < sub.size(); i++) assert(i2b[sub[i]] == true);
+	for(int i = 0; i < sub.size(); i++) assert(i2e[sub[i]] != null_edge);
 
 	double w = get_edge_weight(i2e[ei], gr);
 	for(int i = 0; i < sub.size(); i++)
@@ -328,7 +302,6 @@ int scallop3::split_edge(int ei, const vector<int> &sub)
 
 		int n = i2e.size();
 		i2e.push_back(p.first);
-		i2b.push_back(true);
 		assert(e2i.find(p.first) == e2i.end());
 		e2i.insert(PEI(p.first, n));
 
@@ -408,6 +381,19 @@ int scallop3::identify_equation(int &ei, vector<int> &sub)
 	printf("%d:%d), total %lu combinations\n", sub[sub.size() - 1], x[rsub[sub.size() - 1]], xx.size());
 	
 	return minw;
+}
+
+bool scallop3::verify_equation(int ei, const vector<int> &sub)
+{
+	assert(i2e[ei] != null_edge);
+	for(int i = 0; i < sub.size(); i++)
+	{
+		assert(i2e[sub[i]] != null_edge);
+		bool b1 = gr.check_directed_path(i2e[ei], i2e[sub[i]]);
+		bool b2 = gr.check_directed_path(i2e[sub[i]], i2e[ei]);
+		if(b1 == false && b2 == false) return false;
+	}
+	return true;
 }
 
 int scallop3::compute_closest_subset(int xi, int w, const vector<PI> &xxp)
@@ -496,4 +482,127 @@ int scallop3::compute_closest_equal_edges(int &ex, int &ey)
 		}
 	}
 	return dist;
+}
+
+int scallop3::build_nested_graph()
+{
+	nt.clear();
+	i2n.clear();
+	for(int i = 0; i < gr.num_vertices(); i++) nt.add_vertex();
+
+	i2n.assign(i2e.size(), null_edge);
+	for(int i = 0; i < i2e.size(); i++)
+	{
+		if(i2e[i] == null_edge) continue;
+		int s = i2e[i]->source();
+		int t = i2e[i]->target();
+		edge_descriptor e = nt.add_edge(s, t);
+		i2n[i] = e;
+	}
+	return 0;
+}
+
+bool scallop3::identify_linkable_edges(int &ex, int &ey)
+{
+	ex = ey = -1;
+	vector< vector<int> > vv = compute_disjoint_sets();
+	bool flag = false;
+	for(int i = 0; i < vv.size(); i++)
+	{
+		vector<int> &v = vv[i];
+		if(v.size() == 1) continue;
+		for(int j = 0; j < v.size(); j++)
+		{
+			for(int k = j + 1; k < v.size(); k++)
+			{
+				edge_descriptor ej = i2n[v[j]];
+				edge_descriptor ek = i2n[v[k]];
+				if(ej == null_edge) continue;
+				if(ek == null_edge) continue;
+				bool b1 = nt.check_directed_path(ej, ek);
+				bool b2 = nt.check_directed_path(ek, ej);
+				if(b1 == false && b2 == false) continue;
+				if(b1 == true)
+				{
+					ex = v[j];
+					ey = v[k];
+				}
+				else
+				{
+					ex = v[k];
+					ey = v[j];
+				}
+				flag = true;
+				break;
+			}
+			if(flag == true) break;
+		}
+		if(flag == true) break;
+	}
+	if(flag == false) return false;
+	return false;
+}
+
+int scallop3::print()
+{
+	// print null space
+	/*
+	if(ns.size() == 0) return 0;
+	printf("null space:\n");
+	algebra::print_matrix(ns);
+	*/
+
+	// print edge disjoint sets
+	vector< vector<int> > vv = compute_disjoint_sets();
+	for(int i = 0; i < vv.size(); i++)
+	{
+		vector<int> v = vv[i];
+		assert(v.size() >= 1);
+
+		int w = (int)(get_edge_weight(i2e[v[0]], gr));
+
+		printf("edge set %d, weight = %d, #edges = %lu, set = (%d", i, w, v.size(), v[0]);
+		for(int j = 1; j < v.size(); j++) printf(", %d", v[j]);
+		printf(")\n");
+	}
+	return 0;
+}
+
+int scallop3::draw_splice_graph(const string &file) 
+{
+	MIS mis;
+	char buf[10240];
+	for(int i = 0; i < gr.num_vertices(); i++)
+	{
+		double w = gr.get_vertex_weight(i);
+		sprintf(buf, "%d:%.0lf", i, w);
+		mis.insert(PIS(i, buf));
+	}
+
+	MES mes;
+	for(int i = 0; i < i2e.size(); i++)
+	{
+		if(i2e[i] == null_edge) continue;
+		double w = gr.get_edge_weight(i2e[i]);
+		sprintf(buf, "%d:%.0lf", i, w);
+		mes.insert(PES(i2e[i], buf));
+	}
+
+	gr.draw(file, mis, mes, 5.0);
+	return 0;
+}
+
+int scallop3::draw_nested_graph(const string &file) 
+{
+	MIS mis;
+	MES mes;
+	char buf[1024];
+	for(int i = 0; i < i2n.size(); i++)
+	{
+		if(i2n[i] == null_edge) continue;
+		sprintf(buf, "%d", i);
+		mes.insert(PES(i2n[i], buf));
+	}
+	nt.draw(file, mis, mes, 4.0);
+	return 0;
 }
