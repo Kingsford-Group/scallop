@@ -1,5 +1,4 @@
 #include "splice_graph.h"
-#include "draw.h"
 #include <sstream>
 #include <fstream>
 
