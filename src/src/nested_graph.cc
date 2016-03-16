@@ -103,3 +103,49 @@ int nested_graph::compute_in_ancestor(int x) const
 	return -1;
 }
 
+int nested_graph::exchange(int x, int y, int z)
+{
+	assert(x >= 0 && x < num_vertices());
+	assert(y >= 0 && y < num_vertices());
+	assert(z >= 0 && z < num_vertices());
+	assert(x == compute_in_ancestor(y));
+	assert(z == compute_out_ancestor(y));
+
+	edge_iterator it1, it2;
+	set<edge_descriptor> m;
+	for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
+	{
+		if(check_directed_path((*it1)->target(), y) == false) continue;
+		m.insert(*it1);
+	}
+	for(tie(it1, it2) = in_edges(y); it1 != it2; it1++)
+	{
+		if(check_directed_path(x, (*it1)->source()) == false) continue;
+		m.insert(*it1);
+	}
+	for(tie(it1, it2) = out_edges(y); it1 != it2; it1++)
+	{
+		if(check_directed_path((*it1)->target(), z) == false) continue;
+		m.insert(*it1);
+	}
+	for(tie(it1, it2) = in_edges(z); it1 != it2; it1++)
+	{
+		if(check_directed_path(y, (*it1)->source()) == false) continue;
+		m.insert(*it1);
+	}
+
+	for(set<edge_descriptor>::iterator it = m.begin(); it != m.end(); it++)
+	{
+		int s = (*it)->source();
+		int t = (*it)->target();
+		printf("s = %d, t = %d\n", s, t);
+		if(s == x && t == y) move_edge(*it, y, z);
+		else if(s == x) move_edge(*it, y, t);
+		else if(t == y) move_edge(*it, s, z);
+		else if(s == y && t == z) move_edge(*it, x, y);
+		else if(s == y) move_edge(*it, x, t);
+		else if(t == z) move_edge(*it, s, y);
+		else assert(false);
+	}
+	return 0;
+}

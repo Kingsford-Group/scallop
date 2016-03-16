@@ -58,6 +58,7 @@ public:
 	virtual bool check_directed_path(edge_descriptor ex, edge_descriptor ey) const;
 	virtual bool intersect(edge_descriptor ex, edge_descriptor ey) const;
 	virtual bool check_nested() const;
+	virtual vector<int> topological_sort() const;
 
 	// draw
 	int draw(const string &file, const MIS &mis, const MES &mes, double len) const;

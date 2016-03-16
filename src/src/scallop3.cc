@@ -56,6 +56,12 @@ int scallop3::iterate()
 	}
 
 	this->draw_nested_graph(name + ".nt.tex");
+	nt.exchange(19, 39, 55);
+	this->draw_nested_graph(name + ".nt.1.tex");
+
+	vector<int> v = nt.topological_sort();
+	for(int i = 0; i < v.size(); i++) printf("%d ", v[i]);
+	printf("\n");
 
 	return 0;
 }

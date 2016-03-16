@@ -1,6 +1,7 @@
 #include "graph_base.h"
 #include "draw.h"
 
+#include <climits>
 #include <cstdio>
 #include <cassert>
 #include <tuple>
@@ -353,6 +354,46 @@ bool graph_base::check_nested() const
 	return true;
 }
 
+vector<int> graph_base::topological_sort() const
+{
+	vector<int> v;
+
+	vector<int> vd;
+	for(int i = 0; i < num_vertices(); i++)
+	{
+		int d = in_degree(i);
+		vd.push_back(d);
+	}
+
+	vector<bool> vb;
+	vb.assign(num_vertices(), false);
+	for(int i = 0; i < num_vertices(); i++)
+	{
+		int k = -1;
+		int mind = INT_MAX;
+		for(int j = 0; j < num_vertices(); j++)
+		{
+			if(vb[j] == true) continue;
+			if(vd[j] < mind)
+			{
+				mind = vd[j];
+				k = j;
+			}
+		}
+		assert(k != -1);
+		v.push_back(k);
+		vb[k] = true;
+
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = out_edges(k); it1 != it2; it1++)
+		{
+			int t = (*it1)->target();
+			vd[t]--;
+		}
+	}
+	return v;
+}
+
 int graph_base::draw(const string &file, const MIS &mis, const MES &mes, double len) const
 {
 	ofstream fout(file.c_str());
@@ -370,8 +411,11 @@ int graph_base::draw(const string &file, const MIS &mis, const MES &mes, double 
 	char sx[1024];
 	char sy[1024];
 	double pos = 0;
-	for(int i = 0; i < num_vertices(); i++)
+
+	vector<int> tp = topological_sort();
+	for(int ii = 0; ii < tp.size(); ii++)
 	{
+		int i = tp[ii];
 		int d = degree(i);
 		if(d == 0) continue;
 
@@ -395,7 +439,7 @@ int graph_base::draw(const string &file, const MIS &mis, const MES &mes, double 
 		{
 			// TODO
 			int j = (*it);
-			assert(i < j);
+			//assert(i < j);
 
 			string s;
 			char buf[1024];
