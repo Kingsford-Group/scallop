@@ -320,6 +320,8 @@ bool graph_base::intersect(edge_descriptor ex, edge_descriptor ey) const
 	int xt = ex->target();
 	int ys = ey->source();
 	int yt = ey->target();
+	if(xs == ys || xs == yt) return false;
+	if(xt == ys || xt == yt) return false;
 	if(check_directed_path(xs, ys) == true)
 	{
 		if(check_directed_path(ys, xt) == false) return false;

@@ -31,6 +31,7 @@ edge_descriptor nested_graph::add_edge(int s, int t)
 		edge_descriptor ee = *it1;
 		if(e == ee) continue;
 		bool b = intersect(e, ee);
+		printf("edge (%d, %d) and edge (%d, %d) intersect = %c\n", ee->source(), ee->target(), e->source(), e->target(), b ? 'T' : 'F');
 		if(b == false) continue;
 		int ss = e->source() < ee->source() ? e->source() : ee->source();
 		int tt = e->target() > ee->target() ? e->target() : ee->target();
@@ -42,20 +43,63 @@ edge_descriptor nested_graph::add_edge(int s, int t)
 	return e;
 }
 
-bool nested_graph::intersect(edge_descriptor &ex, edge_descriptor &ey) const
+int nested_graph::compute_out_ancestor(int x) const
 {
-	int xs = ex->source();
-	int xt = ex->target();
-	int ys = ey->source();
-	int yt = ey->target();
-	assert(xs < xt);
-	assert(ys < yt);
+	set<int> m;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
+	{
+		int s = (*it1)->source();
+		int t = (*it1)->target();
+		assert(s == x);
+		if(m.find(t) == m.end()) m.insert(t);
+	}
 
-	if(xs == ys) return false;
-	if(xs > ys) return intersect(ey, ex);
-	if(ys >= xt) return false;
-	if(yt <= xt) return false;
-	// TODO, right now this is a over-strong condition
-	return true;
+	for(set<int>::iterator it = m.begin(); it != m.end(); it++)
+	{
+		vector<int> v;
+		bfs(*it, v);
+		bool f = true;
+		for(set<int>::iterator it2 = m.begin(); it2 != m.end(); it2++)
+		{
+			if(v[*it2] >= 1) 
+			{
+				f = false;
+				break;
+			}
+		}
+		if(f == true) return *it;
+	}
+	return -1;
+}
+
+int nested_graph::compute_in_ancestor(int x) const
+{
+	set<int> m;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = in_edges(x); it1 != it2; it1++)
+	{
+		int s = (*it1)->source();
+		int t = (*it1)->target();
+		assert(t == x);
+		if(m.find(s) == m.end()) m.insert(s);
+	}
+
+	for(set<int>::iterator it = m.begin(); it != m.end(); it++)
+	{
+		vector<int> v;
+		bfs_reverse(*it, v);
+		bool f = true;
+		for(set<int>::iterator it2 = m.begin(); it2 != m.end(); it2++)
+		{
+			if(v[*it2] >= 1) 
+			{
+				f = false;
+				break;
+			}
+		}
+		if(f == true) return *it;
+	}
+	return -1;
 }
 

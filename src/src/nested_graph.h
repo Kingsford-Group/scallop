@@ -17,9 +17,8 @@ public:
 
 public:
 	virtual edge_descriptor add_edge(int s, int t);
-
-private:
-	bool intersect(edge_descriptor &ex, edge_descriptor &ey) const;
+	virtual int compute_out_ancestor(int v) const;
+	virtual int compute_in_ancestor(int v) const;
 };
 
 #endif

@@ -503,6 +503,16 @@ int scallop3::build_nested_graph()
 		edge_descriptor e = nt.add_edge(s, t);
 		i2n[i] = e;
 	}
+
+	// test computing out ancestor
+	/*
+	for(int i = 0; i < nt.num_vertices(); i++)
+	{
+		int a = nt.compute_in_ancestor(i);
+		int b = nt.compute_out_ancestor(i);
+		printf("(in, out) ancestors of %d = (%d, %d)\n", i, a, b);
+	}
+	*/
 	return 0;
 }
 
