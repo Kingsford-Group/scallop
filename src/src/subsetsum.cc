@@ -23,6 +23,7 @@ int subsetsum::solve()
 	optimize();
 	backtrace();
 	recover();
+	//print();
 	return 0;
 }
 
@@ -84,15 +85,15 @@ int subsetsum::fill_table()
 		for(int i = 1; i <= seeds.size(); i++)
 		{
 			int s = seeds[i - 1].first;
-			if(table[i - 1][j] == true)
-			{
-				table[i][j] = true;
-				btptr[i][j] = false;
-			}
-			else if(j >= s && table[i - 1][j - s] == true)
+			if(j >= s && table[i - 1][j - s] == true)
 			{
 				table[i][j] = true;
 				btptr[i][j] = true;
+			}
+			else if(table[i - 1][j] == true)
+			{
+				table[i][j] = true;
+				btptr[i][j] = false;
 			}
 			else
 			{
@@ -168,8 +169,11 @@ int subsetsum::recover()
 
 int subsetsum::print()
 {
-	printf("raw = %lu number, seed has %lu numbers, target = %d, ubound = %d\n", 
-			raw.size(), seeds.size(), target, ubound);
+	printf(" subsetsum = (%d", raw[0]);
+	for(int i = 1; i < raw.size(); i++) printf(", %d", raw[i]);
+	printf("), opt = %d, subset = (%d:%d", opt, subset[0], raw[subset[0]]);
+	for(int i = 1; i < subset.size(); i++) printf(", %d:%d", subset[i], raw[subset[i]]);
+	printf(")\n");
 	return 0;
 }
 

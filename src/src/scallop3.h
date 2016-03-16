@@ -40,16 +40,18 @@ private:
 
 	// iteratively identify equations and update
 	bool iterate();
-	int identify_equation(int &ei, vector<int> &sub);
-	int compute_closest_subset(int xi, int w, const vector<PI> & xxp);
+	bool identify_equation(int &ei, vector<int> &sub);
 	bool verify_equation(int ei, const vector<int> &sub);
+	int split_edge(int exi, int eyi);
 	vector<int> split_edge(int ei, const vector<int> &sub);
 	int compute_intersecting_edges();
 	bool identify_linkable_edges(int &ex, int &ey, vector<int> &p);
 	bool check_linkable(int ex, int ey, vector<int> &p);
 	int build_adjacent_edges(int ex, int ey, const vector<int> &p);
 	bool connect_adjacent_edges(int x, int y);
+	bool connect_edges(int x, int y);
 	bool decompose_trivial_vertices();
+	bool compute_shortest_equal_edges(int &ex, int &ey);
 
 	// test, print and draw
 	int print();
