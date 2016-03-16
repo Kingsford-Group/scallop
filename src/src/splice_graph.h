@@ -38,6 +38,10 @@ public:
 	int set_vertex_weights(const vector<double> &v);
 	int get_edge_indices(VE &i2e, MEI &e2i) const;
 
+	// algorithm
+	int compute_in_ancestor(int v) const;
+	int compute_out_ancestor(int v) const;
+
 	// modify the splice_graph
 	int clear();
 

@@ -4,7 +4,6 @@
 #include "disjoint_sets.h"
 #include "assembler.h"
 #include "algebra.h"
-#include "nested_graph.h"
 
 typedef map< edge_descriptor, vector<int> > MEV;
 typedef pair< edge_descriptor, vector<int> > PEV;
@@ -21,10 +20,8 @@ public:
 	MEI e2i;				// edge map, from edge to index
 	VE i2e;					// edge map, from index to edge
 	MEV mev;				// super edges
-	VVD ns;					// null space from nodes
+	set<PI> sis;			// set of intersecting edges
 	disjoint_sets_t ds;		// edges with the same weight are grouped together
-	nested_graph nt;		// nested graph
-	VE i2n;					// edge map, from index to edges in nt
 
 public:
 	int assemble();
@@ -35,7 +32,6 @@ private:
 	int reconstruct_splice_graph();
 	bool decompose_trivial_vertex(int x);
 	int init_disjoint_sets();
-	int build_null_space();
 
 	// get informations from ds since some edges are deleted
 	vector<int> compute_representatives();
@@ -44,20 +40,18 @@ private:
 	// iteratively identify equations and update
 	int iterate();
 	int identify_equation(int &ei, vector<int> &sub);
+	int compute_closest_subset(int xi, int w, const vector<PI> & xxp);
 	bool verify_equation(int ei, const vector<int> &sub);
 	int split_edge(int ei, const vector<int> &sub);
-	int build_nested_graph();
+	int compute_intersecting_edges();
 	bool identify_linkable_edges(int &ex, int &ey, vector<int> &p);
+	bool check_linkable(int ex, int ey, vector<int> &p);
 	int build_adjacent_edges(int ex, int ey, const vector<int> &p);
-	vector<bool> compute_intersecting_edges();
 	bool connect_adjacent_edges(int x, int y);
-	int compute_closest_subset(int xi, int w, const vector<PI> & xxp);
-	int compute_closest_equal_edges(int &ex, int &ey);
 
 	// test, print and draw
 	int print();
 	int draw_splice_graph(const string &file);
-	int draw_nested_graph(const string &file);
 };
 
 #endif

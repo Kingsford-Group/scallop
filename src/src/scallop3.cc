@@ -19,7 +19,6 @@ int scallop3::assemble()
 	reconstruct_splice_graph();
 	get_edge_indices(gr, i2e, e2i);
 	init_disjoint_sets();
-	build_null_space();
 	iterate();
 	return 0;
 }
@@ -37,16 +36,12 @@ int scallop3::iterate()
 		split_edge(ei, sub);
 	}
 
+	this->draw_splice_graph(name + ".gr.0.tex");
+
 	int cnt = 1;
 	while(true)
 	{
-		build_nested_graph();
-
-		char buf[1024];
-		sprintf(buf, "%s.gr.%d.tex", name.c_str(), cnt);
-		this->draw_splice_graph(buf);
-		sprintf(buf, "%s.nt.%d.tex", name.c_str(), cnt);
-		this->draw_nested_graph(buf);
+		compute_intersecting_edges();
 
 		int ex, ey;
 		vector<int> p;
@@ -60,6 +55,10 @@ int scallop3::iterate()
 
 		build_adjacent_edges(ex, ey, p);
 		connect_adjacent_edges(ex, ey);
+
+		char buf[1024];
+		sprintf(buf, "%s.gr.%d.tex", name.c_str(), cnt);
+		this->draw_splice_graph(buf);
 
 		cnt++;
 	}
@@ -146,36 +145,6 @@ int scallop3::init_disjoint_sets()
 	{
 		ds.make_set(i);
 	}
-	return 0;
-}
-
-int scallop3::build_null_space()
-{
-	ns.clear();
-	for(int i = 1; i < num_vertices(gr) - 1; i++)
-	{
-		if(degree(i, gr) == 0) continue;
-		vector<double> v;
-		v.resize(num_edges(gr), 0);
-		in_edge_iterator i1, i2;
-		for(tie(i1, i2) = in_edges(i, gr); i1 != i2; i1++)
-		{
-			int e = e2i[*i1];
-			v[e] = 1;
-		}
-		out_edge_iterator o1, o2;
-		for(tie(o1, o2) = out_edges(i, gr); o1 != o2; o1++)
-		{
-			int e = e2i[*o1];
-			v[e] = -1;
-		}
-		ns.push_back(v);
-	}
-
-	algebra ab(ns);
-	int rank = ab.partial_eliminate();
-	assert(rank == ns.size());
-
 	return 0;
 }
 
@@ -446,87 +415,9 @@ int scallop3::compute_closest_subset(int xi, int w, const vector<PI> &xxp)
 	else return ti;
 }
 
-int scallop3::compute_closest_equal_edges(int &ex, int &ey)
+int scallop3::compute_intersecting_edges()
 {
-	int dist = INT_MAX;
-	ex = ey = -1;
-	vector< vector<int> > vv = compute_disjoint_sets();
-	for(int i = 0; i < vv.size(); i++)
-	{
-		vector<int> ss;
-		vector<int> tt;
-		for(int j = 0; j < vv[i].size(); j++)
-		{
-			int e = vv[i][j];
-			int s = source(i2e[e], gr);
-			int t = target(i2e[e], gr);
-			ss.push_back(s);
-			tt.push_back(t);
-		}
-
-		for(int j = 0; j < tt.size(); j++)
-		{
-			for(int k = 0; k < ss.size(); k++)
-			{
-				if(tt[j] != ss[k]) continue;
-				dist = 0;
-				ex = vv[i][j];
-				ey = vv[i][k];
-				return dist;
-			}
-		}
-
-		for(int j = 0; j < tt.size(); j++)
-		{
-			vector<int> v;
-			bfs_splice_graph(gr, tt[j], v);
-			for(int k = 0; k < ss.size(); k++)
-			{
-				if(v[ss[k]] <= 0) continue;
-				if(v[ss[k]] < dist)
-				{
-					dist = v[ss[k]];
-					ex = vv[i][j];
-					ey = vv[i][k];
-				}
-			}
-		}
-	}
-	return dist;
-}
-
-int scallop3::build_nested_graph()
-{
-	nt.clear();
-	i2n.clear();
-	for(int i = 0; i < gr.num_vertices(); i++) nt.add_vertex();
-
-	i2n.assign(i2e.size(), null_edge);
-	for(int i = 0; i < i2e.size(); i++)
-	{
-		if(i2e[i] == null_edge) continue;
-		int s = i2e[i]->source();
-		int t = i2e[i]->target();
-		edge_descriptor e = nt.add_edge(s, t);
-		i2n[i] = e;
-	}
-
-	// test computing out ancestor
-	/*
-	for(int i = 0; i < nt.num_vertices(); i++)
-	{
-		int a = nt.compute_in_ancestor(i);
-		int b = nt.compute_out_ancestor(i);
-		printf("(in, out) ancestors of %d = (%d, %d)\n", i, a, b);
-	}
-	*/
-	return 0;
-}
-
-vector<bool> scallop3::compute_intersecting_edges()
-{
-	vector<bool> i2b;
-	i2b.assign(i2e.size(), false);
+	sis.clear();
 	for(int i = 0; i < i2e.size(); i++)
 	{
 		if(i2e[i] == null_edge) continue;
@@ -535,11 +426,59 @@ vector<bool> scallop3::compute_intersecting_edges()
 			if(i2e[j] == null_edge) continue;
 			bool b = gr.intersect(i2e[i], i2e[j]);
 			if(b == false) continue;
-			i2b[i] = true;
-			i2b[j] = true;
+			int s1 = i2e[i]->source();
+			int t1 = i2e[i]->target();
+			int s2 = i2e[j]->source();
+			int t2 = i2e[j]->target();
+			sis.insert(PI(s1, t1));
+			sis.insert(PI(s2, t2));
 		}
 	}
-	return i2b;
+	return 0;
+}
+
+bool scallop3::check_linkable(int ex, int ey, vector<int> &p)
+{
+	assert(i2e[ex] != null_edge);
+	assert(i2e[ey] != null_edge);
+	bool b = gr.compute_shortest_path(i2e[ex], i2e[ey], p);
+	if(b == false) return false;
+	assert(p.size() >= 1);
+	if(p.size() == 1) return true;
+	
+	for(int i = 0; i < p.size() - 1; i++)
+	{
+		PI pi(p[i], p[i + 1]);
+		if(sis.find(pi) != sis.end()) return false;
+	}
+
+	int li = 0;
+	int ri = p.size() - 1;
+	while(li < ri)
+	{
+		int l1 = p[li];
+		int r1 = p[ri];
+		int l2 = p[li + 1];
+		int r2 = p[ri - 1];
+
+		int lr = gr.compute_out_ancestor(l1);
+		int rr = gr.compute_out_ancestor(r1);
+		int ll = gr.compute_in_ancestor(l1);
+		int rl = gr.compute_in_ancestor(r1);
+
+		if(lr == l2 && sis.find(PI(ll, l1)) == sis.end())
+		{
+			p[li] = 0 - p[li];
+			li++;
+		}
+		else if(rl == r2 && sis.find(PI(r1, rr)) == sis.end())
+		{
+			p[ri] = 0 - p[ri];
+			ri--;
+		}
+		else return false;
+	}
+	return true;
 }
 
 bool scallop3::identify_linkable_edges(int &ex, int &ey, vector<int> &p)
@@ -556,27 +495,14 @@ bool scallop3::identify_linkable_edges(int &ex, int &ey, vector<int> &p)
 		{
 			for(int k = j + 1; k < v.size(); k++)
 			{
-				edge_descriptor ej = i2n[v[j]];
-				edge_descriptor ek = i2n[v[k]];
-				if(ej == null_edge) continue;
-				if(ek == null_edge) continue;
-				bool b1 = nt.check_directed_path(ej, ek);
-				bool b2 = nt.check_directed_path(ek, ej);
-				if(b1 == false && b2 == false) continue;
-				if(b1 == true)
+				bool b = check_linkable(v[j], v[k], p);
+				if(b == true)
 				{
 					ex = v[j];
 					ey = v[k];
-					nt.compute_shortest_path(ej, ek, p);
+					flag = true;
+					break;
 				}
-				else
-				{
-					ex = v[k];
-					ey = v[j];
-					nt.compute_shortest_path(ek, ej, p);
-				}
-				flag = true;
-				break;
 			}
 			if(flag == true) break;
 		}
@@ -590,36 +516,26 @@ int scallop3::build_adjacent_edges(int ex, int ey, const vector<int> &p)
 {
 	int l0 = i2e[ex]->source();
 	int r0 = i2e[ey]->target();
-	assert(i2n[ex] != null_edge && i2n[ex]->source() == l0);
-	assert(i2n[ey] != null_edge && i2n[ey]->target() == r0);
 	int li = 0;
 	int ri = p.size() - 1;
 	while(li < ri)
 	{
-		int l1 = p[li];
-		int r1 = p[ri];
-		int l2 = p[li + 1];
-		int r2 = p[ri - 1];
-		bool bl = false;
-		bool br = false;
-		if(l2 == nt.compute_out_ancestor(l1)) bl = true;
-		if(r2 == nt.compute_in_ancestor(r1)) br = true;
-		assert(bl == true || br == true);
-		if(bl == true)
+		int l1 = (int)fabs(p[li]);
+		int r1 = (int)fabs(p[ri]);
+		int l2 = (int)fabs(p[li + 1]);
+		int r2 = (int)fabs(p[ri - 1]);
+
+		if(p[li] < 0)
 		{
-			printf("left exchange (%d, %d, %d)\n", l0, l1, l2);
-			nt.exchange(l0, l1, l2);
 			gr.exchange(l0, l1, l2);
-			l0 = l1;
 			li++;
+			l0 = l1;
 		}
-		else if(br == true)
+		else if(p[ri] < 0)
 		{
-			printf("right exchange (%d, %d, %d)\n", r2, r1, r0);
-			nt.exchange(r2, r1, r0);
 			gr.exchange(r2, r1, r0);
-			r0 = r1;
 			ri--;
+			r0 = r1;
 		}
 		else assert(false);
 	}
@@ -675,17 +591,3 @@ int scallop3::draw_splice_graph(const string &file)
 	return 0;
 }
 
-int scallop3::draw_nested_graph(const string &file) 
-{
-	MIS mis;
-	MES mes;
-	char buf[1024];
-	for(int i = 0; i < i2n.size(); i++)
-	{
-		if(i2n[i] == null_edge) continue;
-		sprintf(buf, "%d", i);
-		mes.insert(PES(i2n[i], buf));
-	}
-	nt.draw(file, mis, mes, 4.0);
-	return 0;
-}

@@ -275,3 +275,64 @@ bool splice_graph::check_fully_connected() const
 
 	return true;
 }
+
+int splice_graph::compute_out_ancestor(int x) const
+{
+	set<int> m;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
+	{
+		int s = (*it1)->source();
+		int t = (*it1)->target();
+		assert(s == x);
+		if(m.find(t) == m.end()) m.insert(t);
+	}
+
+	for(set<int>::iterator it = m.begin(); it != m.end(); it++)
+	{
+		vector<int> v;
+		bfs(*it, v);
+		bool f = true;
+		for(set<int>::iterator it2 = m.begin(); it2 != m.end(); it2++)
+		{
+			if(v[*it2] >= 1) 
+			{
+				f = false;
+				break;
+			}
+		}
+		if(f == true) return *it;
+	}
+	return -1;
+}
+
+int splice_graph::compute_in_ancestor(int x) const
+{
+	set<int> m;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = in_edges(x); it1 != it2; it1++)
+	{
+		int s = (*it1)->source();
+		int t = (*it1)->target();
+		assert(t == x);
+		if(m.find(s) == m.end()) m.insert(s);
+	}
+
+	for(set<int>::iterator it = m.begin(); it != m.end(); it++)
+	{
+		vector<int> v;
+		bfs_reverse(*it, v);
+		bool f = true;
+		for(set<int>::iterator it2 = m.begin(); it2 != m.end(); it2++)
+		{
+			if(v[*it2] >= 1) 
+			{
+				f = false;
+				break;
+			}
+		}
+		if(f == true) return *it;
+	}
+	return -1;
+}
+
