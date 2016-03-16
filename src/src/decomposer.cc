@@ -7,8 +7,6 @@
 #include <algorithm>
 #include <cassert>
 
-using namespace subsetsum;
-
 decomposer::decomposer(const vector<int> &_s, const vector<int> &_t)
 	: s(_s), t(_t)
 {
@@ -46,7 +44,7 @@ int decomposer::build_subsets()
 
 		vector<int> subx;
 		vector<int> suby;
-		double ratio = compute_closest_subsets(x, y, subx, suby);
+		double ratio = subsetsum::compute_closest_subsets(x, y, subx, suby);
 
 		if(ratio < 0.99)
 		{

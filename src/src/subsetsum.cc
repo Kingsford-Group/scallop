@@ -5,6 +5,10 @@
 #include <algorithm>
 #include <cassert>
 
+subsetsum::subsetsum(const vector<int> &v)
+	: seeds(v)
+{}
+
 double subsetsum::compute_closest_subsets(const vector<int> &s, const vector<int> &t, vector<int> &subs, vector<int> &subt)
 {
 	if(s.size() <= 1 || t.size() <= 1) return 0;

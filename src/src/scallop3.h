@@ -22,6 +22,7 @@ public:
 	MEV mev;				// super edges
 	set<PI> sis;			// set of intersecting edges
 	disjoint_sets_t ds;		// edges with the same weight are grouped together
+	int round;				// round in iteration
 
 public:
 	int assemble();
@@ -30,7 +31,7 @@ private:
 	// simplify the splice graph and init all data structures
 	int init_super_edges();
 	int reconstruct_splice_graph();
-	bool decompose_trivial_vertex(int x);
+	bool init_trivial_vertex(int x);
 	int init_disjoint_sets();
 
 	// get informations from ds since some edges are deleted
@@ -38,16 +39,17 @@ private:
 	vector< vector<int> > compute_disjoint_sets();
 
 	// iteratively identify equations and update
-	int iterate();
+	bool iterate();
 	int identify_equation(int &ei, vector<int> &sub);
 	int compute_closest_subset(int xi, int w, const vector<PI> & xxp);
 	bool verify_equation(int ei, const vector<int> &sub);
-	int split_edge(int ei, const vector<int> &sub);
+	vector<int> split_edge(int ei, const vector<int> &sub);
 	int compute_intersecting_edges();
 	bool identify_linkable_edges(int &ex, int &ey, vector<int> &p);
 	bool check_linkable(int ex, int ey, vector<int> &p);
 	int build_adjacent_edges(int ex, int ey, const vector<int> &p);
 	bool connect_adjacent_edges(int x, int y);
+	bool decompose_trivial_vertices();
 
 	// test, print and draw
 	int print();

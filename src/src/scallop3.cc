@@ -3,8 +3,6 @@
 #include <cstdio>
 #include <iostream>
 
-using namespace subsetsum;
-
 scallop3::scallop3(const string &name, splice_graph &gr)
 	: assembler(name, gr)
 {}
@@ -19,11 +17,12 @@ int scallop3::assemble()
 	reconstruct_splice_graph();
 	get_edge_indices(gr, i2e, e2i);
 	init_disjoint_sets();
-	iterate();
+	round = 0;
+	while(iterate());
 	return 0;
 }
 
-int scallop3::iterate()
+bool scallop3::iterate()
 {
 	while(true)
 	{
@@ -36,34 +35,50 @@ int scallop3::iterate()
 		split_edge(ei, sub);
 	}
 
+	char buf[1024];
+	sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
 	this->draw_splice_graph(name + ".gr.0.tex");
+	round++;
 
-	int cnt = 1;
+	bool flag = false;
 	while(true)
 	{
+		print();
+
 		compute_intersecting_edges();
 
 		int ex, ey;
 		vector<int> p;
-		bool b = identify_linkable_edges(ex, ey, p);
-		if(b == false) break;
-		assert(p.size() >= 1);
-		printf("linkable edges = (%d, %d), path = (%d", ex, ey, p[0]);
-		for(int i = 1; i < p.size(); i++) printf(", %d", p[i]);
-		printf(")\n");
-		assert(ex >= 0 && ey >= 0);
+		bool b1 = identify_linkable_edges(ex, ey, p);
+		if(b1 == true)
+		{
+			assert(p.size() >= 1);
+			printf("linkable edges = (%d, %d), path = (%d", ex, ey, p[0]);
+			for(int i = 1; i < p.size(); i++) printf(", %d", p[i]);
+			printf(")\n");
+			assert(ex >= 0 && ey >= 0);
 
-		build_adjacent_edges(ex, ey, p);
-		connect_adjacent_edges(ex, ey);
+			build_adjacent_edges(ex, ey, p);
+			connect_adjacent_edges(ex, ey);
 
-		char buf[1024];
-		sprintf(buf, "%s.gr.%d.tex", name.c_str(), cnt);
-		this->draw_splice_graph(buf);
+			sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
+			this->draw_splice_graph(buf);
+			round++;
+		}
 
-		cnt++;
+		bool b2 = decompose_trivial_vertices();
+		if(b2 == true) 
+		{
+			sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
+			this->draw_splice_graph(buf);
+			round++;
+		}
+
+		if(b1 == true || b2 == true) flag = true;
+		if(b1 == false && b2 == false) break;
 	}
 
-	return 0;
+	return flag;
 }
 
 int scallop3::init_super_edges()
@@ -85,7 +100,7 @@ int scallop3::reconstruct_splice_graph()
 		bool flag = false;
 		for(int i = 0; i < num_vertices(gr); i++)
 		{
-			bool b = decompose_trivial_vertex(i);
+			bool b = init_trivial_vertex(i);
 			if(b == true) flag = true;
 		}
 		if(flag == false) break;
@@ -93,7 +108,7 @@ int scallop3::reconstruct_splice_graph()
 	return 0;
 }
 
-bool scallop3::decompose_trivial_vertex(int x)
+bool scallop3::init_trivial_vertex(int x)
 {
 	int id = in_degree(x, gr);
 	int od = out_degree(x, gr);
@@ -220,8 +235,6 @@ bool scallop3::connect_adjacent_edges(int x, int y)
 	double wx1 = get_edge_stddev(xx, gr);
 	double wy1 = get_edge_stddev(yy, gr);
 
-	//printf("wx0 = %lf, wy0 = %lf, SMIN = %lf\n", wx0, wy0, SMIN);
-
 	assert(fabs(wx0 - wy0) <= SMIN);
 
 	set_edge_weight(p.first, wx0, gr);
@@ -252,8 +265,10 @@ bool scallop3::connect_adjacent_edges(int x, int y)
 	return 0;
 }
 
-int scallop3::split_edge(int ei, const vector<int> &sub)
+vector<int> scallop3::split_edge(int ei, const vector<int> &sub)
 {
+	vector<int> v;
+
 	assert(i2e[ei] != null_edge);
 	assert(sub.size() >= 1);
 	for(int i = 0; i < sub.size(); i++) assert(i2e[sub[i]] != null_edge);
@@ -272,6 +287,7 @@ int scallop3::split_edge(int ei, const vector<int> &sub)
 	set_edge_weight(ex, w0, gr);
 	set_edge_stddev(ex, w1, gr);
 	ds.union_set(ei, sub[0]);
+	v.push_back(ei);
 
 	int s = source(ex, gr);
 	int t = target(ex, gr);
@@ -296,10 +312,12 @@ int scallop3::split_edge(int ei, const vector<int> &sub)
 
 		ds.make_set(n);
 		ds.union_set(n, sub[i]);
+
+		v.push_back(n);
 	}
 
 	// TODO, update null space
-	return 0;
+	return v;
 }
 
 int scallop3::identify_equation(int &ei, vector<int> &sub)
@@ -319,7 +337,7 @@ int scallop3::identify_equation(int &ei, vector<int> &sub)
 	vector<int> xx;
 	vector<int> xf;
 	vector<int> xb;
-	enumerate_subsets(x, xx, xf, xb);
+	subsetsum::enumerate_subsets(x, xx, xf, xb);
 
 	vector<PI> xxp;
 	for(int i = 0; i < xx.size(); i++) xxp.push_back(PI(xx[i], i));
@@ -352,7 +370,7 @@ int scallop3::identify_equation(int &ei, vector<int> &sub)
 	ei = r[ri];
 
 	vector<int> rsub;
-	recover_subset(rsub, xxp[xxpi].second, xf, xb);
+	subsetsum::recover_subset(rsub, xxp[xxpi].second, xf, xb);
 
 	for(int i = 0; i < rsub.size(); i++) sub.push_back(r[rsub[i]]);
 
@@ -371,6 +389,7 @@ bool scallop3::verify_equation(int ei, const vector<int> &sub)
 		assert(i2e[sub[i]] != null_edge);
 		bool b1 = gr.check_directed_path(i2e[ei], i2e[sub[i]]);
 		bool b2 = gr.check_directed_path(i2e[sub[i]], i2e[ei]);
+		//printf("check path (%d, %d) = (%c, %c)\n", ei, sub[i], b1 ? 'T' : 'F', b2 ? 'T' : 'F');
 		if(b1 == false && b2 == false) return false;
 	}
 	return true;
@@ -441,6 +460,12 @@ bool scallop3::check_linkable(int ex, int ey, vector<int> &p)
 {
 	assert(i2e[ex] != null_edge);
 	assert(i2e[ey] != null_edge);
+	bool b1 = gr.check_directed_path(i2e[ex], i2e[ey]);
+	bool b2 = gr.check_directed_path(i2e[ey], i2e[ex]);
+	assert(b1 == false || b2 == false);
+	if(b1 == false && b2 == false) return false;
+	if(b2 == true) return check_linkable(ey, ex, p);
+
 	bool b = gr.compute_shortest_path(i2e[ex], i2e[ey], p);
 	if(b == false) return false;
 	assert(p.size() >= 1);
@@ -498,8 +523,19 @@ bool scallop3::identify_linkable_edges(int &ex, int &ey, vector<int> &p)
 				bool b = check_linkable(v[j], v[k], p);
 				if(b == true)
 				{
-					ex = v[j];
-					ey = v[k];
+					bool b1 = gr.check_directed_path(i2e[v[j]], i2e[v[k]]);
+					bool b2 = gr.check_directed_path(i2e[v[k]], i2e[v[j]]);
+					assert(b1 != b2);
+					if(b1 == true)
+					{
+						ex = v[j];
+						ey = v[k];
+					}
+					else
+					{
+						ex = v[k];
+						ey = v[j];
+					}
 					flag = true;
 					break;
 				}
@@ -542,6 +578,61 @@ int scallop3::build_adjacent_edges(int ex, int ey, const vector<int> &p)
 	return 0;
 }
 
+bool scallop3::decompose_trivial_vertices()
+{
+	bool flag = false;
+	edge_iterator it1, it2;
+	for(int i = 0; i < gr.num_vertices(); i++)
+	{
+		if(gr.degree(i) == 0) continue;
+		if(gr.in_degree(i) == 1)
+		{
+			printf("decompose trivial vertex %d\n", i);
+
+			tie(it1, it2) = gr.in_edges(i);
+			int ei = e2i[*it1];
+			vector<int> sub;
+			for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
+			{
+				int e = e2i[*it1];
+				sub.push_back(e);
+			}
+
+			vector<int> v = split_edge(ei, sub);
+			assert(v.size() == sub.size());
+			for(int k = 0; k < v.size(); k++)
+			{
+				assert(i2e[v[k]] != null_edge);
+				connect_adjacent_edges(v[k], sub[k]);
+			}
+			flag = true;
+		}
+		else if(gr.out_degree(i) == 1)
+		{
+			printf("decompose trivial vertex %d\n", i);
+
+			tie(it1, it2) = gr.out_edges(i);
+			int ei = e2i[*it1];
+			vector<int> sub;
+			for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
+			{
+				int e = e2i[*it1];
+				sub.push_back(e);
+			}
+
+			vector<int> v = split_edge(ei, sub);
+			assert(v.size() == sub.size());
+			for(int k = 0; k < v.size(); k++)
+			{
+				assert(i2e[v[k]] != null_edge);
+				connect_adjacent_edges(sub[k], v[k]);
+			}
+			flag = true;
+		}
+	}
+	return flag;
+}
+
 int scallop3::print()
 {
 	// print null space
@@ -558,6 +649,7 @@ int scallop3::print()
 		vector<int> v = vv[i];
 		assert(v.size() >= 1);
 
+		if(v.size() == 1) continue;
 		int w = (int)(get_edge_weight(i2e[v[0]], gr));
 
 		printf("edge set %d, weight = %d, #edges = %lu, set = (%d", i, w, v.size(), v[0]);
