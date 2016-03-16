@@ -505,10 +505,9 @@ int graph_base::draw(const string &file, const MIS &mis, const MES &mes, double 
 			double bend = -40;
 			if(i + 1 == j) bend = 0;
 
-			string line = "";
-			if(cnt == 1) line = "line width = 0.02cm,";
-			else line = "thin, double,";
-			fout<<"\\draw[->,"<< line.c_str() <<"\\colx, bend right = "<< bend <<"] ("<<sx<<") to node {";
+			string line = "line width = 0.02cm,";
+			//line = "thin, double,";
+			fout<<"\\draw[->,"<< line.c_str() <<"\\colx, bend right = "<< bend <<"] ("<<sx<<") to node[draw, fill=white] {";
 			fout<< s.c_str() <<"} ("<<sy<<");\n";
 		}
 	}
