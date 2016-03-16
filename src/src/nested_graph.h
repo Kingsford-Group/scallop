@@ -17,9 +17,8 @@ public:
 
 public:
 	virtual edge_descriptor add_edge(int s, int t);
-	virtual int compute_out_ancestor(int v) const;
 	virtual int compute_in_ancestor(int v) const;
-	virtual int exchange(int x, int y, int z);
+	virtual int compute_out_ancestor(int v) const;
 };
 
 #endif

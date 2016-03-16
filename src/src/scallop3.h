@@ -48,6 +48,8 @@ private:
 	int split_edge(int ei, const vector<int> &sub);
 	int build_nested_graph();
 	bool identify_linkable_edges(int &ex, int &ey, vector<int> &p);
+	int build_adjacent_edges(int ex, int ey, const vector<int> &p);
+	vector<bool> compute_intersecting_edges();
 	bool connect_adjacent_edges(int x, int y);
 	int compute_closest_subset(int xi, int w, const vector<PI> & xxp);
 	int compute_closest_equal_edges(int &ex, int &ey);

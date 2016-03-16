@@ -32,6 +32,7 @@ public:
 	virtual int remove_edge(edge_base *e);
 	virtual int remove_edge(int s, int t);
 	virtual int move_edge(edge_base *e, int x, int y);
+	virtual int exchange(int x, int y, int z);
 	virtual int clear_vertex(int v);
 	virtual int clear();
 

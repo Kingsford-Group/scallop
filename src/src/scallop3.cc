@@ -37,11 +37,17 @@ int scallop3::iterate()
 		split_edge(ei, sub);
 	}
 
-	this->draw_splice_graph(name + ".gr.tex");
-
+	int cnt = 1;
 	while(true)
 	{
 		build_nested_graph();
+
+		char buf[1024];
+		sprintf(buf, "%s.gr.%d.tex", name.c_str(), cnt);
+		this->draw_splice_graph(buf);
+		sprintf(buf, "%s.nt.%d.tex", name.c_str(), cnt);
+		this->draw_nested_graph(buf);
+
 		int ex, ey;
 		vector<int> p;
 		bool b = identify_linkable_edges(ex, ey, p);
@@ -51,17 +57,12 @@ int scallop3::iterate()
 		for(int i = 1; i < p.size(); i++) printf(", %d", p[i]);
 		printf(")\n");
 		assert(ex >= 0 && ey >= 0);
-		//connect_adjacent_edges(ex, ey);
-		break;
+
+		build_adjacent_edges(ex, ey, p);
+		connect_adjacent_edges(ex, ey);
+
+		cnt++;
 	}
-
-	this->draw_nested_graph(name + ".nt.tex");
-	nt.exchange(19, 39, 55);
-	this->draw_nested_graph(name + ".nt.1.tex");
-
-	vector<int> v = nt.topological_sort();
-	for(int i = 0; i < v.size(); i++) printf("%d ", v[i]);
-	printf("\n");
 
 	return 0;
 }
@@ -522,6 +523,25 @@ int scallop3::build_nested_graph()
 	return 0;
 }
 
+vector<bool> scallop3::compute_intersecting_edges()
+{
+	vector<bool> i2b;
+	i2b.assign(i2e.size(), false);
+	for(int i = 0; i < i2e.size(); i++)
+	{
+		if(i2e[i] == null_edge) continue;
+		for(int j = i + 1; j < i2e.size(); j++)
+		{
+			if(i2e[j] == null_edge) continue;
+			bool b = gr.intersect(i2e[i], i2e[j]);
+			if(b == false) continue;
+			i2b[i] = true;
+			i2b[j] = true;
+		}
+	}
+	return i2b;
+}
+
 bool scallop3::identify_linkable_edges(int &ex, int &ey, vector<int> &p)
 {
 	ex = ey = -1;
@@ -564,6 +584,46 @@ bool scallop3::identify_linkable_edges(int &ex, int &ey, vector<int> &p)
 	}
 	if(flag == false) return false;
 	return true;
+}
+
+int scallop3::build_adjacent_edges(int ex, int ey, const vector<int> &p)
+{
+	int l0 = i2e[ex]->source();
+	int r0 = i2e[ey]->target();
+	assert(i2n[ex] != null_edge && i2n[ex]->source() == l0);
+	assert(i2n[ey] != null_edge && i2n[ey]->target() == r0);
+	int li = 0;
+	int ri = p.size() - 1;
+	while(li < ri)
+	{
+		int l1 = p[li];
+		int r1 = p[ri];
+		int l2 = p[li + 1];
+		int r2 = p[ri - 1];
+		bool bl = false;
+		bool br = false;
+		if(l2 == nt.compute_out_ancestor(l1)) bl = true;
+		if(r2 == nt.compute_in_ancestor(r1)) br = true;
+		assert(bl == true || br == true);
+		if(bl == true)
+		{
+			printf("left exchange (%d, %d, %d)\n", l0, l1, l2);
+			nt.exchange(l0, l1, l2);
+			gr.exchange(l0, l1, l2);
+			l0 = l1;
+			li++;
+		}
+		else if(br == true)
+		{
+			printf("right exchange (%d, %d, %d)\n", r2, r1, r0);
+			nt.exchange(r2, r1, r0);
+			gr.exchange(r2, r1, r0);
+			r0 = r1;
+			ri--;
+		}
+		else assert(false);
+	}
+	return 0;
 }
 
 int scallop3::print()
