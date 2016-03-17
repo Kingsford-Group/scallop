@@ -438,6 +438,110 @@ vector<int> graph_base::topological_sort() const
 	return v;
 }
 
+int graph_base::compute_in_partner(int x) const
+{
+	vector<int> v = topological_sort();
+	assert(v.size() == num_vertices());
+	vector<int> order;
+	order.assign(num_vertices(), -1);
+	for(int i = 0; i < v.size(); i++)
+	{
+		order[v[i]] = i;
+	}
+
+	set<edge_descriptor> se;
+	set<int> sv;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = in_edges(x); it1 != it2; it1++)
+	{
+		assert((*it1)->target() == x);
+		int s = (*it1)->source();
+		if(sv.find(s) == sv.end()) sv.insert(s);
+		if(se.find(*it1) == se.end()) se.insert(*it1);
+	}
+
+	while(sv.size() >= 2)
+	{
+		int k = -1;
+		for(set<int>::iterator it = sv.begin(); it != sv.end(); it++)
+		{
+			if(k == -1 || order[*it] > order[k])
+			{
+				k = *it;
+			}
+		}
+		assert(k != -1);
+
+		for(tie(it1, it2) = out_edges(k); it1 != it2; it1++)
+		{
+			if(se.find(*it1) == se.end()) return -1;
+		}
+
+		for(tie(it1, it2) = in_edges(k); it1 != it2; it1++)
+		{
+			assert(se.find(*it1) == se.end());
+			se.insert(*it1);
+			int s = (*it1)->source();
+			if(sv.find(s) == sv.end()) sv.insert(s);
+		}
+		sv.erase(k);
+	}
+	if(sv.size() == 0) return -1;
+	else return *(sv.begin());
+}
+
+int graph_base::compute_out_partner(int x) const
+{
+	vector<int> v = topological_sort();
+	vector<int> order;
+	order.assign(num_vertices(), -1);
+	for(int i = 0; i < v.size(); i++)
+	{
+		order[v[i]] = i;
+	}
+
+	set<edge_descriptor> se;
+	set<int> sv;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
+	{
+		assert((*it1)->source() == x);
+		int t = (*it1)->target();
+		if(sv.find(t) == sv.end()) sv.insert(t);
+		if(se.find(*it1) == se.end()) se.insert(*it1);
+	}
+
+	while(sv.size() >= 2)
+	{
+		int k = -1;
+		for(set<int>::iterator it = sv.begin(); it != sv.end(); it++)
+		{
+			if(k == -1 || order[*it] < order[k])
+			{
+				k = *it;
+			}
+		}
+		assert(k != -1);
+
+		for(tie(it1, it2) = in_edges(k); it1 != it2; it1++)
+		{
+			if(se.find(*it1) == se.end()) return -1;
+		}
+
+		for(tie(it1, it2) = out_edges(k); it1 != it2; it1++)
+		{
+			assert(se.find(*it1) == se.end());
+			se.insert(*it1);
+			int t = (*it1)->target();
+			if(sv.find(t) == sv.end()) sv.insert(t);
+		}
+		sv.erase(k);
+	}
+
+	if(sv.size() == 0) return -1;
+	else return *(sv.begin());
+}
+
 int graph_base::draw(const string &file, const MIS &mis, const MES &mes, double len) const
 {
 	ofstream fout(file.c_str());

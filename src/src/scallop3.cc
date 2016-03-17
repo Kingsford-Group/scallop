@@ -373,7 +373,6 @@ int scallop3::split_edge(int exi, int eyi)
 	ds.union_set(exi, eyi);
 
 	if(fabs(wx - wy) <= SMIN) return -1;
-	printf("wx = %lf, wy = %lf\n", wx, wy);
 	assert(wx > wy);
 
 	int s = source(ex, gr);
@@ -790,7 +789,17 @@ int scallop3::print()
 	{
 		if(gr.degree(i) >= 1) n++;
 	}
-	printf("statistics: %lu edges, %d vertices\n\n", gr.num_edges(), n);
+	printf("statistics: %lu edges, %d vertices\n", gr.num_edges(), n);
+
+	// print in and out partners
+	for(int i = 0; i < gr.num_vertices(); i++)
+	{
+		if(gr.degree(i) == 0) continue;
+		int ip = gr.compute_in_partner(i);
+		int op = gr.compute_out_partner(i);
+		printf("partner of %d: in = %d, out = %d\n", i, ip, op);
+	}
+	printf("\n");
 	return 0;
 }
 
@@ -814,7 +823,7 @@ int scallop3::draw_splice_graph(const string &file)
 		mes.insert(PES(i2e[i], buf));
 	}
 
-	gr.draw(file, mis, mes, 5.0);
+	gr.draw(file, mis, mes, 4.0);
 	return 0;
 }
 

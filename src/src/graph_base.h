@@ -60,6 +60,8 @@ public:
 	virtual bool intersect(edge_descriptor ex, edge_descriptor ey) const;
 	virtual bool check_nested() const;
 	virtual vector<int> topological_sort() const;
+	virtual int compute_in_partner(int x) const;
+	virtual int compute_out_partner(int x) const;
 
 	// draw
 	int draw(const string &file, const MIS &mis, const MES &mes, double len) const;
