@@ -293,7 +293,7 @@ int graph_base::bfs_reverse(int t, vector<int> &v, vector<int> &b) const
 		edge_iterator it1, it2;
 		for(tie(it1, it2) = in_edges(x); it1 != it2; it1++)
 		{
-			int y = (*it1)->target();
+			int y = (*it1)->source();
 			if(v[y] == -1) 
 			{
 				v[y] = 1 + v[x];

@@ -323,6 +323,7 @@ int splice_graph::compute_in_ancestor(int x) const
 	{
 		vector<int> v;
 		bfs_reverse(*it, v);
+
 		bool f = true;
 		for(set<int>::iterator it2 = m.begin(); it2 != m.end(); it2++)
 		{

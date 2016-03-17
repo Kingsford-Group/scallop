@@ -373,6 +373,7 @@ int scallop3::split_edge(int exi, int eyi)
 	ds.union_set(exi, eyi);
 
 	if(fabs(wx - wy) <= SMIN) return -1;
+	printf("wx = %lf, wy = %lf\n", wx, wy);
 	assert(wx > wy);
 
 	int s = source(ex, gr);
@@ -401,6 +402,7 @@ vector<int> scallop3::split_edge(int ei, const vector<int> &sub)
 	int x = ei;
 	for(int i = 0; i < sub.size(); i++)
 	{
+		printf("split edge %d w.r.t. %d\n", x, sub[i]);
 		int y = split_edge(x, sub[i]);
 		if(i == sub.size() - 1) assert(y == -1);
 		if(y == -1) assert(i == sub.size() - 1);
@@ -606,8 +608,6 @@ bool scallop3::identify_linkable_edges(int &ex, int &ey, vector<int> &p)
 
 int scallop3::build_adjacent_edges(int ex, int ey, const vector<int> &p)
 {
-	int l0 = i2e[ex]->source();
-	int r0 = i2e[ey]->target();
 	int li = 0;
 	int ri = p.size() - 1;
 	while(li < ri)
@@ -619,15 +619,33 @@ int scallop3::build_adjacent_edges(int ex, int ey, const vector<int> &p)
 
 		if(p[li] < 0)
 		{
-			gr.exchange(l0, l1, l2);
+			int lr = gr.compute_out_ancestor(l1);
+			int ll = gr.compute_in_ancestor(l1);
+			assert(lr == l2);
+
+			gr.exchange(ll, l1, l2);
+
+			printf("exchange %d %d %d\n", ll, l1, l2);
+			char buf[1024];
+			sprintf(buf, "%d.%d.%d.tex", ll, l1, l2);
+			draw_splice_graph(buf);
+
 			li++;
-			l0 = l1;
 		}
 		else if(p[ri] < 0)
 		{
-			gr.exchange(r2, r1, r0);
+			int rl = gr.compute_in_ancestor(r1);
+			int rr = gr.compute_out_ancestor(r1);
+			assert(rl == r2);
+
+			gr.exchange(r2, r1, rr);
+
+			printf("exchange %d %d %d\n", r2, r1, rr);
+			char buf[1024];
+			sprintf(buf, "%d.%d.%d.tex", r2, r1, rr);
+			draw_splice_graph(buf);
+
 			ri--;
-			r0 = r1;
 		}
 		else assert(false);
 	}
