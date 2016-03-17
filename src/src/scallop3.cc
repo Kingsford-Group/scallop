@@ -25,11 +25,12 @@ int scallop3::assemble()
 
 bool scallop3::iterate()
 {
+	char buf[1024];
 	while(true)
 	{
 		printf("round %d, start\n", round);
 		print();
-		char buf[1024];
+
 		sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
 		this->draw_splice_graph(buf);
 		round++;
@@ -37,14 +38,17 @@ bool scallop3::iterate()
 		int ei;
 		vector<int> sub;
 		bool flag0 = identify_equation(ei, sub);
-		if(flag0 == true) split_edge(ei, sub);
+		if(flag0 == true) 
+		{
+			split_edge(ei, sub);
 
-		printf("round %d, split edge %d\n", round, ei);
-		print();
+			printf("round %d, split edge %d\n", round, ei);
+			print();
 
-		sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
-		this->draw_splice_graph(buf);
-		round++;
+			sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
+			this->draw_splice_graph(buf);
+			round++;
+		}
 
 		bool flag1 = false;
 		while(true)
@@ -97,7 +101,17 @@ bool scallop3::iterate()
 	if(b == false) return false;
 
 	printf("shortest equal path (%d, %d)\n", ex, ey);
-	return false;
+
+	connect_equal_edges(ex, ey);
+
+	printf("round %d, connect %d and %d\n", round, ex, ey);
+	print();
+
+	sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
+	this->draw_splice_graph(buf);
+	round++;
+
+	return true;
 }
 
 int scallop3::init_super_edges()
@@ -223,10 +237,10 @@ vector< vector<int> > scallop3::compute_disjoint_sets()
 	return xx;
 }
 
-bool scallop3::connect_edges(int x, int y)
+int scallop3::connect_equal_edges(int x, int y)
 {
-	if(i2e[x] == null_edge) return false;
-	if(i2e[y] == null_edge) return false;
+	assert(i2e[x] != null_edge);
+	assert(i2e[y] != null_edge);
 
 	edge_descriptor xx = i2e[x];
 	edge_descriptor yy = i2e[y];
@@ -241,10 +255,14 @@ bool scallop3::connect_edges(int x, int y)
 	assert(b == true);
 	assert(p.size() >= 1);
 
-	double wx0 = gr.get_edge_weight(xx);
-	double wy0 = gr.get_edge_weight(yy);
-	assert(fabs(wx0 - wy0) <= SMIN);
+	double wx = gr.get_edge_weight(xx);
+	double wy = gr.get_edge_weight(yy);
+	assert(fabs(wx - wy) <= SMIN);
 
+	double wp = gr.compute_bottleneck_weight(p);
+	assert(wp >= wx - SMIN);
+
+	int pre = x;
 	for(int i = 0; i < p.size() - 1; i++)
 	{
 		edge_iterator it1, it2;
@@ -254,25 +272,33 @@ bool scallop3::connect_edges(int x, int y)
 		{
 			if((*it1)->target() != p[i + 1]) continue;
 			double w = gr.get_edge_weight(*it1);
-			double d = fabs(w - wx0);
+			if(w <= wx - SMIN) continue;
+			double d = fabs(w - wx);
 			if(d < dist)
 			{
 				dist = d;
 				ee = e2i[*it1];
 			}
 		}
-		if(ee == -1) return false;
-		// TODO
+		assert(ee != -1);
+
+		split_edge(ee, pre);
+		int e1 = connect_adjacent_edges(pre, ee);
+		assert(e1 != -1);
+		pre = e1;
 	}
 
-	return true;
+	split_edge(y, pre);
+	connect_adjacent_edges(pre, y);
+
+	return 0;
 }
 
 
-bool scallop3::connect_adjacent_edges(int x, int y)
+int scallop3::connect_adjacent_edges(int x, int y)
 {
-	if(i2e[x] == null_edge) return false;
-	if(i2e[y] == null_edge) return false;
+	if(i2e[x] == null_edge) return -1;
+	if(i2e[y] == null_edge) return -1;
 
 	edge_descriptor xx = i2e[x];
 	edge_descriptor yy = i2e[y];
@@ -282,7 +308,7 @@ bool scallop3::connect_adjacent_edges(int x, int y)
 	int ys = source(yy, gr);
 	int yt = target(yy, gr);
 
-	if(xt != ys && yt != xs) return false;
+	if(xt != ys && yt != xs) return -1;
 	if(yt == xs) return connect_adjacent_edges(y, x);
 	
 	assert(xt == ys);
@@ -327,7 +353,7 @@ bool scallop3::connect_adjacent_edges(int x, int y)
 	remove_edge(xx, gr);
 	remove_edge(yy, gr);
 
-	return 0;
+	return n;
 }
 
 int scallop3::split_edge(int exi, int eyi)
@@ -371,55 +397,17 @@ int scallop3::split_edge(int exi, int eyi)
 vector<int> scallop3::split_edge(int ei, const vector<int> &sub)
 {
 	vector<int> v;
-
-	assert(i2e[ei] != null_edge);
-	assert(sub.size() >= 1);
-	for(int i = 0; i < sub.size(); i++) assert(i2e[sub[i]] != null_edge);
-
-	double w = get_edge_weight(i2e[ei], gr);
+	v.push_back(ei);
+	int x = ei;
 	for(int i = 0; i < sub.size(); i++)
 	{
-		w -= get_edge_weight(i2e[sub[i]], gr);
+		int y = split_edge(x, sub[i]);
+		if(i == sub.size() - 1) assert(y == -1);
+		if(y == -1) assert(i == sub.size() - 1);
+		if(y == -1) break;
+		v.push_back(y);
+		x = y;
 	}
-	assert(fabs(w) <= SMIN);
-
-	edge_descriptor ex = i2e[ei];
-	edge_descriptor ey = i2e[sub[0]];
-	double w0 = get_edge_weight(ey, gr);
-	double w1 = get_edge_stddev(ey, gr);
-	set_edge_weight(ex, w0, gr);
-	set_edge_stddev(ex, w1, gr);
-	ds.union_set(ei, sub[0]);
-	v.push_back(ei);
-
-	int s = source(ex, gr);
-	int t = target(ex, gr);
-	for(int i = 1; i < sub.size(); i++)
-	{
-		PEB p = add_edge(s, t, gr);
-		assert(p.second == true);
-
-		int n = i2e.size();
-		i2e.push_back(p.first);
-		assert(e2i.find(p.first) == e2i.end());
-		e2i.insert(PEI(p.first, n));
-
-		ey = i2e[sub[i]];
-		w0 = get_edge_weight(ey, gr);
-		w1 = get_edge_stddev(ey, gr);
-
-		set_edge_weight(p.first, w0, gr);
-		set_edge_stddev(p.first, w1, gr);
-
-		mev.insert(PEV(p.first, mev[ex]));
-
-		ds.make_set(n);
-		ds.union_set(n, sub[i]);
-
-		v.push_back(n);
-	}
-
-	// TODO, update null space
 	return v;
 }
 
@@ -707,12 +695,14 @@ bool scallop3::compute_shortest_equal_edges(int &ex, int &ey)
 	vector< vector<int> > vv = compute_disjoint_sets();
 	bool flag = false;
 	int min = -1;
+
 	for(int i = 0; i < vv.size(); i++)
 	{
 		vector<int> &v = vv[i];
 		if(v.size() == 1) continue;
 		for(int j = 0; j < v.size(); j++)
 		{
+			double wx = gr.get_edge_weight(i2e[v[j]]);
 			for(int k = j + 1; k < v.size(); k++)
 			{
 				vector<int> p1;
@@ -724,17 +714,27 @@ bool scallop3::compute_shortest_equal_edges(int &ex, int &ey)
 				if(b1 == false && b2 == false) continue;
 				assert(b1 != b2);
 
-				if(b1 == true && (min == -1 || min > p1.size()))
+				if(b1 == true)
 				{
-					min = p1.size();
-					ex = v[j];
-					ey = v[k];
+					double w = gr.compute_bottleneck_weight(p1);
+					if(wx - SMIN >= w) continue;
+					if(min == -1 || min > p1.size())
+					{
+						min = p1.size();
+						ex = v[j];
+						ey = v[k];
+					}
 				}
-				else if(b2 == true && (min == -1 || min > p2.size()))
+				else
 				{
-					min = p2.size();
-					ex = v[k];
-					ey = v[j];
+					double w = gr.compute_bottleneck_weight(p2);
+					if(wx - SMIN >= w) continue;
+					if(min == -1 || min > p2.size())
+					{
+						min = p2.size();
+						ex = v[k];
+						ey = v[j];
+					}
 				}
 			}
 		}

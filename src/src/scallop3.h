@@ -48,10 +48,10 @@ private:
 	bool identify_linkable_edges(int &ex, int &ey, vector<int> &p);
 	bool check_linkable(int ex, int ey, vector<int> &p);
 	int build_adjacent_edges(int ex, int ey, const vector<int> &p);
-	bool connect_adjacent_edges(int x, int y);
-	bool connect_edges(int x, int y);
+	int connect_adjacent_edges(int x, int y);
 	bool decompose_trivial_vertices();
 	bool compute_shortest_equal_edges(int &ex, int &ey);
+	int connect_equal_edges(int x, int y);
 
 	// test, print and draw
 	int print();

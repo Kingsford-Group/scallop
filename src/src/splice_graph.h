@@ -41,6 +41,7 @@ public:
 	// algorithm
 	int compute_in_ancestor(int v) const;
 	int compute_out_ancestor(int v) const;
+	double compute_bottleneck_weight(const vector<int> &p) const;
 
 	// modify the splice_graph
 	int clear();

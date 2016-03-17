@@ -1,6 +1,7 @@
 #include "splice_graph.h"
 #include <sstream>
 #include <fstream>
+#include <cfloat>
 
 using namespace std;
 
@@ -336,3 +337,22 @@ int splice_graph::compute_in_ancestor(int x) const
 	return -1;
 }
 
+double splice_graph::compute_bottleneck_weight(const vector<int> &p) const
+{
+	double x = DBL_MAX;
+	if(p.size() <= 1) return x;
+
+	for(int i = 0; i < p.size() - 1; i++)
+	{
+		edge_iterator it1, it2;
+		double max = 0;
+		for(tie(it1, it2) = out_edges(p[i]); it1 != it2; it1++)
+		{
+			if((*it1)->target() != p[i + 1]) continue;
+			double w = get_edge_weight(*it1);
+			if(w > max) max = w;
+		}
+		if(max < x) x = max;
+	}
+	return x;
+}
