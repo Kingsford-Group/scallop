@@ -1,45 +1,48 @@
 #include "nested_graph.h"
 
-nested_graph::nested_graph()
-{}
-
 nested_graph::nested_graph(const graph_base &gr)
 {
-	for(int i = 0; i < gr.num_vertices(); i++)
-	{
-		add_vertex();
-	}
-
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
-	{
-		int s = (*it1)->source();
-		int t = (*it1)->target();
-		add_edge(s, t);
-	}
+	build(gr);
 }
 
 nested_graph::~nested_graph()
 {}
 
-edge_descriptor nested_graph::add_edge(int s, int t)
+int nested_graph::build(const graph_base &gr)
 {
-	edge_descriptor e = graph_base::add_edge(s, t);
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = edges(); it1 != it2; it1++)
+	clear();
+	mei.clear();
+	for(int i = 0; i < gr.num_vertices(); i++)
 	{
-		edge_descriptor ee = *it1;
-		if(e == ee) continue;
-		bool b = intersect(e, ee);
-		if(b == false) continue;
-		int ss = e->source() < ee->source() ? e->source() : ee->source();
-		int tt = e->target() > ee->target() ? e->target() : ee->target();
-		remove_edge(e);
-		remove_edge(ee);
-		add_edge(ss, tt);
-		return null_edge;
+		add_vertex();
 	}
-	return e;
+
+	for(int i = 0; i < gr.num_vertices(); i++)
+	{
+		if(gr.degree(i) == 0) continue;
+		int ip = gr.compute_in_partner(i);
+		int op = gr.compute_out_partner(i);
+		if(ip == -1 || op == -1) continue;
+		edge_descriptor e1 = add_edge(ip, i);
+		edge_descriptor e2 = add_edge(i, op);
+		edge_descriptor e3 = add_edge(op, ip);
+		mei.insert(PEI(e1, i));
+		mei.insert(PEI(e2, i));
+		mei.insert(PEI(e3, i));
+	}
+	return 0;
 }
 
-
+int nested_graph::draw(const string &file) 
+{
+	MIS mis;
+	MES mes;
+	for(MEI::iterator it = mei.begin(); it != mei.end(); it++)
+	{
+		char buf[1024];
+		sprintf(buf, "%d", it->second);
+		mes.insert(PES(it->first, buf));
+	}
+	graph_base::draw(file, mis, mes, 3.0);
+	return 0;
+}

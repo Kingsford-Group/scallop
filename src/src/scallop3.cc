@@ -1,5 +1,6 @@
 #include "scallop3.h"
 #include "subsetsum.h"
+#include "nested_graph.h"
 #include <cstdio>
 #include <iostream>
 #include <cfloat>
@@ -33,6 +34,11 @@ bool scallop3::iterate()
 
 		sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
 		this->draw_splice_graph(buf);
+
+		sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
+		nested_graph nt(gr);
+		nt.draw(buf);
+
 		round++;
 
 		int ei;
@@ -47,6 +53,10 @@ bool scallop3::iterate()
 
 			sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
 			this->draw_splice_graph(buf);
+			sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
+			nested_graph nt(gr);
+			nt.draw(buf);
+
 			round++;
 		}
 
@@ -74,6 +84,10 @@ bool scallop3::iterate()
 
 				sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
 				this->draw_splice_graph(buf);
+				sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
+				nested_graph nt(gr);
+				nt.draw(buf);
+
 				round++;
 			}
 
@@ -85,6 +99,10 @@ bool scallop3::iterate()
 
 				sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
 				this->draw_splice_graph(buf);
+				sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
+				nested_graph nt(gr);
+				nt.draw(buf);
+
 				round++;
 			}
 
@@ -109,6 +127,10 @@ bool scallop3::iterate()
 
 	sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
 	this->draw_splice_graph(buf);
+	sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
+	nested_graph nt(gr);
+	nt.draw(buf);
+
 	round++;
 
 	return true;
@@ -789,17 +811,7 @@ int scallop3::print()
 	{
 		if(gr.degree(i) >= 1) n++;
 	}
-	printf("statistics: %lu edges, %d vertices\n", gr.num_edges(), n);
-
-	// print in and out partners
-	for(int i = 0; i < gr.num_vertices(); i++)
-	{
-		if(gr.degree(i) == 0) continue;
-		int ip = gr.compute_in_partner(i);
-		int op = gr.compute_out_partner(i);
-		printf("partner of %d: in = %d, out = %d\n", i, ip, op);
-	}
-	printf("\n");
+	printf("statistics: %lu edges, %d vertices\n\n", gr.num_edges(), n);
 	return 0;
 }
 
@@ -826,4 +838,3 @@ int scallop3::draw_splice_graph(const string &file)
 	gr.draw(file, mis, mes, 4.0);
 	return 0;
 }
-

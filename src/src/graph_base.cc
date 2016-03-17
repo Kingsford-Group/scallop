@@ -472,10 +472,13 @@ int graph_base::compute_in_partner(int x) const
 		}
 		assert(k != -1);
 
+		printf("---\n");
 		for(tie(it1, it2) = out_edges(k); it1 != it2; it1++)
 		{
+			printf(" for vertex %d, checking %d, out-edge = (%d, %d)\n", x, k, (*it1)->source(), (*it1)->target());
 			if(se.find(*it1) == se.end()) return -1;
 		}
+		printf("---\n");
 
 		for(tie(it1, it2) = in_edges(k); it1 != it2; it1++)
 		{

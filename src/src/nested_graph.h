@@ -11,12 +11,15 @@ using namespace std;
 class nested_graph : public graph_base
 {
 public:
-	nested_graph();
 	nested_graph(const graph_base &gr);
 	virtual ~nested_graph();
 
 public:
-	virtual edge_descriptor add_edge(int s, int t);
+	MEI mei;		// map the edge to the original vertex
+
+public:
+	int build(const graph_base &gr);
+	int draw(const string &file);
 };
 
 #endif
