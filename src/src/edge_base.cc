@@ -14,6 +14,14 @@ int edge_base::move(int x, int y)
 	return 0;
 }
 
+int edge_base::swap()
+{
+	int x = s;
+	s = t;
+	t = x;
+	return 0;
+}
+
 int edge_base::source() const
 {
 	return s;

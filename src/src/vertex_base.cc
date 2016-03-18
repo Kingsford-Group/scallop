@@ -66,24 +66,6 @@ PEE vertex_base::out_edges() const
 	return PEE(so.begin(), so.end());
 }
 
-set<int> vertex_base::adjacent_vertices() const
-{
-	set<int> x;
-	/*
-	for(edge_iterator it = si.begin(); it != si.end(); it++)
-	{
-		int s = (*it)->source();
-		if(x.find(s) == x.end()) x.insert(s);
-	}
-	*/
-	for(edge_iterator it = so.begin(); it != so.end(); it++)
-	{
-		int s = (*it)->target();
-		if(x.find(s) == x.end()) x.insert(s);
-	}
-	return x;
-}
-
 int vertex_base::print() const
 {
 	printf("in-edges = ( ");

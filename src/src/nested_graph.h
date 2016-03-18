@@ -18,12 +18,12 @@ public:
 	MEI mei;		// map the edge to the original vertex
 
 public:
-	int get_in_partner(int x) const;
-	int get_out_partner(int x) const;
-	vector<int> get_pivots(const vector<int> &p) const;
+	int get_in_partner(int x); 
+	int get_out_partner(int x);
+	vector<int> get_pivots(const vector<int> &p);
 
 public:
-	int build(const directed_graph &gr);
+	int build(directed_graph &gr);
 	int draw(const string &file);
 };
 

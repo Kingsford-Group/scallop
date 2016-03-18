@@ -14,33 +14,33 @@ directed_graph::directed_graph()
 
 directed_graph::directed_graph(const graph_base &gr)
 {
-	clear();
-	for(int i = 0; i < gr.num_vertices(); i++) add_vertex();
-
-	PEE p = gr.edges();
-	for(edge_iterator it = p.first; it != p.second; it++)
-	{
-		add_edge((*it)->source(), (*it)->target());
-	}
+	copy(gr);
 }
 
 directed_graph::~directed_graph()
 {
 }
 
-
-PEB directed_graph::edge(int s, int t) const
+edge_descriptor directed_graph::add_edge(int s, int t)
 {
 	assert(s >= 0 && s < vv.size());
 	assert(t >= 0 && t < vv.size());
-	PEE p = vv[s]->out_edges();
-	for(edge_iterator it = p.first; it != p.second; it++)
-	{
-		int x = (*it)->target();
-		if(x != t) continue;
-		return PEB(*it, true);
-	}
-	return PEB(null_edge, false);
+	edge_base *e = new edge_base(s, t);
+	assert(se.find(e) == se.end());
+	se.insert(e);
+	vv[s]->add_out_edge(e);
+	vv[t]->add_in_edge(e);
+	return e;
+}
+
+int directed_graph::remove_edge(edge_descriptor e)
+{
+	if(se.find(e) == se.end()) return -1;
+	vv[e->source()]->remove_out_edge(e);
+	vv[e->target()]->remove_in_edge(e);
+	delete e;
+	se.erase(e);
+	return 0;
 }
 
 int directed_graph::exchange(int x, int y, int z)
@@ -87,11 +87,6 @@ int directed_graph::exchange(int x, int y, int z)
 	return 0;
 }
 
-int directed_graph::remove_edge(edge_descriptor e)
-{
-	return graph_base::remove_edge(e);
-}
-
 int directed_graph::remove_edge(int s, int t)
 {
 	vector<edge_base*> v;
@@ -103,7 +98,7 @@ int directed_graph::remove_edge(int s, int t)
 	}
 	for(int i = 0; i < v.size(); i++)
 	{
-		graph_base::remove_edge(v[i]);
+		remove_edge(v[i]);
 	}
 	return 0;
 }
@@ -118,36 +113,14 @@ int directed_graph::out_degree(int v) const
 	return vv[v]->out_degree();
 }
 
-PEE directed_graph::edges() const
-{
-	return graph_base::edges();
-}
-
-PEE directed_graph::in_edges(int v) const
+PEE directed_graph::in_edges(int v)
 {
 	return vv[v]->in_edges();
 }
 
-PEE directed_graph::out_edges(int v) const
+PEE directed_graph::out_edges(int v)
 {
 	return vv[v]->out_edges();
-}
-
-vector<edge_descriptor> directed_graph::edges(int s, int t) const
-{
-	vector<edge_descriptor> v;
-	PEE p = out_edges(s);
-	for(edge_iterator it = p.first; it != p.second; it++)
-	{
-		if((*it)->target() != t) continue;
-		v.push_back(*it);
-	}
-	return v;
-}
-
-set<int> directed_graph::adjacent_vertices(int v) const
-{
-	return vv[v]->adjacent_vertices();
 }
 
 int directed_graph::move_edge(edge_base *e, int x, int y)
@@ -171,7 +144,7 @@ int directed_graph::move_edge(edge_base *e, int x, int y)
 	return 0;
 }
 
-int directed_graph::bfs_reverse(int t, vector<int> &v, vector<int> &b) const
+int directed_graph::bfs_reverse(int t, vector<int> &v, vector<int> &b)
 {
 	v.assign(num_vertices(), -1);
 	b.assign(num_vertices(), -1);
@@ -208,37 +181,37 @@ int directed_graph::bfs_reverse(int t, vector<int> &v, vector<int> &b) const
 	return 0;
 }
 
-int directed_graph::bfs_reverse(int t, vector<int> &v) const
+int directed_graph::bfs_reverse(int t, vector<int> &v)
 {
 	vector<int> b;
 	return bfs_reverse(t, v, b);
 }
 
-bool directed_graph::check_path(int s, int t) const
+bool directed_graph::check_path(int s, int t)
 {
 	return graph_base::check_path(s, t);
 }
 
-bool directed_graph::check_path(edge_descriptor ex, edge_descriptor ey) const
+bool directed_graph::check_path(edge_descriptor ex, edge_descriptor ey)
 {
 	int s = ex->target();
 	int t = ey->source();
 	return check_path(s, t);
 }
 
-bool directed_graph::compute_shortest_path(int x, int y, vector<int> &p) const
+bool directed_graph::compute_shortest_path(int x, int y, vector<int> &p)
 {
 	return graph_base::compute_shortest_path(x, y, p);
 }
 
-bool directed_graph::compute_shortest_path(edge_descriptor ex, edge_descriptor ey, vector<int> &p) const
+bool directed_graph::compute_shortest_path(edge_descriptor ex, edge_descriptor ey, vector<int> &p)
 {
 	int s = ex->target();
 	int t = ey->source();
 	return graph_base::compute_shortest_path(s, t, p);
 }
 
-bool directed_graph::intersect(edge_descriptor ex, edge_descriptor ey) const
+bool directed_graph::intersect(edge_descriptor ex, edge_descriptor ey)
 {
 	int xs = ex->source();
 	int xt = ex->target();
@@ -261,7 +234,7 @@ bool directed_graph::intersect(edge_descriptor ex, edge_descriptor ey) const
 	return false;
 }
 
-vector<int> directed_graph::topological_sort() const
+vector<int> directed_graph::topological_sort()
 {
 	vector<int> v;
 
@@ -301,7 +274,7 @@ vector<int> directed_graph::topological_sort() const
 	return v;
 }
 
-int directed_graph::compute_in_partner(int x) const
+int directed_graph::compute_in_partner(int x)
 {
 	vector<int> v = topological_sort();
 	assert(v.size() == num_vertices());
@@ -353,7 +326,7 @@ int directed_graph::compute_in_partner(int x) const
 	else return *(sv.begin());
 }
 
-int directed_graph::compute_out_partner(int x) const
+int directed_graph::compute_out_partner(int x)
 {
 	vector<int> v = topological_sort();
 	vector<int> order;
@@ -405,7 +378,7 @@ int directed_graph::compute_out_partner(int x) const
 	else return *(sv.begin());
 }
 
-int directed_graph::draw(const string &file, const MIS &mis, const MES &mes, double len) const
+int directed_graph::draw(const string &file, const MIS &mis, const MES &mes, double len)
 {
 	ofstream fout(file.c_str());
 	if(fout.fail())
@@ -482,21 +455,5 @@ int directed_graph::draw(const string &file, const MIS &mis, const MES &mes, dou
 	draw_footer(fout);
 
 	fout.close();
-	return 0;
-}
-
-int directed_graph::print() const
-{
-	printf("total %lu vertices, %lu edges\n", vv.size(), se.size());
-	for(int i = 0; i < vv.size(); i++)
-	{
-		printf("vertex %d: ", i);
-		vv[i]->print();
-	}
-
-	for(edge_iterator it = se.begin(); it != se.end(); it++)
-	{
-		(*it)->print();
-	}
 	return 0;
 }

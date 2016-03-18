@@ -39,9 +39,7 @@ public:
 	int get_edge_indices(VE &i2e, MEI &e2i) const;
 
 	// algorithm
-	int compute_in_ancestor(int v) const;
-	int compute_out_ancestor(int v) const;
-	double compute_bottleneck_weight(const vector<int> &p) const;
+	double compute_bottleneck_weight(const vector<int> &p);
 
 	// modify the splice_graph
 	int clear();
@@ -52,8 +50,8 @@ public:
 	int simulate(int n, int m);
 
 	// analysis the structure of splice graph
-	int compute_num_paths() const;
-	bool check_fully_connected() const;
+	int compute_num_paths();
+	bool check_fully_connected();
 };
 
 #endif

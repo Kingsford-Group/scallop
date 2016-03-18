@@ -27,6 +27,7 @@ public:
 
 public:
 	int assemble();
+	int print();
 
 private:
 	// simplify the splice graph and init all data structures
@@ -54,7 +55,6 @@ private:
 	int connect_equal_edges(int x, int y);
 
 	// test, print and draw
-	int print();
 	int draw_splice_graph(const string &file);
 };
 

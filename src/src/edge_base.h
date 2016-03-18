@@ -18,6 +18,7 @@ protected:
 
 public:
 	virtual int move(int x, int y);
+	virtual int swap();
 	virtual int source() const;
 	virtual int target() const;
 	virtual int print() const;

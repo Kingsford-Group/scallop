@@ -25,9 +25,9 @@ public:
 protected:
 	int smooth_weights();
 
-	double compute_bottleneck_weight(const path &p) const;
-	path compute_maximum_forward_path() const;
-	path compute_maximum_path() const;
+	double compute_bottleneck_weight(const path &p);
+	path compute_maximum_forward_path();
+	path compute_maximum_path();
 
 	int decrease_path(const path &p);
 	int increase_path(const path &p);

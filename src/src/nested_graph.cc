@@ -7,7 +7,7 @@ nested_graph::nested_graph()
 nested_graph::~nested_graph()
 {}
 
-int nested_graph::build(const directed_graph &gr)
+int nested_graph::build(directed_graph &gr)
 {
 	clear();
 	mei.clear();
@@ -32,7 +32,7 @@ int nested_graph::build(const directed_graph &gr)
 	return 0;
 }
 
-int nested_graph::get_in_partner(int x) const
+int nested_graph::get_in_partner(int x)
 {
 	edge_iterator it1, it2;
 	for(tie(it1, it2) = in_edges(x); it1 != it2; it1++)
@@ -45,7 +45,7 @@ int nested_graph::get_in_partner(int x) const
 	return -1;
 }
 
-int nested_graph::get_out_partner(int x) const
+int nested_graph::get_out_partner(int x)
 {
 	edge_iterator it1, it2;
 	for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
@@ -58,7 +58,7 @@ int nested_graph::get_out_partner(int x) const
 	return -1;
 }
 
-vector<int> nested_graph::get_pivots(const vector<int> &p) const
+vector<int> nested_graph::get_pivots(const vector<int> &p)
 {
 	vector<int> v;
 	if(p.size() <= 1) return v;

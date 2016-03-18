@@ -6,8 +6,6 @@
 #include "manager.h"
 #include "bundle.h"
 #include "stringtie.h"
-#include "scallop1.h"
-#include "scallop2.h"
 #include "scallop3.h"
 #include "gtf_gene.h"
 #include "dynamic_graph.h"
@@ -37,7 +35,7 @@ int manager::assemble_bam(const string &file)
     bam1_t *b = bam_init1();
 
 	ofstream stringtie_fout("stringtie.gtf");
-	ofstream scallop1_fout("scallop1.gtf");
+	ofstream scallop3_fout("scallop3.gtf");
 
 	int index = 0;
 	bundle_base bb;
@@ -67,12 +65,12 @@ int manager::assemble_bam(const string &file)
 			st.assemble();
 			st.print("stringtie");
 
-			scallop1 sc(gr);
+			scallop3 sc("", gr);
 			sc.assemble();
-			sc.print("scallop1");
+			sc.print();
 
 			bd.output_gtf(stringtie_fout, st.paths, "stringtie", index);
-			bd.output_gtf(scallop1_fout, sc.paths, "scallop1", index);
+			bd.output_gtf(scallop3_fout, sc.paths, "scallop3", index);
 
 			index++;
 			bb.clear();
@@ -82,7 +80,7 @@ int manager::assemble_bam(const string &file)
     }
 
 	stringtie_fout.close();
-	scallop1_fout.close();
+	scallop3_fout.close();
 
     bam_destroy1(b);
     bam_hdr_destroy(h);
@@ -123,8 +121,6 @@ int manager::assemble_gtf(const string &file)
 
 	/*
 	ofstream stringtie_fout("stringtie.gtf");
-	ofstream scallop1_fout("scallop1.gtf");
-	ofstream scallop2_fout("scallop2.gtf");
 	ofstream standard_fout("standard.gtf");
 	*/
 
@@ -181,8 +177,6 @@ int manager::assemble_gtf(const string &file)
 
 	/*
 	stringtie_fout.close();
-	scallop1_fout.close();
-	scallop2_fout.close();
 	standard_fout.close();
 	*/
 
@@ -195,9 +189,9 @@ int manager::assemble_example(const string &file)
 	build_splice_graph(gr, file);
 	draw_splice_graph(gr, "splice_graph.tex");
 
-	scallop2 sc(gr);
+	scallop3 sc("example", gr);
 	sc.assemble();
-	sc.print("scallop2");
+	sc.print();
 
 	return 0;
 }

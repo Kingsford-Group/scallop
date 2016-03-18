@@ -26,7 +26,6 @@ public:
 	virtual int out_degree() const;
 	virtual PEE in_edges() const;
 	virtual PEE out_edges() const;
-	virtual set<int> adjacent_vertices() const;
 	virtual int print() const;
 };
 

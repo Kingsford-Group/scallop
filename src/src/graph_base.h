@@ -33,33 +33,35 @@ protected:
 
 public:
 	// modify the graph
+	virtual int copy(const graph_base &gr);
 	virtual int add_vertex();
-	virtual edge_descriptor add_edge(int s, int t);
-	virtual int remove_edge(edge_descriptor e);
 	virtual int clear_vertex(int v);
 	virtual int clear();
+	virtual edge_descriptor add_edge(int s, int t) = 0;
+	virtual int remove_edge(edge_descriptor e) = 0;
 	virtual int remove_edge(int s, int t) = 0;
 
 	// access functions
 	virtual size_t num_vertices() const;
 	virtual size_t num_edges() const;
 	virtual int degree(int v) const;
+	virtual PEB edge(int s, int t);
 	virtual PEE edges() const;
-	virtual PEE out_edges(int x) const = 0;
-	virtual PEB edge(int s, int t) const = 0;
-	virtual vector<edge_descriptor> edges(int x, int y) const = 0;
-	virtual set<int> adjacent_vertices(int v) const = 0;
+	virtual vector<edge_descriptor> edges(int x, int y);
+	virtual set<int> adjacent_vertices(int v);
+	virtual PEE out_edges(int x) = 0;
 
 	// algorithms
-	virtual int bfs(int s, vector<int> &v) const;
-	virtual int bfs(int s, vector<int> &v, vector<int> &b) const;
-	virtual bool check_path(int s, int t) const;
-	virtual bool compute_shortest_path(int s, int t, vector<int> &p) const;
-	virtual bool check_nested() const;
-	virtual bool intersect(edge_descriptor ex, edge_descriptor ey) const = 0;
+	virtual int bfs(int s, vector<int> &v);
+	virtual int bfs(int s, vector<int> &v, vector<int> &b);
+	virtual bool check_path(int s, int t);
+	virtual bool compute_shortest_path(int s, int t, vector<int> &p);
+	virtual bool check_nested();
+	virtual bool intersect(edge_descriptor ex, edge_descriptor ey) = 0;
 
 	// draw
-	virtual int draw(const string &file, const MIS &mis, const MES &mes, double len) const = 0;
+	virtual int draw(const string &file, const MIS &mis, const MES &mes, double len) = 0;
+	virtual int print() const;
 };
 
 #endif

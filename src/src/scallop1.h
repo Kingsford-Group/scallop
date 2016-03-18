@@ -15,7 +15,7 @@ public:
 
 private:
 	int iterate();
-	int resolve(const path &px, const path &py, path &qx, path &qy) const;
+	int resolve(const path &px, const path &py, path &qx, path &qy);
 };
 
 #endif

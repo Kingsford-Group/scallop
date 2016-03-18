@@ -23,7 +23,7 @@ int assembler::smooth_weights()
 	return 0;
 }
 
-path assembler::compute_maximum_forward_path() const
+path assembler::compute_maximum_forward_path()
 {
 	path p;
 	vector<double> table;		// dynamic programming table
@@ -78,7 +78,7 @@ path assembler::compute_maximum_forward_path() const
 	return p;
 }
 
-path assembler::compute_maximum_path() const
+path assembler::compute_maximum_path()
 {
 	path p;
 	fibonacci_heap f;						// fibonacci heap
@@ -201,7 +201,7 @@ int assembler::remove_backward_path(const path &p)
 	return 0;
 }
 
-double assembler::compute_bottleneck_weight(const path &p) const
+double assembler::compute_bottleneck_weight(const path &p)
 {
 	double ww = DBL_MAX;
 	for(int i = 0; i < p.v.size() - 1; i++)
