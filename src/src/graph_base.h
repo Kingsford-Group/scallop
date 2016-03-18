@@ -43,6 +43,7 @@ public:
 	virtual int degree(int v) const;
 	virtual int in_degree(int v) const;
 	virtual int out_degree(int v) const;
+	virtual vector<edge_descriptor> edges(int x, int y) const;
 	virtual PEE edges() const;
 	virtual PEE in_edges(int v) const;
 	virtual PEE out_edges(int v) const;

@@ -1,8 +1,7 @@
 #include "nested_graph.h"
 
-nested_graph::nested_graph(const graph_base &gr)
+nested_graph::nested_graph()
 {
-	build(gr);
 }
 
 nested_graph::~nested_graph()
@@ -31,6 +30,47 @@ int nested_graph::build(const graph_base &gr)
 		mei.insert(PEI(e3, i));
 	}
 	return 0;
+}
+
+int nested_graph::get_in_partner(int x) const
+{
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = in_edges(x); it1 != it2; it1++)
+	{
+		MEI::const_iterator it = mei.find(*it1);
+		assert(it != mei.end());
+		if(it->second != x) continue;
+		return (*it1)->source();
+	}
+	return -1;
+}
+
+int nested_graph::get_out_partner(int x) const
+{
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
+	{
+		MEI::const_iterator it = mei.find(*it1);
+		assert(it != mei.end());
+		if(it->second != x) continue;
+		return (*it1)->target();
+	}
+	return -1;
+}
+
+vector<int> nested_graph::get_pivots(const vector<int> &p) const
+{
+	vector<int> v;
+	if(p.size() <= 1) return v;
+	for(int i = 0; i < p.size() - 1; i++)
+	{
+		vector<edge_descriptor> ve = edges(p[i], p[i + 1]);
+		assert(ve.size() >= 1);
+		MEI::const_iterator it = mei.find(ve[0]);
+		assert(it != mei.end());
+		v.push_back(it->second);
+	}
+	return v;
 }
 
 int nested_graph::draw(const string &file) 

@@ -4,6 +4,7 @@
 #include "disjoint_sets.h"
 #include "assembler.h"
 #include "algebra.h"
+#include "nested_graph.h"
 
 typedef map< edge_descriptor, vector<int> > MEV;
 typedef pair< edge_descriptor, vector<int> > PEV;
@@ -20,8 +21,8 @@ public:
 	MEI e2i;				// edge map, from edge to index
 	VE i2e;					// edge map, from index to edge
 	MEV mev;				// super edges
-	set<PI> sis;			// set of intersecting edges
 	disjoint_sets_t ds;		// edges with the same weight are grouped together
+	nested_graph nt;		// nested graph
 	int round;				// round in iteration
 
 public:
@@ -44,10 +45,9 @@ private:
 	bool verify_equation(int ei, const vector<int> &sub);
 	int split_edge(int exi, int eyi);
 	vector<int> split_edge(int ei, const vector<int> &sub);
-	int compute_intersecting_edges();
 	bool identify_linkable_edges(int &ex, int &ey, vector<int> &p);
 	bool check_linkable(int ex, int ey, vector<int> &p);
-	int build_adjacent_edges(int ex, int ey, const vector<int> &p);
+	int build_adjacent_edges(const vector<int> &p);
 	int connect_adjacent_edges(int x, int y);
 	bool decompose_trivial_vertices();
 	bool compute_shortest_equal_edges(int &ex, int &ey);

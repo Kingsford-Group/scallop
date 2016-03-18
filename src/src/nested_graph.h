@@ -11,11 +11,16 @@ using namespace std;
 class nested_graph : public graph_base
 {
 public:
-	nested_graph(const graph_base &gr);
+	nested_graph();
 	virtual ~nested_graph();
 
 public:
 	MEI mei;		// map the edge to the original vertex
+
+public:
+	int get_in_partner(int x) const;
+	int get_out_partner(int x) const;
+	vector<int> get_pivots(const vector<int> &p) const;
 
 public:
 	int build(const graph_base &gr);

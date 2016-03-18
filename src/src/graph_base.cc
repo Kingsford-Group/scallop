@@ -195,6 +195,17 @@ PEE graph_base::edges() const
 	return PEE(se.begin(), se.end());
 }
 
+vector<edge_descriptor> graph_base::edges(int s, int t) const
+{
+	vector<edge_descriptor> v;
+	PEE p = out_edges(s);
+	for(edge_iterator it = p.first; it != p.second; it++)
+	{
+		if((*it)->target() != t) continue;
+		v.push_back(*it);
+	}
+	return v;
+}
 
 size_t graph_base::num_vertices() const
 {
@@ -472,13 +483,10 @@ int graph_base::compute_in_partner(int x) const
 		}
 		assert(k != -1);
 
-		printf("---\n");
 		for(tie(it1, it2) = out_edges(k); it1 != it2; it1++)
 		{
-			printf(" for vertex %d, checking %d, out-edge = (%d, %d)\n", x, k, (*it1)->source(), (*it1)->target());
 			if(se.find(*it1) == se.end()) return -1;
 		}
-		printf("---\n");
 
 		for(tie(it1, it2) = in_edges(k); it1 != it2; it1++)
 		{

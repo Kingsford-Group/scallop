@@ -36,7 +36,7 @@ bool scallop3::iterate()
 		this->draw_splice_graph(buf);
 
 		sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
-		nested_graph nt(gr);
+		nt.build(gr);
 		nt.draw(buf);
 
 		round++;
@@ -54,7 +54,7 @@ bool scallop3::iterate()
 			sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
 			this->draw_splice_graph(buf);
 			sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
-			nested_graph nt(gr);
+			nt.build(gr);
 			nt.draw(buf);
 
 			round++;
@@ -63,20 +63,17 @@ bool scallop3::iterate()
 		bool flag1 = false;
 		while(true)
 		{
-			compute_intersecting_edges();
-
 			int ex, ey;
 			vector<int> p;
 			bool b1 = identify_linkable_edges(ex, ey, p);
 			if(b1 == true)
 			{
-				assert(p.size() >= 1);
-				printf("linkable edges = (%d, %d), path = (%d", ex, ey, p[0]);
-				for(int i = 1; i < p.size(); i++) printf(", %d", p[i]);
+				printf("linkable edges = (%d, %d), path = (#", ex, ey);
+				for(int i = 0; i < p.size(); i++) printf(", %d", p[i]);
 				printf(")\n");
 				assert(ex >= 0 && ey >= 0);
 
-				build_adjacent_edges(ex, ey, p);
+				build_adjacent_edges(p);
 				connect_adjacent_edges(ex, ey);
 
 				printf("round %d, connect edge %d and %d\n", round, ex, ey);
@@ -85,7 +82,7 @@ bool scallop3::iterate()
 				sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
 				this->draw_splice_graph(buf);
 				sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
-				nested_graph nt(gr);
+				nt.build(gr);
 				nt.draw(buf);
 
 				round++;
@@ -100,7 +97,7 @@ bool scallop3::iterate()
 				sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
 				this->draw_splice_graph(buf);
 				sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
-				nested_graph nt(gr);
+				nt.build(gr);
 				nt.draw(buf);
 
 				round++;
@@ -128,7 +125,7 @@ bool scallop3::iterate()
 	sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
 	this->draw_splice_graph(buf);
 	sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
-	nested_graph nt(gr);
+	nt.build(gr);
 	nt.draw(buf);
 
 	round++;
@@ -423,7 +420,6 @@ vector<int> scallop3::split_edge(int ei, const vector<int> &sub)
 	int x = ei;
 	for(int i = 0; i < sub.size(); i++)
 	{
-		printf("split edge %d w.r.t. %d\n", x, sub[i]);
 		int y = split_edge(x, sub[i]);
 		if(i == sub.size() - 1) assert(y == -1);
 		if(y == -1) assert(i == sub.size() - 1);
@@ -513,75 +509,23 @@ bool scallop3::verify_equation(int ei, const vector<int> &sub)
 	return true;
 }
 
-int scallop3::compute_intersecting_edges()
-{
-	sis.clear();
-	for(int i = 0; i < i2e.size(); i++)
-	{
-		if(i2e[i] == null_edge) continue;
-		for(int j = i + 1; j < i2e.size(); j++)
-		{
-			if(i2e[j] == null_edge) continue;
-			bool b = gr.intersect(i2e[i], i2e[j]);
-			if(b == false) continue;
-			int s1 = i2e[i]->source();
-			int t1 = i2e[i]->target();
-			int s2 = i2e[j]->source();
-			int t2 = i2e[j]->target();
-			sis.insert(PI(s1, t1));
-			sis.insert(PI(s2, t2));
-		}
-	}
-	return 0;
-}
-
 bool scallop3::check_linkable(int ex, int ey, vector<int> &p)
 {
 	assert(i2e[ex] != null_edge);
 	assert(i2e[ey] != null_edge);
-	bool b1 = gr.check_directed_path(i2e[ex], i2e[ey]);
-	bool b2 = gr.check_directed_path(i2e[ey], i2e[ex]);
-	assert(b1 == false || b2 == false);
+
+	int xs = i2e[ex]->source();
+	int xt = i2e[ex]->target();
+	int ys = i2e[ey]->source();
+	int yt = i2e[ey]->target();
+
+	vector<int> p1;
+	vector<int> p2;
+	bool b1 = nt.compute_shortest_path(xt, ys, p1);
+	bool b2 = nt.compute_shortest_path(yt, xs, p2);
 	if(b1 == false && b2 == false) return false;
-	if(b2 == true) return check_linkable(ey, ex, p);
-
-	bool b = gr.compute_shortest_path(i2e[ex], i2e[ey], p);
-	if(b == false) return false;
-	assert(p.size() >= 1);
-	if(p.size() == 1) return true;
-	
-	for(int i = 0; i < p.size() - 1; i++)
-	{
-		PI pi(p[i], p[i + 1]);
-		if(sis.find(pi) != sis.end()) return false;
-	}
-
-	int li = 0;
-	int ri = p.size() - 1;
-	while(li < ri)
-	{
-		int l1 = p[li];
-		int r1 = p[ri];
-		int l2 = p[li + 1];
-		int r2 = p[ri - 1];
-
-		int lr = gr.compute_out_ancestor(l1);
-		int rr = gr.compute_out_ancestor(r1);
-		int ll = gr.compute_in_ancestor(l1);
-		int rl = gr.compute_in_ancestor(r1);
-
-		if(lr == l2 && sis.find(PI(ll, l1)) == sis.end())
-		{
-			p[li] = 0 - p[li];
-			li++;
-		}
-		else if(rl == r2 && sis.find(PI(r1, rr)) == sis.end())
-		{
-			p[ri] = 0 - p[ri];
-			ri--;
-		}
-		else return false;
-	}
+	if(b1 == true) p = nt.get_pivots(p1);
+	else p = nt.get_pivots(p2);
 	return true;
 }
 
@@ -600,24 +544,11 @@ bool scallop3::identify_linkable_edges(int &ex, int &ey, vector<int> &p)
 			for(int k = j + 1; k < v.size(); k++)
 			{
 				bool b = check_linkable(v[j], v[k], p);
-				if(b == true)
-				{
-					bool b1 = gr.check_directed_path(i2e[v[j]], i2e[v[k]]);
-					bool b2 = gr.check_directed_path(i2e[v[k]], i2e[v[j]]);
-					assert(b1 != b2);
-					if(b1 == true)
-					{
-						ex = v[j];
-						ey = v[k];
-					}
-					else
-					{
-						ex = v[k];
-						ey = v[j];
-					}
-					flag = true;
-					break;
-				}
+				if(b == false) continue;
+				ex = v[j];
+				ey = v[k];
+				flag = true;
+				break;
 			}
 			if(flag == true) break;
 		}
@@ -627,48 +558,16 @@ bool scallop3::identify_linkable_edges(int &ex, int &ey, vector<int> &p)
 	return true;
 }
 
-int scallop3::build_adjacent_edges(int ex, int ey, const vector<int> &p)
+int scallop3::build_adjacent_edges(const vector<int> &p)
 {
-	int li = 0;
-	int ri = p.size() - 1;
-	while(li < ri)
+	for(int i = 0; i < p.size(); i++)
 	{
-		int l1 = (int)fabs(p[li]);
-		int r1 = (int)fabs(p[ri]);
-		int l2 = (int)fabs(p[li + 1]);
-		int r2 = (int)fabs(p[ri - 1]);
-
-		if(p[li] < 0)
-		{
-			int lr = gr.compute_out_ancestor(l1);
-			int ll = gr.compute_in_ancestor(l1);
-			assert(lr == l2);
-
-			gr.exchange(ll, l1, l2);
-
-			printf("exchange %d %d %d\n", ll, l1, l2);
-			char buf[1024];
-			sprintf(buf, "%d.%d.%d.tex", ll, l1, l2);
-			draw_splice_graph(buf);
-
-			li++;
-		}
-		else if(p[ri] < 0)
-		{
-			int rl = gr.compute_in_ancestor(r1);
-			int rr = gr.compute_out_ancestor(r1);
-			assert(rl == r2);
-
-			gr.exchange(r2, r1, rr);
-
-			printf("exchange %d %d %d\n", r2, r1, rr);
-			char buf[1024];
-			sprintf(buf, "%d.%d.%d.tex", r2, r1, rr);
-			draw_splice_graph(buf);
-
-			ri--;
-		}
-		else assert(false);
+		int x = p[i];
+		int ip = nt.get_in_partner(x);
+		int op = nt.get_out_partner(x);
+		assert(ip != -1);
+		assert(op != -1);
+		gr.exchange(ip, x, op);
 	}
 	return 0;
 }
