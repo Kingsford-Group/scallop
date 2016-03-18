@@ -8,7 +8,6 @@
 #include "stringtie.h"
 #include "scallop.h"
 #include "gtf_gene.h"
-#include "dynamic_graph.h"
 #include "nested_graph.h"
 
 manager::manager()
