@@ -10,8 +10,8 @@ using namespace std;
 
 namespace dynamic_graph
 {
-	typedef edge_iterator in_edge_iterator;
-	typedef edge_iterator out_edge_iterator;
+	typedef edge_iterator edge_iterator;
+	typedef edge_iterator edge_iterator;
 
 	// basic operations
 	int add_vertex(splice_graph &gr);

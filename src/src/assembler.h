@@ -1,10 +1,8 @@
 #ifndef __ASSEMBLER_H__
 #define __ASSEMBLER_H__
 
-#include "dynamic_graph.h"
+#include "splice_graph.h"
 #include "path.h"
-
-using namespace dynamic_graph;
 
 class assembler
 {

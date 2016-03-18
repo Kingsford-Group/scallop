@@ -50,14 +50,14 @@ int scallop2::init()
 {
 	// save the current weights
 	get_edge_weights(gr, ewrt);
-	assert(ewrt.size() == num_edges(gr));
+	assert(ewrt.size() == gr.num_edges());
 
 	// init counters and current paths
 	cabd = 0;
 	cpaths.clear();
 	ecnt.clear();
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = edges(gr); it1 != it2; it1++)
+	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
 	{
 		ecnt.insert(PEI(*it1, 0));
 	}
@@ -65,7 +65,7 @@ int scallop2::init()
 	// GRBLinExpr
 	vars.clear();
 	obj = 0;
-	for(tie(it1, it2) = edges(gr); it1 != it2; it1++)
+	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
 	{
 		eexprs.insert(PEG(*it1, 0));
 	}
@@ -76,12 +76,12 @@ int scallop2::init()
 int scallop2::assign_weights()
 {
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = edges(gr); it1 != it2; it1++)
+	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
 	{
 		assert(ecnt.find(*it1) != ecnt.end());
 		assert(ewrt.find(*it1) != ewrt.end());
 		double w = ewrt[*it1] / (1.0 + ecnt[*it1]);
-		set_edge_weight(*it1, w, gr);
+		gr.set_edge_weight(*it1, w);
 	}
 	return 0;
 }
@@ -90,7 +90,7 @@ int scallop2::update_counters(const path &p)
 {
 	for(int i = 0; i < p.v.size() - 1; i++)
 	{
-		PEB e = edge(p.v[i], p.v[i + 1], gr);
+		PEB e = gr.edge(p.v[i], p.v[i + 1]);
 		assert(e.second == true);
 		ecnt[e.first]++;
 	}
@@ -108,7 +108,7 @@ int scallop2::update_lpsolver(const path &p)
 	// update GRBLinExpr and constraints
 	for(int i = 0; i < p.v.size() - 1; i++)
 	{
-		PEB e = edge(p.v[i], p.v[i + 1], gr);
+		PEB e = gr.edge(p.v[i], p.v[i + 1]);
 		assert(e.second == true);
 		
 		eexprs[e.first] += var;

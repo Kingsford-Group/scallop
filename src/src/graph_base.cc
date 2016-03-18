@@ -231,3 +231,4 @@ int graph_base::print() const
 	}
 	return 0;
 }
+

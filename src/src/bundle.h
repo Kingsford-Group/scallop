@@ -1,7 +1,7 @@
 #ifndef __BUNDLE_H__
 #define __BUNDLE_H__
 
-#include "dynamic_graph.h"
+#include "splice_graph.h"
 #include "interval_map.h"
 #include "bundle_base.h"
 #include "junction.h"
@@ -10,7 +10,6 @@
 #include "path.h"
 
 using namespace std;
-using namespace dynamic_graph;
 
 class bundle : public bundle_base
 {

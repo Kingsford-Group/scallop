@@ -44,7 +44,7 @@ public:
 	// modify the splice_graph
 	int clear();
 
-	// read, write, draw and simulate splice graph
+	// read, write, and simulate splice graph
 	int build(const string &file);
 	int write(const string &file) const;
 	int simulate(int n, int m);

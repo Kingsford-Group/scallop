@@ -18,22 +18,22 @@ int path_space::solve(int n, int m)
 {
 	srand(time(0));
 	simulate(n, m);
-	write_splice_graph(gr, "sgraph.gr");
-	draw_splice_graph(gr, "sgraph.tex");
+	gr.write("sgraph.gr");
+	//gr.draw("sgraph.tex");
 	process();
 	return 0;
 }
 
 int path_space::solve(const string &file)
 {
-	build_splice_graph(gr, file);
+	gr.build(file);
 	process();
 	return 0;
 }
 
 int path_space::process()
 {
-	get_edge_indices(gr, i2e, e2i);
+	gr.get_edge_indices(i2e, e2i);
 	build_path_edge_matrix();
 	pem0 = pem;
 	sample_valid_paths();
@@ -51,8 +51,8 @@ int path_space::simulate(int n, int m)
 {
 	while(true)
 	{
-		simulate_splice_graph(gr, n, m);
-		bool b = check_fully_connected(gr);
+		gr.simulate(n, m);
+		bool b = gr.check_fully_connected();
 		if(b == true) break;
 	}
 	return 0;
@@ -75,7 +75,7 @@ int path_space::sample_paths()
 	for(int i = 0; i < pem0.size(); i++) v.push_back(i);
 
 	pem.clear();
-	int r = num_edges(gr) - num_vertices(gr) + 1;
+	int r = gr.num_edges() - gr.num_vertices() + 1;
 	for(int i = 0; i < r; i++)
 	{
 		int p = rand() % (v.size() - i);
@@ -111,10 +111,10 @@ int path_space::build_path_edge_matrix()
 
 int path_space::build_path_edge_matrix(int s, vector<int> &v)
 {
-	if(s == num_vertices(gr) - 1)
+	if(s == gr.num_vertices() - 1)
 	{
 		vector<double> p;
-		p.resize(num_edges(gr));
+		p.resize(gr.num_edges());
 		for(int i = 0; i < v.size(); i++)
 		{
 			p[v[i]] = 1;
@@ -123,10 +123,10 @@ int path_space::build_path_edge_matrix(int s, vector<int> &v)
 		return 0;
 	}
 
-	out_edge_iterator it1, it2;
-	for(tie(it1, it2) = out_edges(s, gr); it1 != it2; it1++)
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.out_edges(s); it1 != it2; it1++)
 	{
-		int t = target(*it1, gr);
+		int t = (*it1)->target();
 		v.push_back(e2i[*it1]);
 		build_path_edge_matrix(t, v);
 		v.pop_back();
@@ -169,8 +169,8 @@ int path_space::print()
 		}
 		printf("\n");
 	}
-	int m = num_edges(gr);
-	int n = num_vertices(gr);
+	int m = gr.num_edges();
+	int n = gr.num_vertices();
 	int r = m - n + 2;
 	printf("edges = %d, vertices = %d, rank = %d\n\n", m, n, rank);
 	return 0;

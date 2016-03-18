@@ -39,8 +39,8 @@ namespace boost_graph
 
 	typedef graph_traits<splice_graph>::vertex_iterator vertex_iterator;
 	typedef graph_traits<splice_graph>::vertex_descriptor vertex_descriptor;
-	typedef graph_traits<splice_graph>::in_edge_iterator in_edge_iterator;
-	typedef graph_traits<splice_graph>::out_edge_iterator out_edge_iterator;
+	typedef graph_traits<splice_graph>::edge_iterator edge_iterator;
+	typedef graph_traits<splice_graph>::edge_iterator edge_iterator;
 	typedef graph_traits<splice_graph>::edge_iterator edge_iterator;
 	typedef graph_traits<splice_graph>::edge_descriptor edge_descriptor;
 	typedef graph_traits<splice_graph>::adjacency_iterator adj_iterator;

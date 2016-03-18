@@ -6,7 +6,7 @@
 #include "manager.h"
 #include "bundle.h"
 #include "stringtie.h"
-#include "scallop3.h"
+#include "scallop.h"
 #include "gtf_gene.h"
 #include "dynamic_graph.h"
 #include "nested_graph.h"
@@ -35,7 +35,7 @@ int manager::assemble_bam(const string &file)
     bam1_t *b = bam_init1();
 
 	ofstream stringtie_fout("stringtie.gtf");
-	ofstream scallop3_fout("scallop3.gtf");
+	ofstream scallop_fout("scallop.gtf");
 
 	int index = 0;
 	bundle_base bb;
@@ -65,12 +65,12 @@ int manager::assemble_bam(const string &file)
 			st.assemble();
 			st.print("stringtie");
 
-			scallop3 sc("", gr);
+			scallop sc("", gr);
 			sc.assemble();
 			sc.print();
 
 			bd.output_gtf(stringtie_fout, st.paths, "stringtie", index);
-			bd.output_gtf(scallop3_fout, sc.paths, "scallop3", index);
+			bd.output_gtf(scallop_fout, sc.paths, "scallop", index);
 
 			index++;
 			bb.clear();
@@ -80,7 +80,7 @@ int manager::assemble_bam(const string &file)
     }
 
 	stringtie_fout.close();
-	scallop3_fout.close();
+	scallop_fout.close();
 
     bam_destroy1(b);
     bam_hdr_destroy(h);
@@ -137,42 +137,24 @@ int manager::assemble_gtf(const string &file)
 		gg.build_splice_graph(gr);
 
 		string s;	
-		int p = compute_num_paths(gr);
-		assert(p >= num_edges(gr) - num_vertices(gr) + 2);
-		if(p == num_edges(gr) - num_vertices(gr) + 2) s = "EASY";
+		int p = gr.compute_num_paths();
+		assert(p >= gr.num_edges() - gr.num_vertices() + 2);
+		if(p == gr.num_edges() - gr.num_vertices() + 2) s = "EASY";
 		else s = "HARD";
 
 		if(s == "EASY") continue;
 
-		scallop3 sc(gg.exons[0].gene_id, gr);
+		scallop sc(gg.exons[0].gene_id, gr);
 		sc.assemble();
 	
 		continue;
 
-		bool b = check_nested_splice_graph(sc.gr);
+		bool b = sc.gr.check_nested();
 
 		printf("gene %s, %lu transcipts, total %lu exons, %lu vertices, %lu edges %d paths, %s, %s\n",
 				gg.exons[0].gene_id.c_str(), gg.transcripts.size(), gg.exons.size(),
-				num_vertices(sc.gr), num_edges(sc.gr), p, s.c_str(), b ? "NESTED" : "GENERAL");
+				sc.gr.num_vertices(), sc.gr.num_edges(), p, s.c_str(), b ? "NESTED" : "GENERAL");
 
-		char buf[1024];
-		sprintf(buf, "%s.0.tex", gg.exons[0].gene_id.c_str());
-		draw_splice_graph(gr, buf, 1.4);
-
-		sprintf(buf, "%s.1.tex", gg.exons[0].gene_id.c_str());
-		draw_splice_graph(sc.gr, buf, 2.4);
-
-		/*
-		gg.output_gtf(standard_fout);
-
-		scallop2 sc(gr);
-		sc.assemble();
-		gg.output_gtf(scallop2_fout, sc.paths, "scallop2");
-
-		stringtie st(gr);
-		st.assemble();
-		gg.output_gtf(stringtie_fout, st.paths, "stringtie");
-		*/
 	}
 
 	/*
@@ -186,10 +168,9 @@ int manager::assemble_gtf(const string &file)
 int manager::assemble_example(const string &file)
 {
 	splice_graph gr;
-	build_splice_graph(gr, file);
-	draw_splice_graph(gr, "splice_graph.tex");
+	gr.build(file);
 
-	scallop3 sc("example", gr);
+	scallop sc("example", gr);
 	sc.assemble();
 	sc.print();
 

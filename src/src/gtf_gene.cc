@@ -13,22 +13,22 @@ int gtf_gene::build_splice_graph(splice_graph &gr)
 
 int gtf_gene::add_vertices(splice_graph &gr)
 {
-	add_vertex(gr);
+	gr.add_vertex();
 	int32_t s = compute_sum_expression();
-	set_vertex_weight(0, s, gr);
-	set_vertex_stddev(0, 1.0, gr);
+	gr.set_vertex_weight(0, s);
+	gr.set_vertex_stddev(0, 1.0);
 
 	SIMI it;
 	for(it = imap.begin(); it != imap.end(); it++)
 	{
-		add_vertex(gr);
-		set_vertex_weight(num_vertices(gr) - 1, it->second, gr);
-		set_vertex_stddev(num_vertices(gr) - 1, 1.0, gr);
+		gr.add_vertex();
+		gr.set_vertex_weight(gr.num_vertices() - 1, it->second);
+		gr.set_vertex_stddev(gr.num_vertices() - 1, 1.0);
 	}
 
-	add_vertex(gr);
-	set_vertex_weight(num_vertices(gr) - 1, s, gr);
-	set_vertex_stddev(num_vertices(gr) - 1, 1.0, gr);
+	gr.add_vertex();
+	gr.set_vertex_weight(gr.num_vertices() - 1, s);
+	gr.set_vertex_stddev(gr.num_vertices() - 1, 1.0);
 	return 0;
 }
 
@@ -54,25 +54,24 @@ int gtf_gene::add_edges(splice_graph &gr)
 				it++;
 			}
 		}
-		add_single_edge(u, num_vertices(gr) -1, expr, gr);
+		add_single_edge(u, gr.num_vertices() -1, expr, gr);
 	}
 	return 0;
 }
 
 int gtf_gene::add_single_edge(int s, int t, double w, splice_graph &gr)
 {
-	PEB p = edge(s, t, gr);
+	PEB p = gr.edge(s, t);
 	if(p.second == true)
 	{
-		double w0 = get_edge_weight(p.first, gr);	
-		set_edge_weight(p.first, w + w0, gr);
+		double w0 = gr.get_edge_weight(p.first);	
+		gr.set_edge_weight(p.first, w + w0);
 	}
 	else
 	{
-		PEB p = add_edge(s, t, gr);
-		assert(p.second == true);
-		set_edge_weight(p.first, w, gr);
-		set_edge_stddev(p.first, 1.0, gr);
+		edge_descriptor p = gr.add_edge(s, t);
+		gr.set_edge_weight(p, w);
+		gr.set_edge_stddev(p, 1.0);
 	}
 	return 0;
 }

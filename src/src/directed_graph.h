@@ -42,6 +42,7 @@ public:
 	virtual int compute_out_partner(int x);
 
 	// print and draw
+	int draw(const string &file);
 	int draw(const string &file, const MIS &mis, const MES &mes, double len);
 };
 

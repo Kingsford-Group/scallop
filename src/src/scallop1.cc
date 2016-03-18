@@ -94,8 +94,8 @@ int scallop1::resolve(const path &px, const path &py, path &qx, path &qy) const
 	assert(px.abd >= py.abd);
 	vector< vector<int> > vv;
 	vv.resize(2);
-	vv[0] = px.index(num_vertices(gr));
-	vv[1] = py.index(num_vertices(gr));
+	vv[0] = px.index(gr.num_vertices());
+	vv[1] = py.index(gr.num_vertices());
 
 	int k = 0;
 	int s = 0;
@@ -110,7 +110,7 @@ int scallop1::resolve(const path &px, const path &py, path &qx, path &qy) const
 			t = vv[k][s];
 		}
 		qx.v.push_back(t);
-		if(t == num_vertices(gr) - 1) break;
+		if(t == gr.num_vertices() - 1) break;
 		s = t;
 	}
 
@@ -127,7 +127,7 @@ int scallop1::resolve(const path &px, const path &py, path &qx, path &qy) const
 			t = vv[k][s];
 		}
 		qy.v.push_back(t);
-		if(t == num_vertices(gr) - 1) break;
+		if(t == gr.num_vertices() - 1) break;
 		s = t;
 	}
 

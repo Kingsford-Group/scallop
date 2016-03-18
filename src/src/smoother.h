@@ -2,9 +2,7 @@
 #define __LPSOLVER_H__
 
 #include "gurobi_c++.h"
-#include "dynamic_graph.h"
-
-using namespace dynamic_graph;
+#include "splice_graph.h"
 
 class smoother
 {

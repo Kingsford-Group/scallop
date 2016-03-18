@@ -1,10 +1,8 @@
 #ifndef __PATH_SPACE_H__
 #define __PATH_SPACE_H__
 
-#include "dynamic_graph.h"
+#include "splice_graph.h"
 #include "algebra.h"
-
-using namespace dynamic_graph;
 
 class path_space
 {
