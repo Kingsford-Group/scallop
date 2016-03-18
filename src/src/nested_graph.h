@@ -2,13 +2,14 @@
 #define __NESTED_GRAPH_H__
 
 #include "directed_graph.h"
+#include "undirected_graph.h"
 
 #include <map>
 #include <cassert>
 
 using namespace std;
 
-class nested_graph : public directed_graph
+class nested_graph : public undirected_graph
 {
 public:
 	nested_graph();

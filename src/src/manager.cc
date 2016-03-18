@@ -131,7 +131,6 @@ int manager::assemble_gtf(const string &file)
 		// DEBUG
 		//if(gg.exons[0].gene_id != "ABI3BP") continue;
 
-		printf("process gene %s\n", gg.exons[0].gene_id.c_str());
 		splice_graph gr;
 		gg.build_splice_graph(gr);
 

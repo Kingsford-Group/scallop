@@ -42,6 +42,7 @@ public:
 	virtual int remove_edge(int s, int t) = 0;
 
 	// access functions
+	virtual size_t support_size() const;
 	virtual size_t num_vertices() const;
 	virtual size_t num_edges() const;
 	virtual int degree(int v) const;

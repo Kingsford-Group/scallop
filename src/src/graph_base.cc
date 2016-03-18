@@ -1,5 +1,4 @@
 #include "graph_base.h"
-#include "draw.h"
 
 #include <climits>
 #include <cstdio>
@@ -119,6 +118,17 @@ set<int> graph_base::adjacent_vertices(int s)
 		if(ss.find(t) == ss.end()) ss.insert(t);
 	}
 	return ss;
+}
+
+size_t graph_base::support_size() const
+{
+	int s = 0;
+	for(int i = 0; i < num_vertices(); i++)
+	{
+		if(degree(i) == 0) continue;
+		s++;
+	}
+	return s;
 }
 
 size_t graph_base::num_vertices() const

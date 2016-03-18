@@ -27,13 +27,22 @@ int scallop::assemble()
 bool scallop::iterate()
 {
 	char buf[1024];
+
+	printf("%s %lu\n", name.c_str(), gr.support_size());
+	sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
+	draw_splice_graph(buf);
+	sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
+	nt.build(gr);
+	nt.draw(buf);
+	return false;
+
 	while(true)
 	{
 		printf("round %d, start\n", round);
 		print();
 
 		sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
-		this->draw_splice_graph(buf);
+		draw_splice_graph(buf);
 
 		sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
 		nt.build(gr);
@@ -52,7 +61,7 @@ bool scallop::iterate()
 			print();
 
 			sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
-			this->draw_splice_graph(buf);
+			draw_splice_graph(buf);
 			sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
 			nt.build(gr);
 			nt.draw(buf);
@@ -80,7 +89,7 @@ bool scallop::iterate()
 				print();
 
 				sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
-				this->draw_splice_graph(buf);
+				draw_splice_graph(buf);
 				sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
 				nt.build(gr);
 				nt.draw(buf);
@@ -95,7 +104,7 @@ bool scallop::iterate()
 				print();
 
 				sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
-				this->draw_splice_graph(buf);
+				draw_splice_graph(buf);
 				sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
 				nt.build(gr);
 				nt.draw(buf);
@@ -123,7 +132,7 @@ bool scallop::iterate()
 	print();
 
 	sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
-	this->draw_splice_graph(buf);
+	draw_splice_graph(buf);
 	sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
 	nt.build(gr);
 	nt.draw(buf);
@@ -720,7 +729,7 @@ int scallop::draw_splice_graph(const string &file)
 	{
 		double w = gr.get_vertex_weight(i);
 		sprintf(buf, "%d:%.0lf", i, w);
-		mis.insert(PIS(i, buf));
+		//mis.insert(PIS(i, buf));
 	}
 
 	MES mes;
@@ -728,10 +737,10 @@ int scallop::draw_splice_graph(const string &file)
 	{
 		if(i2e[i] == null_edge) continue;
 		double w = gr.get_edge_weight(i2e[i]);
-		sprintf(buf, "%d:%.0lf", i, w);
+		//sprintf(buf, "%d:%.0lf", i, w);
+		sprintf(buf, "%d", i);
 		mes.insert(PES(i2e[i], buf));
 	}
-
-	gr.draw(file, mis, mes, 4.0);
+	gr.draw(file, mis, mes, 3.0);
 	return 0;
 }

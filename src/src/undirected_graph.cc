@@ -139,6 +139,7 @@ int undirected_graph::draw(const string &file, const MIS &mis, const MES &mes, d
 		{
 			// TODO
 			int j = (*it);
+			if(i >= j) continue;
 			//assert(i < j);
 
 			string s;
@@ -163,7 +164,7 @@ int undirected_graph::draw(const string &file, const MIS &mis, const MES &mes, d
 
 			string line = "line width = 0.02cm,";
 			if(cnt >= 2) line = "thin, double,";
-			fout<<"\\draw[->,"<< line.c_str() <<"\\colx, bend right = "<< bend <<"] ("<<sx<<") to node[draw, fill=white] {";
+			fout<<"\\draw["<< line.c_str() <<"\\colx, bend right = "<< bend <<"] ("<<sx<<") to node[draw, fill=white] {";
 			fout<< s.c_str() <<"} ("<<sy<<");\n";
 		}
 	}
