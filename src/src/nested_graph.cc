@@ -7,7 +7,7 @@ nested_graph::nested_graph()
 nested_graph::~nested_graph()
 {}
 
-int nested_graph::build(const graph_base &gr)
+int nested_graph::build(const directed_graph &gr)
 {
 	clear();
 	mei.clear();
@@ -83,6 +83,6 @@ int nested_graph::draw(const string &file)
 		sprintf(buf, "%d", it->second);
 		mes.insert(PES(it->first, buf));
 	}
-	graph_base::draw(file, mis, mes, 3.0);
+	directed_graph::draw(file, mis, mes, 3.0);
 	return 0;
 }

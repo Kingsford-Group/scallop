@@ -501,8 +501,8 @@ bool scallop3::verify_equation(int ei, const vector<int> &sub)
 	for(int i = 0; i < sub.size(); i++)
 	{
 		assert(i2e[sub[i]] != null_edge);
-		bool b1 = gr.check_directed_path(i2e[ei], i2e[sub[i]]);
-		bool b2 = gr.check_directed_path(i2e[sub[i]], i2e[ei]);
+		bool b1 = gr.check_path(i2e[ei], i2e[sub[i]]);
+		bool b2 = gr.check_path(i2e[sub[i]], i2e[ei]);
 		//printf("check path (%d, %d) = (%c, %c)\n", ei, sub[i], b1 ? 'T' : 'F', b2 ? 'T' : 'F');
 		if(b1 == false && b2 == false) return false;
 	}

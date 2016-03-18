@@ -125,7 +125,7 @@ int splice_graph::get_edge_indices(VE &i2e, MEI &e2i) const
 
 int splice_graph::clear()
 {
-	graph_base::clear();
+	directed_graph::clear();
 	vwrt.clear();
 	vdev.clear();
 	ewrt.clear();

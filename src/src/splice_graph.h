@@ -1,14 +1,14 @@
 #ifndef __SPLICE_GRAPH_H__
 #define __SPLICE_GRAPH_H__
 
-#include "graph_base.h"
+#include "directed_graph.h"
 
 #include <map>
 #include <cassert>
 
 using namespace std;
 
-class splice_graph : public graph_base
+class splice_graph : public directed_graph
 {
 public:
 	splice_graph();

@@ -1,14 +1,14 @@
 #ifndef __NESTED_GRAPH_H__
 #define __NESTED_GRAPH_H__
 
-#include "graph_base.h"
+#include "directed_graph.h"
 
 #include <map>
 #include <cassert>
 
 using namespace std;
 
-class nested_graph : public graph_base
+class nested_graph : public directed_graph
 {
 public:
 	nested_graph();
@@ -23,7 +23,7 @@ public:
 	vector<int> get_pivots(const vector<int> &p) const;
 
 public:
-	int build(const graph_base &gr);
+	int build(const directed_graph &gr);
 	int draw(const string &file);
 };
 

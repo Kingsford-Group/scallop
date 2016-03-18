@@ -8,6 +8,7 @@ scallop_SOURCES = boost_graph.h boost_graph.cc \
 				  edge_base.h edge_base.cc \
 				  vertex_base.h vertex_base.cc \
 				  graph_base.h graph_base.cc \
+				  directed_graph.h directed_graph.cc \
 				  splice_graph.h splice_graph.cc \
 				  dynamic_graph.h dynamic_graph.cc \
 				  nested_graph.h nested_graph.cc \
