@@ -43,20 +43,24 @@ int subsetsum::init_seeds()
 
 int subsetsum::rescale()
 {
+	// TODO
+	return 0;
 	int n = seeds.size() * target;
 	if(n <= max_dp_table_size) return 0;
-	double f = max_dp_table_size / n;
+	double f = max_dp_table_size * 1.0 / n;
 	for(int i = 0; i < seeds.size(); i++)
 	{
-		seeds[i].first = (int)ceil(seeds[i].first * 1.0 / f);
+		seeds[i].first = (int)ceil(seeds[i].first * 1.0 * f);
 	}
-	target = (int)ceil(target * 1.0 / f);
+	target = (int)ceil(target * 1.0 * f);
 	ubound = (int)ceil(target * 1.05);
+	printf("n = %d, f = %lf, target = %d, ubound = %d\n", n, f, target, ubound);
 	return 0;
 }
 
 int subsetsum::init_table()
 {
+
 	table.resize(seeds.size() + 1);
 	btptr.resize(seeds.size() + 1);
 	for(int i = 0; i < table.size(); i++)
