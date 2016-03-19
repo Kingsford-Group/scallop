@@ -40,9 +40,7 @@ public:
 	virtual vector<int> topological_sort();
 	virtual int compute_in_partner(int x);
 	virtual int compute_out_partner(int x);
-	virtual int check_partner(int x, int r);
-	virtual int compute_in_content(int x, set<int> &sv, set<edge_descriptor> &ve);
-	virtual int compute_out_content(int x, set<int> &sv, set<edge_descriptor> &ve);
+	virtual int check_nest(int x, int r);
 
 	// print and draw
 	int draw(const string &file);

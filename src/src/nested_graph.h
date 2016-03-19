@@ -30,8 +30,7 @@ public:
 
 private:
 	int init(directed_graph &gr);
-	int build_minimal_intervals(directed_graph &gr);
-	int build_all_intervals(directed_graph &gr);
+	int build_nests(directed_graph &gr);
 	int build_partners(directed_graph &gr);
 };
 

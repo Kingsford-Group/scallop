@@ -11,7 +11,7 @@ nested_graph::~nested_graph()
 int nested_graph::build(directed_graph &gr)
 {
 	init(gr);
-	build_minimal_intervals(gr);
+	build_nests(gr);
 	build_partners(gr);
 	assert(check_nested() == true);
 	return 0;
@@ -27,7 +27,7 @@ int nested_graph::init(directed_graph &gr)
 	return 0;
 }
 
-int nested_graph::build_minimal_intervals(directed_graph &gr)
+int nested_graph::build_nests(directed_graph &gr)
 {
 	for(int i = 0; i < gr.num_vertices(); i++)
 	{
@@ -35,62 +35,9 @@ int nested_graph::build_minimal_intervals(directed_graph &gr)
 		for(int j = 0; j < gr.num_vertices(); j++)
 		{
 			if(gr.degree(j) == 0) continue;
-			int b = gr.check_partner(i, j);
+			int b = gr.check_nest(i, j);
 			if(b == -1) continue;
 			add_edge(i, j);
-		}
-	}
-	return 0;
-}
-
-int nested_graph::build_all_intervals(directed_graph &gr)
-{
-	vector< set<int> > vvi(gr.num_vertices());
-	vector< set<int> > vvo(gr.num_vertices());
-	vector< set<edge_descriptor> > vei(gr.num_vertices());
-	vector< set<edge_descriptor> > veo(gr.num_vertices());
-	for(int i = 0; i < gr.num_vertices(); i++)
-	{
-		gr.compute_in_content(i, vvi[i], vei[i]);
-		gr.compute_out_content(i, vvo[i], veo[i]);
-	}
-
-	vector<int> vv(gr.num_vertices());
-	vector<edge_descriptor> ve(gr.num_edges());
-	for(int i = 0; i < gr.num_vertices(); i++)
-	{
-		for(int j = 0; j < gr.num_vertices(); j++)
-		{
-			if(i == j) continue;
-			vector<int>::iterator iv = set_intersection(vvo[i].begin(), vvo[i].end(), vvi[j].begin(), vvi[j].end(), vv.begin());
-			vector<edge_descriptor>::iterator ie = set_intersection(veo[i].begin(), veo[i].end(), vei[j].begin(), vei[j].end(), ve.begin());
-			vector<int> v(vv.begin(), iv);
-			set<edge_descriptor> se(ve.begin(), ie);
-
-			printf("checking %d and %d: %lu internal vertices, %lu internal edges\n", i, j, v.size(), se.size());
-			if(se.size() == 0) continue;
-
-			bool b = true;
-			for(int k = 0; k < v.size(); k++)
-			{
-				printf(" internal vertex %d\n", v[k]);
-				edge_iterator it1, it2;
-				for(tie(it1, it2) = gr.in_edges(v[k]); it1 != it2; it1++)
-				{
-					if(se.find(*it1) == se.end()) b = false;
-					if(b == false) break;
-				}
-				if(b == false) break;
-				for(tie(it1, it2) = gr.out_edges(v[k]); it1 != it2; it1++)
-				{
-					if(se.find(*it1) == se.end()) b = false;
-					if(b == false) break;
-				}
-				if(b == false) break;
-			}
-			if(b == false) continue;
-
-			edge_descriptor e = add_edge(i, j);
 		}
 	}
 	return 0;
