@@ -35,8 +35,8 @@ int nested_graph::build_minimal_intervals(directed_graph &gr)
 		for(int j = 0; j < gr.num_vertices(); j++)
 		{
 			if(gr.degree(j) == 0) continue;
-			bool b = gr.check_partner(i, j);
-			if(b == false) continue;
+			int b = gr.check_partner(i, j);
+			if(b == -1) continue;
 			add_edge(i, j);
 		}
 	}

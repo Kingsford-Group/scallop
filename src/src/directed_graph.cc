@@ -378,7 +378,7 @@ int directed_graph::compute_out_partner(int x)
 	else return *(sv.begin());
 }
 
-bool directed_graph::check_partner(int x, int y)
+int directed_graph::check_partner(int x, int y)
 {
 	vector<int> rv;
 	bfs_reverse(y, rv);
@@ -407,6 +407,7 @@ bool directed_graph::check_partner(int x, int y)
 
 	//printf(" check (%d, %d), %lu internal vertices\n", x, y, sv.size());
 
+	int cnt = 0;
 	while(sv.size() >= 2)
 	{
 		int k = -1;
@@ -419,10 +420,11 @@ bool directed_graph::check_partner(int x, int y)
 		}
 		assert(k != -1);
 
+		cnt++;
 
 		for(tie(it1, it2) = in_edges(k); it1 != it2; it1++)
 		{
-			if(se.find(*it1) == se.end()) return false;
+			if(se.find(*it1) == se.end()) return -1;
 		}
 
 		for(tie(it1, it2) = out_edges(k); it1 != it2; it1++)
@@ -435,10 +437,10 @@ bool directed_graph::check_partner(int x, int y)
 		sv.erase(k);
 	}
 
-	if(sv.size() == 0) return false;
+	if(sv.size() == 0) return -1;
 	assert(sv.size() == 1);
-	if(*(sv.begin()) == y) return true;
-	else return false;
+	if(*(sv.begin()) == y) return cnt;
+	else return -1;
 }
 
 int directed_graph::compute_out_content(int x, set<int> &sv, set<edge_descriptor> &se)
