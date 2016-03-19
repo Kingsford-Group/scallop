@@ -378,6 +378,126 @@ int directed_graph::compute_out_partner(int x)
 	else return *(sv.begin());
 }
 
+bool directed_graph::check_partner(int x, int y)
+{
+	vector<int> rv;
+	bfs_reverse(y, rv);
+	assert(rv[y] == 0);
+
+	vector<int> v = topological_sort();
+	vector<int> order;
+	order.assign(num_vertices(), -1);
+	for(int i = 0; i < v.size(); i++)
+	{
+		order[v[i]] = i;
+	}
+
+	set<edge_descriptor> se;
+	set<int> sv;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
+	{
+		assert((*it1)->source() == x);
+		int t = (*it1)->target();
+		//printf("check %x, out edge target %d, rv = %d\n", x, t, rv[t]);
+		if(rv[t] < 0) continue;
+		if(sv.find(t) == sv.end()) sv.insert(t);
+		if(se.find(*it1) == se.end()) se.insert(*it1);
+	}
+
+	//printf(" check (%d, %d), %lu internal vertices\n", x, y, sv.size());
+
+	while(sv.size() >= 2)
+	{
+		int k = -1;
+		for(set<int>::iterator it = sv.begin(); it != sv.end(); it++)
+		{
+			if(k == -1 || order[*it] < order[k])
+			{
+				k = *it;
+			}
+		}
+		assert(k != -1);
+
+
+		for(tie(it1, it2) = in_edges(k); it1 != it2; it1++)
+		{
+			if(se.find(*it1) == se.end()) return false;
+		}
+
+		for(tie(it1, it2) = out_edges(k); it1 != it2; it1++)
+		{
+			assert(se.find(*it1) == se.end());
+			int t = (*it1)->target();
+			if(rv[t] < 0) continue;
+			se.insert(*it1);
+			if(sv.find(t) == sv.end()) sv.insert(t);
+		}
+		sv.erase(k);
+	}
+
+	if(sv.size() == 0) return false;
+	assert(sv.size() == 1);
+	if(*(sv.begin()) == y) return true;
+	else return false;
+}
+
+int directed_graph::compute_out_content(int x, set<int> &sv, set<edge_descriptor> &se)
+{
+	sv.clear();
+	se.clear();
+	vector<int> v;
+	bfs(x, v);
+	for(int i = 0; i < v.size(); i++)
+	{
+		if(v[i] < 0) continue;
+		sv.insert(i);
+	}
+	for(set<int>::iterator it = sv.begin(); it != sv.end(); it++)
+	{
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = out_edges(*it); it1 != it2; it1++)
+		{
+			int s = (*it1)->source();
+			int t = (*it1)->target();
+			assert(s == (*it));
+			assert(sv.find(t) != sv.end());
+			se.insert(*it1);
+		}
+	}
+	assert(sv.find(x) != sv.end());
+	sv.erase(x);
+	return 0;
+}
+
+int directed_graph::compute_in_content(int x, set<int> &sv, set<edge_descriptor> &se)
+{
+	sv.clear();
+	se.clear();
+	vector<int> v;
+	bfs_reverse(x, v);
+	for(int i = 0; i < v.size(); i++)
+	{
+		if(v[i] < 0) continue;
+		sv.insert(i);
+	}
+	for(set<int>::iterator it = sv.begin(); it != sv.end(); it++)
+	{
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = in_edges(*it); it1 != it2; it1++)
+		{
+			int s = (*it1)->source();
+			int t = (*it1)->target();
+			assert(t == (*it));
+			assert(sv.find(s) != sv.end());
+			se.insert(*it1);
+		}
+	}
+	assert(sv.find(x) != sv.end());
+	sv.erase(x);
+	return 0;
+}
+
 int directed_graph::draw(const string &file, const MIS &mis, const MES &mes, double len)
 {
 	ofstream fout(file.c_str());

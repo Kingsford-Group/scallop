@@ -9,23 +9,30 @@
 
 using namespace std;
 
-class nested_graph : public undirected_graph
+typedef pair<int, int> PI;
+
+class nested_graph : public directed_graph
 {
 public:
 	nested_graph();
 	virtual ~nested_graph();
 
 public:
-	MEI mei;		// map the edge to the original vertex
+	vector<PI> partners;
 
 public:
 	int get_in_partner(int x); 
 	int get_out_partner(int x);
 	vector<int> get_pivots(const vector<int> &p);
 
-public:
 	int build(directed_graph &gr);
 	int draw(const string &file);
+
+private:
+	int init(directed_graph &gr);
+	int build_minimal_intervals(directed_graph &gr);
+	int build_all_intervals(directed_graph &gr);
+	int build_partners(directed_graph &gr);
 };
 
 #endif

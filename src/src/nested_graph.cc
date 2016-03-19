@@ -1,4 +1,5 @@
 #include "nested_graph.h"
+#include <algorithm>
 
 nested_graph::nested_graph()
 {
@@ -9,71 +10,119 @@ nested_graph::~nested_graph()
 
 int nested_graph::build(directed_graph &gr)
 {
+	init(gr);
+	build_minimal_intervals(gr);
+	build_partners(gr);
+	assert(check_nested() == true);
+	return 0;
+}
+
+int nested_graph::init(directed_graph &gr)
+{
 	clear();
-	mei.clear();
-	for(int i = 0; i < gr.num_vertices(); i++)
+	for(int i = 0; i < gr.num_vertices(); i++) 
 	{
 		add_vertex();
 	}
+	return 0;
+}
 
+int nested_graph::build_minimal_intervals(directed_graph &gr)
+{
+	for(int i = 0; i < gr.num_vertices(); i++)
+	{
+		if(gr.degree(i) == 0) continue;
+		for(int j = 0; j < gr.num_vertices(); j++)
+		{
+			if(gr.degree(j) == 0) continue;
+			bool b = gr.check_partner(i, j);
+			if(b == false) continue;
+			add_edge(i, j);
+		}
+	}
+	return 0;
+}
+
+int nested_graph::build_all_intervals(directed_graph &gr)
+{
+	vector< set<int> > vvi(gr.num_vertices());
+	vector< set<int> > vvo(gr.num_vertices());
+	vector< set<edge_descriptor> > vei(gr.num_vertices());
+	vector< set<edge_descriptor> > veo(gr.num_vertices());
+	for(int i = 0; i < gr.num_vertices(); i++)
+	{
+		gr.compute_in_content(i, vvi[i], vei[i]);
+		gr.compute_out_content(i, vvo[i], veo[i]);
+	}
+
+	vector<int> vv(gr.num_vertices());
+	vector<edge_descriptor> ve(gr.num_edges());
+	for(int i = 0; i < gr.num_vertices(); i++)
+	{
+		for(int j = 0; j < gr.num_vertices(); j++)
+		{
+			if(i == j) continue;
+			vector<int>::iterator iv = set_intersection(vvo[i].begin(), vvo[i].end(), vvi[j].begin(), vvi[j].end(), vv.begin());
+			vector<edge_descriptor>::iterator ie = set_intersection(veo[i].begin(), veo[i].end(), vei[j].begin(), vei[j].end(), ve.begin());
+			vector<int> v(vv.begin(), iv);
+			set<edge_descriptor> se(ve.begin(), ie);
+
+			printf("checking %d and %d: %lu internal vertices, %lu internal edges\n", i, j, v.size(), se.size());
+			if(se.size() == 0) continue;
+
+			bool b = true;
+			for(int k = 0; k < v.size(); k++)
+			{
+				printf(" internal vertex %d\n", v[k]);
+				edge_iterator it1, it2;
+				for(tie(it1, it2) = gr.in_edges(v[k]); it1 != it2; it1++)
+				{
+					if(se.find(*it1) == se.end()) b = false;
+					if(b == false) break;
+				}
+				if(b == false) break;
+				for(tie(it1, it2) = gr.out_edges(v[k]); it1 != it2; it1++)
+				{
+					if(se.find(*it1) == se.end()) b = false;
+					if(b == false) break;
+				}
+				if(b == false) break;
+			}
+			if(b == false) continue;
+
+			edge_descriptor e = add_edge(i, j);
+		}
+	}
+	return 0;
+}
+
+int nested_graph::build_partners(directed_graph &gr)
+{
+	partners.clear();
 	for(int i = 0; i < gr.num_vertices(); i++)
 	{
 		if(gr.degree(i) == 0) continue;
 		int ip = gr.compute_in_partner(i);
 		int op = gr.compute_out_partner(i);
-		if(ip == -1 || op == -1) continue;
-		assert(i >= 1);
-		edge_descriptor e1 = add_edge(ip, i);
-		edge_descriptor e2 = add_edge(i, op);
-		//edge_descriptor e3 = add_edge(op, ip);
-		mei.insert(PEI(e1, 0 - i));
-		mei.insert(PEI(e2, i));
-		//mei.insert(PEI(e3, i));
+		partners.push_back(PI(ip, op));
 	}
 	return 0;
 }
 
 int nested_graph::get_in_partner(int x)
 {
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
-	{
-		assert(x == (*it1)->source());
-		MEI::const_iterator it = mei.find(*it1);
-		assert(it != mei.end());
-		if(it->second != 0 - x) continue;
-		return (*it1)->target();
-	}
-	return -1;
+	return partners[x].first;
 }
 
 int nested_graph::get_out_partner(int x)
 {
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
-	{
-		assert(x == (*it1)->source());
-		MEI::const_iterator it = mei.find(*it1);
-		assert(it != mei.end());
-		if(it->second != x) continue;
-		return (*it1)->target();
-	}
-	return -1;
+	return partners[x].second;
 }
 
 vector<int> nested_graph::get_pivots(const vector<int> &p)
 {
 	// TODO, might be negative
 	vector<int> v;
-	if(p.size() <= 1) return v;
-	for(int i = 0; i < p.size() - 1; i++)
-	{
-		vector<edge_descriptor> ve = edges(p[i], p[i + 1]);
-		assert(ve.size() >= 1);
-		MEI::const_iterator it = mei.find(ve[0]);
-		assert(it != mei.end());
-		v.push_back(it->second);
-	}
 	return v;
 }
 
@@ -81,12 +130,26 @@ int nested_graph::draw(const string &file)
 {
 	MIS mis;
 	MES mes;
-	for(MEI::iterator it = mei.begin(); it != mei.end(); it++)
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = edges(); it1 != it2; it1++)
 	{
+		int s = (*it1)->source();
+		int t = (*it1)->target();
+		string ss;
 		char buf[1024];
-		sprintf(buf, "%d", it->second);
-		mes.insert(PES(it->first, buf));
+		if(partners[s].first != -1 && partners[s].second != -1)
+		{
+			sprintf(buf, "%d", s);
+			ss = string(buf);
+		}
+		if(partners[t].first != -1 && partners[t].second != -1)
+		{
+			sprintf(buf, "%d", t);
+			if(ss == "") ss = string(buf);
+			else ss += (string(",") + string(buf));
+		}
+		mes.insert(PES(*it1, ss));
 	}
-	undirected_graph::draw(file, mis, mes, 2.5);
+	directed_graph::draw(file, mis, mes, 2.5);
 	return 0;
 }
