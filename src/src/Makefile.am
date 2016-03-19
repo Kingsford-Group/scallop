@@ -15,7 +15,6 @@ scallop_SOURCES = edge_base.h edge_base.cc \
 				  binomial.h binomial.cc \
 				  fibonacci_heap.h fibonacci_heap.cc \
 				  subsetsum.h subsetsum.cc \
-				  algebra.h algebra.cc \
 				  disjoint_sets.h disjoint_sets.cc \
 				  config.h config.cc \
 				  hit.h hit.cc \
@@ -32,6 +31,5 @@ scallop_SOURCES = edge_base.h edge_base.cc \
 				  scallop.h scallop.cc \
 				  gtf_exon.h gtf_exon.cc \
 				  gtf_gene.h gtf_gene.cc \
-				  path_space.h path_space.cc \
 				  manager.h manager.cc \
 				  main.cc

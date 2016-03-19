@@ -3,7 +3,6 @@
 
 #include "disjoint_sets.h"
 #include "assembler.h"
-#include "algebra.h"
 #include "nested_graph.h"
 
 typedef map< edge_descriptor, vector<int> > MEV;
