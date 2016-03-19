@@ -99,12 +99,13 @@ int nested_graph::build_all_intervals(directed_graph &gr)
 int nested_graph::build_partners(directed_graph &gr)
 {
 	partners.clear();
+	partners.assign(gr.num_vertices(), PI(-1, -1));
 	for(int i = 0; i < gr.num_vertices(); i++)
 	{
 		if(gr.degree(i) == 0) continue;
 		int ip = gr.compute_in_partner(i);
 		int op = gr.compute_out_partner(i);
-		partners.push_back(PI(ip, op));
+		partners[i] = PI(ip, op);
 	}
 	return 0;
 }
@@ -137,12 +138,13 @@ int nested_graph::draw(const string &file)
 		int t = (*it1)->target();
 		string ss;
 		char buf[1024];
-		if(partners[s].first != -1 && partners[s].second != -1)
+
+		if(partners[s].second == t && partners[s].first >= 0)
 		{
 			sprintf(buf, "%d", s);
 			ss = string(buf);
 		}
-		if(partners[t].first != -1 && partners[t].second != -1)
+		if(partners[t].first == s && partners[t].second >= 0)
 		{
 			sprintf(buf, "%d", t);
 			if(ss == "") ss = string(buf);

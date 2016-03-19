@@ -429,7 +429,6 @@ bool directed_graph::check_partner(int x, int y)
 		{
 			assert(se.find(*it1) == se.end());
 			int t = (*it1)->target();
-			if(rv[t] < 0) continue;
 			se.insert(*it1);
 			if(sv.find(t) == sv.end()) sv.insert(t);
 		}
