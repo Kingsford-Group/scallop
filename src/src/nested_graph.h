@@ -18,6 +18,8 @@ public:
 	virtual ~nested_graph();
 
 public:
+	VE i2e;
+	MEI e2i;
 	vector<PI> partners;
 
 public:

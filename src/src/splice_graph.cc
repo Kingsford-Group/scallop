@@ -108,21 +108,6 @@ int splice_graph::set_vertex_weights(const vector<double> &v)
 	return 0;
 }
 
-int splice_graph::get_edge_indices(VE &i2e, MEI &e2i) const
-{
-	i2e.clear();
-	e2i.clear();
-	int index = 0;
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = edges(); it1 != it2; it1++)
-	{
-		e2i.insert(PEI(*it1, index));
-		i2e.push_back(*it1);
-		index++;
-	}
-	return 0;
-}
-
 int splice_graph::clear()
 {
 	directed_graph::clear();

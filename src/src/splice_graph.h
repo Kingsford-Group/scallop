@@ -36,7 +36,6 @@ public:
 	vector<double> get_vertex_weights() const;
 	int set_edge_weights(const MED & med);
 	int set_vertex_weights(const vector<double> &v);
-	int get_edge_indices(VE &i2e, MEI &e2i) const;
 
 	// algorithm
 	double compute_bottleneck_weight(const vector<int> &p);

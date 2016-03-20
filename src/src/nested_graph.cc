@@ -14,6 +14,7 @@ int nested_graph::build(directed_graph &gr)
 	build_nests(gr);
 	build_partners(gr);
 	assert(check_nested() == true);
+	get_edge_indices(i2e, e2i);
 	//test_linking();
 	return 0;
 }
@@ -243,18 +244,23 @@ int nested_graph::draw(const string &file)
 		int t = (*it1)->target();
 		string ss;
 		char buf[1024];
+		sprintf(buf, "%d(", e2i[*it1]);
+		ss = string(buf);
 
+		bool b = false;
 		if(partners[s].second == t && partners[s].first >= 0)
 		{
 			sprintf(buf, "%d", s);
-			ss = string(buf);
+			ss += string(buf);
+			b = true;
 		}
 		if(partners[t].first == s && partners[t].second >= 0)
 		{
 			sprintf(buf, "%d", t);
-			if(ss == "") ss = string(buf);
+			if(b == false) ss += string(buf);
 			else ss += (string(",") + string(buf));
 		}
+		ss += string(")");
 		mes.insert(PES(*it1, ss));
 	}
 	directed_graph::draw(file, mis, mes, 2.5);

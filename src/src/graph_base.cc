@@ -141,6 +141,21 @@ size_t graph_base::num_edges() const
 	return se.size();
 }
 
+int graph_base::get_edge_indices(VE &i2e, MEI &e2i)
+{
+	i2e.clear();
+	e2i.clear();
+	int index = 0;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = edges(); it1 != it2; it1++)
+	{
+		e2i.insert(PEI(*it1, index));
+		i2e.push_back(*it1);
+		index++;
+	}
+	return 0;
+}
+
 int graph_base::bfs(int s, vector<int> &v, vector<int> &b)
 {
 	v.assign(num_vertices(), -1);
