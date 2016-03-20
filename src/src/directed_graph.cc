@@ -456,6 +456,9 @@ int directed_graph::draw(const string &file, const MIS &mis, const MES &mes, dou
 
 	fout<<"\\def\\len{"<<len<<"cm}\n";
 
+	// draw file name
+	fout<<"\\node[draw, thick, red] at (1.6 * \\len, 0.58 * \\len) {"<<file.c_str()<<"};\n";
+
 	// draw vertices
 	char sx[1024];
 	char sy[1024];

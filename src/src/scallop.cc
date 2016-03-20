@@ -28,7 +28,7 @@ bool scallop::iterate()
 {
 	char buf[1024];
 
-	printf("%s %lu\n", name.c_str(), gr.support_size());
+	printf("%s %lu %lu\n", name.c_str(), gr.support_size(), gr.num_vertices());
 	sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
 	draw_splice_graph(buf);
 	sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
@@ -526,13 +526,16 @@ bool scallop::check_linkable(int ex, int ey, vector<int> &p)
 	int ys = i2e[ey]->source();
 	int yt = i2e[ey]->target();
 
+	// TODO
 	vector<int> p1;
 	vector<int> p2;
 	bool b1 = nt.compute_shortest_path(xt, ys, p1);
 	bool b2 = nt.compute_shortest_path(yt, xs, p2);
 	if(b1 == false && b2 == false) return false;
+	/*
 	if(b1 == true) p = nt.get_pivots(p1);
 	else p = nt.get_pivots(p2);
+	*/
 	return true;
 }
 
@@ -567,15 +570,7 @@ bool scallop::identify_linkable_edges(int &ex, int &ey, vector<int> &p)
 
 int scallop::build_adjacent_edges(const vector<int> &p)
 {
-	for(int i = 0; i < p.size(); i++)
-	{
-		int x = p[i];
-		int ip = nt.get_in_partner(x);
-		int op = nt.get_out_partner(x);
-		assert(ip != -1);
-		assert(op != -1);
-		gr.exchange(ip, x, op);
-	}
+	// TODO
 	return 0;
 }
 

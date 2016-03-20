@@ -23,7 +23,11 @@ public:
 public:
 	int get_in_partner(int x); 
 	int get_out_partner(int x);
-	vector<int> get_pivots(const vector<int> &p);
+
+	// x \in [0, 2n): [0, n) -> into a vertex, [n, 2n) outof a vertex
+	int bfs_search(int x, vector<int> &table, vector<int> &open); 
+	bool link(int s, int t, vector<PI> &p);
+	int test_linking();
 
 	int build(directed_graph &gr);
 	int draw(const string &file);
