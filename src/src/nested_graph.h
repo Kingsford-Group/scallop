@@ -18,9 +18,11 @@ public:
 	virtual ~nested_graph();
 
 public:
-	VE i2e;
-	MEI e2i;
-	vector<PI> partners;
+	vector<PI> partners;	// in/out partners for each vertex
+	VE i2e;					// edge map
+	MEI e2i;				// edge map
+	vector<int>	parents;	// parent for each edge
+	vector<bool> linkable;	// whether this edge can be moved to boundary
 
 public:
 	int get_in_partner(int x); 
@@ -38,6 +40,12 @@ private:
 	int init(directed_graph &gr);
 	int build_nests(directed_graph &gr);
 	int build_partners(directed_graph &gr);
+	int build_parents();
+	int build_parents(int x, const vector<int> &order);
+	int build_linkable();
+	int build_linkable_forward(int x);
+	int build_linkable_backward(int x);
+	int print();
 };
 
 #endif

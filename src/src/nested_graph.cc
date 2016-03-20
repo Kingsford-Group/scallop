@@ -15,6 +15,9 @@ int nested_graph::build(directed_graph &gr)
 	build_partners(gr);
 	assert(check_nested() == true);
 	get_edge_indices(i2e, e2i);
+	build_parents();
+	build_linkable();
+	//print();
 	//test_linking();
 	return 0;
 }
@@ -55,6 +58,73 @@ int nested_graph::build_partners(directed_graph &gr)
 		int ip = gr.compute_in_partner(i);
 		int op = gr.compute_out_partner(i);
 		partners[i] = PI(ip, op);
+	}
+	return 0;
+}
+
+int nested_graph::build_parents()
+{
+	parents.assign(num_edges(), -1);
+	vector<int> v = topological_sort();
+	vector<int> order(num_vertices());
+	for(int i = 0; i < v.size(); i++) 
+	{
+		order[v[i]] = i;
+	}
+	
+	for(int i = 0; i < v.size(); i++)
+	{
+		int x = v[i];
+		if(degree(x) == 0) continue;
+		build_parents(x, order);
+	}
+	return 0;
+}
+
+int nested_graph::build_parents(int x, const vector<int> &order)
+{
+	edge_iterator it1, it2;
+	int k = x;
+	int e = -1;
+	for(tie(it1, it2) = in_edges(x); it1 != it2; it1++)
+	{
+		int s = (*it1)->source();
+		int t = (*it1)->target();
+		assert(t == x);
+		if(order[s] < order[k])
+		{
+			k = s;
+			e = e2i[*it1];
+		}
+	}
+	int p = -1;
+	if(e != -1) p = parents[e];
+
+	vector<PI> pp;
+	for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
+	{
+		int s = (*it1)->source();
+		int t = (*it1)->target();
+		assert(s == x);
+		pp.push_back(PI(order[t], e2i[*it1]));
+	}
+
+	sort(pp.begin(), pp.end());
+
+	for(int i = pp.size() - 1; i >= 0; i--)
+	{
+		int q = p;
+		int ei = pp[i].second;
+		int ii = i2e[ei]->target();
+		for(int j = i + 1; j < pp.size(); j++)
+		{
+			int ej = pp[j].second;
+			int jj = i2e[ej]->target();
+			if(check_path(ii, jj) == false) continue;
+			q = ej;
+			break;
+		}
+		parents[ei] = q;
 	}
 	return 0;
 }
@@ -215,6 +285,109 @@ bool nested_graph::link(int s, int t, vector<PI> &p)
 	return true;
 }
 
+int nested_graph::build_linkable()
+{
+	linkable.assign(num_edges(), false);
+	int n = num_edges();
+	for(int i = -1; i < n; i++)
+	{
+		build_linkable_forward(i);
+		build_linkable_backward(i);
+	}
+	return 0;
+}
+
+int nested_graph::build_linkable_forward(int x)
+{
+	int s = (x == -1) ? 0 : i2e[x]->source();
+	set<int> sv;
+	vector<int> v;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = out_edges(s); it1 != it2; it1++)
+	{
+		int e = e2i[*it1];
+		if(parents[e] != x) continue;
+		linkable[e] = true;
+		v.push_back(e);
+		int t = (*it1)->target();
+		assert(sv.find(t) == sv.end());
+		sv.insert(t);
+	}
+
+	int p = 0;
+	while(p < v.size())
+	{
+		int ee = v[p];
+		p++;
+
+		int ss = i2e[ee]->source();
+		int tt = i2e[ee]->target();
+
+		if(partners[tt].first == -1 || partners[tt].second == -1) continue;
+		if(partners[tt].first != ss) continue;
+
+		for(tie(it1, it2) = out_edges(tt); it1 != it2; it1++)
+		{
+			int e = e2i[*it1];
+			if(parents[e] != x) continue;
+			if(partners[tt].second != (*it1)->target()) continue;
+			assert(linkable[e] == false);
+			linkable[e] = true;
+			v.push_back(e);
+			int t = (*it1)->target();
+			assert(sv.find(t) == sv.end());
+			sv.insert(s);
+		}
+	}
+	return 0;
+}
+
+int nested_graph::build_linkable_backward(int x)
+{
+	int t = (x == -1) ? num_vertices() - 1 : i2e[x]->target();
+	set<int> sv;
+	vector<int> v;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = in_edges(t); it1 != it2; it1++)
+	{
+		int e = e2i[*it1];
+		if(parents[e] != x) continue;
+		if(linkable[e] == true) continue;
+		linkable[e] = true;
+		v.push_back(e);
+		int s = (*it1)->source();
+		assert(sv.find(s) == sv.end());
+		sv.insert(s);
+	}
+
+	int p = 0;
+	while(p < v.size())
+	{
+		int ee = v[p];
+		p++;
+
+		int ss = i2e[ee]->source();
+		int tt = i2e[ee]->target();
+
+		if(partners[ss].first == -1 || partners[ss].second == -1) continue;
+		if(partners[ss].second != tt) continue;
+
+		for(tie(it1, it2) = in_edges(ss); it1 != it2; it1++)
+		{
+			int e = e2i[*it1];
+			if(parents[e] != x) continue;
+			if(partners[ss].first != (*it1)->source()) continue;
+			if(linkable[e] == true) continue;
+			linkable[e] = true;
+			v.push_back(e);
+			int s = (*it1)->source();
+			assert(sv.find(s) == sv.end());
+			sv.insert(s);
+		}
+	}
+	return 0;
+}
+
 int nested_graph::test_linking()
 {
 	for(int i = 0; i < num_vertices() * 2; i++)
@@ -261,8 +434,25 @@ int nested_graph::draw(const string &file)
 			else ss += (string(",") + string(buf));
 		}
 		ss += string(")");
+
+		sprintf(buf, "%d", parents[e2i[*it1]]);
+		ss += string(buf);
+		
+		if(linkable[e2i[*it1]] == true) ss += "T";
+		else ss += "F";
+
 		mes.insert(PES(*it1, ss));
 	}
-	directed_graph::draw(file, mis, mes, 2.5);
+	directed_graph::draw(file, mis, mes, 3.5);
+	return 0;
+}
+
+int nested_graph::print()
+{
+	// print parents:
+	for(int i = 0; i < parents.size(); i++)
+	{
+		printf("parent of %d = %d\n", i, parents[i]);
+	}
 	return 0;
 }
