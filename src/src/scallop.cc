@@ -32,7 +32,7 @@ bool scallop::iterate()
 	sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
 	draw_splice_graph(buf);
 	sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
-	nt.build(gr);
+	nt.solve(gr);
 	nt.draw(buf);
 	return false;
 
@@ -45,7 +45,7 @@ bool scallop::iterate()
 		draw_splice_graph(buf);
 
 		sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
-		nt.build(gr);
+		nt.solve(gr);
 		nt.draw(buf);
 
 		round++;
@@ -63,7 +63,7 @@ bool scallop::iterate()
 			sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
 			draw_splice_graph(buf);
 			sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
-			nt.build(gr);
+			nt.solve(gr);
 			nt.draw(buf);
 
 			round++;
@@ -91,7 +91,7 @@ bool scallop::iterate()
 				sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
 				draw_splice_graph(buf);
 				sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
-				nt.build(gr);
+				nt.solve(gr);
 				nt.draw(buf);
 
 				round++;
@@ -106,7 +106,7 @@ bool scallop::iterate()
 				sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
 				draw_splice_graph(buf);
 				sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
-				nt.build(gr);
+				nt.solve(gr);
 				nt.draw(buf);
 
 				round++;
@@ -134,7 +134,7 @@ bool scallop::iterate()
 	sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
 	draw_splice_graph(buf);
 	sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
-	nt.build(gr);
+	nt.solve(gr);
 	nt.draw(buf);
 
 	round++;
