@@ -25,16 +25,9 @@ public:
 	vector<bool> linkable;	// whether this edge can be moved to boundary
 
 public:
-	int get_in_partner(int x); 
-	int get_out_partner(int x);
-
-	// x \in [0, 2n): [0, n) -> into a vertex, [n, 2n) outof a vertex
-	int bfs_search(int x, vector<int> &table, vector<int> &open); 
-	bool link(int s, int t, vector<PI> &p);
-	int test_linking();
-
 	int build(directed_graph &gr);
 	int draw(const string &file);
+	int print();
 
 private:
 	int init(directed_graph &gr);
@@ -45,7 +38,8 @@ private:
 	int build_linkable();
 	int build_linkable_forward(int x);
 	int build_linkable_backward(int x);
-	int print();
+	bool link(int xs, int xt, int ys, int yt, vector<PI> &p);
+	int test_linking();
 };
 
 #endif
