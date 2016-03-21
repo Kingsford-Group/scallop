@@ -17,7 +17,8 @@ int nested_graph::build(directed_graph &gr)
 	get_edge_indices(i2e, e2i);
 	build_parents();
 	build_linkable();
-	test_linking();
+	draw("nested.tex");
+	test_linking(gr);
 	return 0;
 }
 
@@ -239,34 +240,34 @@ bool nested_graph::link(int xs, int xt, int ys, int yt, vector<PI> &p)
 	edge_descriptor xe = add_edge(xs, xt);
 	edge_descriptor ye = add_edge(ys, yt);
 
-	if(intersect(xe, ye) == true) return false;
+	if(intersect(xe, ye) == true)
+	{
+		remove_edge(xe);
+		remove_edge(ye);
+		return false;
+	}
 
 	assert(check_nested() == true);
-
 	remove_edge(xe);
 	remove_edge(ye);
 
 	return false;
 }
 
-int nested_graph::test_linking()
+int nested_graph::test_linking(directed_graph &gr)
 {
-	for(int i1 = 0; i1 < num_vertices(); i1++)
+	edge_iterator i1, i2;
+	edge_iterator j1, j2;
+	for(tie(i1, i2) = gr.edges(); i1 != i2; i1++)
 	{
-		if(degree(i1) == 0) continue;
-		for(int j1 = i1 + 1; j1 < num_vertices(); j1++)
+		int xs = (*i1)->source();
+		int xt = (*i1)->target();
+		for(tie(j1, j2) = gr.edges(); j1 != j2; j1++)
 		{
-			if(degree(j1) == 0) continue;
-			for(int i2 = i1 + 1; i2 < num_vertices(); i2++)
-			{
-				if(degree(i2) == 0) continue;
-				for(int j2 = j1 + 1; j2 < num_vertices(); j2++)
-				{
-					if(degree(i2) == 0) continue;
-					vector<PI> p;
-					bool b = link(i1, i2, j1, j2, p);
-				}
-			}
+			int ys = (*j1)->source();
+			int yt = (*j1)->target();
+			vector<PI> p;
+			link(xs, xt, ys, yt, p);
 		}
 	}
 	return 0;

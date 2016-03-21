@@ -39,7 +39,7 @@ private:
 	int build_linkable_forward(int x);
 	int build_linkable_backward(int x);
 	bool link(int xs, int xt, int ys, int yt, vector<PI> &p);
-	int test_linking();
+	int test_linking(directed_graph &gr);
 };
 
 #endif
