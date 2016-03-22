@@ -22,6 +22,7 @@ public:
 	virtual int remove_edge(int s, int t);
 	virtual int move_edge(edge_base *e, int x, int y);
 	virtual int exchange(int x, int y, int z);
+	virtual int rotate(int x, int y);
 
 	// access functions
 	virtual int in_degree(int v) const;
@@ -40,6 +41,7 @@ public:
 	virtual vector<int> topological_sort();
 	virtual int compute_in_partner(int x);
 	virtual int compute_out_partner(int x);
+	virtual int check_nest(int x, int r, set<edge_descriptor> &vv);
 	virtual int check_nest(int x, int r);
 
 	// print and draw

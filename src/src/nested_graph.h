@@ -25,15 +25,15 @@ public:
 	vector<int>	parents;	// parent for each edge
 
 public:
-	int solve(directed_graph &gr);
+	int build(directed_graph &gr);
 	int draw(const string &file);
-	int print();
+	bool link(int xs, int xt, int ys, int yt, vector<PI> &xp, vector<PI> &yp);
 
 private:
+	int clear();
 	int init(directed_graph &gr);
 	int build_nests(directed_graph &gr);
 	int build_partial_order();
-
 	int build_partners(directed_graph &gr);
 	int build_parents();
 	int build_parents(int x);
@@ -44,12 +44,12 @@ private:
 	int compute_lca(int x, int y, vector<int> &xv, vector<int> &yv);
 	int dock(int e, int p, vector<PI> &v);
 
-	bool link(int xs, int xt, int ys, int yt, vector<PI> &xp, vector<PI> &yp);
 	PEB add_extra_edge(int s, int t);
 	int remove_extra_edge(PEB p);
 	int compute_parent(edge_descriptor e);
 	
 	int test_linking(directed_graph &gr);
+	int print();
 };
 
 #endif

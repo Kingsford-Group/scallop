@@ -26,28 +26,9 @@ int scallop::assemble()
 
 bool scallop::iterate()
 {
-	char buf[1024];
-
-	printf("%s %lu %lu\n", name.c_str(), gr.support_size(), gr.num_vertices());
-	sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
-	draw_splice_graph(buf);
-	sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
-	nt.solve(gr);
-	nt.draw(buf);
-	return false;
-
 	while(true)
 	{
-		printf("round %d, start\n", round);
 		print();
-
-		sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
-		draw_splice_graph(buf);
-
-		sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
-		nt.solve(gr);
-		nt.draw(buf);
-
 		round++;
 
 		int ei;
@@ -56,16 +37,7 @@ bool scallop::iterate()
 		if(flag0 == true) 
 		{
 			split_edge(ei, sub);
-
-			printf("round %d, split edge %d\n", round, ei);
 			print();
-
-			sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
-			draw_splice_graph(buf);
-			sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
-			nt.solve(gr);
-			nt.draw(buf);
-
 			round++;
 		}
 
@@ -73,42 +45,27 @@ bool scallop::iterate()
 		while(true)
 		{
 			int ex, ey;
-			vector<int> p;
+			vector<PI> p;
 			bool b1 = identify_linkable_edges(ex, ey, p);
 			if(b1 == true)
 			{
 				printf("linkable edges = (%d, %d), path = (#", ex, ey);
-				for(int i = 0; i < p.size(); i++) printf(", %d", p[i]);
+				for(int i = 0; i < p.size(); i++) printf(", (%d,%d)", p[i].first, p[i].second);
 				printf(")\n");
-				assert(ex >= 0 && ey >= 0);
 
 				build_adjacent_edges(p);
-				connect_adjacent_edges(ex, ey);
-
-				printf("round %d, connect edge %d and %d\n", round, ex, ey);
 				print();
+				round++;
 
-				sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
-				draw_splice_graph(buf);
-				sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
-				nt.solve(gr);
-				nt.draw(buf);
-
+				connect_adjacent_edges(ex, ey);
+				print();
 				round++;
 			}
 
 			bool b2 = decompose_trivial_vertices();
 			if(b2 == true) 
 			{
-				printf("round %d, decompose trivial vertex\n", round);
 				print();
-
-				sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
-				draw_splice_graph(buf);
-				sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
-				nt.solve(gr);
-				nt.draw(buf);
-
 				round++;
 			}
 
@@ -128,15 +85,7 @@ bool scallop::iterate()
 
 	connect_equal_edges(ex, ey);
 
-	printf("round %d, connect %d and %d\n", round, ex, ey);
 	print();
-
-	sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
-	draw_splice_graph(buf);
-	sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
-	nt.solve(gr);
-	nt.draw(buf);
-
 	round++;
 
 	return true;
@@ -516,7 +465,7 @@ bool scallop::verify_equation(int ei, const vector<int> &sub)
 	return true;
 }
 
-bool scallop::check_linkable(int ex, int ey, vector<int> &p)
+bool scallop::check_linkable(int ex, int ey, vector<PI> &p)
 {
 	assert(i2e[ex] != null_edge);
 	assert(i2e[ey] != null_edge);
@@ -526,20 +475,17 @@ bool scallop::check_linkable(int ex, int ey, vector<int> &p)
 	int ys = i2e[ey]->source();
 	int yt = i2e[ey]->target();
 
-	// TODO
-	vector<int> p1;
-	vector<int> p2;
-	bool b1 = nt.compute_shortest_path(xt, ys, p1);
-	bool b2 = nt.compute_shortest_path(yt, xs, p2);
-	if(b1 == false && b2 == false) return false;
-	/*
-	if(b1 == true) p = nt.get_pivots(p1);
-	else p = nt.get_pivots(p2);
-	*/
+	vector<PI> xp, yp;
+	bool b = nt.link(xs, xt, ys, yt, xp, yp);
+	if(b == false) return false;
+
+	p = xp;
+	p.insert(p.end(), yp.begin(), yp.end());
+
 	return true;
 }
 
-bool scallop::identify_linkable_edges(int &ex, int &ey, vector<int> &p)
+bool scallop::identify_linkable_edges(int &ex, int &ey, vector<PI> &p)
 {
 	ex = ey = -1;
 	p.clear();
@@ -568,9 +514,23 @@ bool scallop::identify_linkable_edges(int &ex, int &ey, vector<int> &p)
 	return true;
 }
 
-int scallop::build_adjacent_edges(const vector<int> &p)
+int scallop::build_adjacent_edges(const vector<PI> &p)
 {
-	// TODO
+	for(int i = 0; i < p.size(); i++)
+	{
+		int x = p[i].first;
+		int y = p[i].second;
+		if(y == -1)
+		{
+			int l = gr.compute_in_partner(x);
+			int r = gr.compute_out_partner(x);
+			gr.exchange(l, x, r);
+		}
+		else
+		{
+			gr.rotate(x, y);
+		}
+	}
 	return 0;
 }
 
@@ -686,14 +646,7 @@ bool scallop::compute_shortest_equal_edges(int &ex, int &ey)
 
 int scallop::print()
 {
-	// print null space
-	/*
-	if(ns.size() == 0) return 0;
-	printf("null space:\n");
-	algebra::print_matrix(ns);
-	*/
-
-	// print edge disjoint sets
+	printf("round %d\n", round);
 	vector< vector<int> > vv = compute_disjoint_sets();
 	for(int i = 0; i < vv.size(); i++)
 	{
@@ -713,6 +666,15 @@ int scallop::print()
 		if(gr.degree(i) >= 1) n++;
 	}
 	printf("statistics: %lu edges, %d vertices\n\n", gr.num_edges(), n);
+
+	char buf[1024];
+	sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
+	draw_splice_graph(buf);
+
+	sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
+	nt.build(gr);
+	nt.draw(buf);
+
 	return 0;
 }
 
@@ -724,7 +686,7 @@ int scallop::draw_splice_graph(const string &file)
 	{
 		double w = gr.get_vertex_weight(i);
 		sprintf(buf, "%d:%.0lf", i, w);
-		//mis.insert(PIS(i, buf));
+		mis.insert(PIS(i, buf));
 	}
 
 	MES mes;
@@ -732,10 +694,10 @@ int scallop::draw_splice_graph(const string &file)
 	{
 		if(i2e[i] == null_edge) continue;
 		double w = gr.get_edge_weight(i2e[i]);
-		//sprintf(buf, "%d:%.0lf", i, w);
-		sprintf(buf, "%d", i);
+		sprintf(buf, "%d:%.0lf", i, w);
+		//sprintf(buf, "%d", i);
 		mes.insert(PES(i2e[i], buf));
 	}
-	gr.draw(file, mis, mes, 3.0);
+	gr.draw(file, mis, mes, 4.5);
 	return 0;
 }

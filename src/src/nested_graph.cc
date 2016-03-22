@@ -8,21 +8,32 @@ nested_graph::nested_graph()
 nested_graph::~nested_graph()
 {}
 
-int nested_graph::solve(directed_graph &gr)
+int nested_graph::build(directed_graph &gr)
 {
+	clear();
 	init(gr);
 	build_nests(gr);
 	get_edge_indices(i2e, e2i);
 	build_partial_order();
 	build_partners(gr);
 	build_parents();
-	test_linking(gr);
+	//test_linking(gr);
+	return 0;
+}
+
+int nested_graph::clear()
+{
+	directed_graph::clear();
+	i2e.clear();
+	e2i.clear();
+	order.clear();
+	partners.clear();
+	parents.clear();
 	return 0;
 }
 
 int nested_graph::init(directed_graph &gr)
 {
-	clear();
 	for(int i = 0; i < gr.num_vertices(); i++) 
 	{
 		add_vertex();

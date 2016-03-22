@@ -45,9 +45,9 @@ private:
 	bool verify_equation(int ei, const vector<int> &sub);
 	int split_edge(int exi, int eyi);
 	vector<int> split_edge(int ei, const vector<int> &sub);
-	bool identify_linkable_edges(int &ex, int &ey, vector<int> &p);
-	bool check_linkable(int ex, int ey, vector<int> &p);
-	int build_adjacent_edges(const vector<int> &p);
+	bool identify_linkable_edges(int &ex, int &ey, vector<PI> &p);
+	bool check_linkable(int ex, int ey, vector<PI> &p);
+	int build_adjacent_edges(const vector<PI> &p);
 	int connect_adjacent_edges(int x, int y);
 	bool decompose_trivial_vertices();
 	bool compute_shortest_equal_edges(int &ex, int &ey);

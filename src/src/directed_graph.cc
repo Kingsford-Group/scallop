@@ -87,6 +87,27 @@ int directed_graph::exchange(int x, int y, int z)
 	return 0;
 }
 
+int directed_graph::rotate(int x, int y)
+{
+	if(check_path(y, x) == true) return rotate(y, x);
+
+	set<edge_descriptor> se;
+	int f = check_nest(x, y, se);
+	assert(f >= 0);
+
+	for(set<edge_descriptor>::iterator it = se.begin(); it != se.end(); it++)
+	{
+		int s = (*it)->source();
+		int t = (*it)->target();
+
+		if(s == x && t == y) continue;
+		else if(s == x) move_edge(*it, t, y);
+		else if(t == y) move_edge(*it, x, s);
+		else move_edge(*it, t, s);
+	}
+	return 0;
+}
+
 int directed_graph::remove_edge(int s, int t)
 {
 	vector<edge_base*> v;
@@ -380,6 +401,12 @@ int directed_graph::compute_out_partner(int x)
 
 int directed_graph::check_nest(int x, int y)
 {
+	set<edge_descriptor> se;
+	return check_nest(x, y, se);
+}
+
+int directed_graph::check_nest(int x, int y, set<edge_descriptor> &se)
+{
 	vector<int> rv;
 	bfs_reverse(y, rv);
 	assert(rv[y] == 0);
@@ -392,7 +419,7 @@ int directed_graph::check_nest(int x, int y)
 		order[v[i]] = i;
 	}
 
-	set<edge_descriptor> se;
+	se.clear();
 	set<int> sv;
 	edge_iterator it1, it2;
 	for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
