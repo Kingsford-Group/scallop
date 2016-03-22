@@ -179,7 +179,7 @@ vector<int> scallop::compute_representatives()
 	vector< vector<int> > vv = get_disjoint_sets(ds, i2e.size());
 	for(int i = 0; i < vv.size(); i++)
 	{
-		if(vv[i].size() == 0) continue;
+		if(vv[i].size() <= 0) continue;
 		int k = -1;
 		for(int j = 0; j < vv[i].size(); j++)
 		{
@@ -188,7 +188,7 @@ vector<int> scallop::compute_representatives()
 			k = e;
 			break;
 		}
-		assert(k != -1);
+		if(k == -1) continue;
 		v.push_back(k);
 	}
 	return v;
@@ -208,7 +208,7 @@ vector< vector<int> > scallop::compute_disjoint_sets()
 			if(i2e[e] == null_edge) continue;
 			v.push_back(e);
 		}
-		assert(v.size() >= 1);
+		if(v.size() <= 0) continue;
 		xx.push_back(v);
 	}
 	return xx;
@@ -261,13 +261,14 @@ int scallop::connect_equal_edges(int x, int y)
 		}
 		assert(ee != -1);
 
-		split_edge(ee, pre);
-		int e1 = connect_adjacent_edges(pre, ee);
+		int x1 = split_edge(ee, pre);
+		int e1 = connect_adjacent_edges(pre, x1);
 		assert(e1 != -1);
 		pre = e1;
 	}
 
-	split_edge(y, pre);
+	int x1 = split_edge(y, pre);
+	assert(x1 == y);
 	connect_adjacent_edges(pre, y);
 
 	return 0;
@@ -349,44 +350,58 @@ int scallop::split_edge(int exi, int eyi)
 	gr.set_edge_weight(ex, wy);
 	gr.set_edge_stddev(ex, dx);
 
-	// TODO, this is a bug!
-	ds.union_set(exi, eyi);
+	if(fabs(wx - wy) <= SMIN) 
+	{
+		ds.union_set(exi, eyi);
+		return exi;
+	}
 
-	if(fabs(wx - wy) <= SMIN) return -1;
 	assert(wx > wy);
 
 	int s = (ex)->source();
 	int t = (ex)->target();
 
-	edge_descriptor p = gr.add_edge(s, t);
+	edge_descriptor py = gr.add_edge(s, t);
+	edge_descriptor px = gr.add_edge(s, t);
+
+	gr.set_edge_weight(py, wy);
+	gr.set_edge_weight(px, wx - wy);
+	gr.set_edge_stddev(py, dx);
+	gr.set_edge_stddev(px, dx);
+
+	mev.insert(PEV(py, mev[ex]));
+	mev.insert(PEV(px, mev[ex]));
 
 	int n = i2e.size();
-	i2e.push_back(p);
-	assert(e2i.find(p) == e2i.end());
-	e2i.insert(PEI(p, n));
+	i2e.push_back(py);
+	i2e.push_back(px);
+	e2i.insert(PEI(py, n));
+	e2i.insert(PEI(px, n + 1));
 
-	gr.set_edge_weight(p, wx - wy);
-	gr.set_edge_stddev(p, dx);
-	mev.insert(PEV(p, mev[ex]));
+	ds.make_set(n);
+	ds.make_set(n + 1);
+	ds.union_set(n, eyi);
+
+	gr.remove_edge(ex);
+	e2i.erase(ex);
+	i2e[exi] = null_edge;
 
 	return n;
 }
 
-
 vector<int> scallop::split_edge(int ei, const vector<int> &sub)
 {
 	vector<int> v;
-	v.push_back(ei);
 	int x = ei;
 	for(int i = 0; i < sub.size(); i++)
 	{
 		int y = split_edge(x, sub[i]);
-		if(i == sub.size() - 1) assert(y == -1);
-		if(y == -1) assert(i == sub.size() - 1);
-		if(y == -1) break;
+		if(i == sub.size() - 1) assert(y == x);
+		if(y == x) assert(i == sub.size() - 1);
 		v.push_back(y);
-		x = y;
+		x = y + 1;
 	}
+	assert(v.size() == sub.size());
 	return v;
 }
 
