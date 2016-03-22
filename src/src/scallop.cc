@@ -234,6 +234,8 @@ int scallop::connect_equal_edges(int x, int y)
 
 	double wx = gr.get_edge_weight(xx);
 	double wy = gr.get_edge_weight(yy);
+
+	printf("wx = %lf, wy = %lf\n", wx, wy);
 	assert(fabs(wx - wy) <= SMIN);
 
 	double wp = gr.compute_bottleneck_weight(p);
@@ -346,6 +348,8 @@ int scallop::split_edge(int exi, int eyi)
 
 	gr.set_edge_weight(ex, wy);
 	gr.set_edge_stddev(ex, dx);
+
+	// TODO, this is a bug!
 	ds.union_set(exi, eyi);
 
 	if(fabs(wx - wy) <= SMIN) return -1;
@@ -443,7 +447,8 @@ bool scallop::identify_equation(int &ei, vector<int> &sub)
 
 	if(min == -1) return false;
 
-	printf("%s closest subset for edge %d:%.0lf has %lu edges, error = %d, subset = (", name.c_str(), ei, gr.get_edge_weight(i2e[ei]), sub.size(), min);
+	printf("%s closest subset for edge %d:%.0lf has %lu edges, error = %d, subset = (",
+			name.c_str(), ei, gr.get_edge_weight(i2e[ei]), sub.size(), min);
 	for(int i = 0; i < sub.size() - 1; i++) printf("%d:%.0lf, ", sub[i], gr.get_edge_weight(i2e[sub[i]]));
 	printf("%d:%.0lf)\n", sub[sub.size() - 1], gr.get_edge_weight(i2e[sub[sub.size() - 1]]));
 	

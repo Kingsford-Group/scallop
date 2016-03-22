@@ -288,7 +288,7 @@ int nested_graph::dock(int e, int p, vector<PI> &v)
 {
 	v.clear();
 	int x = e;
-	int d = 1;
+	int d = 0;
 	while(x != p)
 	{
 		int s = i2e[x]->source();
@@ -315,7 +315,7 @@ int nested_graph::dock(int e, int p, vector<PI> &v)
 			for(int k = 0; k < vs.size(); k++) v.push_back(PI(vs[k], -1));
 			d = -1;
 		}
-		else return 0;
+		else return -2;
 
 		x = xx;
 	}
@@ -404,7 +404,7 @@ bool nested_graph::link(int xs, int xt, int ys, int yt, vector<PI> &xp, vector<P
 			xi, xs, xt, yi, ys, yt, parents[xi], parents[yi], lca, xu, yu, xd ? 'T' : 'F', yd ? 'T' : 'F'); 
 	*/
 
-	if(xd == 0 || yd == 0)
+	if(xd == -2 || yd == -2)
 	{
 		remove_extra_edge(yb);
 		remove_extra_edge(xb);
