@@ -219,6 +219,18 @@ int splice_graph::simulate(int n, int m)
 	return 0;
 }
 
+int splice_graph::compute_decomp_paths()
+{
+	int n = 0;
+	for(int i = 0; i < num_vertices(); i++)
+	{
+		if(degree(i) == 0) continue;
+		n++;
+	}
+	int m = num_edges();
+	return (m - n + 2);
+}
+
 int splice_graph::compute_num_paths()
 {
 	vector<int> table;

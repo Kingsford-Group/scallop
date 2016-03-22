@@ -21,6 +21,7 @@ int scallop::assemble()
 	init_disjoint_sets();
 	round = 0;
 	while(iterate());
+	printf("%s solution %d paths\n", name.c_str(), gr.compute_decomp_paths());
 	return 0;
 }
 
@@ -662,7 +663,6 @@ bool scallop::compute_shortest_equal_edges(int &ex, int &ey)
 	if(min == -1) return false;
 	else return true;
 }
-
 
 int scallop::print()
 {
