@@ -18,12 +18,11 @@ public:
 	virtual ~nested_graph();
 
 public:
-	vector<int> order;		// partial order of vertex
-	vector<PI> partners;	// in/out partners for each vertex
 	VE i2e;					// edge map
 	MEI e2i;				// edge map
+	vector<int> order;		// partial order of vertex
+	vector<PI> partners;	// in/out partners for each vertex
 	vector<int>	parents;	// parent for each edge
-	vector<bool> docking;	// whether this edge can be moved to boundary
 
 public:
 	int solve(directed_graph &gr);
@@ -39,17 +38,17 @@ private:
 	int build_parents();
 	int build_parents(int x);
 
-	int build_docking();
-	vector<int> bfs_docking_forward(int s, int p);
-	vector<int> bfs_docking_backward(int t, int p);
+	bool bfs_docking_forward(int e, int t, int p, vector<int> &v);
+	bool bfs_docking_backward(int e, int s, int p, vector<int> &v);
 
 	int compute_lca(int x, int y, vector<int> &xv, vector<int> &yv);
-	bool dock(int e, int p);
+	int dock(int e, int p, vector<PI> &v);
 
-	bool link(int xs, int xt, int ys, int yt, vector<PI> &p);
+	bool link(int xs, int xt, int ys, int yt, vector<PI> &xp, vector<PI> &yp);
 	PEB add_extra_edge(int s, int t);
 	int remove_extra_edge(PEB p);
 	int compute_parent(edge_descriptor e);
+	
 	int test_linking(directed_graph &gr);
 };
 

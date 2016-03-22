@@ -16,7 +16,6 @@ int nested_graph::solve(directed_graph &gr)
 	build_partial_order();
 	build_partners(gr);
 	build_parents();
-	build_docking();
 	test_linking(gr);
 	return 0;
 }
@@ -183,116 +182,60 @@ int nested_graph::compute_parent(edge_descriptor e)
 	return p;
 }
 
-int nested_graph::build_docking()
+bool nested_graph::bfs_docking_forward(int e0, int t0, int p0, vector<int> &r)
 {
-	docking.assign(num_edges(), false);
-
-	vector<int> v;
-	v = bfs_docking_forward(0, -1);
-	for(int k = 0; k < v.size(); k++) docking[v[k]] = true;
-
-	v = bfs_docking_backward(num_vertices() - 1, -1);
-	for(int k = 0; k < v.size(); k++) docking[v[k]] = true;
-
-	for(int i = 0; i < num_edges(); i++)
+	r.clear();
+	int s = i2e[e0]->source();
+	int t = i2e[e0]->target();
+	while(true)
 	{
-		int s = i2e[i]->source();
-		int t = i2e[i]->target();
-		v = bfs_docking_forward(s, i);
-		for(int k = 0; k < v.size(); k++) docking[v[k]] = true;
-		v = bfs_docking_backward(t, i);
-		for(int k = 0; k < v.size(); k++) docking[v[k]] = true;
+		if(t == t0) return true;
+		if(partners[t].first == -1 || partners[t].second == -1) return false;
+		if(partners[t].first != s) return false;
+		bool b = false;
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = out_edges(t); it1 != it2; it1++)
+		{
+			int ee = e2i[*it1];
+			int tt = (*it1)->target();
+			if(parents[ee] != p0) continue;
+			if(partners[t].second != tt) continue;
+			b = true;
+			r.push_back(t);
+			s = t;
+			t = tt;
+		}
+		if(b == false) return false;
 	}
-	return 0;
+	return true;
 }
 
-vector<int> nested_graph::bfs_docking_forward(int s, int pp)
+bool nested_graph::bfs_docking_backward(int e0, int s0, int p0, vector<int> &r)
 {
-	set<int> sv;
-	vector<int> v;
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = out_edges(s); it1 != it2; it1++)
+	r.clear();
+	int s = i2e[e0]->source();
+	int t = i2e[e0]->target();
+	while(true)
 	{
-		int e = e2i[*it1];
-		if(parents[e] != pp) continue;
-		//docking[e] = true;
-		v.push_back(e);
-		int t = (*it1)->target();
-		assert(sv.find(t) == sv.end());
-		sv.insert(t);
-	}
-
-	int p = 0;
-	while(p < v.size())
-	{
-		int ee = v[p];
-		p++;
-
-		int ss = i2e[ee]->source();
-		int tt = i2e[ee]->target();
-
-		if(partners[tt].first == -1 || partners[tt].second == -1) continue;
-		if(partners[tt].first != ss) continue;
-
-		for(tie(it1, it2) = out_edges(tt); it1 != it2; it1++)
+		if(s == s0) return true;
+		if(partners[s].first == -1 || partners[s].second == -1) return false;
+		if(partners[s].second != t) return false;
+		bool b = false;
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = in_edges(s); it1 != it2; it1++)
 		{
-			int e = e2i[*it1];
-			if(parents[e] != pp) continue;
-			if(partners[tt].second != (*it1)->target()) continue;
-			//assert(docking[e] == false);
-			//docking[e] = true;
-			v.push_back(e);
-			int t = (*it1)->target();
-			//assert(sv.find(t) == sv.end());
-			sv.insert(s);
+			int ee = e2i[*it1];
+			int ss = (*it1)->source();
+			if(parents[ee] != p0) continue;
+			if(partners[s].first != ss) continue;
+			b = true;
+			r.push_back(s);
+			t = s;
+			s = ss;
 		}
+		if(b == false) return false;
 	}
-	return v;
-}
-
-vector<int> nested_graph::bfs_docking_backward(int t, int pp)
-{
-	set<int> sv;
-	vector<int> v;
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = in_edges(t); it1 != it2; it1++)
-	{
-		int e = e2i[*it1];
-		if(parents[e] != pp) continue;
-		//if(docking[e] == true) continue;
-		//docking[e] = true;
-		v.push_back(e);
-		int s = (*it1)->source();
-		assert(sv.find(s) == sv.end());
-		sv.insert(s);
-	}
-
-	int p = 0;
-	while(p < v.size())
-	{
-		int ee = v[p];
-		p++;
-
-		int ss = i2e[ee]->source();
-		int tt = i2e[ee]->target();
-
-		if(partners[ss].first == -1 || partners[ss].second == -1) continue;
-		if(partners[ss].second != tt) continue;
-
-		for(tie(it1, it2) = in_edges(ss); it1 != it2; it1++)
-		{
-			int e = e2i[*it1];
-			if(parents[e] != pp) continue;
-			if(partners[ss].first != (*it1)->source()) continue;
-			//if(docking[e] == true) continue;
-			//docking[e] = true;
-			v.push_back(e);
-			int s = (*it1)->source();
-			//assert(sv.find(s) == sv.end());
-			sv.insert(s);
-		}
-	}
-	return v;
+	return true;
 }
 
 int nested_graph::compute_lca(int x, int y, vector<int> &xx, vector<int> &yy)
@@ -330,15 +273,42 @@ int nested_graph::compute_lca(int x, int y, vector<int> &xx, vector<int> &yy)
 	assert(false);
 }
 
-bool nested_graph::dock(int e, int p)
+int nested_graph::dock(int e, int p, vector<PI> &v)
 {
+	v.clear();
 	int x = e;
+	int d = 1;
 	while(x != p)
 	{
-		if(docking[x] == false) return false;
-		x = parents[x];
+		int s = i2e[x]->source();
+		int t = i2e[x]->target();
+
+		int xx = parents[x];
+		int ss = i2e[xx]->source();
+		int tt = i2e[xx]->target();
+
+		vector<int> vt;
+		vector<int> vs;
+		bool bt = bfs_docking_forward(x, tt, xx, vt);
+		bool bs = bfs_docking_backward(x, ss, xx, vs);
+
+		if(bt == true)
+		{
+			if(d < 0) v.push_back(PI(s, t));
+			for(int k = 0; k < vt.size(); k++) v.push_back(PI(vt[k], -1));
+			d = 1;
+		}
+		else if(bs == true)
+		{
+			if(d > 0) v.push_back(PI(s, t));
+			for(int k = 0; k < vs.size(); k++) v.push_back(PI(vs[k], -1));
+			d = -1;
+		}
+		else return 0;
+
+		x = xx;
 	}
-	return true;
+	return d;
 }
 
 PEB nested_graph::add_extra_edge(int s, int t)
@@ -354,10 +324,6 @@ PEB nested_graph::add_extra_edge(int s, int t)
 	int pp = compute_parent(e);
 	parents.push_back(pp);
 
-	docking.push_back(false);
-	if(i2e[pp]->source() == s) docking[n] = true;
-	if(i2e[pp]->target() == t) docking[n] = true;
-
 	return PEB(e, false);
 }
 
@@ -372,14 +338,15 @@ int nested_graph::remove_extra_edge(PEB p)
 	i2e.pop_back();
 
 	parents.pop_back();
-	docking.pop_back();
 
 	return 0;
 }
 
-bool nested_graph::link(int xs, int xt, int ys, int yt, vector<PI> &p)
+bool nested_graph::link(int xs, int xt, int ys, int yt, vector<PI> &xp, vector<PI> &yp)
 {
-	p.clear();
+	xp.clear();
+	yp.clear();
+
 	if(xs == yt) return true;
 	if(xt == ys) return true;
 	if(xs == ys) return false;
@@ -415,65 +382,86 @@ bool nested_graph::link(int xs, int xt, int ys, int yt, vector<PI> &p)
 
 	int xu = xv[xv.size() - 2];
 	int yu = yv[yv.size() - 2];
+	assert(xu >= 0 && xu < num_edges());
+	assert(yu >= 0 && yu < num_edges());
 
-	bool xd = dock(xi, xu);
-	bool yd = dock(yi, yu);
+	int xd = dock(xi, xu, xp);
+	int yd = dock(yi, yu, yp);
 
 	/*
 	printf("edges %d:(%d, %d) and %d:(%d, %d), parents = (%d, %d), lca = %d, sub-lca = (%d, %d), dock = (%c, %c)\n",
 			xi, xs, xt, yi, ys, yt, parents[xi], parents[yi], lca, xu, yu, xd ? 'T' : 'F', yd ? 'T' : 'F'); 
 	*/
 
-	if(xd == false || yd == false)
+	if(xd == 0 || yd == 0)
 	{
 		remove_extra_edge(yb);
 		remove_extra_edge(xb);
 		return false;
 	}
 
-	assert(xu >= 0 && xu < num_edges());
-	assert(yu >= 0 && yu < num_edges());
+	int xus = i2e[xu]->source();
+	int xut = i2e[xu]->target();
+	int yus = i2e[yu]->source();
+	int yut = i2e[yu]->target();
 
-	vector<int> xx = bfs_docking_forward(i2e[xu]->target(), lca);
-	vector<int> yy = bfs_docking_forward(i2e[yu]->target(), lca);
+	vector<int> xx, yy;
+	bool xf = bfs_docking_forward(xu, yus, lca, xx);
+	bool yf = bfs_docking_forward(yu, xus, lca, yy);
 
-	for(int i = 0; i < xx.size(); i++)
+	if(xf == true)
 	{
-		if(xx[i] != yu) continue;
+		if(xd == -1) xp.push_back(PI(xus, xut));
+		if(yd == +1) yp.push_back(PI(yus, yut));
+		for(int k = 0; k < xx.size(); k++) xp.push_back(PI(xx[k], -1));
 		remove_extra_edge(yb);
 		remove_extra_edge(xb);
 		return true;
 	}
-
-	for(int i = 0; i < yy.size(); i++)
+	else if(yf == true)
 	{
-		if(yy[i] != xu) continue;
+		if(yd == -1) yp.push_back(PI(yus, yut));
+		if(xd == +1) xp.push_back(PI(xus, xut));
+		for(int k = 0; k < yy.size(); k++) yp.push_back(PI(yy[k], -1));
 		remove_extra_edge(yb);
 		remove_extra_edge(xb);
 		return true;
 	}
-
-	remove_extra_edge(yb);
-	remove_extra_edge(xb);
-	return false;
+	else
+	{
+		remove_extra_edge(yb);
+		remove_extra_edge(xb);
+		return false;
+	}
 }
 
 int nested_graph::test_linking(directed_graph &gr)
 {
 	edge_iterator i1, i2;
 	edge_iterator j1, j2;
+	set<PI> s1;
 	for(tie(i1, i2) = gr.edges(); i1 != i2; i1++)
 	{
 		int xs = (*i1)->source();
 		int xt = (*i1)->target();
+		if(s1.find(PI(xs, xt)) != s1.end()) continue;
+		s1.insert(PI(xs, xt));
+		set<PI> s2;
 		for(tie(j1, j2) = gr.edges(); j1 != j2; j1++)
 		{
 			int ys = (*j1)->source();
 			int yt = (*j1)->target();
-			vector<PI> p;
-			bool b = link(xs, xt, ys, yt, p);
+			if(s2.find(PI(ys, yt)) != s2.end()) continue;
+			s2.insert(PI(ys, yt));
+			vector<PI> xp, yp;
+			bool b = link(xs, xt, ys, yt, xp, yp);
 
 			printf("link (%d, %d) and (%d, %d) = %c\n", xs, xt, ys, yt, b ? 'T' : 'F');
+			printf(" X-action:");
+			for(int k = 0; k < xp.size(); k++) printf(" (%d, %d), ", xp[k].first, xp[k].second);
+			printf("\n Y-action:");
+			for(int k = 0; k < yp.size(); k++) printf(" (%d, %d), ", yp[k].first, yp[k].second);
+			printf("\n");
 		}
 	}
 	return 0;
@@ -510,10 +498,7 @@ int nested_graph::draw(const string &file)
 
 		sprintf(buf, "%d", parents[e2i[*it1]]);
 		ss += string(buf);
-		
-		if(docking[e2i[*it1]] == true) ss += "T";
-		else ss += "F";
-
+	
 		mes.insert(PES(*it1, ss));
 	}
 	directed_graph::draw(file, mis, mes, 3.5);
@@ -527,7 +512,7 @@ int nested_graph::print()
 	{
 		int s = i2e[i]->source();
 		int t = i2e[i]->target();
-		printf("edge (%d, %d), index = %d, parent = %d, docking = %c\n", s, t, i, parents[i], docking[i] ? 'T' : 'F');
+		printf("edge (%d, %d), index = %d, parent = %d\n", s, t, i, parents[i]);
 	}
 	return 0;
 }
