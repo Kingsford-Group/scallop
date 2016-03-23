@@ -38,13 +38,12 @@ private:
 	// get informations from ds since some edges are deleted
 	vector<int> compute_representatives();
 	vector< vector<int> > compute_disjoint_sets();
+	set<int> compute_singletons();
 
 	// iteratively identify equations and update
 	bool iterate();
-	bool identify_equation2(int &ei, vector<int> &sub);
 	bool identify_equation(int &ei, vector<int> &sub);
 	bool identify_edge_equation(int ei, vector<int> &sub);
-	bool verify_equation(int ei, const vector<int> &sub);
 	int split_edge(int exi, int eyi);
 	vector<int> split_edge(int ei, const vector<int> &sub);
 	bool identify_linkable_edges(int &ex, int &ey, vector<PI> &p);

@@ -218,6 +218,19 @@ vector< vector<int> > scallop::compute_disjoint_sets()
 	return xx;
 }
 
+set<int> scallop::compute_singletons()
+{
+	set<int> s;
+	vector< vector<int> > vv = compute_disjoint_sets();
+	for(int i = 0; i < vv.size(); i++)
+	{
+		assert(vv[i].size() >= 1);
+		if(vv[i].size() >= 2) continue;
+		s.insert(vv[i][0]);
+	}
+	return s;
+}
+
 int scallop::connect_equal_edges(int x, int y)
 {
 	assert(i2e[x] != null_edge);
@@ -410,15 +423,31 @@ vector<int> scallop::split_edge(int ei, const vector<int> &sub)
 
 bool scallop::identify_equation(int &ei, vector<int> &sub)
 {
+	vector<PI> p;
 	for(int i = 0; i < i2e.size(); i++)
 	{
 		if(i2e[i] == null_edge) continue;
-		bool b = identify_edge_equation(i, sub);
-		if(b == false) continue;
-		ei = i;
-		return true;
+		int w = (int)(gr.get_edge_weight(i2e[i]));
+		p.push_back(PI(w, i));
 	}
-	return false;
+	sort(p.begin(), p.end());
+
+	sub.clear();
+	for(int i = 0; i < p.size(); i++)
+	{
+		int e = p[i].second;
+		assert(i2e[e] != null_edge);
+		vector<int> v;
+		bool b = identify_edge_equation(e, v);
+		if(b == false) continue;
+		if(sub.size() == 0 || v.size() < sub.size())
+		{
+			ei = e;
+			sub = v;
+		}
+	}
+	if(sub.size() == 0) return false;
+	else return true;
 }
 
 bool scallop::identify_edge_equation(int ei, vector<int> &sub)
@@ -432,23 +461,29 @@ bool scallop::identify_edge_equation(int ei, vector<int> &sub)
 	gr.bfs(t, ff);
 	gr.bfs_reverse(s, bb);
 
-	set<int> sr;
-	sr.insert(ds.find_set(ei));
+	set<int> sr = compute_singletons();
+	//sr.insert(ds.find_set(ei));
 	vector<PI> xi;
 	for(set<edge_descriptor>::iterator it = ff.begin(); it != ff.end(); it++)
 	{
+		/*
 		int r = ds.find_set(e2i[*it]);
 		if(sr.find(r) != sr.end()) continue;
 		sr.insert(r);
+		*/
+		if(sr.find(e2i[*it]) == sr.end()) continue;
 		int ww = (int)(gr.get_edge_weight(*it));
 		if(ww > w) continue;
 		xi.push_back(PI(ww, e2i[*it]));
 	}
 	for(set<edge_descriptor>::iterator it = bb.begin(); it != bb.end(); it++)
 	{
+		/*
 		int r = ds.find_set(e2i[*it]);
 		if(sr.find(r) != sr.end()) continue;
 		sr.insert(r);
+		*/
+		if(sr.find(e2i[*it]) == sr.end()) continue;
 		int ww = (int)(gr.get_edge_weight(*it));
 		if(ww > w) continue;
 		xi.push_back(PI(ww, e2i[*it]));
@@ -458,20 +493,20 @@ bool scallop::identify_edge_equation(int ei, vector<int> &sub)
 
 	xi.push_back(PI(w, ei));
 
+	/*
+	printf("subsetsum: ");
+	for(int i = 0; i < xi.size(); i++)
+	{
+		printf("%d:%d ", xi[i].first, xi[i].second);
+	}
+	printf("\n");
+	*/
+
 	vector<int> v;
 	for(int i = 0; i < xi.size(); i++)
 	{
 		v.push_back(xi[i].first);
 	}
-
-	/*
-	printf("ei = %d, w = %d. ", ei, w);
-	for(int i = 0; i < xi.size(); i++)
-	{
-		printf(" %d:%d", xi[i].first, xi[i].second);
-	}
-	printf("\n");
-	*/
 
 	subsetsum sss(v);
 	sss.solve();
@@ -486,97 +521,12 @@ bool scallop::identify_edge_equation(int ei, vector<int> &sub)
 	int err = (int)fabs(sss.opt - w);
 	if(err >= 1) return false;
 
+	/*
 	printf("closest subset for edge %d:%d has %lu edges, error = %d, subset = (", ei, w, sub.size(), err);
 	for(int i = 0; i < sub.size() - 1; i++) printf("%d:%.0lf, ", sub[i], gr.get_edge_weight(i2e[sub[i]]));
 	printf("%d:%.0lf)\n", sub[sub.size() - 1], gr.get_edge_weight(i2e[sub[sub.size() - 1]]));
+	*/
 	
-	return true;
-}
-
-bool scallop::identify_equation2(int &ei, vector<int> &sub)
-{
-	vector<int> r = compute_representatives();
-	if(r.size() < 2) return false;
-
-	vector<int> x;
-	vector<PI> xi;
-	for(int i = 0; i < r.size(); i++)
-	{
-		double w = gr.get_edge_weight(i2e[r[i]]);
-		x.push_back((int)(w));
-		xi.push_back(PI((int)(w), i));
-	}
-
-	sort(xi.begin(), xi.end());
-
-	printf("representatives: ");
-	for(int i = 0; i < xi.size(); i++)
-	{
-		printf("%d:%d:%d, ", i, xi[i].first, r[xi[i].second]);
-	}
-	printf("\n");
-
-	int min = -1;
-	for(int i = 1; i < xi.size(); i++)
-	{
-		vector<int> v;
-		for(int j = 0; j <= i; j++) 
-		{
-			v.push_back(xi[j].first);
-		}
-
-		subsetsum sss(v);
-		sss.solve();
-
-		int eix = r[xi[i].second];
-		vector<int> ssx;
-		for(int j = 0; j < sss.subset.size(); j++)
-		{
-			int k = sss.subset[j];
-			int kk = xi[k].second;
-			ssx.push_back(r[kk]);
-		}
-
-		bool b = verify_equation(eix, ssx);
-		if(b == false) continue;
-
-		int err = (int)fabs(sss.opt - xi[i].first);
-		if(min == -1 || err < min)
-		{
-			min = err;
-			ei = eix;
-			sub = ssx;
-		}
-		else if(err == min && sub.size() > ssx.size())
-		{
-			min = err;
-			ei = eix;
-			sub = ssx;
-		}
-	}
-
-	if(min == -1) return false;
-
-	printf("%s closest subset for edge %d:%.0lf has %lu edges, error = %d, subset = (",
-			name.c_str(), ei, gr.get_edge_weight(i2e[ei]), sub.size(), min);
-	for(int i = 0; i < sub.size() - 1; i++) printf("%d:%.0lf, ", sub[i], gr.get_edge_weight(i2e[sub[i]]));
-	printf("%d:%.0lf)\n", sub[sub.size() - 1], gr.get_edge_weight(i2e[sub[sub.size() - 1]]));
-	
-	if(min >= 1) return false;
-	else return true;
-}
-
-bool scallop::verify_equation(int ei, const vector<int> &sub)
-{
-	assert(i2e[ei] != null_edge);
-	for(int i = 0; i < sub.size(); i++)
-	{
-		assert(i2e[sub[i]] != null_edge);
-		bool b1 = gr.check_path(i2e[ei], i2e[sub[i]]);
-		bool b2 = gr.check_path(i2e[sub[i]], i2e[ei]);
-		//printf("check path (%d, %d) = (%c, %c)\n", ei, sub[i], b1 ? 'T' : 'F', b2 ? 'T' : 'F');
-		if(b1 == false && b2 == false) return false;
-	}
 	return true;
 }
 
