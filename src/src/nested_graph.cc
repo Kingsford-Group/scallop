@@ -416,24 +416,45 @@ bool nested_graph::link(int xs, int xt, int ys, int yt, vector<PI> &xp, vector<P
 	int yus = i2e[yu]->source();
 	int yut = i2e[yu]->target();
 
-	vector<int> xx, yy;
-	bool xf = bfs_docking_forward(xu, yus, lca, xx);
-	bool yf = bfs_docking_forward(yu, xus, lca, yy);
+	vector<int> vxyf, vxyb, vyxf, vyxb;
+	bool xyf = bfs_docking_forward(xu, yus, lca, vxyf);
+	bool yxf = bfs_docking_forward(yu, xus, lca, vyxf);
+	bool xyb = bfs_docking_backward(xu, yut, lca, vxyb);
+	bool yxb = bfs_docking_backward(yu, xut, lca, vyxb);
 
-	if(xf == true)
+
+	if(xyf == true)
 	{
 		if(xd == -1) xp.push_back(PI(xus, xut));
 		if(yd == +1) yp.push_back(PI(yus, yut));
-		for(int k = 0; k < xx.size(); k++) xp.push_back(PI(xx[k], -1));
+		for(int k = 0; k < vxyf.size(); k++) xp.push_back(PI(vxyf[k], -1));
 		remove_extra_edge(yb);
 		remove_extra_edge(xb);
 		return true;
 	}
-	else if(yf == true)
+	else if(yxf == true)
 	{
 		if(yd == -1) yp.push_back(PI(yus, yut));
 		if(xd == +1) xp.push_back(PI(xus, xut));
-		for(int k = 0; k < yy.size(); k++) yp.push_back(PI(yy[k], -1));
+		for(int k = 0; k < vyxf.size(); k++) yp.push_back(PI(vyxf[k], -1));
+		remove_extra_edge(yb);
+		remove_extra_edge(xb);
+		return true;
+	}
+	else if(xyb == true)
+	{
+		if(xd == -1) xp.push_back(PI(xus, xut));
+		if(yd == +1) yp.push_back(PI(yus, yut));
+		for(int k = 0; k < vxyb.size(); k++) yp.push_back(PI(vxyb[k], -1));
+		remove_extra_edge(yb);
+		remove_extra_edge(xb);
+		return true;
+	}
+	else if(yxb == true)
+	{
+		if(yd == -1) yp.push_back(PI(yus, yut));
+		if(xd == +1) xp.push_back(PI(xus, xut));
+		for(int k = 0; k < vyxb.size(); k++) xp.push_back(PI(vyxb[k], -1));
 		remove_extra_edge(yb);
 		remove_extra_edge(xb);
 		return true;

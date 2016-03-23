@@ -129,8 +129,8 @@ int manager::assemble_gtf(const string &file)
 		if(gg.exons.size() <= 0) continue;
 
 		// DEBUG
-		//if(gg.exons[0].gene_id != "MACF1") continue;
-		//if(gg.exons[0].gene_id != "FLT3LG") continue;
+		//if(gg.exons[0].gene_id != "RABL2A" && gg.exons[0].gene_id != "BPTF") continue;
+		//if(gg.exons[0].gene_id != "ZNF415") continue;
 
 		splice_graph gr;
 		gg.build_splice_graph(gr);

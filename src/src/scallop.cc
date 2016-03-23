@@ -19,7 +19,9 @@ int scallop::assemble()
 	reconstruct_splice_graph();
 	gr.get_edge_indices(i2e, e2i);
 	init_disjoint_sets();
+	printf("\nprocess %s\n", name.c_str());
 	round = 0;
+	print();
 	while(iterate());
 	printf("%s solution %d paths\n", name.c_str(), gr.compute_decomp_paths());
 	return 0;
@@ -29,17 +31,21 @@ bool scallop::iterate()
 {
 	while(true)
 	{
-		print();
-		round++;
-
 		int ei;
 		vector<int> sub;
 		bool flag0 = identify_equation(ei, sub);
 		if(flag0 == true) 
 		{
 			split_edge(ei, sub);
-			print();
-			round++;
+			if(sub.size() >= 2)
+			{
+				printf("decompose %d according to = (#", ei);
+				for(int i = 0; i < sub.size(); i++) printf(", %d", sub[i]);
+				printf(")\n");
+
+				round++;
+				print();
+			}
 		}
 
 		bool flag1 = false;
@@ -55,19 +61,16 @@ bool scallop::iterate()
 				printf(")\n");
 
 				build_adjacent_edges(p);
-				print();
-				round++;
-
 				connect_adjacent_edges(ex, ey);
-				print();
 				round++;
+				print();
 			}
 
 			bool b2 = decompose_trivial_vertices();
 			if(b2 == true) 
 			{
-				print();
 				round++;
+				print();
 			}
 
 			if(b1 == true || b2 == true) flag1 = true;
@@ -86,8 +89,8 @@ bool scallop::iterate()
 
 	connect_equal_edges(ex, ey);
 
-	print();
 	round++;
+	print();
 
 	return true;
 }
@@ -236,7 +239,6 @@ int scallop::connect_equal_edges(int x, int y)
 	double wx = gr.get_edge_weight(xx);
 	double wy = gr.get_edge_weight(yy);
 
-	printf("wx = %lf, wy = %lf\n", wx, wy);
 	assert(fabs(wx - wy) <= SMIN);
 
 	double wp = gr.compute_bottleneck_weight(p);
@@ -408,6 +410,91 @@ vector<int> scallop::split_edge(int ei, const vector<int> &sub)
 
 bool scallop::identify_equation(int &ei, vector<int> &sub)
 {
+	for(int i = 0; i < i2e.size(); i++)
+	{
+		if(i2e[i] == null_edge) continue;
+		bool b = identify_edge_equation(i, sub);
+		if(b == false) continue;
+		ei = i;
+		return true;
+	}
+	return false;
+}
+
+bool scallop::identify_edge_equation(int ei, vector<int> &sub)
+{
+	int s = i2e[ei]->source();
+	int t = i2e[ei]->target();
+	int w = (int)(gr.get_edge_weight(i2e[ei]));
+
+	set<edge_descriptor> ff;
+	set<edge_descriptor> bb;
+	gr.bfs(t, ff);
+	gr.bfs_reverse(s, bb);
+
+	set<int> sr;
+	sr.insert(ds.find_set(ei));
+	vector<PI> xi;
+	for(set<edge_descriptor>::iterator it = ff.begin(); it != ff.end(); it++)
+	{
+		int r = ds.find_set(e2i[*it]);
+		if(sr.find(r) != sr.end()) continue;
+		sr.insert(r);
+		int ww = (int)(gr.get_edge_weight(*it));
+		if(ww > w) continue;
+		xi.push_back(PI(ww, e2i[*it]));
+	}
+	for(set<edge_descriptor>::iterator it = bb.begin(); it != bb.end(); it++)
+	{
+		int r = ds.find_set(e2i[*it]);
+		if(sr.find(r) != sr.end()) continue;
+		sr.insert(r);
+		int ww = (int)(gr.get_edge_weight(*it));
+		if(ww > w) continue;
+		xi.push_back(PI(ww, e2i[*it]));
+	}
+
+	sort(xi.begin(), xi.end());
+
+	xi.push_back(PI(w, ei));
+
+	vector<int> v;
+	for(int i = 0; i < xi.size(); i++)
+	{
+		v.push_back(xi[i].first);
+	}
+
+	/*
+	printf("ei = %d, w = %d. ", ei, w);
+	for(int i = 0; i < xi.size(); i++)
+	{
+		printf(" %d:%d", xi[i].first, xi[i].second);
+	}
+	printf("\n");
+	*/
+
+	subsetsum sss(v);
+	sss.solve();
+
+	sub.clear();
+	for(int j = 0; j < sss.subset.size(); j++)
+	{
+		int k = sss.subset[j];
+		sub.push_back(xi[k].second);
+	}
+
+	int err = (int)fabs(sss.opt - w);
+	if(err >= 1) return false;
+
+	printf("closest subset for edge %d:%d has %lu edges, error = %d, subset = (", ei, w, sub.size(), err);
+	for(int i = 0; i < sub.size() - 1; i++) printf("%d:%.0lf, ", sub[i], gr.get_edge_weight(i2e[sub[i]]));
+	printf("%d:%.0lf)\n", sub[sub.size() - 1], gr.get_edge_weight(i2e[sub[sub.size() - 1]]));
+	
+	return true;
+}
+
+bool scallop::identify_equation2(int &ei, vector<int> &sub)
+{
 	vector<int> r = compute_representatives();
 	if(r.size() < 2) return false;
 
@@ -421,6 +508,13 @@ bool scallop::identify_equation(int &ei, vector<int> &sub)
 	}
 
 	sort(xi.begin(), xi.end());
+
+	printf("representatives: ");
+	for(int i = 0; i < xi.size(); i++)
+	{
+		printf("%d:%d:%d, ", i, xi[i].first, r[xi[i].second]);
+	}
+	printf("\n");
 
 	int min = -1;
 	for(int i = 1; i < xi.size(); i++)
@@ -521,6 +615,7 @@ bool scallop::identify_linkable_edges(int &ex, int &ey, vector<PI> &p)
 			for(int k = j + 1; k < v.size(); k++)
 			{
 				bool b = check_linkable(v[j], v[k], p);
+				//printf(" check %d and %d = %c\n", v[j], v[k], b ? 'T' : 'F');
 				if(b == false) continue;
 				ex = v[j];
 				ey = v[k];

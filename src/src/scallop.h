@@ -41,7 +41,9 @@ private:
 
 	// iteratively identify equations and update
 	bool iterate();
+	bool identify_equation2(int &ei, vector<int> &sub);
 	bool identify_equation(int &ei, vector<int> &sub);
+	bool identify_edge_equation(int ei, vector<int> &sub);
 	bool verify_equation(int ei, const vector<int> &sub);
 	int split_edge(int exi, int eyi);
 	vector<int> split_edge(int ei, const vector<int> &sub);

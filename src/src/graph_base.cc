@@ -13,8 +13,7 @@ graph_base::graph_base()
 
 graph_base::~graph_base()
 {
-	for(int i = 0; i < vv.size(); i++) delete vv[i];
-	for(edge_iterator it = se.begin(); it != se.end(); it++) delete (*it);
+	clear();
 }
 
 int graph_base::copy(const graph_base &gr)
@@ -156,8 +155,9 @@ int graph_base::get_edge_indices(VE &i2e, MEI &e2i)
 	return 0;
 }
 
-int graph_base::bfs(int s, vector<int> &v, vector<int> &b)
+int graph_base::bfs(int s, vector<int> &v, vector<int> &b, set<edge_descriptor> &ss)
 {
+	ss.clear();
 	v.assign(num_vertices(), -1);
 	b.assign(num_vertices(), -1);
 	vector<bool> closed;
@@ -180,6 +180,7 @@ int graph_base::bfs(int s, vector<int> &v, vector<int> &b)
 		for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
 		{
 			int y = (*it1)->target();
+			ss.insert(*it1);
 			if(v[y] == -1) 
 			{
 				v[y] = 1 + v[x];
@@ -193,10 +194,22 @@ int graph_base::bfs(int s, vector<int> &v, vector<int> &b)
 	return 0;
 }
 
+int graph_base::bfs(int s, vector<int> &v, vector<int> &b)
+{
+	set<edge_descriptor> ss;
+	return bfs(s, v, b, ss);
+}
+
 int graph_base::bfs(int t, vector<int> &v) 
 {
 	vector<int> b;
 	return bfs(t, v, b);
+}
+
+int graph_base::bfs(int t, set<edge_descriptor> &ss) 
+{
+	vector<int> v, b;
+	return bfs(t, v, b, ss);
 }
 
 bool graph_base::check_path(int s, int t) 
