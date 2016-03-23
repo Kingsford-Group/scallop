@@ -1,8 +1,12 @@
 #!/bin/bash
 
-num=18
-gene="ABI3BP"
+if [ "$#" != 2 ]
+then
+	exit
+fi
 
+gene=$1
+num=$2
 
 prefix="$gene".gr
 output="$gene".pdf
@@ -20,7 +24,6 @@ done
 
 pdftk $ss cat output $output
 rm "$prefix".*
-
 
 prefix="$gene".nt
 output="$gene".x.pdf
