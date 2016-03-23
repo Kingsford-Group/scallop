@@ -19,10 +19,13 @@ int scallop::assemble()
 	reconstruct_splice_graph();
 	gr.get_edge_indices(i2e, e2i);
 	init_disjoint_sets();
+	nt.build(gr);
+
 	printf("\nprocess %s\n", name.c_str());
-	round = 0;
 	print();
+
 	while(iterate());
+
 	printf("%s solution %d paths\n", name.c_str(), gr.compute_decomp_paths());
 	return 0;
 }
@@ -37,13 +40,13 @@ bool scallop::iterate()
 		if(flag0 == true) 
 		{
 			split_edge(ei, sub);
+			nt.build(gr);
 			if(sub.size() >= 2)
 			{
 				printf("decompose %d according to = (#", ei);
 				for(int i = 0; i < sub.size(); i++) printf(", %d", sub[i]);
 				printf(")\n");
 
-				round++;
 				print();
 			}
 		}
@@ -62,16 +65,14 @@ bool scallop::iterate()
 
 				build_adjacent_edges(p);
 				connect_adjacent_edges(ex, ey);
-				round++;
+				nt.build(gr);
+
 				print();
 			}
 
 			bool b2 = decompose_trivial_vertices();
-			if(b2 == true) 
-			{
-				round++;
-				print();
-			}
+			nt.build(gr);
+			if(b2 == true) print();
 
 			if(b1 == true || b2 == true) flag1 = true;
 			if(b1 == false && b2 == false) break;
@@ -86,10 +87,9 @@ bool scallop::iterate()
 	if(b == false) return false;
 
 	printf("shortest equal path (%d, %d)\n", ex, ey);
-
 	connect_equal_edges(ex, ey);
+	nt.build(gr);
 
-	round++;
 	print();
 
 	return true;
@@ -711,7 +711,6 @@ bool scallop::compute_shortest_equal_edges(int &ex, int &ey)
 
 int scallop::print()
 {
-	printf("round %d\n", round);
 	vector< vector<int> > vv = compute_disjoint_sets();
 	for(int i = 0; i < vv.size(); i++)
 	{
@@ -730,15 +729,19 @@ int scallop::print()
 	{
 		if(gr.degree(i) >= 1) n++;
 	}
-	printf("statistics: %lu edges, %d vertices\n\n", gr.num_edges(), n);
+	printf("statistics: %lu edges, %d vertices\n", gr.num_edges(), n);
+	printf("finish round %d\n\n", round);
 
+	/*
 	char buf[1024];
 	sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
 	draw_splice_graph(buf);
 
 	sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
-	nt.build(gr);
 	nt.draw(buf);
+	*/
+
+	round++;
 
 	return 0;
 }

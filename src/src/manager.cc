@@ -18,8 +18,9 @@ manager::~manager()
 {
 }
 
-int manager::process(const string &file)
+int manager::process(const string &file, string a)
 {
+	algo = a;
 	string s = file.substr(file.size() - 3, 3);
 	if(s == "bam" || s == "sam") assemble_bam(file);
 	else if(s == "gtf") assemble_gtf(file);
@@ -32,9 +33,6 @@ int manager::assemble_bam(const string &file)
     samFile *fn = sam_open(file.c_str(), "r");
     bam_hdr_t *h= sam_hdr_read(fn);
     bam1_t *b = bam_init1();
-
-	ofstream stringtie_fout("stringtie.gtf");
-	ofstream scallop_fout("scallop.gtf");
 
 	int index = 0;
 	bundle_base bb;
@@ -54,6 +52,7 @@ int manager::assemble_bam(const string &file)
 				continue;
 			}
 
+			/*
 			bundle bd(bb);
 			bd.print(index);
 			
@@ -70,6 +69,7 @@ int manager::assemble_bam(const string &file)
 
 			bd.output_gtf(stringtie_fout, st.paths, "stringtie", index);
 			bd.output_gtf(scallop_fout, sc.paths, "scallop", index);
+			*/
 
 			index++;
 			bb.clear();
@@ -77,9 +77,6 @@ int manager::assemble_bam(const string &file)
 		}
 		bb.add_hit(h, b);
     }
-
-	stringtie_fout.close();
-	scallop_fout.close();
 
     bam_destroy1(b);
     bam_hdr_destroy(h);
@@ -118,48 +115,44 @@ int manager::assemble_gtf(const string &file)
 		}
 	}
 
-	/*
-	ofstream stringtie_fout("stringtie.gtf");
-	ofstream standard_fout("standard.gtf");
-	*/
-
 	for(int i = 0; i < genes.size(); i++)
 	{
 		gtf_gene &gg = genes[i];
 		if(gg.exons.size() <= 0) continue;
 
+		string name = gg.exons[0].gene_id;
+
 		// DEBUG
-		//if(gg.exons[0].gene_id != "RABL2A" && gg.exons[0].gene_id != "BPTF") continue;
-		//if(gg.exons[0].gene_id != "ZNF415") continue;
+		//if(name != "ZNF415") continue;
 
 		splice_graph gr;
 		gg.build_splice_graph(gr);
 
 		string s;	
-		int p = gr.compute_num_paths();
-		assert(p >= gr.num_edges() - gr.num_vertices() + 2);
-		if(p == gr.num_edges() - gr.num_vertices() + 2) s = "EASY";
+		int p0 = gr.compute_num_paths();
+		int p1 = gr.num_edges() - gr.num_vertices() + 2;
+		assert(p0 >= p1);
+		if(p0 == p1) s = "EASY";
 		else s = "HARD";
 
-		if(s == "EASY") continue;
-
-		scallop sc(gg.exons[0].gene_id, gr);
-		sc.assemble();
-	
-		continue;
-
-		bool b = sc.gr.check_nested();
-
-		printf("gene %s, %lu transcipts, total %lu exons, %lu vertices, %lu edges %d paths, %s, %s\n",
-				gg.exons[0].gene_id.c_str(), gg.transcripts.size(), gg.exons.size(),
-				sc.gr.num_vertices(), sc.gr.num_edges(), p, s.c_str(), b ? "NESTED" : "GENERAL");
-
+		if(algo == "")
+		{
+			printf("gene %s, %lu transcipts, total %lu exons, %d paths, %d required, %s\n", 
+					name.c_str(), gg.transcripts.size(), gg.exons.size(), p0, p1, s.c_str());
+		}
+		else if(algo == "scallop")
+		{
+			if(s == "EASY") continue;
+			scallop sc(gg.exons[0].gene_id, gr);
+			sc.assemble();
+		}
+		else if(algo == "stringtie")
+		{
+			if(s == "EASY") continue;
+			stringtie st(gg.exons[0].gene_id, gr);
+			st.assemble();
+		}
 	}
-
-	/*
-	stringtie_fout.close();
-	standard_fout.close();
-	*/
 
 	return 0;
 }
@@ -171,7 +164,6 @@ int manager::assemble_example(const string &file)
 
 	scallop sc("example", gr);
 	sc.assemble();
-	sc.print();
 
 	return 0;
 }

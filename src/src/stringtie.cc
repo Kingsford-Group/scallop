@@ -1,7 +1,7 @@
 #include "stringtie.h"
 
-stringtie::stringtie(splice_graph &gr)
-	: assembler(gr)
+stringtie::stringtie(string &s, splice_graph &gr)
+	: assembler(s, gr)
 {}
 
 stringtie::~stringtie()
@@ -11,6 +11,7 @@ int stringtie::assemble()
 {
 	smooth_weights();
 	greedy();
+	printf("%s solution %lu paths\n", name.c_str(), paths.size());
 	return 0;
 }
 

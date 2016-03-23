@@ -2,6 +2,7 @@
 #define __MANAGER_H__
 
 #include <fstream>
+#include <string>
 
 using namespace std;
 
@@ -12,7 +13,10 @@ public:
 	~manager();
 
 public:
-	int process(const string &file);
+	string algo;
+
+public:
+	int process(const string &file, string a);
 
 	int assemble_bam(const string &file);
 	int assemble_gtf(const string &file);

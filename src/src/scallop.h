@@ -26,7 +26,6 @@ public:
 
 public:
 	int assemble();
-	int print();
 
 private:
 	// simplify the splice graph and init all data structures
@@ -56,6 +55,7 @@ private:
 
 	// test, print and draw
 	int draw_splice_graph(const string &file);
+	int print();
 };
 
 #endif

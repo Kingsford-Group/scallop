@@ -5,10 +5,6 @@
 #include <iomanip>
 #include <cfloat>
 
-assembler::assembler(const splice_graph &g)
-	: gr(g)
-{}
-
 assembler::assembler(const string &s, const splice_graph &g)
 	: gr(g), name(s)
 {}
