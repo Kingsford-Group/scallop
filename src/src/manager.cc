@@ -6,11 +6,9 @@
 #include "manager.h"
 #include "bundle.h"
 #include "stringtie.h"
-#include "scallop1.h"
-#include "scallop2.h"
-#include "scallop3.h"
+#include "scallop.h"
 #include "gtf_gene.h"
-#include "splice_graph.h"
+#include "nested_graph.h"
 
 manager::manager()
 {
@@ -20,8 +18,9 @@ manager::~manager()
 {
 }
 
-int manager::process(const string &file)
+int manager::process(const string &file, string a)
 {
+	algo = a;
 	string s = file.substr(file.size() - 3, 3);
 	if(s == "bam" || s == "sam") assemble_bam(file);
 	else if(s == "gtf") assemble_gtf(file);
@@ -34,9 +33,6 @@ int manager::assemble_bam(const string &file)
     samFile *fn = sam_open(file.c_str(), "r");
     bam_hdr_t *h= sam_hdr_read(fn);
     bam1_t *b = bam_init1();
-
-	ofstream stringtie_fout("stringtie.gtf");
-	ofstream scallop1_fout("scallop1.gtf");
 
 	int index = 0;
 	bundle_base bb;
@@ -56,6 +52,7 @@ int manager::assemble_bam(const string &file)
 				continue;
 			}
 
+			/*
 			bundle bd(bb);
 			bd.print(index);
 			
@@ -66,12 +63,13 @@ int manager::assemble_bam(const string &file)
 			st.assemble();
 			st.print("stringtie");
 
-			scallop1 sc(gr);
+			scallop sc("", gr);
 			sc.assemble();
-			sc.print("scallop1");
+			sc.print();
 
 			bd.output_gtf(stringtie_fout, st.paths, "stringtie", index);
-			bd.output_gtf(scallop1_fout, sc.paths, "scallop1", index);
+			bd.output_gtf(scallop_fout, sc.paths, "scallop", index);
+			*/
 
 			index++;
 			bb.clear();
@@ -79,9 +77,6 @@ int manager::assemble_bam(const string &file)
 		}
 		bb.add_hit(h, b);
     }
-
-	stringtie_fout.close();
-	scallop1_fout.close();
 
     bam_destroy1(b);
     bam_hdr_destroy(h);
@@ -120,71 +115,44 @@ int manager::assemble_gtf(const string &file)
 		}
 	}
 
-	/*
-	ofstream stringtie_fout("stringtie.gtf");
-	ofstream scallop1_fout("scallop1.gtf");
-	ofstream scallop2_fout("scallop2.gtf");
-	ofstream standard_fout("standard.gtf");
-	*/
-
 	for(int i = 0; i < genes.size(); i++)
 	{
 		gtf_gene &gg = genes[i];
 		if(gg.exons.size() <= 0) continue;
 
+		string name = gg.exons[0].gene_id;
+
 		// DEBUG
-		if(gg.exons[0].gene_id != "ABI3BP") continue;
+		//if(name != "ZNF415") continue;
 
 		splice_graph gr;
 		gg.build_splice_graph(gr);
 
 		string s;	
-		int p = compute_num_paths(gr);
-		assert(p >= num_edges(gr) - num_vertices(gr) + 2);
-		if(p == num_edges(gr) - num_vertices(gr) + 2) s = "EASY";
+		int p0 = gr.compute_num_paths();
+		int p1 = gr.num_edges() - gr.num_vertices() + 2;
+		assert(p0 >= p1);
+		if(p0 == p1) s = "EASY";
 		else s = "HARD";
 
-		if(s == "EASY") continue;
-
-		scallop3 sc(gg.exons[0].gene_id, gr);
-		sc.assemble();
-		//gg.output_gtf(scallop2_fout, sc.paths, "scallop2");
-
-		continue;
-
-		bool b = check_nested_splice_graph(sc.gr);
-
-		printf("gene %s, %lu transcipts, total %lu exons, %lu vertices, %lu edges %d paths, %s, %s\n",
-				gg.exons[0].gene_id.c_str(), gg.transcripts.size(), gg.exons.size(),
-				num_vertices(sc.gr), num_edges(sc.gr), p, s.c_str(), b ? "NESTED" : "GENERAL");
-
-
-		char buf[1024];
-		sprintf(buf, "%s.0.tex", gg.exons[0].gene_id.c_str());
-		draw_splice_graph(gr, buf, 1.4);
-
-		sprintf(buf, "%s.1.tex", gg.exons[0].gene_id.c_str());
-		draw_splice_graph(sc.gr, buf, 2.4);
-
-		/*
-		gg.output_gtf(standard_fout);
-
-		scallop2 sc(gr);
-		sc.assemble();
-		gg.output_gtf(scallop2_fout, sc.paths, "scallop2");
-
-		stringtie st(gr);
-		st.assemble();
-		gg.output_gtf(stringtie_fout, st.paths, "stringtie");
-		*/
+		if(algo == "")
+		{
+			printf("gene %s, %lu transcipts, total %lu exons, %d paths, %d required, %s\n", 
+					name.c_str(), gg.transcripts.size(), gg.exons.size(), p0, p1, s.c_str());
+		}
+		else if(algo == "scallop")
+		{
+			if(s == "EASY") continue;
+			scallop sc(gg.exons[0].gene_id, gr);
+			sc.assemble();
+		}
+		else if(algo == "stringtie")
+		{
+			if(s == "EASY") continue;
+			stringtie st(gg.exons[0].gene_id, gr);
+			st.assemble();
+		}
 	}
-
-	/*
-	stringtie_fout.close();
-	scallop1_fout.close();
-	scallop2_fout.close();
-	standard_fout.close();
-	*/
 
 	return 0;
 }
@@ -192,12 +160,10 @@ int manager::assemble_gtf(const string &file)
 int manager::assemble_example(const string &file)
 {
 	splice_graph gr;
-	build_splice_graph(gr, file);
-	draw_splice_graph(gr, "splice_graph.tex");
+	gr.build(file);
 
-	scallop2 sc(gr);
+	scallop sc("example", gr);
 	sc.assemble();
-	sc.print("scallop2");
 
 	return 0;
 }

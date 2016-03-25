@@ -417,9 +417,9 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, const string &
 int bundle::build_splice_graph(splice_graph &gr) const
 {
 	// vertices: start, each region, end
-	add_vertex(gr);
-	put(get(vertex_weight, gr), 0, 0);
-	put(get(vertex_stddev, gr), 0, 1);
+	gr.add_vertex();
+	gr.set_vertex_weight(0, 0);
+	gr.set_vertex_stddev(0, 1);
 	for(int i = 0; i < regions.size(); i++)
 	{
 		const region &r = regions[i];
@@ -431,13 +431,13 @@ int bundle::build_splice_graph(splice_graph &gr) const
 			dev = r.dev_abd;					
 			//dev = r.dev_abd / sqrt(r.rcore - r.lcore); // TODO
 		}
-		add_vertex(gr);
-		put(get(vertex_weight, gr), i + 1, ave);
-		put(get(vertex_stddev, gr), i + 1, dev);
+		gr.add_vertex();
+		gr.set_vertex_weight(i + 1, ave);
+		gr.set_vertex_stddev(i + 1, dev);
 	}
-	add_vertex(gr);
-	put(get(vertex_weight, gr), regions.size() + 1, 0);
-	put(get(vertex_stddev, gr), regions.size() + 1, 1);
+	gr.add_vertex();
+	gr.set_vertex_weight(regions.size() + 1, 0);
+	gr.set_vertex_stddev(regions.size() + 1, 1);
 
 	// edges: connecting adjacent regions => e2w
 	for(int i = 0; i < regions.size() - 1; i++)
@@ -459,10 +459,9 @@ int bundle::build_splice_graph(splice_graph &gr) const
 		double wt = xr < yl ? xr : yl;
 		double sd = 0.5 * x.dev_abd + 0.5 * y.dev_abd;
 
-		PEB p = add_edge(i + 1, i + 2, gr);
-		assert(p.second == true);
-		put(get(edge_weight, gr), p.first, wt);
-		put(get(edge_stddev, gr), p.first, sd);
+		edge_descriptor p = gr.add_edge(i + 1, i + 2);
+		gr.set_edge_weight(p, wt);
+		gr.set_edge_stddev(p, sd);
 	}
 
 	// edges: each junction => and e2w
@@ -474,10 +473,9 @@ int bundle::build_splice_graph(splice_graph &gr) const
 
 		double sd = 0.5 * x.dev_abd + 0.5 * y.dev_abd;
 
-		PEB p = add_edge(b.lrgn + 1, b.rrgn + 1, gr);
-		assert(p.second == true);
-		put(get(edge_weight, gr), p.first, b.count);
-		put(get(edge_stddev, gr), p.first, sd);
+		edge_descriptor p = gr.add_edge(b.lrgn + 1, b.rrgn + 1);
+		gr.set_edge_weight(p, b.count);
+		gr.set_edge_stddev(p, sd);
 	}
 
 	// edges: connecting start/end and regions
@@ -492,20 +490,18 @@ int bundle::build_splice_graph(splice_graph &gr) const
 		//if(r.ltype == LEFT_BOUNDARY || r.ltype == START_BOUNDARY)
 		if(r.left_break() || r.ltype == LEFT_BOUNDARY || r.ltype == START_BOUNDARY)
 		{
-			PEB p = add_edge(ss, i + 1, gr);
-			assert(p.second == true);
-			put(get(edge_weight, gr), p.first, r.ave_abd);
-			put(get(edge_stddev, gr), p.first, r.dev_abd);
+			edge_descriptor p = gr.add_edge(ss, i + 1);
+			gr.set_edge_weight(p, r.ave_abd);
+			gr.set_edge_stddev(p, r.dev_abd);
 		}
 
 		// TODO
 		//if(r.rtype == RIGHT_BOUNDARY || r.rtype == END_BOUNDARY) 
 		if(r.right_break() || r.rtype == RIGHT_BOUNDARY || r.rtype == END_BOUNDARY) 
 		{
-			PEB p = add_edge(i + 1, tt, gr);
-			assert(p.second == true);
-			put(get(edge_weight, gr), p.first, r.ave_abd);
-			put(get(edge_stddev, gr), p.first, r.dev_abd);
+			edge_descriptor p = gr.add_edge(i + 1, tt);
+			gr.set_edge_weight(p, r.ave_abd);
+			gr.set_edge_stddev(p, r.dev_abd);
 		}
 	}
 
@@ -515,8 +511,8 @@ int bundle::build_splice_graph(splice_graph &gr) const
 	{
 		const region &r = regions[i];
 		if(r.empty == false) continue;
-		assert(in_degree(i + 1, gr) == 0);
-		assert(out_degree(i + 1, gr) == 0);
+		assert(gr.in_degree(i + 1) == 0);
+		assert(gr.out_degree(i + 1) == 0);
 	}
 
 	return 0;

@@ -50,6 +50,7 @@ extern double min_average_overlap;
 extern int min_max_region_overlap;
 extern double min_region_coverage;
 extern int max_num_bundles;
+extern int max_dp_table_size;
 
 // load parameters
 int load_config(const char * conf_file);

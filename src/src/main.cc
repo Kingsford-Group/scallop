@@ -6,7 +6,7 @@
 
 #include "manager.h"
 #include "config.h"
-#include "splice_graph.h"
+#include "subsetsum.h"
 
 using namespace std;
 
@@ -17,7 +17,8 @@ int main(int argc, char **argv)
 	load_config(argv[1]);
 
 	manager sc;
-	sc.process(argv[2]);
+	if(argc == 3) sc.process(argv[2], "");
+	else sc.process(argv[2], argv[3]);
 
     return 0;
 }

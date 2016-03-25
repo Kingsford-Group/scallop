@@ -6,7 +6,7 @@
 class stringtie : public assembler
 {
 public:
-	stringtie(splice_graph &g);
+	stringtie(string &s, splice_graph &g);
 	virtual ~stringtie();
 
 public:

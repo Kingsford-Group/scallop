@@ -5,10 +5,6 @@
 #include <iomanip>
 #include <cfloat>
 
-assembler::assembler(const splice_graph &g)
-	: gr(g)
-{}
-
 assembler::assembler(const string &s, const splice_graph &g)
 	: gr(g), name(s)
 {}
@@ -23,31 +19,31 @@ int assembler::smooth_weights()
 	return 0;
 }
 
-path assembler::compute_maximum_forward_path() const
+path assembler::compute_maximum_forward_path()
 {
 	path p;
 	vector<double> table;		// dynamic programming table
 	vector<int> back;			// back pointers
-	table.resize(num_vertices(gr), 0);
-	back.resize(num_vertices(gr), -1);
+	table.resize(gr.num_vertices(), 0);
+	back.resize(gr.num_vertices(), -1);
 	table[0] = DBL_MAX;
-	int n = num_vertices(gr);
+	int n = gr.num_vertices();
 	for(int i = 1; i < n; i++)
 	{
-		double abd = get(get(vertex_weight, gr), i);
+		double abd = gr.get_vertex_weight(i);
 		if(i == n - 1) abd = DBL_MAX;
 
 		double max_abd = 0;
 		int max_idx = -1;
-		in_edge_iterator it1, it2;
-		for(tie(it1, it2) = in_edges(i, gr); it1 != it2; it1++)
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
 		{
-			int s = source(*it1, gr);
-			int t = target(*it1, gr);
+			int s = (*it1)->source();
+			int t = (*it1)->target();
 			assert(t == i);
 			assert(s < i);
 			//if(s >= i) continue;
-			double xw = get(get(edge_weight, gr), *it1);
+			double xw = gr.get_edge_weight(*it1);
 			double ww = xw < table[s] ? xw : table[s];
 			if(ww >= max_abd)
 			{
@@ -78,7 +74,7 @@ path assembler::compute_maximum_forward_path() const
 	return p;
 }
 
-path assembler::compute_maximum_path() const
+path assembler::compute_maximum_path()
 {
 	path p;
 	fibonacci_heap f;						// fibonacci heap
@@ -87,10 +83,10 @@ path assembler::compute_maximum_path() const
 	vector<bool> visited;			// whether each node is visited
 	vector<int> backptr;			// backward pointers
 
-	handles.resize(num_vertices(gr));
-	reached.resize(num_vertices(gr), false);
-	visited.resize(num_vertices(gr), false);
-	backptr.resize(num_vertices(gr), -1);
+	handles.resize(gr.num_vertices());
+	reached.resize(gr.num_vertices(), false);
+	visited.resize(gr.num_vertices(), false);
+	backptr.resize(gr.num_vertices(), -1);
 
 	handle_t h = f.push(fnode(0, DBL_MAX));
 	handles[0] = h;
@@ -102,16 +98,16 @@ path assembler::compute_maximum_path() const
 		fnode fx = f.top();
 		visited[fx.v] = true;
 
-		if(fx.v == num_vertices(gr) - 1) break;
+		if(fx.v == gr.num_vertices() - 1) break;
 		
 		f.pop();
-		out_edge_iterator it1, it2;
-		for(tie(it1, it2) = out_edges(fx.v, gr); it1 != it2; it1++)
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = gr.out_edges(fx.v); it1 != it2; it1++)
 		{
-			int y = target(*it1, gr);
+			int y = (*it1)->target();
 			if(visited[y] == true) continue;
 
-			double xw = get(get(edge_weight, gr), *it1);
+			double xw = gr.get_edge_weight(*it1);
 			double ww = xw < fx.w ? xw : fx.w;
 			if(reached[y] == false) 
 			{
@@ -136,7 +132,7 @@ path assembler::compute_maximum_path() const
 
 	p.abd = f.top().w;
 	p.v.clear();
-	int b = num_vertices(gr) - 1;
+	int b = gr.num_vertices() - 1;
 	while(true)
 	{
 		p.v.push_back(b);
@@ -154,13 +150,13 @@ int assembler::decrease_path(const path &p)
 	if(p.v.size() < 2) return 0;
 	for(int i = 0; i < p.v.size() - 1; i++)
 	{
-		PEB e = edge(p.v[i], p.v[i + 1], gr);
+		PEB e = gr.edge(p.v[i], p.v[i + 1]);
 		assert(e.second == true);
-		double w0 = get(get(edge_weight, gr), e.first);
+		double w0 = gr.get_edge_weight(e.first);
 		double w1 = w0 - p.abd;
 		assert(w1 >= -0.000001);
 		if(w1 <= 0) w1 = 0;
-		put(get(edge_weight, gr), e.first, w1);
+		gr.set_edge_weight(e.first, w1);
 	}
 	return 0;
 }
@@ -170,11 +166,11 @@ int assembler::increase_path(const path &p)
 	if(p.v.size() < 2) return 0;
 	for(int i = 0; i < p.v.size() - 1; i++)
 	{
-		PEB e = edge(p.v[i], p.v[i + 1], gr);
+		PEB e = gr.edge(p.v[i], p.v[i + 1]);
 		assert(e.second == true);
-		double w0 = get(get(edge_weight, gr), e.first);
+		double w0 = gr.get_edge_weight(e.first);
 		double w1 = w0 + p.abd;
-		put(get(edge_weight, gr), e.first, w1);
+		gr.set_edge_weight(e.first, w1);
 	}
 	return 0;
 }
@@ -184,9 +180,8 @@ int assembler::add_backward_path(const path &p)
 	if(p.v.size() < 2) return 0;
 	for(int i = 0; i < p.v.size() - 1; i++)
 	{
-		PEB e = add_edge(p.v[i + 1], p.v[i], gr);
-		assert(e.second == true);
-		put(get(edge_weight, gr), e.first, p.abd);
+		edge_descriptor e = gr.add_edge(p.v[i + 1], p.v[i]);
+		gr.set_edge_weight(e, p.abd);
 	}
 	return 0;
 }
@@ -196,19 +191,19 @@ int assembler::remove_backward_path(const path &p)
 	if(p.v.size() < 2) return 0;
 	for(int i = 0; i < p.v.size() - 1; i++)
 	{
-		remove_edge(p.v[i + 1], p.v[i], gr);
+		gr.edge(p.v[i + 1], p.v[i]);
 	}
 	return 0;
 }
 
-double assembler::compute_bottleneck_weight(const path &p) const
+double assembler::compute_bottleneck_weight(const path &p)
 {
 	double ww = DBL_MAX;
 	for(int i = 0; i < p.v.size() - 1; i++)
 	{
-		PEB e = edge(p.v[i], p.v[i + 1], gr);
+		PEB e = gr.edge(p.v[i], p.v[i + 1]);
 		assert(e.second == true);
-		double w = get(get(edge_weight, gr), e.first);
+		double w = gr.get_edge_weight(e.first);
 		if(w < ww) ww = w;
 	}
 	return ww;

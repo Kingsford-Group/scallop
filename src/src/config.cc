@@ -27,6 +27,7 @@ double min_average_overlap;
 int min_max_region_overlap;
 double min_region_coverage;
 int max_num_bundles;
+int max_dp_table_size;
 
 int load_config(const char * conf_file)
 {
@@ -121,6 +122,10 @@ int load_config(const char * conf_file)
 		else if(strcmp(key, "max_num_bundles")==0)
 		{
 			max_num_bundles = (int)atoi(value);
+		}
+		else if(strcmp(key, "max_dp_table_size")==0)
+		{
+			max_dp_table_size = (int)atoi(value);
 		}
 	}
 
