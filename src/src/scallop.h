@@ -39,19 +39,29 @@ private:
 	vector< vector<int> > compute_disjoint_sets();
 	set<int> compute_singletons();
 
-	// iteratively identify equations and update
+	// main flow of the algorithm
 	bool iterate();
+
+	// identify equations 
 	bool identify_equation(int &ei, vector<int> &sub);
 	bool identify_edge_equation(int ei, vector<int> &sub);
+
+	// split edge with identified equal edges
 	int split_edge(int exi, int eyi);
 	vector<int> split_edge(int ei, const vector<int> &sub);
+
+	// check, and make two equal edges adjacent 
 	bool identify_linkable_edges(int &ex, int &ey, vector<PI> &p);
 	bool check_linkable(int ex, int ey, vector<PI> &p);
 	int build_adjacent_edges(const vector<PI> &p);
 	int connect_adjacent_edges(int x, int y);
-	bool decompose_trivial_vertices();
+
+	// compute, and merge two equal edges with minimum distance
 	bool compute_shortest_equal_edges(int &ex, int &ey);
 	int connect_equal_edges(int x, int y);
+
+	// decompose trivial vertices 
+	bool decompose_trivial_vertices();
 
 	// test, print and draw
 	int draw_splice_graph(const string &file);
