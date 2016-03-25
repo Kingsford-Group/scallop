@@ -4,6 +4,8 @@
 #include "splice_graph.h"
 #include "path.h"
 
+#include <string>
+
 class assembler
 {
 public:
@@ -21,15 +23,6 @@ public:
 
 protected:
 	int smooth_weights();
-
-	double compute_bottleneck_weight(const path &p);
-	path compute_maximum_forward_path();
-	path compute_maximum_path();
-
-	int decrease_path(const path &p);
-	int increase_path(const path &p);
-	int add_backward_path(const path &p);
-	int remove_backward_path(const path &p);
 };
 
 #endif

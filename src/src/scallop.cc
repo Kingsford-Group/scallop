@@ -99,9 +99,11 @@ int scallop::init_super_edges()
 {
 	mev.clear();
 	edge_iterator it1, it2;
-	vector<int> v;
 	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
 	{
+		vector<int> v;
+		int s = (*it1)->source();
+		v.push_back(s);
 		mev.insert(PEV(*it1, v));
 	}
 	return 0;
@@ -157,7 +159,7 @@ bool scallop::init_trivial_vertex(int x)
 			assert(mev.find(*ot1) != mev.end());
 
 			vector<int> v = mev[*it1];
-			v.push_back(x);
+			//v.push_back(x);
 			v.insert(v.end(), mev[*ot1].begin(), mev[*ot1].end());
 
 			mev.insert(PEV(p, v));
@@ -327,7 +329,7 @@ int scallop::connect_adjacent_edges(int x, int y)
 	gr.set_edge_stddev(p, wx1);
 
 	vector<int> v = mev[xx];
-	v.push_back(xt);
+	//v.push_back(xt);
 	v.insert(v.end(), mev[yy].begin(), mev[yy].end());
 
 	mev.insert(PEV(p, v));
