@@ -333,12 +333,20 @@ int splice_graph::bfs_w(int s, double w, vector<int> &v, VE &b)
 	return 0;
 }
 
-bool splice_graph::compute_shortest_path_w(int s, int t, double w, VE &p)
+int splice_graph::compute_shortest_path_w(int s, int t, double w)
 {
 	vector<int> v;
 	VE b;
 	bfs_w(s, w, v, b);
-	if(v[t] == -1) return false;
+	return v[t];
+}
+
+int splice_graph::compute_shortest_path_w(int s, int t, double w, VE &p)
+{
+	vector<int> v;
+	VE b;
+	bfs_w(s, w, v, b);
+	if(v[t] == -1) return -1;
 
 	p.clear();
 	int x = t;
@@ -348,5 +356,5 @@ bool splice_graph::compute_shortest_path_w(int s, int t, double w, VE &p)
 		p.push_back(b[x]);
 		x = b[x]->source();
 	}
-	return true;
+	return v[t];
 }

@@ -44,7 +44,8 @@ public:
 
 	// bfs with weight contraints
 	int bfs_w(int s, double w, vector<int> &v, VE &b);
-	bool compute_shortest_path_w(int s, int t, double w, VE &p);
+	int compute_shortest_path_w(int s, int t, double w);
+	int compute_shortest_path_w(int s, int t, double w, VE &p);
 
 	// modify the splice_graph
 	int clear();
