@@ -6,6 +6,8 @@
 #include <map>
 #include <cassert>
 
+#define SMIN 0.0000000001
+
 using namespace std;
 
 class splice_graph : public directed_graph
@@ -39,6 +41,11 @@ public:
 
 	// algorithm
 	double compute_bottleneck_weight(const vector<int> &p);
+
+	// bfs with weight contraints
+	int bfs_w(int s, double w, vector<int> &v, VE &b);
+	int compute_shortest_path_w(int s, int t, double w);
+	int compute_shortest_path_w(int s, int t, double w, VE &p);
 
 	// modify the splice_graph
 	int clear();

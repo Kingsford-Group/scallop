@@ -293,3 +293,68 @@ double splice_graph::compute_bottleneck_weight(const vector<int> &p)
 	}
 	return x;
 }
+
+int splice_graph::bfs_w(int s, double w, vector<int> &v, VE &b)
+{
+	v.assign(num_vertices(), -1);
+	b.assign(num_vertices(), null_edge);
+	vector<bool> closed;
+	closed.resize(num_vertices(), false);
+	vector<int> open;
+	open.push_back(s);
+	v[s] = 0;
+	int p = 0;
+
+	while(p < open.size())
+	{
+		int x = open[p];
+		assert(v[x] >= 0);
+
+		p++;
+		if(closed[x] == true) continue;
+		closed[x] = true;
+
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
+		{
+			int y = (*it1)->target();
+			double ww = get_edge_weight(*it1);
+			if(ww < w - SMIN) continue;
+			if(v[y] == -1) 
+			{
+				v[y] = 1 + v[x];
+				b[y] = (*it1);
+			}
+			assert(v[y] <= 1 + v[x]);
+			if(closed[y] == true) continue;
+			open.push_back(y);
+		}
+	}
+	return 0;
+}
+
+int splice_graph::compute_shortest_path_w(int s, int t, double w)
+{
+	vector<int> v;
+	VE b;
+	bfs_w(s, w, v, b);
+	return v[t];
+}
+
+int splice_graph::compute_shortest_path_w(int s, int t, double w, VE &p)
+{
+	vector<int> v;
+	VE b;
+	bfs_w(s, w, v, b);
+	if(v[t] == -1) return -1;
+
+	p.clear();
+	int x = t;
+	while(x != s)
+	{
+		assert(b[x] != null_edge);
+		p.push_back(b[x]);
+		x = b[x]->source();
+	}
+	return v[t];
+}
