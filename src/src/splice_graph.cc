@@ -2,6 +2,7 @@
 #include <sstream>
 #include <fstream>
 #include <cfloat>
+#include <algorithm>
 
 using namespace std;
 
@@ -356,5 +357,6 @@ int splice_graph::compute_shortest_path_w(int s, int t, double w, VE &p)
 		p.push_back(b[x]);
 		x = b[x]->source();
 	}
+	reverse(p.begin(), p.end());
 	return v[t];
 }

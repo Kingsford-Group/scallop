@@ -21,6 +21,7 @@ int scallop::assemble()
 	init_disjoint_sets();
 	nt.build(gr);
 
+	round = 0;
 	printf("\nprocess %s\n", name.c_str());
 	print();
 
@@ -246,52 +247,25 @@ int scallop::connect_equal_edges(int x, int y)
 	int ys = (yy)->source();
 	int yt = (yy)->target();
 
-	vector<int> p;
-	bool b = gr.compute_shortest_path(xt, ys, p);
-	assert(b == true);
-	assert(p.size() >= 1);
-
 	double wx = gr.get_edge_weight(xx);
 	double wy = gr.get_edge_weight(yy);
-
 	assert(fabs(wx - wy) <= SMIN);
 
-	double wp = gr.compute_bottleneck_weight(p);
-	assert(wp >= wx - SMIN);
+	VE p;
+	int l = gr.compute_shortest_path_w(xt, ys, wx, p);
+	assert(l >= 0);
 
-	int pre = x;
-	for(int i = 0; i < p.size() - 1; i++)
+	vector<int> v;
+	v.push_back(x);
+	for(int i = 0; i < p.size(); i++)
 	{
-		edge_iterator it1, it2;
-		int ee = -1;
-		double dist = DBL_MAX;
-		for(tie(it1, it2) = gr.out_edges(p[i]); it1 != it2; it1++)
-		{
-			if((*it1)->target() != p[i + 1]) continue;
-			double w = gr.get_edge_weight(*it1);
-			if(w <= wx - SMIN) continue;
-			double d = fabs(w - wx);
-			if(d < dist)
-			{
-				dist = d;
-				ee = e2i[*it1];
-			}
-		}
-		assert(ee != -1);
-
-		int x1 = split_edge(ee, pre);
-		int e1 = connect_adjacent_equal_edges(pre, x1);
-		assert(e1 != -1);
-		pre = e1;
+		assert(e2i.find(p[i]) != e2i.end());
+		v.push_back(e2i[p[i]]);
 	}
+	v.push_back(y);
 
-	int x1 = split_edge(y, pre);
-	assert(x1 == y);
-	connect_adjacent_equal_edges(pre, y);
-
-	return 0;
+	return connect_path(v, wx);
 }
-
 
 int scallop::connect_adjacent_equal_edges(int x, int y)
 {
@@ -363,6 +337,8 @@ int scallop::connect_path(const vector<int> &p, double ww)
 	{
 		int s = i2e[p[i]]->source();
 		int t = i2e[p[i]]->target();
+
+		//printf("path at %d, s = %d, t = %d, pret = %d\n", i, s, t, pret);
 		assert(s == pret);
 		pret = t;
 	}
@@ -695,53 +671,46 @@ bool scallop::compute_closest_equal_edges(int &ex, int &ey)
 {
 	ex = ey = -1;
 	vector< vector<int> > vv = compute_disjoint_sets();
-	bool flag = false;
-	int min = -1;
-
+	int min = INT_MAX;
 	for(int i = 0; i < vv.size(); i++)
 	{
 		vector<int> &v = vv[i];
 		if(v.size() == 1) continue;
 		for(int j = 0; j < v.size(); j++)
 		{
+			int xs = i2e[v[j]]->source();
+			int xt = i2e[v[j]]->target();
 			double wx = gr.get_edge_weight(i2e[v[j]]);
 			for(int k = j + 1; k < v.size(); k++)
 			{
-				vector<int> p1;
-				vector<int> p2;
-				bool b1 = gr.compute_shortest_path(i2e[v[j]], i2e[v[k]], p1);
-				bool b2 = gr.compute_shortest_path(i2e[v[k]], i2e[v[j]], p2);
+				int ys = i2e[v[k]]->source();
+				int yt = i2e[v[k]]->target();
+				double wy = gr.get_edge_weight(i2e[v[k]]);
 
-				assert(b1 == false || b2 == false);
-				if(b1 == false && b2 == false) continue;
-				assert(b1 != b2);
+				assert(fabs(wx - wy) <= SMIN);
 
-				if(b1 == true)
+				int pxy = gr.compute_shortest_path_w(xt, ys, wx);
+				int pyx = gr.compute_shortest_path_w(yt, xs, wx);
+				
+				assert(pxy == -1 || pyx == -1);
+				if(pxy == -1 && pyx == -1) continue;
+
+				if(pxy >= 0 && pxy < min)
 				{
-					double w = gr.compute_bottleneck_weight(p1);
-					if(wx - SMIN >= w) continue;
-					if(min == -1 || min > p1.size())
-					{
-						min = p1.size();
-						ex = v[j];
-						ey = v[k];
-					}
+					min = pxy;
+					ex = v[j];
+					ey = v[k];
 				}
-				else
+				else if(pyx >= 0 && pyx < min)
 				{
-					double w = gr.compute_bottleneck_weight(p2);
-					if(wx - SMIN >= w) continue;
-					if(min == -1 || min > p2.size())
-					{
-						min = p2.size();
-						ex = v[k];
-						ey = v[j];
-					}
+					min = pyx;
+					ex = v[k];
+					ey = v[j];
 				}
 			}
 		}
 	}
-	if(min == -1) return false;
+	if(min == INT_MAX) return false;
 	else return true;
 }
 
