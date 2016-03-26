@@ -19,6 +19,7 @@ typedef pair<edge_descriptor, double> PED;
 typedef map<edge_descriptor, int> MEI;
 typedef pair<edge_descriptor, int> PEI;
 typedef vector<edge_descriptor> VE;
+typedef set<edge_descriptor> SE;
 
 class graph_base
 {

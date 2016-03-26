@@ -39,12 +39,17 @@ private:
 	vector< vector<int> > compute_disjoint_sets();
 	set<int> compute_singletons();
 
-	// main flow of the algorithm
-	bool iterate();
+	// different level of the algorithm
+	bool iterate4();
+	bool iterate3();
+	bool iterate2();
+	bool iterate1();
 
-	// identify equations 
-	bool identify_equation(int &ei, vector<int> &sub);
-	bool identify_edge_equation(int ei, vector<int> &sub);
+	// identify and handle equations 
+	bool identify_equation1(vector<int> &subs, vector<int> &subt);
+	bool identify_equation2(vector<int> &subs, vector<int> &subt);
+	bool identify_equation_sub(const vector<int> &subs, vector<int> &subt);
+	bool split_equation(const vector<int> &subs, const vector<int> &subt);
 
 	// split exi w.r.t eyi
 	int split_edge(int exi, double w);
