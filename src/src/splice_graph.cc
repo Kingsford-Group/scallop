@@ -275,26 +275,6 @@ bool splice_graph::check_fully_connected()
 	return true;
 }
 
-double splice_graph::compute_bottleneck_weight(const vector<int> &p)
-{
-	double x = DBL_MAX;
-	if(p.size() <= 1) return x;
-
-	for(int i = 0; i < p.size() - 1; i++)
-	{
-		edge_iterator it1, it2;
-		double max = 0;
-		for(tie(it1, it2) = out_edges(p[i]); it1 != it2; it1++)
-		{
-			if((*it1)->target() != p[i + 1]) continue;
-			double w = get_edge_weight(*it1);
-			if(w > max) max = w;
-		}
-		if(max < x) x = max;
-	}
-	return x;
-}
-
 int splice_graph::bfs_w(int s, double w, vector<int> &v, VE &b)
 {
 	v.assign(num_vertices(), -1);
@@ -359,4 +339,59 @@ int splice_graph::compute_shortest_path_w(int s, int t, double w, VE &p)
 	}
 	reverse(p.begin(), p.end());
 	return v[t];
+}
+
+double splice_graph::compute_maximum_path_w(VE &p)
+{
+	p.clear();
+	vector<double> table;		// dynamic programming table
+	VE back;					// backtrace edge pointers
+	table.resize(num_vertices(), 0);
+	back.resize(num_vertices(), null_edge);
+	table[0] = DBL_MAX;
+
+	vector<int> tp = topological_sort();
+	int n = num_vertices();
+	assert(tp.size() == n);
+	assert(tp[0] == 0);
+	assert(tp[n - 1] == n - 1);
+
+	for(int ii = 1; ii < n; ii++)
+	{
+		int i = tp[ii];
+		if(degree(i) == 0) continue;
+
+		double max_abd = 0;
+		edge_descriptor max_edge = null_edge;
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = in_edges(i); it1 != it2; it1++)
+		{
+			int s = (*it1)->source();
+			int t = (*it1)->target();
+			assert(t == i);
+			double xw = get_edge_weight(*it1);
+			double ww = xw < table[s] ? xw : table[s];
+			if(ww >= max_abd)
+			{
+				max_abd = ww;
+				max_edge = *it1;
+			}
+		}
+		assert(max_edge != null_edge);
+
+		back[i] = max_edge;
+		table[i] = max_abd;
+	}
+
+	int x = n - 1;
+	while(true)
+	{
+		edge_descriptor e = back[x]; 
+		if(e == null_edge) break;
+		p.push_back(e);
+		x = e->source();
+	}
+	reverse(p.begin(), p.end());
+
+	return table[n - 1];
 }

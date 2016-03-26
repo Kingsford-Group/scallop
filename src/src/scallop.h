@@ -60,15 +60,15 @@ private:
 	// compute, and merge two closest equal edges with minimum distance
 	bool compute_closest_equal_edges(int &ex, int &ey);
 	int connect_equal_edges(int x, int y);
+	int connect_path(const vector<int> &p, double ww);
+	int connect_path(const VE &p, double ww);
 
 	// decompose trivial vertices 
 	bool decompose_trivial_vertices();
 
 	// greedily decompose the splice graph into paths
-	double compute_maximum_weight_path(vector<int> &p);
-
-	// split the path out
-	int connect_path(const vector<int> &p, double ww);
+	int collect_paths();
+	vector<int> recover_path(int e);
 
 	// test, print and draw
 	int draw_splice_graph(const string &file);

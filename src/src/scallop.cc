@@ -27,7 +27,12 @@ int scallop::assemble()
 
 	while(iterate());
 
-	printf("%s solution %d paths\n", name.c_str(), gr.compute_decomp_paths());
+	int p = gr.compute_decomp_paths();
+
+	collect_paths();
+
+	printf("%s solution %lu paths, expected = %d paths\n", name.c_str(), paths.size(), p);
+
 	return 0;
 }
 
@@ -159,11 +164,12 @@ bool scallop::init_trivial_vertex(int x)
 			assert(mev.find(*it1) != mev.end());
 			assert(mev.find(*ot1) != mev.end());
 
-			vector<int> v = mev[*it1];
-			//v.push_back(x);
-			v.insert(v.end(), mev[*ot1].begin(), mev[*ot1].end());
+			vector<int> v1 = mev[*it1];
+			vector<int> v2 = mev[*ot1];
+			v1.insert(v1.end(), v2.begin(), v2.end());
 
-			mev.insert(PEV(p, v));
+			if(mev.find(p) != mev.end()) mev[p] = v1;
+			else mev.insert(PEV(p, v1));
 		}
 	}
 	gr.clear_vertex(x);
@@ -255,15 +261,21 @@ int scallop::connect_equal_edges(int x, int y)
 	int l = gr.compute_shortest_path_w(xt, ys, wx, p);
 	assert(l >= 0);
 
+	p.insert(p.begin(), xx);
+	p.insert(p.end(), yy);
+
+	return connect_path(p, wx);
+}
+
+int scallop::connect_path(const VE &p, double wx)
+{
 	vector<int> v;
-	v.push_back(x);
 	for(int i = 0; i < p.size(); i++)
 	{
+		assert(p[i] != null_edge);
 		assert(e2i.find(p[i]) != e2i.end());
 		v.push_back(e2i[p[i]]);
 	}
-	v.push_back(y);
-
 	return connect_path(v, wx);
 }
 
@@ -303,10 +315,10 @@ int scallop::connect_adjacent_equal_edges(int x, int y)
 	gr.set_edge_stddev(p, wx1);
 
 	vector<int> v = mev[xx];
-	//v.push_back(xt);
 	v.insert(v.end(), mev[yy].begin(), mev[yy].end());
 
-	mev.insert(PEV(p, v));
+	if(mev.find(p) != mev.end()) mev[p] = v;
+	else mev.insert(PEV(p, v));
 
 	assert(i2e[n] == p);
 	assert(e2i.find(p) != e2i.end());
@@ -337,8 +349,6 @@ int scallop::connect_path(const vector<int> &p, double ww)
 	{
 		int s = i2e[p[i]]->source();
 		int t = i2e[p[i]]->target();
-
-		//printf("path at %d, s = %d, t = %d, pret = %d\n", i, s, t, pret);
 		assert(s == pret);
 		pret = t;
 	}
@@ -350,7 +360,7 @@ int scallop::connect_path(const vector<int> &p, double ww)
 		int ee = connect_adjacent_equal_edges(pree, e);
 		pree = ee;
 	}
-	return 0;
+	return pree;
 }
 
 int scallop::split_edge(int ei, double w)
@@ -376,8 +386,11 @@ int scallop::split_edge(int ei, double w)
 	gr.set_edge_stddev(p1, dd);
 	gr.set_edge_stddev(p2, dd);
 
-	mev.insert(PEV(p1, mev[ee]));
-	mev.insert(PEV(p2, mev[ee]));
+	if(mev.find(p1) != mev.end()) mev[p1] = mev[ee];
+	else mev.insert(PEV(p1, mev[ee]));
+
+	if(mev.find(p2) != mev.end()) mev[p2] = mev[ee];
+	else mev.insert(PEV(p2, mev[ee]));
 
 	int n = i2e.size();
 	i2e.push_back(p1);
@@ -714,63 +727,54 @@ bool scallop::compute_closest_equal_edges(int &ex, int &ey)
 	else return true;
 }
 
-double scallop::compute_maximum_weight_path(vector<int> &p)
+int scallop::collect_paths()
 {
-	p.clear();
-	vector<double> table;		// dynamic programming table
-	vector<int> back;			// backtrace edge pointers
-	table.resize(gr.num_vertices(), 0);
-	back.resize(gr.num_vertices(), -1);
-	table[0] = DBL_MAX;
-
-	vector<int> tp = gr.topological_sort();
-	int n = gr.num_vertices();
-	assert(tp.size() == n);
-	assert(tp[0] == 0);
-	assert(tp[n - 1] == n - 1);
-
-	for(int ii = 1; ii < n; ii++)
-	{
-		int i = tp[ii];
-		if(gr.degree(i) == 0) continue;
-
-		double max_abd = 0;
-		int max_idx = -1;
-		edge_iterator it1, it2;
-		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
-		{
-			int s = (*it1)->source();
-			int t = (*it1)->target();
-			assert(t == i);
-			double xw = gr.get_edge_weight(*it1);
-			double ww = xw < table[s] ? xw : table[s];
-			if(ww >= max_abd)
-			{
-				max_abd = ww;
-				max_idx = e2i[*it1];
-			}
-		}
-		assert(max_idx != -1);
-
-		back[i] = max_idx;
-		table[i] = max_abd;
-	}
-
-	int x = n - 1;
+	paths.clear();
 	while(true)
 	{
-		int e = back[x]; 
-		if(e == -1) break;
-		p.push_back(e);
-		x = i2e[e]->source();
-	}
-	reverse(p.begin(), p.end());
+		VE v;
+		double w = gr.compute_maximum_path_w(v);
+		if(w <= 0.5) break;
 
-	return table[n - 1];
+		int e = connect_path(v, w);
+
+		path p;
+		p.abd = w;
+		p.v = recover_path(e);
+		paths.push_back(p);
+
+		gr.remove_edge(i2e[e]);
+		e2i.erase(i2e[e]);
+		i2e[e] = null_edge;
+	}
+	return 0;
+}
+
+vector<int> scallop::recover_path(int e)
+{
+	assert(i2e[e] != null_edge);
+	assert(mev.find(i2e[e]) != mev.end());
+	vector<int> v = mev[i2e[e]];
+	sort(v.begin(), v.end());
+
+	assert(v[0] == 0);
+	assert(v[v.size() - 1] < gr.num_vertices() - 1);
+	v.push_back(gr.num_vertices() - 1);
+	return v;
 }
 
 int scallop::print()
 {
+	/*
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	{
+		vector<int> v = mev[*it1];
+		printf("vertices in edge %d = ", e2i[*it1]);
+		for(int i = 0; i < v.size(); i++) printf("%d ", v[i]);
+		printf("\n");
+	}
+
 	vector< vector<int> > vv = compute_disjoint_sets();
 	for(int i = 0; i < vv.size(); i++)
 	{
@@ -784,6 +788,7 @@ int scallop::print()
 		for(int j = 1; j < v.size(); j++) printf(", %d", v[j]);
 		printf(")\n");
 	}
+	*/
 	int n = 0;
 	for(int i = 0; i < gr.num_vertices(); i++) 
 	{
@@ -792,14 +797,12 @@ int scallop::print()
 	printf("statistics: %lu edges, %d vertices\n", gr.num_edges(), n);
 	printf("finish round %d\n\n", round);
 
-	/*
 	char buf[1024];
 	sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
 	draw_splice_graph(buf);
 
 	sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
 	nt.draw(buf);
-	*/
 
 	round++;
 
