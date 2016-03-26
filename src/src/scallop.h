@@ -66,9 +66,14 @@ private:
 	// decompose trivial vertices 
 	bool decompose_trivial_vertices();
 
-	// greedily decompose the splice graph into paths
-	int collect_paths();
-	vector<int> recover_path(int e);
+	// greedily decompose remaining splice graph into paths
+	int greedy_decompose();
+
+	// collect existing s-t path e
+	int collect_path(int e);
+
+	// compute optimal path! this is not optimal!
+	bool identify_optimal_paths();
 
 	// test, print and draw
 	int draw_splice_graph(const string &file);

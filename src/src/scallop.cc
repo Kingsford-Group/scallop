@@ -27,9 +27,9 @@ int scallop::assemble()
 
 	while(iterate());
 
-	int p = gr.compute_decomp_paths();
+	int p = gr.compute_decomp_paths() + paths.size();
 
-	collect_paths();
+	greedy_decompose();
 
 	printf("%s solution %lu paths, expected = %d paths\n", name.c_str(), paths.size(), p);
 
@@ -727,32 +727,46 @@ bool scallop::compute_closest_equal_edges(int &ex, int &ey)
 	else return true;
 }
 
-int scallop::collect_paths()
+int scallop::greedy_decompose()
 {
-	paths.clear();
 	while(true)
 	{
 		VE v;
 		double w = gr.compute_maximum_path_w(v);
 		if(w <= 0.5) break;
-
 		int e = connect_path(v, w);
-
-		path p;
-		p.abd = w;
-		p.v = recover_path(e);
-		paths.push_back(p);
-
-		gr.remove_edge(i2e[e]);
-		e2i.erase(i2e[e]);
-		i2e[e] = null_edge;
+		collect_path(e);
 	}
 	return 0;
 }
 
-vector<int> scallop::recover_path(int e)
+bool scallop::identify_optimal_paths()
+{
+	bool flag = false;
+	while(true)
+	{
+		VE v;
+		bool b = gr.compute_optimal_path(v);
+		if(b == false) break;
+		flag = true;
+
+		double w = gr.compute_minimum_weight(v);
+		int e = connect_path(v, w);
+
+		printf("connect optimal path %d, weight = %.2lf\n", e, w);
+		print();
+
+		collect_path(e);
+	}
+	return flag;
+}
+
+int scallop::collect_path(int e)
 {
 	assert(i2e[e] != null_edge);
+	assert(i2e[e]->source() == 0);
+	assert(i2e[e]->target() == gr.num_vertices() - 1);
+
 	assert(mev.find(i2e[e]) != mev.end());
 	vector<int> v = mev[i2e[e]];
 	sort(v.begin(), v.end());
@@ -760,7 +774,17 @@ vector<int> scallop::recover_path(int e)
 	assert(v[0] == 0);
 	assert(v[v.size() - 1] < gr.num_vertices() - 1);
 	v.push_back(gr.num_vertices() - 1);
-	return v;
+
+	path p;
+	p.abd = gr.get_edge_weight(i2e[e]);
+	p.v = v;
+	paths.push_back(p);
+
+	gr.remove_edge(i2e[e]);
+	e2i.erase(i2e[e]);
+	i2e[e] = null_edge;
+
+	return 0;
 }
 
 int scallop::print()

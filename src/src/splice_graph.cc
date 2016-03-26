@@ -228,6 +228,7 @@ int splice_graph::compute_decomp_paths()
 		if(degree(i) == 0) continue;
 		n++;
 	}
+	if(n == 0) return 0;
 	int m = num_edges();
 	return (m - n + 2);
 }
@@ -394,4 +395,86 @@ double splice_graph::compute_maximum_path_w(VE &p)
 	reverse(p.begin(), p.end());
 
 	return table[n - 1];
+}
+
+bool splice_graph::compute_optimal_path(VE &p)
+{
+	p.clear();
+	vector<double> table;		// dynamic programming table
+	VE back;					// backtrace edge pointers
+	table.resize(num_vertices(), 0);
+	back.resize(num_vertices(), null_edge);
+	table[0] = 0;
+
+	vector<int> tp = topological_sort();
+	int n = num_vertices();
+	assert(tp.size() == n);
+	assert(tp[0] == 0);
+	assert(tp[n - 1] == n - 1);
+
+	edge_iterator it1, it2;
+	for(int ii = 1; ii < n; ii++)
+	{
+		int i = tp[ii];
+		if(degree(i) == 0) continue;
+
+		double sum = 0;
+		for(tie(it1, it2) = in_edges(i); it1 != it2; it1++)
+		{
+			sum += get_edge_weight(*it1);
+		}
+
+		double req = DBL_MAX;
+		edge_descriptor ee = null_edge;
+		for(tie(it1, it2) = in_edges(i); it1 != it2; it1++)
+		{
+			int s = (*it1)->source();
+			int t = (*it1)->target();
+			double xw = get_edge_weight(*it1);
+			double ww = sum - xw + table[s];
+			if(ww < req)
+			{
+				req = ww;
+				ee = *it1;
+			}
+		}
+		assert(ee != null_edge);
+
+		back[i] = ee;
+		table[i] = req;
+	}
+
+	edge_descriptor opt = null_edge;
+	for(tie(it1, it2) = in_edges(n - 1); it1 != it2; it1++)
+	{
+		int s = (*it1)->source();
+		double w = get_edge_weight(*it1);
+		if(w < table[s] + 1) continue;
+		opt = *it1;
+		break;
+	}
+
+	if(opt == null_edge) return false;
+
+	edge_descriptor e = opt;
+	while(e != null_edge)
+	{
+		p.push_back(e);
+		int s = e->source();
+		e = back[s];
+	}
+	reverse(p.begin(), p.end());
+
+	return true;
+}
+
+double splice_graph::compute_minimum_weight(const VE &p)
+{
+	double min = DBL_MAX;
+	for(int i = 0; i < p.size(); i++)
+	{
+		double w = get_edge_weight(p[i]);
+		if(w < min) min = w;
+	}
+	return min;
 }

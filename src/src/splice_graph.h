@@ -57,6 +57,10 @@ public:
 	int compute_shortest_path_w(int s, int t, double w);
 	int compute_shortest_path_w(int s, int t, double w, VE &p);
 	double compute_maximum_path_w(VE &p);
+	double compute_minimum_weight(const VE &p);
+
+	// determine optimal path
+	bool compute_optimal_path(VE &p);
 };
 
 #endif
