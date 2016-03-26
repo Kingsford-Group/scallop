@@ -30,6 +30,7 @@ int scallop::assemble()
 	int p = gr.compute_decomp_paths() + paths.size();
 
 	greedy_decompose();
+	assert(gr.num_edges() == 0);
 
 	printf("%s solution %lu paths, expected = %d paths\n", name.c_str(), paths.size(), p);
 
