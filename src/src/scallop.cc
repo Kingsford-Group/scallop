@@ -1195,12 +1195,14 @@ int scallop::print()
 	printf("statistics: %lu edges, %d vertices\n", gr.num_edges(), n);
 	printf("finish round %d\n\n", round);
 
+	/*
 	char buf[1024];
 	sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
 	draw_splice_graph(buf);
 
 	sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
 	nt.draw(buf);
+	*/
 
 	round++;
 
