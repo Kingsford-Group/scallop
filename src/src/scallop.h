@@ -50,6 +50,8 @@ private:
 	bool identify_equation2(vector<int> &subs, vector<int> &subt);
 	bool identify_equation(const vector<int> &subs, vector<int> &subt);
 	bool split_equation(const vector<int> &subs, const vector<int> &subt);
+	bool split_equation_greedy(const vector<int> &subs, const vector<int> &subt);
+	bool split_equation_maxflow(const vector<int> &subs, const vector<int> &subt);
 
 	// split exi w.r.t eyi
 	int split_edge(int exi, double w);

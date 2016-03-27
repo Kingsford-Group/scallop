@@ -509,6 +509,104 @@ vector<int> scallop::split_edge(int ei, const vector<int> &sub)
 
 bool scallop::split_equation(const vector<int> &subs, const vector<int> &subt)
 {
+	bool b = split_equation_maxflow(subs, subt);
+	if(b == false) return false;
+	split_equation_greedy(subs, subt);
+	return true;
+}
+
+bool scallop::split_equation_greedy(const vector<int> &subs, const vector<int> &subt)
+{
+	vector<int> vv;
+	for(int i = 0; i < subs.size(); i++) vv.push_back(subs[i]);
+	for(int i = 0; i < subt.size(); i++) vv.push_back(subt[i]);
+
+	directed_graph g;
+	for(int i = 0; i < vv.size(); i++) g.add_vertex();
+
+	for(int i = 0; i < subs.size(); i++)
+	{
+		for(int j = subs.size(); j < vv.size(); j++)
+		{
+			bool f1 = gr.check_path(i2e[vv[i]], i2e[vv[j]]);
+			bool f2 = gr.check_path(i2e[vv[j]], i2e[vv[i]]);
+			assert(f1 == false || f2 == false);
+			if(f1 == false && f2 == false) continue;
+			g.add_edge(i, j);
+		}
+	}
+
+	while(g.num_edges() >= 1)
+	{
+		bool flag = false;
+		for(int i = 0; i < subs.size(); i++)
+		{
+			if(g.out_degree(i) == 0) continue;
+			if(g.out_degree(i) >= 2) continue;
+			edge_iterator it1, it2;
+			tie(it1, it2) = g.out_edges(i);
+			int j = (*it1)->target();
+			double wi = gr.get_edge_weight(i2e[vv[i]]);
+			double wj = gr.get_edge_weight(i2e[vv[j]]);
+			//printf(" A: edge %d:%d:%.0lf -> %d:%d:%.0lf\n", i, vv[i], wi, j, vv[j], wj);
+			assert(wi <= wj);
+			int e = split_edge(vv[j], vv[i]);
+			g.clear_vertex(i);
+			if(e == vv[j]) assert(g.degree(j) == 0);
+			vv[j] = e + 1;
+			flag = true;
+			break;
+		}
+		if(flag == true) continue;
+
+		for(int j = subs.size(); j < vv.size(); j++)
+		{
+			if(g.in_degree(j) == 0) continue;
+			if(g.in_degree(j) >= 2) continue;
+			edge_iterator it1, it2;
+			tie(it1, it2) = g.in_edges(j);
+			int i = (*it1)->source();
+			double wi = gr.get_edge_weight(i2e[vv[i]]);
+			double wj = gr.get_edge_weight(i2e[vv[j]]);
+			//printf(" B: edge %d:%d:%.0lf -> %d:%d:%.0lf\n", i, vv[i], wi, j, vv[j], wj);
+			assert(wi >= wj);
+			int e = split_edge(vv[i], vv[j]);
+			g.clear_vertex(j);
+			if(e == vv[i]) assert(g.degree(i) == 0);
+			vv[i] = e + 1;
+			flag = true;
+			break;
+		}
+		if(flag == true) continue;
+
+		edge_iterator it1, it2;
+		tie(it1, it2) = g.edges();
+		int i = (*it1)->source();
+		int j = (*it1)->target();
+		assert(i < subs.size());
+		assert(j >= subs.size());
+		double wi = gr.get_edge_weight(i2e[vv[i]]);
+		double wj = gr.get_edge_weight(i2e[vv[j]]);
+		//printf(" C: edge %d:%d:%.0lf -> %d:%d:%.0lf\n", i, vv[i], wi, j, vv[j], wj);
+		if(wi >= wj)
+		{
+			int e = split_edge(vv[i], vv[j]);
+			g.clear_vertex(j);
+			if(e == vv[i]) assert(g.degree(i) == 0);
+			vv[i] = e + 1;
+		}
+		else
+		{
+			int e = split_edge(vv[j], vv[i]);
+			g.clear_vertex(i);
+			if(e == vv[j]) assert(g.degree(j) == 0);
+			vv[j] = e + 1;
+		}
+	}
+}
+
+bool scallop::split_equation_maxflow(const vector<int> &subs, const vector<int> &subt)
+{
 	using namespace boost;
 
 	typedef adjacency_list_traits<vecS, vecS, bidirectionalS> Traits;
@@ -587,12 +685,13 @@ bool scallop::split_equation(const vector<int> &subs, const vector<int> &subt)
 	int sum = (sums < sumt) ? sums : sumt;
 
 	int flow = push_relabel_max_flow(g, s, t);
-	
+
 	assert(flow <= sum);
 	if(flow != sum) return false;
+	else return true;
+
 
 	// print flow
-	/*
 	Traits::edge_descriptor ee;
 	bool bb;
 	for(int i = 0; i < subs.size(); i++)
@@ -617,7 +716,7 @@ bool scallop::split_equation(const vector<int> &subs, const vector<int> &subt)
 					i + 1, j + 1 + subs.size(), capacity[ee], capacity[ee] - residual_capacity[ee]);
 		}
 	}
-	*/
+
 
 	vector< vector<int> > st(subs.size());
 	vector< vector<int> > ts(subt.size());
