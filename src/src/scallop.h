@@ -48,7 +48,7 @@ private:
 	// identify and handle equations 
 	bool identify_equation1(vector<int> &subs, vector<int> &subt);
 	bool identify_equation2(vector<int> &subs, vector<int> &subt);
-	bool identify_equation_sub(const vector<int> &subs, vector<int> &subt);
+	bool identify_equation(const vector<int> &subs, vector<int> &subt);
 	bool split_equation(const vector<int> &subs, const vector<int> &subt);
 
 	// split exi w.r.t eyi

@@ -5,6 +5,9 @@
 #include <iostream>
 #include <cfloat>
 
+#include <boost/graph/push_relabel_max_flow.hpp>
+#include <boost/graph/adjacency_list.hpp>
+
 scallop::scallop(const string &name, splice_graph &gr)
 	: assembler(name, gr)
 {}
@@ -53,16 +56,13 @@ bool scallop::iterate4()
 		{
 			nt.build(gr);
 
-			if(subs.size() >= 2 || subt.size() >= 2)
-			{
-				printf("equation subs = (%d", subs[0]);
-				for(int i = 1; i < subs.size(); i++) printf(", %d", subs[i]);
-				printf("), subt = (%d", subt[0]);
-				for(int i = 1; i < subt.size(); i++) printf(", %d", subt[i]);
-				printf(")\n");
+			printf("equation subs = (%d", subs[0]);
+			for(int i = 1; i < subs.size(); i++) printf(", %d", subs[i]);
+			printf("), subt = (%d", subt[0]);
+			for(int i = 1; i < subt.size(); i++) printf(", %d", subt[i]);
+			printf(")\n");
 
-				print();
-			}
+			if(subs.size() >= 2 || subt.size() >= 2) print();
 		}
 
 		if(b1 == true || b2 == true) flag = true;
@@ -509,44 +509,169 @@ vector<int> scallop::split_edge(int ei, const vector<int> &sub)
 
 bool scallop::split_equation(const vector<int> &subs, const vector<int> &subt)
 {
-	assert(subs.size() >= 1);
-	assert(subt.size() >= 1);
-	if(subs.size() == 1) 
-	{
-		split_edge(subs[0], subt);
-		return true;
-	}
-	else if(subt.size() == 1)
-	{
-		split_edge(subt[0], subs);
-		return true;
-	}
-	else
-	{
-		int es = -1;
-		int et = -1;
-		for(int i = 0; i < subs.size(); i++)
-		{
-			for(int j = 0; j < subt.size(); j++)
-			{
-				vector<PI> p;
-				bool b = check_linkable(subs[i], subt[j], p);
-				if(b == false) continue;
-				es = subs[i];
-				et = subt[j];
-				break;
-			}
-			if(es != -1) break;
-		}
-		if(es == -1) return false;
+	using namespace boost;
 
-		double ws = gr.get_edge_weight(i2e[es]); 
-		double wt = gr.get_edge_weight(i2e[et]); 
-		if(ws >= wt) split_edge(es, et);
-		else split_edge(et, es);
-		return true;
+	typedef adjacency_list_traits<vecS, vecS, bidirectionalS> Traits;
+	typedef adjacency_list<vecS, vecS, bidirectionalS, 
+			property<vertex_name_t, std::string>,
+			property<edge_capacity_t, int,
+			property<edge_residual_capacity_t, int,
+			property<edge_reverse_t, Traits::edge_descriptor> > > > Graph;
+
+	Graph g;
+
+	property_map<Graph, edge_capacity_t>::type capacity = get(edge_capacity, g);
+	property_map<Graph, edge_reverse_t>::type rev = get(edge_reverse, g);
+	property_map<Graph, edge_residual_capacity_t>::type residual_capacity = get(edge_residual_capacity, g);
+
+	// vertices
+	add_vertex(g);
+	for(int i = 0; i < subs.size(); i++) add_vertex(g);
+	for(int i = 0; i < subt.size(); i++) add_vertex(g);
+	add_vertex(g);
+
+	int n = num_vertices(g);
+
+	int s = 0;
+	int t = n - 1;
+
+	// edges from s to subs
+	Traits::edge_descriptor e1, e2;
+	bool b1, b2;
+	int sums = 0;
+	int sumt = 0;
+	for(int i = 0; i < subs.size(); i++)
+	{
+		tie(e1, b1) = add_edge(s, i + 1, g);
+		tie(e2, b2) = add_edge(i + 1, s, g);
+		int w = (int)(gr.get_edge_weight(i2e[subs[i]]));
+		capacity[e1] = w;
+		capacity[e2] = 0;
+		rev[e1] = e2;
+		rev[e2] = e1;
+		sums += w;
 	}
-	return 0;
+
+	// edges from subt to t
+	for(int i = 0; i < subt.size(); i++)
+	{
+		tie(e1, b1) = add_edge(i + 1 + subs.size(), t, g);
+		tie(e2, b2) = add_edge(t, i + 1 + subs.size(), g);
+		int w = (int)(gr.get_edge_weight(i2e[subt[i]]));
+		capacity[e1] = w;
+		capacity[e2] = 0;
+		rev[e1] = e2;
+		rev[e2] = e1;
+		sumt += w;
+	}
+
+	// edges between subs and subt
+	for(int i = 0; i < subs.size(); i++)
+	{
+		for(int j = 0; j < subt.size(); j++)
+		{
+			bool f1 = gr.check_path(i2e[subs[i]], i2e[subt[j]]);
+			bool f2 = gr.check_path(i2e[subt[j]], i2e[subs[i]]);
+			assert(f1 == false || f2 == false);
+			if(f1 == false && f2 == false) continue;
+
+			tie(e1, b1) = add_edge(i + 1, j + 1 + subs.size(), g);
+			tie(e2, b2) = add_edge(j + 1 + subs.size(), i + 1, g);
+			capacity[e1] = sums + sumt;
+			capacity[e2] = 0;
+			rev[e1] = e2;
+			rev[e2] = e1;
+		}
+	}
+
+	int sum = (sums < sumt) ? sums : sumt;
+
+	int flow = push_relabel_max_flow(g, s, t);
+	
+	assert(flow <= sum);
+	if(flow != sum) return false;
+
+	// print flow
+	/*
+	Traits::edge_descriptor ee;
+	bool bb;
+	for(int i = 0; i < subs.size(); i++)
+	{
+		tie(ee, bb) = edge(s, i + 1, g);
+		printf("edge %3d -> %3d, capacity = %5d, flow = %5d\n", 
+				0, i + 1, capacity[ee], capacity[ee] - residual_capacity[ee]);
+	}
+	for(int i = 0; i < subt.size(); i++)
+	{
+		tie(ee, bb) = edge(i + 1 + subs.size(), t, g);
+		printf("edge %3lu -> %3d, capacity = %5d, flow = %5d\n", 
+				i + 1 + subs.size(), t, capacity[ee], capacity[ee] - residual_capacity[ee]);
+	}
+	for(int i = 0; i < subs.size(); i++)
+	{
+		for(int j = 0; j < subt.size(); j++)
+		{
+			tie(ee, bb) = edge(i + 1, j + 1 + subs.size(), g);
+			if(bb == false) continue;
+			printf("edge %3d -> %3lu, capacity = %5d, flow = %5d\n", 
+					i + 1, j + 1 + subs.size(), capacity[ee], capacity[ee] - residual_capacity[ee]);
+		}
+	}
+	*/
+
+	vector< vector<int> > st(subs.size());
+	vector< vector<int> > ts(subt.size());
+	graph_traits<Graph>::out_edge_iterator oi1, oi2;
+	for(int i = 0; i < subs.size(); i++) 
+	{
+		st[i].assign(subt.size(), -1);
+
+		int ee = subs[i];
+		for (tie(oi1, oi2) = out_edges(i + 1, g); oi1 != oi2; oi1++)
+		{
+			int ss = source(*oi1, g) - 1;
+			int tt = target(*oi1, g) - 1 - subs.size();
+			assert(ss == i);
+			if(tt < 0) continue;
+			int f = capacity[*oi1] - residual_capacity[*oi1];
+			assert(f >= 0);
+			if(f == 0) continue;
+			st[ss][tt] = split_edge(ee, (double)(f));
+			ee = st[ss][tt] + 1;
+		}
+	}
+	graph_traits<Graph>::in_edge_iterator ii1, ii2;
+	for(int i = 0; i < subt.size(); i++)
+	{
+		ts[i].assign(subs.size(), -1);
+
+		int ee = subt[i];
+		for (tie(ii1, ii2) = in_edges(i + 1 + subs.size(), g); ii1 != ii2; ii1++)
+		{
+			int ss = source(*ii1, g) - 1;
+			int tt = target(*ii1, g) - 1 - subs.size();
+			assert(tt == i);
+			if(ss == t - 1) continue;
+			int f = capacity[*ii1] - residual_capacity[*ii1];
+			assert(f >= 0);
+			if(f == 0) continue;
+			ts[tt][ss] = split_edge(ee, (double)(f));
+			ee = ts[tt][ss] + 1;
+		}
+	}
+
+	for(int i = 0; i < subs.size(); i++)
+	{
+		for(int j = 0; j < subt.size(); j++)
+		{
+			if(st[i][j] == -1) assert(ts[j][i] == -1);
+			if(ts[j][i] == -1) assert(st[i][j] == -1);
+			if(st[i][j] == -1) continue;
+			printf("connect %d and %d\n", st[i][j], ts[j][i]);
+			split_edge(st[i][j], ts[j][i]);
+		}
+	}
+	return true;
 }
 
 bool scallop::identify_equation1(vector<int> &subs, vector<int> &subt)
@@ -569,7 +694,7 @@ bool scallop::identify_equation1(vector<int> &subs, vector<int> &subt)
 		vector<int> s;
 		s.push_back(e);
 		vector<int> t;
-		bool b = identify_equation_sub(s, t);
+		bool b = identify_equation(s, t);
 		if(b == false) continue;
 		if(subt.size() == 0 || t.size() < subt.size())
 		{
@@ -607,7 +732,7 @@ bool scallop::identify_equation2(vector<int> &subs, vector<int> &subt)
 			s.push_back(e1);
 			s.push_back(e2);
 			vector<int> t;
-			bool b = identify_equation_sub(s, t);
+			bool b = identify_equation(s, t);
 			if(b == false) continue;
 			if(subt.size() == 0 || t.size() < subt.size())
 			{
@@ -621,7 +746,7 @@ bool scallop::identify_equation2(vector<int> &subs, vector<int> &subt)
 	else return false;
 }
 
-bool scallop::identify_equation_sub(const vector<int> &subs, vector<int> &subt)
+bool scallop::identify_equation(const vector<int> &subs, vector<int> &subt)
 {
 	if(subs.size() == 0) return false;
 
@@ -633,9 +758,9 @@ bool scallop::identify_equation_sub(const vector<int> &subs, vector<int> &subt)
 	SE ff, bb;
 	gr.bfs(t, ff);
 	gr.bfs_reverse(s, bb);
+	ff.insert(bb.begin(), bb.end());
 
-	VE ffv(gr.num_edges());
-	VE bbv(gr.num_edges());
+	VE vv(gr.num_edges());
 
 	for(int i = 1; i < subs.size(); i++)
 	{
@@ -647,11 +772,10 @@ bool scallop::identify_equation_sub(const vector<int> &subs, vector<int> &subt)
 		SE f, b;
 		gr.bfs(t, f);
 		gr.bfs_reverse(s, b);
+		f.insert(b.begin(), b.end());
 
-		VE::iterator fit = set_union(f.begin(), f.end(), ff.begin(), ff.end(), ffv.begin());
-		VE::iterator bit = set_union(b.begin(), b.end(), bb.begin(), bb.end(), bbv.begin());
-		ff = SE(ffv.begin(), fit);
-		bb = SE(bbv.begin(), bit);
+		VE::iterator it = set_union(f.begin(), f.end(), ff.begin(), ff.end(), vv.begin());
+		ff = SE(vv.begin(), it);
 	}
 
 	int sw = (int)(w);
@@ -661,14 +785,6 @@ bool scallop::identify_equation_sub(const vector<int> &subs, vector<int> &subt)
 	set<int> ss(subs.begin(), subs.end());
 	vector<PI> xi;
 	for(SE::iterator it = ff.begin(); it != ff.end(); it++)
-	{
-		if(sr.find(e2i[*it]) == sr.end()) continue;
-		if(ss.find(e2i[*it]) != ss.end()) continue;
-		int ww = (int)(gr.get_edge_weight(*it));
-		if(ww > sw) continue;
-		xi.push_back(PI(ww, e2i[*it]));
-	}
-	for(SE::iterator it = bb.begin(); it != bb.end(); it++)
 	{
 		if(sr.find(e2i[*it]) == sr.end()) continue;
 		if(ss.find(e2i[*it]) != ss.end()) continue;
