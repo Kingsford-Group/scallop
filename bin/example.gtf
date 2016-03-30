@@ -1,6 +1,0 @@
-2L	test	exon	500	600	.	+	.	transcript_id "T1"; gene_id "G1"; expression "1";
-2L	test	exon	300	400	.	+	.	transcript_id "T1"; gene_id "G1"; expression "1";
-2L	test	exon	100	200	.	+	.	transcript_id "T1"; gene_id "G1"; expression "1";
-
-2L	test	exon	100	150	.	+	.	transcript_id "T2"; gene_id "G1"; expression "2";
-2L	test	exon	250	550	.	+	.	transcript_id "T2"; gene_id "G1"; expression "2";
