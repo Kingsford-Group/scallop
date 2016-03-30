@@ -131,8 +131,14 @@ int manager::assemble_gtf(const string &file)
 		string s;	
 		int p0 = gr.compute_num_paths();
 		int p1 = gr.num_edges() - gr.num_vertices() + 2;
+		int p2 = gg.transcripts.size();
 		assert(p0 >= p1);
-		if(p0 == p1) s = "EASY";
+
+		//printf("#paths = %d, delta = %d, #transcripts = %d\n", p0, p1, p2);
+
+		if(p0 == p1) assert(p2 >= p1);
+		if(p0 == p1) s = "TRIVIAL";
+		else if(p2 >= p1) s = "EASY";
 		else s = "HARD";
 
 		if(algo == "")
@@ -142,13 +148,13 @@ int manager::assemble_gtf(const string &file)
 		}
 		else if(algo == "scallop")
 		{
-			if(s == "EASY") continue;
+			if(s != "HARD") continue;
 			scallop sc(gg.exons[0].gene_id, gr);
 			sc.assemble();
 		}
 		else if(algo == "stringtie")
 		{
-			if(s == "EASY") continue;
+			if(s != "HARD") continue;
 			stringtie st(gg.exons[0].gene_id, gr);
 			st.assemble();
 		}
