@@ -161,3 +161,33 @@
 	\item Arbitrarily decompose the remaining graph using greedy algorithm
 	\end{itemize}
 }
+
+\frame
+{
+	\frametitle{Simulation Results}
+
+	\begin{itemize}
+	\item Use iGenome annotation~(gtf file) of Human genome.
+	\vspace{0.2cm}
+	\item Use Flux Simulator to only simulate expression levels~(all with default parameters).
+	\vspace{0.2cm}
+	\item Simulate independently 100 instances and compute their average.
+	\vspace{0.2cm}
+	\end{itemize}
+
+	\def\SA{\hspace*{0pt}}
+	\def\SC{\hspace*{-2pt}}
+	\def\SB{\hspace*{1pt}}
+	\def\SD{\hspace*{3pt}}
+
+	\begin{center}%
+		\setlength{\tabcolsep}{0.9pt}%
+		\begin{tabular}{cccccccccccccccccccccccccccc}%
+		\hline
+		     & #genes & #trivial & #easy & #hard & greedy & scallop &
+		mean & 11376.5 & 8212.9 & 128.8 & 3034.9& 98.4 & 7.5 &
+		std  & 86.7 & 51.6 & 4.9 & 39.6 & 4.2 & 2.8 &
+		\hline\noalign{\smallskip}%
+		\end{tabular}%
+	\end{center}%
+}
