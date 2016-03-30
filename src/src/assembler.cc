@@ -4,7 +4,9 @@
 
 assembler::assembler(const string &s, const splice_graph &g)
 	: gr(g), name(s)
-{}
+{
+	paths.clear();
+}
 
 assembler::~assembler()
 {}
