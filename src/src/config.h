@@ -52,6 +52,13 @@ extern double min_region_coverage;
 extern int max_num_bundles;
 extern int max_dp_table_size;
 
+extern string algo;
+extern string input_file;
+extern string output_gtf_file;
+
+// parse arguments
+bool parse_arguments(int argc, const char ** argv);
+
 // load parameters
 int load_config(const char * conf_file);
 

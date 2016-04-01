@@ -18,13 +18,13 @@ manager::~manager()
 {
 }
 
-int manager::process(const string &file, string a)
+int manager::process()
 {
-	algo = a;
-	string s = file.substr(file.size() - 3, 3);
-	if(s == "bam" || s == "sam") assemble_bam(file);
-	else if(s == "gtf") assemble_gtf(file);
-	else assemble_example(file);
+	if(input_file == "") return 0;
+	string s = input_file.substr(input_file.size() - 3, 3);
+	if(s == "bam" || s == "sam") assemble_bam(input_file);
+	else if(s == "gtf") assemble_gtf(input_file);
+	else assemble_example(input_file);
 	return 0;
 }
 
@@ -115,6 +115,9 @@ int manager::assemble_gtf(const string &file)
 		}
 	}
 
+	ofstream fout;
+	if(output_gtf_file != "") fout.open(output_gtf_file);
+
 	for(int i = 0; i < genes.size(); i++)
 	{
 		gtf_gene &gg = genes[i];
@@ -134,8 +137,6 @@ int manager::assemble_gtf(const string &file)
 		int p2 = gg.transcripts.size();
 		assert(p0 >= p1);
 
-		//printf("#paths = %d, delta = %d, #transcripts = %d\n", p0, p1, p2);
-
 		if(p0 == p1) assert(p2 >= p1);
 		if(p0 == p1) s = "TRIVIAL";
 		else if(p2 >= p1) s = "EASY";
@@ -145,20 +146,27 @@ int manager::assemble_gtf(const string &file)
 		{
 			printf("gene %s, %lu transcipts, total %lu exons, %d paths, %d required, %s\n", 
 					name.c_str(), gg.transcripts.size(), gg.exons.size(), p0, p1, s.c_str());
+
+			if(output_gtf_file == "") continue;
+			gg.output_gtf(fout);
+			continue;
 		}
-		else if(algo == "scallop")
-		{
-			if(s != "HARD") continue;
-			scallop sc(gg.exons[0].gene_id, gr);
-			sc.assemble();
-		}
-		else if(algo == "stringtie")
-		{
-			if(s != "HARD") continue;
-			stringtie st(gg.exons[0].gene_id, gr);
-			st.assemble();
-		}
+
+		if(s != "HARD") continue;
+
+		assembler * a;
+
+		if(algo == "scallop") a = new scallop(name, gr);
+		else if(algo == "stringtie") a = new stringtie(name, gr);
+		else continue;
+
+		a->assemble();
+
+		if(output_gtf_file == "") continue;
+		gg.output_gtf(fout, a->paths, algo);
 	}
+
+	if(output_gtf_file != "") fout.close();
 
 	return 0;
 }

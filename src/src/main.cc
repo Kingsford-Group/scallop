@@ -6,19 +6,16 @@
 
 #include "manager.h"
 #include "config.h"
-#include "subsetsum.h"
 
 using namespace std;
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
-	if(argc < 3) return 0;
-
-	load_config(argv[1]);
+	bool b = parse_arguments(argc, argv);
+	if(b == false) return 0;
 
 	manager sc;
-	if(argc == 3) sc.process(argv[2], "");
-	else sc.process(argv[2], argv[3]);
+	sc.process();
 
     return 0;
 }

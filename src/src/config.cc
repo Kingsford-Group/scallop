@@ -29,6 +29,41 @@ double min_region_coverage;
 int max_num_bundles;
 int max_dp_table_size;
 
+string algo;
+string input_file;
+string output_gtf_file;
+
+bool parse_arguments(int argc, const char ** argv)
+{
+	bool b = false;
+	for(int i = 1; i < argc; i++)
+	{
+		if(string(argv[i]) == "-c")
+		{
+			load_config(argv[i + 1]);
+			b = true;
+			i++;
+		}
+		else if(string(argv[i]) == "-a")
+		{
+			algo = string(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "-o")
+		{
+			output_gtf_file = string(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "-i")
+		{
+			input_file = string(argv[i + 1]);
+			i++;
+		}
+	}
+
+	return b;
+}
+
 int load_config(const char * conf_file)
 {
 	ifstream fin(conf_file);

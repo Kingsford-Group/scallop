@@ -13,10 +13,7 @@ public:
 	~manager();
 
 public:
-	string algo;
-
-public:
-	int process(const string &file, string a);
+	int process();
 
 	int assemble_bam(const string &file);
 	int assemble_gtf(const string &file);
