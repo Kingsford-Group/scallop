@@ -15,8 +15,12 @@ scallop::scallop(const string &name, splice_graph &gr)
 scallop::~scallop()
 {}
 
-int scallop::assemble()
+int scallop::assemble0()
 {
+	printf("\nprocess %s\n", name.c_str());
+	round = 0;
+	print();
+
 	smooth_weights();
 	init_super_edges();
 	reconstruct_splice_graph();
@@ -24,18 +28,52 @@ int scallop::assemble()
 	init_disjoint_sets();
 	nt.build(gr);
 
-	round = 0;
-	printf("\nprocess %s\n", name.c_str());
+	collect_existing_st_paths();
 	print();
 
-	iterate4();
+	printf("%s assemble0 solution %lu paths\n", name.c_str(), paths.size());
 
-	int p = gr.compute_decomp_paths() + paths.size();
+	return 0;
+}
+
+int scallop::greedy()
+{
+	assemble0();
 
 	greedy_decompose();
 	assert(gr.num_edges() == 0);
 
-	printf("%s solution %lu paths, expected = %d paths\n", name.c_str(), paths.size(), p);
+	print();
+
+	printf("%s greedy solution %lu paths\n", name.c_str(), paths.size());
+
+	return 0;
+}
+
+int scallop::assemble1()
+{
+	assemble0();
+
+	iterate4();
+
+	collect_existing_st_paths();
+	print();
+
+	printf("%s assembl1 solution %lu paths\n", name.c_str(), paths.size());
+
+	return 0;
+}
+
+int scallop::assemble()
+{
+	assemble1();
+
+	greedy_decompose();
+	assert(gr.num_edges() == 0);
+
+	print();
+
+	printf("%s full solution %lu paths\n", name.c_str(), paths.size());
 
 	return 0;
 }
@@ -1135,6 +1173,18 @@ bool scallop::identify_optimal_paths()
 	return flag;
 }
 
+int scallop::collect_existing_st_paths()
+{
+	for(int i = 0; i < i2e.size(); i++)
+	{
+		if(i2e[i] == null_edge) continue;
+		if(i2e[i]->source() != 0) continue;
+		if(i2e[i]->target() != gr.num_vertices() - 1) continue;
+		collect_path(i);
+	}
+	return 0;
+}
+
 int scallop::collect_path(int e)
 {
 	assert(i2e[e] != null_edge);
@@ -1195,11 +1245,11 @@ int scallop::print()
 	printf("statistics: %lu edges, %d vertices\n", gr.num_edges(), n);
 	printf("finish round %d\n\n", round);
 
-	/*
 	char buf[1024];
 	sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
 	draw_splice_graph(buf);
 
+	/*
 	sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
 	nt.draw(buf);
 	*/

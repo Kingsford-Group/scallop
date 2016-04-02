@@ -26,8 +26,17 @@ public:
 
 public:
 	int assemble();
+	int assemble0();
+	int assemble1();
+	int greedy();
 
 private:
+	// different level of the algorithm
+	bool iterate4();
+	bool iterate3();
+	bool iterate2();
+	bool iterate1();
+
 	// simplify the splice graph and init all data structures
 	int init_super_edges();
 	int reconstruct_splice_graph();
@@ -38,12 +47,6 @@ private:
 	vector<int> compute_representatives();
 	vector< vector<int> > compute_disjoint_sets();
 	set<int> compute_singletons();
-
-	// different level of the algorithm
-	bool iterate4();
-	bool iterate3();
-	bool iterate2();
-	bool iterate1();
 
 	// identify and handle equations 
 	bool identify_equation1(vector<int> &subs, vector<int> &subt);
@@ -78,6 +81,7 @@ private:
 
 	// collect existing s-t path e
 	int collect_path(int e);
+	int collect_existing_st_paths();
 
 	// compute optimal path! this is not optimal!
 	bool identify_optimal_paths();

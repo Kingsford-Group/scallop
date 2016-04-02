@@ -5,7 +5,6 @@
 #include "config.h"
 #include "manager.h"
 #include "bundle.h"
-#include "stringtie.h"
 #include "scallop.h"
 #include "gtf_gene.h"
 #include "nested_graph.h"
@@ -149,21 +148,20 @@ int manager::assemble_gtf(const string &file)
 
 			if(output_gtf_file == "") continue;
 			if(s == "HARD") gg.output_gtf(fout);
-			continue;
 		}
 
 		if(s != "HARD") continue;
 
-		assembler * a;
+		scallop sc(name, gr);
 
-		if(algo == "scallop") a = new scallop(name, gr);
-		else if(algo == "stringtie") a = new stringtie(name, gr);
+		if(algo == "scallop0") sc.assemble0();
+		else if(algo == "scallop1") sc.assemble1();
+		else if(algo == "scallop") sc.assemble();
+		else if(algo == "greedy") sc.greedy();
 		else continue;
 
-		a->assemble();
-
 		if(output_gtf_file == "") continue;
-		gg.output_gtf(fout, a->paths, algo);
+		gg.output_gtf(fout, sc.paths, algo);
 	}
 
 	if(output_gtf_file != "") fout.close();
