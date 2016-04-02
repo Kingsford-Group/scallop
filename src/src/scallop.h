@@ -28,6 +28,7 @@ public:
 	int assemble();
 	int assemble0();
 	int assemble1();
+	int assemble2();
 	int greedy();
 
 private:

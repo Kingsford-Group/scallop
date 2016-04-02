@@ -156,7 +156,7 @@ int manager::assemble_gtf(const string &file)
 
 		if(algo == "scallop0") sc.assemble0();
 		else if(algo == "scallop1") sc.assemble1();
-		else if(algo == "scallop") sc.assemble();
+		else if(algo == "scallop2") sc.assemble2();
 		else if(algo == "greedy") sc.greedy();
 		else continue;
 
