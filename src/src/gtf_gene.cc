@@ -195,7 +195,8 @@ int gtf_gene::output_gtf(ofstream &fout, const vector<path> &paths, const string
 			fout<<".\t";						// frame
 			fout<<"gene_id \""<<gene.c_str()<<"\"; ";
 			fout<<"transcript_id \""<<gene.c_str()<<"."<<i + 1<<"\"; ";
-			fout<<"exon \""<<++cnt<<"\";"<<endl;
+			fout<<"exon \""<<++cnt<<"\"; ";
+			fout<<"abundance \""<<abd<<"\";"<<endl;
 		}
 	}
 	return 0;
@@ -247,7 +248,8 @@ int gtf_gene::output_gtf(ofstream &fout) const
 			fout<<".\t";						// frame
 			fout<<"gene_id \""<<gene.c_str()<<"\"; ";
 			fout<<"transcript_id \""<<gene.c_str()<<"."<<i + 1<<"\"; ";
-			fout<<"exon \""<<k + 1<<"\";"<<endl;
+			fout<<"exon \""<<k + 1<<"\"; ";
+			fout<<"abundance \""<<abd<<"\";"<<endl;
 		}
 	}
 	return 0;

@@ -148,7 +148,7 @@ int manager::assemble_gtf(const string &file)
 					name.c_str(), gg.transcripts.size(), gg.exons.size(), p0, p1, s.c_str());
 
 			if(output_gtf_file == "") continue;
-			gg.output_gtf(fout);
+			if(s == "HARD") gg.output_gtf(fout);
 			continue;
 		}
 
