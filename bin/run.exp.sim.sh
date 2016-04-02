@@ -8,11 +8,10 @@ do
 	echo "run simulation $i"
 	cur=$dir/$i
 
-	./scallop ./config $cur/expression.gtf > $cur/summary
-	./scallop ./config $cur/expression.gtf stringtie > $cur/stringtie.log
-	./scallop ./config $cur/expression.gtf scallop > $cur/scallop.log
+	./scallop -c ./config -i $cur/expression.gtf -o $cur/refseq.gtf > $cur/refseq.log
+#./scallop -c ./config -i $cur/expression.gtf -o $cur/scallop0.gtf -a scallop0 > $cur/scallop0.log
+#./scallop -c ./config -i $cur/expression.gtf -o $cur/scallop1.gtf -a scallop1 > $cur/scallop1.log
+#./scallop -c ./config -i $cur/expression.gtf -o $cur/scallop2.gtf -a scallop2 > $cur/scallop2.log
+#./scallop -c ./config -i $cur/expression.gtf -o $cur/greedy.gtf -a greedy > $cur/greedy.log
 
-	cat $cur/summary | cut -f 2,3 -d " " | sed 's/,//g' > $cur/reference.path
-	cat $cur/stringtie.log | grep solution | cut -f 1,3 -d " " > $cur/stringtie.path
-	cat $cur/scallop.log | grep solution | cut -f 1,3 -d " " > $cur/scallop.path
 done
