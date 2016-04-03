@@ -42,29 +42,29 @@
 	\vspace{0.3cm}
 	\item<1-> {\bf Fact~3:} $|R(P^*)| \le \Delta$.
 	\vspace{0.3cm}
-	\item<1-> {\bf Fact~4:} If $|R(M)| = \Delta$, then the solution is unique: $(M, s)$, where
-		$s$ is determined by $f = s\cdot M$. {\bf [trivial cases]}
+	\item<1-> {\bf Fact~4:} If $|R(M)| = \Delta$, then there is a unique feasible solution: $(M, s)$, where
+		$s$ is determined by $f = s\cdot M$. {\bf [trivial case]}
 	\vspace{0.3cm}
-	\item<1-> {\bf Fact~5:} If $|R(P^*)| = \Delta$, then greedy algorithm is guarenteed to give optimal
-		solution. {\bf [easy cases]}
+	\item<1-> {\bf Fact~5:} If $R(M) > \Delta$ and $|R(P^*)| = \Delta$, then the optimal solution is not unique,
+		and the greedy algorithm is guaranteed to get one optimal solution. {\bf [easy case]}
 	\vspace{0.3cm}
-	\item<1-> {\bf Degenerated cases:} $|R(P^*)| < \Delta$. {\bf [hard cases]}
+	\item<1-> {\bf [Hard case]:} $R(M) > \Delta$ and $|R(P^*)| < \Delta$.
 	\end{itemize}
 }
 
 \frame
 {
-	\frametitle{Degeneration Theorem}
+	\frametitle{Kernel Theorem}
 	\begin{itemize}
-	\item {\bf Theorem:} there exist $k=\Delta - |R(P^*)|$ linearly independent
-	{\it non-trivial} vectors $q_1,\cdots,q_k$ satisfying $f\cdot q_i = 0$, $1\le i\le k$.
+	\item {\bf Theorem:} there exist $\Delta - |R(P^*)|$ linearly independent
+	{\it non-trivial} vectors $q_k$ satisfying $f\cdot q_k = 0$, $1\le k\le \Delta - |R(P^*)|$.
 	\end{itemize}
 
-	\vspace{0.7cm}
+	\vspace{0.6cm}
 
 	\input{figs/graph2.tex}
 
-	\vspace{-0.4cm}
+	\vspace{-0.5cm}
 
 	\begin{displaymath}
 	\bordermatrix{
@@ -88,6 +88,7 @@
 	\item Consider the {\bf null space} of $P^*$, i.e., $N(P^*) = \{q | P^*\cdot q = 0\}$.
 	\item For any $q\in N(P^*)$, we have $f\cdot q = s\cdot P \cdot q = 0$. 
 	\item $\dim(N(P^*)) = |E| - rank(P^*) = |E| - |R(P^*)|$. 
+	\item Non-trivial vectors: $\dim(N(P^*)) - (|V| - 2) = \Delta - |R(P^*)|$. 
 	\end{itemize}
 }
 
@@ -126,7 +127,6 @@
 
 }
 
-
 \frame
 {
 	\frametitle{Merge Distant Edges with Equal Flow}
@@ -163,8 +163,9 @@
 		algorithm~(but optimal solution is not unique).
 
 	\vspace{0.2cm}
-	\item[0.] For cases that the estimated flow value are not perfect, 
-		we can use LP to correct them when identify equations.
+	\item[0.] For real situations that the estimated flow values are not perfect, 
+		we can use LP to correct the flow values when identifying equations.
+
 	\end{itemize}
 }
 
@@ -226,14 +227,17 @@
 	\frametitle{Next Steps}
 
 	\begin{itemize}
-	\item Prove/disprove the conjecture.
-	\vspace{0.2cm}
-	\item Design better algorithms to use type (b) and even more complicated equations.
-	\vspace{0.2cm}
-	\item Work on generating high quality splice graph~(identify exons and estimate
+	\item[1.] Prove/disprove the conjecture.
+	\vspace{0.3cm}
+	\item[2.] Work on generating high quality splice graph~(identify exons and estimate
 			flow values) from sequence data.
-	\vspace{0.2cm}
-	\item Think about applying this algorithm to othe problems, for example, to
+	\vspace{0.3cm}
+	\item[3.] Design better algorithms to use type (b) and even more complicated equations.
+	\vspace{0.3cm}
+	\item[4.] Identify additional biological information to select the correct one from 
+		multiple optimal solutions.
+	\vspace{0.3cm}
+	\item[5.] Think about applying this algorithm to other problems, for example, to
 		help the EM-step of the quantification algorithm.
 	\end{itemize}
 }
