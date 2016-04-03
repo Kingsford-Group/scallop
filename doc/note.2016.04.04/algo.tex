@@ -43,22 +43,25 @@
 	\item<1-> {\bf Fact~3:} $|R(P^*)| \le \Delta$.
 	\vspace{0.3cm}
 	\item<1-> {\bf Fact~4:} If $|R(M)| = \Delta$, then the solution is unique: $(M, s)$, where
-		$s$ is determined by $f = s\cdot M$. ({\it trivial cases})
+		$s$ is determined by $f = s\cdot M$. {\bf [trivial cases]}
 	\vspace{0.3cm}
-	\item<1-> {\bf Fact~5:} If $|R(P^*)| = \Delta$, then greedy algorithm is guarenteed to give optimal solution. ({\it easy cases})
+	\item<1-> {\bf Fact~5:} If $|R(P^*)| = \Delta$, then greedy algorithm is guarenteed to give optimal
+		solution. {\bf [easy cases]}
 	\vspace{0.3cm}
-	\item<1-> {\bf Degenerated cases:} $|R(P^*)| < \Delta$. ({\it hard cases})
+	\item<1-> {\bf Degenerated cases:} $|R(P^*)| < \Delta$. {\bf [hard cases]}
 	\end{itemize}
 }
 
 \frame
 {
 	\frametitle{Degeneration Theorem}
-	%\begin{itemize}
-	%\item Degenerated example~($rank(P^*) = 3$, $\Delta = 4$).
-	%\end{itemize}
+	\begin{itemize}
+	\item {\bf Theorem:} there exist $k=\Delta - |R(P^*)|$ linearly independent
+	{\it non-trivial} vectors $q_1,\cdots,q_k$ satisfying $f\cdot q_i = 0$, $1\le i\le k$.
+	\end{itemize}
 
-	\vspace{0.4cm}
+	\vspace{0.7cm}
+
 	\input{figs/graph2.tex}
 
 	\vspace{-0.4cm}
@@ -83,10 +86,8 @@
 
 	\begin{itemize}
 	\item Consider the {\bf null space} of $P^*$, i.e., $N(P^*) = \{q | P^*\cdot q = 0\}$.
+	\item For any $q\in N(P^*)$, we have $f\cdot q = s\cdot P \cdot q = 0$. 
 	\item $\dim(N(P^*)) = |E| - rank(P^*) = |E| - |R(P^*)|$. 
-	\item For any $q\in N(P)$, we have $f\cdot q = s\cdot P \cdot q = 0$. 
-	\item {\bf Theorem:} There exists $\Delta - |R(P^*)|$ linearly independent non-trivial vectors
-	satisfying $f\cdot q = 0$.
 	\end{itemize}
 }
 
@@ -96,7 +97,7 @@
 	\begin{itemize}
 	\item {\bf Conjecture:} $q_i \in \{+1, -1, 0\}$.
 	\vspace{0.2cm}
-	\item Only consider two simple orms of equations in the current implementation:
+	\item Only consider two simple forms of equations in the current implementation:
 		\begin{align}
 		f_i & =  f_{i_1} + f_{i_2} + \cdots + f_{i_k} \tag{a}\\
 		f_i + f_j & = f_{i_1} + f_{i_2} + \cdots + f_{i_k} \tag{b}
@@ -132,7 +133,7 @@
 	\vspace{-3.0cm}
 
 	\begin{itemize}
-	\item {\bf Algorithm:} swap and exchange subgraphs based on the its (partial) {\bf nested} structure.
+	\item {\bf Algorithm:} {\bf inverse} and {\bf swap} subgraphs based on the its (partial) {\bf nested} structure.
 	\end{itemize}
 
 	\vspace{0.8cm}
@@ -144,21 +145,26 @@
 {
 	\frametitle{Algorithm}
 	\begin{itemize}
-	\item Iterate until no change is made to the graph
+	\item[1.] Iterate until no change is made to the splice graph. {\bf [core]}
 		\vspace{0.2cm}
 		\begin{itemize}
-		\item[1.] Decompose trivial vertices
+		\item[a.] Decompose trivial vertices
 		\vspace{0.2cm}
-		\item[2.] Identify type~(a) equation and split it
+		\item[b.] Identify type~(a) equation and split it
 		\vspace{0.2cm}
-		\item[3.] Merge equal edges that can be made adjacent
+		\item[c.] Merge equal edges that can be made adjacent
 		\vspace{0.2cm}
-		\item[4.] Merge equal edges that can not be made adjacent~(*)
+		\item[d.] Merge equal edges that can not be made adjacent~(*)
 		\vspace{0.2cm}
-		\item[5.] Identify type~(b) equation and split it~(*)
+		\item[e.] Identify type~(b) equation and split it~(*)
 		\vspace{0.2cm}
 		\end{itemize}
-	\item Arbitrarily decompose the remaining graph using greedy algorithm
+	\item[2.] Arbitrarily decompose the remaining graph using greedy
+		algorithm~(but optimal solution is not unique).
+
+	\vspace{0.2cm}
+	\item[0.] For cases that the estimated flow value are not perfect, 
+		we can use LP to correct them when identify equations.
 	\end{itemize}
 }
 
@@ -168,50 +174,34 @@
 
 	\begin{itemize}
 	\item Use iGenome annotation~(gtf file) of Human genome.
-	\vspace{0.2cm}
-	\item Use Flux Simulator to only simulate expression levels~(all with default parameters).
-	\vspace{0.2cm}
-	\item Simulate independently 100 instances and compute their average.
-	\vspace{0.2cm}
+	\item Use Flux Simulator to only simulate expression.
+	\item Average over 100 independent 100 instances.
 	\end{itemize}
 
+	\vspace{0.2cm}
 	\def\SA{\hspace*{0pt}}
 	\def\SC{\hspace*{-2pt}}
 	\def\SB{\hspace*{1pt}}
 	\def\SD{\hspace*{3pt}}
 
+	\begin{table}
 	\begin{center}%
-		\setlength{\tabcolsep}{5pt}%
+		\setlength{\tabcolsep}{6.47pt}%
 		\begin{tabular}{rrrrrrrrrrrrrrrrrrrrrrrrrrr}%
 		\hline
 		     & genes & trivial & easy & hard & greedy & scallop \\
 		\hline
-		mean & 11376.5 & 8212.9 & 128.8 & 3034.9& 98.4 & {\bf 7.5} \\
+		average & 11374 & 8203 & 129 & 3036 & 99.3 & {\bf 7.8} \\
 		\hline
-		ratio(\%)  & 100 & 72.2  & 1.1 & 26.7 & 3.2 & {\bf 0.2} \\
+		ratio(\%)  & 100 & 72.2  & 1.1 & 26.7 & 3.3 & {\bf 0.26} \\
 		\hline
 		\end{tabular}%
 	\end{center}%
-}
+	\caption{Capability of returning minimized number of paths.}
+	\end{table}
 
-\frame
-{
-	\frametitle{Simulation Results}
-
-	\begin{itemize}
-	\item Use iGenome annotation~(gtf file) of Human genome.
-	\vspace{0.2cm}
-	\item Use Flux Simulator to only simulate expression levels~(all with default parameters).
-	\vspace{0.2cm}
-	\item Simulate independently 100 instances and compute their average.
-	\vspace{0.2cm}
-	\end{itemize}
-
-	\def\SA{\hspace*{0pt}}
-	\def\SC{\hspace*{-2pt}}
-	\def\SB{\hspace*{1pt}}
-	\def\SD{\hspace*{4pt}}
-
+	\vspace{-0.2cm}
+	\begin{table}
 	\begin{center}%
 		\setlength{\tabcolsep}{2.8pt}%
 		\begin{tabular}{rrrrrrrrrrrrrrrrrrrrrrrrrrr}%
@@ -220,10 +210,30 @@
 		\cline{3-5} \cline{7-9}
 		     && correct & predicted & ratio && correct & predicted & ratio\\
 		\hline
-		core && 11376   & 8212.9    & 128.8 && 3034.9  & 98.4      & {\bf 7.5} \\
-		scallop && 11376   & 8212.9    & 128.8 && 3034.9  & 98.4      & {\bf 7.5} \\
-		greedy && 11376   & 8212.9    & 128.8 && 3034.9  & 98.4      & {\bf 7.5} \\
+		core    && 2623 & 2725 & 95.6 && 6763 & 7029 & {\bf 96.2} \\
+		scallop && 2683 & 3035 & 88.4 && 7608 & 8924 & 85.2 \\
+		greedy  && 2617 & 3035 & 86.2 && 7304 & 9037 & 80.8 \\
 		\hline
 		\end{tabular}%
 	\end{center}%
+	\caption{Accuracy of predicted transcripts.}
+	\end{table}
+
+}
+
+\frame
+{
+	\frametitle{Next Steps}
+
+	\begin{itemize}
+	\item Prove/disprove the conjecture.
+	\vspace{0.2cm}
+	\item Design better algorithms to use type (b) and even more complicated equations.
+	\vspace{0.2cm}
+	\item Work on generating high quality splice graph~(identify exons and estimate
+			flow values) from sequence data.
+	\vspace{0.2cm}
+	\item Think about applying this algorithm to othe problems, for example, to
+		help the EM-step of the quantification algorithm.
+	\end{itemize}
 }
