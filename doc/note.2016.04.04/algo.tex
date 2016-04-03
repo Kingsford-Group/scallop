@@ -1,6 +1,6 @@
 \frame
 {
-	\frametitle{Formulation}
+	\frametitle{Problem Formulation}
 
 	\begin{itemize}
 	\item<1-> {\bf Input:} fully connected directed acyclic graph $G=(V,E)$ with source $s$ and sink $t$,
@@ -44,12 +44,37 @@
 	\vspace{0.3cm}
 	\item<1-> {\bf Fact~4:} If $|R(M)| = \Delta$, then there is a unique feasible solution: $(M, s)$, where
 		$s$ is determined by $f = s\cdot M$. {\bf [trivial case]}
+	\end{itemize}
+	\vspace{1.0cm}
+	\input{figs/trivial.tex}
+	\vspace{-0.1cm}
+}
+
+
+\frame
+{
+	\frametitle{Facts~(Cont'd)}
+
 	\vspace{0.3cm}
+	\begin{itemize}
 	\item<1-> {\bf Fact~5:} If $R(M) > \Delta$ and $|R(P^*)| = \Delta$, then the optimal solution is not unique,
 		and the greedy algorithm is guaranteed to get one optimal solution. {\bf [easy case]}
-	\vspace{0.3cm}
-	\item<1-> {\bf [Hard case]:} $R(M) > \Delta$ and $|R(P^*)| < \Delta$.
 	\end{itemize}
+
+	\vspace{0.5cm}
+	\input{figs/easy.tex}
+
+	\vspace{0.4cm}
+
+	\begin{itemize}
+	\item<1-> {\bf Fact~6:} $R(M) > \Delta$ and $|R(P^*)| < \Delta$, the optimal solution
+		might be unique. {\bf [Hard case]} 
+	\end{itemize}
+
+	\vspace{0.5cm}
+	\input{figs/hard.tex}
+	\vspace{-0.1cm}
+
 }
 
 \frame
@@ -74,7 +99,7 @@
 		p_3 & 0 & 1 & 1 & 0 & 1 & 0 \cr
 	} 
 	\bordermatrix{
-   	   ~& q_1 & q_2 & q_3 \cr
+   	   ~& q'_1 & q'_2 & q_1 \cr
 		& +1 &  0 & +1  \cr
 		& +1 &  0 &  0  \cr
 		& -1 & +1 &  0  \cr
@@ -85,10 +110,10 @@
 	\end{displaymath}
 
 	\begin{itemize}
-	\item Consider the {\bf null space} of $P^*$, i.e., $N(P^*) = \{q | P^*\cdot q = 0\}$.
-	\item For any $q\in N(P^*)$, we have $f\cdot q = s\cdot P \cdot q = 0$. 
-	\item $\dim(N(P^*)) = |E| - rank(P^*) = |E| - |R(P^*)|$. 
-	\item Non-trivial vectors: $\dim(N(P^*)) - (|V| - 2) = \Delta - |R(P^*)|$. 
+	\item[1.] Consider the {\bf kernel space} of $P^*$, i.e., $N(P^*) = \{q | P^*\cdot q = 0\}$.
+	\item[2.] For any $q\in N(P^*)$, we have $f\cdot q = s\cdot P^* \cdot q = 0$. 
+	\item[3.] $\dim(N(P^*)) = |E| - rank(P^*) = |E| - |R(P^*)|$. 
+	\item[4.] Non-trivial vectors: $\dim(N(P^*)) - (|V| - 2) = \Delta - |R(P^*)|$. 
 	\end{itemize}
 }
 
