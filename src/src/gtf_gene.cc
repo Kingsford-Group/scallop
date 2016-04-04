@@ -166,12 +166,12 @@ int gtf_gene::output_gtf(ofstream &fout, const vector<path> &paths, const string
 		fout<<"transcript\t";						// feature
 		fout<<lower(si->first)<<"\t";				// left position
 		fout<<upper(ti->first)<<"\t";				// right position
-		fout<<1000<<"\t";							// score, now as abundance
+		fout<<1000<<"\t";							// score
 		fout<<"+\t";								// strand
 		fout<<".\t";								// frame
 		fout<<"gene_id \""<<gene.c_str()<<"\"; ";
 		fout<<"transcript_id \""<<gene.c_str()<<"."<<i + 1<<"\"; ";
-		fout<<"abundance \""<<abd<<"\";"<<endl;
+		fout<<"expression \""<<abd<<"\";"<<endl;
 
 		assert(v[0] == 0);
 		join_interval_map jmap;
@@ -190,13 +190,13 @@ int gtf_gene::output_gtf(ofstream &fout, const vector<path> &paths, const string
 			fout<<"exon\t";						// feature
 			fout<<lower(it->first)<<"\t";		// left position
 			fout<<upper(it->first) - 1<<"\t";	// right position
-			fout<<1000<<"\t";					// score, now as abundance
+			fout<<1000<<"\t";					// score
 			fout<<"+\t";						// strand
 			fout<<".\t";						// frame
 			fout<<"gene_id \""<<gene.c_str()<<"\"; ";
 			fout<<"transcript_id \""<<gene.c_str()<<"."<<i + 1<<"\"; ";
 			fout<<"exon \""<<++cnt<<"\"; ";
-			fout<<"abundance \""<<abd<<"\";"<<endl;
+			fout<<"expression \""<<abd<<"\";"<<endl;
 		}
 	}
 	return 0;
@@ -228,12 +228,12 @@ int gtf_gene::output_gtf(ofstream &fout) const
 		fout<<"transcript\t";						// feature
 		fout<<lpos<<"\t";							// left position
 		fout<<rpos<<"\t";							// right position
-		fout<<1000<<"\t";							// score, now as abundance
+		fout<<1000<<"\t";							// score
 		fout<<"+\t";								// strand
 		fout<<".\t";								// frame
 		fout<<"gene_id \""<<gene.c_str()<<"\"; ";
 		fout<<"transcript_id \""<<gene.c_str()<<"."<<i + 1<<"\"; ";
-		fout<<"abundance \""<<abd<<"\";"<<endl;
+		fout<<"expression \""<<abd<<"\";"<<endl;
 
 		for(int k = 0; k < v.size(); k++)
 		{
@@ -242,14 +242,14 @@ int gtf_gene::output_gtf(ofstream &fout) const
 			fout<<src.c_str()<<"\t";			// source
 			fout<<"exon\t";						// feature
 			fout<<ge.start<<"\t";				// left position
-			fout<<ge.end - 1<<"\t";					// right position
-			fout<<1000<<"\t";					// score, now as abundance
+			fout<<ge.end - 1<<"\t";				// right position
+			fout<<1000<<"\t";					// score
 			fout<<"+\t";						// strand
 			fout<<".\t";						// frame
 			fout<<"gene_id \""<<gene.c_str()<<"\"; ";
 			fout<<"transcript_id \""<<gene.c_str()<<"."<<i + 1<<"\"; ";
 			fout<<"exon \""<<k + 1<<"\"; ";
-			fout<<"abundance \""<<abd<<"\";"<<endl;
+			fout<<"expression \""<<abd<<"\";"<<endl;
 		}
 	}
 	return 0;

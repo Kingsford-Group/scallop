@@ -391,7 +391,7 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, const string &
 		fout<<".\t";					// frame
 		fout<<"gene_id \"manager."<<index<<"\"; ";
 		fout<<"transcript_id \"manager."<<index<<"."<<i + 1<<"\"; ";
-		fout<<"abundance \""<<abd<<"\";"<<endl;
+		fout<<"expression \""<<abd<<"\";"<<endl;
 
 		assert(v[0] == 0);
 		assert(v[v.size() - 1] == regions.size() + 1);
@@ -408,7 +408,8 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, const string &
 			fout<<".\t";					// frame
 			fout<<"gene_id \"manager."<<index<<"\"; ";
 			fout<<"transcript_id \"manager."<<index<<"."<<i + 1<<"\"; ";
-			fout<<"exon_number \""<<k<<"\";"<<endl;
+			fout<<"exon_number \""<<k<<"\"; ";
+			fout<<"expression \""<<abd<<"\";"<<endl;
 		}
 	}
 	return 0;
