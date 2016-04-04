@@ -68,7 +68,7 @@
 
 	\begin{itemize}
 	\item<1-> {\bf Fact~6:} $R(M) > \Delta$ and $|R(P^*)| < \Delta$, the optimal solution
-		might be unique. {\bf [Hard case]} 
+		might be unique. {\bf [hard case]} 
 	\end{itemize}
 
 	\vspace{0.5cm}
@@ -184,8 +184,8 @@
 		\item[e.] Identify type~(b) equation and split it~(*)
 		\vspace{0.2cm}
 		\end{itemize}
-	\item[2.] Arbitrarily decompose the remaining graph using greedy
-		algorithm~(but optimal solution is not unique).
+	\item[2.] Arbitrarily decompose the remaining splice graph~(easy case, the optimal
+			solution is not unique) using greedy algorithm.
 
 	\vspace{0.2cm}
 	\item[0.] For real situations that the estimated flow values are not perfect, 
@@ -264,5 +264,43 @@
 	\vspace{0.3cm}
 	\item[5.] Think about applying this algorithm to other problems, for example, to
 		help the EM-step of the quantification algorithm.
+	\end{itemize}
+}
+
+\frame
+{
+	\frametitle{Building Nested Graph}
+	\vspace{-1.2cm}
+
+	\begin{itemize}
+	\item {\bf Problem:} given splice graph $G=(V,E)$, to build $G'=(V,E')$.
+	\item For $u,v\in V$, define subgraph $G_{uv} = (V_{uv}, E_{uv})$:
+	$V_{uv}$ is the set of vertices that can be reached from $u$ and can reach $t$; $E_{uv}$ 
+	is the set of edges for each of which both ends are in $V_{uv}$.
+	\item $G_{uv}$ is {\bf independent} if for each $w\in V_{uv}\setminus \{u,v\}$, all adjacent edges
+	of $w$ are in $E_{uv}$.  $E' = \{(u,v) | G_{uv} \textrm{ is independent}\}$.
+	\item We can prove that $G'$ is a nested graph.
+	\end{itemize}
+	\vspace{0.8cm}
+	\input{figs/nested.tex}
+}
+
+\frame
+{
+	\frametitle{Merge Two Edges}
+
+	\vspace{1.0cm}
+	\input{figs/merge.tex}
+
+	\vspace{2.0cm}
+	\begin{itemize}
+	\item If $e_x$ and $e_y$ intersect, then they cannot be merged.
+	\item Otherwise, after adding $e_x$ and $e_y$ to $G'$, $G'$ is still nested.
+	\item {\bf Algorithm:} dynamic programming: for each interval, determine
+	whether $e_x$ and $e_y$ can be moved to its left boundary and right boundary.
+		\begin{itemize}
+		\item Original edges in $G'$ can be used to {\bf inverse}.
+		\item Subset of adjacent original edges in $G'$ can be used to {\bf swap}.
+		\end{itemize}
 	\end{itemize}
 }
