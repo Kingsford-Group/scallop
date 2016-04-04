@@ -558,7 +558,7 @@ bool scallop::split_equation(const vector<int> &subs, const vector<int> &subt)
 	return true;
 }
 
-bool scallop::split_equation_greedy(const vector<int> &subs, const vector<int> &subt)
+int scallop::split_equation_greedy(const vector<int> &subs, const vector<int> &subt)
 {
 	vector<int> vv;
 	for(int i = 0; i < subs.size(); i++) vv.push_back(subs[i]);
@@ -646,6 +646,7 @@ bool scallop::split_equation_greedy(const vector<int> &subs, const vector<int> &
 			vv[j] = e + 1;
 		}
 	}
+	return 0;
 }
 
 bool scallop::split_equation_maxflow(const vector<int> &subs, const vector<int> &subt)
