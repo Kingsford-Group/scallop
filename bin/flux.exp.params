@@ -1,5 +1,5 @@
 GEN_DIR			.
-REF_FILE_NAME	GSM981256/genes1.gtf
+REF_FILE_NAME	genes1.gtf
 LOAD_CODING		true
 LOAD_NONCODING	false
 PRO_FILE_NAME	profile
