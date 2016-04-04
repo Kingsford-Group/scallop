@@ -106,12 +106,12 @@ You might want to link it into \url{bin} through\\
 \section{Command line}
 The usage of Scallop is as follows:\\
 \makebox[0.9\textwidth][l]{\hspace{0.618cm}
-	\url{$./scallop -c <config-file> -i <input.gtf> -o <output.gtf> -a <algorithm>}}\\
-Parameter \url{config-file} configures the behavior of the algorithm.
+	\url{$./scallop -c <config> -i <input.gtf>  -a <algo> -o <output.gtf>}}\\
+Parameter \url{config} configures the behavior of the algorithm.
 There is such an example configure file at \url{bin/example.config}.
 Currently we work on perfectly estimated splice graph, represented in a \url{gtf} file with
 augmented expressions. One such example can be found at \url{bin/example.expression.gtf}.
-There are three options for \url{algorithm} parameter: \url{scallop1}, \url{scallop2}, and \url{greedy}.
+There are three options for \url{algo} parameter: \url{scallop1}, \url{scallop2}, and \url{greedy}.
 With option of \url{scallop1}, the program will only run the core algorithm to partly
 decompose the given splice graph, which will predicte fewer transcripts but with
 higher accuracy. With option of \url{scallop2}, the program will completely
