@@ -54,15 +54,15 @@
 \maketitle              % typeset the title of the contribution
 
 \section{Installation}
-To install Scallop, you need to first download/compile a few sofware packages~(Samtools,
+To install Scallop, you need to first download/compile a few software packages~(Samtools,
 Boost, and GUROBI), setup the corresponding environmental variables, and then
 compile the source code of Scallop.
 
 \subsection{Install Samtools}
-Download Samtools from \url{http://www.htslib.org/} with verion 1.2 or higher.
+Download Samtools from \url{http://www.htslib.org/} with version 1.2 or higher.
 Compile it to generate the htslib file \url{libhts.a}. Set environment variable
 \url{HTSLIB} to indicate the directory of \url{libhts.a}. 
-For example, for Unix plateforms, add the following
+For example, for Unix platforms, add the following
 statement to the file \url{~/.bash_profile}:\\
 \makebox[0.9\textwidth][l]{\hspace{0.618cm}\url{export HTSLIB="/directory/to/your/htslib/htslib-1.2.1"} }
 
@@ -70,7 +70,7 @@ statement to the file \url{~/.bash_profile}:\\
 Download Boost from \url{http://www.boost.org}. Uncompress it
 somewhere~(compiling and installing are not necessary). Set environment
 variable \url{BOOST_HOME} to indicate the directory of Boost.
-For example, for Unix plateforms, add the following
+For example, for Unix platforms, add the following
 statement to the file \url{~/.bash_profile}:\\
 \makebox[0.9\textwidth][l]{\hspace{0.618cm}\url{export BOOST_HOME="/directory/to/your/boost/boost_1_60_0"} }
 
@@ -82,7 +82,7 @@ the full features of GUROBI~(Please refer to the GUROBI documentation for more i
 After that, set two environment
 variables, \url{GUROBI_HOME} and \url{GRB_LICENSE_FILE}, which indicates the directory of GUROBI, and
 the location of your license file, respectively.
-For example, for Unix plateforms, add the following
+For example, for Unix platforms, add the following
 two statements to the file \url{~/.bash_profile}:\\
 \makebox[0.9\textwidth][l]{\hspace{0.618cm}\url{export GUROBI_HOME="/directory/to/your/gurobi/linux64"} }\\
 \makebox[0.9\textwidth][l]{\hspace{0.618cm}\url{export GRB_LICENSE_FILE="/location/of/your/license/gurobi.lic"} }
@@ -113,7 +113,7 @@ Currently we work on perfectly estimated splice graph, represented in a \url{gtf
 augmented expressions. One such example can be found at \url{bin/example.expression.gtf}.
 There are three options for \url{algo} parameter: \url{scallop1}, \url{scallop2}, and \url{greedy}.
 With option of \url{scallop1}, the program will only run the core algorithm to partly
-decompose the given splice graph, which will predicte fewer transcripts but with
+decompose the given splice graph, which will predict fewer transcripts but with
 higher accuracy. With option of \url{scallop2}, the program will completely
 decompose the given splice graph, using greedy algorithm following the core part of the algorithm.
 With option of \url{greedy}, the program will only use greedy algorithm to fully decompose
