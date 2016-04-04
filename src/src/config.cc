@@ -32,9 +32,11 @@ int max_dp_table_size;
 string algo;
 string input_file;
 string output_gtf_file;
+bool output_tex_files;
 
 bool parse_arguments(int argc, const char ** argv)
 {
+	output_tex_files = false;
 	bool b = false;
 	for(int i = 1; i < argc; i++)
 	{
@@ -58,6 +60,10 @@ bool parse_arguments(int argc, const char ** argv)
 		{
 			input_file = string(argv[i + 1]);
 			i++;
+		}
+		else if(string(argv[i]) == "-t")
+		{
+			output_tex_files = true;
 		}
 	}
 

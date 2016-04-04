@@ -55,6 +55,7 @@ extern int max_dp_table_size;
 extern string algo;
 extern string input_file;
 extern string output_gtf_file;
+extern bool output_tex_files;
 
 // parse arguments
 bool parse_arguments(int argc, const char ** argv);
