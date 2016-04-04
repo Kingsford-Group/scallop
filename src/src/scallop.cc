@@ -32,7 +32,7 @@ int scallop::assemble0()
 	collect_existing_st_paths();
 	print();
 
-	printf("%s assemble0 solution %lu paths\n", name.c_str(), paths.size());
+	printf("%s scallop0 solution %lu paths\n", name.c_str(), paths.size());
 
 	return 0;
 }
@@ -60,7 +60,7 @@ int scallop::assemble1()
 	collect_existing_st_paths();
 	print();
 
-	printf("%s assemble1 solution %lu paths\n", name.c_str(), paths.size());
+	printf("%s scallop1 solution %lu paths\n", name.c_str(), paths.size());
 
 	return 0;
 }
@@ -74,7 +74,7 @@ int scallop::assemble2()
 
 	print();
 
-	printf("%s assemble2 solution %lu paths\n", name.c_str(), paths.size());
+	printf("%s scallop2 solution %lu paths\n", name.c_str(), paths.size());
 
 	return 0;
 }
