@@ -10,7 +10,6 @@ typedef map< edge_descriptor, vector<int> > MEV;
 typedef pair< edge_descriptor, vector<int> > PEV;
 typedef pair<int, int> PI;
 
-// algorithm: identify subsetsum signal
 class scallop
 {
 public:
