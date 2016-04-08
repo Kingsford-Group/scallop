@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "genome.h"
+#include "compare.h"
 
 using namespace std;
 
@@ -18,7 +19,7 @@ int main(int argc, const char **argv)
 
 	genome g1(argv[1]);
 	genome g2(argv[2]);
-	g1.compare(g2);
+	compare_genome(g1, g2);
 
     return 0;
 }
