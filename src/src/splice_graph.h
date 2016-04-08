@@ -62,6 +62,15 @@ public:
 	// determine optimal path
 	bool compute_optimal_path(VE &p);
 
+	// use LP to smooth weights
+	int smooth_weights();
+
+	// rounding all weights to integers
+	int round_weights();
+
+	// remove edges with 0 weight
+	int remove_empty_edges();
+
 	// draw
 	int draw(const string &file);
 	int draw(const string &file, const MIS &mis, const MES &mes, double len);

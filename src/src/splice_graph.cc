@@ -1,7 +1,9 @@
 #include "splice_graph.h"
+#include "smoother.h"
 #include <sstream>
 #include <fstream>
 #include <cfloat>
+#include <cmath>
 #include <algorithm>
 
 using namespace std;
@@ -477,6 +479,59 @@ double splice_graph::compute_minimum_weight(const VE &p)
 		if(w < min) min = w;
 	}
 	return min;
+}
+
+int splice_graph::smooth_weights()
+{
+	smoother lp(*this);
+	lp.solve();
+	return 0;
+}
+
+int splice_graph::round_weights()
+{
+	MED m = ewrt;
+	for(MED::iterator it = m.begin(); it != m.end(); it++)
+	{
+		it->second = 0.0;
+	}
+
+	while(true)
+	{
+		VE v;
+		double w = compute_maximum_path_w(v);
+		if(w < 0.5) break;
+		double r = w - floor(w);
+		double ww = floor(w) + ((r >= 0.5) ? 1.0 : 0.0);
+		
+		for(int i = 0; i < v.size(); i++)
+		{
+			m[v[i]] += ww;
+			ewrt[v[i]] -= ww;
+			if(ewrt[v[i]] <= 0) ewrt[v[i]] = 0;
+		}
+	}
+
+	ewrt = m;
+	return 0;
+}
+
+int splice_graph::remove_empty_edges()
+{
+	VE v;
+	for(MED::iterator it = ewrt.begin(); it != ewrt.end(); it++)
+	{
+		if(it->second >= 1) continue;
+		assert(it->second <= 0);		// need to run round_weights before
+		v.push_back(it->first);
+	}
+	for(int i = 0; i < v.size(); i++)
+	{
+		remove_edge(v[i]);
+		ewrt.erase(v[i]);
+		edev.erase(v[i]);
+	}
+	return 0;
 }
 
 int splice_graph::draw(const string &file, const MIS &mis, const MES &mes, double len)

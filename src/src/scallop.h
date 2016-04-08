@@ -43,9 +43,6 @@ private:
 	bool iterate2();
 	bool iterate1();
 
-	// making weights as a flow
-	int smooth_weights();
-
 	// simplify the splice graph and init all data structures
 	int init_super_edges();
 	int reconstruct_splice_graph();

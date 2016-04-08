@@ -33,7 +33,9 @@ int scallop::assemble0()
 
 	gr.draw(name + "." + tostring(round++) + ".tex");
 
-	smooth_weights();
+	gr.smooth_weights();
+	gr.round_weights();
+	gr.remove_empty_edges();
 
 	gr.draw(name + "." + tostring(round++) + ".tex");
 
@@ -213,13 +215,6 @@ bool scallop::iterate1()
 		if(b1 == false && b2 == false) break;
 	}
 	return flag;
-}
-
-int scallop::smooth_weights()
-{
-	smoother lp(gr);
-	lp.solve();
-	return 0;
 }
 
 int scallop::init_super_edges()
