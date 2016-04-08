@@ -389,8 +389,8 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, const string &
 		fout<<1000<<"\t";				// score, now as abundance
 		fout<<"+\t";					// strand
 		fout<<".\t";					// frame
-		fout<<"gene_id \"manager."<<index<<"\"; ";
-		fout<<"transcript_id \"manager."<<index<<"."<<i + 1<<"\"; ";
+		fout<<"gene_id \""<<algo.c_str()<<"."<<index<<"\"; ";
+		fout<<"transcript_id \""<<algo.c_str()<<"."<<index<<"."<<i + 1<<"\"; ";
 		fout<<"expression \""<<abd<<"\";"<<endl;
 
 		assert(v[0] == 0);
@@ -406,8 +406,8 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, const string &
 			fout<<1000<<"\t";				// score, now as abundance
 			fout<<"+\t";					// strand
 			fout<<".\t";					// frame
-			fout<<"gene_id \"manager."<<index<<"\"; ";
-			fout<<"transcript_id \"manager."<<index<<"."<<i + 1<<"\"; ";
+			fout<<"gene_id \""<<algo.c_str()<<"."<<index<<"\"; ";
+			fout<<"transcript_id \""<<algo.c_str()<<"."<<index<<"."<<i + 1<<"\"; ";
 			fout<<"exon_number \""<<k<<"\"; ";
 			fout<<"expression \""<<abd<<"\";"<<endl;
 		}
