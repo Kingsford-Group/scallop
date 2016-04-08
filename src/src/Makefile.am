@@ -26,9 +26,8 @@ scallop_SOURCES = edge_base.h edge_base.cc \
 				  draw.h draw.cc \
 				  path.h path.cc \
 				  smoother.h smoother.cc \
-				  assembler.h assembler.cc \
 				  scallop.h scallop.cc \
 				  gtf_exon.h gtf_exon.cc \
 				  gtf_gene.h gtf_gene.cc \
-				  manager.h manager.cc \
+				  assembler.h assembler.cc \
 				  main.cc
