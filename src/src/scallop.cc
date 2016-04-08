@@ -16,6 +16,15 @@ scallop::scallop(const string &name, splice_graph &gr)
 scallop::~scallop()
 {}
 
+int scallop::assemble()
+{
+	if(algo == "scallop0") return assemble0();
+	if(algo == "scallop1") return assemble1();
+	if(algo == "scallop2") return assemble2();
+	if(algo == "greedy") return greedy();
+	return 0;
+}
+
 int scallop::assemble0()
 {
 	printf("\nprocess %s\n", name.c_str());
@@ -77,11 +86,6 @@ int scallop::assemble2()
 	printf("%s scallop2 solution %lu paths\n", name.c_str(), paths.size());
 
 	return 0;
-}
-
-int scallop::assemble()
-{
-	return assemble2();
 }
 
 bool scallop::iterate4()

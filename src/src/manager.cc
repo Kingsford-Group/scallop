@@ -33,6 +33,9 @@ int manager::assemble_bam(const string &file)
     bam_hdr_t *h= sam_hdr_read(fn);
     bam1_t *b = bam_init1();
 
+	ofstream fout;
+	if(output_gtf_file != "") fout.open(output_gtf_file);
+
 	int index = 0;
 	bundle_base bb;
     while(sam_read1(fn, h, b) >= 0)
@@ -51,24 +54,22 @@ int manager::assemble_bam(const string &file)
 				continue;
 			}
 
-			/*
 			bundle bd(bb);
 			bd.print(index);
 			
 			splice_graph gr;
 			bd.build_splice_graph(gr);
 
-			stringtie st(gr);
-			st.assemble();
-			st.print("stringtie");
+			char name[1024];
+			sprintf(name, "bundle %d", index);
 
-			scallop sc("", gr);
+			scallop sc(name, gr);
 			sc.assemble();
-			sc.print();
 
-			bd.output_gtf(stringtie_fout, st.paths, "stringtie", index);
-			bd.output_gtf(scallop_fout, sc.paths, "scallop", index);
-			*/
+			if(output_gtf_file != "")
+			{
+				bd.output_gtf(fout, sc.paths, algo, index);
+			}
 
 			index++;
 			bb.clear();
@@ -153,12 +154,7 @@ int manager::assemble_gtf(const string &file)
 		if(s != "HARD") continue;
 
 		scallop sc(name, gr);
-
-		if(algo == "scallop0") sc.assemble0();
-		else if(algo == "scallop1") sc.assemble1();
-		else if(algo == "scallop2") sc.assemble2();
-		else if(algo == "greedy") sc.greedy();
-		else continue;
+		sc.assemble();
 
 		if(output_gtf_file == "") continue;
 		gg.output_gtf(fout, sc.paths, algo);
