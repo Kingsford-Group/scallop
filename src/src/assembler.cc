@@ -6,7 +6,8 @@
 #include "assembler.h"
 #include "bundle.h"
 #include "scallop.h"
-#include "gtf_gene.h"
+#include "gtf.h"
+#include "genome.h"
 #include "nested_graph.h"
 
 assembler::assembler()
@@ -85,43 +86,17 @@ int assembler::assemble_bam(const string &file)
 
 int assembler::assemble_gtf(const string &file)
 {
-	ifstream fin(file.c_str());
-	if(fin.fail())
-	{
-		printf("open file %s error\n", file.c_str());
-		return 0;
-	}
-
-	char line[102400];
-	
-	vector<gtf_gene> genes;
-	map<string, int> m;
-	while(fin.getline(line, 102400, '\n'))
-	{
-		gtf_exon ge(line);
-		if(ge.feature != "exon") continue;
-		if(m.find(ge.gene_id) == m.end())
-		{
-			gtf_gene gg;
-			gg.add_exon(ge);
-			genes.push_back(gg);
-			m.insert(pair<string, int>(ge.gene_id, genes.size() - 1));
-		}
-		else
-		{
-			genes[m[ge.gene_id]].add_exon(ge);
-		}
-	}
+	genome g(file);
 
 	ofstream fout;
 	if(output_gtf_file != "") fout.open(output_gtf_file);
 
-	for(int i = 0; i < genes.size(); i++)
+	for(int i = 0; i < g.genes.size(); i++)
 	{
-		gtf_gene &gg = genes[i];
+		gtf gg(g.genes[i]);
 		if(gg.exons.size() <= 0) continue;
 
-		string name = gg.exons[0].gene_id;
+		string name = gg.gene_id;
 
 		// DEBUG
 		//if(name != "ZNF415") continue;

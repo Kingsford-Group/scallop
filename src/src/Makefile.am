@@ -1,8 +1,10 @@
 bin_PROGRAMS=scallop
 
-scallop_CPPFLAGS = -std=c++11 -I$(HTSLIB) -I$(GUROBI_HOME)/include -I$(BOOST_HOME)
-scallop_LDFLAGS = -L$(HTSLIB) -L$(GUROBI_HOME)/lib -pthread
-scallop_LDADD = -lhts -lz -lgurobi_c++ -lgurobi
+GTFDIR = ../../lib/gtf/src
+
+scallop_CPPFLAGS = -std=c++11 -I$(HTSLIB) -I$(GUROBI_HOME)/include -I$(BOOST_HOME) -I$(GTFDIR)
+scallop_LDFLAGS = -L$(HTSLIB) -L$(GUROBI_HOME)/lib -L$(GTFDIR) -pthread
+scallop_LDADD = -lhts -lz -lgurobi_c++ -lgurobi -lgtf
 
 scallop_SOURCES = edge_base.h edge_base.cc \
 				  vertex_base.h vertex_base.cc \
@@ -27,7 +29,6 @@ scallop_SOURCES = edge_base.h edge_base.cc \
 				  path.h path.cc \
 				  smoother.h smoother.cc \
 				  scallop.h scallop.cc \
-				  gtf_exon.h gtf_exon.cc \
-				  gtf_gene.h gtf_gene.cc \
+				  gtf.h gtf.cc \
 				  assembler.h assembler.cc \
 				  main.cc
