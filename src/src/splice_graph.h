@@ -61,6 +61,10 @@ public:
 
 	// determine optimal path
 	bool compute_optimal_path(VE &p);
+
+	// draw
+	int draw(const string &file);
+	int draw(const string &file, const MIS &mis, const MES &mes, double len);
 };
 
 #endif

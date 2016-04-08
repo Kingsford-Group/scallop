@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <map>
+#include <sstream>
 
 using namespace std;
 
@@ -62,5 +63,14 @@ bool parse_arguments(int argc, const char ** argv);
 
 // load parameters
 int load_config(const char * conf_file);
+
+// common small functions
+template<typename T>
+string tostring(T t)
+{
+	ostringstream s;
+	s << t;
+	return s.str();
+}
 
 #endif

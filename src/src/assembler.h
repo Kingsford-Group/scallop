@@ -1,28 +1,23 @@
 #ifndef __ASSEMBLER_H__
 #define __ASSEMBLER_H__
 
-#include "splice_graph.h"
-#include "path.h"
-
+#include <fstream>
 #include <string>
+
+using namespace std;
 
 class assembler
 {
 public:
-	assembler(const string &s, const splice_graph &g);
-	virtual ~assembler();
+	assembler();
+	~assembler();
 
 public:
-	string name;					// name for this gene
-	splice_graph gr;				// splice graph
-	vector<path> paths;				// transcripts
+	int process();
 
-public:
-	virtual int assemble() = 0;
-	int print(const string &prefix) const;
-
-protected:
-	int smooth_weights();
+	int assemble_bam(const string &file);
+	int assemble_gtf(const string &file);
+	int assemble_example(const string &file);
 };
 
 #endif

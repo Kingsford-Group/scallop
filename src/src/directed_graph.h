@@ -46,8 +46,7 @@ public:
 	virtual int check_nest(int x, int r, set<edge_descriptor> &vv);
 	virtual int check_nest(int x, int r);
 
-	// print and draw
-	int draw(const string &file);
+	// draw
 	int draw(const string &file, const MIS &mis, const MES &mes, double len);
 };
 

@@ -2,15 +2,16 @@
 #include "subsetsum.h"
 #include "nested_graph.h"
 #include "config.h"
+#include "smoother.h"
+
 #include <cstdio>
 #include <iostream>
 #include <cfloat>
-
 #include <boost/graph/push_relabel_max_flow.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
-scallop::scallop(const string &name, splice_graph &gr)
-	: assembler(name, gr)
+scallop::scallop(const string &s, splice_graph &g)
+	: name(s), gr(g)
 {}
 
 scallop::~scallop()
@@ -29,9 +30,13 @@ int scallop::assemble0()
 {
 	printf("\nprocess %s\n", name.c_str());
 	round = 0;
-	print();
+
+	gr.draw(name + "." + tostring(round++) + ".tex");
 
 	smooth_weights();
+
+	gr.draw(name + "." + tostring(round++) + ".tex");
+
 	init_super_edges();
 	reconstruct_splice_graph();
 	gr.get_edge_indices(i2e, e2i);
@@ -208,6 +213,13 @@ bool scallop::iterate1()
 		if(b1 == false && b2 == false) break;
 	}
 	return flag;
+}
+
+int scallop::smooth_weights()
+{
+	smoother lp(gr);
+	lp.solve();
+	return 0;
 }
 
 int scallop::init_super_edges()
@@ -1262,8 +1274,10 @@ int scallop::print()
 		sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
 		draw_splice_graph(buf);
 
+		/*
 		sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
 		nt.draw(buf);
+		*/
 	}
 
 	round++;

@@ -2,27 +2,33 @@
 #define __SCALLOP_H__
 
 #include "disjoint_sets.h"
-#include "assembler.h"
+#include "splice_graph.h"
 #include "nested_graph.h"
+#include "path.h"
 
 typedef map< edge_descriptor, vector<int> > MEV;
 typedef pair< edge_descriptor, vector<int> > PEV;
 typedef pair<int, int> PI;
 
 // algorithm: identify subsetsum signal
-class scallop : public assembler
+class scallop
 {
 public:
 	scallop(const string &name, splice_graph &gr);
 	virtual ~scallop();
 
 public:
+	string name;			// name for this gene
+	splice_graph gr;		// splice graph
+
 	MEI e2i;				// edge map, from edge to index
 	VE i2e;					// edge map, from index to edge
 	MEV mev;				// super edges
 	disjoint_sets_t ds;		// edges with the same weight are grouped together
 	nested_graph nt;		// nested graph
 	int round;				// round in iteration
+
+	vector<path> paths;		// predicted transcripts
 
 public:
 	int assemble();
@@ -37,6 +43,9 @@ private:
 	bool iterate3();
 	bool iterate2();
 	bool iterate1();
+
+	// making weights as a flow
+	int smooth_weights();
 
 	// simplify the splice graph and init all data structures
 	int init_super_edges();

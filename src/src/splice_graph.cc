@@ -478,3 +478,31 @@ double splice_graph::compute_minimum_weight(const VE &p)
 	}
 	return min;
 }
+
+int splice_graph::draw(const string &file, const MIS &mis, const MES &mes, double len)
+{
+	return directed_graph::draw(file, mis, mes, len);
+}
+
+int splice_graph::draw(const string &file)
+{
+	MIS mis;
+	char buf[10240];
+	for(int i = 0; i < num_vertices(); i++)
+	{
+		double w = get_vertex_weight(i);
+		sprintf(buf, "%.2lf", w);
+		mis.insert(PIS(i, buf));
+	}
+
+	MES mes;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = edges(); it1 != it2; it1++)
+	{
+		double w = get_edge_weight(*it1);
+		sprintf(buf, "%.2lf", w);
+		mes.insert(PES(*it1, buf));
+	}
+	draw(file, mis, mes, 2.5);
+	return 0;
+}
