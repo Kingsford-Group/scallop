@@ -94,9 +94,9 @@ int assembler::assemble_gtf(const string &file)
 	for(int i = 0; i < g.genes.size(); i++)
 	{
 		gtf gg(g.genes[i]);
-		if(gg.exons.size() <= 0) continue;
+		if(gg.transcripts.size() <= 0) continue;
 
-		string name = gg.gene_id;
+		string name = gg.get_gene_id();
 
 		// DEBUG
 		//if(name != "ZNF415") continue;
@@ -117,8 +117,7 @@ int assembler::assemble_gtf(const string &file)
 
 		if(algo == "")
 		{
-			printf("gene %s, %lu transcipts, total %lu exons, %d paths, %d required, %s\n", 
-					name.c_str(), gg.transcripts.size(), gg.exons.size(), p0, p1, s.c_str());
+			printf("gene %s, %lu transcipts, %d paths, %d required, %s\n", name.c_str(), gg.transcripts.size(), p0, p1, s.c_str());
 
 			if(output_gtf_file == "") continue;
 			if(s == "HARD") gg.output_gtf(fout);

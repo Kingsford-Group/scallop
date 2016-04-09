@@ -81,10 +81,14 @@ int gtf::add_single_edge(int s, int t, double w, splice_graph &gr)
 int gtf::build_split_interval_map()
 {
 	imap.clear();
-	for(int i = 0; i < exons.size(); i++)
+	for(int i = 0; i < transcripts.size(); i++)
 	{
-		exon &ge = exons[i];
-		imap += make_pair(ROI(ge.start, ge.end), ge.expression);
+		transcript &t = transcripts[i];
+		for(int j = 0; j < t.exons.size(); j++)
+		{
+			PI32 p = t.exons[i];
+			imap += make_pair(ROI(p.first, p.second), t.expression);
+		}
 	}
 	return 0;
 }
@@ -104,10 +108,10 @@ int gtf::output_gtf(ofstream &fout, const vector<path> &paths, const string &pre
 	fout.precision(2);
 	fout<<fixed;
 
-	if(exons.size() == 0) return 0;
+	if(transcripts.size() == 0) return 0;
 
-	string chrm = exons[0].seqname;
-	string gene = exons[0].gene_id;
+	string chrm = transcripts[0].seqname;
+	string gene = transcripts[0].gene_id;
 
 	for(int i = 0; i < paths.size(); i++)
 	{
