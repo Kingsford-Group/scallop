@@ -6,6 +6,7 @@
 #include <cassert>
 #include <tuple>
 #include <algorithm>
+#include <iostream>
 
 using namespace std;
 

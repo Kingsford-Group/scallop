@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <map>
+#include <string>
 
 #include "vertex_base.h"
 #include "edge_base.h"
