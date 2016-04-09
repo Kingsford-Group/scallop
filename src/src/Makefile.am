@@ -1,17 +1,13 @@
 bin_PROGRAMS=scallop
 
 GTFDIR = ../../lib/gtf/src
+GRAPHDIR = ../../lib/graph/src
 
-scallop_CPPFLAGS = -std=c++11 -I$(HTSLIB) -I$(GUROBI_HOME)/include -I$(BOOST_HOME) -I$(GTFDIR)
-scallop_LDFLAGS = -L$(HTSLIB) -L$(GUROBI_HOME)/lib -L$(GTFDIR) -pthread
-scallop_LDADD = -lhts -lz -lgurobi_c++ -lgurobi -lgtf
+scallop_CPPFLAGS = -std=c++11 -I$(HTSLIB) -I$(GUROBI_HOME)/include -I$(BOOST_HOME) -I$(GTFDIR) -I$(GRAPHDIR)
+scallop_LDFLAGS = -L$(HTSLIB) -L$(GUROBI_HOME)/lib -L$(GTFDIR) -L$(GRAPHDIR) -pthread
+scallop_LDADD = -lhts -lz -lgurobi_c++ -lgurobi -lgtf -lgraph
 
-scallop_SOURCES = edge_base.h edge_base.cc \
-				  vertex_base.h vertex_base.cc \
-				  graph_base.h graph_base.cc \
-				  directed_graph.h directed_graph.cc \
-				  undirected_graph.h undirected_graph.cc \
-				  splice_graph.h splice_graph.cc \
+scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  nested_graph.h nested_graph.cc \
 				  interval_map.h interval_map.cc \
 				  binomial.h binomial.cc \
