@@ -17,20 +17,22 @@ public:
 	~transcript();
 
 public:
-	vector<PI32> exons;
 	string seqname;
 	string source;
 	string feature;
-	string transcript_id;
 	string gene_id;
+
+	string transcript_id;
 	int32_t expression;
+	vector<PI32> exons;
+	char strand;
 
 public:
+	int add_exon(int s, int t);
 	int add_exon(const exon &e);
 	int sort();
 	int write(ofstream &fout) const;
-	//int length() const;
-	//double compute_abundance() const;
+	int length() const;
 };
 
 #endif

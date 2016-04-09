@@ -3,20 +3,18 @@
 #include <cassert>
 #include "gene.h"
 
-int gene::add_exon(const exon &ge)
+int gene::add_transcript(const transcript &t)
 {
-	seqname = ge.seqname;
-	gene_id = ge.gene_id;
-	exons.push_back(ge);
+	transcripts.push_back(t);
 	return 0;
 }
 
-int gene::build_transcripts()
+int gene::build(const vector<exon> &v)
 {
 	map<string, int> m;
-	for(int i = 0; i < exons.size(); i++)
+	for(int i = 0; i < v.size(); i++)
 	{
-		exon &e = exons[i];
+		const exon &e = v[i];
 		if(m.find(e.transcript_id) == m.end())
 		{
 			transcript t;
@@ -29,19 +27,26 @@ int gene::build_transcripts()
 			transcripts[m[e.transcript_id]].add_exon(e);
 		}
 	}
-
-	for(int i = 0; i < transcripts.size(); i++)
-	{
-		transcripts[i].sort();
-	}
 	return 0;
 }
 
-int gene::print() const
+string gene::get_seqname() const
 {
-	for(int i = 0; i < exons.size(); i++)
+	if(transcripts.size() == 0) return "";
+	else return transcripts[0].seqname;
+}
+
+string gene::get_gene_id() const
+{
+	if(transcripts.size() == 0) return "";
+	else return transcripts[0].gene_id;
+}
+
+int gene::sort()
+{
+	for(int i = 0; i < transcripts.size(); i++)
 	{
-		exons[i].print();
+		transcripts[i].sort();
 	}
 	return 0;
 }
@@ -54,4 +59,3 @@ int gene::write(ofstream &fout) const
 	}
 	return 0;
 }
-

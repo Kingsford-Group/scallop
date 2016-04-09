@@ -70,15 +70,8 @@ bool exon::operator<(const exon &ge) const
 	else return false;
 }
 
-/*
 int exon::length() const
 {
 	assert(end > start);
 	return end - start;
 }
-
-double exon::compute_abundance() const
-{
-	return expression * 1.0 / length();
-}
-*/

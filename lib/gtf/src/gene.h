@@ -12,16 +12,15 @@ using namespace std;
 class gene
 {
 public:
-	string seqname;
-	string gene_id;
-	vector<exon> exons;	
 	vector<transcript> transcripts;			
 
 public:
-	int build_transcripts();
-	int add_exon(const exon &ge);
+	int add_transcript(const transcript &t);
+	int build(const vector<exon> &v);
+	int sort();
+	string get_gene_id() const;
+	string get_seqname() const;
 	int write(ofstream &fout) const;	
-	int print() const;
 };
 
 #endif

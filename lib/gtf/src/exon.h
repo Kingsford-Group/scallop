@@ -15,8 +15,7 @@ public:
 	int parse(const string &s);
 	bool operator<(const exon &ge) const;
 	int print() const;
-	//int length() const;
-	//double compute_abundance() const;
+	int length() const;
 
 public:
 	string seqname;

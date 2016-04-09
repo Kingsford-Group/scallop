@@ -53,7 +53,7 @@ int compare_genome(const genome &x, const genome &y)
 	for(int i = 0; i < x.genes.size(); i++)
 	{
 		const gene* gx = &(x.genes[i]);
-		const gene* gy = y.get_gene(x.genes[i].get_gene_id());
+		const gene* gy = y.get_gene(x.genes[i].gene_id);
 		if(gx == NULL || gy == NULL) continue;
 		int tx = gx->transcripts.size();
 		int ty = gy->transcripts.size();
@@ -63,7 +63,7 @@ int compare_genome(const genome &x, const genome &y)
 		ttotal += tx;
 		tequal += t0;
 		if(t0 == tx) gequal++;
-		printf("%s %d and %d transcripts, %d are equal, %s\n", gx->get_gene_id().c_str(), tx, ty, t0, (t0 == tx) ? "TRUE" : "FALSE");
+		printf("%s %d and %d transcripts, %d are equal, %s\n", gx->gene_id.c_str(), tx, ty, t0, (t0 == tx) ? "TRUE" : "FALSE");
 	}
 	printf("summary: %d out of %d genes are equal, %d out of %d transcripts are equal\n",
 			gequal, gtotal, tequal, ttotal);

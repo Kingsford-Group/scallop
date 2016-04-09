@@ -14,6 +14,12 @@ transcript::~transcript()
 {
 }
 
+int transcript::add_exon(int s, int t)
+{
+	exons.push_back(PI32(s, t));
+	return 0;
+}
+
 int transcript::add_exon(const exon &e)
 {
 	seqname = e.seqname;
@@ -22,6 +28,7 @@ int transcript::add_exon(const exon &e)
 	transcript_id = e.transcript_id;
 	gene_id = e.gene_id;
 	expression = e.expression;
+	strand = e.strand;
 	exons.push_back(PI32(e.start, e.end));
 	return 0;
 }
@@ -32,7 +39,6 @@ int transcript::sort()
 	return 0;
 }
 
-/*
 int transcript::length() const
 {
 	int s = 0;
@@ -43,12 +49,6 @@ int transcript::length() const
 	}
 	return s;
 }
-
-double transcript::compute_abundance() const
-{
-	return expression * 1.0 / length();
-}
-*/
 
 int transcript::write(ofstream &fout) const
 {
@@ -66,7 +66,7 @@ int transcript::write(ofstream &fout) const
 	fout<<lpos<<"\t";							// left position
 	fout<<rpos<<"\t";							// right position
 	fout<<1000<<"\t";							// score, now as expression
-	fout<<"+\t";								// strand
+	fout<<strand<<"\t";					// strand
 	fout<<".\t";								// frame
 	fout<<"gene_id \""<<gene_id.c_str()<<"\"; ";
 	fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
@@ -80,7 +80,7 @@ int transcript::write(ofstream &fout) const
 		fout<<exons[k].first<<"\t";			// left position
 		fout<<exons[k].second - 1<<"\t";	// right position
 		fout<<1000<<"\t";					// score, now as expression
-		fout<<"+\t";						// strand
+		fout<<strand<<"\t";					// strand
 		fout<<".\t";						// frame
 		fout<<"gene_id \""<<gene_id.c_str()<<"\"; ";
 		fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
