@@ -17,6 +17,9 @@ public:
 	~transcript();
 
 public:
+	bool operator< (const transcript &t) const;
+
+public:
 	string seqname;
 	string source;
 	string feature;
@@ -33,6 +36,7 @@ public:
 	int sort();
 	int write(ofstream &fout) const;
 	int length() const;
+	PI32 get_bounds() const;
 };
 
 #endif

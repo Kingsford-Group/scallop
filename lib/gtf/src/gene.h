@@ -17,9 +17,11 @@ public:
 public:
 	int add_transcript(const transcript &t);
 	int build(const vector<exon> &v);
+	int clear();
 	int sort();
 	string get_gene_id() const;
 	string get_seqname() const;
+	int set_gene_id(const string &id);
 	int write(ofstream &fout) const;	
 };
 

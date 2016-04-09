@@ -4,7 +4,7 @@
 AC_PREREQ([2.69])
 AC_INIT(hayer2gtf, 1.0, shaomingfu@gmail.com)
 AM_INIT_AUTOMAKE()
-AC_CONFIG_SRCDIR([src/compare.cc])
+AC_CONFIG_SRCDIR([src/hayer.cc])
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.

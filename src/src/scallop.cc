@@ -31,13 +31,13 @@ int scallop::assemble0()
 	printf("\nprocess %s\n", name.c_str());
 	round = 0;
 
-	gr.draw(name + "." + tostring(round++) + ".tex");
+	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 
 	gr.smooth_weights();
 	gr.round_weights();
 	gr.remove_empty_edges();
 
-	gr.draw(name + "." + tostring(round++) + ".tex");
+	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 
 	init_super_edges();
 	reconstruct_splice_graph();
@@ -1265,11 +1265,11 @@ int scallop::print()
 
 	if(output_tex_files == true)
 	{
+		/*
 		char buf[1024];
 		sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
 		draw_splice_graph(buf);
 
-		/*
 		sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
 		nt.draw(buf);
 		*/

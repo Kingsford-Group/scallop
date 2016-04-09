@@ -14,6 +14,17 @@ transcript::~transcript()
 {
 }
 
+bool transcript::operator< (const transcript &t) const
+{
+	int b = seqname.compare(t.seqname);
+	if(b < 0) return true;
+	if(b > 0) return false;
+	if(exons.size() == 0) return true;
+	if(t.exons.size() == 0) return false;
+	if(exons[0].first < t.exons[0].first) return true;
+	else return false;
+}
+
 int transcript::add_exon(int s, int t)
 {
 	exons.push_back(PI32(s, t));
@@ -48,6 +59,14 @@ int transcript::length() const
 		s += exons[i].second - exons[i].first;
 	}
 	return s;
+}
+
+PI32 transcript::get_bounds() const
+{
+	if(exons.size() == 0) return PI32(-1, -1);
+	int32_t p = exons[0].first;
+	int32_t q = exons[exons.size() - 1].second;
+	return PI32(p, q);
 }
 
 int transcript::write(ofstream &fout) const

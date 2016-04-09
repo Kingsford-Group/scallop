@@ -62,7 +62,7 @@ int gtf::add_edges(splice_graph &gr)
 		{
 			PI32 &ge = tt.exons[k];
 			SIMI it = imap.find(ge.first);
-			assert(it != imap.end());
+			assert(it != imap.end());		// make sure all input transcripts with >= 1 expression
 			while(true)
 			{
 				int uu = distance((SIMI)(imap.begin()), it) + 1;

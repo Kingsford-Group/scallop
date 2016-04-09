@@ -9,6 +9,12 @@ int gene::add_transcript(const transcript &t)
 	return 0;
 }
 
+int gene::clear()
+{
+	transcripts.clear();
+	return 0;
+}
+
 int gene::build(const vector<exon> &v)
 {
 	map<string, int> m;
@@ -40,6 +46,15 @@ string gene::get_gene_id() const
 {
 	if(transcripts.size() == 0) return "";
 	else return transcripts[0].gene_id;
+}
+
+int gene::set_gene_id(const string &id) 
+{
+	for(int i = 0; i < transcripts.size(); i++)
+	{
+		transcripts[i].gene_id = id;
+	}
+	return 0;
 }
 
 int gene::sort()
