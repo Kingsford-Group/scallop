@@ -3,13 +3,29 @@
 
 gtf::gtf(const gene &g)
 	:gene(g)
-{}
+{
+}
 
 int gtf::build_splice_graph(splice_graph &gr)
 {
 	build_split_interval_map();
 	add_vertices(gr);
 	add_edges(gr);
+	return 0;
+}
+
+int gtf::build_split_interval_map()
+{
+	imap.clear();
+	for(int i = 0; i < transcripts.size(); i++)
+	{
+		transcript &t = transcripts[i];
+		for(int j = 0; j < t.exons.size(); j++)
+		{
+			PI32 p = t.exons[j];
+			imap += make_pair(ROI(p.first, p.second), t.expression);
+		}
+	}
 	return 0;
 }
 
@@ -74,21 +90,6 @@ int gtf::add_single_edge(int s, int t, double w, splice_graph &gr)
 		edge_descriptor p = gr.add_edge(s, t);
 		gr.set_edge_weight(p, w);
 		gr.set_edge_stddev(p, 1.0);
-	}
-	return 0;
-}
-
-int gtf::build_split_interval_map()
-{
-	imap.clear();
-	for(int i = 0; i < transcripts.size(); i++)
-	{
-		transcript &t = transcripts[i];
-		for(int j = 0; j < t.exons.size(); j++)
-		{
-			PI32 p = t.exons[i];
-			imap += make_pair(ROI(p.first, p.second), t.expression);
-		}
 	}
 	return 0;
 }
