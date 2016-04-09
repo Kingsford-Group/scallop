@@ -32,6 +32,24 @@ int transcript::sort()
 	return 0;
 }
 
+/*
+int transcript::length() const
+{
+	int s = 0;
+	for(int i = 0; i < exons.size(); i++)
+	{
+		assert(exons[i].second > exons[i].first);
+		s += exons[i].second - exons[i].first;
+	}
+	return s;
+}
+
+double transcript::compute_abundance() const
+{
+	return expression * 1.0 / length();
+}
+*/
+
 int transcript::write(ofstream &fout) const
 {
 	fout.precision(2);

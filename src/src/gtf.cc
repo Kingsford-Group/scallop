@@ -16,8 +16,8 @@ int gtf::build_splice_graph(splice_graph &gr)
 int gtf::add_vertices(splice_graph &gr)
 {
 	gr.add_vertex();
-	int32_t s = compute_sum_expression();
-	gr.set_vertex_weight(0, s);
+	double sum = compute_sum_expression();
+	gr.set_vertex_weight(0, sum);
 	gr.set_vertex_stddev(0, 1.0);
 
 	SIMI it;
@@ -29,7 +29,7 @@ int gtf::add_vertices(splice_graph &gr)
 	}
 
 	gr.add_vertex();
-	gr.set_vertex_weight(gr.num_vertices() - 1, s);
+	gr.set_vertex_weight(gr.num_vertices() - 1, sum);
 	gr.set_vertex_stddev(gr.num_vertices() - 1, 1.0);
 	return 0;
 }
@@ -89,13 +89,12 @@ int gtf::build_split_interval_map()
 	return 0;
 }
 
-int32_t gtf::compute_sum_expression()
+double gtf::compute_sum_expression()
 {
-	int32_t s = 0;
+	double s = 0;
 	for(int i = 0; i < transcripts.size(); i++)
 	{
-		transcript &tt = transcripts[i];
-		s += tt.expression;
+		s += transcripts[i].expression;
 	}
 	return s;
 }

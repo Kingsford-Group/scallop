@@ -29,6 +29,8 @@ public:
 	int add_exon(const exon &e);
 	int sort();
 	int write(ofstream &fout) const;
+	//int length() const;
+	//double compute_abundance() const;
 };
 
 #endif
