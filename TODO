@@ -4,3 +4,4 @@
 4, How to decide a region is empty
 5, Do not use desc_pos and asc_pos right now. Later on consider different types of regions.
 6, examples explaining DP is limited: CCDC88A
+7, Schrodinger's cat bug! Appears at EP HAYER.19995
