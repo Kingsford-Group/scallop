@@ -2,6 +2,7 @@
 #include <cassert>
 #include <fstream>
 #include <sstream>
+#include <cstdlib>
 
 using namespace std;
 
@@ -14,7 +15,7 @@ hayer::hayer(const string &file)
 
 int hayer::read(const string &file)
 {
-	ifstream fin(file);
+	ifstream fin(file.c_str());
 	if(fin.fail()) return 0;
 
 	char buf[102400];
