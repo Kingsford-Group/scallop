@@ -20,7 +20,6 @@ scallop::~scallop()
 
 int scallop::assemble()
 {
-	if(algo == "scallop0") return assemble0();
 	if(algo == "scallop1") return assemble1();
 	if(algo == "scallop2") return assemble2();
 	if(algo == "greedy") return greedy();
@@ -49,21 +48,7 @@ int scallop::assemble0()
 	collect_existing_st_paths();
 	print();
 
-	printf("%s scallop0 solution %lu paths\n", name.c_str(), paths.size());
-
-	return 0;
-}
-
-int scallop::greedy()
-{
-	assemble0();
-
-	greedy_decompose();
-	assert(gr.num_edges() == 0);
-
-	print();
-
-	//printf("%s greedy solution %lu paths\n", name.c_str(), paths.size());
+	//printf("%s scallop0 solution %lu paths\n", name.c_str(), paths.size());
 
 	return 0;
 }
@@ -96,6 +81,20 @@ int scallop::assemble2()
 	print();
 
 	printf("%s scallop2 solution %lu paths\n", name.c_str(), paths.size());
+
+	return 0;
+}
+
+int scallop::greedy()
+{
+	assemble0();
+
+	greedy_decompose();
+	assert(gr.num_edges() == 0);
+
+	print();
+
+	printf("%s greedy solution %lu paths\n", name.c_str(), paths.size());
 
 	return 0;
 }
