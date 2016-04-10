@@ -99,7 +99,7 @@ int assembler::assemble_gtf(const string &file)
 		string name = gg.get_gene_id();
 
 		// DEBUG
-		//if(name != "ZNF415") continue;
+		if(fixed_gene_name != "" && name != fixed_gene_name) continue;
 
 		splice_graph gr;
 		gg.build_splice_graph(gr);

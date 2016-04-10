@@ -12,7 +12,8 @@
 
 scallop::scallop(const string &s, splice_graph &g)
 	: name(s), gr(g)
-{}
+{
+}
 
 scallop::~scallop()
 {}
@@ -71,6 +72,7 @@ int scallop::assemble1()
 {
 	assemble0();
 
+	forbidden = true;
 	iterate4();
 
 	collect_existing_st_paths();
@@ -84,6 +86,9 @@ int scallop::assemble1()
 int scallop::assemble2()
 {
 	assemble1();
+
+	forbidden = false;
+	iterate4();
 
 	greedy_decompose();
 	assert(gr.num_edges() == 0);
@@ -104,6 +109,7 @@ bool scallop::iterate4()
 
 		vector<int> subs;
 		vector<int> subt;
+		identify_equation0();
 		bool b0 = identify_equation2(subs, subt);
 		bool b1 = false;
 		if(b0 == true) b1 = split_equation(subs, subt);
@@ -159,6 +165,7 @@ bool scallop::iterate2()
 
 		vector<int> subs;
 		vector<int> subt;
+		identify_equation0();
 		bool b1 = identify_equation1(subs, subt);
 		if(b1 == true) 
 		{
@@ -829,6 +836,28 @@ bool scallop::split_equation_maxflow(const vector<int> &subs, const vector<int> 
 	return true;
 }
 
+bool scallop::identify_equation0()
+{
+	bool flag = false;
+	for(int i = 0; i < i2e.size(); i++)
+	{
+		if(i2e[i] == null_edge) continue;
+		int wi = (int)(gr.get_edge_weight(i2e[i]));
+		int si = ds.find_set(i);
+		for(int j = i + 1; j < i2e.size(); j++)
+		{
+			if(i2e[j] == null_edge) continue;
+			int wj = (int)(gr.get_edge_weight(i2e[j]));
+			int sj = ds.find_set(j);
+			if(wi != wj) continue;
+			if(si == sj) continue;
+			ds.union_set(i, j);
+			flag = true;
+		}
+	}
+	return flag;
+}
+
 bool scallop::identify_equation1(vector<int> &subs, vector<int> &subt)
 {
 	vector<PI> p;
@@ -1005,20 +1034,49 @@ bool scallop::check_linkable(int ex, int ey, vector<PI> &p)
 	return true;
 }
 
-bool scallop::identify_linkable_edges(int &ex, int &ey, vector<PI> &p)
+set<int> scallop::build_forbidden_edges()
 {
-	ex = ey = -1;
-	p.clear();
+	set<int> s;
 	vector< vector<int> > vv = compute_disjoint_sets();
-	bool flag = false;
 	for(int i = 0; i < vv.size(); i++)
 	{
 		vector<int> &v = vv[i];
 		if(v.size() == 1) continue;
 		for(int j = 0; j < v.size(); j++)
 		{
+			if(s.find(v[j]) != s.end()) continue;
 			for(int k = j + 1; k < v.size(); k++)
 			{
+				if(s.find(v[k]) != s.end()) continue;
+				bool b1 = gr.check_path(i2e[v[j]], i2e[v[k]]);
+				bool b2 = gr.check_path(i2e[v[k]], i2e[v[j]]);
+				if(b1 || b2 ) continue;
+				s.insert(v[j]);
+				s.insert(v[k]);
+			}
+		}
+	}
+	return s;
+}
+
+bool scallop::identify_linkable_edges(int &ex, int &ey, vector<PI> &p)
+{
+	ex = ey = -1;
+	p.clear();
+	vector< vector<int> > vv = compute_disjoint_sets();
+	bool flag = false;
+	
+	set<int> fb = build_forbidden_edges();
+	for(int i = 0; i < vv.size(); i++)
+	{
+		vector<int> &v = vv[i];
+		if(v.size() == 1) continue;
+		for(int j = 0; j < v.size(); j++)
+		{
+			if(forbidden && fb.find(v[j]) != fb.end()) continue;
+			for(int k = j + 1; k < v.size(); k++)
+			{
+				if(forbidden && fb.find(v[k]) != fb.end()) continue;
 				bool b = check_linkable(v[j], v[k], p);
 				//printf(" check %d and %d = %c\n", v[j], v[k], b ? 'T' : 'F');
 				if(b == false) continue;
@@ -1114,6 +1172,7 @@ bool scallop::compute_closest_equal_edges(int &ex, int &ey)
 {
 	ex = ey = -1;
 	vector< vector<int> > vv = compute_disjoint_sets();
+	set<int> fb = build_forbidden_edges();
 	int min = INT_MAX;
 	for(int i = 0; i < vv.size(); i++)
 	{
@@ -1124,8 +1183,10 @@ bool scallop::compute_closest_equal_edges(int &ex, int &ey)
 			int xs = i2e[v[j]]->source();
 			int xt = i2e[v[j]]->target();
 			double wx = gr.get_edge_weight(i2e[v[j]]);
+			if(forbidden && fb.find(v[j]) != fb.end()) continue;
 			for(int k = j + 1; k < v.size(); k++)
 			{
+				if(forbidden && fb.find(v[k]) != fb.end()) continue;
 				int ys = i2e[v[k]]->source();
 				int yt = i2e[v[k]]->target();
 				double wy = gr.get_edge_weight(i2e[v[k]]);
@@ -1265,14 +1326,8 @@ int scallop::print()
 
 	if(output_tex_files == true)
 	{
-		/*
-		char buf[1024];
-		sprintf(buf, "%s.gr.%d.tex", name.c_str(), round);
-		draw_splice_graph(buf);
-
-		sprintf(buf, "%s.nt.%d.tex", name.c_str(), round);
-		nt.draw(buf);
-		*/
+		draw_splice_graph(name + "." + tostring(round) + ".tex");
+		nt.draw(name + "." + tostring(round) + ".nt.tex");
 	}
 
 	round++;

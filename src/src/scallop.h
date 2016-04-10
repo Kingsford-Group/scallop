@@ -26,6 +26,7 @@ public:
 	disjoint_sets_t ds;		// edges with the same weight are grouped together
 	nested_graph nt;		// nested graph
 	int round;				// round in iteration
+	bool forbidden;			// switch for forbidden
 
 	vector<path> paths;		// predicted transcripts
 
@@ -55,6 +56,7 @@ private:
 	set<int> compute_singletons();
 
 	// identify and handle equations 
+	bool identify_equation0();
 	bool identify_equation1(vector<int> &subs, vector<int> &subt);
 	bool identify_equation2(vector<int> &subs, vector<int> &subt);
 	bool identify_equation(const vector<int> &subs, vector<int> &subt);
@@ -68,6 +70,7 @@ private:
 	vector<int> split_edge(int ei, const vector<int> &sub);
 
 	// check, and make two equal edges adjacent 
+	set<int> build_forbidden_edges();
 	bool identify_linkable_edges(int &ex, int &ey, vector<PI> &p);
 	bool check_linkable(int ex, int ey, vector<PI> &p);
 	int build_adjacent_equal_edges(const vector<PI> &p);
