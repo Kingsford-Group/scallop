@@ -44,6 +44,9 @@ private:
 	bool iterate2();
 	bool iterate1();
 
+	// trivial, or hard
+	int classify();
+
 	// simplify the splice graph and init all data structures
 	int init_super_edges();
 	int reconstruct_splice_graph();

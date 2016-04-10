@@ -16,6 +16,9 @@ using namespace std;
 #define START_BOUNDARY 5
 #define END_BOUNDARY 6
 
+#define TRIVIAL 0
+#define NORMAL 1
+
 // pre-defined parameters
 #define MAX_NUM_CIGAR 7
 #define MIN_LEN_FLANK 1

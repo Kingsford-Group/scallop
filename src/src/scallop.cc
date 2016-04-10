@@ -20,15 +20,33 @@ scallop::~scallop()
 
 int scallop::assemble()
 {
+	int c = classify();
+	if(c == TRIVIAL) return 0;
+
+	if(algo == "scallop0") return assemble0();
 	if(algo == "scallop1") return assemble1();
 	if(algo == "scallop2") return assemble2();
 	if(algo == "greedy") return greedy();
 	return 0;
 }
 
+int scallop::classify()
+{
+	string s;	
+	int p0 = gr.compute_num_paths();
+	int p1 = gr.num_edges() - gr.num_vertices() + 2;
+	assert(p0 >= p1);
+
+	bool b = (p0 == p1) ? true : false;
+
+	printf("\nprocess %s %s\n", name.c_str(), b ? "TRIVIAL" : "NORMAL");
+
+	if(p0 == p1) return TRIVIAL;
+	else return NORMAL;
+}
+
 int scallop::assemble0()
 {
-	printf("\nprocess %s\n", name.c_str());
 	round = 0;
 
 	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
@@ -45,9 +63,8 @@ int scallop::assemble0()
 	init_disjoint_sets();
 	nt.build(gr);
 
-	collect_existing_st_paths();
 	print();
-
+	//collect_existing_st_paths();
 	//printf("%s scallop0 solution %lu paths\n", name.c_str(), paths.size());
 
 	return 0;

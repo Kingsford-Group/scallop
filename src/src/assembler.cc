@@ -65,10 +65,7 @@ int assembler::assemble_bam(const string &file)
 			scallop sc(name, gr);
 			sc.assemble();
 
-			if(output_gtf_file != "")
-			{
-				bd.output_gtf(fout, sc.paths, algo, index);
-			}
+			if(output_gtf_file != "") bd.output_gtf(fout, sc.paths, algo, index);
 
 			index++;
 			bb.clear();
@@ -103,27 +100,6 @@ int assembler::assemble_gtf(const string &file)
 
 		splice_graph gr;
 		gg.build_splice_graph(gr);
-
-		string s;	
-		int p0 = gr.compute_num_paths();
-		int p1 = gr.num_edges() - gr.num_vertices() + 2;
-		int p2 = gg.transcripts.size();
-		assert(p0 >= p1);
-
-		if(p0 == p1) assert(p2 >= p1);
-		if(p0 == p1) s = "TRIVIAL";
-		else if(p2 >= p1) s = "EASY";
-		else s = "HARD";
-
-		if(algo == "")
-		{
-			printf("gene %s, %lu transcipts, %d paths, %d required, %s\n", name.c_str(), gg.transcripts.size(), p0, p1, s.c_str());
-
-			if(output_gtf_file == "") continue;
-			if(s == "HARD") gg.output_gtf(fout);
-		}
-
-		if(s != "HARD") continue;
 
 		scallop sc(name, gr);
 		sc.assemble();
