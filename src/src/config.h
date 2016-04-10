@@ -47,6 +47,7 @@ extern string algo;
 extern string input_file;
 extern string output_gtf_file;
 extern bool output_tex_files;
+extern string fixed_gene_name;
 
 // parse arguments
 bool parse_arguments(int argc, const char ** argv);

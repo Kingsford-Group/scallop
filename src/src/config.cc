@@ -33,6 +33,7 @@ string algo;
 string input_file;
 string output_gtf_file;
 bool output_tex_files;
+string fixed_gene_name;
 
 bool parse_arguments(int argc, const char ** argv)
 {
@@ -59,6 +60,11 @@ bool parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "-i")
 		{
 			input_file = string(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "-g")
+		{
+			fixed_gene_name = string(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "-t")
