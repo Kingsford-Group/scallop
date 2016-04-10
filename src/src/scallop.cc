@@ -63,7 +63,7 @@ int scallop::greedy()
 
 	print();
 
-	printf("%s greedy solution %lu paths\n", name.c_str(), paths.size());
+	//printf("%s greedy solution %lu paths\n", name.c_str(), paths.size());
 
 	return 0;
 }
@@ -85,7 +85,7 @@ int scallop::assemble1()
 
 int scallop::assemble2()
 {
-	assemble1();
+	assemble0();
 
 	forbidden = false;
 	iterate4();
@@ -109,7 +109,7 @@ bool scallop::iterate4()
 
 		vector<int> subs;
 		vector<int> subt;
-		identify_equation0();
+		if(forbidden == true) identify_equation0();
 		bool b0 = identify_equation2(subs, subt);
 		bool b1 = false;
 		if(b0 == true) b1 = split_equation(subs, subt);
@@ -165,7 +165,7 @@ bool scallop::iterate2()
 
 		vector<int> subs;
 		vector<int> subt;
-		identify_equation0();
+		if(forbidden == true) identify_equation0();
 		bool b1 = identify_equation1(subs, subt);
 		if(b1 == true) 
 		{
