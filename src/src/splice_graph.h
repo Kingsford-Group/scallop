@@ -66,9 +66,6 @@ public:
 	// determine optimal path
 	bool compute_optimal_path(VE &p);
 
-	// use LP to smooth weights
-	int smooth_weights();
-
 	// rounding all weights to integers
 	int round_weights();
 

@@ -29,6 +29,7 @@ double min_region_coverage;
 int max_num_bundles;
 int max_dp_table_size;
 int max_num_subsetsum_solutions;
+double max_equation_error_ratio;
 
 string algo;
 string input_file;
@@ -179,7 +180,10 @@ int load_config(const char * conf_file)
 		{
 			max_num_subsetsum_solutions = (int)atoi(value);
 		}
-
+		else if(strcmp(key, "max_equation_error_ratio")==0)
+		{
+			max_equation_error_ratio = atof(value);
+		}
 	}
 
 	return 0;

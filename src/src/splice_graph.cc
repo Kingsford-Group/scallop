@@ -1,5 +1,4 @@
 #include "splice_graph.h"
-#include "smoother.h"
 #include <sstream>
 #include <fstream>
 #include <cfloat>
@@ -496,13 +495,6 @@ double splice_graph::compute_minimum_weight(const VE &p)
 	return min;
 }
 
-int splice_graph::smooth_weights()
-{
-	smoother lp(*this);
-	lp.solve();
-	return 0;
-}
-
 int splice_graph::round_weights()
 {
 	MED m = ewrt;
@@ -580,7 +572,7 @@ int splice_graph::draw(const string &file)
 	for(int i = 0; i < num_vertices(); i++)
 	{
 		double w = get_vertex_weight(i);
-		sprintf(buf, "%.0lf:%s", w, vstr[i].c_str());
+		sprintf(buf, "%.1lf:%s", w, vstr[i].c_str());
 		mis.insert(PIS(i, buf));
 	}
 

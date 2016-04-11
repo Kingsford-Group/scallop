@@ -11,7 +11,11 @@ public:
 	virtual ~smoother();
 
 private:
-	splice_graph &gr;						// splice graph
+	splice_graph &gr;				// splice graph
+
+	vector<VE> xeq;					// equations
+	vector<VE> yeq;
+
 	vector<edge_descriptor> i2e;	// edge map
 	MEI e2i;						// edge map
 
@@ -25,6 +29,7 @@ private:
 
 public:
 	int solve();
+	int add_equation(const VE &x, const VE &y);
 
 private:
 	int build_edge_map();
@@ -37,6 +42,7 @@ private:
 	int add_edge_error_constraints();
 
 	int add_conservation_constraints();
+	int add_additional_constraints();
 
 	int update();
 };

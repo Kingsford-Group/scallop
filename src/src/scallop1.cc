@@ -53,7 +53,9 @@ int scallop1::assemble0()
 
 	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 
-	gr.smooth_weights();
+	smoother sm(gr);
+	sm.solve();
+
 	gr.round_weights();
 	gr.remove_empty_edges();
 

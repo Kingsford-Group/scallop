@@ -26,6 +26,7 @@ int smoother::solve()
 	add_edge_error_constraints();
 
 	add_conservation_constraints();
+	add_additional_constraints();
 
 	model->getEnv().set(GRB_IntParam_OutputFlag, 0);
 
@@ -33,6 +34,13 @@ int smoother::solve()
 
 	update();
 
+	return 0;
+}
+
+int smoother::add_equation(const VE &x, const VE &y)
+{
+	xeq.push_back(x);
+	yeq.push_back(y);
 	return 0;
 }
 
@@ -151,6 +159,32 @@ int smoother::add_conservation_constraints()
 
 		model->addConstr(vnwt[i], GRB_EQUAL, ei);
 		model->addConstr(vnwt[i], GRB_EQUAL, eo);
+	}
+	return 0;
+}
+
+int smoother::add_additional_constraints()
+{
+	assert(xeq.size() == yeq.size());
+	for(int i = 0; i < xeq.size(); i++)
+	{
+		GRBLinExpr ei;
+		for(int k = 0; k < xeq[i].size(); k++)
+		{
+			int e = e2i[xeq[i][k]];
+			assert(e >= 0 && e < gr.num_edges());
+			ei += enwt[e];
+		}
+
+		GRBLinExpr eo;
+		for(int k = 0; k < yeq[i].size(); k++)
+		{
+			int e = e2i[yeq[i][k]];
+			assert(e >= 0 && e < gr.num_edges());
+			eo += enwt[e];
+		}
+
+		model->addConstr(ei, GRB_EQUAL, eo);
 	}
 	return 0;
 }

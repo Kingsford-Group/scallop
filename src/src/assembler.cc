@@ -6,6 +6,7 @@
 #include "assembler.h"
 #include "bundle.h"
 #include "scallop1.h"
+#include "scallop2.h"
 #include "gtf.h"
 #include "genome.h"
 #include "nested_graph.h"
@@ -61,7 +62,7 @@ int assembler::assemble_bam(const string &file)
 			bd.build_splice_graph(gr);
 
 			string name = "bundle." + tostring(index);
-			scallop1 sc(name, gr);
+			scallop2 sc(name, gr);
 			sc.assemble();
 
 			if(output_gtf_file != "") bd.output_gtf(fout, sc.paths, algo, index);
