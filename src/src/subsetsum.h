@@ -24,12 +24,11 @@ private:
 	vector< vector<bool> > btptr;		// backtrace pointer (true means using the current number)
 
 public:
-	vector<int> subset;					// optimal subset
-	int opt;							// error to optimal solution
+	vector< vector<int> > subsets;		// multiple solutions
+	vector<int> opts;					// errors to target
 
 public:
 	int solve();
-	static int test();
 
 private:
 	int init_seeds();
@@ -37,9 +36,8 @@ private:
 	int init_table();
 	int fill_table();
 	int optimize();
-	int backtrace();
-	int recover();
-	int print();
+	int backtrace(int opt, vector<int> &subset);
+	int recover(int &opt, vector<int> &subset);
 };
 
 #endif

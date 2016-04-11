@@ -9,8 +9,8 @@
 subsetsum::subsetsum(const vector<int> &v)
 	: raw(v)
 {
-	opt = -1;
-	subset.clear();
+	opts.clear();
+	subsets.clear();
 }
 
 int subsetsum::solve()
@@ -21,9 +21,14 @@ int subsetsum::solve()
 	init_table();
 	fill_table();
 	optimize();
-	backtrace();
-	recover();
-	//print();
+
+	for(int i = 0; i < opts.size(); i++)
+	{
+		vector<int> subset;
+		backtrace(opts[i], subset);
+		recover(opts[i], subset);
+		subsets.push_back(subset);
+	}
 	return 0;
 }
 
@@ -36,7 +41,7 @@ int subsetsum::init_seeds()
 	}
 	sort(seeds.begin(), seeds.end());
 	target = seeds[seeds.size() - 1].first;
-	ubound = ceil(target * 1.05);
+	ubound = ceil(target * 2.0);
 	seeds.pop_back();
 	return 0;
 }
@@ -112,32 +117,25 @@ int subsetsum::fill_table()
 int subsetsum::optimize()
 {
 	int s = seeds.size();
-	int ku = INT_MAX;
-	for(int i = target + 1; i <= ubound; i++)
+	bool b = true;
+	int d = 0;
+	while(true)
 	{
-		if(table[s][i] == true) 
+		int k = target + (b ? 0 + d : 0 - d);
+		if(k <= 1 || k >= ubound) break;
+		if(table[s][k] == true)
 		{
-			ku = i;
-			break;
+			opts.push_back(k);
+			if(opts.size() >= max_num_subsetsum_solutions) break;
 		}
+		b = (b ? false : true);
+		d++;
 	}
-	int kl = -1;
-	for(int i = target; i >= 1; i--)
-	{
-		if(table[s][i] == true)
-		{
-			kl = i;
-			break;
-		}
-	}
-	assert(kl != -1);
-
-	opt = kl;
-	if(ku - target < target - kl) opt = ku;
+	assert(opts.size() >= 1);
 	return 0;
 }
 
-int subsetsum::backtrace()
+int subsetsum::backtrace(int opt, vector<int> &subset)
 {
 	int s = seeds.size();
 	int x = opt;
@@ -155,7 +153,7 @@ int subsetsum::backtrace()
 	return 0;
 }
 
-int subsetsum::recover()
+int subsetsum::recover(int &opt, vector<int> &subset)
 {
 	vector<int> v;
 	int sum = 0;
@@ -170,32 +168,4 @@ int subsetsum::recover()
 	subset = v;
 	return 0;
 }
-
-int subsetsum::print()
-{
-	printf(" subsetsum = (%d", raw[0]);
-	for(int i = 1; i < raw.size(); i++) printf(", %d", raw[i]);
-	printf("), opt = %d, subset = (%d:%d", opt, subset[0], raw[subset[0]]);
-	for(int i = 1; i < subset.size(); i++) printf(", %d:%d", subset[i], raw[subset[i]]);
-	printf(")\n");
-	return 0;
-}
-
-int subsetsum::test()
-{
-	vector<int> v;
-	v.push_back(100);
-	v.push_back(200);
-	v.push_back(1);
-	v.push_back(3);
-	v.push_back(150);
-
-	subsetsum sss(v);
-	sss.solve();
-	printf("opt = %d, subset = (%d", sss.opt, sss.subset[0]);
-	for(int i = 1; i < sss.subset.size(); i++) printf(", %d", sss.subset[i]);
-	printf(")\n");
-	return 0;
-}
-
 

@@ -17,7 +17,6 @@ public:
 
 	int assemble_bam(const string &file);
 	int assemble_gtf(const string &file);
-	int assemble_example(const string &file);
 };
 
 #endif

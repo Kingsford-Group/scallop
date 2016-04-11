@@ -28,6 +28,7 @@ int min_max_region_overlap;
 double min_region_coverage;
 int max_num_bundles;
 int max_dp_table_size;
+int max_num_subsetsum_solutions;
 
 string algo;
 string input_file;
@@ -174,6 +175,11 @@ int load_config(const char * conf_file)
 		{
 			max_dp_table_size = (int)atoi(value);
 		}
+		else if(strcmp(key, "max_num_subsetsum_solutions")==0)
+		{
+			max_num_subsetsum_solutions = (int)atoi(value);
+		}
+
 	}
 
 	return 0;

@@ -45,6 +45,7 @@ extern int min_max_region_overlap;
 extern double min_region_coverage;
 extern int max_num_bundles;
 extern int max_dp_table_size;
+extern int max_num_subsetsum_solutions;
 
 extern string algo;
 extern string input_file;

@@ -5,7 +5,7 @@
 #include "config.h"
 #include "assembler.h"
 #include "bundle.h"
-#include "scallop.h"
+#include "scallop1.h"
 #include "gtf.h"
 #include "genome.h"
 #include "nested_graph.h"
@@ -23,8 +23,7 @@ int assembler::process()
 	if(input_file == "") return 0;
 	string s = input_file.substr(input_file.size() - 3, 3);
 	if(s == "bam" || s == "sam") assemble_bam(input_file);
-	else if(s == "gtf") assemble_gtf(input_file);
-	else assemble_example(input_file);
+	if(s == "gtf") assemble_gtf(input_file);
 	return 0;
 }
 
@@ -62,7 +61,7 @@ int assembler::assemble_bam(const string &file)
 			bd.build_splice_graph(gr);
 
 			string name = "bundle." + tostring(index);
-			scallop sc(name, gr);
+			scallop1 sc(name, gr);
 			sc.assemble();
 
 			if(output_gtf_file != "") bd.output_gtf(fout, sc.paths, algo, index);
@@ -101,7 +100,7 @@ int assembler::assemble_gtf(const string &file)
 		splice_graph gr;
 		gg.build_splice_graph(gr);
 
-		scallop sc(name, gr);
+		scallop1 sc(name, gr);
 		sc.assemble();
 
 		if(output_gtf_file == "") continue;
@@ -113,13 +112,3 @@ int assembler::assemble_gtf(const string &file)
 	return 0;
 }
 
-int assembler::assemble_example(const string &file)
-{
-	splice_graph gr;
-	gr.build(file);
-
-	scallop sc("example", gr);
-	sc.assemble();
-
-	return 0;
-}
