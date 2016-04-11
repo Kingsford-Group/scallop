@@ -155,7 +155,7 @@ int graph_base::get_edge_indices(VE &i2e, MEI &e2i)
 	return 0;
 }
 
-int graph_base::bfs(int s, vector<int> &v, vector<int> &b, set<edge_descriptor> &ss)
+int graph_base::bfs(int s, vector<int> &v, vector<int> &b, set<edge_descriptor> &ss, const set<edge_descriptor> &fb)
 {
 	ss.clear();
 	v.assign(num_vertices(), -1);
@@ -179,6 +179,7 @@ int graph_base::bfs(int s, vector<int> &v, vector<int> &b, set<edge_descriptor> 
 		edge_iterator it1, it2;
 		for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
 		{
+			if(fb.find(*it1) != fb.end()) continue;
 			int y = (*it1)->target();
 			ss.insert(*it1);
 			if(v[y] == -1) 
@@ -192,6 +193,12 @@ int graph_base::bfs(int s, vector<int> &v, vector<int> &b, set<edge_descriptor> 
 		}
 	}
 	return 0;
+}
+
+int graph_base::bfs(int s, vector<int> &v, vector<int> &b, set<edge_descriptor> &ss)
+{
+	set<edge_descriptor> fb;
+	return bfs(s, v, b, ss, fb);
 }
 
 int graph_base::bfs(int s, vector<int> &v, vector<int> &b)

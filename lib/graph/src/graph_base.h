@@ -60,6 +60,7 @@ public:
 	virtual int bfs(int s, set<edge_descriptor> &ss);
 	virtual int bfs(int s, vector<int> &v, vector<int> &b);
 	virtual int bfs(int s, vector<int> &v, vector<int> &b, set<edge_descriptor> &ss);
+	virtual int bfs(int s, vector<int> &v, vector<int> &b, set<edge_descriptor> &ss, const set<edge_descriptor> &fb);
 	virtual bool check_path(int s, int t);
 	virtual bool compute_shortest_path(int s, int t, vector<int> &p);
 	virtual bool check_nested();

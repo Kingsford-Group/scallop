@@ -166,7 +166,7 @@ int directed_graph::move_edge(edge_base *e, int x, int y)
 	return 0;
 }
 
-int directed_graph::bfs_reverse(int t, vector<int> &v, vector<int> &b, set<edge_descriptor> &ss)
+int directed_graph::bfs_reverse(int t, vector<int> &v, vector<int> &b, set<edge_descriptor> &ss, const set<edge_descriptor> &fb)
 {
 	ss.clear();
 	v.assign(num_vertices(), -1);
@@ -190,6 +190,7 @@ int directed_graph::bfs_reverse(int t, vector<int> &v, vector<int> &b, set<edge_
 		edge_iterator it1, it2;
 		for(tie(it1, it2) = in_edges(x); it1 != it2; it1++)
 		{
+			if(fb.find(*it1) != fb.end()) continue;
 			int y = (*it1)->source();
 			ss.insert(*it1);
 			if(v[y] == -1) 
@@ -203,6 +204,12 @@ int directed_graph::bfs_reverse(int t, vector<int> &v, vector<int> &b, set<edge_
 		}
 	}
 	return 0;
+}
+
+int directed_graph::bfs_reverse(int t, vector<int> &v, vector<int> &b, set<edge_descriptor> &ss)
+{
+	set<edge_descriptor> fb;
+	return bfs_reverse(t, v, b, ss, fb);
 }
 
 int directed_graph::bfs_reverse(int t, vector<int> &v, vector<int> &b)
