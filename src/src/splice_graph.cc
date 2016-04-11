@@ -263,7 +263,7 @@ int splice_graph::compute_num_paths()
 			int s = (*it1)->source();
 			int t = (*it1)->target();
 			assert(t == i);
-			assert(s < i);
+			//assert(s < i);
 			table[t] += table[s];
 		}
 	}
@@ -567,7 +567,6 @@ int splice_graph::draw(const string &file)
 {
 	MIS mis;
 	char buf[10240];
-	printf("vstr.size = %lu\n", vstr.size());
 
 	for(int i = 0; i < num_vertices(); i++)
 	{

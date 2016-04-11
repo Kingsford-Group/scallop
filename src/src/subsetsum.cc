@@ -122,14 +122,15 @@ int subsetsum::optimize()
 	while(true)
 	{
 		int k = target + (b ? 0 + d : 0 - d);
-		if(k <= 1 || k >= ubound) break;
+		if(k <= 0 || k > ubound) break;
+		//printf("d = %d, target = %d, ubound = %d, table[%d][%d] = %d\n", d, target, ubound, s, k, table[s][k] ? 1 : 0);
 		if(table[s][k] == true)
 		{
 			opts.push_back(k);
 			if(opts.size() >= max_num_subsetsum_solutions) break;
 		}
+		if(b == true) d++;
 		b = (b ? false : true);
-		d++;
 	}
 	assert(opts.size() >= 1);
 	return 0;

@@ -56,6 +56,10 @@ int scallop2::assemble0()
 	smoother sm(gr);
 	sm.solve();
 
+	gr.round_weights();
+
+	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
+
 	//gr.round_weights();
 	gr.remove_empty_edges();
 
@@ -121,8 +125,18 @@ int scallop2::iterate()
 {
 	while(true)
 	{
-		bool b1 = decompose_trivial_vertices();
+		bool b1 = false;
+		while(true)
+		{
+			bool b = decompose_trivial_vertices();
+			if(b == true) nt.build(gr);
+			if(b == true) b1 = true;
+			else break;
+		}
+		if(b1 == true) print();
+
 		bool b2 = decompose_with_equation();
+
 		if(b1 == false && b2 == false) return 0;
 	}
 	return 0;
@@ -148,8 +162,19 @@ bool scallop2::decompose_with_equation()
 	sm.solve();
 
 	subs = split_edge(subs[0], subt);
-	int c = connect_pairs(subs, subt);
 	nt.build(gr);
+
+	printf("equal pairs: ");
+	for(int i = 0; i < subs.size(); i++)
+	{
+		printf(" (%d, %d)", subs[i], subt[i]);
+	}
+	printf("\n");
+	print();
+
+	int c = connect_pairs(subs, subt);
+
+	gr.round_weights();
 
 	printf("connect %d pairs with equations\n", c);
 
@@ -567,7 +592,23 @@ int scallop2::identify_equation(const vector<int> &subs, vector<int> &subt)
 		xi.push_back(PI(ww, e2i[*it]));
 	}
 
+	if(xi.size() == 0) return INT_MAX;
+
 	sort(xi.begin(), xi.end());
+
+	// print
+	/*
+	for(int i = 0; i < subs.size(); i++)
+	{
+		double w = gr.get_edge_weight(i2e[subs[i]]);
+		printf("subs: %d:%.0lf\n", subs[i], w);
+	}
+	for(int i = 0; i < xi.size(); i++)
+	{
+		printf("subt: %d:%d\n", xi[i].second, xi[i].first);
+	}
+	printf("----\n");
+	*/
 
 	xi.push_back(PI(sw, e));
 
@@ -616,12 +657,19 @@ int scallop2::connect_pairs(const vector<int> &vx, const vector<int> &vy)
 		{
 			build_adjacent_equal_edges(p);
 			connect_adjacent_equal_edges(x, y);
+			nt.build(gr);
 			cnt++;
+			printf("connect (adjacent) edge pair (%d, %d)\n", x, y);
+			print();
 		}
 		else
 		{
 			bool b = connect_equal_edges(x, y);
-			if(b == true) cnt++;
+			if(b == false) continue;
+			cnt++;
+			nt.build(gr);
+			printf("connect (distant) edge pair (%d, %d)\n", x, y);
+			print();
 		}
 	}
 	return cnt;
@@ -657,10 +705,12 @@ int scallop2::build_adjacent_equal_edges(const vector<PI> &p)
 		{
 			int l = gr.compute_in_partner(x);
 			int r = gr.compute_out_partner(x);
+			printf("exchange (%d, %d, %d)\n", l, x, r);
 			gr.exchange(l, x, r);
 		}
 		else
 		{
+			printf("rotate (%d, %d)\n", x, y);
 			gr.rotate(x, y);
 		}
 	}
