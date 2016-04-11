@@ -419,6 +419,7 @@ int bundle::build_splice_graph(splice_graph &gr) const
 {
 	// vertices: start, each region, end
 	gr.add_vertex();
+	gr.set_vertex_string(0, "");
 	gr.set_vertex_weight(0, 0);
 	gr.set_vertex_stddev(0, 1);
 	for(int i = 0; i < regions.size(); i++)
@@ -433,10 +434,12 @@ int bundle::build_splice_graph(splice_graph &gr) const
 			//dev = r.dev_abd / sqrt(r.rcore - r.lcore); // TODO
 		}
 		gr.add_vertex();
+		gr.set_vertex_string(i + 1, r.label());
 		gr.set_vertex_weight(i + 1, ave);
 		gr.set_vertex_stddev(i + 1, dev);
 	}
 	gr.add_vertex();
+	gr.set_vertex_string(regions.size() + 1, "");
 	gr.set_vertex_weight(regions.size() + 1, 0);
 	gr.set_vertex_stddev(regions.size() + 1, 1);
 

@@ -17,6 +17,7 @@ splice_graph::splice_graph(const splice_graph &gr)
 	for(int i = 0; i < gr.num_vertices(); i++)
 	{
 		add_vertex();
+		set_vertex_string(i, gr.get_vertex_string(i));
 		set_vertex_weight(i, gr.get_vertex_weight(i));
 		set_vertex_stddev(i, gr.get_vertex_stddev(i));
 	}
@@ -32,6 +33,12 @@ splice_graph::splice_graph(const splice_graph &gr)
 
 splice_graph::~splice_graph()
 {}
+
+string splice_graph::get_vertex_string(int v) const
+{
+	assert(v >= 0 && v < vstr.size());
+	return vstr[v];
+}
 
 double splice_graph::get_vertex_weight(int v) const
 {
@@ -57,6 +64,14 @@ double splice_graph::get_edge_stddev(edge_base *e) const
 	MED::const_iterator it = edev.find(e);
 	assert(it != edev.end());
 	return it->second;
+}
+
+int splice_graph::set_vertex_string(int v, string s) 
+{
+	assert(v >= 0 && v < vv.size());
+	if(vstr.size() != vv.size()) vstr.resize(vv.size());
+	vstr[v] = s;
+	return 0;
 }
 
 int splice_graph::set_vertex_weight(int v, double w) 
@@ -513,6 +528,23 @@ int splice_graph::round_weights()
 	}
 
 	ewrt = m;
+	vwrt.assign(num_vertices(), 0);
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = out_edges(0); it1 != it2; it1++)
+	{
+		double w = ewrt[*it1];
+		vwrt[0] += w;
+	}
+
+	for(int i = 1; i < num_vertices(); i++)
+	{
+		for(tie(it1, it2) = in_edges(i); it1 != it2; it1++)
+		{
+			double w = ewrt[*it1];
+			vwrt[i] += w;
+		}
+	}
+
 	return 0;
 }
 
@@ -543,10 +575,12 @@ int splice_graph::draw(const string &file)
 {
 	MIS mis;
 	char buf[10240];
+	printf("vstr.size = %lu\n", vstr.size());
+
 	for(int i = 0; i < num_vertices(); i++)
 	{
 		double w = get_vertex_weight(i);
-		sprintf(buf, "%.2lf", w);
+		sprintf(buf, "%.0lf:%s", w, vstr[i].c_str());
 		mis.insert(PIS(i, buf));
 	}
 
@@ -558,6 +592,6 @@ int splice_graph::draw(const string &file)
 		sprintf(buf, "%.2lf", w);
 		mes.insert(PES(*it1, buf));
 	}
-	draw(file, mis, mes, 2.5);
+	draw(file, mis, mes, 3.0);
 	return 0;
 }

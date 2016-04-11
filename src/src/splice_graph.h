@@ -18,6 +18,7 @@ public:
 	virtual ~splice_graph();
 
 private:
+	vector<string> vstr;
 	vector<double> vwrt;
 	vector<double> vdev;
 	MED ewrt;
@@ -25,10 +26,13 @@ private:
 
 public:
 	// get and set properties
+	string get_vertex_string(int v) const;
 	double get_vertex_weight(int v) const;
 	double get_vertex_stddev(int v) const;
 	double get_edge_weight(edge_base *e) const;
 	double get_edge_stddev(edge_base *e) const;
+
+	int set_vertex_string(int v, string s);
 	int set_vertex_weight(int v, double w);
 	int set_vertex_stddev(int v, double w);
 	int set_edge_weight(edge_base *e, double w);

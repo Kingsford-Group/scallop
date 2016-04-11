@@ -1,5 +1,6 @@
 #include <algorithm>
 #include "gtf.h"
+#include "util.h"
 
 gtf::gtf(const gene &g)
 	:gene(g)
@@ -31,8 +32,9 @@ int gtf::build_split_interval_map()
 
 int gtf::add_vertices(splice_graph &gr)
 {
-	gr.add_vertex();
 	double sum = compute_sum_expression();
+	gr.add_vertex();
+	gr.set_vertex_string(0, "");
 	gr.set_vertex_weight(0, sum);
 	gr.set_vertex_stddev(0, 1.0);
 
@@ -40,11 +42,16 @@ int gtf::add_vertices(splice_graph &gr)
 	for(it = imap.begin(); it != imap.end(); it++)
 	{
 		gr.add_vertex();
+		string l = tostring(lower(it->first) % 100000);
+		string r = tostring(upper(it->first) % 100000);
+		string s = l + "-" + r;
+		gr.set_vertex_string(gr.num_vertices() - 1, s);
 		gr.set_vertex_weight(gr.num_vertices() - 1, it->second);
 		gr.set_vertex_stddev(gr.num_vertices() - 1, 1.0);
 	}
 
 	gr.add_vertex();
+	gr.set_vertex_string(gr.num_vertices() - 1, "");
 	gr.set_vertex_weight(gr.num_vertices() - 1, sum);
 	gr.set_vertex_stddev(gr.num_vertices() - 1, 1.0);
 	return 0;

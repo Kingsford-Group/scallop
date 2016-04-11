@@ -32,6 +32,7 @@ public:
 	int estimate_abundance();
 	bool left_break() const;
 	bool right_break() const;
+	string label() const;
 	int print(int index) const;
 };
 
