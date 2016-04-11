@@ -517,6 +517,7 @@ int bundle::build_splice_graph(splice_graph &gr) const
 		if(r.empty == false) continue;
 		assert(gr.in_degree(i + 1) == 0);
 		assert(gr.out_degree(i + 1) == 0);
+		// TODO, still bugy here
 	}
 
 	return 0;

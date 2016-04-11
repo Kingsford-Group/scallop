@@ -540,24 +540,6 @@ int splice_graph::round_weights()
 	return 0;
 }
 
-int splice_graph::remove_empty_edges()
-{
-	VE v;
-	for(MED::iterator it = ewrt.begin(); it != ewrt.end(); it++)
-	{
-		if(it->second >= 1) continue;
-		assert(it->second <= 0);		// need to run round_weights before
-		v.push_back(it->first);
-	}
-	for(int i = 0; i < v.size(); i++)
-	{
-		remove_edge(v[i]);
-		ewrt.erase(v[i]);
-		edev.erase(v[i]);
-	}
-	return 0;
-}
-
 int splice_graph::draw(const string &file, const MIS &mis, const MES &mes, double len)
 {
 	return directed_graph::draw(file, mis, mes, len);

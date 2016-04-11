@@ -49,6 +49,9 @@ private:
 	int reconstruct_splice_graph();
 	bool init_trivial_vertex(int x);
 
+	// remove empty edges
+	int remove_empty_edges();
+
 	// identify and handle equations 
 	bool identify_equation1(vector<int> &subs, vector<int> &subt);
 	int identify_equation(const vector<int> &subs, vector<int> &subt);

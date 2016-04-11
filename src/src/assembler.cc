@@ -55,6 +55,17 @@ int assembler::assemble_bam(const string &file)
 				continue;
 			}
 
+			index++;
+
+			// DEBUG
+			/*
+			if(index <= 10800) 
+			{
+				bb.clear();
+				continue;
+			}
+			*/
+
 			bundle bd(bb);
 			bd.print(index);
 			
@@ -67,7 +78,6 @@ int assembler::assemble_bam(const string &file)
 
 			if(output_gtf_file != "") bd.output_gtf(fout, sc.paths, algo, index);
 
-			index++;
 			bb.clear();
 			if(max_num_bundles > 0 && index > max_num_bundles) break;
 		}

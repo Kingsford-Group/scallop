@@ -132,7 +132,7 @@ int subsetsum::optimize()
 		if(b == true) d++;
 		b = (b ? false : true);
 	}
-	assert(opts.size() >= 1);
+	//assert(opts.size() >= 1);
 	return 0;
 }
 

@@ -54,6 +54,9 @@ private:
 	bool init_trivial_vertex(int x);
 	int init_disjoint_sets();
 
+	// remove empty edges
+	int remove_empty_edges();
+
 	// get informations from ds since some edges are deleted
 	vector<int> compute_representatives();
 	vector< vector<int> > compute_disjoint_sets();

@@ -57,7 +57,7 @@ int scallop1::assemble0()
 	sm.solve();
 
 	gr.round_weights();
-	gr.remove_empty_edges();
+	remove_empty_edges();
 
 	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 
@@ -1256,6 +1256,21 @@ int scallop1::collect_path(int e)
 	e2i.erase(i2e[e]);
 	i2e[e] = null_edge;
 
+	return 0;
+}
+
+int scallop1::remove_empty_edges()
+{
+	for(int i = 0; i < i2e.size(); i++)
+	{
+		if(i2e[i] == null_edge) continue;
+		double w = gr.get_edge_weight(i2e[i]);
+		if(w >= 1) continue;
+		assert(w <= 0);
+		gr.remove_edge(i2e[i]);
+		i2e[i] = null_edge;
+		e2i.erase(i2e[i]);
+	}
 	return 0;
 }
 

@@ -57,7 +57,7 @@ int scallop2::assemble0()
 	sm.solve();
 
 	gr.round_weights();
-	gr.remove_empty_edges();
+	remove_empty_edges();
 
 	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 
@@ -171,9 +171,9 @@ bool scallop2::decompose_with_equation()
 	int c = connect_pairs(subs, subt);
 
 	gr.round_weights();
-	gr.remove_empty_edges();
+	remove_empty_edges();
 
-	printf("connect %d pairs with equations\n", c);
+	//printf("connect %d pairs with equations\n", c);
 
 	if(c >= 1) return true;
 	else return false;
@@ -617,6 +617,9 @@ int scallop2::identify_equation(const vector<int> &subs, vector<int> &subt)
 
 	subsetsum sss(v);
 	sss.solve();
+
+	if(sss.subsets.size() == 0) return INT_MAX;
+
 	assert(sss.subsets.size() >= 1);
 	vector<int> subset = sss.subsets[0];
 	int opt = sss.opts[0];
@@ -702,12 +705,10 @@ int scallop2::build_adjacent_equal_edges(const vector<PI> &p)
 		{
 			int l = gr.compute_in_partner(x);
 			int r = gr.compute_out_partner(x);
-			printf("exchange (%d, %d, %d)\n", l, x, r);
 			gr.exchange(l, x, r);
 		}
 		else
 		{
-			printf("rotate (%d, %d)\n", x, y);
 			gr.rotate(x, y);
 		}
 	}
@@ -820,6 +821,21 @@ int scallop2::collect_path(int e)
 	return 0;
 }
 
+int scallop2::remove_empty_edges()
+{
+	for(int i = 0; i < i2e.size(); i++)
+	{
+		if(i2e[i] == null_edge) continue;
+		double w = gr.get_edge_weight(i2e[i]);
+		if(w >= 1) continue;
+		assert(w <= 0);
+		e2i.erase(i2e[i]);
+		gr.remove_edge(i2e[i]);
+		i2e[i] = null_edge;
+	}
+	return 0;
+}
+
 int scallop2::print()
 {
 	int n = 0;
@@ -867,3 +883,4 @@ int scallop2::draw_splice_graph(const string &file)
 	gr.draw(file, mis, mes, 4.5);
 	return 0;
 }
+

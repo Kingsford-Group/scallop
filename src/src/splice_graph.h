@@ -69,9 +69,6 @@ public:
 	// rounding all weights to integers
 	int round_weights();
 
-	// remove edges with 0 weight
-	int remove_empty_edges();
-
 	// draw
 	int draw(const string &file);
 	int draw(const string &file, const MIS &mis, const MES &mes, double len);
