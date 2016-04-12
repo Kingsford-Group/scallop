@@ -37,6 +37,31 @@ int genome::read(const string &file)
 	char line[102400];
 	
 	genes.clear();
+	map<string, int> m;
+	while(fin.getline(line, 102400, '\n'))
+	{
+		exon ge(line);
+		if(ge.feature != "exon") continue;
+		if(m.find(ge.gene_id) == m.end())
+		{
+			gene gg;
+			gg.add_exon(ge);
+			genes.push_back(gg);
+			m.insert(pair<string, int>(ge.gene_id, genes.size() - 1));
+		}
+		else
+		{
+			genes[m[ge.gene_id]].add_exon(ge);
+		}
+	}
+
+	for(int i = 0; i < genes.size(); i++)
+	{
+		genes[i].build_transcripts();
+	}
+
+	/*
+	genes.clear();
 	vector< vector<exon> > vv;
 	map<string, int> m;
 	while(fin.getline(line, 102400, '\n'))
@@ -62,6 +87,7 @@ int genome::read(const string &file)
 		gg.build(vv[i]);
 		genes.push_back(gg);
 	}
+	*/
 
 	return 0;
 }

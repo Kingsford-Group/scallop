@@ -13,10 +13,12 @@ class gene
 {
 public:
 	vector<transcript> transcripts;			
+	vector<exon> exons;
 
 public:
+	int add_exon(const exon &e);
+	int build_transcripts();
 	int add_transcript(const transcript &t);
-	int build(const vector<exon> &v);
 	int clear();
 	int sort();
 	string get_gene_id() const;

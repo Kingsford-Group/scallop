@@ -12,15 +12,23 @@ int gene::add_transcript(const transcript &t)
 int gene::clear()
 {
 	transcripts.clear();
+	exons.clear();
 	return 0;
 }
 
-int gene::build(const vector<exon> &v)
+int gene::add_exon(const exon &e)
 {
+	exons.push_back(e);
+	return 0;
+}
+
+int gene::build_transcripts()
+{
+	transcripts.clear();
 	map<string, int> m;
-	for(int i = 0; i < v.size(); i++)
+	for(int i = 0; i < exons.size(); i++)
 	{
-		const exon &e = v[i];
+		const exon &e = exons[i];
 		if(m.find(e.transcript_id) == m.end())
 		{
 			transcript t;
@@ -38,14 +46,14 @@ int gene::build(const vector<exon> &v)
 
 string gene::get_seqname() const
 {
-	if(transcripts.size() == 0) return "";
-	else return transcripts[0].seqname;
+	if(exons.size() == 0) return "";
+	else return exons[0].seqname;
 }
 
 string gene::get_gene_id() const
 {
-	if(transcripts.size() == 0) return "";
-	else return transcripts[0].gene_id;
+	if(exons.size() == 0) return "";
+	else return exons[0].gene_id;
 }
 
 int gene::set_gene_id(const string &id) 
@@ -53,6 +61,10 @@ int gene::set_gene_id(const string &id)
 	for(int i = 0; i < transcripts.size(); i++)
 	{
 		transcripts[i].gene_id = id;
+	}
+	for(int i = 0; i < exons.size(); i++)
+	{
+		exons[i].gene_id = id;
 	}
 	return 0;
 }
