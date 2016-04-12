@@ -29,7 +29,7 @@ public:
 	int output_gtf(ofstream &fout, const vector<path> &paths, const string &prefix, int index) const;	
 	int print(int index) const;
 
-private:
+protected:
 	// check whether hits are sorted
 	int check_left_ascending();
 	int check_right_ascending();

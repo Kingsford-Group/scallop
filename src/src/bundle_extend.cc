@@ -24,7 +24,3 @@ int bundle_extend::build()
 	return 0;
 }
 
-int bundle_extend::correct_boundaries()
-{
-	return 0;
-}
