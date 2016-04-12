@@ -370,51 +370,6 @@ int bundle::print(int index) const
 	return 0;
 }
 
-int bundle::output_gtf(ofstream &fout, const vector<path> &paths, const string &prefix, int index) const
-{
-	fout.precision(2);
-	fout<<fixed;
-
-	for(int i = 0; i < paths.size(); i++)
-	{
-		const vector<int> &v = paths[i].v;
-		double abd = paths[i].abd;
-		if(v.size() < 2) continue;
-
-		fout<<chrm.c_str()<<"\t";		// chromosome name
-		fout<<prefix.c_str()<<"\t";		// source
-		fout<<"transcript\t";			// feature
-		fout<<lpos<<"\t";				// left position
-		fout<<rpos<<"\t";				// right position
-		fout<<1000<<"\t";				// score, now as abundance
-		fout<<"+\t";					// strand
-		fout<<".\t";					// frame
-		fout<<"gene_id \""<<algo.c_str()<<"."<<index<<"\"; ";
-		fout<<"transcript_id \""<<algo.c_str()<<"."<<index<<"."<<i + 1<<"\"; ";
-		fout<<"expression \""<<abd<<"\";"<<endl;
-
-		assert(v[0] == 0);
-		assert(v[v.size() - 1] == regions.size() + 1);
-		for(int k = 1; k < v.size() - 1; k++)
-		{
-			const region &r = regions[v[k] - 1];
-			fout<<chrm.c_str()<<"\t";		// chromosome name
-			fout<<prefix.c_str()<<"\t";		// source
-			fout<<"exon\t";					// feature
-			fout<<r.lpos<<"\t";				// left position
-			fout<<r.rpos<<"\t";				// right position
-			fout<<1000<<"\t";				// score, now as abundance
-			fout<<"+\t";					// strand
-			fout<<".\t";					// frame
-			fout<<"gene_id \""<<algo.c_str()<<"."<<index<<"\"; ";
-			fout<<"transcript_id \""<<algo.c_str()<<"."<<index<<"."<<i + 1<<"\"; ";
-			fout<<"exon_number \""<<k<<"\"; ";
-			fout<<"expression \""<<abd<<"\";"<<endl;
-		}
-	}
-	return 0;
-}
-
 int bundle::build_splice_graph(splice_graph &gr) const
 {
 	// vertices: start, each region, end
@@ -520,6 +475,59 @@ int bundle::build_splice_graph(splice_graph &gr) const
 		// TODO, still bugy here
 	}
 
+	return 0;
+}
+
+int bundle::output_gtf(ofstream &fout, const vector<path> &paths, const string &prefix, int index) const
+{
+	fout.precision(2);
+	fout<<fixed;
+
+	for(int i = 0; i < paths.size(); i++)
+	{
+		const vector<int> &v = paths[i].v;
+		double abd = paths[i].abd;
+		if(v.size() < 2) continue;
+
+		fout<<chrm.c_str()<<"\t";		// chromosome name
+		fout<<prefix.c_str()<<"\t";		// source
+		fout<<"transcript\t";			// feature
+		fout<<lpos<<"\t";				// left position
+		fout<<rpos<<"\t";				// right position
+		fout<<1000<<"\t";				// score, now as abundance
+		fout<<"+\t";					// strand
+		fout<<".\t";					// frame
+		fout<<"gene_id \""<<algo.c_str()<<"."<<index<<"\"; ";
+		fout<<"transcript_id \""<<algo.c_str()<<"."<<index<<"."<<i + 1<<"\"; ";
+		fout<<"expression \""<<abd<<"\";"<<endl;
+
+		assert(v[0] == 0);
+		assert(v[v.size() - 1] == regions.size() + 1);
+
+		join_interval_map jmap;
+		for(int k = 1; k < v.size() - 1; k++)
+		{
+			const region &r = regions[v[k] - 1];
+			jmap += make_pair(ROI(r.lpos, r.rpos), 1);
+		}
+
+		int cnt = 0;
+		for(JIMI it = jmap.begin(); it != jmap.end(); it++)
+		{
+			fout<<chrm.c_str()<<"\t";			// chromosome name
+			fout<<prefix.c_str()<<"\t";			// source
+			fout<<"exon\t";						// feature
+			fout<<lower(it->first) + 1<<"\t";		// left position
+			fout<<upper(it->first)<<"\t";	// right position
+			fout<<1000<<"\t";					// score
+			fout<<"+\t";						// strand
+			fout<<".\t";						// frame
+			fout<<"gene_id \""<<algo.c_str()<<"."<<index<<"\"; ";
+			fout<<"transcript_id \""<<algo.c_str()<<"."<<index<<"."<<i + 1<<"\"; ";
+			fout<<"exon_number \""<<cnt<<"\"; ";
+			fout<<"expression \""<<abd<<"\";"<<endl;
+		}
+	}
 	return 0;
 }
 
