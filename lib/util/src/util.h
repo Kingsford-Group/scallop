@@ -26,4 +26,16 @@ string tostring(T t)
 	return s.str();
 }
 
+template<typename T>
+T compute_overlap(const pair<T, T> &x, const pair<T, T> &y)
+{
+	assert(x.first <= x.second);
+	assert(y.first <= y.second);
+	if(x.first > y.first) return compute_overlap(y, x);
+	assert(x.first <= y.first);
+	if(y.first >= x.second) return T(0);
+	if(x.second <= y.second) return x.second - y.first;
+	else return y.second - y.first;
+}
+
 #endif

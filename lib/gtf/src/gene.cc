@@ -71,11 +71,33 @@ int gene::set_gene_id(const string &id)
 
 int gene::sort()
 {
+	std::sort(exons.begin(), exons.end());
 	for(int i = 0; i < transcripts.size(); i++)
 	{
 		transcripts[i].sort();
 	}
 	return 0;
+}
+
+set<int32_t> gene::get_exon_boundaries() const
+{
+	set<int32_t> s;
+	for(int i = 0; i < exons.size(); i++)
+	{
+		int32_t l = exons[i].start;
+		int32_t r = exons[i].end;
+		s.insert(l);
+		s.insert(r);
+	}
+	return s;
+}
+
+PI32 gene::get_bounds() const
+{
+	if(exons.size() == 0) return PI32(-1, -1);
+	int32_t l = exons[0].start;
+	int32_t r = exons[exons.size() - 1].end;
+	return PI32(l, r);
 }
 
 int gene::write(ofstream &fout) const

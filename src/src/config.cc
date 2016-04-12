@@ -33,6 +33,7 @@ double max_equation_error_ratio;
 
 string algo;
 string input_file;
+string input_annotation_file;
 string output_gtf_file;
 bool output_tex_files;
 string fixed_gene_name;
@@ -67,6 +68,11 @@ bool parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "-g")
 		{
 			fixed_gene_name = string(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "-n")
+		{
+			input_annotation_file = string(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "-t")

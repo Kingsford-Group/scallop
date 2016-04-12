@@ -50,6 +50,7 @@ extern double max_equation_error_ratio;
 
 extern string algo;
 extern string input_file;
+extern string input_annotation_file;
 extern string output_gtf_file;
 extern bool output_tex_files;
 extern string fixed_gene_name;

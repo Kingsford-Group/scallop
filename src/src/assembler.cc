@@ -37,7 +37,7 @@ int assembler::assemble_bam(const string &file)
 	ofstream fout;
 	if(output_gtf_file != "") fout.open(output_gtf_file);
 
-	int index = 0;
+	int index = -1;
 	bundle_base bb;
     while(sam_read1(fn, h, b) >= 0)
 	{
@@ -67,6 +67,7 @@ int assembler::assemble_bam(const string &file)
 			*/
 
 			bundle bd(bb);
+			bd.build();
 			bd.print(index);
 			
 			splice_graph gr;

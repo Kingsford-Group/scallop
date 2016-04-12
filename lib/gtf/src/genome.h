@@ -19,12 +19,20 @@ public:
 	map<string, int> s2i;
 
 public:
-	int add_gene(const gene &g);
+	// read and write
 	int read(const string &file);
 	int write(const string &file) const;
+
+	// modify
 	int sort();
 	int build_index();
+
+	// fetch information
 	const gene* get_gene(string name) const;
+	const gene* locate_gene(const string &chr, const PI32 &p) const;
+
+private:
+	int add_gene(const gene &g);
 };
 
 #endif

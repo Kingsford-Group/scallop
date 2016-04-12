@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <vector>
+#include <set>
 
 #include "exon.h"
 #include "transcript.h"
@@ -16,14 +17,23 @@ public:
 	vector<exon> exons;
 
 public:
+	// build
 	int add_exon(const exon &e);
 	int build_transcripts();
 	int add_transcript(const transcript &t);
-	int clear();
+
+	// modify
 	int sort();
+	int clear();
+	int set_gene_id(const string &id);
+
+	// fetch information
 	string get_gene_id() const;
 	string get_seqname() const;
-	int set_gene_id(const string &id);
+	set<int32_t> get_exon_boundaries() const;
+	PI32 get_bounds() const;
+
+	// write
 	int write(ofstream &fout) const;	
 };
 

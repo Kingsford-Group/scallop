@@ -18,15 +18,16 @@ public:
 	virtual ~bundle();
 
 private:
-	split_interval_map imap;				// interval map
+	split_interval_map imap;		// interval map
 	vector<junction> junctions;		// splice junctions
 	vector<boundary> boundaries;	// all types of boundaries
 	vector<region> regions;			// regions
 
 public:
-	int print(int index) const;
-	int output_gtf(ofstream &fout, const vector<path> &paths, const string &prefix, int index) const;	
+	virtual int build();
 	int build_splice_graph(splice_graph &gr) const;
+	int output_gtf(ofstream &fout, const vector<path> &paths, const string &prefix, int index) const;	
+	int print(int index) const;
 
 private:
 	// check whether hits are sorted

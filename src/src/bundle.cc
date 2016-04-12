@@ -10,13 +10,20 @@
 bundle::bundle(const bundle_base &bb)
 	: bundle_base(bb)
 {
+}
+
+bundle::~bundle()
+{}
+
+int bundle::build()
+{
 	// make sure all reads are sorted 
 	check_left_ascending();
 
 	build_split_interval_map();
 
 	infer_junctions();
-	infer_left_boundaries();
+	//infer_left_boundaries();
 	//infer_right_boundaries();
 	add_start_boundary();
 	add_end_boundary();
@@ -27,10 +34,9 @@ bundle::bundle(const bundle_base &bb)
 	build_regions();
 	link_regions();
 	split_region_boundaries();
-}
 
-bundle::~bundle()
-{}
+	return 0;
+}
 
 int bundle::build_split_interval_map()
 {

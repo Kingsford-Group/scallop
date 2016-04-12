@@ -4,6 +4,7 @@
 #include <map>
 
 #include "genome.h"
+#include "util.h"
 
 genome::genome()
 {}
@@ -130,3 +131,23 @@ const gene* genome::get_gene(string name) const
 	return &(genes[k]);
 }
 
+const gene* genome::locate_gene(const string &chrm, const PI32 &p) const
+{
+	assert(p.first <= p.second);
+	const gene * x = NULL;
+	int32_t oo = 0;
+	for(int i = 0; i < genes.size(); i++)
+	{
+		const gene &g = genes[i];
+		if(g.get_seqname() != chrm) continue;
+		PI32 b = g.get_bounds();
+		assert(b.first <= b.second);
+		int32_t o = compute_overlap(p, b);
+		if(o > oo)
+		{
+			x = &(genes[i]);
+			oo = o;
+		}
+	}
+	return x;
+}
