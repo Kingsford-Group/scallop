@@ -523,8 +523,6 @@ bool scallop2::identify_equation1(vector<int> &subs, vector<int> &subt)
 		s.push_back(e);
 		vector<int> t;
 		int err = identify_equation(s, t);
-		if(t.size() >= 3) continue;
-		if(verify_equation_nontrivial(s, t) == false) continue;
 		if(err > min_err) continue;
 		subs = s;
 		subt = t;
@@ -620,22 +618,27 @@ int scallop2::identify_equation(const vector<int> &subs, vector<int> &subt)
 
 	if(sss.subsets.size() == 0) return INT_MAX;
 
-	assert(sss.subsets.size() >= 1);
-	vector<int> subset = sss.subsets[0];
-	int opt = sss.opts[0];
-
-	subt.clear();
-	
-	for(int j = 0; j < subset.size(); j++)
+	for(int i = 0; i < sss.subsets.size(); i++)
 	{
-		int k = subset[j];
-		assert(xi[k].second != -1);
-		subt.push_back(xi[k].second);
+		vector<int> subset = sss.subsets[i];
+		int opt = sss.opts[i];
+
+		subt.clear();
+		for(int j = 0; j < subset.size(); j++)
+		{
+			int k = subset[j];
+			assert(xi[k].second != -1);
+			subt.push_back(xi[k].second);
+		}
+
+		if(subt.size() >= 3) continue;
+		if(verify_equation_nontrivial(subs, subt) == false) continue;
+
+		int err = (int)fabs(opt - sw);
+		return err;
 	}
-
-	int err = (int)fabs(opt - sw);
-
-	return err;
+	
+	return INT_MAX;
 }
 
 int scallop2::connect_pairs(const vector<int> &vx, const vector<int> &vy)
