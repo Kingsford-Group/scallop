@@ -8,5 +8,5 @@ uint32_t compute_binomial_score(int n, double pr, int x)
 
 	binomial_distribution<> b(n, pr);
 	double p = cdf(complement(b, x - 1));
-	return (uint32_t)(-10.0 * log10(p));
+	return (uint32_t)(-100.0 * log10(p));
 }
