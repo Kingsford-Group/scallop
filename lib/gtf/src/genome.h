@@ -24,6 +24,7 @@ public:
 	int write(const string &file) const;
 
 	// modify
+	int add_gene(const gene &g);
 	int sort();
 	int build_index();
 
@@ -31,8 +32,6 @@ public:
 	const gene* get_gene(string name) const;
 	const gene* locate_gene(const string &chr, const PI32 &p) const;
 
-private:
-	int add_gene(const gene &g);
 };
 
 #endif
