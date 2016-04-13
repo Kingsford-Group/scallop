@@ -30,6 +30,8 @@ int max_num_bundles;
 int max_dp_table_size;
 int max_num_subsetsum_solutions;
 double max_equation_error_ratio;
+int region_bin_size;
+int transcript_end_bin_num;
 
 string algo;
 string input_file;
@@ -189,6 +191,14 @@ int load_config(const char * conf_file)
 		else if(strcmp(key, "max_equation_error_ratio")==0)
 		{
 			max_equation_error_ratio = atof(value);
+		}
+		else if(strcmp(key, "region_bin_size")==0)
+		{
+			region_bin_size = (int)atoi(value);
+		}
+		else if(strcmp(key, "transcript_end_bin_num")==0)
+		{
+			transcript_end_bin_num = (int)atoi(value);
 		}
 	}
 

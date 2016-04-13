@@ -47,6 +47,8 @@ extern int max_num_bundles;
 extern int max_dp_table_size;
 extern int max_num_subsetsum_solutions;
 extern double max_equation_error_ratio;
+extern int region_bin_size;
+extern int transcript_end_bin_num;
 
 extern string algo;
 extern string input_file;
