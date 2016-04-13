@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <map>
 #include <sstream>
+#include <cassert>
 
 using namespace std;
 
@@ -15,7 +16,7 @@ using namespace std;
 // definitions
 typedef map<int32_t, int> MPI;
 typedef pair<int32_t, int> PPI;
-
+typedef pair<int, int> PI;
 
 // common small functions
 template<typename T>
@@ -33,7 +34,7 @@ T compute_overlap(const pair<T, T> &x, const pair<T, T> &y)
 	assert(y.first <= y.second);
 	if(x.first > y.first) return compute_overlap(y, x);
 	assert(x.first <= y.first);
-	if(y.first >= x.second) return T(0);
+	if(y.first >= x.second) return x.second - y.first;
 	if(x.second <= y.second) return x.second - y.first;
 	else return y.second - y.first;
 }

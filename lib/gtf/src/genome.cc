@@ -143,7 +143,7 @@ const gene* genome::locate_gene(const string &chrm, const PI32 &p) const
 		PI32 b = g.get_bounds();
 		assert(b.first <= b.second);
 		int32_t o = compute_overlap(p, b);
-		if(o > oo)
+		if(o > 0 && o > oo)
 		{
 			x = &(genes[i]);
 			oo = o;
