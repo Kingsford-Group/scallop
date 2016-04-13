@@ -17,8 +17,7 @@ public:
 	int32_t rpos;					// the rightmost boundary on reference
 	int ltype;						// type of the left boundary
 	int rtype;						// type of the right boundary
-
-	const split_interval_map *imap;		// pointer to a interval map
+	const split_interval_map *imap;	// pointer to a interval map
 
 	int32_t lcore;					// left core position
 	int32_t rcore;					// right core position
@@ -27,13 +26,26 @@ public:
 	double ave_abd;					// average abundance
 	double dev_abd;					// standard-deviation of abundance
 
+private:
+	vector<int> bins;			// average abundance for bins
+	vector<int> s5end;			// score for 5end
+	vector<int> s3end;			// score for 3end
+
 public:
-	int check_empty();
-	int estimate_abundance();
+	int build();
 	bool left_break() const;
 	bool right_break() const;
 	string label() const;
 	int print(int index) const;
+	int print_boundaries(int index) const;
+
+private:
+	int init_core_empty();
+	int estimate_abundance();
+
+	// identify boundaries inside this region
+	int compute_bin_abundance();
+	int compute_end_candidates();
 };
 
 #endif

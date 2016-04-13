@@ -32,6 +32,7 @@ int bundle::build()
 	//remove_left_boundary_intervals();
 
 	build_regions();
+
 	link_regions();
 	split_region_boundaries();
 
@@ -302,6 +303,11 @@ int bundle::build_regions()
 		region r(v[i], v[i + 1], s[v[i]], s[v[i + 1]], &imap);
 		regions.push_back(r);
 	}
+
+	for(int i = 0; i < regions.size(); i++)
+	{
+		regions[i].build();
+	}
 	return 0;
 }
 
@@ -373,6 +379,13 @@ int bundle::print(int index) const
 	{
 		regions[i].print(i);
 	}
+
+	// print region boundaries
+	for(int i = 0; i < regions.size(); i++)
+	{
+		regions[i].print_boundaries(i);
+	}
+
 	return 0;
 }
 
