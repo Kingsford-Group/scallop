@@ -1,6 +1,5 @@
 #include "region.h"
 #include "config.h"
-#include "binomial.h"
 #include "util.h"
 
 region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_imap)
