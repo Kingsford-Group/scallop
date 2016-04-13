@@ -19,6 +19,9 @@ using namespace std;
 #define TRIVIAL 0
 #define NORMAL 1
 
+#define SLOPE5END 0
+#define SLOPE3END 1
+
 // pre-defined parameters
 #define MAX_NUM_CIGAR 7
 #define MIN_LEN_FLANK 1
@@ -49,6 +52,7 @@ extern int max_num_subsetsum_solutions;
 extern double max_equation_error_ratio;
 extern int region_bin_size;
 extern int transcript_end_bin_num;
+extern int min_slope_distance;
 
 extern string algo;
 extern string input_file;

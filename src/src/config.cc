@@ -32,6 +32,7 @@ int max_num_subsetsum_solutions;
 double max_equation_error_ratio;
 int region_bin_size;
 int transcript_end_bin_num;
+int min_slope_distance;
 
 string algo;
 string input_file;
@@ -200,6 +201,11 @@ int load_config(const char * conf_file)
 		{
 			transcript_end_bin_num = (int)atoi(value);
 		}
+		else if(strcmp(key, "min_slope_distance")==0)
+		{
+			min_slope_distance = (int)atoi(value);
+		}
+
 	}
 
 	return 0;

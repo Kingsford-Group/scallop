@@ -4,8 +4,10 @@
 #include <stdint.h>
 #include <vector>
 #include "interval_map.h"
+#include "slope.h"
 
 using namespace std;
+
 class region
 {
 public:
@@ -28,8 +30,7 @@ public:
 
 private:
 	vector<int> bins;			// average abundance for bins
-	vector<int> s5end;			// score for 5end
-	vector<int> s3end;			// score for 3end
+	vector<slope> slopes;		// slopes
 
 public:
 	int build();
@@ -42,10 +43,13 @@ public:
 private:
 	int init_core_empty();
 	int estimate_abundance();
+	int estimate_abundance(int ll, int rr, double &ave, double &dev);
+	double compute_deviation(const split_interval_map &sim);
 
 	// identify boundaries inside this region
-	int compute_bin_abundance();
-	int compute_end_candidates();
+	int compute_bin_abundances();
+	int compute_slopes();
+	int select_slopes();
 };
 
 #endif

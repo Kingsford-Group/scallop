@@ -2,6 +2,9 @@
 #include "config.h"
 #include "util.h"
 #include "binomial.h"
+#include <algorithm>
+
+using namespace std;
 
 region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_imap)
 	:lpos(_lpos), rpos(_rpos), imap(_imap), ltype(_ltype), rtype(_rtype)
@@ -19,8 +22,9 @@ int region::build()
 {
 	init_core_empty();
 	estimate_abundance();
-	compute_bin_abundance();
-	compute_end_candidates();
+	compute_bin_abundances();
+	compute_slopes();
+	select_slopes();
 	return 0;
 }
 
@@ -56,27 +60,55 @@ int region::init_core_empty()
 
 int region::estimate_abundance()
 {
+	return estimate_abundance(lcore, rcore, ave_abd, dev_abd);
+}
+
+double region::compute_deviation(const split_interval_map &sim)
+{
+	double var = 0;
+	int len = 0;
+	for(SIMI it = sim.begin(); it != sim.end(); it++)
+	{
+		int l = lower(it->first);
+		int r = upper(it->first);
+		len += (r - l);
+		int w = it->second;
+		if(w <= 0) continue;
+
+		double a, d;
+		estimate_abundance(l, r, a, d);
+		var += d * d * (r - l);
+	}
+	return sqrt(var / len);
+}
+
+int region::estimate_abundance(int ll, int rr, double &ave, double &dev)
+{
 	if(empty == true) return 0;
 
-	SIMI lit, rit;
-	tie(lit, rit) = locate_boundary_iterators(*imap, lpos, rpos);
+	ave = 0;
+	dev = 0;
 
-	ave_abd = 1.0 * compute_sum_overlap(*imap, lit, rit) / (rcore - lcore);
+	SIMI lit, rit;
+	tie(lit, rit) = locate_boundary_iterators(*imap, ll, rr);
+
+	if(lit == imap->end()) return 0;
+	if(rit == imap->end()) return 0;
+
+	ave = 1.0 * compute_sum_overlap(*imap, lit, rit) / (rr - ll);
 
 	double var = 0;
 	for(SIMI it = lit; ; it++)
 	{
 		assert(upper(it->first) > lower(it->first));
-		var += (it->second - ave_abd) * (it->second - ave_abd) * (upper(it->first) - lower(it->first));
+		var += (it->second - ave) * (it->second - ave) * (upper(it->first) - lower(it->first));
 		if(it == rit) break;
 	}
 
-	dev_abd = sqrt(var / (rcore - lcore));
-	if(dev_abd < 0.1) dev_abd = 0.1;
+	dev = sqrt(var / (rr - ll));
 
 	return 0;
 }
-
 
 bool region::left_break() const
 {
@@ -114,17 +146,12 @@ int region::print(int index) const
 int region::print_boundaries(int index) const
 {
 	int bsize = region_bin_size;
-	int tsize = region_bin_size * transcript_end_bin_num;
-	printf("region %d ends scores:\n", index);
-	for(int i = 0; i < s5end.size(); i++)
+	printf("region %d slopes:\n", index);
+	for(int i = 0; i < slopes.size(); i++)
 	{
-		if(s5end[i] <= 40) continue;
-		printf("%d + %d: 5end score = %d\n", lcore + i * bsize, tsize, s5end[i]);
-	}
-	for(int i = 0; i < s3end.size(); i++)
-	{
-		if(s3end[i] <= 40) continue;
-		printf("%d + %d: 3end score = %d\n", lcore + i * bsize, tsize, s3end[i]);
+		//if(slopes[i].score <= 40) continue;
+		const slope &s = slopes[i];
+		printf("slope %d: type = %d, (%d - %d), score = %d, dev = %.2lf\n", i, s.type, s.lpos, s.rpos, s.score, s.dev);
 	}
 
 	/*
@@ -137,7 +164,7 @@ int region::print_boundaries(int index) const
 	return 0;
 }
 
-int region::compute_bin_abundance()
+int region::compute_bin_abundances()
 {
 	bins.clear();
 	if(empty == true) return 0;
@@ -182,7 +209,7 @@ int region::compute_bin_abundance()
 	return 0;
 }
 
-int region::compute_end_candidates()
+int region::compute_slopes()
 {
 	if(bins.size() < transcript_end_bin_num) return 0;
 
@@ -201,20 +228,29 @@ int region::compute_end_candidates()
 		zo += bins[z + i];
 	}
 
-	s5end.clear();
+	int bsize = region_bin_size;
+	int tsize = bsize * transcript_end_bin_num;
+	slopes.clear();
 	for(int i = nbin; i <= bins.size() - transcript_end_bin_num + nbin; i++)
 	{
+		int ll = lcore + bsize * (x + i - nbin);
+		int rr = ll + tsize;
+		if(i == bins.size() - transcript_end_bin_num + nbin) rr = rcore;
+
 		int xx = xo / average_read_length;
 		int yy = yo / average_read_length;
 		int zz = zo / average_read_length;
 
 		int sxy = compute_binomial_score(xx + yy, 0.5, yy);
 		int syz = compute_binomial_score(yy + zz, 0.5, zz);
-		s5end.push_back( (sxy < syz) ? sxy : syz );
+
+		slope s5(SLOPE5END, ll, rr, (sxy < syz) ? sxy : syz);
+		if(s5.score > 40) slopes.push_back(s5);
 
 		int syx = compute_binomial_score(xx + yy, 0.5, xx);
 		int szy = compute_binomial_score(yy + zz, 0.5, yy);
-		s3end.push_back( (syx < szy) ? syx : szy );
+		slope s3(SLOPE3END, ll, rr, (syx < szy) ? syx : szy);
+		if(s3.score > 40) slopes.push_back(s3);
 
 		xo -= bins[x + i - nbin];
 		yo -= bins[y + i - nbin];
@@ -224,6 +260,43 @@ int region::compute_end_candidates()
 		yo += bins[y + i];
 		zo += bins[z + i];
 	}
+
+	std::sort(slopes.begin(), slopes.end());
 	return 0;
 }
 
+int region::select_slopes()
+{
+	vector<slope> ss;
+
+	split_interval_map sim;
+	sim += make_pair(ROI(lcore, rcore), 1);
+
+	double dev = compute_deviation(sim);
+
+	for(int i = 0; i < slopes.size(); i++)
+	{
+		slope &x = slopes[i];
+		bool b = true;
+		for(int k = 0; k < ss.size(); k++)
+		{
+			slope &y = ss[k];
+			int d = x.distance(y);
+			if(d <= min_slope_distance) b = false;
+			if(b == false) break;
+		}
+		if(b == false) continue;
+
+		sim -= make_pair(ROI(x.lpos, x.rpos), 1);
+
+		double d = compute_deviation(sim);
+		if(d >= dev) break;
+
+		dev = d;
+		x.dev = dev;
+		ss.push_back(x);
+	}
+
+	slopes = ss;
+	return 0;
+}
