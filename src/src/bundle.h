@@ -5,8 +5,8 @@
 #include "interval_map.h"
 #include "bundle_base.h"
 #include "junction.h"
-#include "boundary.h"
 #include "region.h"
+#include "partial_exon.h"
 #include "path.h"
 
 using namespace std;
@@ -20,8 +20,8 @@ public:
 private:
 	split_interval_map imap;		// interval map
 	vector<junction> junctions;		// splice junctions
-	vector<boundary> boundaries;	// all types of boundaries
 	vector<region> regions;			// regions
+	vector<partial_exons> pexons;	// partial exons
 
 public:
 	virtual int build();
@@ -37,23 +37,18 @@ protected:
 	// build interval map
 	int build_split_interval_map();
 
-	// remove these intervals starting at a LEFT_BOUNDARY
-	int remove_left_boundary_intervals();
-
 	// binary search for a specific given starting point, return count
 	int locate_hits(int32_t p, int &li);
 
 	// infer boundaries
 	int infer_junctions();
-	int infer_left_boundaries();
-	int infer_right_boundaries();
-	int add_start_boundary();
-	int add_end_boundary();
 
 	// build regions
 	int build_regions();
+
 	// store the corresponding regions in each junction
 	int link_regions();
+
 	// run create_split on the boundaries of all regions
 	int split_region_boundaries();
 };

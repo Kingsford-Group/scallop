@@ -23,15 +23,8 @@ int bundle::build()
 	build_split_interval_map();
 
 	infer_junctions();
-	//infer_left_boundaries();
-	//infer_right_boundaries();
-	add_start_boundary();
-	add_end_boundary();
 
-	// TODO
-	//remove_left_boundary_intervals();
-
-	build_regions();
+	build_partial_exons();
 
 	link_regions();
 	split_region_boundaries();
@@ -51,34 +44,6 @@ int bundle::build_split_interval_map()
 			int32_t s = high32(v[k]);
 			int32_t t = low32(v[k]);
 			imap += make_pair(ROI(s, t), 1);
-		}
-	}
-	return 0;
-}
-
-int bundle::remove_left_boundary_intervals()
-{
-	vector<int64_t> v;
-	for(int i = 0; i < boundaries.size(); i++)
-	{
-		boundary &b = boundaries[i];
-		if(b.type != LEFT_BOUNDARY) continue;
-
-		int si = 0;
-		int cnt = locate_hits(b.pos, si);
-		if(cnt <= 0) continue;
-		for(int j = si; j < cnt + si; j++)
-		{
-			if(hits[j].pos > hits[j].mpos) continue;
-			if((hits[j].flag & 0x10) >= 1) continue;			
-
-			hits[j].get_matched_intervals(v);
-			for(int k = 0; k < v.size(); k++)
-			{
-				int32_t s = high32(v[k]);
-				int32_t t = low32(v[k]);
-				imap -= make_pair(ROI(s, t), 1);
-			}
 		}
 	}
 	return 0;
@@ -127,100 +92,6 @@ int bundle::infer_junctions()
 		if(it->second.max_qual < min_max_splice_boundary_qual) continue;
 		junctions.push_back(it->second);
 	}
-	return 0;
-}
-
-int bundle::infer_left_boundaries()
-{
-	int32_t pre = 0;
-	int cnt = 1;
-	for(int i = 1; i < hits.size(); i++)
-	{
-		if(hits[i].pos == pre)
-		{
-			cnt++;
-			continue;
-		}
-
-		int32_t tpre = pre;
-		int tcnt = cnt;
-		
-		cnt = 1;
-		pre = hits[i].pos;
-
-		// check the validity of the previous position
-		if(tcnt < min_left_boundary_hits) continue;
-
-		boundary sb(LEFT_BOUNDARY, tpre);
-		for(int k = 0; k < tcnt; k++)
-		{
-			int j = i - 1 - k;
-			if(hits[j].pos > hits[j].mpos) continue;
-			if((hits[j].flag & 0x10) >= 1) continue;			
-			sb.count++;
-			if(hits[j].qual < sb.min_qual) sb.min_qual = hits[j].qual;
-			if(hits[j].qual > sb.max_qual) sb.max_qual = hits[j].qual;
-		}
-		
-		if(sb.count < min_left_boundary_hits) continue;
-		if(sb.max_qual < min_max_left_boundary_qual) continue;
-
-		int r = compute_overlap(imap, tpre);
-
-		sb.score = compute_binomial_score(r, 1.0 / average_read_length, sb.count);
-
-		if(sb.score < min_boundary_score) continue;
-
-		boundaries.push_back(sb);
-	}
-
-	return 0;
-}
-
-int bundle::infer_right_boundaries()
-{
-	int32_t pre = 0;
-	int cnt = 1;
-	for(int i = 1; i < hits.size(); i++)
-	{
-		if(hits[i].rpos == pre)
-		{
-			cnt++;
-			continue;
-		}
-
-		int32_t tpre = pre;
-		int tcnt = cnt;
-		
-		cnt = 1;
-		pre = hits[i].rpos;
-
-		// check the validity of the previous position
-		if(tcnt < min_right_boundary_hits) continue;
-
-		boundary sb(RIGHT_BOUNDARY, tpre);
-		for(int k = 0; k < tcnt; k++)
-		{
-			int j = i - 1 - k;
-			if(hits[j].pos < hits[j].mpos) continue;
-			if((hits[j].flag & 0x10) == 0) continue;			
-			sb.count++;
-			if(hits[j].qual < sb.min_qual) sb.min_qual = hits[j].qual;
-			if(hits[j].qual > sb.max_qual) sb.max_qual = hits[j].qual;
-		}
-		
-		if(sb.count < min_right_boundary_hits) continue;
-		if(sb.max_qual < min_max_right_boundary_qual) continue;
-
-		int r = compute_overlap(imap, tpre);
-
-		sb.score = compute_binomial_score(r, 1.0 / average_read_length, sb.count);
-
-		if(sb.score < min_boundary_score) continue;
-
-		boundaries.push_back(sb);
-	}
-
 	return 0;
 }
 
