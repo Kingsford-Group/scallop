@@ -5,6 +5,7 @@
 #include <vector>
 #include "interval_map.h"
 #include "slope.h"
+#include "partial_exon.h"
 
 using namespace std;
 
@@ -14,7 +15,7 @@ public:
 	region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_imap);
 	~region();
 
-public:
+private:
 	int32_t lpos;					// the leftmost boundary on reference
 	int32_t rpos;					// the rightmost boundary on reference
 	int ltype;						// type of the left boundary
@@ -25,31 +26,24 @@ public:
 	int32_t rcore;					// right core position
 	bool empty;						// whether this region is completely spliced
 
-	double ave_abd;					// average abundance
-	double dev_abd;					// standard-deviation of abundance
-
-private:
-	vector<int> bins;			// average abundance for bins
-	vector<slope> slopes;		// slopes
+	vector<int> bins;				// average abundance for bins
+	vector<slope> slopes;			// slopes
+	vector<partial_exon> pexons;	// partial exons;
 
 public:
 	int build();
-	bool left_break() const;
-	bool right_break() const;
-	string label() const;
 	int print(int index) const;
-	int print_boundaries(int index) const;
 
 private:
-	int init_core_empty();
-	int estimate_abundance();
+	int init();
 	int estimate_abundance(int ll, int rr, double &ave, double &dev);
 	double compute_deviation(const split_interval_map &sim);
 
-	// identify boundaries inside this region
 	int compute_bin_abundances();
 	int compute_slopes();
 	int select_slopes();
+	int refine_slope(slope &s);
+	int build_partial_exons();
 };
 
 #endif

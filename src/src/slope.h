@@ -11,15 +11,14 @@ public:
 	int lpos;
 	int rpos;
 	int score;
-
 	double dev;
 
 public:
-	bool operator < (const slope &s) const;
-
-public:
 	int distance(const slope &s) const;
-
+	int print(int index) const;
 };
+
+bool compare_slope_score(const slope &x, const slope &y);
+bool compare_slope_pos(const slope &x, const slope &y);
 
 #endif

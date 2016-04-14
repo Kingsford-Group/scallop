@@ -9,8 +9,6 @@ using namespace std;
 region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_imap)
 	:lpos(_lpos), rpos(_rpos), imap(_imap), ltype(_ltype), rtype(_rtype)
 {
-	ave_abd = 0;
-	dev_abd = 1;
 	lcore = lpos;
 	rcore = rpos;
 }
@@ -20,15 +18,15 @@ region::~region()
 
 int region::build()
 {
-	init_core_empty();
-	estimate_abundance();
+	init();
 	compute_bin_abundances();
 	compute_slopes();
 	select_slopes();
+	build_partial_exons();
 	return 0;
 }
 
-int region::init_core_empty()
+int region::init()
 {
 	SIMI lit, rit;
 	tie(lit, rit) = locate_boundary_iterators(*imap, lpos, rpos);
@@ -56,30 +54,6 @@ int region::init_core_empty()
 	if(1.0 * s / (rcore - lcore) > min_average_overlap) empty = false;
 
 	return 0;
-}
-
-int region::estimate_abundance()
-{
-	return estimate_abundance(lcore, rcore, ave_abd, dev_abd);
-}
-
-double region::compute_deviation(const split_interval_map &sim)
-{
-	double var = 0;
-	int len = 0;
-	for(SIMI it = sim.begin(); it != sim.end(); it++)
-	{
-		int l = lower(it->first);
-		int r = upper(it->first);
-		len += (r - l);
-		int w = it->second;
-		if(w <= 0) continue;
-
-		double a, d;
-		estimate_abundance(l, r, a, d);
-		var += d * d * (r - l);
-	}
-	return sqrt(var / len);
 }
 
 int region::estimate_abundance(int ll, int rr, double &ave, double &dev)
@@ -110,58 +84,23 @@ int region::estimate_abundance(int ll, int rr, double &ave, double &dev)
 	return 0;
 }
 
-bool region::left_break() const
+double region::compute_deviation(const split_interval_map &sim)
 {
-	if(ltype == RIGHT_SPLICE) return false;
-	if(empty == true) return true;
-	if(lcore > lpos + 9) return true;
-	else return false;
-}
-
-bool region::right_break() const
-{
-	if(rtype == LEFT_SPLICE) return false;
-	if(empty == true) return true;
-	if(rcore < rpos - 9) return true;
-	else return false;
-}
-
-string region::label() const
-{
-	string l = tostring(lpos % 100000);
-	string r = tostring(rpos % 100000);
-	return (l + "-" + r);
-}
-
-int region::print(int index) const
-{
-	char em = empty ? 'T' : 'F';
-	char cl = left_break() ? 'T' : 'F';
-	char cr = right_break() ? 'T' : 'F';
-	printf("region %d: [%d-%d), type = (%d, %d), empty = %c, break = (%c, %c), core = [%d-%d), ave-abd = %.1lf, std-abd = %.1lf\n",
-			index, lpos, rpos, ltype, rtype, em, cl, cr, lcore, rcore, ave_abd, dev_abd);
-	return 0;
-}
-
-int region::print_boundaries(int index) const
-{
-	int bsize = region_bin_size;
-	printf("region %d slopes:\n", index);
-	for(int i = 0; i < slopes.size(); i++)
+	double var = 0;
+	int len = 0;
+	for(SIMI it = sim.begin(); it != sim.end(); it++)
 	{
-		//if(slopes[i].score <= 40) continue;
-		const slope &s = slopes[i];
-		printf("slope %d: type = %d, (%d - %d), score = %d, dev = %.2lf\n", i, s.type, s.lpos, s.rpos, s.score, s.dev);
-	}
+		int l = lower(it->first);
+		int r = upper(it->first);
+		len += (r - l);
+		int w = it->second;
+		if(w <= 0) continue;
 
-	/*
-	printf("region %d bin abundances:\n", index);
-	for(int i = 0; i < bins.size(); i++)
-	{
-		printf("%d + %d: %d\n", lcore + i * bsize, bsize, bins[i]);
+		double a, d;
+		estimate_abundance(l, r, a, d);
+		var += d * d * (r - l);
 	}
-	*/
-	return 0;
+	return sqrt(var / len);
 }
 
 int region::compute_bin_abundances()
@@ -261,7 +200,6 @@ int region::compute_slopes()
 		zo += bins[z + i];
 	}
 
-	std::sort(slopes.begin(), slopes.end());
 	return 0;
 }
 
@@ -274,9 +212,12 @@ int region::select_slopes()
 
 	double dev = compute_deviation(sim);
 
+	std::sort(slopes.begin(), slopes.end(), compare_slope_score);
 	for(int i = 0; i < slopes.size(); i++)
 	{
 		slope &x = slopes[i];
+		refine_slope(x);
+
 		bool b = true;
 		for(int k = 0; k < ss.size(); k++)
 		{
@@ -300,3 +241,114 @@ int region::select_slopes()
 	slopes = ss;
 	return 0;
 }
+
+int region::refine_slope(slope &s)
+{
+	assert(s.lpos >= lcore);
+	assert(s.rpos <= rcore);
+	//if(s.lpos - 100 <= lcore && s.type == SLOPE5END && ltype == START_BOUNDARY) 
+	if(s.lpos - 100 <= lcore) 
+	{
+		s.lpos = lcore;
+	}
+
+	//if(s.rpos + 100 >= rcore && s.type == SLOPE3END && rtype == END_BOUNDARY) 
+	if(s.rpos + 100 >= rcore) 
+	{
+		s.rpos = rcore;
+	}
+
+	return 0;
+}
+
+int region::build_partial_exons()
+{
+	std::sort(slopes.begin(), slopes.end(), compare_slope_pos);
+
+	int lexon = lcore;
+	int lseg = lcore;
+	int lltype = ltype;
+	for(int i = 0; i < slopes.size(); i++)
+	{
+		slope &s = slopes[i];
+
+		if(s.type == SLOPE5END)
+		{
+			int rseg = s.lpos;
+			int rexon = s.lpos;
+			int rrtype = START_BOUNDARY;
+
+			assert(lseg < rseg);
+
+			if(lexon < rexon)
+			{
+				double ave, dev;
+				estimate_abundance(lseg, rseg, ave, dev);
+				partial_exon pe(lexon, rexon, lltype, rrtype);
+				pe.ave_abd = ave;
+				pe.dev_abd = dev;
+				pexons.push_back(pe);
+			}
+
+			lexon = s.lpos;
+			lseg = s.rpos;
+			lltype = START_BOUNDARY;
+		}
+		else if(s.type == SLOPE3END)
+		{
+			int rseg = s.lpos;
+			int rexon = s.rpos;
+			int rrtype = END_BOUNDARY;
+
+			assert(lseg < rseg);
+
+			if(lexon < rexon)
+			{
+				double ave, dev;
+				estimate_abundance(lseg, rseg, ave, dev);
+				partial_exon pe(lexon, rexon, lltype, rrtype);
+				pe.ave_abd = ave;
+				pe.dev_abd = dev;
+				pexons.push_back(pe);
+			}
+
+			lexon = s.rpos;
+			lseg = s.rpos;
+			lltype = END_BOUNDARY;
+		}
+	}
+	int rseg = rcore;
+	int rexon = rcore;
+	int rrtype = rtype;
+
+	assert(lseg < rseg);
+
+	if(lexon < rexon)
+	{
+		double ave, dev;
+		estimate_abundance(lseg, rseg, ave, dev);
+		partial_exon pe(lexon, rexon, lltype, rrtype);
+		pe.ave_abd = ave;
+		pe.dev_abd = dev;
+		pexons.push_back(pe);
+	}
+
+	return 0;
+}
+
+int region::print(int index) const
+{
+	int bsize = region_bin_size;
+	printf("region %d\n", index);
+	for(int i = 0; i < slopes.size(); i++)
+	{
+		slopes[i].print(i);
+	}
+	for(int i = 0; i < pexons.size(); i++)
+	{
+		pexons[i].print(i);
+	}
+	return 0;
+}
+
+
