@@ -16,14 +16,14 @@ region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split
 region::~region()
 {}
 
-int region::build()
+vector<partial_exon> region::build()
 {
 	init();
 	compute_bin_abundances();
 	compute_slopes();
 	select_slopes();
 	build_partial_exons();
-	return 0;
+	return pexons;
 }
 
 int region::init()

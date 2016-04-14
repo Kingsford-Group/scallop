@@ -17,17 +17,12 @@ bundle::~bundle()
 
 int bundle::build()
 {
-	// make sure all reads are sorted 
 	check_left_ascending();
-
 	build_split_interval_map();
-
 	infer_junctions();
-
 	build_partial_exons();
-
-	link_regions();
-	split_region_boundaries();
+	link_partial_exons();
+	split_boundaries();
 
 	return 0;
 }
@@ -95,34 +90,6 @@ int bundle::infer_junctions()
 	return 0;
 }
 
-int bundle::add_start_boundary()
-{
-	for(int i = 0; i < boundaries.size(); i++)
-	{
-		boundary &b = boundaries[i];
-		if(b.pos == lpos) return 0;
-	}
-
-	boundary b(START_BOUNDARY, lpos, 1, 100, 100);
-	boundaries.push_back(b);
-
-	return 0;
-}
-
-int bundle::add_end_boundary()
-{
-	for(int i = 0; i < boundaries.size(); i++)
-	{
-		boundary &b = boundaries[i];
-		if(b.pos == rpos) return 0;
-	}
-
-	boundary b(END_BOUNDARY, rpos, 1, 100, 100);
-	boundaries.push_back(b);
-
-	return 0;
-}
-
 int bundle::check_left_ascending()
 {
 	for(int i = 1; i < hits.size(); i++)
@@ -145,51 +112,37 @@ int bundle::check_right_ascending()
 	return 0;
 }
 
-int bundle::build_regions()
+int bundle::build_partial_exons()
 {
-	typedef map<int32_t, int> MM;
-	typedef pair<int32_t, int> PP;
+	vector<PPI> v;
+	v.push_back(PPI(lpos, START_BOUNDARY));
+	v.push_back(PPI(rpos, END_BOUNDARY));
 
-	MM s;
 	for(int i = 0; i < junctions.size(); i++)
 	{
-		s.insert(PP(junctions[i].lpos, LEFT_SPLICE));
-		s.insert(PP(junctions[i].rpos, RIGHT_SPLICE));
+		v.push_back(PPI(junctions[i].lpos, LEFT_SPLICE));
+		v.push_back(PPI(junctions[i].rpos, RIGHT_SPLICE));
 	}
 
-	for(int i = 0; i < boundaries.size(); i++)
-	{
-		s.insert(PP(boundaries[i].pos, boundaries[i].type));
-	}
-
-	vector<int32_t> v;
-	MM::iterator it;
-	for(it = s.begin(); it != s.end(); it++) v.push_back(it->first);
 	sort(v.begin(), v.end());
-
-	if(v.size() <= 1) return 0;
 
 	for(int i = 0; i < v.size() - 1; i++)
 	{
-		region r(v[i], v[i + 1], s[v[i]], s[v[i + 1]], &imap);
-		regions.push_back(r);
-	}
-
-	for(int i = 0; i < regions.size(); i++)
-	{
-		regions[i].build();
+		region r(v[i].first, v[i + 1].first, v[i].second, v[i + 1].second, &imap);
+		vector<partial_exon> vp = r.build();
+		pexons.insert(pexons.end(), vp.begin(), vp.end());
 	}
 	return 0;
 }
 
-int bundle::link_regions()
+int bundle::link_partial_exons()
 {
 	MPI lm;
 	MPI rm;
-	for(int i = 0; i < regions.size(); i++)
+	for(int i = 0; i < pexons.size(); i++)
 	{
-		int32_t l = regions[i].lpos;
-		int32_t r = regions[i].rpos;
+		int32_t l = pexons[i].lpos;
+		int32_t r = pexons[i].rpos;
 		assert(lm.find(l) == lm.end());
 		assert(rm.find(r) == rm.end());
 		lm.insert(PPI(l, i));
@@ -209,12 +162,12 @@ int bundle::link_regions()
 	return 0;
 }
 
-int bundle::split_region_boundaries()
+int bundle::split_boundaries()
 {
-	for(int i = 0; i < regions.size(); i++)
+	for(int i = 0; i < pexons.size(); i++)
 	{
-		create_split(imap, regions[i].lpos);
-		create_split(imap, regions[i].rpos);
+		create_split(imap, pexons[i].lpos);
+		create_split(imap, pexons[i].rpos);
 	}
 	return 0;
 }
@@ -239,22 +192,10 @@ int bundle::print(int index) const
 		junctions[i].print(i);
 	}
 
-	// print boundaries
-	for(int i = 0; i < boundaries.size(); i++)
+	// print partial exons
+	for(int i = 0; i < pexons.size(); i++)
 	{
-		boundaries[i].print(i);
-	}
-
-	// print regions
-	for(int i = 0; i < regions.size(); i++)
-	{
-		regions[i].print(i);
-	}
-
-	// print region boundaries
-	for(int i = 0; i < regions.size(); i++)
-	{
-		regions[i].print_boundaries(i);
+		pexons[i].print(i);
 	}
 
 	return 0;
@@ -267,40 +208,28 @@ int bundle::build_splice_graph(splice_graph &gr) const
 	gr.set_vertex_string(0, "");
 	gr.set_vertex_weight(0, 0);
 	gr.set_vertex_stddev(0, 1);
-	for(int i = 0; i < regions.size(); i++)
+	for(int i = 0; i < pexons.size(); i++)
 	{
-		const region &r = regions[i];
+		const partial_exon &r = pexons[i];
 		double ave = 0;
 		double dev = 1;
-		if(r.empty == false)
-		{
-			ave = r.ave_abd;
-			dev = r.dev_abd;					
-			//dev = r.dev_abd / sqrt(r.rcore - r.lcore); // TODO
-		}
 		gr.add_vertex();
 		gr.set_vertex_string(i + 1, r.label());
 		gr.set_vertex_weight(i + 1, ave);
 		gr.set_vertex_stddev(i + 1, dev);
 	}
 	gr.add_vertex();
-	gr.set_vertex_string(regions.size() + 1, "");
-	gr.set_vertex_weight(regions.size() + 1, 0);
-	gr.set_vertex_stddev(regions.size() + 1, 1);
+	gr.set_vertex_string(pexons.size() + 1, "");
+	gr.set_vertex_weight(pexons.size() + 1, 0);
+	gr.set_vertex_stddev(pexons.size() + 1, 1);
 
-	// edges: connecting adjacent regions => e2w
-	for(int i = 0; i < regions.size() - 1; i++)
+	// edges: connecting adjacent pexons => e2w
+	for(int i = 0; i < pexons.size() - 1; i++)
 	{
-		const region &x = regions[i];
-		const region &y = regions[i + 1];
+		const partial_exon &x = pexons[i];
+		const partial_exon &y = pexons[i + 1];
 
-		if(x.empty || y.empty) continue;
-
-		if(x.right_break()) continue;
-		if(y.left_break()) continue;
-
-		//if(x.rtype == RIGHT_BOUNDARY) continue;
-		//if(y.ltype == LEFT_BOUNDARY) continue;
+		if(x.rpos != y.lpos) continue;
 
 		assert(x.rpos == y.lpos);
 		int32_t xr = compute_overlap(imap, x.rpos - 1);
@@ -317,8 +246,8 @@ int bundle::build_splice_graph(splice_graph &gr) const
 	for(int i = 0; i < junctions.size(); i++)
 	{
 		const junction &b = junctions[i];
-		const region &x = regions[b.lrgn];
-		const region &y = regions[b.rrgn];
+		const partial_exon &x = pexons[b.lrgn];
+		const partial_exon &y = pexons[b.rrgn];
 
 		double sd = 0.5 * x.dev_abd + 0.5 * y.dev_abd;
 
@@ -327,17 +256,14 @@ int bundle::build_splice_graph(splice_graph &gr) const
 		gr.set_edge_stddev(p, sd);
 	}
 
-	// edges: connecting start/end and regions
+	// edges: connecting start/end and pexons
 	int ss = 0;
-	int tt = regions.size() + 1;
-	for(int i = 0; i < regions.size(); i++)
+	int tt = pexons.size() + 1;
+	for(int i = 0; i < pexons.size(); i++)
 	{
-		const region &r = regions[i];
-		if(r.empty == true) continue;
+		const partial_exon &r = pexons[i];
 
-		// TODO
-		//if(r.ltype == LEFT_BOUNDARY || r.ltype == START_BOUNDARY)
-		if(r.left_break() || r.ltype == LEFT_BOUNDARY || r.ltype == START_BOUNDARY)
+		if(r.ltype == START_BOUNDARY)
 		{
 			edge_descriptor p = gr.add_edge(ss, i + 1);
 			gr.set_edge_weight(p, r.ave_abd);
@@ -345,8 +271,7 @@ int bundle::build_splice_graph(splice_graph &gr) const
 		}
 
 		// TODO
-		//if(r.rtype == RIGHT_BOUNDARY || r.rtype == END_BOUNDARY) 
-		if(r.right_break() || r.rtype == RIGHT_BOUNDARY || r.rtype == END_BOUNDARY) 
+		if(r.rtype == END_BOUNDARY) 
 		{
 			edge_descriptor p = gr.add_edge(i + 1, tt);
 			gr.set_edge_weight(p, r.ave_abd);
@@ -355,11 +280,10 @@ int bundle::build_splice_graph(splice_graph &gr) const
 	}
 
 	// check
-	if(regions.size() == 1) return 0;
-	for(int i = 0; i < regions.size(); i++)
+	if(pexons.size() == 1) return 0;
+	for(int i = 0; i < pexons.size(); i++)
 	{
-		const region &r = regions[i];
-		if(r.empty == false) continue;
+		const partial_exon &r = pexons[i];
 		assert(gr.in_degree(i + 1) == 0);
 		assert(gr.out_degree(i + 1) == 0);
 		// TODO, still bugy here
@@ -392,12 +316,12 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, const string &
 		fout<<"expression \""<<abd<<"\";"<<endl;
 
 		assert(v[0] == 0);
-		assert(v[v.size() - 1] == regions.size() + 1);
+		assert(v[v.size() - 1] == pexons.size() + 1);
 
 		join_interval_map jmap;
 		for(int k = 1; k < v.size() - 1; k++)
 		{
-			const region &r = regions[v[k] - 1];
+			const partial_exon &r = pexons[v[k] - 1];
 			jmap += make_pair(ROI(r.lpos, r.rpos), 1);
 		}
 
@@ -420,5 +344,3 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, const string &
 	}
 	return 0;
 }
-
-

@@ -21,7 +21,7 @@ private:
 	split_interval_map imap;		// interval map
 	vector<junction> junctions;		// splice junctions
 	vector<region> regions;			// regions
-	vector<partial_exons> pexons;	// partial exons
+	vector<partial_exon> pexons;	// partial exons
 
 public:
 	virtual int build();
@@ -44,13 +44,13 @@ protected:
 	int infer_junctions();
 
 	// build regions
-	int build_regions();
+	int build_partial_exons();
 
 	// store the corresponding regions in each junction
-	int link_regions();
+	int link_partial_exons();
 
 	// run create_split on the boundaries of all regions
-	int split_region_boundaries();
+	int split_boundaries();
 };
 
 #endif

@@ -31,7 +31,7 @@ private:
 	vector<partial_exon> pexons;	// partial exons;
 
 public:
-	int build();
+	vector<partial_exon> build();
 	int print(int index) const;
 
 private:
