@@ -27,7 +27,7 @@ private:
 	bool empty;						// whether this region is completely spliced
 
 	vector<int> bins;				// average abundance for bins
-	vector<slope> slopes;			// slopes
+	vector<slope> slopes;			// chosen slopes
 	vector<partial_exon> pexons;	// partial exons;
 
 public:
@@ -36,13 +36,13 @@ public:
 
 private:
 	int init();
-	int estimate_abundance(int ll, int rr, double &ave, double &dev);
-	double compute_deviation(const split_interval_map &sim);
+	int evaluate_rectangle(int ll, int rr, double &ave, double &dev);
+	int evaluate_triangle(int ll, int rr, double &ave, double &dev);
+	double compute_deviation(const split_interval_map &sim, const vector<slope> &ss);
 
-	int compute_bin_abundances();
-	int compute_slopes();
+	int build_bins();
+	int build_slopes();
 	int select_slopes();
-	int refine_slope(slope &s);
 	int build_partial_exons();
 };
 

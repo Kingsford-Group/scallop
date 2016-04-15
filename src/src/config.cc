@@ -30,9 +30,11 @@ int max_num_bundles;
 int max_dp_table_size;
 int max_num_subsetsum_solutions;
 double max_equation_error_ratio;
-int region_bin_size;
-int transcript_end_bin_num;
-int min_slope_distance;
+
+int slope_bin_size;
+int slope_min_bin_num;
+int slope_std_bin_num;
+int slope_min_distance;
 
 string algo;
 string input_file;
@@ -193,19 +195,22 @@ int load_config(const char * conf_file)
 		{
 			max_equation_error_ratio = atof(value);
 		}
-		else if(strcmp(key, "region_bin_size")==0)
+		else if(strcmp(key, "slope_bin_size")==0)
 		{
-			region_bin_size = (int)atoi(value);
+			slope_bin_size = (int)atoi(value);
 		}
-		else if(strcmp(key, "transcript_end_bin_num")==0)
+		else if(strcmp(key, "slope_min_bin_num")==0)
 		{
-			transcript_end_bin_num = (int)atoi(value);
+			slope_min_bin_num = (int)atoi(value);
 		}
-		else if(strcmp(key, "min_slope_distance")==0)
+		else if(strcmp(key, "slope_std_bin_num")==0)
 		{
-			min_slope_distance = (int)atoi(value);
+			slope_std_bin_num = (int)atoi(value);
 		}
-
+		else if(strcmp(key, "slope_min_distance")==0)
+		{
+			slope_min_distance = (int)atoi(value);
+		}
 	}
 
 	return 0;

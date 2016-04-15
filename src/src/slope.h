@@ -7,11 +7,15 @@ public:
 	slope(int t, int l, int r, int s);
 
 public:
-	int type;
+	int type;			// 5end or 3 end
+	int flag;			// margin or middle
+	int lbin;
+	int rbin;
 	int lpos;
 	int rpos;
-	int score;
-	double dev;
+	int score;			// the likelihood of being a slope
+	double ave;			// mean of abundance
+	double dev;			// dev of abundance
 
 public:
 	int distance(const slope &s) const;

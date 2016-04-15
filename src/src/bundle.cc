@@ -21,6 +21,8 @@ int bundle::build()
 	build_split_interval_map();
 	infer_junctions();
 	build_partial_exons();
+	return 0;
+
 	link_partial_exons();
 	split_boundaries();
 

@@ -19,10 +19,12 @@ region::~region()
 vector<partial_exon> region::build()
 {
 	init();
-	compute_bin_abundances();
-	compute_slopes();
+	build_bins();
+	build_slopes();
 	select_slopes();
 	build_partial_exons();
+	
+	print(0);
 	return pexons;
 }
 
@@ -56,7 +58,7 @@ int region::init()
 	return 0;
 }
 
-int region::estimate_abundance(int ll, int rr, double &ave, double &dev)
+int region::evaluate_rectangle(int ll, int rr, double &ave, double &dev)
 {
 	if(empty == true) return 0;
 
@@ -84,7 +86,67 @@ int region::estimate_abundance(int ll, int rr, double &ave, double &dev)
 	return 0;
 }
 
-double region::compute_deviation(const split_interval_map &sim)
+int region::evaluate_triangle(int ll, int rr, double &ave, double &dev)
+{
+	if(empty == true) return 0;
+
+	ave = 0;
+	dev = 0;
+
+	SIMI lit, rit;
+	tie(lit, rit) = locate_boundary_iterators(*imap, ll, rr);
+
+	if(lit == imap->end()) return 0;
+	if(rit == imap->end()) return 0;
+
+	vector<double> xv;
+	vector<double> yv;
+	double xm = 0;
+	double ym = 0;
+	for(SIMI it = lit; ; it++)
+	{
+		assert(upper(it->first) > lower(it->first));
+		double xi = (lower(it->first) + upper(it->first)) / 2.0;
+		double yi = it->second;
+		xv.push_back(xi);
+		yv.push_back(yi);
+		xm += xi;
+		ym += yi;
+		if(it == rit) break;
+	}
+
+	xm /= xv.size();
+	ym /= yv.size();
+
+	double f1 = 0;
+	double f2 = 0;
+	for(int i = 0; i < xv.size(); i++)
+	{
+		f1 += (xv[i] - xm) * (yv[i] - ym);
+		f2 += (xv[i] - xm) * (xv[i] - xm);
+	}
+
+	double b1 = f1 / f2;
+	double b0 = ym - b1 * xm;
+
+	ave = 2.0 * (b1 * (rr - ll) / 2.0 + b0);
+
+	double var = 0;
+	for(SIMI it = lit; ; it++)
+	{
+		assert(upper(it->first) > lower(it->first));
+		double xi = (upper(it->first) + lower(it->first)) / 2.0;
+		double yi = b1 * xi + b0;
+		var += (it->second - yi) * (it->second - yi) * (upper(it->first) - lower(it->first));
+		if(it == rit) break;
+	}
+
+	dev = sqrt(var / (rr - ll));
+
+	return 0;
+}
+
+double region::compute_deviation(const split_interval_map &sim, const vector<slope> &ss)
 {
 	double var = 0;
 	int len = 0;
@@ -97,18 +159,25 @@ double region::compute_deviation(const split_interval_map &sim)
 		if(w <= 0) continue;
 
 		double a, d;
-		estimate_abundance(l, r, a, d);
+		evaluate_rectangle(l, r, a, d);
 		var += d * d * (r - l);
+	}
+
+	for(int i = 0; i < ss.size(); i++)
+	{
+		const slope &s = ss[i];
+		var += s.dev * s.dev * (s.rpos - s.lpos);
+		len += (s.rpos - s.lpos);
 	}
 	return sqrt(var / len);
 }
 
-int region::compute_bin_abundances()
+int region::build_bins()
 {
 	bins.clear();
 	if(empty == true) return 0;
 
-	int32_t bsize = region_bin_size;
+	int32_t bsize = slope_bin_size;
 	int bnum = ceil((rcore - lcore) * 1.0 / bsize);
 	bins.resize(bnum, 0.0);
 
@@ -148,33 +217,42 @@ int region::compute_bin_abundances()
 	return 0;
 }
 
-int region::compute_slopes()
+int region::build_slopes()
 {
-	if(bins.size() < transcript_end_bin_num) return 0;
+	if(bins.size() < slope_min_bin_num) return 0;
 
-	int nbin = transcript_end_bin_num / 3;
-	int x = 0;
-	int y = x + nbin;
-	int z = y + nbin;
-	
+	// left part
+	int mbin = slope_min_bin_num / 3;
+	int nbin = slope_std_bin_num / 3;
+
+	int lbin = 0 * mbin;
+	int rbin = 3 * (mbin - 1);
 	int xo = 0;
 	int yo = 0;
 	int zo = 0;
-	for(int i = 0; i < nbin; i++)
+	int d = 0;
+	for(d = 0; d < mbin - 1; d++)
 	{
-		xo += bins[x + i];
-		yo += bins[y + i];
-		zo += bins[z + i];
+		xo += bins[0 * (mbin - 1) + d];
+		yo += bins[1 * (mbin - 1) + d];
+		zo += bins[2 * (mbin - 1) + d];
 	}
+	assert(d == mbin - 1);
 
-	int bsize = region_bin_size;
-	int tsize = bsize * transcript_end_bin_num;
 	slopes.clear();
-	for(int i = nbin; i <= bins.size() - transcript_end_bin_num + nbin; i++)
+	for(d = mbin - 1; d < nbin && rbin + 3 <= bins.size(); d++)
 	{
-		int ll = lcore + bsize * (x + i - nbin);
-		int rr = ll + tsize;
-		if(i == bins.size() - transcript_end_bin_num + nbin) rr = rcore;
+		xo += bins[lbin + 1 * d + 0];
+		yo -= bins[lbin + 1 * d + 0];
+		yo += bins[lbin + 2 * d + 0];
+		yo += bins[lbin + 2 * d + 1];
+		zo -= bins[lbin + 2 * d + 0];
+		zo -= bins[lbin + 2 * d + 1];
+		zo += bins[lbin + 3 * d + 0];
+		zo += bins[lbin + 3 * d + 1];
+		zo += bins[lbin + 3 * d + 2];
+
+		rbin += 3;
 
 		int xx = xo / average_read_length;
 		int yy = yo / average_read_length;
@@ -183,21 +261,89 @@ int region::compute_slopes()
 		int sxy = compute_binomial_score(xx + yy, 0.5, yy);
 		int syz = compute_binomial_score(yy + zz, 0.5, zz);
 
-		slope s5(SLOPE5END, ll, rr, (sxy < syz) ? sxy : syz);
+		slope s5(SLOPE5END, lbin, rbin, (sxy < syz) ? sxy : syz);
 		if(s5.score > 40) slopes.push_back(s5);
 
 		int syx = compute_binomial_score(xx + yy, 0.5, xx);
 		int szy = compute_binomial_score(yy + zz, 0.5, yy);
-		slope s3(SLOPE3END, ll, rr, (syx < szy) ? syx : szy);
+		slope s3(SLOPE3END, lbin, rbin, (syx < szy) ? syx : szy);
 		if(s3.score > 40) slopes.push_back(s3);
+	}
 
-		xo -= bins[x + i - nbin];
-		yo -= bins[y + i - nbin];
-		zo -= bins[z + i - nbin];
+	// middle part
+	while(rbin + 1 <= bins.size())
+	{
+		xo -= bins[lbin + 0 * d];
+		xo += bins[lbin + 1 * d];
+		yo -= bins[lbin + 1 * d];
+		yo += bins[lbin + 2 * d];
+		zo -= bins[lbin + 2 * d];
+		zo += bins[lbin + 3 * d];
 
-		xo += bins[x + i];
-		yo += bins[y + i];
-		zo += bins[z + i];
+		lbin++;
+		rbin++;
+
+		int xx = xo / average_read_length;
+		int yy = yo / average_read_length;
+		int zz = zo / average_read_length;
+
+		int sxy = compute_binomial_score(xx + yy, 0.5, yy);
+		int syz = compute_binomial_score(yy + zz, 0.5, zz);
+
+		slope s5(SLOPE5END, lbin, rbin, (sxy < syz) ? sxy : syz);
+		if(s5.score > 40) slopes.push_back(s5);
+
+		int syx = compute_binomial_score(xx + yy, 0.5, xx);
+		int szy = compute_binomial_score(yy + zz, 0.5, yy);
+		slope s3(SLOPE3END, lbin, rbin, (syx < szy) ? syx : szy);
+		if(s3.score > 40) slopes.push_back(s3);
+	}
+
+	assert(rbin == bins.size());
+
+	// right part
+	for(; d > mbin; d--) 
+	{
+		xo -= bins[lbin + 0 * d + 0];
+		xo -= bins[lbin + 0 * d + 1];
+		xo -= bins[lbin + 0 * d + 2];
+		xo += bins[lbin + 1 * d + 0];
+		xo += bins[lbin + 1 * d + 1];
+
+		yo -= bins[lbin + 1 * d + 0];
+		yo -= bins[lbin + 1 * d + 1];
+		yo += bins[lbin + 2 * d + 0];
+
+		zo -= bins[lbin + 2 * d + 0];
+
+		lbin += 3;
+
+		int xx = xo / average_read_length;
+		int yy = yo / average_read_length;
+		int zz = zo / average_read_length;
+
+		int sxy = compute_binomial_score(xx + yy, 0.5, yy);
+		int syz = compute_binomial_score(yy + zz, 0.5, zz);
+
+		slope s5(SLOPE5END, lbin, rbin, (sxy < syz) ? sxy : syz);
+		if(s5.score > 40) slopes.push_back(s5);
+
+		int syx = compute_binomial_score(xx + yy, 0.5, xx);
+		int szy = compute_binomial_score(yy + zz, 0.5, yy);
+		slope s3(SLOPE3END, lbin, rbin, (syx < szy) ? syx : szy);
+		if(s3.score > 40) slopes.push_back(s3);
+	}
+
+	for(int i = 0; i < slopes.size(); i++)
+	{
+		slope &s = slopes[i];
+		s.lpos = lcore + lbin * slope_bin_size;
+
+		if(s.rbin == bins.size()) s.rpos = rcore;
+		else s.rpos = lcore + rbin * slope_bin_size;
+
+		if(s.lpos == lcore || s.rpos == rcore) s.flag = SLOPE_MARGIN;
+		else s.flag = SLOPE_MIDDLE;
 	}
 
 	return 0;
@@ -210,54 +356,41 @@ int region::select_slopes()
 	split_interval_map sim;
 	sim += make_pair(ROI(lcore, rcore), 1);
 
-	double dev = compute_deviation(sim);
+	double dev = compute_deviation(sim, ss);
 
 	std::sort(slopes.begin(), slopes.end(), compare_slope_score);
 	for(int i = 0; i < slopes.size(); i++)
 	{
 		slope &x = slopes[i];
-		refine_slope(x);
+		evaluate_triangle(x.lpos, x.rpos, x.ave, x.dev);	
 
 		bool b = true;
 		for(int k = 0; k < ss.size(); k++)
 		{
 			slope &y = ss[k];
 			int d = x.distance(y);
-			if(d <= min_slope_distance) b = false;
+			if(d <= slope_min_distance) b = false;
 			if(b == false) break;
 		}
 		if(b == false) continue;
 
+		ss.push_back(x);
 		sim -= make_pair(ROI(x.lpos, x.rpos), 1);
 
-		double d = compute_deviation(sim);
-		if(d >= dev) break;
+		double d = compute_deviation(sim, ss);
 
-		dev = d;
-		x.dev = dev;
-		ss.push_back(x);
+		if(d <= dev * 0.9)
+		{
+			dev = d;
+		}
+		else
+		{
+			ss.pop_back();
+			break;
+		}
 	}
 
 	slopes = ss;
-	return 0;
-}
-
-int region::refine_slope(slope &s)
-{
-	assert(s.lpos >= lcore);
-	assert(s.rpos <= rcore);
-	//if(s.lpos - 100 <= lcore && s.type == SLOPE5END && ltype == START_BOUNDARY) 
-	if(s.lpos - 100 <= lcore) 
-	{
-		s.lpos = lcore;
-	}
-
-	//if(s.rpos + 100 >= rcore && s.type == SLOPE3END && rtype == END_BOUNDARY) 
-	if(s.rpos + 100 >= rcore) 
-	{
-		s.rpos = rcore;
-	}
-
 	return 0;
 }
 
@@ -265,25 +398,31 @@ int region::build_partial_exons()
 {
 	std::sort(slopes.begin(), slopes.end(), compare_slope_pos);
 
-	int lexon = lcore;
-	int lseg = lcore;
+	int32_t lexon = lcore;
+	int32_t ppos = lcore;
+	double pvar = 0.0;
+	double psum = 0.0;
 	int lltype = ltype;
 	for(int i = 0; i < slopes.size(); i++)
 	{
 		slope &s = slopes[i];
-
 		if(s.type == SLOPE5END)
 		{
-			int rseg = s.lpos;
 			int rexon = s.lpos;
 			int rrtype = START_BOUNDARY;
 
-			assert(lseg < rseg);
+			if(rexon > ppos)
+			{
+				double ave, dev;
+				evaluate_rectangle(ppos, rexon, ave, dev);
+				psum += ave * (rexon - ppos);
+				pvar += dev * dev * (rexon - ppos);
+			}
 
 			if(lexon < rexon)
 			{
-				double ave, dev;
-				estimate_abundance(lseg, rseg, ave, dev);
+				double ave = psum / (rexon - lexon);
+				double dev = sqrt(pvar / (rexon - lexon));
 				partial_exon pe(lexon, rexon, lltype, rrtype);
 				pe.ave_abd = ave;
 				pe.dev_abd = dev;
@@ -291,42 +430,59 @@ int region::build_partial_exons()
 			}
 
 			lexon = s.lpos;
-			lseg = s.rpos;
+			ppos = s.rpos;
 			lltype = START_BOUNDARY;
+			psum = s.ave * (s.rpos - s.lpos);
+			pvar = s.dev * s.dev * (s.rpos - s.lpos);
 		}
 		else if(s.type == SLOPE3END)
 		{
-			int rseg = s.lpos;
 			int rexon = s.rpos;
 			int rrtype = END_BOUNDARY;
 
-			assert(lseg < rseg);
-
-			if(lexon < rexon)
+			if(s.lpos > ppos)
 			{
 				double ave, dev;
-				estimate_abundance(lseg, rseg, ave, dev);
-				partial_exon pe(lexon, rexon, lltype, rrtype);
-				pe.ave_abd = ave;
-				pe.dev_abd = dev;
-				pexons.push_back(pe);
+				evaluate_rectangle(ppos, s.lpos, ave, dev);
+				psum += ave * (s.lpos - ppos);
+				pvar += dev * dev * (s.lpos - ppos);
 			}
 
+			psum += s.ave * (s.rpos - s.lpos);
+			pvar += s.dev * s.dev * (s.rpos - s.lpos);
+
+			assert(lexon < rexon);
+
+			double ave = psum / (rexon - lexon);
+			double dev = sqrt(pvar / (rexon - lexon));
+			partial_exon pe(lexon, rexon, lltype, rrtype);
+			pe.ave_abd = ave;
+			pe.dev_abd = dev;
+			pexons.push_back(pe);
+
 			lexon = s.rpos;
-			lseg = s.rpos;
+			ppos = s.rpos;
 			lltype = END_BOUNDARY;
+			psum = 0;
+			pvar = 0;
 		}
 	}
-	int rseg = rcore;
+
 	int rexon = rcore;
 	int rrtype = rtype;
 
-	assert(lseg < rseg);
+	if(rexon > ppos)
+	{
+		double ave, dev;
+		evaluate_rectangle(ppos, rexon, ave, dev);
+		psum += ave * (rexon - ppos);
+		pvar += dev * dev * (rexon - ppos);
+	}
 
 	if(lexon < rexon)
 	{
-		double ave, dev;
-		estimate_abundance(lseg, rseg, ave, dev);
+		double ave = psum / (rexon - lexon);
+		double dev = sqrt(pvar / (rexon - lexon));
 		partial_exon pe(lexon, rexon, lltype, rrtype);
 		pe.ave_abd = ave;
 		pe.dev_abd = dev;
@@ -338,7 +494,7 @@ int region::build_partial_exons()
 
 int region::print(int index) const
 {
-	int bsize = region_bin_size;
+	int bsize = slope_bin_size;
 	printf("region %d\n", index);
 	for(int i = 0; i < slopes.size(); i++)
 	{

@@ -22,6 +22,9 @@ using namespace std;
 #define SLOPE5END 0
 #define SLOPE3END 1
 
+#define SLOPE_MARGIN 0
+#define SLOPE_MIDDLE 1
+
 // pre-defined parameters
 #define MAX_NUM_CIGAR 7
 #define MIN_LEN_FLANK 1
@@ -50,9 +53,10 @@ extern int max_num_bundles;
 extern int max_dp_table_size;
 extern int max_num_subsetsum_solutions;
 extern double max_equation_error_ratio;
-extern int region_bin_size;
-extern int transcript_end_bin_num;
-extern int min_slope_distance;
+extern int slope_bin_size;
+extern int slope_min_bin_num;
+extern int slope_std_bin_num;
+extern int slope_min_distance;
 
 extern string algo;
 extern string input_file;

@@ -68,6 +68,8 @@ int assembler::assemble_bam(const string &file)
 
 			bundle bd(bb);
 			bd.build();
+
+			/*
 			bd.print(index);
 			
 			splice_graph gr;
@@ -78,6 +80,7 @@ int assembler::assemble_bam(const string &file)
 			sc.assemble();
 
 			if(output_gtf_file != "") bd.output_gtf(fout, sc.paths, algo, index);
+			*/
 
 			bb.clear();
 			if(max_num_bundles > 0 && index > max_num_bundles) break;
