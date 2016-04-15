@@ -15,6 +15,7 @@ using namespace boost;
 scallop2::scallop2(const string &s, splice_graph &g)
 	: name(s), gr(g)
 {
+	round = 0;
 	assert(gr.check_fully_connected() == true);
 }
 
