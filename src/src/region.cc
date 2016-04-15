@@ -63,10 +63,10 @@ int region::init()
 
 int region::evaluate_rectangle(int ll, int rr, double &ave, double &dev)
 {
-	if(empty == true) return 0;
-
 	ave = 0;
-	dev = 0;
+	dev = 1.0;
+
+	if(empty == true) return 0;
 
 	SIMI lit, rit;
 	tie(lit, rit) = locate_boundary_iterators(*imap, ll, rr);
@@ -85,16 +85,17 @@ int region::evaluate_rectangle(int ll, int rr, double &ave, double &dev)
 	}
 
 	dev = sqrt(var / (rr - ll));
+	if(dev < 1.0) dev = 1.0;
 
 	return 0;
 }
 
 int region::evaluate_triangle(int ll, int rr, double &ave, double &dev)
 {
-	if(empty == true) return 0;
-
 	ave = 0;
-	dev = 0;
+	dev = 1.0;
+
+	if(empty == true) return 0;
 
 	SIMI lit, rit;
 	tie(lit, rit) = locate_boundary_iterators(*imap, ll, rr);
@@ -147,6 +148,7 @@ int region::evaluate_triangle(int ll, int rr, double &ave, double &dev)
 	}
 
 	dev = sqrt(var / (rr - ll));
+	if(dev < 1.0) dev = 1.0;
 
 	return 0;
 }
@@ -354,21 +356,6 @@ int region::build_slopes()
 		evaluate_triangle(s.lpos, s.rpos, s.ave, s.dev);
 	}
 
-	/*
-	for(int i = 0; i < seeds.size(); i++)
-	{
-		seeds[i].print(i);
-	}
-	printf("-------------\n");
-
-	std::sort(seeds.begin(), seeds.end(), compare_slope_score);
-	for(int i = 0; i < seeds.size(); i++)
-	{
-		seeds[i].print(i);
-	}
-	printf("=============\n");
-	*/
-
 	return 0;
 }
 
@@ -383,7 +370,7 @@ int region::select_slopes()
 	for(int i = 0; i < seeds.size(); i++)
 	{
 		slope &x = seeds[i];
-		evaluate_triangle(x.lpos, x.rpos, x.ave, x.dev);	
+		//evaluate_triangle(x.lpos, x.rpos, x.ave, x.dev);	
 
 		bool b = true;
 		for(int k = 0; k < slopes.size(); k++)
