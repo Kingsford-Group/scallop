@@ -23,6 +23,7 @@ int slope::print(int index) const
 bool compare_slope_score(const slope &x, const slope &y)
 {
 	if(x.flag < y.flag) return true;
+	if(x.flag > y.flag) return false;
 	if(x.score > y.score) return true;
 	return false;
 }

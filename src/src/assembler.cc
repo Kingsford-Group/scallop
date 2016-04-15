@@ -59,7 +59,7 @@ int assembler::assemble_bam(const string &file)
 
 			// DEBUG
 			/*
-			if(index <= 10800) 
+			if(index <= 9000) 
 			{
 				bb.clear();
 				continue;
@@ -69,9 +69,13 @@ int assembler::assemble_bam(const string &file)
 			bundle bd(bb);
 			bd.build();
 
-			/*
+			bb.clear();
+			if(max_num_bundles > 0 && index > max_num_bundles) break;
+
 			bd.print(index);
-			
+
+			if(bd.size() >= 100) continue;
+
 			splice_graph gr;
 			bd.build_splice_graph(gr);
 
@@ -80,10 +84,7 @@ int assembler::assemble_bam(const string &file)
 			sc.assemble();
 
 			if(output_gtf_file != "") bd.output_gtf(fout, sc.paths, algo, index);
-			*/
 
-			bb.clear();
-			if(max_num_bundles > 0 && index > max_num_bundles) break;
 		}
 		bb.add_hit(h, b);
     }

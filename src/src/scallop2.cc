@@ -15,6 +15,7 @@ using namespace boost;
 scallop2::scallop2(const string &s, splice_graph &g)
 	: name(s), gr(g)
 {
+	assert(gr.check_fully_connected() == true);
 }
 
 scallop2::~scallop2()
@@ -34,6 +35,9 @@ int scallop2::assemble()
 
 int scallop2::classify()
 {
+	assert(gr.num_vertices() >= 2);
+	if(gr.num_vertices() == 2) return TRIVIAL;
+
 	string s;	
 	int p0 = gr.compute_num_paths();
 	int p1 = gr.num_edges() - gr.num_vertices() + 2;
@@ -49,8 +53,6 @@ int scallop2::classify()
 
 int scallop2::assemble0()
 {
-	round = 0;
-
 	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 
 	smoother sm(gr);

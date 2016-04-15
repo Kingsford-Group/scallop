@@ -27,6 +27,7 @@ private:
 	bool empty;						// whether this region is completely spliced
 
 	vector<int> bins;				// average abundance for bins
+	vector<slope> seeds;			// slopes candidates
 	vector<slope> slopes;			// chosen slopes
 	vector<partial_exon> pexons;	// partial exons;
 

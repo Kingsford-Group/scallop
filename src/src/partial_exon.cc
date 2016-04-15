@@ -14,7 +14,7 @@ string partial_exon::label() const
 
 int partial_exon::print(int index) const
 {
-	printf("partial_exon %d: [%d-%d), type = (%d, %d)ave-abd = %.1lf, std-abd = %.1lf\n",
+	printf("partial_exon %d: [%d-%d), type = (%d, %d), ave-abd = %.1lf, std-abd = %.1lf\n",
 			index, lpos, rpos, ltype, rtype, ave_abd, dev_abd);
 	return 0;
 }

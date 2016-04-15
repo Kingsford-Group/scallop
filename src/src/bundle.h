@@ -28,6 +28,7 @@ public:
 	int build_splice_graph(splice_graph &gr) const;
 	int output_gtf(ofstream &fout, const vector<path> &paths, const string &prefix, int index) const;	
 	int print(int index) const;
+	int size() const;
 
 protected:
 	// check whether hits are sorted

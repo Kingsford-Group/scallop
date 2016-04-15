@@ -15,6 +15,7 @@ using namespace boost;
 scallop1::scallop1(const string &s, splice_graph &g)
 	: name(s), gr(g)
 {
+	assert(gr.check_fully_connected() == true);
 }
 
 scallop1::~scallop1()

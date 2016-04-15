@@ -21,8 +21,6 @@ int bundle::build()
 	build_split_interval_map();
 	infer_junctions();
 	build_partial_exons();
-	return 0;
-
 	link_partial_exons();
 	split_boundaries();
 
@@ -130,8 +128,10 @@ int bundle::build_partial_exons()
 
 	for(int i = 0; i < v.size() - 1; i++)
 	{
+		//printf("try region %d\n", i);
 		region r(v[i].first, v[i + 1].first, v[i].second, v[i + 1].second, &imap);
 		vector<partial_exon> vp = r.build();
+		//r.print(i);
 		pexons.insert(pexons.end(), vp.begin(), vp.end());
 	}
 	return 0;
@@ -139,6 +139,8 @@ int bundle::build_partial_exons()
 
 int bundle::link_partial_exons()
 {
+	if(pexons.size() == 0) return 0;
+
 	MPI lm;
 	MPI rm;
 	for(int i = 0; i < pexons.size(); i++)
@@ -174,37 +176,15 @@ int bundle::split_boundaries()
 	return 0;
 }
 
-int bundle::print(int index) const
+int bundle::size() const
 {
-	printf("\nBundle %d: ", index);
-	char o = phits > qhits ? '+' : '-';
-	printf("tid = %d, #hits = %lu (%d, %d), range = %s:%d-%d, orient = %c\n",
-			tid, hits.size(), phits, qhits, chrm.c_str(), lpos, rpos, o);
-	// print hits
-	/*
-	for(int i = 0; i < hits.size(); i++)
-	{
-		hits[i].print();
-	}
-	*/
-
-	// print junctions 
-	for(int i = 0; i < junctions.size(); i++)
-	{
-		junctions[i].print(i);
-	}
-
-	// print partial exons
-	for(int i = 0; i < pexons.size(); i++)
-	{
-		pexons[i].print(i);
-	}
-
-	return 0;
+	return pexons.size();
 }
+
 
 int bundle::build_splice_graph(splice_graph &gr) const
 {
+	//if(pexons.size() == 0) return 0;
 	// vertices: start, each region, end
 	gr.add_vertex();
 	gr.set_vertex_string(0, "");
@@ -213,12 +193,10 @@ int bundle::build_splice_graph(splice_graph &gr) const
 	for(int i = 0; i < pexons.size(); i++)
 	{
 		const partial_exon &r = pexons[i];
-		double ave = 0;
-		double dev = 1;
 		gr.add_vertex();
 		gr.set_vertex_string(i + 1, r.label());
-		gr.set_vertex_weight(i + 1, ave);
-		gr.set_vertex_stddev(i + 1, dev);
+		gr.set_vertex_weight(i + 1, r.ave_abd);
+		gr.set_vertex_stddev(i + 1, r.dev_abd);
 	}
 	gr.add_vertex();
 	gr.set_vertex_string(pexons.size() + 1, "");
@@ -226,7 +204,7 @@ int bundle::build_splice_graph(splice_graph &gr) const
 	gr.set_vertex_stddev(pexons.size() + 1, 1);
 
 	// edges: connecting adjacent pexons => e2w
-	for(int i = 0; i < pexons.size() - 1; i++)
+	for(int i = 0; i < (int)(pexons.size()) - 1; i++)
 	{
 		const partial_exon &x = pexons[i];
 		const partial_exon &y = pexons[i + 1];
@@ -281,14 +259,33 @@ int bundle::build_splice_graph(splice_graph &gr) const
 		}
 	}
 
-	// check
-	if(pexons.size() == 1) return 0;
+	return 0;
+}
+
+int bundle::print(int index) const
+{
+	printf("\nBundle %d: ", index);
+	char o = phits > qhits ? '+' : '-';
+	printf("tid = %d, #hits = %lu (%d, %d), range = %s:%d-%d, orient = %c %s\n",
+			tid, hits.size(), phits, qhits, chrm.c_str(), lpos, rpos, o, (pexons.size() >= 100 ? "[monster]" : ""));
+	// print hits
+	/*
+	for(int i = 0; i < hits.size(); i++)
+	{
+		hits[i].print();
+	}
+	*/
+
+	// print junctions 
+	for(int i = 0; i < junctions.size(); i++)
+	{
+		junctions[i].print(i);
+	}
+
+	// print partial exons
 	for(int i = 0; i < pexons.size(); i++)
 	{
-		const partial_exon &r = pexons[i];
-		assert(gr.in_degree(i + 1) == 0);
-		assert(gr.out_degree(i + 1) == 0);
-		// TODO, still bugy here
+		pexons[i].print(i);
 	}
 
 	return 0;

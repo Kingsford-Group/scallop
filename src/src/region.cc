@@ -19,12 +19,12 @@ region::~region()
 vector<partial_exon> region::build()
 {
 	init();
+	if(empty == true) return pexons;
+
 	build_bins();
 	build_slopes();
 	select_slopes();
 	build_partial_exons();
-	
-	print(0);
 	return pexons;
 }
 
@@ -39,9 +39,12 @@ int region::init()
 		return 0;
 	}
 
-	lcore = lower(lit->first);
-	rcore = upper(rit->first);
+	if(ltype != RIGHT_SPLICE) lcore = lower(lit->first);
+	if(rtype != LEFT_SPLICE) rcore = upper(rit->first);
 	assert(rcore > lcore);
+
+	if(lcore > lpos) ltype = START_BOUNDARY;
+	if(rcore < rpos) rtype = END_BOUNDARY;
 
 	if(ltype == RIGHT_SPLICE || rtype == LEFT_SPLICE) 
 	{
@@ -129,7 +132,9 @@ int region::evaluate_triangle(int ll, int rr, double &ave, double &dev)
 	double b1 = f1 / f2;
 	double b0 = ym - b1 * xm;
 
-	ave = 2.0 * (b1 * (rr - ll) / 2.0 + b0);
+	double a1 = b1 * rr + b0;
+	double a0 = b1 * ll + b0;
+	ave = (a1 > a0) ? a1 : a0;
 
 	double var = 0;
 	for(SIMI it = lit; ; it++)
@@ -239,7 +244,7 @@ int region::build_slopes()
 	}
 	assert(d == mbin - 1);
 
-	slopes.clear();
+	seeds.clear();
 	for(d = mbin - 1; d < nbin && rbin + 3 <= bins.size(); d++)
 	{
 		xo += bins[lbin + 1 * d + 0];
@@ -262,12 +267,12 @@ int region::build_slopes()
 		int syz = compute_binomial_score(yy + zz, 0.5, zz);
 
 		slope s5(SLOPE5END, lbin, rbin, (sxy < syz) ? sxy : syz);
-		if(s5.score > 40) slopes.push_back(s5);
+		if(s5.score > 40) seeds.push_back(s5);
 
 		int syx = compute_binomial_score(xx + yy, 0.5, xx);
 		int szy = compute_binomial_score(yy + zz, 0.5, yy);
 		slope s3(SLOPE3END, lbin, rbin, (syx < szy) ? syx : szy);
-		if(s3.score > 40) slopes.push_back(s3);
+		if(s3.score > 40) seeds.push_back(s3);
 	}
 
 	// middle part
@@ -291,12 +296,12 @@ int region::build_slopes()
 		int syz = compute_binomial_score(yy + zz, 0.5, zz);
 
 		slope s5(SLOPE5END, lbin, rbin, (sxy < syz) ? sxy : syz);
-		if(s5.score > 40) slopes.push_back(s5);
+		if(s5.score > 40) seeds.push_back(s5);
 
 		int syx = compute_binomial_score(xx + yy, 0.5, xx);
 		int szy = compute_binomial_score(yy + zz, 0.5, yy);
 		slope s3(SLOPE3END, lbin, rbin, (syx < szy) ? syx : szy);
-		if(s3.score > 40) slopes.push_back(s3);
+		if(s3.score > 40) seeds.push_back(s3);
 	}
 
 	assert(rbin == bins.size());
@@ -326,58 +331,74 @@ int region::build_slopes()
 		int syz = compute_binomial_score(yy + zz, 0.5, zz);
 
 		slope s5(SLOPE5END, lbin, rbin, (sxy < syz) ? sxy : syz);
-		if(s5.score > 40) slopes.push_back(s5);
+		if(s5.score > 40) seeds.push_back(s5);
 
 		int syx = compute_binomial_score(xx + yy, 0.5, xx);
 		int szy = compute_binomial_score(yy + zz, 0.5, yy);
 		slope s3(SLOPE3END, lbin, rbin, (syx < szy) ? syx : szy);
-		if(s3.score > 40) slopes.push_back(s3);
+		if(s3.score > 40) seeds.push_back(s3);
 	}
 
-	for(int i = 0; i < slopes.size(); i++)
+	for(int i = 0; i < seeds.size(); i++)
 	{
-		slope &s = slopes[i];
-		s.lpos = lcore + lbin * slope_bin_size;
+		slope &s = seeds[i];
+		s.lpos = lcore + s.lbin * slope_bin_size;
 
 		if(s.rbin == bins.size()) s.rpos = rcore;
-		else s.rpos = lcore + rbin * slope_bin_size;
+		else s.rpos = lcore + s.rbin * slope_bin_size;
 
 		if(s.lpos == lcore || s.rpos == rcore) s.flag = SLOPE_MARGIN;
 		else s.flag = SLOPE_MIDDLE;
+
+		double ave, dev;
+		evaluate_triangle(s.lpos, s.rpos, s.ave, s.dev);
 	}
+
+	/*
+	for(int i = 0; i < seeds.size(); i++)
+	{
+		seeds[i].print(i);
+	}
+	printf("-------------\n");
+
+	std::sort(seeds.begin(), seeds.end(), compare_slope_score);
+	for(int i = 0; i < seeds.size(); i++)
+	{
+		seeds[i].print(i);
+	}
+	printf("=============\n");
+	*/
 
 	return 0;
 }
 
 int region::select_slopes()
 {
-	vector<slope> ss;
-
 	split_interval_map sim;
 	sim += make_pair(ROI(lcore, rcore), 1);
 
-	double dev = compute_deviation(sim, ss);
+	double dev = compute_deviation(sim, slopes);
 
-	std::sort(slopes.begin(), slopes.end(), compare_slope_score);
-	for(int i = 0; i < slopes.size(); i++)
+	std::sort(seeds.begin(), seeds.end(), compare_slope_score);
+	for(int i = 0; i < seeds.size(); i++)
 	{
-		slope &x = slopes[i];
+		slope &x = seeds[i];
 		evaluate_triangle(x.lpos, x.rpos, x.ave, x.dev);	
 
 		bool b = true;
-		for(int k = 0; k < ss.size(); k++)
+		for(int k = 0; k < slopes.size(); k++)
 		{
-			slope &y = ss[k];
+			slope &y = slopes[k];
 			int d = x.distance(y);
 			if(d <= slope_min_distance) b = false;
 			if(b == false) break;
 		}
 		if(b == false) continue;
 
-		ss.push_back(x);
+		slopes.push_back(x);
 		sim -= make_pair(ROI(x.lpos, x.rpos), 1);
 
-		double d = compute_deviation(sim, ss);
+		double d = compute_deviation(sim, slopes);
 
 		if(d <= dev * 0.9)
 		{
@@ -385,12 +406,11 @@ int region::select_slopes()
 		}
 		else
 		{
-			ss.pop_back();
+			slopes.pop_back();
 			break;
 		}
 	}
 
-	slopes = ss;
 	return 0;
 }
 
@@ -494,8 +514,14 @@ int region::build_partial_exons()
 
 int region::print(int index) const
 {
-	int bsize = slope_bin_size;
-	printf("region %d\n", index);
+	printf("region %d: empty = %c, pos = [%d, %d), core = [%d, %d), bins = %lu\n", 
+			index, empty ? 'T' : 'F', lpos, rpos, lcore, rcore, bins.size());
+	/*
+	for(int i = 0; i < seeds.size(); i++)
+	{
+		seeds[i].print(i);
+	}
+	*/
 	for(int i = 0; i < slopes.size(); i++)
 	{
 		slopes[i].print(i);
@@ -504,6 +530,7 @@ int region::print(int index) const
 	{
 		pexons[i].print(i);
 	}
+	printf("\n");
 	return 0;
 }
 

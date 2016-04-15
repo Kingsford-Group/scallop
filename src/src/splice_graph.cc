@@ -272,7 +272,8 @@ int splice_graph::compute_num_paths()
 
 bool splice_graph::check_fully_connected()
 {
-	if(num_vertices() <= 1) return true;
+	assert(num_vertices() >= 2);
+	if(num_vertices() <= 2) return true;
 
 	vector<int> s;
 	vector<int> t;
