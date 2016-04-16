@@ -57,8 +57,8 @@ int assembler::assemble_bam(const string &file)
 
 			index++;
 
-			//string name = "bundle." + tostring(index);
-			string name = "test";
+			//string name = "test";
+			string name = "bundle." + tostring(index);
 			if(fixed_gene_name != "" && name != fixed_gene_name)
 			{
 				bb.clear();
