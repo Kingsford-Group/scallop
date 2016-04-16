@@ -59,6 +59,8 @@ int scallop2::assemble0()
 	smoother sm(gr);
 	sm.solve();
 
+	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
+
 	gr.round_weights();
 	//remove_empty_edges();
 
@@ -594,20 +596,6 @@ int scallop2::identify_equation(const vector<int> &subs, vector<int> &subt)
 
 	sort(xi.begin(), xi.end());
 
-	// print
-	/*
-	for(int i = 0; i < subs.size(); i++)
-	{
-		double w = gr.get_edge_weight(i2e[subs[i]]);
-		printf("subs: %d:%.0lf\n", subs[i], w);
-	}
-	for(int i = 0; i < xi.size(); i++)
-	{
-		printf("subt: %d:%d\n", xi[i].second, xi[i].first);
-	}
-	printf("----\n");
-	*/
-
 	xi.push_back(PI(sw, e));
 
 	vector<int> v;
@@ -876,7 +864,7 @@ int scallop2::draw_splice_graph(const string &file)
 	for(int i = 0; i < gr.num_vertices(); i++)
 	{
 		double w = gr.get_vertex_weight(i);
-		sprintf(buf, "%d:%.0lf", i, w);
+		sprintf(buf, "%d:%.1lf", i, w);
 		mis.insert(PIS(i, buf));
 	}
 
@@ -885,7 +873,7 @@ int scallop2::draw_splice_graph(const string &file)
 	{
 		if(i2e[i] == null_edge) continue;
 		double w = gr.get_edge_weight(i2e[i]);
-		sprintf(buf, "%d:%.0lf", i, w);
+		sprintf(buf, "%d:%.1lf", i, w);
 		//sprintf(buf, "%d", i);
 		mes.insert(PES(i2e[i], buf));
 	}

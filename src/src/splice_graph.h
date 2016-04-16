@@ -57,10 +57,12 @@ public:
 	bool check_fully_connected();
 
 	// algorithms with weight contraints
+	edge_descriptor compute_maximum_edge_w();
 	int bfs_w(int s, double w, vector<int> &v, VE &b);
 	int compute_shortest_path_w(int s, int t, double w);
 	int compute_shortest_path_w(int s, int t, double w, VE &p);
 	double compute_maximum_path_w(VE &p);
+	double compute_maximum_st_path_w(VE &p, int s, int t);
 	double compute_minimum_weight(const VE &p);
 
 	// determine optimal path

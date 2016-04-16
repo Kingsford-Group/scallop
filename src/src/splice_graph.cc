@@ -125,6 +125,22 @@ int splice_graph::set_vertex_weights(const vector<double> &v)
 	return 0;
 }
 
+edge_descriptor splice_graph::compute_maximum_edge_w()
+{
+	edge_iterator it1, it2;
+	double max_weight = -1;
+	edge_descriptor max_edge = null_edge;
+
+	for(tie(it1, it2) = edges(); it1 != it2; it1++)
+	{
+		double w = get_edge_weight(*it1);
+		if(w < max_weight) continue;
+		max_weight = w;
+		max_edge = *it1;
+	}
+	return max_edge;
+}
+
 int splice_graph::clear()
 {
 	directed_graph::clear();
@@ -361,12 +377,16 @@ int splice_graph::compute_shortest_path_w(int s, int t, double w, VE &p)
 
 double splice_graph::compute_maximum_path_w(VE &p)
 {
+	return compute_maximum_st_path_w(p, 0, num_vertices() - 1);
+}
+
+double splice_graph::compute_maximum_st_path_w(VE &p, int ss, int tt)
+{
 	p.clear();
 	vector<double> table;		// dynamic programming table
 	VE back;					// backtrace edge pointers
-	table.resize(num_vertices(), 0);
+	table.resize(num_vertices(), -1);
 	back.resize(num_vertices(), null_edge);
-	table[0] = DBL_MAX;
 
 	vector<int> tp = topological_sort();
 	int n = num_vertices();
@@ -374,7 +394,18 @@ double splice_graph::compute_maximum_path_w(VE &p)
 	assert(tp[0] == 0);
 	assert(tp[n - 1] == n - 1);
 
-	for(int ii = 1; ii < n; ii++)
+	int ssi = -1;
+	int tti = -1;
+	for(int i = 0; i < tp.size(); i++)
+	{
+		if(tp[i] == ss) ssi = i;
+		if(tp[i] == tt) tti = i;
+	}
+	assert(ssi != -1);
+	assert(tti != -1);
+
+	table[ss] = DBL_MAX;
+	for(int ii = ssi + 1; ii <= tti; ii++)
 	{
 		int i = tp[ii];
 		if(degree(i) == 0) continue;
@@ -387,6 +418,7 @@ double splice_graph::compute_maximum_path_w(VE &p)
 			int s = (*it1)->source();
 			int t = (*it1)->target();
 			assert(t == i);
+			if(table[s] <= -1) continue;
 			double xw = get_edge_weight(*it1);
 			double ww = xw < table[s] ? xw : table[s];
 			if(ww >= max_abd)
@@ -395,13 +427,14 @@ double splice_graph::compute_maximum_path_w(VE &p)
 				max_edge = *it1;
 			}
 		}
-		assert(max_edge != null_edge);
+
+		if(max_edge == null_edge) continue;
 
 		back[i] = max_edge;
 		table[i] = max_abd;
 	}
 
-	int x = n - 1;
+	int x = tt;
 	while(true)
 	{
 		edge_descriptor e = back[x]; 
@@ -411,7 +444,7 @@ double splice_graph::compute_maximum_path_w(VE &p)
 	}
 	reverse(p.begin(), p.end());
 
-	return table[n - 1];
+	return table[tt];
 }
 
 bool splice_graph::compute_optimal_path(VE &p)
@@ -506,10 +539,29 @@ int splice_graph::round_weights()
 
 	while(true)
 	{
-		VE v;
-		double w = compute_maximum_path_w(v);
-		if(w <= 0) break;
+		edge_descriptor e = compute_maximum_edge_w();
+		if(e == null_edge) break;
+
+		double w0 = get_edge_weight(e);
+		if(w0 <= 0) break;
+
+		VE v1, v2;
+		double w1 = w0;
+		double w2 = w0;
+
+		if(e->source() != 0) w1 = compute_maximum_st_path_w(v1, 0, e->source());
+		if(e->target() != num_vertices() - 1) w2 = compute_maximum_st_path_w(v2, e->target(), num_vertices() - 1);
+
+		assert(w1 <= w0);
+		assert(w2 <= w0);
+
+		double w = (w1 < w2) ? w1 : w2;
 		double ww = ceil(w);
+		if(ww <= 0) ww = 1;
+
+		VE v = v1;
+		v.push_back(e);
+		v.insert(v.end(), v2.begin(), v2.end());
 		
 		for(int i = 0; i < v.size(); i++)
 		{
