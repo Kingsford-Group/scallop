@@ -61,7 +61,7 @@ int scallop2::assemble0()
 
 	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 
-	gr.round_weights();
+	//gr.round_weights();
 	//remove_empty_edges();
 
 	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
@@ -175,7 +175,7 @@ bool scallop2::decompose_with_equation()
 
 	int c = connect_pairs(subs, subt);
 
-	gr.round_weights();
+	//gr.round_weights();
 	//remove_empty_edges();
 
 	//printf("connect %d pairs with equations\n", c);
@@ -513,6 +513,7 @@ bool scallop2::identify_equation1(vector<int> &subs, vector<int> &subt)
 	{
 		if(i2e[i] == null_edge) continue;
 		int w = (int)(gr.get_edge_weight(i2e[i]));
+		if(w <= 0) continue;
 		p.push_back(PI(w, i));
 	}
 	sort(p.begin(), p.end());
@@ -588,6 +589,7 @@ int scallop2::identify_equation(const vector<int> &subs, vector<int> &subt)
 	{
 		if(ss.find(e2i[*it]) != ss.end()) continue;
 		int ww = (int)(gr.get_edge_weight(*it));
+		if(ww <= 0) continue;
 		if(ww * 1.0 > sw * 1.0 * (1.0 + max_equation_error_ratio)) continue;
 		xi.push_back(PI(ww, e2i[*it]));
 	}
@@ -773,7 +775,7 @@ int scallop2::greedy_decompose()
 	{
 		VE v;
 		double w = gr.compute_maximum_path_w(v);
-		if(w <= 0.5) break;
+		if(w <= 0.0) break;
 		int e = connect_path(v, w);
 		collect_path(e);
 	}
