@@ -24,7 +24,7 @@ int smoother::solve()
 
 	add_vertex_error_constraints();
 	add_edge_error_constraints();
-
+	add_edge_weight_constraints();
 	add_conservation_constraints();
 	add_additional_constraints();
 
@@ -125,6 +125,15 @@ int smoother::add_edge_error_constraints()
 		double w = gr.get_edge_weight(i2e[i]);
 		model->addConstr(enwt[i], GRB_LESS_EQUAL, w + eerr[i]);
 		model->addConstr(enwt[i], GRB_GREATER_EQUAL, w - eerr[i]);
+	}
+	return 0;
+}
+
+int smoother::add_edge_weight_constraints()
+{
+	for(int i = 0; i < gr.num_edges(); i++)
+	{
+		model->addConstr(enwt[i], GRB_GREATER_EQUAL, 1.0);
 	}
 	return 0;
 }

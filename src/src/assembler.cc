@@ -57,20 +57,20 @@ int assembler::assemble_bam(const string &file)
 
 			index++;
 
-			// DEBUG
-			/*
-			if(index <= 9000) 
+			//string name = "bundle." + tostring(index);
+			string name = "test";
+			if(fixed_gene_name != "" && name != fixed_gene_name)
 			{
 				bb.clear();
 				continue;
 			}
-			*/
+
+			if(max_num_bundles > 0 && index > max_num_bundles) break;
 
 			bundle bd(bb);
 			bd.build();
 
 			bb.clear();
-			if(max_num_bundles > 0 && index > max_num_bundles) break;
 
 			bd.print(index);
 
@@ -79,7 +79,6 @@ int assembler::assemble_bam(const string &file)
 			splice_graph gr;
 			bd.build_splice_graph(gr);
 
-			string name = "bundle." + tostring(index);
 			scallop2 sc(name, gr);
 			sc.assemble();
 

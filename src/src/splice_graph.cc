@@ -508,9 +508,8 @@ int splice_graph::round_weights()
 	{
 		VE v;
 		double w = compute_maximum_path_w(v);
-		if(w < 0.5) break;
-		double r = w - floor(w);
-		double ww = floor(w) + ((r >= 0.5) ? 1.0 : 0.0);
+		if(w <= 0) break;
+		double ww = ceil(w);
 		
 		for(int i = 0; i < v.size(); i++)
 		{

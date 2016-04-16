@@ -40,6 +40,7 @@ private:
 
 	int add_vertex_error_constraints();
 	int add_edge_error_constraints();
+	int add_edge_weight_constraints();
 
 	int add_conservation_constraints();
 	int add_additional_constraints();

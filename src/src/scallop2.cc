@@ -60,7 +60,7 @@ int scallop2::assemble0()
 	sm.solve();
 
 	gr.round_weights();
-	remove_empty_edges();
+	//remove_empty_edges();
 
 	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 
@@ -174,7 +174,7 @@ bool scallop2::decompose_with_equation()
 	int c = connect_pairs(subs, subt);
 
 	gr.round_weights();
-	remove_empty_edges();
+	//remove_empty_edges();
 
 	//printf("connect %d pairs with equations\n", c);
 
@@ -652,6 +652,9 @@ int scallop2::connect_pairs(const vector<int> &vx, const vector<int> &vy)
 	{
 		int x = vx[i];
 		int y = vy[i];
+
+		if(i2e[x] == null_edge) continue;
+		if(i2e[y] == null_edge) continue;
 		
 		double wx = gr.get_edge_weight(i2e[x]);
 		double wy = gr.get_edge_weight(i2e[y]);
