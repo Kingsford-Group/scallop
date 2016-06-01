@@ -1,4 +1,4 @@
-#include "scallop2.h"
+#include "scallop.h"
 #include "subsetsum.h"
 #include "nested_graph.h"
 #include "config.h"
@@ -12,17 +12,17 @@
 
 using namespace boost;
 
-scallop2::scallop2(const string &s, splice_graph &g)
+scallop::scallop(const string &s, splice_graph &g)
 	: name(s), gr(g)
 {
 	round = 0;
 	assert(gr.check_fully_connected() == true);
 }
 
-scallop2::~scallop2()
+scallop::~scallop()
 {}
 
-int scallop2::assemble()
+int scallop::assemble()
 {
 	int c = classify();
 	if(c == TRIVIAL) return 0;
@@ -34,7 +34,7 @@ int scallop2::assemble()
 	return 0;
 }
 
-int scallop2::classify()
+int scallop::classify()
 {
 	assert(gr.num_vertices() >= 2);
 	if(gr.num_vertices() == 2) return TRIVIAL;
@@ -52,7 +52,7 @@ int scallop2::classify()
 	else return NORMAL;
 }
 
-int scallop2::assemble0()
+int scallop::assemble0()
 {
 	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 
@@ -73,12 +73,12 @@ int scallop2::assemble0()
 
 	print();
 	//collect_existing_st_paths();
-	//printf("%s scallop20 solution %lu paths\n", name.c_str(), paths.size());
+	//printf("%s scallop0 solution %lu paths\n", name.c_str(), paths.size());
 
 	return 0;
 }
 
-int scallop2::assemble1()
+int scallop::assemble1()
 {
 	assemble0();
 
@@ -92,7 +92,7 @@ int scallop2::assemble1()
 	return 0;
 }
 
-int scallop2::assemble2()
+int scallop::assemble2()
 {
 	assemble0();
 
@@ -108,7 +108,7 @@ int scallop2::assemble2()
 	return 0;
 }
 
-int scallop2::greedy()
+int scallop::greedy()
 {
 	assemble0();
 
@@ -122,7 +122,7 @@ int scallop2::greedy()
 	return 0;
 }
 
-int scallop2::iterate()
+int scallop::iterate()
 {
 	while(true)
 	{
@@ -143,7 +143,7 @@ int scallop2::iterate()
 	return 0;
 }
 
-bool scallop2::decompose_with_equation()
+bool scallop::decompose_with_equation()
 {
 	vector<int> subs;
 	vector<int> subt;
@@ -184,7 +184,7 @@ bool scallop2::decompose_with_equation()
 	else return false;
 }
 
-int scallop2::init_super_edges()
+int scallop::init_super_edges()
 {
 	mev.clear();
 	edge_iterator it1, it2;
@@ -198,7 +198,7 @@ int scallop2::init_super_edges()
 	return 0;
 }
 
-int scallop2::reconstruct_splice_graph()
+int scallop::reconstruct_splice_graph()
 {
 	while(true)
 	{
@@ -213,7 +213,7 @@ int scallop2::reconstruct_splice_graph()
 	return 0;
 }
 
-bool scallop2::init_trivial_vertex(int x)
+bool scallop::init_trivial_vertex(int x)
 {
 	int id = gr.in_degree(x);
 	int od = gr.out_degree(x);
@@ -259,7 +259,7 @@ bool scallop2::init_trivial_vertex(int x)
 	return true;
 }
 
-bool scallop2::connect_equal_edges(int x, int y)
+bool scallop::connect_equal_edges(int x, int y)
 {
 	assert(i2e[x] != null_edge);
 	assert(i2e[y] != null_edge);
@@ -286,7 +286,7 @@ bool scallop2::connect_equal_edges(int x, int y)
 	return connect_path(p, wx);
 }
 
-int scallop2::connect_path(const VE &p, double wx)
+int scallop::connect_path(const VE &p, double wx)
 {
 	vector<int> v;
 	for(int i = 0; i < p.size(); i++)
@@ -298,7 +298,7 @@ int scallop2::connect_path(const VE &p, double wx)
 	return connect_path(v, wx);
 }
 
-int scallop2::connect_path(const vector<int> &p, double ww)
+int scallop::connect_path(const vector<int> &p, double ww)
 {
 	if(p.size() == 0) return -1;
 	if(p.size() == 1) return p[0];
@@ -322,7 +322,7 @@ int scallop2::connect_path(const vector<int> &p, double ww)
 	return pree;
 }
 
-int scallop2::connect_adjacent_equal_edges(int x, int y)
+int scallop::connect_adjacent_equal_edges(int x, int y)
 {
 	if(i2e[x] == null_edge) return -1;
 	if(i2e[y] == null_edge) return -1;
@@ -379,7 +379,7 @@ int scallop2::connect_adjacent_equal_edges(int x, int y)
 }
 
 
-int scallop2::split_edge(int ei, double w)
+int scallop::split_edge(int ei, double w)
 {
 	assert(i2e[ei] != null_edge);
 	edge_descriptor ee = i2e[ei];
@@ -421,7 +421,7 @@ int scallop2::split_edge(int ei, double w)
 	return n;
 }
 
-int scallop2::split_edge(int exi, int eyi)
+int scallop::split_edge(int exi, int eyi)
 {
 	assert(i2e[exi] != null_edge);
 	assert(i2e[eyi] != null_edge);
@@ -434,7 +434,7 @@ int scallop2::split_edge(int exi, int eyi)
 	return split_edge(exi, wy);
 }
 
-vector<int> scallop2::split_edge(int ei, const vector<int> &sub)
+vector<int> scallop::split_edge(int ei, const vector<int> &sub)
 {
 	vector<int> v;
 	int x = ei;
@@ -450,7 +450,7 @@ vector<int> scallop2::split_edge(int ei, const vector<int> &sub)
 	return v;
 }
 
-bool scallop2::verify_equation_nontrivial(const vector<int> &subs, const vector<int> &subt)
+bool scallop::verify_equation_nontrivial(const vector<int> &subs, const vector<int> &subt)
 {
 	set<edge_descriptor> fb;
 	for(int i = 0; i < subs.size(); i++)
@@ -506,7 +506,7 @@ bool scallop2::verify_equation_nontrivial(const vector<int> &subs, const vector<
 	return true;
 }
 
-bool scallop2::identify_equation1(vector<int> &subs, vector<int> &subt)
+bool scallop::identify_equation1(vector<int> &subs, vector<int> &subt)
 {
 	vector<PI> p;
 	for(int i = 0; i < i2e.size(); i++)
@@ -549,7 +549,7 @@ bool scallop2::identify_equation1(vector<int> &subs, vector<int> &subt)
 	else return true;
 }
 
-int scallop2::identify_equation(const vector<int> &subs, vector<int> &subt)
+int scallop::identify_equation(const vector<int> &subs, vector<int> &subt)
 {
 	if(subs.size() == 0) return false;
 
@@ -634,7 +634,7 @@ int scallop2::identify_equation(const vector<int> &subs, vector<int> &subt)
 	return INT_MAX;
 }
 
-int scallop2::connect_pairs(const vector<int> &vx, const vector<int> &vy)
+int scallop::connect_pairs(const vector<int> &vx, const vector<int> &vy)
 {
 	int cnt = 0;
 	assert(vx.size() == vy.size());
@@ -674,7 +674,7 @@ int scallop2::connect_pairs(const vector<int> &vx, const vector<int> &vy)
 	return cnt;
 }
 
-bool scallop2::check_linkable(int ex, int ey, vector<PI> &p)
+bool scallop::check_linkable(int ex, int ey, vector<PI> &p)
 {
 	assert(i2e[ex] != null_edge);
 	assert(i2e[ey] != null_edge);
@@ -694,7 +694,7 @@ bool scallop2::check_linkable(int ex, int ey, vector<PI> &p)
 	return true;
 }
 
-int scallop2::build_adjacent_equal_edges(const vector<PI> &p)
+int scallop::build_adjacent_equal_edges(const vector<PI> &p)
 {
 	for(int i = 0; i < p.size(); i++)
 	{
@@ -714,7 +714,7 @@ int scallop2::build_adjacent_equal_edges(const vector<PI> &p)
 	return 0;
 }
 
-bool scallop2::decompose_trivial_vertices()
+bool scallop::decompose_trivial_vertices()
 {
 	bool flag = false;
 	edge_iterator it1, it2;
@@ -769,7 +769,7 @@ bool scallop2::decompose_trivial_vertices()
 	return flag;
 }
 
-int scallop2::greedy_decompose()
+int scallop::greedy_decompose()
 {
 	while(true)
 	{
@@ -782,7 +782,7 @@ int scallop2::greedy_decompose()
 	return 0;
 }
 
-int scallop2::collect_existing_st_paths()
+int scallop::collect_existing_st_paths()
 {
 	for(int i = 0; i < i2e.size(); i++)
 	{
@@ -794,7 +794,7 @@ int scallop2::collect_existing_st_paths()
 	return 0;
 }
 
-int scallop2::collect_path(int e)
+int scallop::collect_path(int e)
 {
 	assert(i2e[e] != null_edge);
 	assert(i2e[e]->source() == 0);
@@ -820,7 +820,7 @@ int scallop2::collect_path(int e)
 	return 0;
 }
 
-int scallop2::remove_empty_edges()
+int scallop::remove_empty_edges()
 {
 	for(int i = 0; i < i2e.size(); i++)
 	{
@@ -835,7 +835,7 @@ int scallop2::remove_empty_edges()
 	return 0;
 }
 
-int scallop2::print()
+int scallop::print()
 {
 	int n = 0;
 	for(int i = 0; i < gr.num_vertices(); i++) 
@@ -859,7 +859,7 @@ int scallop2::print()
 	return 0;
 }
 
-int scallop2::draw_splice_graph(const string &file) 
+int scallop::draw_splice_graph(const string &file) 
 {
 	MIS mis;
 	char buf[10240];

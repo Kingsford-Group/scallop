@@ -10,11 +10,11 @@ typedef pair< edge_descriptor, vector<int> > PEV;
 typedef pair<int, int> PI;
 
 // for perfectly estimated splice graph
-class scallop2
+class scallop
 {
 public:
-	scallop2(const string &name, splice_graph &gr);
-	virtual ~scallop2();
+	scallop(const string &name, splice_graph &gr);
+	virtual ~scallop();
 
 public:
 	string name;			// name for this gene
