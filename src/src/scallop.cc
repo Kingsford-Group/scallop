@@ -545,7 +545,7 @@ bool scallop::identify_equation1(vector<int> &subs, vector<int> &subt)
 	}
 	double ratio = min_err * 1.0 / sums;
 
-	if(ratio >= max_equation_error_ratio) return false;
+	if(ratio > max_equation_error_ratio) return false;
 	else return true;
 }
 
