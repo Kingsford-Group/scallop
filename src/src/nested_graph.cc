@@ -198,6 +198,7 @@ bool nested_graph::bfs_docking_forward(int e0, int t0, int p0, vector<int> &r)
 	r.clear();
 	int s = i2e[e0]->source();
 	int t = i2e[e0]->target();
+	// TODO, while is not necessary
 	while(true)
 	{
 		if(t == t0) return true;
