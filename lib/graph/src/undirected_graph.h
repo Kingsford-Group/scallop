@@ -22,7 +22,7 @@ public:
 	virtual int remove_edge(int s, int t);
 
 	// access
-	virtual PEE out_edges(int v);
+	virtual PEEI out_edges(int v);
 
 	// algorithms
 	virtual bool intersect(edge_descriptor ex, edge_descriptor ey);

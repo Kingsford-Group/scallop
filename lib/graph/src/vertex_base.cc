@@ -56,14 +56,14 @@ int vertex_base::out_degree() const
 	return (int)(so.size());
 }
 
-PEE vertex_base::in_edges() const
+PEEI vertex_base::in_edges() const
 {
-	return PEE(si.begin(), si.end());
+	return PEEI(si.begin(), si.end());
 }
 
-PEE vertex_base::out_edges() const
+PEEI vertex_base::out_edges() const
 {
-	return PEE(so.begin(), so.end());
+	return PEEI(so.begin(), so.end());
 }
 
 int vertex_base::print() const

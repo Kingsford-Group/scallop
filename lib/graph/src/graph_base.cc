@@ -29,7 +29,7 @@ int graph_base::copy(const graph_base &gr)
 	clear();
 	for(int i = 0; i < gr.num_vertices(); i++) add_vertex();
 
-	PEE p = gr.edges();
+	PEEI p = gr.edges();
 	for(edge_iterator it = p.first; it != p.second; it++)
 	{
 		add_edge((*it)->source(), (*it)->target());
@@ -47,8 +47,8 @@ int graph_base::add_vertex()
 int graph_base::clear_vertex(int x)
 {
 	vector<edge_base*> v;
-	PEE pi = vv[x]->in_edges();
-	PEE po = vv[x]->out_edges();
+	PEEI pi = vv[x]->in_edges();
+	PEEI po = vv[x]->out_edges();
 	for(edge_iterator it = pi.first; it != pi.second; it++)
 	{
 		v.push_back(*it);
@@ -85,7 +85,7 @@ PEB graph_base::edge(int s, int t)
 {
 	assert(s >= 0 && s < vv.size());
 	assert(t >= 0 && t < vv.size());
-	PEE p = vv[s]->out_edges();
+	PEEI p = vv[s]->out_edges();
 	for(edge_iterator it = p.first; it != p.second; it++)
 	{
 		assert((*it)->source() == s);
@@ -99,7 +99,7 @@ PEB graph_base::edge(int s, int t)
 vector<edge_descriptor> graph_base::edges(int s, int t)
 {
 	vector<edge_descriptor> v;
-	PEE p = out_edges(s);
+	PEEI p = out_edges(s);
 	for(edge_iterator it = p.first; it != p.second; it++)
 	{
 		assert((*it)->source() == s);
@@ -109,15 +109,15 @@ vector<edge_descriptor> graph_base::edges(int s, int t)
 	return v;
 }
 
-PEE graph_base::edges() const
+PEEI graph_base::edges() const
 {
-	return PEE(se.begin(), se.end());
+	return PEEI(se.begin(), se.end());
 }
 
 set<int> graph_base::adjacent_vertices(int s)
 {
 	set<int> ss;
-	PEE p = out_edges(s);
+	PEEI p = out_edges(s);
 	for(edge_iterator it = p.first; it != p.second; it++)
 	{
 		assert((*it)->source() == s);
@@ -255,7 +255,7 @@ bool graph_base::compute_shortest_path(int s, int t, vector<int> &p)
 
 bool graph_base::check_nested() 
 {
-	PEE p = edges();
+	PEEI p = edges();
 	for(edge_iterator i = p.first; i != p.second; i++)
 	{
 		edge_iterator j = i;

@@ -27,6 +27,7 @@ public:
 typedef edge_base* edge_descriptor;
 typedef set<edge_base*>::iterator edge_iterator;
 typedef pair<edge_descriptor, bool> PEB;
-typedef pair<edge_iterator, edge_iterator> PEE;
+typedef pair<edge_descriptor, edge_descriptor> PEE;
+typedef pair<edge_iterator, edge_iterator> PEEI;
 
 #endif

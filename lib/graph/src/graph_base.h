@@ -50,10 +50,10 @@ public:
 	virtual size_t num_edges() const;
 	virtual int degree(int v) const;
 	virtual PEB edge(int s, int t);
-	virtual PEE edges() const;
+	virtual PEEI edges() const;
 	virtual vector<edge_descriptor> edges(int x, int y);
 	virtual set<int> adjacent_vertices(int v);
-	virtual PEE out_edges(int x) = 0;
+	virtual PEEI out_edges(int x) = 0;
 	virtual int get_edge_indices(VE &e2i, MEI &i2e);
 
 	// algorithms

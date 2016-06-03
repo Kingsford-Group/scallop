@@ -27,8 +27,8 @@ public:
 	// access functions
 	virtual int in_degree(int v) const;
 	virtual int out_degree(int v) const;
-	virtual PEE in_edges(int v);
-	virtual PEE out_edges(int v);
+	virtual PEEI in_edges(int v);
+	virtual PEEI out_edges(int v);
 
 	// algorithms
 	virtual int bfs_reverse(int t, vector<int> &v);

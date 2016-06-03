@@ -24,8 +24,8 @@ public:
 	virtual int degree() const;
 	virtual int in_degree() const;
 	virtual int out_degree() const;
-	virtual PEE in_edges() const;
-	virtual PEE out_edges() const;
+	virtual PEEI in_edges() const;
+	virtual PEEI out_edges() const;
 	virtual int print() const;
 };
 

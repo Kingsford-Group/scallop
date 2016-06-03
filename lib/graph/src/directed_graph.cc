@@ -112,7 +112,7 @@ int directed_graph::rotate(int x, int y)
 int directed_graph::remove_edge(int s, int t)
 {
 	vector<edge_base*> v;
-	PEE p = vv[s]->out_edges();
+	PEEI p = vv[s]->out_edges();
 	for(edge_iterator it = p.first; it != p.second; it++)
 	{
 		if((*it)->target() != t) continue;
@@ -135,12 +135,12 @@ int directed_graph::out_degree(int v) const
 	return vv[v]->out_degree();
 }
 
-PEE directed_graph::in_edges(int v)
+PEEI directed_graph::in_edges(int v)
 {
 	return vv[v]->in_edges();
 }
 
-PEE directed_graph::out_edges(int v)
+PEEI directed_graph::out_edges(int v)
 {
 	return vv[v]->out_edges();
 }

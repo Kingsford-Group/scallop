@@ -46,7 +46,7 @@ int undirected_graph::remove_edge(edge_descriptor e)
 int undirected_graph::remove_edge(int s, int t)
 {
 	vector<edge_base*> v;
-	PEE p = vv[s]->out_edges();
+	PEEI p = vv[s]->out_edges();
 	for(edge_iterator it = p.first; it != p.second; it++)
 	{
 		int ss = (*it)->source();
@@ -63,9 +63,9 @@ int undirected_graph::remove_edge(int s, int t)
 	return 0;
 }
 
-PEE undirected_graph::out_edges(int x)
+PEEI undirected_graph::out_edges(int x)
 {
-	PEE p = vv[x]->out_edges();
+	PEEI p = vv[x]->out_edges();
 	for(edge_iterator it = p.first; it != p.second; it++)
 	{
 		if((*it)->source() != x) (*it)->swap();
