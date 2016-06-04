@@ -13,7 +13,7 @@ int main(int argc, const char **argv)
 {
 	if(argc != 3)
 	{
-		cout<<"usage: "<<argv[0]<< "<gtf-file-1> <gtf-file-2>"<<endl;
+		cout<<"usage: "<<argv[0]<< " <gtf-file-1> <gtf-file-2>"<<endl;
 		return 0;
 	}
 
