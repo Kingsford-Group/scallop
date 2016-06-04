@@ -27,6 +27,7 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  bundle_extend.h bundle_extend.cc \
 				  path.h path.cc \
 				  smoother.h smoother.cc \
+				  equation.h equation.cc \
 				  scallop.h scallop.cc \
 				  gtf.h gtf.cc \
 				  assembler.h assembler.cc \

@@ -12,6 +12,13 @@ splice_graph::splice_graph()
 
 splice_graph::splice_graph(const splice_graph &gr)
 {
+	MEE x2y;
+	MEE y2x;
+	copy(gr, x2y, y2x);
+}
+
+int splice_graph::copy(const splice_graph &gr, MEE &x2y, MEE &y2x)
+{
 	clear();
 	for(int i = 0; i < gr.num_vertices(); i++)
 	{
@@ -21,13 +28,31 @@ splice_graph::splice_graph(const splice_graph &gr)
 		set_vertex_stddev(i, gr.get_vertex_stddev(i));
 	}
 
-	PEE p = gr.edges();
+	PEEI p = gr.edges();
 	for(edge_iterator it = p.first; it != p.second; it++)
 	{
 		edge_descriptor e = add_edge((*it)->source(), (*it)->target());
 		set_edge_weight(e, gr.get_edge_weight(*it));
 		set_edge_stddev(e, gr.get_edge_stddev(*it));
+		assert(x2y.find(*it) == x2y.end());
+		assert(y2x.find(e) == y2x.end());
+		x2y.insert(PEE(*it, e));
+		y2x.insert(PEE(e, *it));
 	}
+
+	return 0;
+}
+
+int splice_graph::shallow_copy(const splice_graph &gr)
+{
+	clear();
+	directed_graph::shallow_copy(gr);
+	vstr = gr.vstr;
+	vwrt = gr.vwrt;
+	vdev = gr.vdev;
+	ewrt = gr.ewrt;
+	edev = gr.edev;
+	return 0;
 }
 
 splice_graph::~splice_graph()

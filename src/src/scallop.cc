@@ -54,17 +54,17 @@ int scallop::classify()
 
 int scallop::assemble0()
 {
-	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
+	//if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 
 	smoother sm(gr);
 	sm.solve();
 
-	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
+	//if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 
 	//gr.round_weights();
 	//remove_empty_edges();
 
-	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
+	//if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 
 	init_super_edges();
 	reconstruct_splice_graph();
@@ -145,43 +145,66 @@ int scallop::iterate()
 
 bool scallop::decompose_with_equation()
 {
-	vector<int> subs;
-	vector<int> subt;
-	bool b = identify_equation1(subs, subt);
+	vector<equation> eqns;
+	identify_equation1(eqns);
 
-	if(b == false) return false;
+	if(eqns.size() == 0) return false;
 
-	assert(subs.size() == 1);
-	assert(subt.size() >= 1);
+	sort(eqns.begin(), eqns.end());
 
-	VE vx, vy;
-	for(int i = 0; i < subs.size(); i++) vx.push_back(i2e[subs[i]]);
-	for(int i = 0; i < subt.size(); i++) vy.push_back(i2e[subt[i]]);
-
-	smoother sm(gr);
-	sm.add_equation(vx, vy);
-	sm.solve();
-
-	subs = split_edge(subs[0], subt);
-	nt.build(gr);
-
-	printf("equal pairs: ");
-	for(int i = 0; i < subs.size(); i++)
+	for(int k = 0; k < eqns.size(); k++)
 	{
-		printf(" (%d, %d)", subs[i], subt[i]);
+		// backup splice graph and mev
+		MEV mev2;
+		MEE x2y, y2x;
+		splice_graph gr2;
+		gr2.copy(gr, x2y, y2x);
+		for(MEV::iterator it = mev.begin(); it != mev.end(); it++)
+		{
+			mev2.insert(PEV(x2y[it->first], it->second));
+		}
+
+		vector<int> subs = eqns[k].s;
+		vector<int> subt = eqns[k].t;
+
+		assert(subs.size() == 1);
+		assert(subt.size() >= 1);
+
+		VE vx, vy;
+		for(int i = 0; i < subs.size(); i++) vx.push_back(i2e[subs[i]]);
+		for(int i = 0; i < subt.size(); i++) vy.push_back(i2e[subt[i]]);
+
+		smoother sm(gr);
+		sm.add_equation(vx, vy);
+		sm.solve();
+
+		subs = split_edge(subs[0], subt);
+		nt.build(gr);
+
+		printf("equal pairs: ");
+		for(int i = 0; i < subs.size(); i++)
+		{
+			printf(" (%d, %d)", subs[i], subt[i]);
+		}
+		printf("\n");
+		print();
+
+		int c = connect_pairs(subs, subt);
+
+		//gr.round_weights();
+		//remove_empty_edges();
+		//printf("connect %d pairs with equations\n", c);
+
+		if(c >= subs.size()) return true;
+
+		// recover splice graph
+		gr.shallow_copy(gr2);
+		mev = mev2;
+		gr.get_edge_indices(i2e, e2i);
+		nt.build(gr);
 	}
-	printf("\n");
-	print();
 
-	int c = connect_pairs(subs, subt);
-
-	//gr.round_weights();
-	//remove_empty_edges();
-
-	//printf("connect %d pairs with equations\n", c);
-
-	if(c >= 1) return true;
-	else return false;
+	return false;
 }
 
 int scallop::init_super_edges()
@@ -506,8 +529,9 @@ bool scallop::verify_equation_nontrivial(const vector<int> &subs, const vector<i
 	return true;
 }
 
-bool scallop::identify_equation1(vector<int> &subs, vector<int> &subt)
+int scallop::identify_equation1(vector<equation> &eqns)
 {
+	eqns.clear();
 	vector<PI> p;
 	for(int i = 0; i < i2e.size(); i++)
 	{
@@ -518,9 +542,6 @@ bool scallop::identify_equation1(vector<int> &subs, vector<int> &subt)
 	}
 	sort(p.begin(), p.end());
 
-	subs.clear();
-	subt.clear();
-	int min_err = INT_MAX;
 	for(int i = 0; i < p.size(); i++)
 	{
 		int e = p[i].second;
@@ -529,24 +550,14 @@ bool scallop::identify_equation1(vector<int> &subs, vector<int> &subt)
 		s.push_back(e);
 		vector<int> t;
 		int err = identify_equation(s, t);
-		if(err > min_err) continue;
-		subs = s;
-		subt = t;
-		min_err = err;
+
+		double ratio = err * 1.0 / gr.get_edge_weight(i2e[e]);
+		if(ratio > max_equation_error_ratio) continue;
+
+		equation eqn(s, t, err);
+		eqns.push_back(eqn);
 	}
-
-	if(subs.size() == 0) return false;
-
-	double sums = 0;
-	for(int i = 0; i < subs.size(); i++)
-	{
-		edge_descriptor &e = i2e[subs[i]];
-		sums += gr.get_edge_weight(e);
-	}
-	double ratio = min_err * 1.0 / sums;
-
-	if(ratio > max_equation_error_ratio) return false;
-	else return true;
+	return 0;
 }
 
 int scallop::identify_equation(const vector<int> &subs, vector<int> &subt)
@@ -866,7 +877,7 @@ int scallop::draw_splice_graph(const string &file)
 	for(int i = 0; i < gr.num_vertices(); i++)
 	{
 		double w = gr.get_vertex_weight(i);
-		sprintf(buf, "%d:%.1lf", i, w);
+		sprintf(buf, "%d:%.0lf", i, w);
 		mis.insert(PIS(i, buf));
 	}
 
@@ -875,7 +886,7 @@ int scallop::draw_splice_graph(const string &file)
 	{
 		if(i2e[i] == null_edge) continue;
 		double w = gr.get_edge_weight(i2e[i]);
-		sprintf(buf, "%d:%.1lf", i, w);
+		sprintf(buf, "%d:%.0lf", i, w);
 		//sprintf(buf, "%d", i);
 		mes.insert(PES(i2e[i], buf));
 	}

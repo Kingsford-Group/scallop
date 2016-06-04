@@ -4,9 +4,11 @@
 #include "splice_graph.h"
 #include "nested_graph.h"
 #include "path.h"
+#include "equation.h"
 
 typedef map< edge_descriptor, vector<int> > MEV;
 typedef pair< edge_descriptor, vector<int> > PEV;
+typedef pair< vector<int>, vector<int> > PVV;
 typedef pair<int, int> PI;
 
 // for perfectly estimated splice graph
@@ -53,7 +55,7 @@ private:
 	int remove_empty_edges();
 
 	// identify and handle equations 
-	bool identify_equation1(vector<int> &subs, vector<int> &subt);
+	int identify_equation1(vector<equation> &eqns);
 	int identify_equation(const vector<int> &subs, vector<int> &subt);
 	bool verify_equation_nontrivial(const vector<int> &subs, const vector<int> &subt);
 
