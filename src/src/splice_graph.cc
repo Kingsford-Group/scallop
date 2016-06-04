@@ -34,24 +34,17 @@ int splice_graph::copy(const splice_graph &gr, MEE &x2y, MEE &y2x)
 		edge_descriptor e = add_edge((*it)->source(), (*it)->target());
 		set_edge_weight(e, gr.get_edge_weight(*it));
 		set_edge_stddev(e, gr.get_edge_stddev(*it));
+
+		assert(e != NULL);
+		assert(ewrt.find(e) != ewrt.end());
+		assert(edev.find(e) != edev.end());
 		assert(x2y.find(*it) == x2y.end());
 		assert(y2x.find(e) == y2x.end());
+
 		x2y.insert(PEE(*it, e));
 		y2x.insert(PEE(e, *it));
 	}
 
-	return 0;
-}
-
-int splice_graph::shallow_copy(const splice_graph &gr)
-{
-	clear();
-	directed_graph::shallow_copy(gr);
-	vstr = gr.vstr;
-	vwrt = gr.vwrt;
-	vdev = gr.vdev;
-	ewrt = gr.ewrt;
-	edev = gr.edev;
 	return 0;
 }
 

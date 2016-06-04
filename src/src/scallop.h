@@ -15,6 +15,7 @@ typedef pair<int, int> PI;
 class scallop
 {
 public:
+	scallop();
 	scallop(const string &name, splice_graph &gr);
 	virtual ~scallop();
 
@@ -29,6 +30,11 @@ public:
 	int round;				// round in iteration
 
 	vector<path> paths;		// predicted transcripts
+
+public:
+	int clear();
+	int save(scallop &sc);
+	int load(scallop &sc);
 
 public:
 	int assemble();

@@ -12,6 +12,9 @@
 
 using namespace boost;
 
+scallop::scallop()
+{}
+
 scallop::scallop(const string &s, splice_graph &g)
 	: name(s), gr(g)
 {
@@ -21,6 +24,154 @@ scallop::scallop(const string &s, splice_graph &g)
 
 scallop::~scallop()
 {}
+
+int scallop::clear()
+{
+	name = "";
+	gr.clear();
+	e2i.clear();
+	i2e.clear();
+	mev.clear();
+	nt.clear();
+	round = -1;
+	paths.clear();
+	return 0;
+}
+
+int scallop::save(scallop &sc)
+{
+	sc.clear();
+
+	sc.name = name;
+	MEE x2y, y2x;
+	sc.gr.copy(gr, x2y, y2x);
+
+	for(MEI::iterator it = e2i.begin(); it != e2i.end(); it++)
+	{
+		edge_descriptor e = it->first;
+		int k = it->second;
+		assert(k >= 0 && k < i2e.size());
+		if(i2e[k] == null_edge)
+		{
+			assert(x2y.find(e) == x2y.end());
+			sc.e2i.insert(PEI(e, k));
+		}
+		else
+		{
+			assert(x2y.find(e) != x2y.end());
+			sc.e2i.insert(PEI(x2y[e], k));
+		}
+	}
+
+	for(int i = 0; i < i2e.size(); i++)
+	{
+		if(i2e[i] == null_edge)
+		{
+			sc.i2e.push_back(null_edge);
+		}
+		else
+		{
+			assert(x2y.find(i2e[i]) != x2y.end());
+			sc.i2e.push_back(x2y[i2e[i]]);
+		}
+	}
+
+	for(MEV::iterator it = mev.begin(); it != mev.end(); it++)
+	{
+		edge_descriptor e = it->first;
+		vector<int> v = it->second;
+		if(x2y.find(e) == x2y.end())
+		{
+			if(e2i.find(e) == e2i.end()) continue;
+			int k = e2i[e];
+			assert(i2e[k] == null_edge);
+			assert(sc.i2e[k] == null_edge);
+			sc.mev.insert(PEV(e, v));
+		}
+		else
+		{
+			int k = e2i[e];
+			assert(i2e[k] == e);
+			assert(sc.e2i[x2y[e]] == k);
+			assert(sc.i2e[k] == x2y[e]);
+			sc.mev.insert(PEV(x2y[e], v));
+		}
+	}
+
+	sc.nt.build(sc.gr);
+	sc.round = round;
+	sc.paths = paths;
+
+	return 0;
+}
+
+int scallop::load(scallop &sc)
+{
+	clear();
+
+	name = sc.name;
+
+	MEE x2y, y2x;
+	gr.copy(sc.gr, x2y, y2x);
+
+	for(MEI::iterator it = sc.e2i.begin(); it != sc.e2i.end(); it++)
+	{
+		edge_descriptor e = it->first;
+		int k = it->second;
+		assert(k >= 0 && k < sc.i2e.size());
+		if(sc.i2e[k] == null_edge)
+		{
+			assert(x2y.find(e) == x2y.end());
+			e2i.insert(PEI(e, k));
+		}
+		else
+		{
+			assert(x2y.find(e) != x2y.end());
+			e2i.insert(PEI(x2y[e], k));
+		}
+	}
+
+	for(int i = 0; i < sc.i2e.size(); i++)
+	{
+		if(sc.i2e[i] == null_edge)
+		{
+			i2e.push_back(null_edge);
+		}
+		else
+		{
+			assert(x2y.find(sc.i2e[i]) != x2y.end());
+			i2e.push_back(x2y[sc.i2e[i]]);
+		}
+	}
+
+	for(MEV::iterator it = sc.mev.begin(); it != sc.mev.end(); it++)
+	{
+		edge_descriptor e = it->first;
+		vector<int> v = it->second;
+		if(x2y.find(e) == x2y.end())
+		{
+			if(sc.e2i.find(e) == sc.e2i.end()) continue;
+			int k = sc.e2i[e];
+			assert(sc.i2e[k] == null_edge);
+			assert(i2e[k] == null_edge);
+			mev.insert(PEV(e, v));
+		}
+		else
+		{
+			int k = sc.e2i[e];
+			assert(sc.i2e[k] == e);
+			assert(e2i[x2y[e]] == k);
+			assert(i2e[k] == x2y[e]);
+			mev.insert(PEV(x2y[e], v));
+		}
+	}
+
+	nt.build(gr);
+	round = sc.round;
+	paths = sc.paths;
+
+	return 0;
+}
 
 int scallop::assemble()
 {
@@ -71,7 +222,7 @@ int scallop::assemble0()
 	gr.get_edge_indices(i2e, e2i);
 	nt.build(gr);
 
-	print();
+	//print();
 	//collect_existing_st_paths();
 	//printf("%s scallop0 solution %lu paths\n", name.c_str(), paths.size());
 
@@ -85,7 +236,7 @@ int scallop::assemble1()
 	iterate();
 
 	collect_existing_st_paths();
-	print();
+	//print();
 
 	printf("%s core solution %lu paths\n", name.c_str(), paths.size());
 
@@ -101,7 +252,7 @@ int scallop::assemble2()
 	greedy_decompose();
 	assert(gr.num_edges() == 0);
 
-	print();
+	//print();
 
 	printf("%s full solution %lu paths\n", name.c_str(), paths.size());
 
@@ -115,7 +266,7 @@ int scallop::greedy()
 	greedy_decompose();
 	assert(gr.num_edges() == 0);
 
-	print();
+	//print();
 
 	printf("%s greedy solution %lu paths\n", name.c_str(), paths.size());
 
@@ -124,6 +275,7 @@ int scallop::greedy()
 
 int scallop::iterate()
 {
+	print();
 	while(true)
 	{
 		bool b1 = false;
@@ -134,9 +286,11 @@ int scallop::iterate()
 			if(b == true) b1 = true;
 			else break;
 		}
-		if(b1 == true) print();
+		//if(b1 == true) print();
 
 		bool b2 = decompose_with_equation();
+
+		if(b2 == true) print();
 
 		if(b1 == false && b2 == false) return 0;
 	}
@@ -155,53 +309,39 @@ bool scallop::decompose_with_equation()
 	for(int k = 0; k < eqns.size(); k++)
 	{
 		// backup splice graph and mev
-		MEV mev2;
-		MEE x2y, y2x;
-		splice_graph gr2;
-		gr2.copy(gr, x2y, y2x);
-		for(MEV::iterator it = mev.begin(); it != mev.end(); it++)
-		{
-			mev2.insert(PEV(x2y[it->first], it->second));
-		}
+		scallop sc;
+		save(sc);
+
+		draw_splice_graph("graph1.tex");
+		sc.draw_splice_graph("graph2.tex");
 
 		vector<int> subs = eqns[k].s;
 		vector<int> subt = eqns[k].t;
-
-		assert(subs.size() == 1);
-		assert(subt.size() >= 1);
 
 		VE vx, vy;
 		for(int i = 0; i < subs.size(); i++) vx.push_back(i2e[subs[i]]);
 		for(int i = 0; i < subt.size(); i++) vy.push_back(i2e[subt[i]]);
 
 		smoother sm(gr);
-		sm.add_equation(vx, vy);
+		//sm.add_equation(vx, vy);
 		sm.solve();
+
+		assert(subs.size() == 1);
+		assert(subt.size() >= 1);
 
 		subs = split_edge(subs[0], subt);
 		nt.build(gr);
 
-		printf("equal pairs: ");
-		for(int i = 0; i < subs.size(); i++)
-		{
-			printf(" (%d, %d)", subs[i], subt[i]);
-		}
-		printf("\n");
-		print();
-
 		int c = connect_pairs(subs, subt);
 
-		//gr.round_weights();
-		//remove_empty_edges();
-		//printf("connect %d pairs with equations\n", c);
+		printf("round %d, %d / %lu equation, %lu total equal pairs, %d succeeded\n", round, k, eqns.size(), subs.size(), c);
 
 		if(c >= subs.size()) return true;
 
 		// recover splice graph
-		gr.shallow_copy(gr2);
-		mev = mev2;
-		gr.get_edge_indices(i2e, e2i);
-		nt.build(gr);
+		load(sc);
+		draw_splice_graph("graph3.tex");
+		printf("--------------\n");
 	}
 
 	return false;
@@ -669,8 +809,8 @@ int scallop::connect_pairs(const vector<int> &vx, const vector<int> &vy)
 			connect_adjacent_equal_edges(x, y);
 			nt.build(gr);
 			cnt++;
-			printf("connect (adjacent) edge pair (%d, %d)\n", x, y);
-			print();
+			printf(" connect (adjacent) edge pair (%d, %d)\n", x, y);
+			//print();
 		}
 		else
 		{
@@ -678,8 +818,8 @@ int scallop::connect_pairs(const vector<int> &vx, const vector<int> &vy)
 			if(b == false) continue;
 			cnt++;
 			nt.build(gr);
-			printf("connect (distant) edge pair (%d, %d)\n", x, y);
-			print();
+			printf(" connect (distant) edge pair (%d, %d)\n", x, y);
+			//print();
 		}
 	}
 	return cnt;
@@ -734,7 +874,7 @@ bool scallop::decompose_trivial_vertices()
 		if(gr.degree(i) == 0) continue;
 		if(gr.in_degree(i) == 1)
 		{
-			printf("decompose trivial vertex %d\n", i);
+			printf(" decompose trivial vertex %d\n", i);
 
 			tie(it1, it2) = gr.in_edges(i);
 			int ei = e2i[*it1];
@@ -756,7 +896,7 @@ bool scallop::decompose_trivial_vertices()
 		}
 		else if(gr.out_degree(i) == 1)
 		{
-			printf("decompose trivial vertex %d\n", i);
+			printf(" decompose trivial vertex %d\n", i);
 
 			tie(it1, it2) = gr.out_edges(i);
 			int ei = e2i[*it1];

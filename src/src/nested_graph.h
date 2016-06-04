@@ -26,12 +26,12 @@ public:
 	vector<int>	parents;	// parent for each edge
 
 public:
+	int clear();
 	int build(directed_graph &gr);
 	int draw(const string &file);
 	bool link(int xs, int xt, int ys, int yt, vector<PI> &xp, vector<PI> &yp);
 
 private:
-	int clear();
 	int init(directed_graph &gr);
 	int build_nests(directed_graph &gr);
 	int build_partial_order();
