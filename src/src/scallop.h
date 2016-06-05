@@ -2,7 +2,6 @@
 #define __SCALLOP2_H__
 
 #include "splice_graph.h"
-#include "nested_graph.h"
 #include "path.h"
 #include "equation.h"
 
@@ -26,7 +25,6 @@ public:
 	MEI e2i;				// edge map, from edge to index
 	VE i2e;					// edge map, from index to edge
 	MEV mev;				// super edges
-	nested_graph nt;		// nested graph
 	int round;				// round in iteration
 
 	vector<path> paths;		// predicted transcripts

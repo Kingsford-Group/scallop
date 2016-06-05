@@ -6,6 +6,11 @@ nested_graph::nested_graph()
 {
 }
 
+nested_graph::nested_graph(directed_graph &gr)
+{
+	build(gr);
+}
+
 nested_graph::~nested_graph()
 {}
 

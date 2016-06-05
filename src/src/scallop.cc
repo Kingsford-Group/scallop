@@ -1,8 +1,8 @@
 #include "scallop.h"
 #include "subsetsum.h"
-#include "nested_graph.h"
 #include "config.h"
 #include "smoother.h"
+#include "nested_graph.h"
 
 #include <cstdio>
 #include <iostream>
@@ -32,7 +32,6 @@ int scallop::clear()
 	e2i.clear();
 	i2e.clear();
 	mev.clear();
-	nt.clear();
 	round = -1;
 	paths.clear();
 	return 0;
@@ -98,7 +97,6 @@ int scallop::save(scallop &sc)
 		}
 	}
 
-	sc.nt.build(sc.gr);
 	sc.round = round;
 	sc.paths = paths;
 
@@ -166,7 +164,6 @@ int scallop::load(scallop &sc)
 		}
 	}
 
-	nt.build(gr);
 	round = sc.round;
 	paths = sc.paths;
 
@@ -220,7 +217,6 @@ int scallop::assemble0()
 	init_super_edges();
 	reconstruct_splice_graph();
 	gr.get_edge_indices(i2e, e2i);
-	nt.build(gr);
 
 	//print();
 	//collect_existing_st_paths();
@@ -342,7 +338,6 @@ int scallop::decompose_single_equation(equation &eqn)
 	assert(subt.size() >= 1);
 
 	subs = split_edge(subs[0], subt);
-	nt.build(gr);
 
 	PI p = connect_pairs(subs, subt);
 
@@ -833,7 +828,7 @@ PI scallop::connect_pairs(const vector<int> &vx, const vector<int> &vy)
 
 			if(fabs(wx - wy) > SMIN) continue;
 
-			if(check_adjacent_mergable(x, y) == true)
+			if(check_adjacent_mergable( x, y) == true)
 			{
 				r[i].first = 0;
 				break;
@@ -865,7 +860,6 @@ PI scallop::connect_pairs(const vector<int> &vx, const vector<int> &vy)
 			assert(b == true);
 			build_adjacent_equal_edges(p);
 			connect_adjacent_equal_edges(x, y);
-			nt.build(gr);
 			pi.first++;
 			printf(" connect (adjacent) edge pair (%d, %d)\n", x, y);
 		}
@@ -876,7 +870,6 @@ PI scallop::connect_pairs(const vector<int> &vx, const vector<int> &vy)
 			assert(l >= 2);
 			connect_path(p, w);
 			pi.second++;
-			nt.build(gr);
 			printf(" connect (distant) edge pair (%d, %d)\n", x, y);
 		}
 	}
@@ -902,6 +895,8 @@ bool scallop::check_adjacent_mergable(int ex, int ey, vector<PI> &p)
 
 	vector<PI> xp, yp;
 	bool b = false;
+
+	nested_graph nt(gr);
 
 	if(gr.check_path(i2e[ex], i2e[ey])) b = nt.link(xs, xt, ys, yt, xp, yp);
 	else if(gr.check_path(i2e[ey], i2e[ex])) b = nt.link(ys, yt, xs, xt, yp, xp);
@@ -1072,6 +1067,7 @@ int scallop::print()
 	if(output_tex_files == true)
 	{
 		draw_splice_graph(name + "." + tostring(round) + ".tex");
+		nested_graph nt(gr);
 		nt.draw(name + "." + tostring(round) + ".nt.tex");
 	}
 

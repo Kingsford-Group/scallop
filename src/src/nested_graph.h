@@ -16,6 +16,7 @@ class nested_graph : public directed_graph
 {
 public:
 	nested_graph();
+	nested_graph(directed_graph &gr);
 	virtual ~nested_graph();
 
 public:
