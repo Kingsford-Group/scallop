@@ -2,6 +2,7 @@
 #define __EDGE_BASE_H__
 
 #include <set>
+#include <map>
 
 using namespace std;
 
@@ -28,6 +29,7 @@ typedef edge_base* edge_descriptor;
 typedef set<edge_base*>::iterator edge_iterator;
 typedef pair<edge_descriptor, bool> PEB;
 typedef pair<edge_descriptor, edge_descriptor> PEE;
+typedef map<edge_descriptor, edge_descriptor> MEE;
 typedef pair<edge_iterator, edge_iterator> PEEI;
 
 #endif
