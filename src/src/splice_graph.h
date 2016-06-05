@@ -10,8 +10,6 @@
 
 using namespace std;
 
-typedef map<edge_descriptor, edge_descriptor> MEE;
-
 class splice_graph : public directed_graph
 {
 public:

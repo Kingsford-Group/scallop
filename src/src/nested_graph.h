@@ -2,7 +2,6 @@
 #define __NESTED_GRAPH_H__
 
 #include "directed_graph.h"
-#include "undirected_graph.h"
 
 #include <map>
 #include <cassert>
@@ -11,6 +10,7 @@
 using namespace std;
 
 typedef pair<int, int> PI;
+typedef pair<int, edge_descriptor> PIE;
 
 class nested_graph : public directed_graph
 {
@@ -19,11 +19,9 @@ public:
 	virtual ~nested_graph();
 
 public:
-	VE i2e;					// edge map
-	MEI e2i;				// edge map
 	vector<int> order;		// partial order of vertex
-	vector<PI> partners;	// in/out partners for each vertex
-	vector<int>	parents;	// parent for each edge
+	vector<PEE> partners;	// in/out partners for each vertex
+	MEE parents;			// parent for each edge
 
 public:
 	int clear();
@@ -39,21 +37,21 @@ private:
 	int build_parents();
 	int build_parents(int x);
 
-	int get_left_sibling(int e);
-	int get_right_sibling(int e);
+	edge_descriptor get_left_sibling(edge_descriptor e);
+	edge_descriptor get_right_sibling(edge_descriptor e);
 
-	bool bfs_docking_forward(int e, int t, int p, vector<int> &v);
-	bool bfs_docking_backward(int e, int s, int p, vector<int> &v);
+	int move_left(edge_descriptor e);
+	int move_right(edge_descriptor e);
 
-	int compute_lca(int x, int y, vector<int> &xv, vector<int> &yv);
-	int dock(int e, int p, vector<PI> &v);
+	bool dock_left(edge_descriptor e, vector<int> &r);
+	bool dock_right(edge_descriptor e, vector<int> &r);
+
+	edge_descriptor compute_lca(edge_descriptor x, edge_descriptor y);
+	int dock(edge_descriptor e, edge_descriptor p, vector<PI> &v);
 
 	PEB add_extra_edge(int s, int t);
 	int remove_extra_edge(PEB p);
-	int compute_parent(edge_descriptor e);
-	
-	int test_linking(directed_graph &gr);
-	int print();
+	edge_descriptor compute_parent(edge_descriptor e);
 };
 
 #endif

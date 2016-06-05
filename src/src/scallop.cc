@@ -901,7 +901,12 @@ bool scallop::check_adjacent_mergable(int ex, int ey, vector<PI> &p)
 	int yt = i2e[ey]->target();
 
 	vector<PI> xp, yp;
-	bool b = nt.link(xs, xt, ys, yt, xp, yp);
+	bool b = false;
+
+	if(gr.check_path(i2e[ex], i2e[ey])) b = nt.link(xs, xt, ys, yt, xp, yp);
+	else if(gr.check_path(i2e[ey], i2e[ex])) b = nt.link(ys, yt, xs, xt, yp, xp);
+	else return false;
+	
 	if(b == false) return false;
 
 	p = xp;
