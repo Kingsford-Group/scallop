@@ -47,7 +47,8 @@ private:
 	// iteratively decompose
 	int iterate();
 	bool decompose_trivial_vertices();
-	bool decompose_with_equation();
+	bool decompose_with_equations();
+	int decompose_single_equation(equation &eqn);
 
 	// trivial, or hard
 	int classify();
@@ -66,20 +67,22 @@ private:
 	bool verify_equation_nontrivial(const vector<int> &subs, const vector<int> &subt);
 
 	// split and connect pairs of identical edges
-	int connect_pairs(const vector<int> &vx, const vector<int> &vy);
+	PI connect_pairs(const vector<int> &vx, const vector<int> &vy);
 
 	// split exi w.r.t eyi
 	int split_edge(int exi, double w);
 	int split_edge(int exi, int eyi);
 	vector<int> split_edge(int ei, const vector<int> &sub);
 
-	// check, and make two equal edges adjacent 
-	bool check_linkable(int ex, int ey, vector<PI> &p);
+	// check, and make two adjacent equal edges adjacent 
+	bool check_adjacent_mergable(int ex, int ey, vector<PI> &p);
+	bool check_adjacent_mergable(int ex, int ey);
 	int build_adjacent_equal_edges(const vector<PI> &p);
 	int connect_adjacent_equal_edges(int x, int y);
 
-	// compute, and merge two closest equal edges with minimum distance
-	bool connect_equal_edges(int x, int y);
+	// compute, and merge two distant equal edges
+	int check_distant_mergable(int x, int y, VE &p);
+	int check_distant_mergable(int x, int y);
 	int connect_path(const vector<int> &p, double ww);
 	int connect_path(const VE &p, double ww);
 

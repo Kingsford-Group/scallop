@@ -11,12 +11,19 @@ public:
 	equation(const vector<int> &, const vector<int> &);
 	equation(const vector<int> &, const vector<int> &, double);
 
-	bool operator< (const equation &e) const;
+public:
+	int print(int index);
 
 public:
-	vector<int> s;
-	vector<int> t;
-	double e;
+	vector<int> s;		// subs
+	vector<int> t;		// subt
+	double e;			// erro
+
+	bool b;				// whether fail or not
+	int d;				// # distant merges
 };
+
+bool equation_cmp1(const equation &x, const equation &y);
+bool equation_cmp2(const equation &x, const equation &y);
 
 #endif

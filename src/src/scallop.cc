@@ -288,63 +288,76 @@ int scallop::iterate()
 		}
 		//if(b1 == true) print();
 
-		bool b2 = decompose_with_equation();
+		bool b2 = decompose_with_equations();
 
 		if(b2 == true) print();
 
-		if(b1 == false && b2 == false) return 0;
+		if(b1 == false && b2 == false) break;
 	}
+
+	print();
 	return 0;
 }
 
-bool scallop::decompose_with_equation()
+bool scallop::decompose_with_equations()
 {
 	vector<equation> eqns;
 	identify_equation1(eqns);
 
 	if(eqns.size() == 0) return false;
 
-	sort(eqns.begin(), eqns.end());
+	sort(eqns.begin(), eqns.end(), equation_cmp1);
 
 	for(int k = 0; k < eqns.size(); k++)
 	{
-		// backup splice graph and mev
 		scallop sc;
 		save(sc);
-
-		draw_splice_graph("graph1.tex");
-		sc.draw_splice_graph("graph2.tex");
-
-		vector<int> subs = eqns[k].s;
-		vector<int> subt = eqns[k].t;
-
-		VE vx, vy;
-		for(int i = 0; i < subs.size(); i++) vx.push_back(i2e[subs[i]]);
-		for(int i = 0; i < subt.size(); i++) vy.push_back(i2e[subt[i]]);
-
-		smoother sm(gr);
-		//sm.add_equation(vx, vy);
-		sm.solve();
-
-		assert(subs.size() == 1);
-		assert(subt.size() >= 1);
-
-		subs = split_edge(subs[0], subt);
-		nt.build(gr);
-
-		int c = connect_pairs(subs, subt);
-
-		printf("round %d, %d / %lu equation, %lu total equal pairs, %d succeeded\n", round, k, eqns.size(), subs.size(), c);
-
-		if(c >= subs.size()) return true;
-
-		// recover splice graph
+		decompose_single_equation(eqns[k]);
 		load(sc);
-		draw_splice_graph("graph3.tex");
-		printf("--------------\n");
 	}
 
-	return false;
+	sort(eqns.begin(), eqns.end(), equation_cmp2);
+
+	for(int i = 0; i < eqns.size(); i++) 
+	{
+		printf(" "); 
+		eqns[i].print(i);
+	}
+
+	if(eqns[0].b == false) return false;
+
+	decompose_single_equation(eqns[0]);
+
+	return true;
+}
+
+int scallop::decompose_single_equation(equation &eqn)
+{
+	vector<int> subs = eqn.s;
+	vector<int> subt = eqn.t;
+
+	VE vx, vy;
+	for(int i = 0; i < subs.size(); i++) vx.push_back(i2e[subs[i]]);
+	for(int i = 0; i < subt.size(); i++) vy.push_back(i2e[subt[i]]);
+
+	smoother sm(gr);
+	sm.add_equation(vx, vy);
+	sm.solve();
+
+	assert(subs.size() == 1);
+	assert(subt.size() >= 1);
+
+	subs = split_edge(subs[0], subt);
+	nt.build(gr);
+
+	PI p = connect_pairs(subs, subt);
+
+	eqn.d = p.second;
+
+	if(p.first + p.second >= subs.size()) eqn.b = true;
+	else eqn.b = false;
+
+	return 0;
 }
 
 int scallop::init_super_edges()
@@ -422,8 +435,16 @@ bool scallop::init_trivial_vertex(int x)
 	return true;
 }
 
-bool scallop::connect_equal_edges(int x, int y)
+int scallop::check_distant_mergable(int x, int y)
 {
+	VE p;
+	return check_distant_mergable(x, y, p);
+}
+
+int scallop::check_distant_mergable(int x, int y, VE &p)
+{
+	p.clear();
+
 	assert(i2e[x] != null_edge);
 	assert(i2e[y] != null_edge);
 
@@ -439,14 +460,16 @@ bool scallop::connect_equal_edges(int x, int y)
 	double wy = gr.get_edge_weight(yy);
 	assert(fabs(wx - wy) <= SMIN);
 
-	VE p;
+	if(gr.check_path(yt, xs) == true) return check_distant_mergable(y, x, p);
+	if(gr.check_path(xt, ys) == false) return -1;
+
 	int l = gr.compute_shortest_path_w(xt, ys, wx, p);
-	if(l < 0) return false;
+	if(l < 0) return -1;
 
 	p.insert(p.begin(), xx);
 	p.insert(p.end(), yy);
 
-	return connect_path(p, wx);
+	return l + 2;
 }
 
 int scallop::connect_path(const VE &p, double wx)
@@ -785,47 +808,95 @@ int scallop::identify_equation(const vector<int> &subs, vector<int> &subt)
 	return INT_MAX;
 }
 
-int scallop::connect_pairs(const vector<int> &vx, const vector<int> &vy)
+PI scallop::connect_pairs(const vector<int> &vx, const vector<int> &vy)
 {
-	int cnt = 0;
+	PI pi(0, 0);
 	assert(vx.size() == vy.size());
-	for(int i = 0; i < vx.size(); i++)
+
+	vector<bool> m;
+	m.assign(vx.size(), false);
+
+	int n = (int)(gr.num_edges()) * 2;
+
+	while(true)
 	{
-		int x = vx[i];
-		int y = vy[i];
-
-		if(i2e[x] == null_edge) continue;
-		if(i2e[y] == null_edge) continue;
-		
-		double wx = gr.get_edge_weight(i2e[x]);
-		double wy = gr.get_edge_weight(i2e[y]);
-
-		if(fabs(wx - wy) > SMIN) continue;
-
-		vector<PI> p;
-		if(check_linkable(x, y, p) == true)
+		vector<PI> r;
+		for(int i = 0; i < vx.size(); i++)
 		{
+			r.push_back(PI(n, i));
+		}
+
+		for(int i = 0; i < vx.size(); i++)
+		{
+			int x = vx[i];
+			int y = vy[i];
+
+			if(i2e[x] == null_edge) continue;
+			if(i2e[y] == null_edge) continue;
+
+			double wx = gr.get_edge_weight(i2e[x]);
+			double wy = gr.get_edge_weight(i2e[y]);
+
+			if(fabs(wx - wy) > SMIN) continue;
+
+			if(check_adjacent_mergable(x, y) == true)
+			{
+				r[i].first = 0;
+				break;
+			}
+
+			int l = check_distant_mergable(x, y);
+			assert(l < n);
+			if(l < 0) continue;
+
+			r[i].first = l;
+			break;
+		}
+
+		sort(r.begin(), r.end());
+
+		if(r[0].first == n) break;
+
+		int k = r[0].second;
+		m[k] = true;
+
+		int x = vx[k];
+		int y = vy[k];
+		double w = gr.get_edge_weight(i2e[x]);
+
+		if(r[0].first == 0)
+		{
+			vector<PI> p;
+			bool b = check_adjacent_mergable(x, y, p);
+			assert(b == true);
 			build_adjacent_equal_edges(p);
 			connect_adjacent_equal_edges(x, y);
 			nt.build(gr);
-			cnt++;
+			pi.first++;
 			printf(" connect (adjacent) edge pair (%d, %d)\n", x, y);
-			//print();
 		}
 		else
 		{
-			bool b = connect_equal_edges(x, y);
-			if(b == false) continue;
-			cnt++;
+			VE p;
+			int l = check_distant_mergable(x, y, p);
+			assert(l >= 2);
+			connect_path(p, w);
+			pi.second++;
 			nt.build(gr);
 			printf(" connect (distant) edge pair (%d, %d)\n", x, y);
-			//print();
 		}
 	}
-	return cnt;
+
+	return pi;
 }
 
-bool scallop::check_linkable(int ex, int ey, vector<PI> &p)
+bool scallop::check_adjacent_mergable(int ex, int ey)
+{
+	vector<PI> p;
+	return check_adjacent_mergable(ex, ey, p);
+}
+
+bool scallop::check_adjacent_mergable(int ex, int ey, vector<PI> &p)
 {
 	assert(i2e[ex] != null_edge);
 	assert(i2e[ey] != null_edge);
