@@ -16,14 +16,6 @@ graph_base::~graph_base()
 	clear();
 }
 
-int graph_base::shallow_copy(const graph_base &gr)
-{
-	clear();
-	vv = gr.vv;
-	se = gr.se;
-	return 0;
-}
-
 int graph_base::copy(const graph_base &gr)
 {
 	clear();

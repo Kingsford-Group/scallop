@@ -36,7 +36,6 @@ protected:
 public:
 	// modify the graph
 	virtual int copy(const graph_base &gr);
-	virtual int shallow_copy(const graph_base &gr);
 	virtual int add_vertex();
 	virtual int clear_vertex(int v);
 	virtual int clear();
