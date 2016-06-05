@@ -233,12 +233,12 @@ int scallop::assemble1()
 {
 	assemble0();
 
-	iterate();
+	int f = iterate();
 
 	collect_existing_st_paths();
 	//print();
 
-	printf("%s core solution %lu paths\n", name.c_str(), paths.size());
+	printf("%s core solution %lu paths, iteration = %d\n", name.c_str(), paths.size(), f);
 
 	return 0;
 }
@@ -247,14 +247,14 @@ int scallop::assemble2()
 {
 	assemble0();
 
-	iterate();
+	int f = iterate();
 
 	greedy_decompose();
 	assert(gr.num_edges() == 0);
 
 	//print();
 
-	printf("%s full solution %lu paths\n", name.c_str(), paths.size());
+	printf("%s full solution %lu paths, iteration = %d\n", name.c_str(), paths.size(), f);
 
 	return 0;
 }
@@ -278,33 +278,27 @@ int scallop::iterate()
 	print();
 	while(true)
 	{
-		bool b1 = false;
 		while(true)
 		{
 			bool b = decompose_trivial_vertices();
-			if(b == true) nt.build(gr);
-			if(b == true) b1 = true;
-			else break;
+			if(b == false) break;
 		}
-		//if(b1 == true) print();
 
-		bool b2 = decompose_with_equations();
+		int f = decompose_with_equations();
 
-		if(b2 == true) print();
-
-		if(b1 == false && b2 == false) break;
+		print();
+		
+		if(f == 0) continue;
+		else return f;
 	}
-
-	print();
-	return 0;
 }
 
-bool scallop::decompose_with_equations()
+int scallop::decompose_with_equations()
 {
 	vector<equation> eqns;
 	identify_equation1(eqns);
 
-	if(eqns.size() == 0) return false;
+	if(eqns.size() == 0) return -2;
 
 	sort(eqns.begin(), eqns.end(), equation_cmp1);
 
@@ -324,11 +318,11 @@ bool scallop::decompose_with_equations()
 		eqns[i].print(i);
 	}
 
-	if(eqns[0].b == false) return false;
+	if(eqns[0].b == false) return -1;
 
 	decompose_single_equation(eqns[0]);
 
-	return true;
+	return 0;
 }
 
 int scallop::decompose_single_equation(equation &eqn)
