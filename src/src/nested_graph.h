@@ -39,6 +39,9 @@ private:
 	int build_parents();
 	int build_parents(int x);
 
+	int get_left_sibling(int e);
+	int get_right_sibling(int e);
+
 	bool bfs_docking_forward(int e, int t, int p, vector<int> &v);
 	bool bfs_docking_backward(int e, int s, int p, vector<int> &v);
 

@@ -47,7 +47,7 @@ private:
 	// iteratively decompose
 	int iterate();
 	bool decompose_trivial_vertices();
-	bool decompose_with_equations();
+	int decompose_with_equations();
 	int decompose_single_equation(equation &eqn);
 
 	// trivial, or hard

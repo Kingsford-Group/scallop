@@ -15,8 +15,8 @@ int nested_graph::build(directed_graph &gr)
 	build_nests(gr);
 	get_edge_indices(i2e, e2i);
 	build_partial_order();
-	build_partners(gr);
 	build_parents();
+	build_partners(gr);
 	//test_linking(gr);
 	return 0;
 }
@@ -68,6 +68,14 @@ int nested_graph::build_partners(directed_graph &gr)
 		int ip = gr.compute_in_partner(i);
 		int op = gr.compute_out_partner(i);
 		partners[i] = PI(ip, op);
+
+		// checking consistent with left- right-siblings
+		if(ip < 0 || op < 0) continue;
+		PEB p1 = edge(ip, i);
+		PEB p2 = edge(i, op);
+		assert(p1.second && p2.second);
+		assert(e2i[p1.first] == get_left_sibling(e2i[p2.first]));
+		assert(e2i[p2.first] == get_right_sibling(e2i[p1.first]));
 	}
 	return 0;
 }
@@ -191,6 +199,34 @@ int nested_graph::compute_parent(edge_descriptor e)
 	if(ee != -1) p = parents[ee];
 
 	return p;
+}
+
+int nested_graph::get_left_sibling(int e)
+{
+	int p = parents[e];
+	int s = i2e[e]->source();
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = in_edges(s); it1 != it2; it1++)
+	{
+		int ee = e2i[*it1];
+		int pp = parents[ee];
+		if(pp == p) return ee;
+	}
+	return -1;
+}
+
+int nested_graph::get_right_sibling(int e)
+{
+	int p = parents[e];
+	int t = i2e[e]->target();
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = out_edges(t); it1 != it2; it1++)
+	{
+		int ee = e2i[*it1];
+		int pp = parents[ee];
+		if(pp == p) return ee;
+	}
+	return -1;
 }
 
 bool nested_graph::bfs_docking_forward(int e0, int t0, int p0, vector<int> &r)
@@ -394,6 +430,12 @@ bool nested_graph::link(int xs, int xt, int ys, int yt, vector<PI> &xp, vector<P
 
 	int xu = xv[xv.size() - 2];
 	int yu = yv[yv.size() - 2];
+
+	bool b1 = check_path(i2e[xu], i2e[yu]);
+	bool b2 = check_path(i2e[yu], i2e[xu]);
+
+	assert(b1 || b2);
+
 	assert(xu >= 0 && xu < num_edges());
 	assert(yu >= 0 && yu < num_edges());
 
