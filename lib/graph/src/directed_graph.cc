@@ -281,6 +281,38 @@ vector<int> directed_graph::topological_sort()
 {
 	vector<int> v;
 
+	vector<int> q;
+	vector<int> vd;
+	for(int i = 0; i < num_vertices(); i++)
+	{
+		int d = in_degree(i);
+		vd.push_back(d);
+		if(d == 0) q.push_back(i);
+	}
+
+	int k = 0;
+
+	while(k < q.size())
+	{
+		int x = q[k++];
+		v.push_back(x);
+
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
+		{
+			int t = (*it1)->target();
+			vd[t]--;
+			assert(vd[t] >= 0);
+			if(vd[t] == 0) q.push_back(t);
+		}
+	}
+	return v;
+}
+
+vector<int> directed_graph::topological_sort0()
+{
+	vector<int> v;
+
 	vector<int> vd;
 	for(int i = 0; i < num_vertices(); i++)
 	{
