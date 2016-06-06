@@ -63,7 +63,11 @@ int compare_genome(const genome &x, const genome &y)
 		ttotal += tx;
 		tequal += t0;
 		if(t0 == tx) gequal++;
-		printf("%s %d and %d transcripts, %d are equal, %s\n", gx->get_gene_id().c_str(), tx, ty, t0, (t0 == tx) ? "TRUE" : "FALSE");
+		string s;
+		if(tx == ty) s = "EQUAL";
+		else if(tx > ty) s = "GREATER";
+		else s = "LESS";
+		printf("%s %d and %d transcripts, %d are equal, %s, %s\n", gx->get_gene_id().c_str(), tx, ty, t0, (t0 == tx) ? "TRUE" : "FALSE", s.c_str());
 	}
 	printf("summary: %d out of %d genes are equal, %d out of %d transcripts are equal\n",
 			gequal, gtotal, tequal, ttotal);
