@@ -14,6 +14,7 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  binomial.h binomial.cc \
 				  fibonacci_heap.h fibonacci_heap.cc \
 				  subsetsum.h subsetsum.cc \
+				  subsetsum2.h subsetsum2.cc \
 				  disjoint_sets.h disjoint_sets.cc \
 				  config.h config.cc \
 				  hit.h hit.cc \

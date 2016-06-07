@@ -274,11 +274,14 @@ int scallop::iterate()
 	print();
 	while(true)
 	{
+		bool t = false;
 		while(true)
 		{
 			bool b = decompose_trivial_vertices();
+			if(b == true) t = true;
 			if(b == false) break;
 		}
+		if(t == true) print();
 
 		int f = decompose_with_equations();
 
