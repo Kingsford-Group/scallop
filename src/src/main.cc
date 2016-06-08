@@ -6,11 +6,15 @@
 
 #include "assembler.h"
 #include "config.h"
+#include "subsetsum2.h"
 
 using namespace std;
 
 int main(int argc, const char **argv)
 {
+	subsetsum2::test();
+	return 0;
+
 	bool b = parse_arguments(argc, argv);
 	if(b == false) return 0;
 

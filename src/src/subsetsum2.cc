@@ -19,15 +19,9 @@ int subsetsum2::solve()
 	rescale();
 	init_table();
 	fill_table();
-	optimize();
-
-	for(int i = 0; i < opts.size(); i++)
-	{
-		vector<int> subset;
-		backtrace(opts[i], subset);
-		recover(opts[i], subset);
-		subsets.push_back(subset);
-	}
+	optimize1();
+	optimize2();
+	recover();
 	return 0;
 }
 
@@ -117,47 +111,93 @@ int subsetsum2::fill_table()
 	return 0;
 }
 
-int subsetsum2::optimize()
+int subsetsum2::optimize1()
 {
-	int s = seeds.size();
-	bool b = true;
-	int d = 0;
-	while(true)
+	// perfect equation (error = 0)
+	for(int i = 1; i <= seeds.size(); i++)
 	{
-		int k = target + (b ? 0 + d : 0 - d);
-		if(k <= 0 || k > ubound) break;
-		//printf("d = %d, target = %d, ubound = %d, table[%d][%d] = %d\n", d, target, ubound, s, k, table[s][k] ? 1 : 0);
-		if(table[s][k] == true)
+		for(int j = 1; j < ubound; j++)
 		{
-			opts.push_back(k);
-			if(opts.size() >= max_num_subsetsum_solutions) break;
+			if(table[i][j] != 2) continue;
+			equation eqn(0);
+			backtrace(i - 1, j, eqn.s);
+			vector<int> v;
+			backtrace(i - 1, j - seeds[i - 1].first, v);
+			eqn.t.push_back(i - 1);
+			eqn.t.insert(eqn.t.end(), v.begin(), v.end());
+			eqns.push_back(eqn);
 		}
-		if(b == true) d++;
-		b = (b ? false : true);
 	}
-	//assert(opts.size() >= 1);
 	return 0;
 }
 
-int subsetsum2::backtrace(int opt, vector<int> &subset)
+int subsetsum2::optimize2()
 {
+	// non-perfect equation (error > 0)
+	vector<int> v;
 	int s = seeds.size();
-	int x = opt;
+	for(int x = 1; x <= ubound; x++)
+	{
+		if(table[s][x] < 0) continue;
+		if(table[s][x] == 2) continue;
+		v.push_back(x);
+	}
+
+	if(v.size() == 0) return 0;
+
+	vector<int> s1;
+	vector<int> s2;
+	backtrace(s, v[0], s1);
+	for(int i = 1; i < v.size(); i++)
+	{
+		backtrace(s, v[i], s2);
+		double r = (v[i] - v[i - 1]) * 1.0 / v[i - 1];
+		if(r >= max_equation_error_ratio)
+		{
+			s1 = s2;
+			continue;
+		}
+		equation eqn(s1, s2, v[i] - v[i - 1]);
+		eqns.push_back(eqn);
+	}
+	return 0;
+}
+
+int subsetsum2::backtrace(int s, int x, vector<int> &subset)
+{
+	subset.clear();
 	while(x >= 1 && s >= 1)
 	{
-		assert(table[s][x] == true);
-		bool b = btptr[s][x];
-		if(b == true)
+		if(table[s][x] == 0)
 		{
-			x = x - seeds[s - 1].first;
-			subset.push_back(s - 1);
+			s = s - 1;
 		}
-		s = s - 1;
+		else if(table[s][x] == 1)
+		{
+			s = s - 1;
+			x = x - seeds[s].first;
+			subset.push_back(s);
+		}
+		else
+		{
+			assert(false);
+		}
 	}
 	return 0;
 }
 
-int subsetsum2::recover(int &opt, vector<int> &subset)
+int subsetsum2::recover()
+{
+	for(int i = 0; i < eqns.size(); i++)
+	{
+		int s1 = recover(eqns[i].s);
+		int s2 = recover(eqns[i].t);
+		eqns[i].e = (int)fabs(s1 - s2);
+	}
+	return 0;
+}
+
+int subsetsum2::recover(vector<int> &subset)
 {
 	vector<int> v;
 	int sum = 0;
@@ -168,8 +208,29 @@ int subsetsum2::recover(int &opt, vector<int> &subset)
 		v.push_back(r);
 		sum += raw[r];
 	}
-	opt = sum;
-	subset = v;
-	return 0;
+	return sum;
 }
 
+int subsetsum2::test()
+{
+	vector<int> v;
+	v.push_back(1); // 0
+	v.push_back(2); // 1
+	v.push_back(3); // 2
+	v.push_back(4); // 3
+	v.push_back(5); // 4
+	v.push_back(6); // 5
+	v.push_back(7); // 6
+	v.push_back(8); // 7
+	v.push_back(9); // 8
+
+	subsetsum2 sss(v);
+	sss.solve();
+
+	for(int i = 0; i < sss.eqns.size(); i++)
+	{
+		sss.eqns[i].print(i);
+	}
+
+	return 0;
+}

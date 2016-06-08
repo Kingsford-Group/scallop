@@ -1,6 +1,10 @@
 #include "equation.h"
 #include <cstdio>
 
+equation::equation(double _e)
+	:e(_e)
+{}
+
 equation::equation(const vector<int> &_s, const vector<int> &_t)
 	: s(_s), t(_t)
 {
