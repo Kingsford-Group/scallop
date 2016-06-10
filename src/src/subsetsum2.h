@@ -35,10 +35,11 @@ private:
 	int fill_table();
 	int optimize1();
 	int optimize2();
+	bool verify(int s, int x);
 	int backtrace(int s, int x, vector<int> &subset);
 	int recover();
 	int recover(vector<int> &subset);
-
+	int print();
 };
 
 #endif

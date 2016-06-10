@@ -82,13 +82,13 @@ int subsetsum2::fill_table()
 		for(int i = 1; i <= seeds.size(); i++)
 		{
 			int s = seeds[i - 1].first;
-			if(j >= s && table[i - 1][j - s] == 2)
+			if(j >= s && table[i - 1][j - s] >= 2)
 			{
-				table[i][j] = -1;
+				table[i][j] = 4;
 			}
-			else if(table[i - 1][j] == 2)
+			else if(table[i - 1][j] >= 2)
 			{
-				table[i][j] = -1;
+				table[i][j] = 3;
 			}
 			else if(j >= s && table[i - 1][j - s] >= 0 && table[i - 1][j] >= 0)
 			{
@@ -114,32 +114,53 @@ int subsetsum2::fill_table()
 int subsetsum2::optimize1()
 {
 	// perfect equation (error = 0)
-	for(int i = 1; i <= seeds.size(); i++)
+	for(int j = 1; j < ubound; j++)
 	{
-		for(int j = 1; j < ubound; j++)
+		int i = 0;
+		for(int k = 1; k <= seeds.size(); k++)
 		{
-			if(table[i][j] != 2) continue;
-			equation eqn(0);
-			backtrace(i - 1, j, eqn.s);
-			vector<int> v;
-			backtrace(i - 1, j - seeds[i - 1].first, v);
-			eqn.t.push_back(i - 1);
-			eqn.t.insert(eqn.t.end(), v.begin(), v.end());
-			eqns.push_back(eqn);
+			if(table[k][j] == 2)
+			{
+				i = k;
+				break;
+			}
 		}
+
+		if(i == 0) continue;
+		//printf("verify (%d, %d)\n", i, j);
+		if(verify(i, j) == false) continue;
+
+		equation eqn(0);
+		backtrace(i - 1, j, eqn.s);
+		vector<int> v;
+		backtrace(i - 1, j - seeds[i - 1].first, v);
+		eqn.t.push_back(i - 1);
+		eqn.t.insert(eqn.t.end(), v.begin(), v.end());
+		eqns.push_back(eqn);
 	}
 	return 0;
 }
 
+bool subsetsum2::verify(int s, int x)
+{
+	for(int i = 0; i < s; i++)
+	{
+		int xx = x - seeds[i].first;
+		if(table[i + 1][xx] >= 2) return false;
+	}
+	return true;
+}
+
 int subsetsum2::optimize2()
 {
+	// TODO
 	// non-perfect equation (error > 0)
 	vector<int> v;
 	int s = seeds.size();
 	for(int x = 1; x <= ubound; x++)
 	{
 		if(table[s][x] < 0) continue;
-		if(table[s][x] == 2) continue;
+		if(table[s][x] >= 2) continue;
 		v.push_back(x);
 	}
 
@@ -232,5 +253,15 @@ int subsetsum2::test()
 		sss.eqns[i].print(i);
 	}
 
+	return 0;
+}
+int subsetsum2::print()
+{
+	int s = seeds.size();
+	for(int i = 1; i <= ubound; i++)
+	{
+		printf("table[%d] = %d\n", i, table[s][i]);
+	}
+	printf("\n");
 	return 0;
 }
