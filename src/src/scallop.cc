@@ -1,5 +1,6 @@
 #include "scallop.h"
 #include "subsetsum.h"
+#include "subsetsum2.h"
 #include "config.h"
 #include "smoother.h"
 #include "nested_graph.h"
@@ -281,21 +282,26 @@ int scallop::iterate()
 			if(b == true) t = true;
 			if(b == false) break;
 		}
+
 		if(t == true) print();
 
-		int f = decompose_with_equations();
+		int f1 = decompose_with_equations(1);
 
-		print();
-		
-		if(f == 0) continue;
-		else return f;
+		if(f1 >= 0) print();
+		if(f1 >= 0) continue;
+
+		int f2 = decompose_with_equations(2);
+
+		if(f2 >= 0) print();
+		else return f2;
 	}
 }
 
-int scallop::decompose_with_equations()
+int scallop::decompose_with_equations(int level)
 {
 	vector<equation> eqns;
-	identify_equation1(eqns);
+	if(level == 1) identify_equations1(eqns);
+	else if(level == 2) identify_equations2(eqns);
 
 	if(eqns.size() == 0) return -2;
 
@@ -684,7 +690,87 @@ bool scallop::verify_equation_nontrivial(const vector<int> &subs, const vector<i
 	return true;
 }
 
-int scallop::identify_equation1(vector<equation> &eqns)
+int scallop::identify_equations(vector<equation> &eqns)
+{
+	eqns.clear();
+	vector<int> vw;
+	vector<int> vi;
+	for(int i = 0; i < i2e.size(); i++)
+	{
+		if(i2e[i] == null_edge) continue;
+		int w = (int)(gr.get_edge_weight(i2e[i]));
+		if(w <= 0) continue;
+		vw.push_back(w);
+		vi.push_back(i);
+	}
+
+	set<int> sw;
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		if(gr.degree(i) == 0) continue;
+		assert(gr.in_degree(i) >= 1);
+		assert(gr.out_degree(i) >= 1);
+		int sum = 0;
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
+		{
+			int w = (int)(gr.get_edge_weight(*it1));
+			sum += w;
+		}
+		if(sw.find(sum) != sw.end()) sw.insert(sum);
+	}
+
+	subsetsum2 sss(vw);
+	sss.solve();
+
+	printf("vector: ");
+	for(int i = 0; i < vw.size(); i++)
+	{
+		printf("%d:%d, ", i, vw[i]);
+	}
+	printf("\n");
+
+	printf("------------------\n");
+
+	for(int i = 0; i < sss.eqns.size(); i++)
+	{
+		sss.eqns[i].print(i);
+	}
+
+	printf("------------------\n");
+
+	for(int i = 0; i < sss.eqns.size(); i++)
+	{
+		equation & x = sss.eqns[i];
+		equation eqn(x.e);
+		int ss = 0;
+		int tt = 0;
+		for(int j = 0; j < x.s.size(); j++)
+		{
+			int k = x.s[j];
+			eqn.s.push_back(vi[k]);
+			ss += vw[k];
+		}
+		for(int j = 0; j < x.t.size(); j++)
+		{
+			int k = x.t[j];
+			eqn.t.push_back(vi[k]);
+			tt += vw[k];
+		}
+		
+		if(sw.find(ss) != sw.end()) continue;
+		if(sw.find(tt) != sw.end()) continue;
+
+		x.print(i);
+		eqns.push_back(eqn);
+	}
+	printf("------------------\n");
+	print();
+
+	return 0;
+}
+
+int scallop::identify_equations1(vector<equation> &eqns)
 {
 	eqns.clear();
 	vector<PI> p;
@@ -711,6 +797,47 @@ int scallop::identify_equation1(vector<equation> &eqns)
 
 		equation eqn(s, t, err);
 		eqns.push_back(eqn);
+	}
+	return 0;
+}
+
+int scallop::identify_equations2(vector<equation> &eqns)
+{
+	eqns.clear();
+	vector<PI> p;
+	for(int i = 0; i < i2e.size(); i++)
+	{
+		if(i2e[i] == null_edge) continue;
+		int w = (int)(gr.get_edge_weight(i2e[i]));
+		if(w <= 0) continue;
+		p.push_back(PI(w, i));
+	}
+	sort(p.begin(), p.end());
+
+	for(int i = 0; i < p.size(); i++)
+	{
+		for(int j = i + 1; j < p.size(); j++)
+		{
+			int e1 = p[i].second;
+			int e2 = p[j].second;
+			assert(i2e[e1] != null_edge);
+			assert(i2e[e2] != null_edge);
+			vector<int> s;
+			s.push_back(e1);
+			s.push_back(e2);
+			vector<int> t;
+			int err = identify_equation(s, t);
+
+			double ww = 0.0;
+			ww += gr.get_edge_weight(i2e[e1]);
+			ww += gr.get_edge_weight(i2e[e2]);
+
+			double ratio = err * 1.0 / ww;
+			if(ratio > max_equation_error_ratio) continue;
+
+			equation eqn(s, t, err);
+			eqns.push_back(eqn);
+		}
 	}
 	return 0;
 }

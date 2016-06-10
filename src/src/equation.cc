@@ -3,7 +3,10 @@
 
 equation::equation(double _e)
 	:e(_e)
-{}
+{
+	b = false;
+	d = 0;
+}
 
 equation::equation(const vector<int> &_s, const vector<int> &_t)
 	: s(_s), t(_t)
@@ -22,7 +25,7 @@ equation::equation(const vector<int> &_s, const vector<int> &_t, double _e)
 
 int equation::print(int index)
 {
-	printf("equation %d: (%lu, %lu) edges, error = %.1lf, b = %c, distant = %d. ", 
+	printf("equation %3d: (%2lu, %2lu) edges, error = %3.1lf, b = %c, distant = %2d. ", 
 			index, s.size(), t.size(), e, b ? 'T' : 'F', d);
 
 	printf("S = (%d", s[0]);

@@ -1,5 +1,5 @@
-#ifndef __SUBSETSUM_H__
-#define __SUBSETSUM_H__
+#ifndef __SUBSETSUM2_H__
+#define __SUBSETSUM2_H__
 
 #include "equation.h"
 #include <vector>

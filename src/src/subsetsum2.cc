@@ -20,7 +20,7 @@ int subsetsum2::solve()
 	init_table();
 	fill_table();
 	optimize1();
-	optimize2();
+	//optimize2();
 	recover();
 	return 0;
 }
@@ -239,11 +239,14 @@ int subsetsum2::test()
 	v.push_back(2); // 1
 	v.push_back(3); // 2
 	v.push_back(4); // 3
-	v.push_back(5); // 4
-	v.push_back(6); // 5
-	v.push_back(7); // 6
-	v.push_back(8); // 7
-	v.push_back(9); // 8
+	/*
+	v.push_back(2898); // 2
+	v.push_back(2855); // 3
+	v.push_back(2855); // 3
+	v.push_back(85); // 4
+	v.push_back(37); // 5
+	v.push_back(128); // 6
+	*/
 
 	subsetsum2 sss(v);
 	sss.solve();
@@ -255,6 +258,7 @@ int subsetsum2::test()
 
 	return 0;
 }
+
 int subsetsum2::print()
 {
 	int s = seeds.size();

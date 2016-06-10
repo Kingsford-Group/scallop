@@ -45,7 +45,7 @@ private:
 	// iteratively decompose
 	int iterate();
 	bool decompose_trivial_vertices();
-	int decompose_with_equations();
+	int decompose_with_equations(int level);
 	int decompose_single_equation(equation &eqn);
 
 	// trivial, or hard
@@ -60,7 +60,9 @@ private:
 	int remove_empty_edges();
 
 	// identify and handle equations 
-	int identify_equation1(vector<equation> &eqns);
+	int identify_equations(vector<equation> &eqns);
+	int identify_equations1(vector<equation> &eqns);
+	int identify_equations2(vector<equation> &eqns);
 	int identify_equation(const vector<int> &subs, vector<int> &subt);
 	bool verify_equation_nontrivial(const vector<int> &subs, const vector<int> &subt);
 
