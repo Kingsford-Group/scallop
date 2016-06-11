@@ -20,7 +20,7 @@ public:
 	vector<int> t;		// subt
 	double e;			// erro
 
-	bool b;				// whether fail or not
+	int f;				// 2: fully, 1: partly, 0: none
 	int a;				// # adjacent merges
 	int d;				// # distant merges
 };

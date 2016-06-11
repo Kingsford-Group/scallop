@@ -4,7 +4,7 @@
 equation::equation(double _e)
 	:e(_e)
 {
-	b = false;
+	f = 0;
 	d = 0;
 }
 
@@ -12,21 +12,21 @@ equation::equation(const vector<int> &_s, const vector<int> &_t)
 	: s(_s), t(_t)
 {
 	e = 0;
-	b = false;
+	f = 0;
 	d = 0;
 }
 
 equation::equation(const vector<int> &_s, const vector<int> &_t, double _e)
 	: s(_s), t(_t), e(_e)
 {
-	b = false;
+	f = 0;
 	d = 0;
 }
 
 int equation::print(int index)
 {
-	printf("equation %3d: (%2lu, %2lu) edges, error = %3.1lf, b = %c, adjacent = %2d, distant = %2d. ", 
-			index, s.size(), t.size(), e, b ? 'T' : 'F', a, d);
+	printf("equation %3d: (%2lu, %2lu) edges, error = %3.1lf, f = %d, adjacent = %2d, distant = %2d. ", 
+			index, s.size(), t.size(), e, f, a, d);
 
 	printf("S = (%d", s[0]);
 	for(int i = 1; i < s.size(); i++) printf(", %d", s[i]);
@@ -47,8 +47,8 @@ bool equation_cmp1(const equation &x, const equation &y)
 
 bool equation_cmp2(const equation &x, const equation &y) 
 {
-	if(x.b == true && y.b == false) return true;
-	else if(x.b == false && y.b == true) return false;
+	if(x.f > y.f) return true;
+	if(x.f < y.f) return false;
 	else if(x.d < y.d) return true;
 	else if(x.d > y.d) return false;
 	else if(x.s.size() + x.t.size() < y.s.size() + y.t.size()) return true;

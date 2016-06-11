@@ -104,7 +104,8 @@ int assembler::assemble_gtf(const string &file)
 	for(int i = 0; i < g.genes.size(); i++)
 	{
 		gtf gg(g.genes[i]);
-		if(gg.transcripts.size() <= 0) continue;
+
+		if(gg.transcripts.size() < min_gtf_transcripts_num) continue;
 
 		string name = gg.get_gene_id();
 

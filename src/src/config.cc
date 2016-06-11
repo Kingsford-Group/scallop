@@ -42,6 +42,7 @@ string input_annotation_file;
 string output_gtf_file;
 bool output_tex_files;
 string fixed_gene_name;
+int min_gtf_transcripts_num;
 
 bool parse_arguments(int argc, const char ** argv)
 {
@@ -83,6 +84,11 @@ bool parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "-t")
 		{
 			output_tex_files = true;
+		}
+		else if(string(argv[i]) == "-s")
+		{
+			min_gtf_transcripts_num = atoi(argv[i + 1]);
+			i++;
 		}
 	}
 

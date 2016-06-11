@@ -320,7 +320,7 @@ int scallop::decompose_with_equations(int level)
 		eqns[i].print(i);
 	}
 
-	if(eqns[0].b == false) return -1;
+	if(eqns[0].f != 2) return -1;
 
 	smooth_with_equation(eqns[0]);
 	resolve_equation(eqns[0]);
@@ -830,13 +830,13 @@ int scallop::resolve_equation(equation &eqn)
 	vector<int> s = eqn.s;
 	vector<int> t = eqn.t;
 	eqn.a = eqn.d = 0;
-	eqn.b = resolve_equation(s, t, eqn.a, eqn.d);
+	eqn.f = resolve_equation(s, t, eqn.a, eqn.d);
 	return 0;
 }
 
-bool scallop::resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md)
+int scallop::resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md)
 {
-	if(s.size() == 0 && t.size() == 0) return true;
+	if(s.size() == 0 && t.size() == 0) return 2;
 
 	assert(s.size() >= 1);
 	assert(t.size() >= 1);
@@ -879,7 +879,9 @@ bool scallop::resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md)
 			if(vv[1] == y) t.erase(t.begin() + j);
 			else t[j] = vv[1];
 
-			return resolve_equation(s, t, ma, md);
+			int f = resolve_equation(s, t, ma, md);
+			if(f == 2) return 2;
+			else return 1;
 		}
 	}
 
@@ -945,11 +947,13 @@ bool scallop::resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md)
 			if(vv[n] == y) t.erase(t.begin() + j);
 			else t[j] = vv[n];
 
-			return resolve_equation(s, t, ma, md);
+			int f = resolve_equation(s, t, ma, md);
+			if(f == 2) return 2;
+			else return 1;
 		}
 	}
 
-	return false;
+	return 0;
 }
 
 bool scallop::check_adjacent_mergable(int ex, int ey, vector<PI> &p)

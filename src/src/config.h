@@ -64,6 +64,7 @@ extern string input_annotation_file;
 extern string output_gtf_file;
 extern bool output_tex_files;
 extern string fixed_gene_name;
+extern int min_gtf_transcripts_num;
 
 // parse arguments
 bool parse_arguments(int argc, const char ** argv);

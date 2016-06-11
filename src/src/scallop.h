@@ -48,7 +48,7 @@ private:
 	int decompose_with_equations(int level);
 	int smooth_with_equation(equation &eqn);
 	int resolve_equation(equation &eqn);
-	bool resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md);
+	int resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md);
 
 	// trivial, or hard
 	int classify();
