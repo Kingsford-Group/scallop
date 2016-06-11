@@ -21,6 +21,7 @@ public:
 	double e;			// erro
 
 	bool b;				// whether fail or not
+	int a;				// # adjacent merges
 	int d;				// # distant merges
 };
 

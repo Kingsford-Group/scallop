@@ -275,25 +275,19 @@ int scallop::iterate()
 	print();
 	while(true)
 	{
-		bool t = false;
-		while(true)
-		{
-			bool b = decompose_trivial_vertices();
-			if(b == true) t = true;
-			if(b == false) break;
-		}
-
-		if(t == true) print();
+		bool b = decompose_trivial_vertices();
+		if(b == true) print();
+		if(b == true) continue;
 
 		int f1 = decompose_with_equations(1);
-
 		if(f1 >= 0) print();
 		if(f1 >= 0) continue;
 
 		int f2 = decompose_with_equations(2);
-
 		if(f2 >= 0) print();
-		else return f2;
+		if(f2 >= 0) continue;
+
+		return 0;
 	}
 }
 
@@ -311,7 +305,10 @@ int scallop::decompose_with_equations(int level)
 	{
 		scallop sc;
 		save(sc);
-		decompose_single_equation(eqns[k]);
+
+		smooth_with_equation(eqns[k]);
+		resolve_equation(eqns[k]);
+
 		load(sc);
 	}
 
@@ -325,35 +322,8 @@ int scallop::decompose_with_equations(int level)
 
 	if(eqns[0].b == false) return -1;
 
-	decompose_single_equation(eqns[0]);
-
-	return 0;
-}
-
-int scallop::decompose_single_equation(equation &eqn)
-{
-	vector<int> subs = eqn.s;
-	vector<int> subt = eqn.t;
-
-	VE vx, vy;
-	for(int i = 0; i < subs.size(); i++) vx.push_back(i2e[subs[i]]);
-	for(int i = 0; i < subt.size(); i++) vy.push_back(i2e[subt[i]]);
-
-	smoother sm(gr);
-	sm.add_equation(vx, vy);
-	sm.solve();
-
-	assert(subs.size() == 1);
-	assert(subt.size() >= 1);
-
-	subs = split_edge(subs[0], subt);
-
-	PI p = connect_pairs(subs, subt);
-
-	eqn.d = p.second;
-
-	if(p.first + p.second >= subs.size()) eqn.b = true;
-	else eqn.b = false;
+	smooth_with_equation(eqns[0]);
+	resolve_equation(eqns[0]);
 
 	return 0;
 }
@@ -433,44 +403,7 @@ bool scallop::init_trivial_vertex(int x)
 	return true;
 }
 
-int scallop::check_distant_mergable(int x, int y)
-{
-	VE p;
-	return check_distant_mergable(x, y, p);
-}
-
-int scallop::check_distant_mergable(int x, int y, VE &p)
-{
-	p.clear();
-
-	assert(i2e[x] != null_edge);
-	assert(i2e[y] != null_edge);
-
-	edge_descriptor xx = i2e[x];
-	edge_descriptor yy = i2e[y];
-
-	int xs = (xx)->source();
-	int xt = (xx)->target();
-	int ys = (yy)->source();
-	int yt = (yy)->target();
-
-	double wx = gr.get_edge_weight(xx);
-	double wy = gr.get_edge_weight(yy);
-	assert(fabs(wx - wy) <= SMIN);
-
-	if(gr.check_path(yt, xs) == true) return check_distant_mergable(y, x, p);
-	if(gr.check_path(xt, ys) == false) return -1;
-
-	int l = gr.compute_shortest_path_w(xt, ys, wx, p);
-	if(l < 0) return -1;
-
-	p.insert(p.begin(), xx);
-	p.insert(p.end(), yy);
-
-	return l + 2;
-}
-
-int scallop::connect_path(const VE &p, double wx)
+int scallop::split_merge_path(const VE &p, double wx, vector<int> &vv)
 {
 	vector<int> v;
 	for(int i = 0; i < p.size(); i++)
@@ -479,34 +412,26 @@ int scallop::connect_path(const VE &p, double wx)
 		assert(e2i.find(p[i]) != e2i.end());
 		v.push_back(e2i[p[i]]);
 	}
-	return connect_path(v, wx);
+	return split_merge_path(v, wx, vv);
 }
 
-int scallop::connect_path(const vector<int> &p, double ww)
+int scallop::split_merge_path(const vector<int> &p, double ww, vector<int> &vv)
 {
+	vv.clear();
 	if(p.size() == 0) return -1;
-	if(p.size() == 1) return p[0];
-
-	int pret = i2e[p[0]]->target();
+	int ee = p[0];
+	int x = split_edge(p[0], ww);
+	vv.push_back(x);
 	for(int i = 1; i < p.size(); i++)
 	{
-		int s = i2e[p[i]]->source();
-		int t = i2e[p[i]]->target();
-		assert(s == pret);
-		pret = t;
+		x = split_edge(p[i], ww);
+		vv.push_back(x);
+		ee = merge_adjacent_equal_edges(ee, p[i]);
 	}
-
-	int pree = split_edge(p[0], ww);
-	for(int i = 1; i < p.size(); i++)
-	{
-		int e = split_edge(p[i], pree);
-		int ee = connect_adjacent_equal_edges(pree, e);
-		pree = ee;
-	}
-	return pree;
+	return ee;
 }
 
-int scallop::connect_adjacent_equal_edges(int x, int y)
+int scallop::merge_adjacent_equal_edges(int x, int y)
 {
 	if(i2e[x] == null_edge) return -1;
 	if(i2e[y] == null_edge) return -1;
@@ -520,7 +445,7 @@ int scallop::connect_adjacent_equal_edges(int x, int y)
 	int yt = (yy)->target();
 
 	if(xt != ys && yt != xs) return -1;
-	if(yt == xs) return connect_adjacent_equal_edges(y, x);
+	if(yt == xs) return merge_adjacent_equal_edges(y, x);
 	
 	assert(xt == ys);
 
@@ -562,6 +487,23 @@ int scallop::connect_adjacent_equal_edges(int x, int y)
 	return n;
 }
 
+int scallop::merge_adjacent_edges(int x, int y)
+{
+	if(i2e[x] == null_edge) return -1;
+	if(i2e[y] == null_edge) return -1;
+
+	edge_descriptor xx = i2e[x];
+	edge_descriptor yy = i2e[y];
+
+	double wx = gr.get_edge_weight(xx);
+	double wy = gr.get_edge_weight(yy);
+	double ww = (wx <= wy) ? wx : wy;
+
+	split_edge(x, ww);
+	split_edge(y, ww);
+
+	return merge_adjacent_equal_edges(x, y);
+}
 
 int scallop::split_edge(int ei, double w)
 {
@@ -572,66 +514,25 @@ int scallop::split_edge(int ei, double w)
 	double dd = gr.get_edge_stddev(ee);
 
 	if(fabs(ww - w) <= SMIN) return ei;
-
 	assert(ww >= w + SMIN);
 
 	int s = ee->source();
 	int t = ee->target();
 
-	edge_descriptor p1 = gr.add_edge(s, t);
 	edge_descriptor p2 = gr.add_edge(s, t);
 
-	gr.set_edge_weight(p1, w);
+	gr.set_edge_weight(ee, w);
 	gr.set_edge_weight(p2, ww - w);
-	gr.set_edge_stddev(p1, dd);
 	gr.set_edge_stddev(p2, dd);
-
-	if(mev.find(p1) != mev.end()) mev[p1] = mev[ee];
-	else mev.insert(PEV(p1, mev[ee]));
 
 	if(mev.find(p2) != mev.end()) mev[p2] = mev[ee];
 	else mev.insert(PEV(p2, mev[ee]));
 
 	int n = i2e.size();
-	i2e.push_back(p1);
 	i2e.push_back(p2);
-	e2i.insert(PEI(p1, n));
-	e2i.insert(PEI(p2, n + 1));
-
-	gr.remove_edge(ee);
-	e2i.erase(ee);
-	i2e[ei] = null_edge;
+	e2i.insert(PEI(p2, n));
 
 	return n;
-}
-
-int scallop::split_edge(int exi, int eyi)
-{
-	assert(i2e[exi] != null_edge);
-	assert(i2e[eyi] != null_edge);
-	edge_descriptor ex = i2e[exi];
-	edge_descriptor ey = i2e[eyi];
-
-	double wx = gr.get_edge_weight(ex);
-	double wy = gr.get_edge_weight(ey);
-
-	return split_edge(exi, wy);
-}
-
-vector<int> scallop::split_edge(int ei, const vector<int> &sub)
-{
-	vector<int> v;
-	int x = ei;
-	for(int i = 0; i < sub.size(); i++)
-	{
-		int y = split_edge(x, sub[i]);
-		if(i == sub.size() - 1) assert(y == x);
-		if(y == x) assert(i == sub.size() - 1);
-		v.push_back(y);
-		x = y + 1;
-	}
-	assert(v.size() == sub.size());
-	return v;
 }
 
 bool scallop::verify_equation_nontrivial(const vector<int> &subs, const vector<int> &subt)
@@ -927,90 +828,144 @@ int scallop::identify_equation(const vector<int> &subs, vector<int> &subt)
 	return INT_MAX;
 }
 
-PI scallop::connect_pairs(const vector<int> &vx, const vector<int> &vy)
+int scallop::smooth_with_equation(equation &eqn)
 {
-	PI pi(0, 0);
-	assert(vx.size() == vy.size());
+	VE vx, vy;
+	for(int i = 0; i < eqn.s.size(); i++) vx.push_back(i2e[eqn.s[i]]);
+	for(int i = 0; i < eqn.t.size(); i++) vy.push_back(i2e[eqn.t[i]]);
 
-	vector<bool> m;
-	m.assign(vx.size(), false);
+	smoother sm(gr);
+	sm.add_equation(vx, vy);
+	sm.solve();
+	
+	return 0;
+}
 
-	int n = (int)(gr.num_edges()) * 2;
+int scallop::resolve_equation(equation &eqn)
+{
+	vector<int> s = eqn.s;
+	vector<int> t = eqn.t;
+	eqn.a = eqn.d = 0;
+	eqn.b = resolve_equation(s, t, eqn.a, eqn.d);
+	return 0;
+}
 
-	while(true)
+bool scallop::resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md)
+{
+	if(s.size() == 0 && t.size() == 0) return true;
+
+	assert(s.size() >= 1);
+	assert(t.size() >= 1);
+
+	for(int i = 0; i < s.size(); i++)
 	{
-		vector<PI> r;
-		for(int i = 0; i < vx.size(); i++)
+		for(int j = 0; j < t.size(); j++)
 		{
-			r.push_back(PI(n, i));
-		}
+			int x = s[i];
+			int y = t[j];
+			assert(i2e[x] != null_edge);
+			assert(i2e[y] != null_edge);
 
-		for(int i = 0; i < vx.size(); i++)
-		{
-			int x = vx[i];
-			int y = vy[i];
+			vector<PI> p;
+			if(check_adjacent_mergable(x, y, p) == false) continue;
 
-			if(i2e[x] == null_edge) continue;
-			if(i2e[y] == null_edge) continue;
+			build_adjacent_edges(p);
 
 			double wx = gr.get_edge_weight(i2e[x]);
 			double wy = gr.get_edge_weight(i2e[y]);
+			double ww = (wx <= wy) ? wx : wy;
 
-			if(fabs(wx - wy) > SMIN) continue;
+			vector<int> v;
+			v.push_back(x);
+			v.push_back(y);
 
-			if(check_adjacent_mergable( x, y) == true)
-			{
-				r[i].first = 0;
-				break;
-			}
+			vector<int> vv;
+			split_merge_path(v, ww, vv);
 
-			int l = check_distant_mergable(x, y);
-			assert(l < n);
-			if(l < 0) continue;
+			ma++;
 
-			r[i].first = l;
-			break;
-		}
+			printf(" merge (adjacent) edge pair (%d, %d)\n", x, y);
 
-		sort(r.begin(), r.end());
+			if(i2e[vv[0]] == null_edge) assert(vv[0] == x);
+			if(i2e[vv[1]] == null_edge) assert(vv[1] == y);
 
-		if(r[0].first == n) break;
+			if(vv[0] == x) s.erase(s.begin() + i);
+			else s[i] = vv[0];
 
-		int k = r[0].second;
-		m[k] = true;
+			if(vv[1] == y) t.erase(t.begin() + j);
+			else t[j] = vv[1];
 
-		int x = vx[k];
-		int y = vy[k];
-		double w = gr.get_edge_weight(i2e[x]);
-
-		if(r[0].first == 0)
-		{
-			vector<PI> p;
-			bool b = check_adjacent_mergable(x, y, p);
-			assert(b == true);
-			build_adjacent_equal_edges(p);
-			connect_adjacent_equal_edges(x, y);
-			pi.first++;
-			printf(" connect (adjacent) edge pair (%d, %d)\n", x, y);
-		}
-		else
-		{
-			VE p;
-			int l = check_distant_mergable(x, y, p);
-			assert(l >= 2);
-			connect_path(p, w);
-			pi.second++;
-			printf(" connect (distant) edge pair (%d, %d)\n", x, y);
+			return resolve_equation(s, t, ma, md);
 		}
 	}
 
-	return pi;
-}
+	set<int> ss;
+	for(int i = 0; i < s.size(); i++)
+	{
+		assert(ss.find(s[i]) == ss.end());
+		ss.insert(s[i]);
+	}
+	for(int i = 0; i < t.size(); i++)
+	{
+		assert(ss.find(t[i]) == ss.end());
+		ss.insert(t[i]);
+	}
 
-bool scallop::check_adjacent_mergable(int ex, int ey)
-{
-	vector<PI> p;
-	return check_adjacent_mergable(ex, ey, p);
+	for(int i = 0; i < s.size(); i++)
+	{
+		for(int j = 0; j < t.size(); j++)
+		{
+			int x = s[i];
+			int y = t[j];
+			assert(i2e[x] != null_edge);
+			assert(i2e[y] != null_edge);
+
+			double wx = gr.get_edge_weight(i2e[x]);
+			double wy = gr.get_edge_weight(i2e[y]);
+			double ww = (wx <= wy) ? wx : wy;
+
+			VE p;
+			int l = check_distant_mergable(x, y, ww, p);
+			if(l < 0) continue;
+
+			assert(l >= 2);
+			assert(p.size() >= 2);
+			assert(i2e[x] == p[0]);
+			assert(i2e[y] == p[p.size() - 1]);
+
+			bool c = false;
+			for(int k = 1; k < p.size() - 1; k++)
+			{
+				int e = e2i[p[k]];
+				if(ss.find(e) != ss.end()) c = true;
+				if(c == true) break;
+			}
+
+			if(c == true) continue;
+
+			vector<int> vv;
+			split_merge_path(p, ww, vv);
+
+			printf(" connect (distant) edge pair (%d, %d)\n", x, y);
+
+			md++;
+
+			int n = vv.size() - 1;
+
+			if(i2e[vv[0]] == null_edge) assert(vv[0] == x);
+			if(i2e[vv[n]] == null_edge) assert(vv[n] == y);
+
+			if(vv[0] == x) s.erase(s.begin() + i);
+			else s[i] = vv[0];
+
+			if(vv[n] == y) t.erase(t.begin() + j);
+			else t[j] = vv[n];
+
+			return resolve_equation(s, t, ma, md);
+		}
+	}
+
+	return false;
 }
 
 bool scallop::check_adjacent_mergable(int ex, int ey, vector<PI> &p)
@@ -1040,7 +995,41 @@ bool scallop::check_adjacent_mergable(int ex, int ey, vector<PI> &p)
 	return true;
 }
 
-int scallop::build_adjacent_equal_edges(const vector<PI> &p)
+int scallop::check_distant_mergable(int x, int y, double w, VE &p)
+{
+	p.clear();
+
+	assert(i2e[x] != null_edge);
+	assert(i2e[y] != null_edge);
+
+	edge_descriptor xx = i2e[x];
+	edge_descriptor yy = i2e[y];
+
+	int xs = (xx)->source();
+	int xt = (xx)->target();
+	int ys = (yy)->source();
+	int yt = (yy)->target();
+
+	if(gr.check_path(yt, xs) == true)
+	{
+		int r = check_distant_mergable(y, x, w, p);
+		reverse(p);
+		return r;
+	}
+
+	if(gr.check_path(xt, ys) == false) return -1;
+
+	int l = gr.compute_shortest_path_w(xt, ys, w, p);
+	if(l < 0) return -1;
+
+	p.insert(p.begin(), xx);
+	p.insert(p.end(), yy);
+
+	assert(p.size() == l + 2);
+	return l + 2;
+}
+
+int scallop::build_adjacent_edges(const vector<PI> &p)
 {
 	for(int i = 0; i < p.size(); i++)
 	{
@@ -1063,54 +1052,31 @@ int scallop::build_adjacent_equal_edges(const vector<PI> &p)
 bool scallop::decompose_trivial_vertices()
 {
 	bool flag = false;
-	edge_iterator it1, it2;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.degree(i) == 0) continue;
-		if(gr.in_degree(i) == 1)
+		if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) continue;
+
+		printf(" decompose trivial vertex %d\n", i);
+
+		equation eqn(0);
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
 		{
-			printf(" decompose trivial vertex %d\n", i);
-
-			tie(it1, it2) = gr.in_edges(i);
-			int ei = e2i[*it1];
-			vector<int> sub;
-			for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
-			{
-				int e = e2i[*it1];
-				sub.push_back(e);
-			}
-
-			vector<int> v = split_edge(ei, sub);
-			assert(v.size() == sub.size());
-			for(int k = 0; k < v.size(); k++)
-			{
-				assert(i2e[v[k]] != null_edge);
-				connect_adjacent_equal_edges(v[k], sub[k]);
-			}
-			flag = true;
+			int e = e2i[*it1];
+			eqn.s.push_back(e);
 		}
-		else if(gr.out_degree(i) == 1)
+		for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
 		{
-			printf(" decompose trivial vertex %d\n", i);
-
-			tie(it1, it2) = gr.out_edges(i);
-			int ei = e2i[*it1];
-			vector<int> sub;
-			for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
-			{
-				int e = e2i[*it1];
-				sub.push_back(e);
-			}
-
-			vector<int> v = split_edge(ei, sub);
-			assert(v.size() == sub.size());
-			for(int k = 0; k < v.size(); k++)
-			{
-				assert(i2e[v[k]] != null_edge);
-				connect_adjacent_equal_edges(sub[k], v[k]);
-			}
-			flag = true;
+			int e = e2i[*it1];
+			eqn.t.push_back(e);
 		}
+
+		eqn.print(i);
+
+		resolve_equation(eqn);
+
+		flag = true;
 	}
 	return flag;
 }
@@ -1120,9 +1086,10 @@ int scallop::greedy_decompose()
 	while(true)
 	{
 		VE v;
+		vector<int> vv;
 		double w = gr.compute_maximum_path_w(v);
 		if(w <= 0.0) break;
-		int e = connect_path(v, w);
+		int e = split_merge_path(v, w, vv);
 		collect_path(e);
 	}
 	return 0;

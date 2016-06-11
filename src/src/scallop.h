@@ -46,7 +46,9 @@ private:
 	int iterate();
 	bool decompose_trivial_vertices();
 	int decompose_with_equations(int level);
-	int decompose_single_equation(equation &eqn);
+	int smooth_with_equation(equation &eqn);
+	int resolve_equation(equation &eqn);
+	bool resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md);
 
 	// trivial, or hard
 	int classify();
@@ -56,35 +58,29 @@ private:
 	int reconstruct_splice_graph();
 	bool init_trivial_vertex(int x);
 
-	// remove empty edges
+	// remove empty edges, not use now
 	int remove_empty_edges();
 
 	// identify and handle equations 
-	int identify_equations(vector<equation> &eqns);
 	int identify_equations1(vector<equation> &eqns);
 	int identify_equations2(vector<equation> &eqns);
 	int identify_equation(const vector<int> &subs, vector<int> &subt);
 	bool verify_equation_nontrivial(const vector<int> &subs, const vector<int> &subt);
+	// not use now
+	int identify_equations(vector<equation> &eqns);
 
-	// split and connect pairs of identical edges
-	PI connect_pairs(const vector<int> &vx, const vector<int> &vy);
-
-	// split exi w.r.t eyi
+	// split, and merge
 	int split_edge(int exi, double w);
-	int split_edge(int exi, int eyi);
-	vector<int> split_edge(int ei, const vector<int> &sub);
+	int merge_adjacent_equal_edges(int x, int y);
+	int split_merge_path(const vector<int> &p, double ww, vector<int> &vv);
+	int split_merge_path(const VE &p, double ww, vector<int> &vv);
+	int merge_adjacent_edges(int x, int y);
 
-	// check, and make two adjacent equal edges adjacent 
+	// check, and make two edges adjacent
 	bool check_adjacent_mergable(int ex, int ey, vector<PI> &p);
-	bool check_adjacent_mergable(int ex, int ey);
-	int build_adjacent_equal_edges(const vector<PI> &p);
-	int connect_adjacent_equal_edges(int x, int y);
+	int build_adjacent_edges(const vector<PI> &p);
+	int check_distant_mergable(int x, int y, double w, VE &p);
 
-	// compute, and merge two distant equal edges
-	int check_distant_mergable(int x, int y, VE &p);
-	int check_distant_mergable(int x, int y);
-	int connect_path(const vector<int> &p, double ww);
-	int connect_path(const VE &p, double ww);
 
 	// decompose the graph with greedy algorithm
 	int greedy_decompose();

@@ -25,8 +25,8 @@ equation::equation(const vector<int> &_s, const vector<int> &_t, double _e)
 
 int equation::print(int index)
 {
-	printf("equation %3d: (%2lu, %2lu) edges, error = %3.1lf, b = %c, distant = %2d. ", 
-			index, s.size(), t.size(), e, b ? 'T' : 'F', d);
+	printf("equation %3d: (%2lu, %2lu) edges, error = %3.1lf, b = %c, adjacent = %2d, distant = %2d. ", 
+			index, s.size(), t.size(), e, b ? 'T' : 'F', a, d);
 
 	printf("S = (%d", s[0]);
 	for(int i = 1; i < s.size(); i++) printf(", %d", s[i]);
