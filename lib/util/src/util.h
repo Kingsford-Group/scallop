@@ -5,6 +5,7 @@
 #include <map>
 #include <sstream>
 #include <cassert>
+#include <vector>
 
 using namespace std;
 
@@ -37,6 +38,23 @@ T compute_overlap(const pair<T, T> &x, const pair<T, T> &y)
 	if(y.first >= x.second) return x.second - y.first;
 	if(x.second <= y.second) return x.second - y.first;
 	else return y.second - y.first;
+}
+
+template<typename T>
+int reverse(vector<T> &x)
+{
+	if(x.size() == 0) return 0;
+	int i = 0;
+	int j = x.size() - 1;
+	while(i < j)
+	{
+		T t = x[i];
+		x[i] = x[j];
+		x[j] = t;
+		i++;
+		j--;
+	}
+	return 0;
 }
 
 #endif
