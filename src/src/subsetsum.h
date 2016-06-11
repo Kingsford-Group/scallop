@@ -29,6 +29,7 @@ public:
 
 public:
 	int solve();
+	static int test();
 
 private:
 	int init_seeds();

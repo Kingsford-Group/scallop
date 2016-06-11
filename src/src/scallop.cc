@@ -624,22 +624,6 @@ int scallop::identify_equations(vector<equation> &eqns)
 	subsetsum2 sss(vw);
 	sss.solve();
 
-	printf("vector: ");
-	for(int i = 0; i < vw.size(); i++)
-	{
-		printf("%d:%d, ", i, vw[i]);
-	}
-	printf("\n");
-
-	printf("------------------\n");
-
-	for(int i = 0; i < sss.eqns.size(); i++)
-	{
-		sss.eqns[i].print(i);
-	}
-
-	printf("------------------\n");
-
 	for(int i = 0; i < sss.eqns.size(); i++)
 	{
 		equation & x = sss.eqns[i];
@@ -691,6 +675,7 @@ int scallop::identify_equations1(vector<equation> &eqns)
 		vector<int> s;
 		s.push_back(e);
 		vector<int> t;
+
 		int err = identify_equation(s, t);
 
 		double ratio = err * 1.0 / gr.get_edge_weight(i2e[e]);
@@ -818,7 +803,6 @@ int scallop::identify_equation(const vector<int> &subs, vector<int> &subt)
 			subt.push_back(xi[k].second);
 		}
 
-		if(subt.size() >= 3) continue;
 		if(verify_equation_nontrivial(subs, subt) == false) continue;
 
 		int err = (int)fabs(opt - sw);
@@ -884,7 +868,7 @@ bool scallop::resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md)
 
 			ma++;
 
-			printf(" merge (adjacent) edge pair (%d, %d)\n", x, y);
+			printf("merge (adjacent) edge pair (%d, %d)\n", x, y);
 
 			if(i2e[vv[0]] == null_edge) assert(vv[0] == x);
 			if(i2e[vv[1]] == null_edge) assert(vv[1] == y);
@@ -946,7 +930,7 @@ bool scallop::resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md)
 			vector<int> vv;
 			split_merge_path(p, ww, vv);
 
-			printf(" connect (distant) edge pair (%d, %d)\n", x, y);
+			printf("connect (distant) edge pair (%d, %d)\n", x, y);
 
 			md++;
 
@@ -1057,7 +1041,7 @@ bool scallop::decompose_trivial_vertices()
 		if(gr.degree(i) == 0) continue;
 		if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) continue;
 
-		printf(" decompose trivial vertex %d\n", i);
+		printf("decompose trivial vertex %d\n", i);
 
 		equation eqn(0);
 		edge_iterator it1, it2;
@@ -1072,6 +1056,7 @@ bool scallop::decompose_trivial_vertices()
 			eqn.t.push_back(e);
 		}
 
+		printf(" ");
 		eqn.print(i);
 
 		resolve_equation(eqn);

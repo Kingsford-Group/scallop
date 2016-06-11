@@ -6,7 +6,7 @@
 
 #include "assembler.h"
 #include "config.h"
-#include "subsetsum2.h"
+#include "subsetsum.h"
 
 using namespace std;
 

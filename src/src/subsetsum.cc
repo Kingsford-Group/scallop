@@ -170,3 +170,23 @@ int subsetsum::recover(int &opt, vector<int> &subset)
 	return 0;
 }
 
+int subsetsum::test()
+{
+	vector<int> v;
+	v.push_back(5);
+	v.push_back(6);
+	v.push_back(434);
+	v.push_back(445);
+
+	subsetsum sss(v);
+	sss.solve();
+
+	for(int i = 0; i < sss.opts.size(); i++)
+	{
+		printf("obj = %3d, subset = (%d", sss.opts[i], sss.subsets[i][0]);
+		for(int k = 1; k < sss.subsets[i].size(); k++) printf(", %d", sss.subsets[i][k]);
+		printf(")\n");
+	}
+
+	return 0;
+}
