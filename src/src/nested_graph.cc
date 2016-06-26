@@ -18,7 +18,7 @@ int nested_graph::build(directed_graph &gr)
 {
 	clear();
 	init(gr);
-	build_nests(gr);
+	build_nests0(gr);
 	build_partial_order();
 	build_parents();
 	build_partners(gr);
@@ -44,6 +44,84 @@ int nested_graph::init(directed_graph &gr)
 }
 
 int nested_graph::build_nests(directed_graph &gr)
+{
+	vector< set<int> > vs;
+	vector< set<int> > vt;
+	vs.resize(gr.num_vertices());
+	vt.resize(gr.num_vertices());
+	for(int i = 0; i < gr.num_vertices(); i++)
+	{
+		if(gr.degree(i) == 0) continue;
+		vector<int> v;
+		set<int> s;
+		gr.bfs(i, v);
+		for(int k = 0; k < v.size(); k++)
+		{
+			if(v[k] < 0) continue;
+			s.insert(k);
+		}
+		vs[i] = s;
+
+		v.clear();
+		s.clear();
+		gr.bfs_reverse(i, v);
+		for(int k = 0; k < v.size(); k++)
+		{
+			if(v[k] < 0) continue;
+			s.insert(k);
+		}
+		vt[i] = s;
+	}
+
+	for(int i = 0; i < gr.num_vertices(); i++)
+	{
+		if(gr.degree(i) == 0) continue;
+		for(int j = 0; j < gr.num_vertices(); j++)
+		{
+			if(gr.degree(j) == 0) continue;
+			if(j == i) continue;
+
+			bool b = verify_nest(gr, vs, vt, i, j);
+			if(b == false) continue;
+
+			int f = gr.check_nest(i, j);
+			if(f == -1) continue;
+
+			add_edge(i, j);
+		}
+	}
+	assert(check_nested() == true);
+	return 0;
+}
+
+bool nested_graph::verify_nest(directed_graph &gr, vector< set<int> >&vs, vector< set<int> > &vt, int i , int j)
+{
+	vector<int> vv;
+	vv.resize(gr.num_vertices());
+
+	vector<int>::iterator iv = set_intersection(vs[i].begin(), vs[i].end(), vt[j].begin(), vt[j].end(), vv.begin());
+	set<int> s(vv.begin(), iv);
+	if(s.size() <= 1) return false;
+	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
+	{
+		int x = *it;
+		if(x == i || x == j) continue;
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
+		{
+			int y = (*it1)->source();
+			if(s.find(y) == s.end()) return false;
+		}
+		for(tie(it1, it2) = gr.out_edges(x); it1 != it2; it1++)
+		{
+			int y = (*it1)->target();
+			if(s.find(y) == s.end()) return false;
+		}
+	}
+	return true;
+}
+
+int nested_graph::build_nests0(directed_graph &gr)
 {
 	for(int i = 0; i < gr.num_vertices(); i++)
 	{

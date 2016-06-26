@@ -32,7 +32,9 @@ public:
 
 private:
 	int init(directed_graph &gr);
+	int build_nests0(directed_graph &gr);
 	int build_nests(directed_graph &gr);
+	bool verify_nest(directed_graph &gr, vector< set<int> > &vs, vector< set<int> > &vt, int i, int j);
 	int build_partial_order();
 	int build_partners(directed_graph &gr);
 	int build_parents();
