@@ -968,10 +968,7 @@ bool scallop::check_adjacent_mergable(int ex, int ey, vector<PI> &p)
 	vector<PI> xp, yp;
 	bool b = false;
 
-	printf("AAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
-	draw_splice_graph("sgraph.tex");
 	nested_graph nt(gr);
-	printf("BBBBBBBBBBBBBBBBBBBBBBBBBBB\n");
 
 	if(gr.check_path(i2e[ex], i2e[ey])) b = nt.link(xs, xt, ys, yt, xp, yp);
 	else if(gr.check_path(i2e[ey], i2e[ex])) b = nt.link(ys, yt, xs, xt, yp, xp);
@@ -1156,11 +1153,7 @@ int scallop::print()
 	{
 		draw_splice_graph(name + "." + tostring(round) + ".tex");
 
-		printf("AAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
-		draw_splice_graph("sgraph.tex");
 		nested_graph nt(gr);
-		printf("BBBBBBBBBBBBBBBBBBBBBBBBBBB\n");
-
 		nt.draw(name + "." + tostring(round) + ".nt.tex");
 	}
 
