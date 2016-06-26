@@ -1,0 +1,5 @@
+GEN_DIR			.
+LOAD_CODING		true
+LOAD_NONCODING	false
+PRO_FILE_NAME	profile
+LIB_FILE_NAME	libfile
