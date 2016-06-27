@@ -283,9 +283,9 @@ int splice_graph::compute_decomp_paths()
 	return (m - n + 2);
 }
 
-int splice_graph::compute_num_paths()
+long splice_graph::compute_num_paths()
 {
-	vector<int> table;
+	vector<long> table;
 	int n = num_vertices();
 	table.resize(n, 0);
 	table[0] = 1;
@@ -301,6 +301,7 @@ int splice_graph::compute_num_paths()
 			table[t] += table[s];
 		}
 	}
+	
 	return table[n - 1];
 }
 

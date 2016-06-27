@@ -53,7 +53,7 @@ public:
 	int simulate(int n, int m);
 
 	// analysis the structure of splice graph
-	int compute_num_paths();
+	long compute_num_paths();
 	int compute_decomp_paths();
 	bool check_fully_connected();
 

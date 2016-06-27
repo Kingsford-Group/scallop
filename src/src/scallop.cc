@@ -189,8 +189,12 @@ int scallop::classify()
 	if(gr.num_vertices() == 2) return TRIVIAL;
 
 	string s;	
-	int p0 = gr.compute_num_paths();
-	int p1 = gr.num_edges() - gr.num_vertices() + 2;
+
+	long p0 = gr.compute_num_paths();
+	long p1 = gr.num_edges() - gr.num_vertices() + 2;
+
+	printf("vertices = %lu, edges = %lu, p0 = %d, p1 = %d\n", gr.num_vertices(), gr.num_edges(), p0, p1);
+
 	assert(p0 >= p1);
 
 	bool b = (p0 == p1) ? true : false;
