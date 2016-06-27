@@ -299,8 +299,10 @@ int scallop::decompose_with_equations(int level)
 
 	if(eqns.size() == 0) return -2;
 
-	sort(eqns.begin(), eqns.end(), equation_cmp1);
+	printf(" equations = %lu\n", eqns.size());
 
+	/*
+	sort(eqns.begin(), eqns.end(), equation_cmp1);
 	for(int k = 0; k < eqns.size(); k++)
 	{
 		scallop sc;
@@ -311,6 +313,7 @@ int scallop::decompose_with_equations(int level)
 
 		load(sc);
 	}
+	*/
 
 	sort(eqns.begin(), eqns.end(), equation_cmp2);
 
@@ -681,7 +684,19 @@ int scallop::identify_equations1(vector<equation> &eqns)
 		if(ratio > max_equation_error_ratio) continue;
 
 		equation eqn(s, t, err);
+
+		// evaluate it right now
+		scallop sc;
+		save(sc);
+
+		smooth_with_equation(eqn);
+		resolve_equation(eqn);
+
+		load(sc);
+
 		eqns.push_back(eqn);
+
+		if(eqn.f == 2 && eqn.d == 0) return 0;
 	}
 	return 0;
 }
@@ -721,7 +736,19 @@ int scallop::identify_equations2(vector<equation> &eqns)
 			if(ratio > max_equation_error_ratio) continue;
 
 			equation eqn(s, t, err);
+
+			// evaluate it right now
+			scallop sc;
+			save(sc);
+
+			smooth_with_equation(eqn);
+			resolve_equation(eqn);
+
+			load(sc);
+
 			eqns.push_back(eqn);
+
+			if(eqn.f == 2 && eqn.d == 0) return 0;
 		}
 	}
 	return 0;
@@ -1152,7 +1179,6 @@ int scallop::print()
 	if(output_tex_files == true)
 	{
 		draw_splice_graph(name + "." + tostring(round) + ".tex");
-
 		nested_graph nt(gr);
 		nt.draw(name + "." + tostring(round) + ".nt.tex");
 	}

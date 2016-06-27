@@ -73,19 +73,28 @@ int nested_graph::build_nests(directed_graph &gr)
 		vt[i] = s;
 	}
 
+	vector<int> v = gr.topological_sort();
+	assert(v.size() == gr.num_vertices());
+	vector<int> tpo;
+	tpo.assign(gr.num_vertices(), -1);
+	for(int i = 0; i < v.size(); i++)
+	{
+		tpo[v[i]] = i;
+	}
+
 	for(int i = 0; i < gr.num_vertices(); i++)
 	{
 		if(gr.degree(i) == 0) continue;
 		for(int j = 0; j < gr.num_vertices(); j++)
 		{
 			if(gr.degree(j) == 0) continue;
-			if(j == i) continue;
 
-			bool b = verify_nest(gr, vs, vt, i, j);
+			// for verifying
+			//int f = gr.check_nest(i, j);
+			//if(f == -1) continue;
+
+			bool b = verify_minimal_nest(gr, tpo, vs, vt, i, j);
 			if(b == false) continue;
-
-			int f = gr.check_nest(i, j);
-			if(f == -1) continue;
 
 			add_edge(i, j);
 		}
@@ -94,14 +103,25 @@ int nested_graph::build_nests(directed_graph &gr)
 	return 0;
 }
 
-bool nested_graph::verify_nest(directed_graph &gr, vector< set<int> >&vs, vector< set<int> > &vt, int i , int j)
+bool nested_graph::verify_minimal_nest(directed_graph &gr, const vector<int> &tpo, vector< set<int> >&vs, vector< set<int> > &vt, int i , int j)
 {
 	vector<int> vv;
 	vv.resize(gr.num_vertices());
 
 	vector<int>::iterator iv = set_intersection(vs[i].begin(), vs[i].end(), vt[j].begin(), vt[j].end(), vv.begin());
 	set<int> s(vv.begin(), iv);
+
+	/*
+	printf("vertices = ");
+	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
+	{
+		printf("%d:%d ", *it, tpo[*it]);
+	}
+	printf("\n");
+	*/
 	if(s.size() <= 1) return false;
+
+	// verify that it is a nest
 	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
 	{
 		int x = *it;
@@ -118,7 +138,45 @@ bool nested_graph::verify_nest(directed_graph &gr, vector< set<int> >&vs, vector
 			if(s.find(y) == s.end()) return false;
 		}
 	}
-	return true;
+
+	// verify that it is a minimal nest
+	set<int> ss;
+	vector<int> q;
+	int k = 0;
+	ss.insert(i);
+	q.push_back(i);
+	int m = -1;
+	while(true)
+	{
+		if(k == q.size()) 
+		{
+			if(m == j) return true;
+			else return false;
+		}
+		int x = q[k++];
+		
+		//printf("check x = %d, m = %d, k = %d, q = %lu, ss = %lu\n", x, m, k, q.size(), ss.size()); 
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = gr.out_edges(x); it1 != it2; it1++)
+		{
+			int y = (*it1)->target();
+			//printf(" adjacent to %d\n", y);
+			if(s.find(y) == s.end()) continue;
+			if(ss.find(y) != ss.end()) continue;
+			if(y == m) continue;
+			ss.insert(x);
+			if(m == -1 || tpo[y] > tpo[m])
+			{
+				if(m != -1) q.push_back(m);
+				m = y;
+			}
+			else
+			{
+				q.push_back(y);
+			}
+		}
+	}
+	assert(false);
 }
 
 int nested_graph::build_nests0(directed_graph &gr)
