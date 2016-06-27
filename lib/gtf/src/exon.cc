@@ -32,25 +32,25 @@ int exon::parse(const string &s)
 	frame = buf[0];
 
 	char buf2[10240];
-
 	while(sstr.eof() == false)
 	{
-		sstr>>buf>>buf2;
-		if(string(buf) == "transcript_id")
-		{
-			string ss(buf2);
-			transcript_id = ss.substr(1, ss.size() - 3);
-		}
-		else if(string(buf) == "gene_id")
-		{
-			string ss(buf2);
-			gene_id = ss.substr(1, ss.size() - 3);
-		}
-		else if(string(buf) == "expression")
-		{
-			string ss(buf2);
-			expression = (int32_t)(atoi(ss.substr(1, ss.size() - 2).c_str()));
-		}
+		sstr>>buf;
+		sstr.getline(buf2, 10240, ';');
+		string k(buf2);
+		if(string(buf) == "" || k == "") break;
+
+		size_t p1 = k.find_first_of('"');
+		size_t p2 = k.find_last_of('"');
+		assert(p1 != string::npos);
+		assert(p2 != string::npos);
+		assert(p1 != p2);
+		string v = k.substr(p1 + 1, p2 - p1 - 1);
+
+		//printf(" |%s|%s|\n", buf, v.c_str());
+
+		if(string(buf) == "transcript_id") transcript_id = v;
+		else if(string(buf) == "gene_id") gene_id = v;
+		else if(string(buf) == "expression") expression = atoi(v.c_str());
 	}
 	
 	return 0;
