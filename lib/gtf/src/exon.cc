@@ -35,22 +35,18 @@ int exon::parse(const string &s)
 	while(sstr.eof() == false)
 	{
 		sstr>>buf;
-		sstr.getline(buf2, 10240, ';');
-		string k(buf2);
-		if(string(buf) == "" || k == "") break;
+		sstr.getline(buf2, 10240, '"');
+		sstr.getline(buf2, 10240, '"');
+		string v(buf2);
+		if(string(buf) == "" || v == "") break;
 
-		size_t p1 = k.find_first_of('"');
-		size_t p2 = k.find_last_of('"');
-		assert(p1 != string::npos);
-		assert(p2 != string::npos);
-		assert(p1 != p2);
-		string v = k.substr(p1 + 1, p2 - p1 - 1);
-
-		//printf(" |%s|%s|\n", buf, v.c_str());
+		//printf(" |%s|%s|%lu|%lu|\n", buf, k.c_str(), p1, p2);
 
 		if(string(buf) == "transcript_id") transcript_id = v;
 		else if(string(buf) == "gene_id") gene_id = v;
 		else if(string(buf) == "expression") expression = atoi(v.c_str());
+
+		sstr.getline(buf2, 10240, ';');
 	}
 	
 	return 0;
