@@ -193,7 +193,7 @@ int scallop::classify()
 	long p0 = gr.compute_num_paths();
 	long p1 = gr.num_edges() - gr.num_vertices() + 2;
 
-	printf("vertices = %lu, edges = %lu, p0 = %d, p1 = %d\n", gr.num_vertices(), gr.num_edges(), p0, p1);
+	printf("vertices = %lu, edges = %lu, p0 = %ld, p1 = %ld\n", gr.num_vertices(), gr.num_edges(), p0, p1);
 
 	assert(p0 >= p1);
 
