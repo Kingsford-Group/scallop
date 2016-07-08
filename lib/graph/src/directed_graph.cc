@@ -592,7 +592,7 @@ int directed_graph::draw(const string &file, const MIS &mis, const MES &mes, dou
 			sprintf(sy, "s%d", j);
 
 			double bend = -40;
-			if(i + 1 == j) bend = 0;
+			//if(i + 1 == j) bend = 0;
 
 			string line = "line width = 0.02cm,";
 			if(cnt >= 2) line = "thin, double,";
