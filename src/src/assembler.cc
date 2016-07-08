@@ -20,10 +20,19 @@ assembler::~assembler()
 
 int assembler::process()
 {
-	if(input_file == "") return 0;
+	if(input_file == "")
+	{
+		if(output_file == "") return 0;
+		splice_graph sg;
+		sg.simulate(simulation_num_vertices, simulation_num_edges, simulation_max_edge_weight);
+		sg.write(output_file);
+		return 0;
+	}
+
 	string s = input_file.substr(input_file.size() - 3, 3);
 	if(s == "bam" || s == "sam") assemble_bam(input_file);
 	if(s == "gtf") assemble_gtf(input_file);
+	if(s == "sgr") assemble_sgr(input_file);
 	return 0;
 }
 
@@ -34,7 +43,7 @@ int assembler::assemble_bam(const string &file)
     bam1_t *b = bam_init1();
 
 	ofstream fout;
-	if(output_gtf_file != "") fout.open(output_gtf_file);
+	if(output_file != "") fout.open(output_file);
 
 	int index = -1;
 	bundle_base bb;
@@ -81,7 +90,7 @@ int assembler::assemble_bam(const string &file)
 			scallop sc(name, gr);
 			sc.assemble();
 
-			if(output_gtf_file != "") bd.output_gtf(fout, sc.paths, algo, index);
+			if(output_file != "") bd.output_gtf(fout, sc.paths, algo, index);
 
 		}
 		bb.add_hit(h, b);
@@ -99,7 +108,7 @@ int assembler::assemble_gtf(const string &file)
 	genome g(file);
 
 	ofstream fout;
-	if(output_gtf_file != "") fout.open(output_gtf_file);
+	if(output_file != "") fout.open(output_file);
 
 	for(int i = 0; i < g.genes.size(); i++)
 	{
@@ -118,12 +127,22 @@ int assembler::assemble_gtf(const string &file)
 		scallop sc(name, gr);
 		sc.assemble();
 
-		if(output_gtf_file == "") continue;
+		if(output_file == "") continue;
 		gg.output_gtf(fout, sc.paths, algo);
 	}
 
-	if(output_gtf_file != "") fout.close();
+	if(output_file != "") fout.close();
 
 	return 0;
 }
 
+int assembler::assemble_sgr(const string &file)
+{
+	splice_graph sg;
+	sg.build(file);
+
+	scallop sc("shao", sg);
+	sc.assemble();
+
+	return 0;
+}

@@ -9,6 +9,7 @@ typedef map< edge_descriptor, vector<int> > MEV;
 typedef pair< edge_descriptor, vector<int> > PEV;
 typedef pair< vector<int>, vector<int> > PVV;
 typedef pair<int, int> PI;
+typedef map<int, int> MI;
 
 // for perfectly estimated splice graph
 class scallop
@@ -62,6 +63,7 @@ private:
 	int remove_empty_edges();
 
 	// identify and handle equations 
+	int identify_equations0(vector<equation> &eqns);
 	int identify_equations1(vector<equation> &eqns);
 	int identify_equations2(vector<equation> &eqns);
 	int identify_equation(const vector<int> &subs, vector<int> &subt);

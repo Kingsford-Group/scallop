@@ -8,41 +8,51 @@
 
 using namespace std;
 
-int min_num_hits_in_bundle;
-int32_t min_bundle_gap;
-int32_t min_splice_boundary_hits;
-int32_t min_left_boundary_hits;
-int32_t min_right_boundary_hits;
-uint32_t min_max_splice_boundary_qual;
-uint32_t min_max_left_boundary_qual;
-uint32_t min_max_right_boundary_qual;
-int32_t average_read_length;
-uint32_t min_boundary_score;
-int32_t ascending_step;
-int32_t descending_step;
-uint32_t min_ascending_score;
-uint32_t min_descending_score;
-int num_sample_positions;
-double min_average_overlap;
-int min_max_region_overlap;
-double min_region_coverage;
-int max_num_bundles;
-int max_dp_table_size;
-int max_num_subsetsum_solutions;
-double max_equation_error_ratio;
+//// parameters
 
-int slope_bin_size;
-int slope_min_bin_num;
-int slope_std_bin_num;
-int slope_min_distance;
+// for bam file
+int32_t min_bundle_gap = 50;
+int min_num_hits_in_bundle = 20;
+int32_t min_splice_boundary_hits = 3;
+int32_t min_left_boundary_hits = 4;
+int32_t min_right_boundary_hits = 4;
+uint32_t min_max_splice_boundary_qual = 3;
+uint32_t min_max_left_boundary_qual = 4;
+uint32_t min_max_right_boundary_qual = 4;
+int32_t average_read_length = 75;
+uint32_t min_boundary_score = 100;
+int32_t ascending_step = 10;
+int32_t descending_step = 10;
+uint32_t min_ascending_score = 30;
+uint32_t min_descending_score = 15;
+int num_sample_positions = 100;
+double min_average_overlap = 2;
+int min_max_region_overlap = 5;
+double min_region_coverage = 0.5;
+int max_num_bundles = -1;
+int slope_bin_size = 10;
+int slope_min_bin_num = 9;
+int slope_std_bin_num = 24;
+int slope_min_distance = 100;
 
+// for algorithm
+int max_dp_table_size = 10000;
+int max_num_subsetsum_solutions = 10;
+double max_equation_error_ratio = 0.00000001;
+
+//// from command line
 string algo;
 string input_file;
-string input_annotation_file;
-string output_gtf_file;
+string output_file;
+
 bool output_tex_files;
 string fixed_gene_name;
 int min_gtf_transcripts_num;
+
+// for simulation
+int simulation_num_vertices;
+int simulation_num_edges;
+int simulation_max_edge_weight;
 
 bool parse_arguments(int argc, const char ** argv)
 {
@@ -63,7 +73,7 @@ bool parse_arguments(int argc, const char ** argv)
 		}
 		else if(string(argv[i]) == "-o")
 		{
-			output_gtf_file = string(argv[i + 1]);
+			output_file = string(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "-i")
@@ -76,11 +86,6 @@ bool parse_arguments(int argc, const char ** argv)
 			fixed_gene_name = string(argv[i + 1]);
 			i++;
 		}
-		else if(string(argv[i]) == "-n")
-		{
-			input_annotation_file = string(argv[i + 1]);
-			i++;
-		}
 		else if(string(argv[i]) == "-t")
 		{
 			output_tex_files = true;
@@ -88,6 +93,21 @@ bool parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "-s")
 		{
 			min_gtf_transcripts_num = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "-sv")
+		{
+			simulation_num_vertices = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "-se")
+		{
+			simulation_num_edges = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "-sw")
+		{
+			simulation_max_edge_weight = atoi(argv[i + 1]);
 			i++;
 		}
 	}

@@ -20,7 +20,7 @@ scallop::scallop(const string &s, splice_graph &g)
 	: name(s), gr(g)
 {
 	round = 0;
-	assert(gr.check_fully_connected() == true);
+	//assert(gr.check_fully_connected() == true);
 }
 
 scallop::~scallop()
@@ -192,6 +192,10 @@ int scallop::classify()
 
 	long p0 = gr.compute_num_paths();
 	long p1 = gr.num_edges() - gr.num_vertices() + 2;
+	for(int i = 0; i < gr.num_vertices(); i++) 
+	{
+		if(gr.degree(i) == 0) p1++;
+	}
 
 	printf("vertices = %lu, edges = %lu, p0 = %ld, p1 = %ld\n", gr.num_vertices(), gr.num_edges(), p0, p1);
 
@@ -207,7 +211,7 @@ int scallop::classify()
 
 int scallop::assemble0()
 {
-	//if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
+	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 
 	smoother sm(gr);
 	sm.solve();
@@ -283,6 +287,10 @@ int scallop::iterate()
 		if(b == true) print();
 		if(b == true) continue;
 
+		int f0 = decompose_with_equations(0);
+		if(f0 >= 0) print();
+		if(f0 >= 0) continue;
+
 		int f1 = decompose_with_equations(1);
 		if(f1 >= 0) print();
 		if(f1 >= 0) continue;
@@ -298,12 +306,13 @@ int scallop::iterate()
 int scallop::decompose_with_equations(int level)
 {
 	vector<equation> eqns;
-	if(level == 1) identify_equations1(eqns);
+	if(level == 0) identify_equations0(eqns);
+	else if(level == 1) identify_equations1(eqns);
 	else if(level == 2) identify_equations2(eqns);
 
 	if(eqns.size() == 0) return -2;
 
-	printf(" equations = %lu\n", eqns.size());
+	printf("equations = %lu (level = %d)\n", eqns.size(), level);
 
 	/*
 	sort(eqns.begin(), eqns.end(), equation_cmp1);
@@ -661,6 +670,56 @@ int scallop::identify_equations(vector<equation> &eqns)
 	return 0;
 }
 
+int scallop::identify_equations0(vector<equation> &eqns)
+{
+	eqns.clear();
+
+	for(int i = 0; i < gr.num_vertices(); i++)
+	{
+		if(gr.degree(i) == 0) continue;
+		if(gr.in_degree(i) == 1) continue;
+		if(gr.out_degree(i) == 1) continue;
+
+		MI m1;
+		MI m2;
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
+		{
+			int w = (int)(gr.get_edge_weight(*it1));
+			int e = e2i[*it1];
+			if(m1.find(w) != m1.end()) continue;
+			m1.insert(PI(w, e));
+		}
+
+		for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
+		{
+			int w = (int)(gr.get_edge_weight(*it1));
+			int e = e2i[*it1];
+			if(m2.find(w) != m2.end()) continue;
+			m2.insert(PI(w, e));
+		}
+
+		for(MI::iterator it = m1.begin(); it != m1.end(); it++)
+		{
+			int w = it->first;
+			if(m2.find(w) == m2.end()) continue;
+			vector<int> s;
+			vector<int> t;
+			s.push_back(it->second);
+			t.push_back(m2[w]);
+
+			equation eqn(s, t, 0);
+			eqn.f = 2;
+			eqn.a = 1;
+			eqn.d = 0;
+
+			eqns.push_back(eqn);
+			return 0;
+		}
+	}
+	return 0;
+}
+
 int scallop::identify_equations1(vector<equation> &eqns)
 {
 	eqns.clear();
@@ -898,7 +957,7 @@ int scallop::resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md)
 
 			ma++;
 
-			printf("merge (adjacent) edge pair (%d, %d)\n", x, y);
+			//// printf("merge (adjacent) edge pair (%d, %d)\n", x, y);
 
 			if(i2e[vv[0]] == null_edge) assert(vv[0] == x);
 			if(i2e[vv[1]] == null_edge) assert(vv[1] == y);
@@ -962,7 +1021,7 @@ int scallop::resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md)
 			vector<int> vv;
 			split_merge_path(p, ww, vv);
 
-			printf("connect (distant) edge pair (%d, %d)\n", x, y);
+			//// printf("connect (distant) edge pair (%d, %d)\n", x, y);
 
 			md++;
 

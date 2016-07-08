@@ -31,7 +31,6 @@ using namespace std;
 
 // user-defined parameters
 extern int32_t min_bundle_gap;
-
 extern int min_num_hits_in_bundle;
 extern int32_t min_splice_boundary_hits;
 extern int32_t min_left_boundary_hits;
@@ -60,11 +59,13 @@ extern int slope_min_distance;
 
 extern string algo;
 extern string input_file;
-extern string input_annotation_file;
-extern string output_gtf_file;
+extern string output_file;
 extern bool output_tex_files;
 extern string fixed_gene_name;
 extern int min_gtf_transcripts_num;
+extern int simulation_num_vertices;
+extern int simulation_num_edges;
+extern int simulation_max_edge_weight;
 
 // parse arguments
 bool parse_arguments(int argc, const char ** argv);

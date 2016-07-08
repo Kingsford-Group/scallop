@@ -1,9 +1,11 @@
 #include "splice_graph.h"
+#include "util.h"
 #include <sstream>
 #include <fstream>
 #include <cfloat>
 #include <cmath>
 #include <algorithm>
+#include <cstdlib>
 
 using namespace std;
 
@@ -185,12 +187,14 @@ int splice_graph::build(const string &file)
 
 	for(int i = 0; i < n; i++)
 	{
+		char name[10240];
 		double weight, stddev;
 		fin.getline(line, 10240, '\n');	
 		stringstream sstr(line);
-		sstr>>weight>>stddev;
+		sstr>>name>>weight>>stddev;
 
 		add_vertex();
+		set_vertex_string(i, name);
 		set_vertex_weight(i, weight);
 		set_vertex_stddev(i, stddev);
 	}
@@ -231,9 +235,10 @@ int splice_graph::write(const string &file) const
 	fin<<n<<endl;
 	for(int i = 0; i < n; i++)
 	{
+		string name = get_vertex_string(i);
 		double weight = get_vertex_weight(i);
 		double stddev = get_vertex_stddev(i);
-		fin<<weight<<" "<<stddev<<endl;
+		fin<<name.c_str()<<" "<<weight<<" "<<stddev<<endl;
 	}
 
 	edge_iterator it1, it2;
@@ -249,24 +254,96 @@ int splice_graph::write(const string &file) const
 	return 0;
 }
 
-int splice_graph::simulate(int n, int m)
+int splice_graph::simulate(int nv, int ne, int mw)
 {
 	clear();
-	for(int i = 0; i < n; i++)
+	for(int i = 0; i < nv; i++)
 	{
 		add_vertex();
-		set_vertex_weight(i, 1);
-		set_vertex_stddev(i, 1);
+		vstr.push_back("v" + tostring(i));
+		vdev.push_back(1);
+		vwrt.push_back(0);
 	}
 
-	for(int i = 0; i < m; i++)
+	while(true)
 	{
-		int s = rand() % (n - 1);
-		int t = s + 1 + rand() % (n - s - 1);
-		edge_descriptor p = add_edge(s, t);
-		set_edge_weight(p, 1);
-		set_edge_stddev(p, 1);
+		int s = rand() % nv;
+		if(s == nv - 1) continue;
+		int t = rand() % ((nv - s - 1) / 2 + 1) + s + 1;
+		assert(s >= 0 && s < nv);
+		assert(t > s  && t < nv);
+		if(s == 0 && t == nv - 1) continue;
+		int f = rand() % (mw - 10) + 10;
+		PEB p = edge(s, t);
+		if(p.second == true) continue;
+
+		edge_descriptor e = add_edge(s, t);
+		edev.insert(PED(e, 1));
+		ewrt.insert(PED(e, f));
+		if(ewrt.size() >= ne) break;
 	}
+
+	assert(in_degree(0) == 0);
+	assert(out_degree(num_vertices() - 1) == 0);
+
+	MED med;
+	while(true)
+	{
+		VE v;
+		int w = (int)(compute_maximum_path_w(v));
+		if(w <= 0) break;
+		for(int i = 0; i < v.size(); i++)
+		{
+			ewrt[v[i]] -= w;
+			if(med.find(v[i]) == med.end()) med.insert(PED(v[i], w));
+			else med[v[i]] += w;
+		}
+	}
+
+	for(MED::iterator it = ewrt.begin(); it != ewrt.end(); it++)
+	{
+		if(med.find(it->first) == med.end()) remove_edge(it->first);
+	}
+
+	ewrt = med;
+	edev = med;
+	for(MED::iterator it = edev.begin(); it != edev.end(); it++)
+	{
+		it->second = 1;
+	}
+
+	edge_iterator it1, it2;
+	for(int i = 0; i < num_vertices(); i++)
+	{
+		int wx = 0;
+		for(tie(it1, it2) = in_edges(i); it1 != it2; it1++)
+		{
+			wx += (int)(ewrt[*it1]);
+		}
+		int wy = 0;
+		for(tie(it1, it2) = out_edges(i); it1 != it2; it1++)
+		{
+			wy += (int)(ewrt[*it1]);
+		}
+
+		if(i == 0) assert(wx == 0);
+		else if(i == num_vertices() - 1) wy = 0;
+		else assert(wx == wy);
+
+		if(i == 0) vwrt[i] = wy;
+		else vwrt[i] = wx;
+	}
+
+	assert(vwrt[0] == vwrt[num_vertices() - 1]);
+
+	int vv = 0;
+	for(int i = 0; i < num_vertices(); i++)
+	{
+		if(degree(i) >= 1) vv++;
+	}
+	int delta = num_edges() - vv + 2;
+	printf("simulate %d vertices, %lu edges, %.0lf max-flow, delta = %d\n", vv, num_edges(), vwrt[0], delta);
+
 	return 0;
 }
 
@@ -285,6 +362,7 @@ int splice_graph::compute_decomp_paths()
 
 long splice_graph::compute_num_paths()
 {
+	long max = 9999999999;
 	vector<long> table;
 	int n = num_vertices();
 	table.resize(n, 0);
@@ -299,6 +377,7 @@ long splice_graph::compute_num_paths()
 			assert(t == i);
 			//assert(s < i);
 			table[t] += table[s];
+			if(table[t] >= max) return max;
 		}
 	}
 	
@@ -410,8 +489,8 @@ double splice_graph::compute_maximum_st_path_w(VE &p, int ss, int tt)
 	vector<int> tp = topological_sort();
 	int n = num_vertices();
 	assert(tp.size() == n);
-	assert(tp[0] == 0);
-	assert(tp[n - 1] == n - 1);
+	//assert(tp[0] == 0);
+	//assert(tp[n - 1] == n - 1);
 
 	int ssi = -1;
 	int tti = -1;
@@ -639,3 +718,5 @@ int splice_graph::draw(const string &file)
 	draw(file, mis, mes, 3.0);
 	return 0;
 }
+
+
