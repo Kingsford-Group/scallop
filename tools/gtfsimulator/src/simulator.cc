@@ -3,7 +3,7 @@
 #include "simulator.h"
 #include "util.h"
 
-simulator::simulator(int _num_exons, int _num_transcripts, int _max_expression, int _max_length)
+simulator::simulator(int _num_exons, int _num_transcripts, int _max_length, int _max_expression)
 	: num_exons(_num_exons), num_transcripts(_num_transcripts), max_expression(_max_expression), max_length(_max_length)
 {
 }

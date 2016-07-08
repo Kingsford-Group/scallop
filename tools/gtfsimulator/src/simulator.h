@@ -9,7 +9,7 @@ using namespace std;
 class simulator
 {
 public:
-	simulator(int _num_exons, int _num_transcripts, int _max_expression, int _max_length);
+	simulator(int _num_exons, int _num_transcripts, int _max_length, int _max_expression);
 
 public:
 	int num_exons;
