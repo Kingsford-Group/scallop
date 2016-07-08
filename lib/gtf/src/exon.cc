@@ -11,6 +11,13 @@ exon::exon(const string &s)
 	parse(s);
 }
 
+exon::exon(const string &_transcript_id, const string &_gene_id, int32_t _start, int32_t _end, int32_t _expression)
+	: seqname("chr1"), source("simulation"), start(_start), end(_end), transcript_id(_transcript_id),
+	gene_id(_gene_id), expression(_expression), feature("exon"), score(1000), strand('+'), frame(0)
+{
+}
+
+
 int exon::parse(const string &s)
 {
 	char buf[10240];
