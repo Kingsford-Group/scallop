@@ -194,48 +194,8 @@ bool directed_graph::bfs_reverse(const vector<int> &t, int s, const set<edge_des
 	return false;
 }
 
-
-int directed_graph::bfs_reverse(const vector<int> &t, vector<int> &v, vector<int> &b, const set<edge_descriptor> &fb)
+int directed_graph::bfs_reverse(int t, vector<int> &v, vector<int> &b)
 {
-	v.assign(num_vertices(), -1);
-	b.assign(num_vertices(), -1);
-	vector<bool> closed;
-	closed.resize(num_vertices(), false);
-	vector<int> open = t;
-	for(int i = 0; i < t.size(); i++) v[t[i]] = 0;
-	int p = 0;
-
-	while(p < open.size())
-	{
-		int x = open[p];
-		assert(v[x] >= 0);
-
-		p++;
-		if(closed[x] == true) continue;
-		closed[x] = true;
-
-		edge_iterator it1, it2;
-		for(tie(it1, it2) = in_edges(x); it1 != it2; it1++)
-		{
-			if(fb.find(*it1) != fb.end()) continue;
-			int y = (*it1)->source();
-			if(v[y] == -1) 
-			{
-				v[y] = 1 + v[x];
-				b[y] = x;
-			}
-			assert(v[y] <= 1 + v[x]);
-			if(closed[y] == true) continue;
-			open.push_back(y);
-		}
-	}
-	return 0;
-}
-
-int directed_graph::bfs_reverse(int t, vector<int> &v, vector<int> &b, set<edge_descriptor> &ss, const set<edge_descriptor> &fb)
-{
-	VE vss;
-	ss.clear();
 	v.assign(num_vertices(), -1);
 	b.assign(num_vertices(), -1);
 	vector<bool> closed;
@@ -257,10 +217,7 @@ int directed_graph::bfs_reverse(int t, vector<int> &v, vector<int> &b, set<edge_
 		edge_iterator it1, it2;
 		for(tie(it1, it2) = in_edges(x); it1 != it2; it1++)
 		{
-			if(fb.find(*it1) != fb.end()) continue;
 			int y = (*it1)->source();
-			//ss.insert(*it1);
-			vss.push_back(*it1);
 			if(v[y] == -1) 
 			{
 				v[y] = 1 + v[x];
@@ -271,26 +228,36 @@ int directed_graph::bfs_reverse(int t, vector<int> &v, vector<int> &b, set<edge_
 			open.push_back(y);
 		}
 	}
-	ss.insert(vss.begin(), vss.end());
 	return 0;
-}
-
-int directed_graph::bfs_reverse(int t, vector<int> &v, vector<int> &b, set<edge_descriptor> &ss)
-{
-	set<edge_descriptor> fb;
-	return bfs_reverse(t, v, b, ss, fb);
-}
-
-int directed_graph::bfs_reverse(int t, vector<int> &v, vector<int> &b)
-{
-	set<edge_descriptor> ss;
-	return bfs_reverse(t, v, b, ss);
 }
 
 int directed_graph::bfs_reverse(int t, set<edge_descriptor> &ss)
 {
-	vector<int> b, v;
-	return bfs_reverse(t, v, b, ss);
+	ss.clear();
+	vector<bool> closed;
+	closed.resize(num_vertices(), false);
+	vector<int> open;
+	open.push_back(t);
+	int p = 0;
+
+	while(p < open.size())
+	{
+		int x = open[p];
+
+		p++;
+		if(closed[x] == true) continue;
+		closed[x] = true;
+
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = in_edges(x); it1 != it2; it1++)
+		{
+			int y = (*it1)->source();
+			ss.insert(*it1);
+			if(closed[y] == true) continue;
+			open.push_back(y);
+		}
+	}
+	return 0;
 }
 
 int directed_graph::bfs_reverse(int t, vector<int> &v)

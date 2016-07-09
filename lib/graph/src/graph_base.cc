@@ -183,46 +183,8 @@ bool graph_base::bfs(const vector<int> &vs, int t, const set<edge_descriptor> &f
 	return false;
 }
 
-int graph_base::bfs(const vector<int> &vs, vector<int> &v, vector<int> &b, const set<edge_descriptor> &fb)
+int graph_base::bfs(int s, vector<int> &v, vector<int> &b)
 {
-	v.assign(num_vertices(), -1);
-	b.assign(num_vertices(), -1);
-	vector<bool> closed;
-	closed.resize(num_vertices(), false);
-	vector<int> open = vs;
-	for(int i = 0; i < vs.size(); i++) v[vs[i]] = 0;
-	int p = 0;
-
-	while(p < open.size())
-	{
-		int x = open[p];
-		assert(v[x] >= 0);
-
-		p++;
-		if(closed[x] == true) continue;
-		closed[x] = true;
-
-		edge_iterator it1, it2;
-		for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
-		{
-			if(fb.find(*it1) != fb.end()) continue;
-			int y = (*it1)->target();
-			if(v[y] == -1) 
-			{
-				v[y] = 1 + v[x];
-				b[y] = x;
-			}
-			assert(v[y] <= 1 + v[x]);
-			if(closed[y] == true) continue;
-			open.push_back(y);
-		}
-	}
-	return 0;
-}
-
-int graph_base::bfs(int s, vector<int> &v, vector<int> &b, set<edge_descriptor> &ss, const set<edge_descriptor> &fb)
-{
-	ss.clear();
 	v.assign(num_vertices(), -1);
 	b.assign(num_vertices(), -1);
 	vector<bool> closed;
@@ -244,9 +206,7 @@ int graph_base::bfs(int s, vector<int> &v, vector<int> &b, set<edge_descriptor> 
 		edge_iterator it1, it2;
 		for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
 		{
-			if(fb.find(*it1) != fb.end()) continue;
 			int y = (*it1)->target();
-			ss.insert(*it1);
 			if(v[y] == -1) 
 			{
 				v[y] = 1 + v[x];
@@ -260,28 +220,38 @@ int graph_base::bfs(int s, vector<int> &v, vector<int> &b, set<edge_descriptor> 
 	return 0;
 }
 
-int graph_base::bfs(int s, vector<int> &v, vector<int> &b, set<edge_descriptor> &ss)
+int graph_base::bfs(int s, set<edge_descriptor> &ss)
 {
-	set<edge_descriptor> fb;
-	return bfs(s, v, b, ss, fb);
-}
+	ss.clear();
+	vector<bool> closed;
+	closed.resize(num_vertices(), false);
+	vector<int> open;
+	open.push_back(s);
+	int p = 0;
 
-int graph_base::bfs(int s, vector<int> &v, vector<int> &b)
-{
-	set<edge_descriptor> ss;
-	return bfs(s, v, b, ss);
+	while(p < open.size())
+	{
+		int x = open[p];
+		p++;
+		if(closed[x] == true) continue;
+		closed[x] = true;
+
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
+		{
+			int y = (*it1)->target();
+			ss.insert(*it1);
+			if(closed[y] == true) continue;
+			open.push_back(y);
+		}
+	}
+	return 0;
 }
 
 int graph_base::bfs(int t, vector<int> &v) 
 {
 	vector<int> b;
 	return bfs(t, v, b);
-}
-
-int graph_base::bfs(int t, set<edge_descriptor> &ss) 
-{
-	vector<int> v, b;
-	return bfs(t, v, b, ss);
 }
 
 bool graph_base::check_path(int s, int t) 
