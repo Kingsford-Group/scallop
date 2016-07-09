@@ -1,9 +1,10 @@
 #ifndef __SCALLOP2_H__
 #define __SCALLOP2_H__
 
-#include "splice_graph.h"
 #include "path.h"
 #include "equation.h"
+#include "splice_graph.h"
+#include "nested_graph.h"
 
 typedef map< edge_descriptor, vector<int> > MEV;
 typedef pair< edge_descriptor, vector<int> > PEV;
@@ -22,6 +23,11 @@ public:
 public:
 	string name;			// name for this gene
 	splice_graph gr;		// splice graph
+	/*
+	nested_graph nt;		// nested graph
+	int gr_version;			// version of splice graph
+	int nt_version;			// version of nested graph
+	*/
 
 	MEI e2i;				// edge map, from edge to index
 	VE i2e;					// edge map, from index to edge
@@ -68,8 +74,6 @@ private:
 	int identify_equations2(vector<equation> &eqns);
 	int identify_equation(const vector<int> &subs, vector<int> &subt);
 	bool verify_equation_nontrivial(const vector<int> &subs, const vector<int> &subt);
-	// not use now
-	int identify_equations(vector<equation> &eqns);
 
 	// split, and merge
 	int split_edge(int exi, double w);
@@ -82,7 +86,6 @@ private:
 	bool check_adjacent_mergable(int ex, int ey, vector<PI> &p);
 	int build_adjacent_edges(const vector<PI> &p);
 	int check_distant_mergable(int x, int y, double w, VE &p);
-
 
 	// decompose the graph with greedy algorithm
 	int greedy_decompose();

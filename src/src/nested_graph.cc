@@ -99,7 +99,7 @@ int nested_graph::build_nests(directed_graph &gr)
 			add_edge(i, j);
 		}
 	}
-	assert(check_nested() == true);
+	//assert(check_nested() == true);
 	return 0;
 }
 
@@ -188,16 +188,24 @@ int nested_graph::build_nests0(directed_graph &gr)
 		v1.push_back(i);
 	}
 
+	vector<int> v = gr.topological_sort();
+	vector<int> tpo;
+	tpo.assign(num_vertices(), -1);
+	for(int i = 0; i < tpo.size(); i++)
+	{
+		tpo[v[i]] = i;
+	}
+
 	for(int i = 0; i < v1.size(); i++)
 	{
 		for(int j = 0; j < v1.size(); j++)
 		{
-			int b = gr.check_nest(i, j);
+			int b = gr.check_nest(v1[i], v1[j], tpo);
 			if(b == -1) continue;
-			add_edge(i, j);
+			add_edge(v1[i], v1[j]);
 		}
 	}
-	assert(check_nested() == true);
+	//assert(check_nested() == true);
 	return 0;
 }
 
@@ -543,7 +551,7 @@ bool nested_graph::link(int xs, int xt, int ys, int yt, vector<PI> &xp, vector<P
 		return false;
 	}
 
-	assert(check_nested() == true);
+	//assert(check_nested() == true);
 
 	edge_descriptor lca = compute_lca(xe, ye);
 
