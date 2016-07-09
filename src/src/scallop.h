@@ -72,8 +72,12 @@ private:
 	int identify_equations0(vector<equation> &eqns);
 	int identify_equations1(vector<equation> &eqns);
 	int identify_equations2(vector<equation> &eqns);
+	int identify_equations3(vector<equation> &eqns);
 	int identify_equation(const vector<int> &subs, vector<int> &subt);
 	bool verify_equation_nontrivial(const vector<int> &subs, const vector<int> &subt);
+
+	// use equation to decompose trivial vertex, new feature
+	int resolve_vertex_with_equation(equation &eqn);
 
 	// split, and merge
 	int split_edge(int exi, double w);
@@ -84,6 +88,7 @@ private:
 
 	// check, and make two edges adjacent
 	bool check_adjacent_mergable(int ex, int ey, vector<PI> &p);
+	bool check_adjacent_mergable(int ex, int ey, nested_graph &nt);
 	int build_adjacent_edges(const vector<PI> &p);
 	int check_distant_mergable(int x, int y, double w, VE &p);
 

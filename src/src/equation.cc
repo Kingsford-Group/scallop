@@ -5,6 +5,7 @@ equation::equation(double _e)
 	:e(_e)
 {
 	f = 0;
+	a = 0;
 	d = 0;
 }
 
@@ -14,6 +15,7 @@ equation::equation(const vector<int> &_s, const vector<int> &_t)
 	e = 0;
 	f = 0;
 	d = 0;
+	a = 0;
 }
 
 equation::equation(const vector<int> &_s, const vector<int> &_t, double _e)
@@ -21,6 +23,7 @@ equation::equation(const vector<int> &_s, const vector<int> &_t, double _e)
 {
 	f = 0;
 	d = 0;
+	a = 0;
 }
 
 int equation::print(int index)

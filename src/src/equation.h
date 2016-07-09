@@ -20,7 +20,7 @@ public:
 	vector<int> t;		// subt
 	double e;			// erro
 
-	int f;				// 2: fully, 1: partly, 0: none
+	int f;				// 3: resolve vertex 2: fully, 1: partly, 0: none
 	int a;				// # adjacent merges
 	int d;				// # distant merges
 };
