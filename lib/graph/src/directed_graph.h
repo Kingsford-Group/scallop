@@ -36,6 +36,8 @@ public:
 	virtual int bfs_reverse(int t, vector<int> &v, vector<int> &b);
 	virtual int bfs_reverse(int t, vector<int> &v, vector<int> &b, set<edge_descriptor> &ss);
 	virtual int bfs_reverse(int t, vector<int> &v, vector<int> &b, set<edge_descriptor> &ss, const set<edge_descriptor> &fb);
+	virtual int bfs_reverse(const vector<int> &vt, vector<int> &v, vector<int> &b, const set<edge_descriptor> &fb);
+	virtual bool bfs_reverse(const vector<int> &vt, int s, const set<edge_descriptor> &fb);
 	virtual bool compute_shortest_path(int x, int y, vector<int> &p);
 	virtual bool compute_shortest_path(edge_descriptor ex, edge_descriptor ey, vector<int> &p);
 	virtual bool check_path(int x, int y);

@@ -155,6 +155,71 @@ int graph_base::get_edge_indices(VE &i2e, MEI &e2i)
 	return 0;
 }
 
+bool graph_base::bfs(const vector<int> &vs, int t, const set<edge_descriptor> &fb)
+{
+	vector<bool> closed;
+	closed.resize(num_vertices(), false);
+	vector<int> open = vs;
+	int p = 0;
+
+	while(p < open.size())
+	{
+		int x = open[p];
+		if(x == t) return true;
+		p++;
+
+		if(closed[x] == true) continue;
+		closed[x] = true;
+
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
+		{
+			if(fb.find(*it1) != fb.end()) continue;
+			int y = (*it1)->target();
+			if(closed[y] == true) continue;
+			open.push_back(y);
+		}
+	}
+	return false;
+}
+
+int graph_base::bfs(const vector<int> &vs, vector<int> &v, vector<int> &b, const set<edge_descriptor> &fb)
+{
+	v.assign(num_vertices(), -1);
+	b.assign(num_vertices(), -1);
+	vector<bool> closed;
+	closed.resize(num_vertices(), false);
+	vector<int> open = vs;
+	for(int i = 0; i < vs.size(); i++) v[vs[i]] = 0;
+	int p = 0;
+
+	while(p < open.size())
+	{
+		int x = open[p];
+		assert(v[x] >= 0);
+
+		p++;
+		if(closed[x] == true) continue;
+		closed[x] = true;
+
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
+		{
+			if(fb.find(*it1) != fb.end()) continue;
+			int y = (*it1)->target();
+			if(v[y] == -1) 
+			{
+				v[y] = 1 + v[x];
+				b[y] = x;
+			}
+			assert(v[y] <= 1 + v[x]);
+			if(closed[y] == true) continue;
+			open.push_back(y);
+		}
+	}
+	return 0;
+}
+
 int graph_base::bfs(int s, vector<int> &v, vector<int> &b, set<edge_descriptor> &ss, const set<edge_descriptor> &fb)
 {
 	ss.clear();
