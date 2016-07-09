@@ -6,16 +6,9 @@
 #include <algorithm>
 #include <cassert>
 
-subsetsum1::subsetsum1(const vector<int> &s, const vector<int> &t)
+subsetsum1::subsetsum1(const vector<PI> &s, const vector<PI> &t)
+	: source(s), target(t)
 {
-	for(int i = 0; i < s.size(); i++)
-	{
-		source.push_back(PI(s[i], i));
-	}
-	for(int i = 0; i < t.size(); i++)
-	{
-		target.push_back(PI(t[i], i));
-	}
 	eqns.clear();
 }
 
@@ -68,7 +61,7 @@ int subsetsum1::fill()
 				table2[i][j] = i;
 			}
 			
-			if(table2[i][j] == -1 && table2[i - 1][j] >= 0)
+			if(table2[i - 1][j] >= 0)
 			{
 				table2[i][j] = table2[i - 1][j];
 			}
@@ -152,18 +145,19 @@ int subsetsum1::print()
 
 int subsetsum1::test()
 {
-	vector<int> v;
-	v.push_back(5);
-	v.push_back(6);
-	v.push_back(8);
-	v.push_back(3);
-	v.push_back(10);
+	vector<PI> v;
+	v.push_back(PI(5, 1));
+	v.push_back(PI(6, 2));
+	v.push_back(PI(8, 3));
+	v.push_back(PI(3, 5));
+	v.push_back(PI(10,8));
 
-	vector<int> t;
-	t.push_back(20);
-	t.push_back(8);
-	t.push_back(11);
-	t.push_back(18);
+	vector<PI> t;
+	t.push_back(PI(20, 2));
+	t.push_back(PI(8, 4));
+	t.push_back(PI(11, 5));
+	t.push_back(PI(18, 3));
+	t.push_back(PI(10, 1));
 
 	subsetsum1 sss(v, t);
 	sss.solve();

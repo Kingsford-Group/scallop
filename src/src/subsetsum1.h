@@ -15,7 +15,7 @@ typedef pair<int, int> PI;
 class subsetsum1
 {
 public:
-	subsetsum1(const vector<int> &s, const vector<int> &t);
+	subsetsum1(const vector<PI> &s, const vector<PI> &t);
 
 private:
 	vector<PI> source;					// given input
@@ -25,6 +25,7 @@ private:
 	vector< vector<bool> > table1;		// dp table1
 	vector< vector<int> > table2;		// dp table2
 
+public:
 	vector<equation> eqns;
 
 public:

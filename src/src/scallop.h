@@ -73,6 +73,7 @@ private:
 	int identify_equations1(vector<equation> &eqns);
 	int identify_equations2(vector<equation> &eqns);
 	int identify_equations3(vector<equation> &eqns);
+	int enumerate_equations(vector<equation> &eqns);
 	int identify_equation(const vector<int> &subs, vector<int> &subt);
 	bool verify_equation_nontrivial(const vector<int> &subs, const vector<int> &subt);
 

@@ -1,6 +1,6 @@
 #include "scallop.h"
 #include "subsetsum.h"
-#include "subsetsum2.h"
+#include "subsetsum1.h"
 #include "config.h"
 #include "smoother.h"
 #include "nested_graph.h"
@@ -716,38 +716,7 @@ int scallop::identify_equations1(vector<equation> &eqns)
 
 int scallop::identify_equations2(vector<equation> &eqns)
 {
-	eqns.clear();
-	vector<PI> p;
-	for(int i = 0; i < i2e.size(); i++)
-	{
-		edge_descriptor &e = i2e[i];
-		if(e == null_edge) continue;
-		if(e->source() == 0 && e->target() == gr.num_vertices() - 1) continue;
-		int w = (int)(gr.get_edge_weight(e));
-		if(w <= 0) continue;
-		p.push_back(PI(w, i));
-	}
-	sort(p.begin(), p.end());
-
-	for(int i = 0; i < p.size(); i++)
-	{
-		int e = p[i].second;
-		assert(i2e[e] != null_edge);
-		vector<int> s;
-		s.push_back(e);
-		vector<int> t;
-
-		int err = identify_equation(s, t);
-
-		if(t.size() <= 1) continue;
-
-		double ratio = err * 1.0 / gr.get_edge_weight(i2e[e]);
-		if(ratio > max_equation_error_ratio) continue;
-
-		equation eqn(s, t, err);
-		eqns.push_back(eqn);
-	}
-
+	enumerate_equations(eqns);
 	if(eqns.size() == 0) return 0;
 
 	nested_graph nt(gr);
@@ -831,6 +800,32 @@ int scallop::identify_equations3(vector<equation> &eqns)
 	return 0;
 }
 
+int scallop::enumerate_equations(vector<equation> &eqns)
+{
+	vector<PI> p;
+	for(int i = 0; i < i2e.size(); i++)
+	{
+		edge_descriptor &e = i2e[i];
+		if(e == null_edge) continue;
+		if(e->source() == 0 && e->target() == gr.num_vertices() - 1) continue;
+		int w = (int)(gr.get_edge_weight(e));
+		if(w <= 0) continue;
+		p.push_back(PI(w, i));
+	}
+
+	subsetsum1 sss1(p, p);
+	sss1.solve();
+
+	eqns.clear();
+	for(int i = 0; i < sss1.eqns.size(); i++)
+	{
+		equation &eqn = sss1.eqns[i];
+		if(eqn.s.size() == 1 && eqn.t.size() == 1) continue;
+		eqns.push_back(eqn);
+	}
+	return 0;
+}
+
 int scallop::identify_equation(const vector<int> &subs, vector<int> &subt)
 {
 	if(subs.size() == 0) return false;
@@ -888,6 +883,8 @@ int scallop::identify_equation(const vector<int> &subs, vector<int> &subt)
 	{
 		v.push_back(xi[i].first);
 	}
+
+	printf("call subsetsum with %lu elements\n", v.size());
 
 	subsetsum sss(v);
 	sss.solve();
