@@ -181,12 +181,17 @@ bool nested_graph::verify_minimal_nest(directed_graph &gr, const vector<int> &tp
 
 int nested_graph::build_nests0(directed_graph &gr)
 {
+	vector<int> v1;
 	for(int i = 0; i < gr.num_vertices(); i++)
 	{
 		if(gr.degree(i) == 0) continue;
-		for(int j = 0; j < gr.num_vertices(); j++)
+		v1.push_back(i);
+	}
+
+	for(int i = 0; i < v1.size(); i++)
+	{
+		for(int j = 0; j < v1.size(); j++)
 		{
-			if(gr.degree(j) == 0) continue;
 			int b = gr.check_nest(i, j);
 			if(b == -1) continue;
 			add_edge(i, j);

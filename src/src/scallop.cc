@@ -338,7 +338,7 @@ int scallop::decompose_with_equations(int level)
 
 	if(eqns[0].f != 2) return -1;
 
-	smooth_with_equation(eqns[0]);
+	//smooth_with_equation(eqns[0]);
 	resolve_equation(eqns[0]);
 
 	return 0;
@@ -553,6 +553,55 @@ int scallop::split_edge(int ei, double w)
 
 bool scallop::verify_equation_nontrivial(const vector<int> &subs, const vector<int> &subt)
 {
+	set<edge_descriptor> fbs;
+	set<edge_descriptor> fbt;
+	vector<int> vsx;
+	vector<int> vsy;
+	vector<int> vtx;
+	vector<int> vty;
+	for(int i = 0; i < subs.size(); i++)
+	{
+		edge_descriptor &e = i2e[subs[i]];
+		assert(e != null_edge);
+		fbs.insert(e);
+		vsx.push_back(e->source());
+		vsy.push_back(e->target());
+	}
+	for(int i = 0; i < subt.size(); i++)
+	{
+		edge_descriptor &e = i2e[subt[i]];
+		assert(e != null_edge);
+		fbt.insert(e);
+		vtx.push_back(e->source());
+		vty.push_back(e->target());
+	}
+
+	/*
+	printv("subs", subs);
+	printv("subt", subt);
+	printv("vsx ", vsx);
+	printv("vsy ", vsy);
+	printv("vtx ", vtx);
+	printv("vty ", vty);
+	*/
+
+	int n = gr.num_vertices() - 1;
+	bool b1 = gr.bfs(vsy, n, fbt);
+	bool b2 = gr.bfs_reverse(vtx, 0, fbs);
+	//printf("b1 = %c, b2 = %c\n", b1 ? 'T' : 'F', b2 ? 'T' : 'F');
+	if(b1 == false && b2 == false) return false;
+
+	b1 = gr.bfs(vty, n, fbs);
+	b2 = gr.bfs_reverse(vsx, 0, fbt);
+	//printf("b1 = %c, b2 = %c\n", b1 ? 'T' : 'F', b2 ? 'T' : 'F');
+	if(b1 == false && b2 == false) return false;
+
+	return true;
+}
+
+/*
+bool scallop::verify_equation_nontrivial0(const vector<int> &subs, const vector<int> &subt)
+{
 	set<edge_descriptor> fb;
 	for(int i = 0; i < subs.size(); i++)
 	{
@@ -606,6 +655,7 @@ bool scallop::verify_equation_nontrivial(const vector<int> &subs, const vector<i
 
 	return true;
 }
+*/
 
 int scallop::identify_equations(vector<equation> &eqns)
 {
@@ -726,8 +776,10 @@ int scallop::identify_equations1(vector<equation> &eqns)
 	vector<PI> p;
 	for(int i = 0; i < i2e.size(); i++)
 	{
-		if(i2e[i] == null_edge) continue;
-		int w = (int)(gr.get_edge_weight(i2e[i]));
+		edge_descriptor &e = i2e[i];
+		if(e == null_edge) continue;
+		if(e->source() == 0 && e->target() == gr.num_vertices() - 1) continue;
+		int w = (int)(gr.get_edge_weight(e));
 		if(w <= 0) continue;
 		p.push_back(PI(w, i));
 	}
@@ -770,8 +822,10 @@ int scallop::identify_equations2(vector<equation> &eqns)
 	vector<PI> p;
 	for(int i = 0; i < i2e.size(); i++)
 	{
-		if(i2e[i] == null_edge) continue;
-		int w = (int)(gr.get_edge_weight(i2e[i]));
+		edge_descriptor &e = i2e[i];
+		if(e == null_edge) continue;
+		if(e->source() == 0 && e->target() == gr.num_vertices() - 1) continue;
+		int w = (int)(gr.get_edge_weight(e));
 		if(w <= 0) continue;
 		p.push_back(PI(w, i));
 	}
@@ -856,6 +910,7 @@ int scallop::identify_equation(const vector<int> &subs, vector<int> &subt)
 	for(SE::iterator it = ff.begin(); it != ff.end(); it++)
 	{
 		if(ss.find(e2i[*it]) != ss.end()) continue;
+		if((*it)->source() == 0 && (*it)->target() == gr.num_vertices() - 1) continue;
 		int ww = (int)(gr.get_edge_weight(*it));
 		if(ww <= 0) continue;
 		if(ww * 1.0 > sw * 1.0 * (1.0 + max_equation_error_ratio)) continue;
@@ -891,6 +946,16 @@ int scallop::identify_equation(const vector<int> &subs, vector<int> &subt)
 			assert(xi[k].second != -1);
 			subt.push_back(xi[k].second);
 		}
+
+		/*
+		bool b0 = verify_equation_nontrivial0(subs, subt);
+		bool b1 = verify_equation_nontrivial(subs, subt);
+		if(b0 != b1)
+		{
+			draw_splice_graph("sgraph.tex");
+			assert(b0 == b1);
+		}
+		*/
 
 		if(verify_equation_nontrivial(subs, subt) == false) continue;
 
@@ -1054,6 +1119,9 @@ bool scallop::check_adjacent_mergable(int ex, int ey, vector<PI> &p)
 	int xt = i2e[ex]->target();
 	int ys = i2e[ey]->source();
 	int yt = i2e[ey]->target();
+
+	if(xt == ys) return true;
+	if(yt == xs) return true;
 
 	vector<PI> xp, yp;
 	bool b = false;
