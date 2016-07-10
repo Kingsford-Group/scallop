@@ -23,6 +23,7 @@ public:
 	int f;				// 3: resolve vertex 2: fully, 1: partly, 0: none
 	int a;				// # adjacent merges
 	int d;				// # distant merges
+	int w;				// weight
 };
 
 bool equation_cmp1(const equation &x, const equation &y);

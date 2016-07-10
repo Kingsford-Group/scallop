@@ -57,8 +57,7 @@ int nested_graph::build_nests(directed_graph &gr)
 		gr.bfs(i, v);
 		for(int k = 0; k < v.size(); k++)
 		{
-			if(v[k] < 0) continue;
-			s.insert(k);
+			s.insert(v[k]);
 		}
 		vs[i] = s;
 
@@ -67,8 +66,7 @@ int nested_graph::build_nests(directed_graph &gr)
 		gr.bfs_reverse(i, v);
 		for(int k = 0; k < v.size(); k++)
 		{
-			if(v[k] < 0) continue;
-			s.insert(k);
+			s.insert(v[k]);
 		}
 		vt[i] = s;
 	}
@@ -196,6 +194,7 @@ int nested_graph::build_nests0(directed_graph &gr)
 		tpo[v[i]] = i;
 	}
 
+	int c = 0;
 	for(int i = 0; i < v1.size(); i++)
 	{
 		for(int j = 0; j < v1.size(); j++)
@@ -203,8 +202,10 @@ int nested_graph::build_nests0(directed_graph &gr)
 			int b = gr.check_nest(v1[i], v1[j], tpo);
 			if(b == -1) continue;
 			add_edge(v1[i], v1[j]);
+			c++;
 		}
 	}
+	printf("building nested graph takes %d check_nest\n", c);
 	//assert(check_nested() == true);
 	return 0;
 }

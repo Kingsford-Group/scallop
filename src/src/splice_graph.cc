@@ -393,17 +393,9 @@ bool splice_graph::check_fully_connected()
 	vector<int> t;
 	bfs(0, s);
 	bfs_reverse(num_vertices() - 1, t);
-
-	for(int i = 0; i < s.size(); i++)
-	{
-		if(s[i] == -1) return false;
-	}
-
-	for(int i = 0; i < t.size(); i++)
-	{
-		if(t[i] == -1) return false;
-	}
-
+	
+	if(s.size() != num_vertices()) return false;
+	if(t.size() != num_vertices()) return false;
 	return true;
 }
 

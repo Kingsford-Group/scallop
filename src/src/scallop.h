@@ -33,6 +33,7 @@ public:
 	VE i2e;					// edge map, from index to edge
 	MEV mev;				// super edges
 	int round;				// round in iteration
+	bool aggressive;		// mode
 
 	vector<path> paths;		// predicted transcripts
 
@@ -72,13 +73,12 @@ private:
 	int identify_equations0(vector<equation> &eqns);
 	int identify_equations1(vector<equation> &eqns);
 	int identify_equations2(vector<equation> &eqns);
-	int identify_equations3(vector<equation> &eqns);
-	int enumerate_equations(vector<equation> &eqns);
-	int identify_equation(const vector<int> &subs, vector<int> &subt);
-	bool verify_equation_nontrivial(const vector<int> &subs, const vector<int> &subt);
+	bool verify_equation_nontrivial(equation &eqn);
+	bool verify_equation_mergable(equation &eqn);
 
 	// use equation to decompose trivial vertex, new feature
-	int resolve_vertex_with_equation(equation &eqn);
+	bool resolve_vertex_with_equation1(equation &eqn);
+	bool resolve_vertex_with_equation2(equation &eqn);
 
 	// split, and merge
 	int split_edge(int exi, double w);
