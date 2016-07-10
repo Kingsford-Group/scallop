@@ -289,7 +289,11 @@ int scallop::iterate()
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = decompose_with_equations();
+		b = decompose_with_equations(1);
+		if(b == true) print();
+		if(b == true) continue;
+
+		b = decompose_with_equations(2);
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -298,22 +302,33 @@ int scallop::iterate()
 	return 0;
 }
 
-bool scallop::decompose_with_equations()
+bool scallop::decompose_with_equations(int level)
 {
 	vector<equation> eqns;
 
 	bool b = false;
-	if(b == false) b = identify_equations1(eqns);
-	if(b == false) b = identify_equations2(eqns);
-	if(b == false) b = identify_equations3(eqns);
+	if(level == 1)
+	{
+		if(b == false) b = identify_equations1(eqns);
+		if(b == false) b = identify_equations2(eqns);
+	}
+	else if(level == 2)
+	{
+		if(b == false) b = identify_equations3(eqns);
+	}
 
 	if(eqns.size() == 0) return false;
 
-	printf("equations = %lu\n", eqns.size());
-
-	//resolve_vertex_with_equations(eqns);
-
 	sort(eqns.begin(), eqns.end(), equation_cmp2);
+
+	if(eqns[0].f < 2 || eqns[0].d > 0)
+	{
+		sort(eqns.begin(), eqns.end(), equation_cmp1);
+		resolve_vertex_with_equations(eqns);
+		sort(eqns.begin(), eqns.end(), equation_cmp2);
+	}
+
+	printf("equations = %lu\n", eqns.size());
 
 	for(int i = 0; i < eqns.size(); i++) 
 	{
@@ -800,9 +815,17 @@ bool scallop::resolve_vertex_with_equations(vector<equation> &eqns)
 {
 	for(int i = 0; i < eqns.size(); i++)
 	{
-		resolve_vertex_with_equation1(eqns[i]);
-		resolve_vertex_with_equation2(eqns[i]);
-		if(eqns[i].f == 3) return true;
+		equation &eqn = eqns[i];
+		resolve_vertex_with_equation1(eqn);
+		resolve_vertex_with_equation2(eqn);
+		if(eqn.f == 3) return true;
+
+		vector<int> t = eqn.s;
+		eqn.s = eqn.t;
+		eqn.t = t;
+		resolve_vertex_with_equation1(eqn);
+		resolve_vertex_with_equation2(eqn);
+		if(eqn.f == 3) return true;
 	}
 	return false;
 }
@@ -873,6 +896,9 @@ bool scallop::resolve_vertex_with_equation1(equation &eqn)
 		edge_descriptor e = ve[i];
 		double ww = gr.get_edge_weight(e);
 		int ee = split_edge(ei, ww);
+
+		printf("resolve vertex with equation: (%d, %d)\n", ei, e2i[e]);
+
 		merge_adjacent_equal_edges(ei, e2i[e]);
 		ei = ee;
 	}
@@ -946,6 +972,9 @@ bool scallop::resolve_vertex_with_equation2(equation &eqn)
 		edge_descriptor e = ve[i];
 		double ww = gr.get_edge_weight(e);
 		int ee = split_edge(ei, ww);
+
+		printf("resolve vertex with equation: (%d, %d)\n", ei, e2i[e]);
+
 		merge_adjacent_equal_edges(ei, e2i[e]);
 		ei = ee;
 	}

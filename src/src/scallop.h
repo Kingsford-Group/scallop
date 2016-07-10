@@ -52,7 +52,7 @@ private:
 	// iteratively decompose
 	int iterate();
 	bool decompose_trivial_vertices();
-	bool decompose_with_equations();
+	bool decompose_with_equations(int level);
 	int smooth_with_equation(equation &eqn);
 
 	// trivial, or hard

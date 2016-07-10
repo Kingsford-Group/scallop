@@ -28,5 +28,6 @@ public:
 
 bool equation_cmp1(const equation &x, const equation &y);
 bool equation_cmp2(const equation &x, const equation &y);
+bool equation_cmp3(const equation &x, const equation &y);
 
 #endif
