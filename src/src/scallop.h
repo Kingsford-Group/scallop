@@ -73,6 +73,7 @@ private:
 	int identify_equations0(vector<equation> &eqns);
 	int identify_equations1(vector<equation> &eqns);
 	int identify_equations2(vector<equation> &eqns);
+	int identify_equations3(vector<equation> &eqns);
 	bool verify_equation_nontrivial(equation &eqn);
 	bool verify_equation_mergable(equation &eqn);
 

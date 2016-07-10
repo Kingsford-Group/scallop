@@ -285,7 +285,7 @@ int scallop::iterate()
 	while(true)
 	{
 		bool b = decompose_trivial_vertices();
-		if(b == true) print();
+		print();
 		if(b == true) aggressive = false;
 		if(b == true) continue;
 
@@ -296,14 +296,19 @@ int scallop::iterate()
 		*/
 
 		int f1 = decompose_with_equations(1);
-		if(f1 >= 0) print();
+		print();
 		if(f1 >= 0) aggressive = false;
 		if(f1 >= 0) continue;
 
 		int f2 = decompose_with_equations(2);
-		if(f2 >= 0) print();
+		print();
 		if(f2 >= 0) aggressive = false;
 		if(f2 >= 0) continue;
+
+		int f3 = decompose_with_equations(3);
+		print();
+		if(f3 >= 0) aggressive = false;
+		if(f3 >= 0) continue;
 
 		if(aggressive == true) return 0;
 		else aggressive = true;
@@ -316,6 +321,9 @@ int scallop::decompose_with_equations(int level)
 	if(level == 0) identify_equations0(eqns);
 	else if(level == 1) identify_equations1(eqns);
 	else if(level == 2) identify_equations2(eqns);
+	else if(level == 3) identify_equations3(eqns);
+
+	if(level == 3) aggressive = true;
 
 	if(eqns.size() == 0) return -2;
 
@@ -547,23 +555,41 @@ int scallop::split_edge(int ei, double w)
 
 bool scallop::verify_equation_mergable(equation &eqn)
 {
-	if(eqn.s.size() != 1) return false; // TODO TODO
+	if(eqn.s.size() == 0) return false; 
 	if(eqn.t.size() == 0) return false;
 
-	int e = eqn.s[0];
-	int s = i2e[e]->source();
-	int t = i2e[e]->target();
+	SE xx, yy;
+	for(int i = 0; i < eqn.s.size(); i++)
+	{
+		edge_descriptor x = i2e[eqn.s[i]];
+		SE se;
+		gr.bfs(x->target(), se);
+		xx.insert(se.begin(), se.end());
+		se.clear();
+		gr.bfs_reverse(x->source(), se);
+		xx.insert(se.begin(), se.end());
+	}
+	for(int i = 0; i < eqn.t.size(); i++)
+	{
+		edge_descriptor x = i2e[eqn.t[i]];
+		SE se;
+		gr.bfs(x->target(), se);
+		yy.insert(se.begin(), se.end());
+		se.clear();
+		gr.bfs_reverse(x->source(), se);
+		yy.insert(se.begin(), se.end());
+	}
 
-	SE s1, s2;
-	gr.bfs(t, s1);
-	gr.bfs_reverse(s, s2);
+	for(int i = 0; i < eqn.s.size(); i++)
+	{
+		edge_descriptor x = i2e[eqn.s[i]];
+		if(yy.find(x) == yy.end()) return false;
+	}
 
 	for(int i = 0; i < eqn.t.size(); i++)
 	{
 		edge_descriptor x = i2e[eqn.t[i]];
-		if(s1.find(x) != s1.end()) continue;
-		if(s2.find(x) != s2.end()) continue;
-		return false;
+		if(xx.find(x) == xx.end()) return false;
 	}
 	return true;
 }
@@ -757,9 +783,9 @@ int scallop::identify_equations2(vector<equation> &eqns)
 	for(int i = 0; i < sss1.eqns.size(); i++)
 	{
 		equation &eqn = sss1.eqns[i];
+		assert(eqn.s.size() == 1);
 		if(eqn.s.size() == 1 && eqn.t.size() == 1) continue;
 		if(eqn.s.size() != 1) continue;
-		if(eqn.t.size() >= 4) continue;
 		if(verify_equation_mergable(eqn) == false) continue;
 		if(verify_equation_nontrivial(eqn) == false) continue;
 		eqns.push_back(eqn);
@@ -781,6 +807,75 @@ int scallop::identify_equations2(vector<equation> &eqns)
 			bool b = check_adjacent_mergable(eqn.s[0], eqn.t[k], nt);
 			if(b == false) eqn.d++;
 			else eqn.a++;
+		}
+	}
+	return 0;
+}
+
+int scallop::identify_equations3(vector<equation> &eqns)
+{
+	eqns.clear();
+	vector<PI> p;
+	for(int i = 0; i < i2e.size(); i++)
+	{
+		edge_descriptor &e = i2e[i];
+		if(e == null_edge) continue;
+		if(e->source() == 0 && e->target() == gr.num_vertices() - 1) continue;
+		int w = (int)(gr.get_edge_weight(e));
+		if(w <= 0) continue;
+		p.push_back(PI(w, i));
+	}
+
+	if(p.size() == 0) return 0;
+
+	vector<PI> ppi;
+	vector<PI> ppw;
+	for(int i = 0; i < p.size(); i++)
+	{
+		for(int j = i + 1; j < p.size(); j++)
+		{
+			int w = p[i].first + p[j].first;
+			ppw.push_back(PI(w, ppw.size()));
+			ppi.push_back(PI(p[i].second, p[j].second));
+		}
+	}
+
+	subsetsum1 sss1(p, ppw);
+	sss1.solve();
+
+	for(int i = 0; i < sss1.eqns.size(); i++)
+	{
+		equation &eqn = sss1.eqns[i];
+		assert(eqn.s.size() == 1);
+		int si = eqn.s[0];
+		eqn.s.clear();
+		eqn.s.push_back(ppi[si].first);
+		eqn.s.push_back(ppi[si].second);
+
+		set<int> ss(eqn.t.begin(), eqn.t.end());
+		if(ss.find(eqn.s[0]) != ss.end()) continue;
+		if(ss.find(eqn.s[1]) != ss.end()) continue;
+
+		if(verify_equation_mergable(eqn) == false) continue;
+		if(verify_equation_nontrivial(eqn) == false) continue;
+		eqns.push_back(eqn);
+	}
+
+	if(eqns.size() == 0) return 0;
+
+	nested_graph nt(gr);
+
+	for(int i = 0; i < eqns.size(); i++)
+	{
+		equation & eqn = eqns[i];
+		for(int j = 0; j < eqn.s.size(); j++)
+		{
+			for(int k = 0; k < eqn.t.size(); k++)
+			{
+				bool b = check_adjacent_mergable(eqn.s[j], eqn.t[k], nt);
+				if(b == false) eqn.d++;
+				else eqn.a++;
+			}
 		}
 	}
 	return 0;
