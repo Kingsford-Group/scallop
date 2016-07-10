@@ -20,7 +20,6 @@ scallop::scallop(const string &s, splice_graph &g)
 	: name(s), gr(g)
 {
 	round = 0;
-	aggressive = false;
 	//assert(gr.check_fully_connected() == true);
 }
 
@@ -284,48 +283,35 @@ int scallop::iterate()
 	print();
 	while(true)
 	{
-		bool b = decompose_trivial_vertices();
-		print();
-		if(b == true) aggressive = false;
+		bool b = false;
+
+		b = decompose_trivial_vertices();
+		if(b == true) print();
 		if(b == true) continue;
 
-		/*
-		int f0 = decompose_with_equations(0);
-		if(f0 >= 0) print();
-		if(f0 >= 0) continue;
-		*/
+		b = decompose_with_equations();
+		if(b == true) print();
+		if(b == true) continue;
 
-		int f1 = decompose_with_equations(1);
-		print();
-		if(f1 >= 0) aggressive = false;
-		if(f1 >= 0) continue;
-
-		int f2 = decompose_with_equations(2);
-		print();
-		if(f2 >= 0) aggressive = false;
-		if(f2 >= 0) continue;
-
-		int f3 = decompose_with_equations(3);
-		print();
-		if(f3 >= 0) aggressive = false;
-		if(f3 >= 0) continue;
-
-		if(aggressive == true) return 0;
-		else aggressive = true;
+		break;
 	}
+	return 0;
 }
 
-int scallop::decompose_with_equations(int level)
+bool scallop::decompose_with_equations()
 {
 	vector<equation> eqns;
-	if(level == 0) identify_equations0(eqns);
-	else if(level == 1) identify_equations1(eqns);
-	else if(level == 2) identify_equations2(eqns);
-	else if(level == 3) identify_equations3(eqns);
 
-	if(eqns.size() == 0) return -2;
+	bool b = false;
+	if(b == false) b = identify_equations1(eqns);
+	if(b == false) b = identify_equations2(eqns);
+	if(b == false) b = identify_equations3(eqns);
 
-	printf("equations = %lu (level = %d)\n", eqns.size(), level);
+	if(eqns.size() == 0) return false;
+
+	printf("equations = %lu\n", eqns.size());
+
+	//resolve_vertex_with_equations(eqns);
 
 	sort(eqns.begin(), eqns.end(), equation_cmp2);
 
@@ -335,15 +321,13 @@ int scallop::decompose_with_equations(int level)
 		eqns[i].print(i);
 	}
 
-	if(eqns[0].f == 3) return 0;
-
-	if(level == 3) aggressive = true;
+	if(eqns[0].f == 3) return true;
 
 	smooth_with_equation(eqns[0]);
 	resolve_equation(eqns[0]);
 
-	if(eqns[0].f != 2) return -1;
-	else return 0;
+	if(eqns[0].f >= 2) return true;
+	else return false;
 }
 
 int scallop::init_super_edges()
@@ -631,62 +615,11 @@ bool scallop::verify_equation_nontrivial(equation &eqn)
 	return true;
 }
 
-int scallop::identify_equations0(vector<equation> &eqns)
-{
-	eqns.clear();
-	int min_w = -1;
-	for(int i = 0; i < gr.num_vertices(); i++)
-	{
-		if(gr.degree(i) == 0) continue;
-		if(gr.in_degree(i) == 1) continue;
-		if(gr.out_degree(i) == 1) continue;
-
-		MI m1;
-		MI m2;
-		edge_iterator it1, it2;
-		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
-		{
-			int w = (int)(gr.get_edge_weight(*it1));
-			int e = e2i[*it1];
-			if(m1.find(w) != m1.end()) continue;
-			m1.insert(PI(w, e));
-		}
-
-		for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
-		{
-			int w = (int)(gr.get_edge_weight(*it1));
-			int e = e2i[*it1];
-			if(m2.find(w) != m2.end()) continue;
-			m2.insert(PI(w, e));
-		}
-
-		for(MI::iterator it = m1.begin(); it != m1.end(); it++)
-		{
-			int w = it->first;
-			if(m2.find(w) == m2.end()) continue;
-			vector<int> s;
-			vector<int> t;
-			s.push_back(it->second);
-			t.push_back(m2[w]);
-
-			equation eqn(s, t, 0);
-			eqn.f = 2;
-			eqn.a = 1;
-			eqn.d = 0;
-
-			eqns.push_back(eqn);
-			return 0;
-		}
-	}
-	return 0;
-}
-
-int scallop::identify_equations1(vector<equation> &eqns)
+bool scallop::identify_equations1(vector<equation> &eqns)
 {
 	typedef map<int, vector<int> > MIV;
 	typedef pair<int, vector<int> > PIV;
 
-	eqns.clear();
 	MIV m;
 	edge_iterator it1, it2;
 	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
@@ -715,7 +648,7 @@ int scallop::identify_equations1(vector<equation> &eqns)
 			for(int j = i + 1; j < v.size(); j++)
 			{
 				bool b = check_adjacent_mergable(v[i], v[j], nt);
-				if(b == false) continue;
+				int l = check_distant_mergable(v[i], v[j], it->first);
 
 				vector<int> s;
 				vector<int> t;
@@ -723,47 +656,33 @@ int scallop::identify_equations1(vector<equation> &eqns)
 				t.push_back(v[j]);
 
 				equation eqn(s, t, 0);
-				eqn.f = 2;
-				eqn.a = 1;
-				eqn.d = 0;
+
+				if(b == true || l >= 0) eqn.f = 2;
+				else eqn.f = 1;
+
+				if(b == true)
+				{
+					eqn.a = 1;
+					eqn.d = 0;
+				}
+				else
+				{
+					eqn.a = 0;
+					eqn.d = 1;
+				}
+
 				eqn.w = it->first;
 				eqns.push_back(eqn);
+
+				if(b == true) return true;
 			}
 		}
 	}
-
-	if(eqns.size() >= 1) return 0;
-
-	for(MIV::iterator it = m.begin(); it != m.end(); it++)
-	{
-		vector<int> &v = it->second;
-		if(v.size() <= 1) continue;
-		for(int i = 0; i < v.size(); i++)
-		{
-			for(int j = i + 1; j < v.size(); j++)
-			{
-				vector<int> s;
-				vector<int> t;
-				s.push_back(v[i]);
-				t.push_back(v[j]);
-
-				equation eqn(s, t, 0);
-				resolve_vertex_with_equation1(eqn);
-				resolve_vertex_with_equation2(eqn);
-				if(eqn.f == 3)
-				{
-					eqns.push_back(eqn);
-					return 0;
-				}
-			}
-		}
-	}
-	return 0;
+	return false;
 }
 
-int scallop::identify_equations2(vector<equation> &eqns)
+bool scallop::identify_equations2(vector<equation> &eqns)
 {
-	eqns.clear();
 	vector<PI> p;
 	for(int i = 0; i < i2e.size(); i++)
 	{
@@ -775,7 +694,7 @@ int scallop::identify_equations2(vector<equation> &eqns)
 		p.push_back(PI(w, i));
 	}
 
-	if(p.size() == 0) return 0;
+	if(p.size() == 0) return false;
 
 	subsetsum1 sss1(p, p);
 	sss1.solve();
@@ -784,37 +703,24 @@ int scallop::identify_equations2(vector<equation> &eqns)
 	{
 		equation &eqn = sss1.eqns[i];
 		assert(eqn.s.size() == 1);
-		if(eqn.s.size() == 1 && eqn.t.size() == 1) continue;
-		if(eqn.s.size() != 1) continue;
+		if(eqn.t.size() == 1) continue;
 		if(verify_equation_mergable(eqn) == false) continue;
 		if(verify_equation_nontrivial(eqn) == false) continue;
+
+		scallop sc;
+		save(sc);
+		smooth_with_equation(eqn);
+		resolve_equation(eqn);
+		load(sc);
+
 		eqns.push_back(eqn);
+		if(eqn.f == 2 && eqn.d == 0) return true;
 	}
-
-	if(eqns.size() == 0) return 0;
-
-	nested_graph nt(gr);
-	for(int i = 0; i < eqns.size(); i++)
-	{
-		equation & eqn = eqns[i];
-
-		resolve_vertex_with_equation1(eqn);
-		resolve_vertex_with_equation2(eqn);
-		if(eqn.f == 3) return 0;
-
-		for(int k = 0; k < eqn.t.size(); k++)
-		{
-			bool b = check_adjacent_mergable(eqn.s[0], eqn.t[k], nt);
-			if(b == false) eqn.d++;
-			else eqn.a++;
-		}
-	}
-	return 0;
+	return false;
 }
 
-int scallop::identify_equations3(vector<equation> &eqns)
+bool scallop::identify_equations3(vector<equation> &eqns)
 {
-	eqns.clear();
 	vector<PI> p;
 	for(int i = 0; i < i2e.size(); i++)
 	{
@@ -826,7 +732,7 @@ int scallop::identify_equations3(vector<equation> &eqns)
 		p.push_back(PI(w, i));
 	}
 
-	if(p.size() == 0) return 0;
+	if(p.size() == 0) return false;
 
 	vector<PI> ppi;
 	vector<PI> ppw;
@@ -847,6 +753,8 @@ int scallop::identify_equations3(vector<equation> &eqns)
 	{
 		equation &eqn = sss1.eqns[i];
 		assert(eqn.s.size() == 1);
+		if(eqn.t.size() == 1) continue;
+
 		int si = eqn.s[0];
 		eqn.s.clear();
 		eqn.s.push_back(ppi[si].first);
@@ -858,13 +766,19 @@ int scallop::identify_equations3(vector<equation> &eqns)
 
 		if(verify_equation_mergable(eqn) == false) continue;
 		if(verify_equation_nontrivial(eqn) == false) continue;
+
+		scallop sc;
+		save(sc);
+		smooth_with_equation(eqn);
+		resolve_equation(eqn);
+		load(sc);
+
 		eqns.push_back(eqn);
+		if(eqn.f == 2 && eqn.d == 0) return true;
 	}
 
-	if(eqns.size() == 0) return 0;
-
+	/*
 	nested_graph nt(gr);
-
 	for(int i = 0; i < eqns.size(); i++)
 	{
 		equation & eqn = eqns[i];
@@ -878,43 +792,66 @@ int scallop::identify_equations3(vector<equation> &eqns)
 			}
 		}
 	}
-	return 0;
+	*/
+	return false;
+}
+
+bool scallop::resolve_vertex_with_equations(vector<equation> &eqns)
+{
+	for(int i = 0; i < eqns.size(); i++)
+	{
+		resolve_vertex_with_equation1(eqns[i]);
+		resolve_vertex_with_equation2(eqns[i]);
+		if(eqns[i].f == 3) return true;
+	}
+	return false;
 }
 
 bool scallop::resolve_vertex_with_equation1(equation &eqn)
 {
-	if(eqn.s.size() != 1) return false;	
+	if(eqn.s.size() == 0) return false;	
+	
+	SE sex;
 	edge_descriptor ex = i2e[eqn.s[0]];
+	sex.insert(ex);
+	int xt = ex->target();
+	for(int i = 1; i < eqn.s.size(); i++)
+	{
+		edge_descriptor ex = i2e[eqn.s[i]];
+		sex.insert(ex);
+		if(ex->target() != xt) return false;
+	}
 
 	for(int i = 0; i < eqn.t.size(); i++)
 	{
 		edge_descriptor ey = i2e[eqn.t[i]];
-		if(gr.check_path(ex, ey) == false) return false;
+		int ys = ey->source();
+		if(gr.check_path(xt, ys) == false) return false;
 	}
 
-	int xs = ex->source();
-	int xt = ex->target();
-
 	assert(gr.in_degree(xt) >= 1);
-	if(gr.in_degree(xt) > 2) return false;
+	if(gr.in_degree(xt) != 1 + eqn.s.size()) return false;
 
 	edge_descriptor ex2 = null_edge;
 	edge_iterator it1, it2;
 	for(tie(it1, it2) = gr.in_edges(xt); it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
-		if(e != ex) ex2 = e;
+		if(sex.find(e) != sex.end()) continue;
+		ex2 = e;
 	}
+	assert(ex2 != null_edge);
 	double w2 = gr.get_edge_weight(ex2);
 
-	vector<SE> vse;
+	SE sey;
 	for(int i = 0; i < eqn.t.size(); i++)
 	{
 		edge_descriptor ey = i2e[eqn.t[i]];
+		sey.insert(ey);
 		int ys = ey->source();
 		SE se;
 		gr.bfs_reverse(ys, se);
-		vse.push_back(se);
+		sey.insert(se.begin(), se.end());
 	}
 
 	VE ve;
@@ -922,20 +859,13 @@ bool scallop::resolve_vertex_with_equation1(equation &eqn)
 	for(tie(it1, it2) = gr.out_edges(xt); it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
-		bool b = false;
-		for(int k = 0; k < vse.size(); k++)
-		{
-			if(e == i2e[eqn.t[k]]) b = true;
-			if(vse[k].find(e) != vse[k].end()) b = true;
-			if(b == true) break;
-		}
-		if(b == true) continue;
+		if(sey.find(e) != sey.end()) continue;
 		ve.push_back(e);
 		w1 += gr.get_edge_weight(e);
 	}
 
-	if(ve.size() >= 1 && w1 > w2 + SMIN) return false;
 	if(ve.size() <= 0) return false;
+	if(ve.size() >= 1 && w1 > w2 + SMIN) return false;
 
 	int ei = e2i[ex2];
 	for(int i = 0; i < ve.size(); i++)
@@ -953,59 +883,62 @@ bool scallop::resolve_vertex_with_equation1(equation &eqn)
 
 bool scallop::resolve_vertex_with_equation2(equation &eqn)
 {
-	if(eqn.t.size() != 1) return false;	
+	if(eqn.t.size() == 0) return false;	
+
+	SE sey;
 	edge_descriptor ey = i2e[eqn.t[0]];
+	sey.insert(ey);
+	int ys = ey->source();
+	for(int i = 1; i < eqn.t.size(); i++)
+	{
+		edge_descriptor ey = i2e[eqn.t[i]];
+		sey.insert(ey);
+		if(ey->source() != ys) return false;
+	}
 
 	for(int i = 0; i < eqn.s.size(); i++)
 	{
 		edge_descriptor ex = i2e[eqn.s[i]];
-		if(gr.check_path(ex, ey) == false) return false;
+		int xt = ex->target();
+		if(gr.check_path(xt, ys) == false) return false;
 	}
 
-	int ys = ey->source();
-	int yt = ey->target();
-
-
 	assert(gr.out_degree(ys) >= 1);
-	if(gr.out_degree(ys) > 2) return false;
+	if(gr.out_degree(ys) != 1 + eqn.t.size()) return false;
 
 	edge_iterator it1, it2;
 	edge_descriptor ey2 = null_edge;
 	for(tie(it1, it2) = gr.out_edges(ys); it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
-		if(e != ey) ey2 = e;
+		if(sey.find(e) != sey.end()) continue;
+		ey2 = e;
 	}
+	assert(ey2 != null_edge);
 	double w2 = gr.get_edge_weight(ey2);
 
-	vector<SE> vse;
+	SE sex;
 	for(int i = 0; i < eqn.s.size(); i++)
 	{
 		edge_descriptor ex = i2e[eqn.s[i]];
+		sex.insert(ex);
 		int xt = ex->target();
 		SE se;	
 		gr.bfs(xt, se);
-		vse.push_back(se);
+		sex.insert(se.begin(), se.end());
 	}
 	VE ve;
 	double w1 = 0;
 	for(tie(it1, it2) = gr.in_edges(ys); it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
-		bool b = false;
-		for(int k = 0; k < vse.size(); k++)
-		{
-			if(e == i2e[eqn.s[k]]) b = true;
-			if(vse[k].find(e) != vse[k].end()) b = true;
-			if(b == true) break;
-		}
-		if(b == true) continue;
+		if(sex.find(e) != sex.end()) continue;
 		ve.push_back(e);
 		w1 += gr.get_edge_weight(e);
 	}
 
-	if(ve.size() >= 1 && w1 > w2 + SMIN) return false;
 	if(ve.size() <= 0) return false;
+	if(ve.size() >= 1 && w1 > w2 + SMIN) return false;
 
 	int ei = e2i[ey2];
 	for(int i = 0; i < ve.size(); i++)
@@ -1095,8 +1028,6 @@ int scallop::resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md)
 			else return 1;
 		}
 	}
-
-	if(aggressive == false) return 0;
 
 	set<int> ss;
 	for(int i = 0; i < s.size(); i++)
@@ -1219,6 +1150,12 @@ bool scallop::check_adjacent_mergable(int ex, int ey, vector<PI> &p)
 	p.insert(p.end(), yp.begin(), yp.end());
 
 	return true;
+}
+
+int scallop::check_distant_mergable(int x, int y, double w)
+{
+	VE p;
+	return check_distant_mergable(x, y, w, p);
 }
 
 int scallop::check_distant_mergable(int x, int y, double w, VE &p)

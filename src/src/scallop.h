@@ -33,7 +33,6 @@ public:
 	VE i2e;					// edge map, from index to edge
 	MEV mev;				// super edges
 	int round;				// round in iteration
-	bool aggressive;		// mode
 
 	vector<path> paths;		// predicted transcripts
 
@@ -53,10 +52,8 @@ private:
 	// iteratively decompose
 	int iterate();
 	bool decompose_trivial_vertices();
-	int decompose_with_equations(int level);
+	bool decompose_with_equations();
 	int smooth_with_equation(equation &eqn);
-	int resolve_equation(equation &eqn);
-	int resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md);
 
 	// trivial, or hard
 	int classify();
@@ -70,14 +67,18 @@ private:
 	int remove_empty_edges();
 
 	// identify and handle equations 
-	int identify_equations0(vector<equation> &eqns);
-	int identify_equations1(vector<equation> &eqns);
-	int identify_equations2(vector<equation> &eqns);
-	int identify_equations3(vector<equation> &eqns);
+	bool identify_equations1(vector<equation> &eqns);
+	bool identify_equations2(vector<equation> &eqns);
+	bool identify_equations3(vector<equation> &eqns);
 	bool verify_equation_nontrivial(equation &eqn);
 	bool verify_equation_mergable(equation &eqn);
 
+	// resolve equation
+	int resolve_equation(equation &eqn);
+	int resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md);
+
 	// use equation to decompose trivial vertex, new feature
+	bool resolve_vertex_with_equations(vector<equation> &eqns);
 	bool resolve_vertex_with_equation1(equation &eqn);
 	bool resolve_vertex_with_equation2(equation &eqn);
 
@@ -91,8 +92,9 @@ private:
 	// check, and make two edges adjacent
 	bool check_adjacent_mergable(int ex, int ey, vector<PI> &p);
 	bool check_adjacent_mergable(int ex, int ey, nested_graph &nt);
-	int build_adjacent_edges(const vector<PI> &p);
 	int check_distant_mergable(int x, int y, double w, VE &p);
+	int check_distant_mergable(int x, int y, double w);
+	int build_adjacent_edges(const vector<PI> &p);
 
 	// decompose the graph with greedy algorithm
 	int greedy_decompose();
