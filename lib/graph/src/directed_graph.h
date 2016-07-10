@@ -45,7 +45,8 @@ public:
 	virtual int compute_in_partner(int x);
 	virtual int compute_out_partner(int x);
 	virtual int check_nest(int x, int r, set<edge_descriptor> &vv);
-	virtual int check_nest(int x, int r);
+	virtual int check_nest(int x, int r, set<edge_descriptor> &vv, const vector<int> &tpo);
+	virtual int check_nest(int x, int r, const vector<int> &tpo);
 
 	// draw
 	int draw(const string &file, const MIS &mis, const MES &mes, double len);

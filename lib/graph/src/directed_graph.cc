@@ -168,26 +168,22 @@ int directed_graph::move_edge(edge_base *e, int x, int y)
 
 bool directed_graph::bfs_reverse(const vector<int> &t, int s, const set<edge_descriptor> &fb)
 {
-	vector<bool> closed;
-	closed.resize(num_vertices(), false);
 	vector<int> open = t;
+	set<int> closed(t.begin(), t.end());
 	int p = 0;
 
 	while(p < open.size())
 	{
 		int x = open[p];
 		if(x == s) return true;
-
 		p++;
-		if(closed[x] == true) continue;
-		closed[x] = true;
-
 		edge_iterator it1, it2;
 		for(tie(it1, it2) = in_edges(x); it1 != it2; it1++)
 		{
 			if(fb.find(*it1) != fb.end()) continue;
 			int y = (*it1)->source();
-			if(closed[y] == true) continue;
+			if(closed.find(y) != closed.end()) continue;
+			closed.insert(y);
 			open.push_back(y);
 		}
 	}
@@ -196,36 +192,31 @@ bool directed_graph::bfs_reverse(const vector<int> &t, int s, const set<edge_des
 
 int directed_graph::bfs_reverse(int t, vector<int> &v, vector<int> &b)
 {
-	v.assign(num_vertices(), -1);
-	b.assign(num_vertices(), -1);
-	vector<bool> closed;
-	closed.resize(num_vertices(), false);
+	v.clear();
+	b.clear();
+	set<int> closed;
 	vector<int> open;
 	open.push_back(t);
-	v[t] = 0;
+	closed.insert(t);
+	v.push_back(t);
+	b.push_back(-1);
 	int p = 0;
 
 	while(p < open.size())
 	{
 		int x = open[p];
-		assert(v[x] >= 0);
-
 		p++;
-		if(closed[x] == true) continue;
-		closed[x] = true;
-
 		edge_iterator it1, it2;
 		for(tie(it1, it2) = in_edges(x); it1 != it2; it1++)
 		{
 			int y = (*it1)->source();
-			if(v[y] == -1) 
-			{
-				v[y] = 1 + v[x];
-				b[y] = x;
-			}
-			assert(v[y] <= 1 + v[x]);
-			if(closed[y] == true) continue;
+
+			if(closed.find(y) != closed.end()) continue;
+			closed.insert(y);
 			open.push_back(y);
+
+			v.push_back(y);
+			b.push_back(x);
 		}
 	}
 	return 0;
@@ -234,26 +225,22 @@ int directed_graph::bfs_reverse(int t, vector<int> &v, vector<int> &b)
 int directed_graph::bfs_reverse(int t, set<edge_descriptor> &ss)
 {
 	ss.clear();
-	vector<bool> closed;
-	closed.resize(num_vertices(), false);
+	set<int> closed;
 	vector<int> open;
 	open.push_back(t);
+	closed.insert(t);
 	int p = 0;
-
 	while(p < open.size())
 	{
 		int x = open[p];
-
 		p++;
-		if(closed[x] == true) continue;
-		closed[x] = true;
-
 		edge_iterator it1, it2;
 		for(tie(it1, it2) = in_edges(x); it1 != it2; it1++)
 		{
-			int y = (*it1)->source();
 			ss.insert(*it1);
-			if(closed[y] == true) continue;
+			int y = (*it1)->source();
+			if(closed.find(y) != closed.end()) continue;
+			closed.insert(y);
 			open.push_back(y);
 		}
 	}
@@ -489,25 +476,39 @@ int directed_graph::compute_out_partner(int x)
 	else return *(sv.begin());
 }
 
-int directed_graph::check_nest(int x, int y)
+int directed_graph::check_nest(int x, int y, const vector<int> &tpo)
 {
 	set<edge_descriptor> se;
-	return check_nest(x, y, se);
+	return check_nest(x, y, se, tpo);
 }
 
 int directed_graph::check_nest(int x, int y, set<edge_descriptor> &se)
 {
+	vector<int> v = topological_sort();
+	vector<int> tpo;
+	tpo.assign(num_vertices(), -1);
+	for(int i = 0; i < tpo.size(); i++)
+	{
+		tpo[v[i]] = i;
+	}
+	return check_nest(x, y, se, tpo);
+}
+
+int directed_graph::check_nest(int x, int y, set<edge_descriptor> &se, const vector<int> &tpo)
+{
 	vector<int> rv;
 	bfs_reverse(y, rv);
-	assert(rv[y] == 0);
+	set<int> srv(rv.begin(), rv.end());
 
+	/*
 	vector<int> v = topological_sort();
 	vector<int> order;
 	order.assign(num_vertices(), -1);
-	for(int i = 0; i < v.size(); i++)
+	for(int i = 0; i < tpo.size(); i++)
 	{
-		order[v[i]] = i;
+		order[tpo[i]] = i;
 	}
+	*/
 
 	se.clear();
 	set<int> sv;
@@ -517,7 +518,7 @@ int directed_graph::check_nest(int x, int y, set<edge_descriptor> &se)
 		assert((*it1)->source() == x);
 		int t = (*it1)->target();
 		//printf("check %x, out edge target %d, rv = %d\n", x, t, rv[t]);
-		if(rv[t] < 0) continue;
+		if(srv.find(t) == srv.end()) continue;
 		if(sv.find(t) == sv.end()) sv.insert(t);
 		if(se.find(*it1) == se.end()) se.insert(*it1);
 	}
@@ -530,7 +531,7 @@ int directed_graph::check_nest(int x, int y, set<edge_descriptor> &se)
 		int k = -1;
 		for(set<int>::iterator it = sv.begin(); it != sv.end(); it++)
 		{
-			if(k == -1 || order[*it] < order[k])
+			if(k == -1 || tpo[*it] < tpo[k])
 			{
 				k = *it;
 			}
