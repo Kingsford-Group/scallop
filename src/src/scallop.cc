@@ -323,8 +323,6 @@ int scallop::decompose_with_equations(int level)
 	else if(level == 2) identify_equations2(eqns);
 	else if(level == 3) identify_equations3(eqns);
 
-	if(level == 3) aggressive = true;
-
 	if(eqns.size() == 0) return -2;
 
 	printf("equations = %lu (level = %d)\n", eqns.size(), level);
@@ -338,6 +336,8 @@ int scallop::decompose_with_equations(int level)
 	}
 
 	if(eqns[0].f == 3) return 0;
+
+	if(level == 3) aggressive = true;
 
 	smooth_with_equation(eqns[0]);
 	resolve_equation(eqns[0]);

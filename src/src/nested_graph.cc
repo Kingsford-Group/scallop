@@ -205,7 +205,7 @@ int nested_graph::build_nests0(directed_graph &gr)
 			c++;
 		}
 	}
-	printf("building nested graph takes %d check_nest\n", c);
+	//printf("building nested graph takes %d check_nest\n", c);
 	//assert(check_nested() == true);
 	return 0;
 }
