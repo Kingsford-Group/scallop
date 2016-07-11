@@ -48,6 +48,7 @@ string output_file;
 bool output_tex_files;
 string fixed_gene_name;
 int min_gtf_transcripts_num;
+bool fast_mode;
 
 // for simulation
 int simulation_num_vertices;
@@ -89,6 +90,10 @@ bool parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "-t")
 		{
 			output_tex_files = true;
+		}
+		else if(string(argv[i]) == "-f")
+		{
+			fast_mode = true;
 		}
 		else if(string(argv[i]) == "-s")
 		{

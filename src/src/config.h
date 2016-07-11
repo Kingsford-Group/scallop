@@ -66,6 +66,7 @@ extern int min_gtf_transcripts_num;
 extern int simulation_num_vertices;
 extern int simulation_num_edges;
 extern int simulation_max_edge_weight;
+extern bool fast_mode;
 
 // parse arguments
 bool parse_arguments(int argc, const char ** argv);

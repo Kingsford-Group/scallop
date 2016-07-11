@@ -67,6 +67,7 @@ private:
 	int remove_empty_edges();
 
 	// identify and handle equations 
+	bool identify_equations0(vector<equation> &eqns);
 	bool identify_equations1(vector<equation> &eqns);
 	bool identify_equations2(vector<equation> &eqns);
 	bool identify_equations3(vector<equation> &eqns);
@@ -79,6 +80,7 @@ private:
 
 	// use equation to decompose trivial vertex, new feature
 	bool resolve_vertex_with_equations(vector<equation> &eqns);
+	bool resolve_vertex_with_equation(equation &eqn);
 	bool resolve_vertex_with_equation1(equation &eqn);
 	bool resolve_vertex_with_equation2(equation &eqn);
 
