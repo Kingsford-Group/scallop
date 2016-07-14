@@ -1,7 +1,7 @@
 #!/bin/bash
 
 num=100
-dir=./ensembl/$1/exp1
+dir=./ensembl/$1/exp2
 
 for i in `seq 1 $num`
 do
@@ -23,6 +23,8 @@ do
 
 	t3c=`cat $cur/scallop3.cmp | grep summary | cut -f 9 -d " "`
 	t3d=`cat $cur/scallop3.cmp | grep summary | cut -f 12 -d " "`
+
+	t2t=`cat $cur/scallop2.time | grep summary | cut -f 9 -d " "`
 
 	echo $i $ggg $t2e $t3e $t1c $t1d $t2c $t2d $t3c $t3d
 done

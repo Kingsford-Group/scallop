@@ -1,6 +1,7 @@
 ## File locations
-REF_FILE_NAME   hg19_RefSeq_fromUCSC100615_sorted_nuc.gtf
-GEN_DIR         genomes/hg19/
+REF_FILE_NAME   genes1_sorted.gtf
+GEN_DIR         /home/mingfus/Data/Transcriptomics/iGenomes/Homo.sapiens/GRCh38/Sequence/Chromosomes
+
 
 ## Library preparation
 # Expression

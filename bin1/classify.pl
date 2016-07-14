@@ -26,8 +26,9 @@ while(<FILE>)
 	my @x = split(' ');
 	my $k = $x[3] - 1;
 
-	if($k <= 8)
+	if($k <= 9)
 	{
+		$p0[$k] = $p0[$k] + $x[1];
 		$t0[$k] = $t0[$k] + $x[1];
 		$t1[$k] = $t1[$k] + $x[5];
 		if($x[9] eq "EQUAL")
@@ -43,6 +44,9 @@ while(<FILE>)
 			$n2[$k] = $n2[$k] + 1;
 		}
 	}
+	
+	next; #TODO
+
 	if($k >= 9)
 	{
 		my $i = 9;

@@ -33,6 +33,8 @@ done
 pdftk $ss cat output $output
 #rm "$prefix".*
 
+exit
+
 prefix="$gene"
 output="$gene".nt.pdf
 

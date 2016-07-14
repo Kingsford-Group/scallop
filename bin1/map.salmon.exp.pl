@@ -52,9 +52,9 @@ while(<FILE2>)
 		next;
 	}
 
-	my $exp = int($line[1]);
+	my $exp = int($line[1] * 10);
 
-	if($exp <= 0)
+	if($exp <= 9)
 	{
 		next;
 	}
