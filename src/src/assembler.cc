@@ -5,7 +5,8 @@
 #include "config.h"
 #include "assembler.h"
 #include "bundle.h"
-#include "scallop.h"
+#include "scallop1.h"
+#include "scallop2.h"
 #include "gtf.h"
 #include "genome.h"
 #include "nested_graph.h"
@@ -87,7 +88,10 @@ int assembler::assemble_bam(const string &file)
 			splice_graph gr;
 			bd.build_splice_graph(gr);
 
-			scallop sc(name, gr);
+			scallop2 sc(name, gr);
+			sc.print();
+
+			continue;
 			sc.assemble();
 
 			if(output_file != "") bd.output_gtf(fout, sc.paths, algo, index);
@@ -124,7 +128,7 @@ int assembler::assemble_gtf(const string &file)
 		splice_graph gr;
 		gg.build_splice_graph(gr);
 
-		scallop sc(name, gr);
+		scallop1 sc(name, gr);
 		sc.assemble();
 
 		if(output_file == "") continue;
@@ -141,7 +145,7 @@ int assembler::assemble_sgr(const string &file)
 	splice_graph sg;
 	sg.build(file);
 
-	scallop sc("shao", sg);
+	scallop1 sc("shao", sg);
 	sc.assemble();
 
 	return 0;

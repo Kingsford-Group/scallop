@@ -1,5 +1,5 @@
-#ifndef __SCALLOP1_H__
-#define __SCALLOP1_H__
+#ifndef __SCALLOP2_H__
+#define __SCALLOP2_H__
 
 #include "path.h"
 #include "equation.h"
@@ -12,13 +12,13 @@ typedef pair< vector<int>, vector<int> > PVV;
 typedef pair<int, int> PI;
 typedef map<int, int> MI;
 
-// for perfectly estimated splice graph
-class scallop1
+// for noisy splice graph
+class scallop2
 {
 public:
-	scallop1();
-	scallop1(const string &name, splice_graph &gr);
-	virtual ~scallop1();
+	scallop2();
+	scallop2(const string &name, splice_graph &gr);
+	virtual ~scallop2();
 
 public:
 	string name;			// name for this gene
@@ -38,8 +38,8 @@ public:
 
 public:
 	int clear();
-	int save(scallop1 &sc);
-	int load(scallop1 &sc);
+	int save(scallop2 &sc);
+	int load(scallop2 &sc);
 
 public:
 	int assemble();
