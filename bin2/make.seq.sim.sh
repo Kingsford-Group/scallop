@@ -23,8 +23,8 @@ do
 
 	rm -rf $cur/genes
 	./select.transcripts.pl $cur/params.pro $idmap > $cur/tlist
+	./merge.gtf.tlist.pl $gtf $cur/tlist > $cur/expression.gtf
 	./split.bed.pl $cur/params.bed $cur/tlist $cur/genes
-	#./merge.sim.exp.pl $gtf $cur/params.pro > $cur/expression.gtf
 	continue;
 
 	echo "REF_FILE_NAME	$name.gtf" > $params

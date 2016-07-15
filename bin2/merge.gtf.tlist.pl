@@ -2,7 +2,7 @@
 
 if($#ARGV != 1)
 {
-	die("usage: ./merge.expression.pl <gtf-file> <expression-file>\n");
+	die("usage: ./merge.gtf.tlist.pl <gtf-file> <tlist-file>\n");
 }
 
 # load expression file
@@ -14,12 +14,8 @@ open(FILE1, '<', $ARGV[1]) or die("open expression file $ARGV[1] error\n");
 while(<FILE1>)
 {
 	chomp;
-	my @line = split('\t');
-	if($line[5] eq 0)
-	{
-		next;
-	}
-	$expr{$line[1]} = $line[5];
+	my @line = split(' ');
+	$expr{$line[0]} = $line[3];
 }
 
 # read and write gtf file

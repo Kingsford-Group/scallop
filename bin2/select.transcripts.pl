@@ -54,9 +54,9 @@ while(<FILE2>)
 foreach my $k (@list)
 {
 	my @s = split(' ', $k);
-	if($count{$s[0]} >= 3)
+	if($count{$s[0]} >= 2)
 	{
 #print("$k\n");
-		print("$s[1] $s[0]\n");
+		print("$s[1] $s[0] $count{$s[0]} $s[4]\n");
 	}
 }
