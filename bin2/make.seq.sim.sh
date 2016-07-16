@@ -2,6 +2,7 @@
 
 name=p2
 data=`pwd`/../data/ensembl/$1/gtf/
+genome=`pwd`/genomes/human.hg38.genome
 idmap=$data/id.map
 gtf=$data/$name.gtf
 sgtf=$data/"$name"_sorted.gtf
@@ -19,12 +20,25 @@ do
 	ln -sf $sgtf $cur/
 	params=$cur/params
 
-	echo $i
-
 	rm -rf $cur/genes
 	./select.transcripts.pl $cur/params.pro $idmap > $cur/tlist
 	./merge.gtf.tlist.pl $gtf $cur/tlist > $cur/expression.gtf
 	./split.bed.pl $cur/params.bed $cur/tlist $cur/genes
+
+	for k in `ls $cur/genes | grep -v bed | grep -v bam`
+	do
+		echo $i $k
+		mv $cur/genes/$k $cur/genes/$k.bed
+		bedtools bedtobam -bed12 -i $cur/genes/$k.bed -g $genome > $cur/genes/$k.bam
+	done
+
+	for k in `ls $cur/genes | grep bam`
+	do
+		echo $i $k
+		j=${k/.bam/}
+		samtools sort $cur/genes/$k $cur/genes/$j.sort
+	done
+
 	continue;
 
 	echo "REF_FILE_NAME	$name.gtf" > $params

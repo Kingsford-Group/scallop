@@ -29,9 +29,13 @@ while(<FILE2>)
 {
 	chomp;
 	my @line = split('\t');
+	if($line[0] eq "polyA")
+	{
+		next;
+	}
+
 	my @s9 = split(':', $line[3]);
 	my $tid = $s9[2];
-
 	if($tid eq $pret)
 	{
 		$trunk = $trunk . "$_\n";
