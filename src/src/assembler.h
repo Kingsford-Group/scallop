@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <string>
+#include "bundle_base.h"
 
 using namespace std;
 
@@ -16,8 +17,9 @@ public:
 	int process();
 
 	int assemble_sgr(const string &file);
-	int assemble_bam(const string &file);
 	int assemble_gtf(const string &file);
+	int assemble_bam(const string &file);
+	int process_bundle(bundle_base &bb, int &index, ofstream &fout);
 };
 
 #endif

@@ -56,53 +56,57 @@ int assembler::assemble_bam(const string &file)
 		if(p.n_cigar < 1) continue;				// should never happen
 		if(p.n_cigar > 7) continue;				// ignore hits with more than 7 cigar types
 		//if(p.qual <= 4) continue;				// ignore hits with quality-score < 5
+		
 		if(bb.get_num_hits() > 0 && (bb.get_rpos() + min_bundle_gap < p.pos || p.tid != bb.get_tid()))
 		{
-			if(bb.get_num_hits() < min_num_hits_in_bundle) 
-			{
-				bb.clear();
-				continue;
-			}
-
-			index++;
-
-			//string name = "test";
-			string name = "bundle." + tostring(index);
-			if(fixed_gene_name != "" && name != fixed_gene_name)
-			{
-				bb.clear();
-				continue;
-			}
-
-			if(max_num_bundles > 0 && index > max_num_bundles) break;
-
-			bundle bd(bb);
-			bd.build();
-
-			bb.clear();
-
-			bd.print(index);
-
-			if(bd.size() >= 100) continue;
-
-			splice_graph gr;
-			bd.build_splice_graph(gr);
-
-			scallop2 sc(name, gr);
-			sc.print();
-
-			continue;
-			sc.assemble();
-
-			if(output_file != "") bd.output_gtf(fout, sc.paths, algo, index);
-
+			process_bundle(bb, index, fout);
 		}
 		bb.add_hit(h, b);
     }
+	process_bundle(bb, index, fout);
 
     bam_destroy1(b);
     bam_hdr_destroy(h);
     sam_close(fn);
+	if(output_file != "") fout.close();
+
+	return 0;
+}
+
+int assembler::process_bundle(bundle_base &bb, int &index, ofstream &fout)
+{
+	if(bb.get_num_hits() < min_num_hits_in_bundle) 
+	{
+		bb.clear();
+		return 0;
+	}
+
+	index++;
+
+	string name = "bundle." + tostring(index);
+	if(fixed_gene_name != "" && name != fixed_gene_name)
+	{
+		bb.clear();
+		return 0;
+	}
+
+	bundle bd(bb);
+	bd.build();
+
+	bb.clear();
+
+	bd.print(index);
+
+	if(bd.size() >= 100) return 0;
+
+	splice_graph gr;
+	bd.build_splice_graph(gr);
+
+	scallop2 sc(name, gr);
+
+	sc.assemble();
+
+	if(output_file != "") bd.output_gtf(fout, sc.paths, algo, index);
 
 	return 0;
 }

@@ -174,7 +174,12 @@ int scallop2::load(scallop2 &sc)
 int scallop2::assemble()
 {
 	int c = classify();
+
+	print();
+	return 0;
+
 	if(c == TRIVIAL) return 0;
+
 
 	if(algo == "basic") return assemble0();
 	if(algo == "core") return assemble1();
