@@ -7,7 +7,7 @@ partial_exon::partial_exon(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype)
 
 string partial_exon::label() const
 {
-	string l = tostring(lpos % 100000);
+	string l = tostring((lpos + 1) % 100000);
 	string r = tostring(rpos % 100000);
 	return (l + "-" + r);
 }

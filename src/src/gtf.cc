@@ -43,7 +43,7 @@ int gtf::add_vertices(splice_graph &gr)
 	{
 		gr.add_vertex();
 		string l = tostring(lower(it->first) % 100000);
-		string r = tostring(upper(it->first) % 100000);
+		string r = tostring((upper(it->first) - 1) % 100000);
 		string s = l + "-" + r;
 		gr.set_vertex_string(gr.num_vertices() - 1, s);
 		gr.set_vertex_weight(gr.num_vertices() - 1, it->second);

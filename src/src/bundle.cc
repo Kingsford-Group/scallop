@@ -330,8 +330,8 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, const string &
 			fout<<chrm.c_str()<<"\t";			// chromosome name
 			fout<<prefix.c_str()<<"\t";			// source
 			fout<<"exon\t";						// feature
-			fout<<lower(it->first) + 1<<"\t";		// left position
-			fout<<upper(it->first)<<"\t";	// right position
+			fout<<lower(it->first) + 1<<"\t";	// left position
+			fout<<upper(it->first)<<"\t";		// right position
 			fout<<1000<<"\t";					// score
 			fout<<"+\t";						// strand
 			fout<<".\t";						// frame

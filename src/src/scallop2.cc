@@ -175,7 +175,8 @@ int scallop2::assemble()
 {
 	int c = classify();
 
-	print();
+	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
+
 	return 0;
 
 	if(c == TRIVIAL) return 0;
