@@ -20,11 +20,6 @@ uint32_t min_max_splice_boundary_qual = 3;
 uint32_t min_max_left_boundary_qual = 4;
 uint32_t min_max_right_boundary_qual = 4;
 int32_t average_read_length = 75;
-uint32_t min_boundary_score = 100;
-int32_t ascending_step = 10;
-int32_t descending_step = 10;
-uint32_t min_ascending_score = 30;
-uint32_t min_descending_score = 15;
 int num_sample_positions = 100;
 double min_average_overlap = 2;
 int min_max_region_overlap = 5;
@@ -32,8 +27,9 @@ double min_region_coverage = 0.5;
 int max_num_bundles = -1;
 int slope_bin_size = 10;
 int slope_min_bin_num = 9;
-int slope_std_bin_num = 24;
+int slope_std_bin_num = 32;
 int slope_min_distance = 100;
+int min_slope_score = 35;
 
 // for algorithm
 int max_dp_table_size = 10000;
@@ -173,26 +169,6 @@ int load_config(const char * conf_file)
 		else if(strcmp(key, "average_read_length")==0)
 		{
 			average_read_length = (int32_t)atoi(value);
-		}
-		else if(strcmp(key, "ascending_step")==0)
-		{
-			ascending_step = (int32_t)atoi(value);
-		}
-		else if(strcmp(key, "descending_step")==0)
-		{
-			descending_step = (int32_t)atoi(value);
-		}
-		else if(strcmp(key, "min_boundary_score")==0)
-		{
-			min_boundary_score = (uint32_t)atoi(value);
-		}
-		else if(strcmp(key, "min_ascending_score")==0)
-		{
-			min_ascending_score = (uint32_t)atoi(value);
-		}
-		else if(strcmp(key, "min_descending_score")==0)
-		{
-			min_descending_score = (uint32_t)atoi(value);
 		}
 		else if(strcmp(key, "num_sample_positions")==0)
 		{

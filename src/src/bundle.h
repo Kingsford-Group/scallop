@@ -51,7 +51,8 @@ protected:
 	int link_partial_exons();
 
 	// run create_split on the boundaries of all regions
-	int split_boundaries();
+	// not necessary, because now using split_interval_map
+	//int split_boundaries();
 };
 
 #endif

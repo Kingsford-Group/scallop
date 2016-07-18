@@ -269,12 +269,12 @@ int region::build_slopes()
 		int syz = compute_binomial_score(yy + zz, 0.5, zz);
 
 		slope s5(SLOPE5END, lbin, rbin, (sxy < syz) ? sxy : syz);
-		if(s5.score > 40) seeds.push_back(s5);
+		if(s5.score > min_slope_score) seeds.push_back(s5);
 
 		int syx = compute_binomial_score(xx + yy, 0.5, xx);
 		int szy = compute_binomial_score(yy + zz, 0.5, yy);
 		slope s3(SLOPE3END, lbin, rbin, (syx < szy) ? syx : szy);
-		if(s3.score > 40) seeds.push_back(s3);
+		if(s3.score > min_slope_score) seeds.push_back(s3);
 	}
 
 	// middle part
@@ -298,12 +298,12 @@ int region::build_slopes()
 		int syz = compute_binomial_score(yy + zz, 0.5, zz);
 
 		slope s5(SLOPE5END, lbin, rbin, (sxy < syz) ? sxy : syz);
-		if(s5.score > 40) seeds.push_back(s5);
+		if(s5.score > min_slope_score) seeds.push_back(s5);
 
 		int syx = compute_binomial_score(xx + yy, 0.5, xx);
 		int szy = compute_binomial_score(yy + zz, 0.5, yy);
 		slope s3(SLOPE3END, lbin, rbin, (syx < szy) ? syx : szy);
-		if(s3.score > 40) seeds.push_back(s3);
+		if(s3.score > min_slope_score) seeds.push_back(s3);
 	}
 
 	assert(rbin == bins.size());
@@ -333,12 +333,12 @@ int region::build_slopes()
 		int syz = compute_binomial_score(yy + zz, 0.5, zz);
 
 		slope s5(SLOPE5END, lbin, rbin, (sxy < syz) ? sxy : syz);
-		if(s5.score > 40) seeds.push_back(s5);
+		if(s5.score > min_slope_score) seeds.push_back(s5);
 
 		int syx = compute_binomial_score(xx + yy, 0.5, xx);
 		int szy = compute_binomial_score(yy + zz, 0.5, yy);
 		slope s3(SLOPE3END, lbin, rbin, (syx < szy) ? syx : szy);
-		if(s3.score > 40) seeds.push_back(s3);
+		if(s3.score > min_slope_score) seeds.push_back(s3);
 	}
 
 	for(int i = 0; i < seeds.size(); i++)
@@ -481,6 +481,9 @@ int region::build_partial_exons()
 	if(rexon > ppos)
 	{
 		double ave, dev;
+		//printf("-------------------\n");
+		//printf("rectangle [%d, %d), ave = %.2lf, dev = %.2lf\n", ppos, rexon, ave, dev);
+		//printf("===================\n");
 		evaluate_rectangle(ppos, rexon, ave, dev);
 		psum += ave * (rexon - ppos);
 		pvar += dev * dev * (rexon - ppos);

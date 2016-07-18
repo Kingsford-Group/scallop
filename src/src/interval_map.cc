@@ -86,7 +86,14 @@ int32_t compute_sum_overlap(const split_interval_map &imap, SIMI &p, SIMI &q)
 	if(p == imap.end()) return 0;
 
 	int32_t s = 0;
-	for(SIMI it = p; it != q; it++) s += it->second;
+	for(SIMI it = p; it != q; it++)
+	{
+		int l = lower(it->first);
+		int u = upper(it->first);
+		assert(u > l);
+		//printf(" add [%d, %d) : %d\n", lower(it->first), upper(it->first), it->second);
+		s += (u - l) * it->second;
+	}
 	if(q != imap.end()) s += q->second;
 	return s;
 }

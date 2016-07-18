@@ -22,8 +22,30 @@ int bundle::build()
 	infer_junctions();
 	build_partial_exons();
 	link_partial_exons();
-	split_boundaries();
+	//split_boundaries();
 
+	return 0;
+}
+
+int bundle::check_left_ascending()
+{
+	for(int i = 1; i < hits.size(); i++)
+	{
+		int32_t p1 = hits[i - 1].pos;
+		int32_t p2 = hits[i].pos;
+		assert(p1 <= p2);
+	}
+	return 0;
+}
+
+int bundle::check_right_ascending()
+{
+	for(int i = 1; i < hits.size(); i++)
+	{
+		int32_t p1 = hits[i - 1].rpos;
+		int32_t p2 = hits[i].rpos;
+		assert(p1 <= p2);
+	}
 	return 0;
 }
 
@@ -90,27 +112,6 @@ int bundle::infer_junctions()
 	return 0;
 }
 
-int bundle::check_left_ascending()
-{
-	for(int i = 1; i < hits.size(); i++)
-	{
-		int32_t p1 = hits[i - 1].pos;
-		int32_t p2 = hits[i].pos;
-		assert(p1 <= p2);
-	}
-	return 0;
-}
-
-int bundle::check_right_ascending()
-{
-	for(int i = 1; i < hits.size(); i++)
-	{
-		int32_t p1 = hits[i - 1].rpos;
-		int32_t p2 = hits[i].rpos;
-		assert(p1 <= p2);
-	}
-	return 0;
-}
 
 int bundle::build_partial_exons()
 {
@@ -166,6 +167,7 @@ int bundle::link_partial_exons()
 	return 0;
 }
 
+/*
 int bundle::split_boundaries()
 {
 	for(int i = 0; i < pexons.size(); i++)
@@ -175,6 +177,7 @@ int bundle::split_boundaries()
 	}
 	return 0;
 }
+*/
 
 int bundle::size() const
 {
