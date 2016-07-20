@@ -18,25 +18,43 @@ smoother::~smoother()
 
 int smoother::solve()
 {
-	build_edge_map();
+	try
+	{
+		build_edge_map();
 
-	add_vertex_weight_variables();
-	add_vertex_error_variables();
-	add_edge_weight_variables();
-	add_edge_error_variables();
+		add_vertex_weight_variables();
+		add_vertex_error_variables();
+		add_edge_weight_variables();
+		add_edge_error_variables();
 
-	add_vertex_error_constraints();
-	add_edge_error_constraints();
-	add_edge_weight_constraints();
-	add_conservation_constraints();
-	add_additional_constraints();
+		add_vertex_error_constraints();
+		add_edge_error_constraints();
+		add_edge_weight_constraints();
+		add_conservation_constraints();
+		add_additional_constraints();
 
-	set_objective();
+		set_objective();
 
-	model->getEnv().set(GRB_IntParam_OutputFlag, 0);
-	model->optimize();
+		model->getEnv().set(GRB_IntParam_OutputFlag, 0);
 
-	update();
+		model->optimize();
+
+		int f = model->get(GRB_IntAttr_Status);
+
+		if (f != GRB_OPTIMAL) return -1;
+
+		update();
+	} 
+	catch(GRBException e) 
+	{
+		cout << "GRB exception code = " << e.getErrorCode() << ", message = " << e.getMessage() << endl;
+		return -1;
+	} 
+	catch(...) 
+	{
+		cout << "GRB exception" << endl;
+		return -1;
+	}
 
 	return 0;
 }
