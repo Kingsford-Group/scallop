@@ -45,6 +45,7 @@ private:
 	int add_conservation_constraints();
 	int add_additional_constraints();
 
+	int set_objective();
 	int update();
 };
 

@@ -49,9 +49,18 @@ public:
 	int greedy();
 
 private:
+	// used in scallop2
+	bool decompose_trivial_edges();
+	bool decompose_trivial_vertices();
+	int decompose_trivial_vertex(int i);
+	int decompose_trivial_edge(edge_descriptor &e);
+
+	// smooth weights
+	int smooth();
+	int smooth(equation &eqn);
+
 	// iteratively decompose
 	int iterate();
-	bool decompose_trivial_vertices();
 	bool decompose_with_equations(int level);
 
 	// trivial, or hard
@@ -74,7 +83,6 @@ private:
 	bool verify_equation_mergable(equation &eqn);
 
 	// resolve equation
-	int smooth_with_equation(equation &eqn);
 	int resolve_equation(equation &eqn);
 	int resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md);
 

@@ -6,7 +6,7 @@
 #include <map>
 #include <cassert>
 
-#define SMIN 0.0000000001
+#define SMIN 0.00001
 
 using namespace std;
 

@@ -196,11 +196,14 @@ int bundle::build_splice_graph(splice_graph &gr) const
 	for(int i = 0; i < pexons.size(); i++)
 	{
 		const partial_exon &r = pexons[i];
+		int length = r.rpos - r.lpos;
+		assert(length >= 1);
 		gr.add_vertex();
 		gr.set_vertex_string(i + 1, r.label());
 		gr.set_vertex_weight(i + 1, r.ave_abd);
-		gr.set_vertex_stddev(i + 1, r.dev_abd);
+		gr.set_vertex_stddev(i + 1, length * 1.0 / r.dev_abd / r.dev_abd);	// TODO
 	}
+
 	gr.add_vertex();
 	gr.set_vertex_string(pexons.size() + 1, "");
 	gr.set_vertex_weight(pexons.size() + 1, 0);
@@ -218,7 +221,8 @@ int bundle::build_splice_graph(splice_graph &gr) const
 		int32_t xr = compute_overlap(imap, x.rpos - 1);
 		int32_t yl = compute_overlap(imap, y.lpos);
 		double wt = xr < yl ? xr : yl;
-		double sd = 0.5 * x.dev_abd + 0.5 * y.dev_abd;
+		double sd = 1.0;
+		//double sd = 0.5 * x.dev_abd + 0.5 * y.dev_abd;
 
 		edge_descriptor p = gr.add_edge(i + 1, i + 2);
 		gr.set_edge_weight(p, wt);
@@ -232,7 +236,8 @@ int bundle::build_splice_graph(splice_graph &gr) const
 		const partial_exon &x = pexons[b.lrgn];
 		const partial_exon &y = pexons[b.rrgn];
 
-		double sd = 0.5 * x.dev_abd + 0.5 * y.dev_abd;
+		//double sd = 0.5 * x.dev_abd + 0.5 * y.dev_abd;
+		double sd = 1.0;
 
 		edge_descriptor p = gr.add_edge(b.lrgn + 1, b.rrgn + 1);
 		gr.set_edge_weight(p, b.count);
@@ -250,7 +255,8 @@ int bundle::build_splice_graph(splice_graph &gr) const
 		{
 			edge_descriptor p = gr.add_edge(ss, i + 1);
 			gr.set_edge_weight(p, r.ave_abd);
-			gr.set_edge_stddev(p, r.dev_abd);
+			//gr.set_edge_stddev(p, r.dev_abd);
+			gr.set_edge_stddev(p, 1.0);
 		}
 
 		// TODO
@@ -258,7 +264,8 @@ int bundle::build_splice_graph(splice_graph &gr) const
 		{
 			edge_descriptor p = gr.add_edge(i + 1, tt);
 			gr.set_edge_weight(p, r.ave_abd);
-			gr.set_edge_stddev(p, r.dev_abd);
+			//gr.set_edge_stddev(p, r.dev_abd);
+			gr.set_edge_stddev(p, 1.0);
 		}
 	}
 

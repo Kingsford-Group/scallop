@@ -1,4 +1,7 @@
 #include "smoother.h"
+#include "config.h"
+
+#include <cmath>
 
 smoother::smoother(splice_graph &g)
 	: gr(g)
@@ -28,8 +31,9 @@ int smoother::solve()
 	add_conservation_constraints();
 	add_additional_constraints();
 
-	model->getEnv().set(GRB_IntParam_OutputFlag, 0);
+	set_objective();
 
+	model->getEnv().set(GRB_IntParam_OutputFlag, 0);
 	model->optimize();
 
 	update();
@@ -74,8 +78,7 @@ int smoother::add_vertex_error_variables()
 	verr.clear();
 	for(int i = 0; i < gr.num_vertices(); i++)
 	{
-		double sd = gr.get_vertex_stddev(i);
-		GRBVar var = model->addVar(0, GRB_INFINITY, 1.0 / sd, GRB_CONTINUOUS);
+		GRBVar var = model->addVar(0, GRB_INFINITY, 0, GRB_CONTINUOUS);
 		verr.push_back(var);
 	}
 	model->update();
@@ -99,8 +102,7 @@ int smoother::add_edge_error_variables()
 	eerr.clear();
 	for(int i = 0; i < i2e.size(); i++)
 	{
-		double sd = gr.get_edge_stddev(i2e[i]);
-		GRBVar var = model->addVar(0, GRB_INFINITY, 1.0 / sd, GRB_CONTINUOUS);
+		GRBVar var = model->addVar(0, GRB_INFINITY, 0, GRB_CONTINUOUS);
 		eerr.push_back(var);
 	}
 	model->update();
@@ -198,6 +200,33 @@ int smoother::add_additional_constraints()
 	return 0;
 }
 
+int smoother::set_objective()
+{
+	GRBQuadExpr expr;
+	for(int i = 0; i < gr.num_vertices(); i++)
+	{
+		double sd = gr.get_vertex_stddev(i);
+		double wt = average_read_length + sd;
+		if(i == 0) wt = 0;
+		if(i == gr.num_vertices() - 1) wt = 0;
+		expr += wt * verr[i] * verr[i];
+	}
+
+	for(int i = 0; i < i2e.size(); i++)
+	{
+		double sd = gr.get_edge_stddev(i2e[i]);
+		double wt = average_read_length + sd;
+		int s = i2e[i]->source();
+		int t = i2e[i]->target();
+		if(s == 0) wt = 0;
+		if(t == gr.num_vertices() - 1) wt = 0;
+		expr += wt * eerr[i] * eerr[i];
+	}
+
+	model->setObjective(expr);
+	return 0;
+}
+
 int smoother::update()
 {
 	for(int i = 0; i < vnwt.size(); i++)
@@ -210,7 +239,13 @@ int smoother::update()
 	for(int i = 0; i < enwt.size(); i++)
 	{
 		double w1 = enwt[i].get(GRB_DoubleAttr_X);
+		double e1 = eerr[i].get(GRB_DoubleAttr_X);
 		double w0 = gr.get_edge_weight(i2e[i]);
+		double d0 = gr.get_edge_stddev(i2e[i]);
+		edge_descriptor e = i2e[i];
+		int s = e->source();
+		int t = e->target();
+		printf("edge (%d, %d), initial weight = %.2lf, error = %.2lf, new weight = %.2lf, stddev = %.2lf\n", s, t, w0, e1, w1, d0);
 		gr.set_edge_weight(i2e[i], w1);
 	}
 
