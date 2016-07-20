@@ -51,14 +51,17 @@ private:
 	int init_super_edges();
 
 	// decompose trivial edges and vertices
-	bool decompose_trivial_edges();
-	bool decompose_trivial_vertices();
-	bool decompose_trivial_vertex(int i);
-	bool decompose_trivial_edge(edge_descriptor &e);
+	bool join_trivial_edges();
+	bool join_trivial_edge(edge_descriptor &e);
+	bool join_trivial_vertices();
+	bool join_trivial_vertex(int i);
+	bool decompose_trivial_internal_vertices();
+	bool decompose_trivial_external_vertices();
+	bool decompose_trivial_vertex(int v);
 
 	// smooth weights
 	int smooth();
-	int smooth(equation &eqn);
+	bool smooth(equation &eqn);
 
 	// iteratively decompose
 	int iterate();
