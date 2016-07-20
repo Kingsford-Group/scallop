@@ -71,6 +71,7 @@ public:
 
 	// rounding all weights to integers
 	int round_weights();
+	int locate(int v);
 
 	// draw
 	int draw(const string &file);

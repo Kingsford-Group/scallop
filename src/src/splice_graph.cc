@@ -619,6 +619,27 @@ double splice_graph::compute_minimum_weight(const VE &p)
 	return min;
 }
 
+int splice_graph::locate(int v)
+{
+	if(v == 0) return 1;
+	if(v == num_vertices() - 1) return 2;
+	edge_iterator it1, it2;
+	bool b1 = false, b2 = false;
+	for(tie(it1, it2) = in_edges(v); it1 != it2; it1++)
+	{
+		if((*it1)->source() == 0) b1 = true;
+	}
+	for(tie(it1, it2) = out_edges(v); it1 != it2; it1++)
+	{
+		if((*it1)->target() == num_vertices() - 1) b2 = true;
+	}
+
+	if(b1 == true && b2 == true) return 3;
+	if(b1 == true) return 4;
+	if(b2 == true) return 5;
+	return 0;
+}
+
 int splice_graph::round_weights()
 {
 	MED m = ewrt;
