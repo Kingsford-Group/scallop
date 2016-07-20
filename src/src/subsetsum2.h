@@ -8,7 +8,7 @@ using namespace std;
 
 typedef pair<int, int> PI;
 
-#define SMIN 0.0000000001
+#define SMIN 0.00001
 
 class subsetsum2
 {

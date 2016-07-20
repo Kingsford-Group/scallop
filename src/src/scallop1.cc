@@ -539,6 +539,7 @@ int scallop1::split_edge(int ei, double w)
 	double dd = gr.get_edge_stddev(ee);
 
 	if(fabs(ww - w) <= SMIN) return ei;
+
 	assert(ww >= w + SMIN);
 
 	int s = ee->source();
