@@ -34,7 +34,7 @@ int min_slope_score = 35;
 // for algorithm
 int max_dp_table_size = 10000;
 int max_num_subsetsum_solutions = 10;
-double max_equation_error_ratio = 0.00000001;
+double max_equation_error_ratio = 0.2;
 
 //// from command line
 string algo;

@@ -35,14 +35,13 @@ int subsetsum::solve()
 int subsetsum::init_seeds()
 {
 	seeds.clear();
-	for(int i = 0; i < raw.size(); i++)
+	for(int i = 0; i < raw.size() - 1; i++)
 	{
 		seeds.push_back(PI(raw[i], i));
 	}
 	sort(seeds.begin(), seeds.end());
-	target = seeds[seeds.size() - 1].first;
+	target = raw[raw.size() - 1];
 	ubound = ceil(target * 2.0);
-	seeds.pop_back();
 	return 0;
 }
 

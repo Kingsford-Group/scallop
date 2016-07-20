@@ -1,6 +1,5 @@
 #include "scallop2.h"
 #include "subsetsum.h"
-#include "subsetsum1.h"
 #include "config.h"
 #include "smoother.h"
 #include "nested_graph.h"
@@ -285,18 +284,12 @@ int scallop2::iterate()
 		bool b = false;
 
 		b = decompose_trivial_vertices();
-		if(b == true) print();
-		if(b == true) continue;
-
-		break;
-
-		b = decompose_with_equations(0);
-		if(b == true) print();
 		if(b == true) continue;
 
 		b = decompose_with_equations(1);
-		if(b == true) print();
 		if(b == true) continue;
+
+		break;
 
 		b = decompose_with_equations(2);
 		if(b == true) print();
@@ -311,47 +304,52 @@ bool scallop2::decompose_with_equations(int level)
 {
 	vector<equation> eqns;
 
+	gr.round_weights();
+
 	bool b = false;
-	if(level == 0)
-	{
-		if(b == false) b = identify_equations0(eqns);
-	}
-	else if(level == 1)
-	{
-		if(b == false) b = identify_equations1(eqns);
-		if(b == false) b = identify_equations2(eqns);
-	}
-	else if(level == 2)
-	{
-		if(b == false) b = identify_equations3(eqns);
-	}
+	if(level == 1) b = identify_equations1(eqns);
+	if(level == 2) b = identify_equations2(eqns);
 
 	if(eqns.size() == 0) return false;
 
-	sort(eqns.begin(), eqns.end(), equation_cmp2);
+	sort(eqns.begin(), eqns.end(), equation_cmp1);
 
-	if(fast_mode == false && (eqns[0].f < 2 || eqns[0].d > 0))
+	printf("candidate equations:\n");
+	for(int i = 0; i < eqns.size(); i++)
 	{
-		sort(eqns.begin(), eqns.end(), equation_cmp1);
-		resolve_vertex_with_equations(eqns);
-		sort(eqns.begin(), eqns.end(), equation_cmp2);
-	}
-
-	printf("equations = %lu\n", eqns.size());
-
-	for(int i = 0; i < eqns.size(); i++) 
-	{
-		printf(" "); 
 		eqns[i].print(i);
 	}
 
-	if(eqns[0].f == 3) return true;
+	equation eqn(0);
+	for(int i = 0; i < eqns.size(); i++)
+	{
+		eqn = eqns[i];
 
-	smooth(eqns[0]);
-	resolve_equation(eqns[0]);
+		if(verify_equation_mergable(eqn) == false) continue;
+		if(verify_equation_nontrivial(eqn) == false) continue;
 
-	if(eqns[0].f >= 2) return true;
-	else return false;
+		scallop2 sc;
+		save(sc);
+		smooth(eqn);
+		resolve_equation(eqn);
+		load(sc);
+
+		if(eqn.f == 2 && eqn.d == 0) break;
+	}
+
+	if(eqn.f != 2 || eqn.d != 0) return false;
+
+	eqn.print(99);
+
+	printf("smooth with equation\n");
+	smooth(eqn);
+	print();
+
+	printf("resolve equation\n");
+	resolve_equation(eqn);
+	print();
+
+	return true;
 }
 
 int scallop2::init_super_edges()
@@ -366,67 +364,6 @@ int scallop2::init_super_edges()
 		mev.insert(PEV(*it1, v));
 	}
 	return 0;
-}
-
-int scallop2::reconstruct_splice_graph()
-{
-	while(true)
-	{
-		bool flag = false;
-		for(int i = 0; i < gr.num_vertices(); i++)
-		{
-			bool b = init_trivial_vertex(i);
-			if(b == true) flag = true;
-		}
-		if(flag == false) break;
-	}
-	return 0;
-}
-
-bool scallop2::init_trivial_vertex(int x)
-{
-	int id = gr.in_degree(x);
-	int od = gr.out_degree(x);
-
-	if(id <= 0 || od <= 0) return false;
-	if(id >= 2 && od >= 2) return false;
-	//if(id <= 1 && od <= 1) return false;
-
-	edge_iterator it1, it2;
-	edge_iterator ot1, ot2;
-	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
-	{
-
-		for(tie(ot1, ot2) = gr.out_edges(x); ot1 != ot2; ot1++)
-		{
-			int s = (*it1)->source();
-			int t = (*ot1)->target();
-
-			double w1 = gr.get_edge_weight(*it1);
-			double a1 = gr.get_edge_stddev(*it1);
-			double w2 = gr.get_edge_weight(*ot1);
-			double a2 = gr.get_edge_stddev(*ot1);
-
-			double w = w1 < w2 ? w1 : w2;
-			double a = w1 < w2 ? a1 : a2;
-
-			edge_descriptor p = gr.add_edge(s, t);
-			gr.set_edge_weight(p, w);
-			gr.set_edge_stddev(p, a);
-
-			assert(mev.find(*it1) != mev.end());
-			assert(mev.find(*ot1) != mev.end());
-
-			vector<int> v1 = mev[*it1];
-			vector<int> v2 = mev[*ot1];
-			v1.insert(v1.end(), v2.begin(), v2.end());
-
-			if(mev.find(p) != mev.end()) mev[p] = v1;
-			else mev.insert(PEV(p, v1));
-		}
-	}
-	gr.clear_vertex(x);
-	return true;
 }
 
 int scallop2::split_merge_path(const VE &p, double wx, vector<int> &vv)
@@ -640,264 +577,146 @@ bool scallop2::verify_equation_nontrivial(equation &eqn)
 	return true;
 }
 
-bool scallop2::identify_equations0(vector<equation> &eqns)
+int scallop2::identify_equation(const vector<int> &subs, vector<equation> &eqns)
 {
-	eqns.clear();
-	for(int i = 0; i < gr.num_vertices(); i++)
+	if(subs.size() == 0) return 0;
+
+	int e = subs[0];
+	int s = i2e[e]->source();
+	int t = i2e[e]->target();
+	double w = gr.get_edge_weight(i2e[e]);
+
+	SE ff, bb;
+	gr.bfs(t, ff);
+	gr.bfs_reverse(s, bb);
+	ff.insert(bb.begin(), bb.end());
+
+	VE vv(gr.num_edges());
+
+	for(int i = 1; i < subs.size(); i++)
 	{
-		if(gr.degree(i) == 0) continue;
-		if(gr.in_degree(i) == 1) continue;
-		if(gr.out_degree(i) == 1) continue;
+		e = subs[i];
+		s = i2e[e]->source();
+		t = i2e[e]->target();
+		w += gr.get_edge_weight(i2e[e]);
 
-		MI m1;
-		MI m2;
-		edge_iterator it1, it2;
-		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
-		{
-			int w = (int)(gr.get_edge_weight(*it1));
-			int e = e2i[*it1];
-			if(m1.find(w) != m1.end()) continue;
-			m1.insert(PI(w, e));
-		}
+		SE f, b;
+		gr.bfs(t, f);
+		gr.bfs_reverse(s, b);
+		f.insert(b.begin(), b.end());
 
-		for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
-		{
-			int w = (int)(gr.get_edge_weight(*it1));
-			int e = e2i[*it1];
-			if(m2.find(w) != m2.end()) continue;
-			m2.insert(PI(w, e));
-		}
-
-		for(MI::iterator it = m1.begin(); it != m1.end(); it++)
-		{
-			int w = it->first;
-			if(m2.find(w) == m2.end()) continue;
-			vector<int> s;
-			vector<int> t;
-			s.push_back(it->second);
-			t.push_back(m2[w]);
-
-			equation eqn(s, t, 0);
-			eqn.f = 2;
-			eqn.a = 1;
-			eqn.d = 0;
-			eqn.w = w;
-
-			eqns.push_back(eqn);
-			return true;
-		}
+		VE::iterator it = set_union(f.begin(), f.end(), ff.begin(), ff.end(), vv.begin());
+		ff = SE(vv.begin(), it);
 	}
-	return false;
+
+	int sw = (int)(w);
+
+	set<int> ss(subs.begin(), subs.end());
+	vector<PI> xi;
+	for(SE::iterator it = ff.begin(); it != ff.end(); it++)
+	{
+		edge_descriptor e = *it;
+		if(ss.find(e2i[e]) != ss.end()) continue;
+		int s = e->source();
+		int t = e->target();
+		if(s == 0 || t == gr.num_vertices() - 1) continue;
+		int ww = (int)(gr.get_edge_weight(*it));
+		if(ww <= 0) continue;
+		if(ww > sw) continue;
+		//if(ww * 1.0 > sw * 1.0 * (1.0 + max_equation_error_ratio)) continue;
+		xi.push_back(PI(ww, e2i[*it]));
+	}
+
+	if(xi.size() == 0) return 0;
+
+	sort(xi.begin(), xi.end());
+	xi.push_back(PI(sw, e));
+
+	vector<int> v;
+	for(int i = 0; i < xi.size(); i++)
+	{
+		v.push_back(xi[i].first);
+	}
+
+	subsetsum sss(v);
+	sss.solve();
+
+	if(sss.subsets.size() == 0) return 0;
+
+	for(int i = 0; i < sss.subsets.size(); i++)
+	{
+		vector<int> subset = sss.subsets[i];
+		int opt = sss.opts[i];
+
+		vector<int> subt;
+		for(int j = 0; j < subset.size(); j++)
+		{
+			int k = subset[j];
+			assert(xi[k].second != -1);
+			subt.push_back(xi[k].second);
+		}
+
+		int err = (int)fabs(opt - sw);
+
+		if(err * 1.0 > 1.0 * sw * max_equation_error_ratio) continue;
+
+		equation eqn(err);
+		eqn.s = subs;
+		eqn.t = subt;
+		eqns.push_back(eqn);
+
+		return 0;		// only consider one equation
+	}
+	return 0;
 }
 
-
-bool scallop2::identify_equations1(vector<equation> &eqns)
+int scallop2::identify_equations1(vector<equation> &eqns)
 {
-	typedef map<int, vector<int> > MIV;
-	typedef pair<int, vector<int> > PIV;
-
-	MIV m;
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
-	{
-		int w = (int)(gr.get_edge_weight(*it1));
-		int e = e2i[*it1];
-		if(m.find(w) != m.end()) 
-		{
-			m[w].push_back(e);
-		}
-		else
-		{
-			vector<int> v;
-			v.push_back(e);
-			m.insert(PIV(w, v));
-		}
-	}
-
-	nested_graph nt(gr);
-	for(MIV::iterator it = m.begin(); it != m.end(); it++)
-	{
-		vector<int> &v = it->second;
-		if(v.size() <= 1) continue;
-		for(int i = 0; i < v.size(); i++)
-		{
-			for(int j = i + 1; j < v.size(); j++)
-			{
-				bool b = check_adjacent_mergable(v[i], v[j], nt);
-				int l = check_distant_mergable(v[i], v[j], it->first);
-
-				vector<int> s;
-				vector<int> t;
-				s.push_back(v[i]);
-				t.push_back(v[j]);
-
-				equation eqn(s, t, 0);
-
-				if(b == true || l >= 0) eqn.f = 2;
-				else eqn.f = 1;
-
-				if(b == true)
-				{
-					eqn.a = 1;
-					eqn.d = 0;
-				}
-				else
-				{
-					eqn.a = 0;
-					eqn.d = 1;
-				}
-
-				eqn.w = it->first;
-
-				if(b == true)
-				{
-					eqns.push_back(eqn);
-					return true;
-				}
-
-				if(fast_mode == true)
-				{
-					resolve_vertex_with_equation(eqn);
-					eqns.push_back(eqn);
-					if(eqn.f == 3) return true;
-				}
-			}
-		}
-	}
-	return false;
-}
-
-bool scallop2::identify_equations2(vector<equation> &eqns)
-{
-	vector<PI> p;
 	for(int i = 0; i < i2e.size(); i++)
 	{
 		edge_descriptor &e = i2e[i];
 		if(e == null_edge) continue;
-		if(e->source() == 0 && e->target() == gr.num_vertices() - 1) continue;
-		int w = (int)(gr.get_edge_weight(e));
-		if(w <= 0) continue;
-		p.push_back(PI(w, i));
+		if(e->source() == 0) continue;
+		if(e->target() == gr.num_vertices() - 1) continue;
+
+		vector<int> s;
+		s.push_back(i);
+
+		identify_equation(s, eqns);
 	}
+	return 0;
 
-	if(p.size() == 0) return false;
-
-	subsetsum1 sss1(p, p);
-	sss1.solve();
-
-	nested_graph nt(gr);
-	for(int i = 0; i < sss1.eqns.size(); i++)
-	{
-		equation &eqn = sss1.eqns[i];
-		assert(eqn.s.size() == 1);
-		if(eqn.t.size() == 1) continue;
-		if(verify_equation_mergable(eqn) == false) continue;
-		if(verify_equation_nontrivial(eqn) == false) continue;
-
-		if(fast_mode == true)
-		{
-			for(int k = 0; k < eqn.t.size(); k++)
-			{
-				bool b = check_adjacent_mergable(eqn.s[0], eqn.t[k], nt);
-				if(b == false) eqn.d++;
-				else eqn.a++;
-			}
-			resolve_vertex_with_equation(eqn);
-			eqns.push_back(eqn);
-			if(eqn.f == 3) return true;
-		}
-		else
-		{
-			scallop2 sc;
-			save(sc);
-			smooth(eqn);
-			resolve_equation(eqn);
-			load(sc);
-			eqns.push_back(eqn);
-			if(eqn.f == 2 && eqn.d == 0) return true;
-		}
-	}
-	return false;
 }
 
-bool scallop2::identify_equations3(vector<equation> &eqns)
+int scallop2::identify_equations2(vector<equation> &eqns)
 {
-	vector<PI> p;
+	vector<int> p;
 	for(int i = 0; i < i2e.size(); i++)
 	{
 		edge_descriptor &e = i2e[i];
 		if(e == null_edge) continue;
-		if(e->source() == 0 && e->target() == gr.num_vertices() - 1) continue;
+		if(e->source() == 0) continue;
+		if(e->target() == gr.num_vertices() - 1) continue;
 		int w = (int)(gr.get_edge_weight(e));
 		if(w <= 0) continue;
-		p.push_back(PI(w, i));
+		p.push_back(i);
 	}
 
-	if(p.size() == 0) return false;
+	if(p.size() == 0) return 0;
 
-	vector<PI> ppi;
-	vector<PI> ppw;
 	for(int i = 0; i < p.size(); i++)
 	{
 		for(int j = i + 1; j < p.size(); j++)
 		{
-			int w = p[i].first + p[j].first;
-			ppw.push_back(PI(w, ppw.size()));
-			ppi.push_back(PI(p[i].second, p[j].second));
+			vector<int> s;
+			s.push_back(p[i]);
+			s.push_back(p[j]);
+			
+			identify_equation(s, eqns);
 		}
 	}
 
-	subsetsum1 sss1(p, ppw);
-	sss1.solve();
-
-	nested_graph nt(gr);
-	for(int i = 0; i < sss1.eqns.size(); i++)
-	{
-		equation &eqn = sss1.eqns[i];
-		assert(eqn.s.size() == 1);
-		if(eqn.t.size() == 1) continue;
-
-		int si = eqn.s[0];
-		eqn.w = ppw[si].first;
-		eqn.s.clear();
-		eqn.s.push_back(ppi[si].first);
-		eqn.s.push_back(ppi[si].second);
-
-		set<int> ss(eqn.t.begin(), eqn.t.end());
-		if(ss.find(eqn.s[0]) != ss.end()) continue;
-		if(ss.find(eqn.s[1]) != ss.end()) continue;
-
-		if(verify_equation_mergable(eqn) == false) continue;
-		if(verify_equation_nontrivial(eqn) == false) continue;
-
-		if(fast_mode == true)
-		{
-			for(int j = 0; j < eqn.s.size(); j++)
-			{
-				for(int k = 0; k < eqn.t.size(); k++)
-				{
-					bool b = check_adjacent_mergable(eqn.s[j], eqn.t[k], nt);
-					if(b == false) eqn.d++;
-					else eqn.a++;
-				}
-			}
-			resolve_vertex_with_equation(eqn);
-			eqns.push_back(eqn);
-			if(eqn.f == 3) return true;
-		}
-		else
-		{
-			scallop2 sc;
-			save(sc);
-			smooth(eqn);
-			resolve_equation(eqn);
-			load(sc);
-			eqns.push_back(eqn);
-			if(eqn.f == 2 && eqn.d == 0) return true;
-		}
-	}
-
-	return false;
+	return 0;
 }
 
 bool scallop2::resolve_vertex_with_equations(vector<equation> &eqns)
@@ -1081,14 +900,8 @@ bool scallop2::resolve_vertex_with_equation2(equation &eqn)
 
 int scallop2::smooth()
 {
-	printf("smooth all weights\n");
 	smoother sm(gr);
 	sm.solve();
-	print();
-
-	printf("round all weights\n");
-	gr.round_weights();
-	print();
 	return 0;
 }
 
@@ -1098,16 +911,9 @@ int scallop2::smooth(equation &eqn)
 	for(int i = 0; i < eqn.s.size(); i++) vx.push_back(i2e[eqn.s[i]]);
 	for(int i = 0; i < eqn.t.size(); i++) vy.push_back(i2e[eqn.t[i]]);
 
-	printf("smooth all weights\n");
 	smoother sm(gr);
 	sm.add_equation(vx, vy);
 	sm.solve();
-	print();
-
-	printf("round all weights\n");
-	gr.round_weights();
-	print();
-
 	return 0;
 }
 
@@ -1368,8 +1174,8 @@ bool scallop2::decompose_trivial_edges()
 		if(gr.out_degree(s) != 1) continue;
 		if(gr.in_degree(t) != 1) continue;
 
-		decompose_trivial_edge(e);
-		return true;
+		bool b = decompose_trivial_edge(e);
+		if(b == true) return true;
 	}
 
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
@@ -1396,13 +1202,13 @@ bool scallop2::decompose_trivial_edges()
 		gr.set_edge_stddev(e1, d / 2.0);
 		gr.set_edge_stddev(e2, d / 2.0);
 
-		decompose_trivial_vertex(i);
-		return true;
+		bool b = decompose_trivial_vertex(i);
+		if(b == true) return true;
 	}
 	return false;
 }
 
-int scallop2::decompose_trivial_edge(edge_descriptor &e)
+bool scallop2::decompose_trivial_edge(edge_descriptor &e)
 {
 	int s = e->source();
 	int t = e->target();
@@ -1425,9 +1231,7 @@ int scallop2::decompose_trivial_edge(edge_descriptor &e)
 	}
 	gr.set_edge_weight(e, ew);
 
-	decompose_trivial_vertex(t);
-
-	return 0;
+	return decompose_trivial_vertex(t);
 }
 
 bool scallop2::decompose_trivial_vertices()
@@ -1438,33 +1242,39 @@ bool scallop2::decompose_trivial_vertices()
 		if(gr.degree(i) == 0) continue;
 		if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) continue;
 
-		decompose_trivial_vertex(i);
-		flag = true;
+		bool b = decompose_trivial_vertex(i);
+		if(b == true) flag = true;
 	}
 	return flag;
 }
 
-int scallop2::decompose_trivial_vertex(int i)
+bool scallop2::decompose_trivial_vertex(int i)
 {
-	printf("decompose trivial vertex %d\n", i);
 	equation eqn(0);
 	edge_iterator it1, it2;
 	for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
 	{
-		int e = e2i[*it1];
-		eqn.s.push_back(e);
+		edge_descriptor e = *it1;
+		if(e->source() == 0) return 0;
+		if(e->target() == gr.num_vertices() - 1) return false;
+		int ei = e2i[e];
+		eqn.s.push_back(ei);
 	}
 	for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
 	{
-		int e = e2i[*it1];
-		eqn.t.push_back(e);
+		edge_descriptor e = *it1;
+		if(e->source() == 0) return 0;
+		if(e->target() == gr.num_vertices() - 1) return false;
+		int ei = e2i[e];
+		eqn.t.push_back(ei);
 	}
 
+	printf("decompose trivial vertex %d\n", i);
 	printf(" ");
 	eqn.print(i);
 
 	resolve_equation(eqn);
-	return 0;
+	return true;
 }
 
 int scallop2::greedy_decompose()
@@ -1519,21 +1329,6 @@ int scallop2::collect_path(int e)
 	return 0;
 }
 
-int scallop2::remove_empty_edges()
-{
-	for(int i = 0; i < i2e.size(); i++)
-	{
-		if(i2e[i] == null_edge) continue;
-		double w = gr.get_edge_weight(i2e[i]);
-		if(w >= 1) continue;
-		assert(w <= 0);
-		e2i.erase(i2e[i]);
-		gr.remove_edge(i2e[i]);
-		i2e[i] = null_edge;
-	}
-	return 0;
-}
-
 int scallop2::print()
 {
 	int n = 0;
@@ -1582,7 +1377,7 @@ int scallop2::draw_splice_graph(const string &file)
 		sprintf(buf, "%d:%.0lf:%.0lf", i, w, d);
 		mes.insert(PES(i2e[i], buf));
 	}
-	gr.draw(file, mis, mes, 3.0);
+	gr.draw(file, mis, mes, 4.0);
 	return 0;
 }
 

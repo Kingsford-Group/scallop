@@ -23,11 +23,6 @@ public:
 public:
 	string name;			// name for this gene
 	splice_graph gr;		// splice graph
-	/*
-	nested_graph nt;		// nested graph
-	int gr_version;			// version of splice graph
-	int nt_version;			// version of nested graph
-	*/
 
 	MEI e2i;				// edge map, from edge to index
 	VE i2e;					// edge map, from index to edge
@@ -49,11 +44,17 @@ public:
 	int greedy();
 
 private:
-	// used in scallop2
+	// trivial, or hard
+	int classify();
+
+	// init
+	int init_super_edges();
+
+	// decompose trivial edges and vertices
 	bool decompose_trivial_edges();
 	bool decompose_trivial_vertices();
-	int decompose_trivial_vertex(int i);
-	int decompose_trivial_edge(edge_descriptor &e);
+	bool decompose_trivial_vertex(int i);
+	bool decompose_trivial_edge(edge_descriptor &e);
 
 	// smooth weights
 	int smooth();
@@ -63,22 +64,10 @@ private:
 	int iterate();
 	bool decompose_with_equations(int level);
 
-	// trivial, or hard
-	int classify();
-
-	// simplify the splice graph and init all data structures
-	int init_super_edges();
-	int reconstruct_splice_graph();
-	bool init_trivial_vertex(int x);
-
-	// remove empty edges, not use now
-	int remove_empty_edges();
-
 	// identify and handle equations 
-	bool identify_equations0(vector<equation> &eqns);
-	bool identify_equations1(vector<equation> &eqns);
-	bool identify_equations2(vector<equation> &eqns);
-	bool identify_equations3(vector<equation> &eqns);
+	int identify_equations1(vector<equation> &eqns);
+	int identify_equations2(vector<equation> &eqns);
+	int identify_equation(const vector<int> &subs, vector<equation> &eqns);
 	bool verify_equation_nontrivial(equation &eqn);
 	bool verify_equation_mergable(equation &eqn);
 
