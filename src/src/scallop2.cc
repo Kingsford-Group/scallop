@@ -358,10 +358,13 @@ bool scallop2::decompose_with_equations(int level)
 
 	if(eqn.f != 2 || eqn.d != 0) return false;
 
-	printf("smooth and resolve with the chosen equation\n");
+	printf("smooth with equation\n");
 	eqn.print(99);
-
 	smooth(eqn);
+	print();
+
+	printf("resolve with equation\n");
+	eqn.print(99);
 	resolve_equation(eqn);
 
 	return true;

@@ -37,10 +37,8 @@ int bundle_base::add_hit(bam_hdr_t *h, bam1_t *b)
 	}
 	assert(tid == ht.tid);
 
-	//if((ht.flag & 0x10) <= 0 && ht.isize < 0) phits++;
-	//if((ht.flag & 0x10) >= 1 && ht.isize > 0) qhits++;
-	if((ht.flag & 0x10) <= 0) phits++;
-	if((ht.flag & 0x10) >= 1) qhits++;
+	if(ht.xs == '+') phits++;
+	else if(ht.xs == '-') qhits++;
 
 	return 0;
 }

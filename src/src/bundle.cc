@@ -306,6 +306,8 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, const string &
 	fout.precision(2);
 	fout<<fixed;
 
+	char o = phits > qhits ? '+' : '-';
+
 	for(int i = 0; i < paths.size(); i++)
 	{
 		const vector<int> &v = paths[i].v;
@@ -318,7 +320,7 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, const string &
 		fout<<lpos<<"\t";				// left position
 		fout<<rpos<<"\t";				// right position
 		fout<<1000<<"\t";				// score, now as abundance
-		fout<<"+\t";					// strand
+		fout<<o<<"\t";					// strand
 		fout<<".\t";					// frame
 		fout<<"gene_id \""<<algo.c_str()<<"."<<index<<"\"; ";
 		fout<<"transcript_id \""<<algo.c_str()<<"."<<index<<"."<<i + 1<<"\"; ";
@@ -343,7 +345,7 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, const string &
 			fout<<lower(it->first) + 1<<"\t";	// left position
 			fout<<upper(it->first)<<"\t";		// right position
 			fout<<1000<<"\t";					// score
-			fout<<"+\t";						// strand
+			fout<<o<<"\t";						// strand
 			fout<<".\t";						// frame
 			fout<<"gene_id \""<<algo.c_str()<<"."<<index<<"\"; ";
 			fout<<"transcript_id \""<<algo.c_str()<<"."<<index<<"."<<i + 1<<"\"; ";
