@@ -439,8 +439,13 @@ int region::build_partial_exons()
 			lexon = s.lpos;
 			ppos = s.rpos;
 			lltype = START_BOUNDARY;
-			psum = s.ave * (s.rpos - s.lpos);
-			pvar = s.dev * s.dev * (s.rpos - s.lpos);
+
+			double ave, dev;
+			evaluate_rectangle(s.lpos, s.rpos, ave, dev);
+			psum = ave * (s.rpos - s.lpos);
+			pvar = dev * dev * (s.rpos - s.lpos);
+			//psum = s.ave * (s.rpos - s.lpos);
+			//pvar = s.dev * s.dev * (s.rpos - s.lpos);
 		}
 		else if(s.type == SLOPE3END)
 		{
@@ -455,13 +460,17 @@ int region::build_partial_exons()
 				pvar += dev * dev * (s.lpos - ppos);
 			}
 
-			psum += s.ave * (s.rpos - s.lpos);
-			pvar += s.dev * s.dev * (s.rpos - s.lpos);
+			double ave, dev;
+			evaluate_rectangle(s.lpos, s.rpos, ave, dev);
+			psum += ave * (s.rpos - s.lpos);
+			pvar += dev * dev * (s.rpos - s.lpos);
+			//psum += s.ave * (s.rpos - s.lpos);
+			//pvar += s.dev * s.dev * (s.rpos - s.lpos);
 
 			assert(lexon < rexon);
 
-			double ave = psum / (rexon - lexon);
-			double dev = sqrt(pvar / (rexon - lexon));
+			ave = psum / (rexon - lexon);
+			dev = sqrt(pvar / (rexon - lexon));
 			partial_exon pe(lexon, rexon, lltype, rrtype);
 			pe.ave_abd = ave;
 			pe.dev_abd = dev;
