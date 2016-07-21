@@ -439,13 +439,15 @@ int scallop2::merge_adjacent_equal_edges(int x, int y)
 
 	double wx0 = gr.get_edge_weight(xx);
 	double wy0 = gr.get_edge_weight(yy);
-	double wx1 = gr.get_edge_stddev(xx);
-	double wy1 = gr.get_edge_stddev(yy);
-
 	assert(fabs(wx0 - wy0) <= SMIN);
 
+	int lx1 = gr.get_edge_info(xx).length;
+	int ly1 = gr.get_edge_info(yy).length;
+	int lxt = gr.get_vertex_info(xt).length;
+	int lxy = lx1 + ly1 + lxt;
+
 	gr.set_edge_weight(p, wx0);
-	gr.set_edge_stddev(p, wx1 + wy1);
+	gr.set_edge_info(p, edge_info(lxy));
 
 	vector<int> v = mev[xx];
 	v.insert(v.end(), mev[yy].begin(), mev[yy].end());
@@ -492,7 +494,6 @@ int scallop2::split_edge(int ei, double w)
 	edge_descriptor ee = i2e[ei];
 
 	double ww = gr.get_edge_weight(ee);
-	double dd = gr.get_edge_stddev(ee);
 
 	if(fabs(ww - w) <= SMIN) return ei;
 	assert(ww >= w + SMIN);
@@ -501,11 +502,12 @@ int scallop2::split_edge(int ei, double w)
 	int t = ee->target();
 
 	edge_descriptor p2 = gr.add_edge(s, t);
+	edge_info eif = gr.get_edge_info(ee);
 
 	gr.set_edge_weight(ee, w);
-	gr.set_edge_stddev(ee, dd);
+	gr.set_edge_info(ee, eif);
 	gr.set_edge_weight(p2, ww - w);
-	gr.set_edge_stddev(p2, dd);
+	gr.set_edge_info(p2, eif);
 
 	if(mev.find(p2) != mev.end()) mev[p2] = mev[ee];
 	else mev.insert(PEV(p2, mev[ee]));
@@ -1206,17 +1208,22 @@ bool scallop2::join_trivial_edge(edge_descriptor &e)
 	int s = e->source();
 	int t = e->target();
 
-	double ds = gr.get_vertex_stddev(s);
-	double dt = gr.get_vertex_stddev(t);
 	double as = gr.get_vertex_weight(s);
 	double at = gr.get_vertex_weight(t);
-	double dev = ds + dt;
-	double ave = (as * ds + at * dt) / dev;
-	gr.set_vertex_weight(s, ave);
-	gr.set_vertex_stddev(s, dev);
+	double ae = gr.get_edge_weight(e);
+	int ls = gr.get_vertex_info(s).length;
+	int lt = gr.get_vertex_info(t).length;
+	int le = gr.get_edge_info(e).length;
+
+	int arl = average_read_length;
+	int ll = ls + lt + le;
+	double ave = (ls * as + lt * at + (le + arl) * ae) / (ll + arl);
 
 	if(gr.locate(t) == 0)
 	{
+		gr.set_vertex_weight(s, ave);
+		gr.set_vertex_info(s, vertex_info(ll));
+
 		double ew = 0;
 		edge_iterator it1, it2;
 		for(tie(it1, it2) = gr.out_edges(t); it1 != it2; it1++)
@@ -1224,12 +1231,17 @@ bool scallop2::join_trivial_edge(edge_descriptor &e)
 			ew += gr.get_edge_weight(*it1);
 		}
 		gr.set_edge_weight(e, ew);
+		gr.set_edge_info(e, edge_info(0));
+		gr.set_vertex_info(t, vertex_info(0));
 
 		decompose_trivial_vertex(t);
 		return true;
 	}
 	else if(gr.locate(s) == 0)
 	{
+		gr.set_vertex_weight(t, ave);
+		gr.set_vertex_info(t, vertex_info(ll));
+
 		double ew = 0;
 		edge_iterator it1, it2;
 		for(tie(it1, it2) = gr.in_edges(s); it1 != it2; it1++)
@@ -1237,6 +1249,9 @@ bool scallop2::join_trivial_edge(edge_descriptor &e)
 			ew += gr.get_edge_weight(*it1);
 		}
 		gr.set_edge_weight(e, ew);
+		gr.set_edge_info(e, edge_info(0));
+		gr.set_vertex_info(s, vertex_info(0));
+
 		decompose_trivial_vertex(s);
 		return true;
 	}
@@ -1268,16 +1283,18 @@ bool scallop2::join_trivial_vertex(int i)
 	if(e1->source() == 0) return false;
 	if(e2->target() == gr.num_vertices() - 1) return false;
 
-	double w = gr.get_vertex_weight(i);
-	double d = 0;
-	d += gr.get_vertex_stddev(i);
-	d += gr.get_edge_stddev(e1);
-	d += gr.get_edge_stddev(e2);
+	double wv = gr.get_vertex_weight(i);
+	double w1 = gr.get_edge_weight(e1);
+	double w2 = gr.get_edge_weight(e2);
+	int lv = gr.get_vertex_info(i).length;
+	int l1 = gr.get_edge_info(e1).length;
+	int l2 = gr.get_edge_info(e2).length;
+
+	int arl = average_read_length;
+	double w = (wv * lv + (l1 + arl) * w1 + (l2 + arl) * w2) / (lv + 2 * arl + l1 + l2);
 
 	gr.set_edge_weight(e1, w);
 	gr.set_edge_weight(e2, w);
-	gr.set_edge_stddev(e1, d / 2.0);
-	gr.set_edge_stddev(e2, d / 2.0);
 
 	decompose_trivial_vertex(i);
 	return true;
@@ -1422,10 +1439,10 @@ int scallop2::draw_splice_graph(const string &file)
 	for(int i = 0; i < gr.num_vertices(); i++)
 	{
 		double w = gr.get_vertex_weight(i);
-		double d = gr.get_vertex_stddev(i);
+		int l = gr.get_vertex_info(i).length;
 		//string s = gr.get_vertex_string(i);
 		//sprintf(buf, "%d:%.0lf:%s", i, w, s.c_str());
-		sprintf(buf, "%d:%.1lf:%.0lf", i, w, d);
+		sprintf(buf, "%d:%.1lf:%d", i, w, l);
 		mis.insert(PIS(i, buf));
 	}
 
@@ -1434,8 +1451,8 @@ int scallop2::draw_splice_graph(const string &file)
 	{
 		if(i2e[i] == null_edge) continue;
 		double w = gr.get_edge_weight(i2e[i]);
-		double d = gr.get_edge_stddev(i2e[i]);
-		sprintf(buf, "%d:%.1lf", i, w);
+		int l = gr.get_edge_info(i2e[i]).length;
+		sprintf(buf, "%d:%.1lf:%d", i, w, l);
 		mes.insert(PES(i2e[i], buf));
 	}
 	gr.draw(file, mis, mes, 4.0);

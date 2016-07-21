@@ -402,16 +402,12 @@ bool scallop1::init_trivial_vertex(int x)
 			int t = (*ot1)->target();
 
 			double w1 = gr.get_edge_weight(*it1);
-			double a1 = gr.get_edge_stddev(*it1);
 			double w2 = gr.get_edge_weight(*ot1);
-			double a2 = gr.get_edge_stddev(*ot1);
 
 			double w = w1 < w2 ? w1 : w2;
-			double a = w1 < w2 ? a1 : a2;
 
 			edge_descriptor p = gr.add_edge(s, t);
 			gr.set_edge_weight(p, w);
-			gr.set_edge_stddev(p, a);
 
 			assert(mev.find(*it1) != mev.end());
 			assert(mev.find(*ot1) != mev.end());
@@ -483,13 +479,10 @@ int scallop1::merge_adjacent_equal_edges(int x, int y)
 
 	double wx0 = gr.get_edge_weight(xx);
 	double wy0 = gr.get_edge_weight(yy);
-	double wx1 = gr.get_edge_stddev(xx);
-	double wy1 = gr.get_edge_stddev(yy);
 
 	assert(fabs(wx0 - wy0) <= SMIN);
 
 	gr.set_edge_weight(p, wx0);
-	gr.set_edge_stddev(p, wx1);
 
 	vector<int> v = mev[xx];
 	v.insert(v.end(), mev[yy].begin(), mev[yy].end());
@@ -536,7 +529,6 @@ int scallop1::split_edge(int ei, double w)
 	edge_descriptor ee = i2e[ei];
 
 	double ww = gr.get_edge_weight(ee);
-	double dd = gr.get_edge_stddev(ee);
 
 	if(fabs(ww - w) <= SMIN) return ei;
 
@@ -549,7 +541,6 @@ int scallop1::split_edge(int ei, double w)
 
 	gr.set_edge_weight(ee, w);
 	gr.set_edge_weight(p2, ww - w);
-	gr.set_edge_stddev(p2, dd);
 
 	if(mev.find(p2) != mev.end()) mev[p2] = mev[ee];
 	else mev.insert(PEV(p2, mev[ee]));

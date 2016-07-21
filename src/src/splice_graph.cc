@@ -27,7 +27,7 @@ int splice_graph::copy(const splice_graph &gr, MEE &x2y, MEE &y2x)
 		add_vertex();
 		set_vertex_string(i, gr.get_vertex_string(i));
 		set_vertex_weight(i, gr.get_vertex_weight(i));
-		set_vertex_stddev(i, gr.get_vertex_stddev(i));
+		set_vertex_info(i, gr.get_vertex_info(i));
 	}
 
 	PEEI p = gr.edges();
@@ -35,11 +35,11 @@ int splice_graph::copy(const splice_graph &gr, MEE &x2y, MEE &y2x)
 	{
 		edge_descriptor e = add_edge((*it)->source(), (*it)->target());
 		set_edge_weight(e, gr.get_edge_weight(*it));
-		set_edge_stddev(e, gr.get_edge_stddev(*it));
+		set_edge_info(e, gr.get_edge_info(*it));
 
 		assert(e != NULL);
 		assert(ewrt.find(e) != ewrt.end());
-		assert(edev.find(e) != edev.end());
+		assert(einf.find(e) != einf.end());
 		assert(x2y.find(*it) == x2y.end());
 		assert(y2x.find(e) == y2x.end());
 
@@ -65,10 +65,10 @@ double splice_graph::get_vertex_weight(int v) const
 	return vwrt[v];
 }
 
-double splice_graph::get_vertex_stddev(int v) const
+vertex_info splice_graph::get_vertex_info(int v) const
 {
-	assert(v >= 0 && v < vdev.size());
-	return vdev[v];
+	assert(v >= 0 && v < vinf.size());
+	return vinf[v];
 }
 
 double splice_graph::get_edge_weight(edge_base *e) const
@@ -78,10 +78,10 @@ double splice_graph::get_edge_weight(edge_base *e) const
 	return it->second;
 }
 
-double splice_graph::get_edge_stddev(edge_base *e) const
+edge_info splice_graph::get_edge_info(edge_base *e) const
 {
-	MED::const_iterator it = edev.find(e);
-	assert(it != edev.end());
+	MEIF::const_iterator it = einf.find(e);
+	assert(it != einf.end());
 	return it->second;
 }
 
@@ -101,11 +101,11 @@ int splice_graph::set_vertex_weight(int v, double w)
 	return 0;
 }
 
-int splice_graph::set_vertex_stddev(int v, double w) 
+int splice_graph::set_vertex_info(int v, const vertex_info &vi) 
 {
 	assert(v >= 0 && v < vv.size());
-	if(vdev.size() != vv.size()) vdev.resize(vv.size());
-	vdev[v] = w;
+	if(vinf.size() != vv.size()) vinf.resize(vv.size());
+	vinf[v] = vi;
 	return 0;
 }
 
@@ -116,10 +116,10 @@ int splice_graph::set_edge_weight(edge_base* e, double w)
 	return 0;
 }
 
-int splice_graph::set_edge_stddev(edge_base* e, double w) 
+int splice_graph::set_edge_info(edge_base* e, const edge_info &ei) 
 {
-	if(edev.find(e) != edev.end()) edev[e] = w;
-	else edev.insert(PED(e, w));
+	if(einf.find(e) != einf.end()) einf[e] = ei;
+	else einf.insert(PEIF(e, ei));
 	return 0;
 }
 
@@ -165,9 +165,9 @@ int splice_graph::clear()
 {
 	directed_graph::clear();
 	vwrt.clear();
-	vdev.clear();
+	vinf.clear();
 	ewrt.clear();
-	edev.clear();
+	einf.clear();
 	return 0;
 }
 
@@ -188,23 +188,25 @@ int splice_graph::build(const string &file)
 	for(int i = 0; i < n; i++)
 	{
 		char name[10240];
-		double weight, stddev;
+		double weight;
+		vertex_info vi;
 		fin.getline(line, 10240, '\n');	
 		stringstream sstr(line);
-		sstr>>name>>weight>>stddev;
+		sstr>>name>>weight>>vi.length;
 
 		add_vertex();
 		set_vertex_string(i, name);
 		set_vertex_weight(i, weight);
-		set_vertex_stddev(i, stddev);
+		set_vertex_info(i, vi);
 	}
 
 	while(fin.getline(line, 10240, '\n'))
 	{
 		int x, y;
-		double weight, stddev;
+		double weight;
+		edge_info ei;
 		stringstream sstr(line);
-		sstr>>x>>y>>weight>>stddev;
+		sstr>>x>>y>>weight>>ei.length;
 
 		assert(x != y);
 		assert(x >= 0 && x < num_vertices());
@@ -212,7 +214,7 @@ int splice_graph::build(const string &file)
 
 		edge_descriptor p = add_edge(x, y);
 		set_edge_weight(p, weight);
-		set_edge_stddev(p, stddev);
+		set_edge_info(p, ei);
 	}
 
 	fin.close();
@@ -237,8 +239,8 @@ int splice_graph::write(const string &file) const
 	{
 		string name = get_vertex_string(i);
 		double weight = get_vertex_weight(i);
-		double stddev = get_vertex_stddev(i);
-		fin<<name.c_str()<<" "<<weight<<" "<<stddev<<endl;
+		vertex_info vi = get_vertex_info(i);
+		fin<<name.c_str()<<" "<<weight<<" "<<vi.length<<endl;
 	}
 
 	edge_iterator it1, it2;
@@ -247,8 +249,8 @@ int splice_graph::write(const string &file) const
 		int s = (*it1)->source(); 
 		int t = (*it1)->target();
 		double weight = get_edge_weight(*it1);
-		double stddev = get_edge_stddev(*it1);
-		fin<<s<<" "<<t<<" "<<weight<<" "<<stddev<<endl;
+		edge_info ei = get_edge_info(*it1);
+		fin<<s<<" "<<t<<" "<<weight<<" "<<ei.length<<endl;
 	}
 	fin.close();
 	return 0;
@@ -261,7 +263,7 @@ int splice_graph::simulate(int nv, int ne, int mw)
 	{
 		add_vertex();
 		vstr.push_back("v" + tostring(i));
-		vdev.push_back(1);
+		vinf.push_back(vertex_info());
 		vwrt.push_back(0);
 	}
 
@@ -278,8 +280,8 @@ int splice_graph::simulate(int nv, int ne, int mw)
 		if(p.second == true) continue;
 
 		edge_descriptor e = add_edge(s, t);
-		edev.insert(PED(e, 1));
 		ewrt.insert(PED(e, f));
+		einf.insert(PEIF(e, edge_info()));
 		if(ewrt.size() >= ne) break;
 	}
 
@@ -306,10 +308,10 @@ int splice_graph::simulate(int nv, int ne, int mw)
 	}
 
 	ewrt = med;
-	edev = med;
-	for(MED::iterator it = edev.begin(); it != edev.end(); it++)
+	einf.clear();
+	for(MED::iterator it = ewrt.begin(); it != ewrt.end(); it++)
 	{
-		it->second = 1;
+		einf.insert(PEIF(it->first, edge_info()));
 	}
 
 	edge_iterator it1, it2;

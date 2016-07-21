@@ -224,8 +224,8 @@ int smoother::set_objective()
 	GRBQuadExpr expr;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
-		double sd = gr.get_vertex_stddev(i);
-		double wt = average_read_length + sd;
+		double ll = gr.get_vertex_info(i).length * 1.0 / average_read_length;
+		double wt = 1.0 + ll;
 		if(i == 0) wt = 0;
 		if(i == gr.num_vertices() - 1) wt = 0;
 		expr += wt * verr[i] * verr[i];
@@ -233,8 +233,8 @@ int smoother::set_objective()
 
 	for(int i = 0; i < i2e.size(); i++)
 	{
-		double sd = gr.get_edge_stddev(i2e[i]);
-		double wt = average_read_length + sd;
+		double ll = gr.get_edge_info(i2e[i]).length * 1.0 / average_read_length;
+		double wt = 1.0 + ll;
 		int s = i2e[i]->source();
 		int t = i2e[i]->target();
 		if(s == 0) wt = 0;
@@ -253,9 +253,9 @@ int smoother::update()
 		double w1 = vnwt[i].get(GRB_DoubleAttr_X);
 		double e1 = verr[i].get(GRB_DoubleAttr_X);
 		double w0 = gr.get_vertex_weight(i);
-		double d0 = gr.get_vertex_stddev(i);
+		int l0 = gr.get_vertex_info(i).length;
 		gr.set_vertex_weight(i, w1);
-		//printf("vertex %d, initial weight = %.2lf, error = %.2lf, new weight = %.2lf, stddev = %.2lf\n", i, w0, e1, w1, d0);
+		//printf("vertex %d, initial weight = %.2lf, error = %.2lf, new weight = %.2lf, length = %.2lf\n", i, w0, e1, w1, l0);
 	}
 
 	for(int i = 0; i < enwt.size(); i++)
@@ -263,11 +263,11 @@ int smoother::update()
 		double w1 = enwt[i].get(GRB_DoubleAttr_X);
 		double e1 = eerr[i].get(GRB_DoubleAttr_X);
 		double w0 = gr.get_edge_weight(i2e[i]);
-		double d0 = gr.get_edge_stddev(i2e[i]);
+		int l0 = gr.get_edge_info(i2e[i]).length;
 		edge_descriptor e = i2e[i];
 		int s = e->source();
 		int t = e->target();
-		//printf("edge (%d, %d), initial weight = %.2lf, error = %.2lf, new weight = %.2lf, stddev = %.2lf\n", s, t, w0, e1, w1, d0);
+		//printf("edge (%d, %d), initial weight = %.2lf, error = %.2lf, new weight = %.2lf, length = %.2lf\n", s, t, w0, e1, w1, l0);
 		gr.set_edge_weight(i2e[i], w1);
 	}
 

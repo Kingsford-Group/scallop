@@ -36,7 +36,7 @@ int gtf::add_vertices(splice_graph &gr)
 	gr.add_vertex();
 	gr.set_vertex_string(0, "");
 	gr.set_vertex_weight(0, sum);
-	gr.set_vertex_stddev(0, 1.0);
+	gr.set_vertex_info(0, vertex_info());
 
 	SIMI it;
 	for(it = imap.begin(); it != imap.end(); it++)
@@ -47,13 +47,14 @@ int gtf::add_vertices(splice_graph &gr)
 		string s = l + "-" + r;
 		gr.set_vertex_string(gr.num_vertices() - 1, s);
 		gr.set_vertex_weight(gr.num_vertices() - 1, it->second);
-		gr.set_vertex_stddev(gr.num_vertices() - 1, 1.0);
+		int length = upper(it->first) - lower(it->first);
+		gr.set_vertex_info(gr.num_vertices() - 1, vertex_info(length));
 	}
 
 	gr.add_vertex();
 	gr.set_vertex_string(gr.num_vertices() - 1, "");
 	gr.set_vertex_weight(gr.num_vertices() - 1, sum);
-	gr.set_vertex_stddev(gr.num_vertices() - 1, 1.0);
+	gr.set_vertex_info(gr.num_vertices() - 1, vertex_info());
 	return 0;
 }
 
@@ -96,7 +97,7 @@ int gtf::add_single_edge(int s, int t, double w, splice_graph &gr)
 	{
 		edge_descriptor p = gr.add_edge(s, t);
 		gr.set_edge_weight(p, w);
-		gr.set_edge_stddev(p, 1.0);
+		gr.set_edge_info(p, edge_info());
 	}
 	return 0;
 }

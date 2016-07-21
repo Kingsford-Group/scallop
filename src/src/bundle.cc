@@ -192,7 +192,7 @@ int bundle::build_splice_graph(splice_graph &gr) const
 	gr.add_vertex();
 	gr.set_vertex_string(0, "");
 	gr.set_vertex_weight(0, 0);
-	gr.set_vertex_stddev(0, 1);
+	gr.set_vertex_info(0, vertex_info());
 	for(int i = 0; i < pexons.size(); i++)
 	{
 		const partial_exon &r = pexons[i];
@@ -201,13 +201,13 @@ int bundle::build_splice_graph(splice_graph &gr) const
 		gr.add_vertex();
 		gr.set_vertex_string(i + 1, r.label());
 		gr.set_vertex_weight(i + 1, r.ave_abd);
-		gr.set_vertex_stddev(i + 1, length * 1.0 / r.dev_abd / r.dev_abd);	// TODO
+		gr.set_vertex_info(i + 1, vertex_info(length));
 	}
 
 	gr.add_vertex();
 	gr.set_vertex_string(pexons.size() + 1, "");
 	gr.set_vertex_weight(pexons.size() + 1, 0);
-	gr.set_vertex_stddev(pexons.size() + 1, 1);
+	gr.set_vertex_info(pexons.size() + 1, vertex_info());
 
 	// edges: connecting adjacent pexons => e2w
 	for(int i = 0; i < (int)(pexons.size()) - 1; i++)
@@ -226,7 +226,7 @@ int bundle::build_splice_graph(splice_graph &gr) const
 
 		edge_descriptor p = gr.add_edge(i + 1, i + 2);
 		gr.set_edge_weight(p, wt);
-		gr.set_edge_stddev(p, sd);
+		gr.set_edge_info(p, edge_info());
 	}
 
 	// edges: each junction => and e2w
@@ -238,10 +238,9 @@ int bundle::build_splice_graph(splice_graph &gr) const
 
 		//double sd = 0.5 * x.dev_abd + 0.5 * y.dev_abd;
 		double sd = 1.0;
-
 		edge_descriptor p = gr.add_edge(b.lrgn + 1, b.rrgn + 1);
 		gr.set_edge_weight(p, b.count);
-		gr.set_edge_stddev(p, sd);
+		gr.set_edge_info(p, edge_info());
 	}
 
 	// edges: connecting start/end and pexons
@@ -255,8 +254,7 @@ int bundle::build_splice_graph(splice_graph &gr) const
 		{
 			edge_descriptor p = gr.add_edge(ss, i + 1);
 			gr.set_edge_weight(p, r.ave_abd);
-			//gr.set_edge_stddev(p, r.dev_abd);
-			gr.set_edge_stddev(p, 1.0);
+			gr.set_edge_info(p, edge_info());
 		}
 
 		// TODO
@@ -264,8 +262,7 @@ int bundle::build_splice_graph(splice_graph &gr) const
 		{
 			edge_descriptor p = gr.add_edge(i + 1, tt);
 			gr.set_edge_weight(p, r.ave_abd);
-			//gr.set_edge_stddev(p, r.dev_abd);
-			gr.set_edge_stddev(p, 1.0);
+			gr.set_edge_info(p, edge_info());
 		}
 	}
 
