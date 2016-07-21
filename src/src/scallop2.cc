@@ -173,7 +173,7 @@ int scallop2::load(scallop2 &sc)
 int scallop2::assemble()
 {
 	int c = classify();
-	if(c == TRIVIAL) return 0;
+	//if(c == TRIVIAL) return 0;
 
 	if(algo == "core") return assemble1();
 	if(algo == "full") return assemble2();
