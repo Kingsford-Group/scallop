@@ -214,7 +214,7 @@ int scallop1::assemble0()
 	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 
 	smoother sm(gr);
-	sm.solve();
+	sm.smooth();
 
 	//if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 
@@ -1079,7 +1079,7 @@ int scallop1::smooth_with_equation(equation &eqn)
 
 	smoother sm(gr);
 	sm.add_equation(vx, vy);
-	sm.solve();
+	sm.smooth();
 	
 	return 0;
 }

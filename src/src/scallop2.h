@@ -6,6 +6,8 @@
 #include "splice_graph.h"
 #include "nested_graph.h"
 
+#include "gurobi_c++.h"
+
 typedef map< edge_descriptor, vector<int> > MEV;
 typedef pair< edge_descriptor, vector<int> > PEV;
 typedef pair< vector<int>, vector<int> > PVV;
@@ -23,6 +25,9 @@ public:
 public:
 	string name;			// name for this gene
 	splice_graph gr;		// splice graph
+
+	GRBModel *model;		// quadratic solver for smoothing
+	GRBEnv *env;			// quadratic solver for smoothing
 
 	MEI e2i;				// edge map, from edge to index
 	VE i2e;					// edge map, from index to edge
@@ -62,6 +67,7 @@ private:
 	// smooth weights
 	int smooth();
 	bool smooth(equation &eqn);
+	int smooth_vertex(int v);
 
 	// iteratively decompose
 	int iterate();

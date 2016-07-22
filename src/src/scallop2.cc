@@ -923,7 +923,7 @@ bool scallop2::resolve_vertex_with_equation2(equation &eqn)
 int scallop2::smooth()
 {
 	smoother sm(gr);
-	sm.solve();
+	sm.smooth();
 	return 0;
 }
 
@@ -935,7 +935,7 @@ bool scallop2::smooth(equation &eqn)
 
 	smoother sm(gr);
 	sm.add_equation(vx, vy);
-	bool f = sm.solve();
+	bool f = sm.smooth();
 	if(f == 0) return true;
 	else return false;
 }

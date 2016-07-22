@@ -16,11 +16,59 @@ smoother::~smoother()
 	delete env;
 }
 
-int smoother::solve()
+int smoother::smooth_vertex(int i, double f1, double f2)
+{
+	try
+	{
+		build_edge_map(i);
+		build_vertex_map(i);
+		build_factor(i, f1, f2);
+
+		add_vertex_weight_variables();
+		add_vertex_error_variables();
+		add_edge_weight_variables();
+		add_edge_error_variables();
+
+		add_vertex_error_constraints();
+		add_edge_error_constraints();
+		add_edge_weight_constraints();
+		add_conservation_constraints();
+		add_additional_constraints();
+
+		set_objective();
+
+		model->getEnv().set(GRB_IntParam_OutputFlag, 0);
+
+		model->optimize();
+
+		int f = model->get(GRB_IntAttr_Status);
+
+		if (f != GRB_OPTIMAL) return -1;
+
+		update();
+	} 
+	catch(GRBException e) 
+	{
+		cout << "GRB exception code = " << e.getErrorCode() << ", message = " << e.getMessage() << endl;
+		return -1;
+	} 
+	catch(...) 
+	{
+		cout << "GRB exception" << endl;
+		return -1;
+	}
+
+	return 0;
+}
+
+
+int smoother::smooth()
 {
 	try
 	{
 		build_edge_map();
+		build_vertex_map();
+		build_factors();
 
 		add_vertex_weight_variables();
 		add_vertex_error_variables();
@@ -70,6 +118,8 @@ int smoother::build_edge_map()
 {
 	int index = 0;
 	edge_iterator it1, it2;
+	i2e.clear();
+	e2i.clear();
 	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
 	{
 		e2i.insert(PEI(*it1, index));
@@ -79,10 +129,66 @@ int smoother::build_edge_map()
 	return 0;
 }
 
+int smoother::build_edge_map(int i)
+{
+	i2e.clear();
+	e2i.clear();
+	int index = 0;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
+	{
+		e2i.insert(PEI(*it1, index));
+		i2e.push_back(*it1);
+		index++;
+	}
+	for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
+	{
+		e2i.insert(PEI(*it1, index));
+		i2e.push_back(*it1);
+		index++;
+	}
+	return 0;
+}
+
+int smoother::build_vertex_map()
+{
+	v2i.clear();
+	i2v.clear();
+	for(int i = 0; i < gr.num_vertices(); i++)
+	{
+		v2i.push_back(i);
+		i2v.push_back(i);
+	}
+	return 0;
+}
+
+int smoother::build_vertex_map(int i)
+{
+	v2i.assign(gr.num_vertices(), -1);
+	v2i[i] = 0;
+	i2v.assign(1, 0);
+	return 0;
+}
+
+int smoother::build_factors()
+{
+	sf.assign(i2v.size(), 1.0);
+	tf.assign(i2v.size(), 1.0);
+	return 0;
+}
+
+int smoother::build_factor(int i, double f1, double f2)
+{
+	sf.assign(1, f1);
+	tf.assign(1, f2);
+	return 0;
+}
+
+
 int smoother::add_vertex_weight_variables()
 {
 	vnwt.clear();
-	for(int i = 0; i < gr.num_vertices(); i++)
+	for(int i = 0; i < i2v.size(); i++)
 	{
 		GRBVar var = model->addVar(0, GRB_INFINITY, 0, GRB_CONTINUOUS);
 		vnwt.push_back(var);
@@ -94,7 +200,7 @@ int smoother::add_vertex_weight_variables()
 int smoother::add_vertex_error_variables()
 {
 	verr.clear();
-	for(int i = 0; i < gr.num_vertices(); i++)
+	for(int i = 0; i < i2v.size(); i++)
 	{
 		GRBVar var = model->addVar(0, GRB_INFINITY, 0, GRB_CONTINUOUS);
 		verr.push_back(var);
@@ -106,7 +212,7 @@ int smoother::add_vertex_error_variables()
 int smoother::add_edge_weight_variables()
 {
 	enwt.clear();
-	for(int i = 0; i < gr.num_edges(); i++)
+	for(int i = 0; i < i2e.size(); i++)
 	{
 		GRBVar var = model->addVar(0, GRB_INFINITY, 0, GRB_CONTINUOUS);
 		enwt.push_back(var);
@@ -129,9 +235,12 @@ int smoother::add_edge_error_variables()
 
 int smoother::add_vertex_error_constraints()
 {
-	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	for(int k = 0; k < i2v.size(); k++)
 	{
+		int i = i2v[k];
 		if(gr.degree(i) == 0) continue;
+		if(i == 0) continue;
+		if(i == gr.num_vertices() - 1) continue;
 		double w = gr.get_vertex_weight(i);
 		model->addConstr(vnwt[i], GRB_LESS_EQUAL, w + verr[i]);
 		model->addConstr(vnwt[i], GRB_GREATER_EQUAL, w - verr[i]);
@@ -141,7 +250,7 @@ int smoother::add_vertex_error_constraints()
 
 int smoother::add_edge_error_constraints()
 {
-	for(int i = 0; i < gr.num_edges(); i++)
+	for(int i = 0; i < i2e.size(); i++)
 	{
 		double w = gr.get_edge_weight(i2e[i]);
 		model->addConstr(enwt[i], GRB_LESS_EQUAL, w + eerr[i]);
@@ -152,7 +261,7 @@ int smoother::add_edge_error_constraints()
 
 int smoother::add_edge_weight_constraints()
 {
-	for(int i = 0; i < gr.num_edges(); i++)
+	for(int i = 0; i < i2e.size(); i++)
 	{
 		model->addConstr(enwt[i], GRB_GREATER_EQUAL, 1.0);
 	}
@@ -161,13 +270,16 @@ int smoother::add_edge_weight_constraints()
 
 int smoother::add_conservation_constraints()
 {
-	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	for(int k = 0; k < i2v.size(); k++)
 	{
-		int xi = gr.in_degree(i);
-		int yi = gr.out_degree(i);
-		if(xi == 0 && yi == 0) continue;
+		int i = i2v[k];
+		if(i == 0) continue;
+		if(i == gr.num_vertices() - 1) continue;
 
-		assert(xi > 0 && yi > 0);
+		//int xi = gr.in_degree(i);
+		//int yi = gr.out_degree(i);
+		//if(xi == 0 && yi == 0) continue;
+		//assert(xi > 0 && yi > 0);
 
 		edge_iterator i1, i2;
 		GRBLinExpr ei;
@@ -187,8 +299,8 @@ int smoother::add_conservation_constraints()
 			eo += enwt[e];
 		}
 
-		model->addConstr(vnwt[i], GRB_EQUAL, ei);
-		model->addConstr(vnwt[i], GRB_EQUAL, eo);
+		model->addConstr(ei * sf[k], GRB_EQUAL, eo * tf[k]);
+		model->addConstr(vnwt[k], GRB_EQUAL, (ei + eo) / 2.0);
 	}
 	return 0;
 }
@@ -222,13 +334,14 @@ int smoother::add_additional_constraints()
 int smoother::set_objective()
 {
 	GRBQuadExpr expr;
-	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	for(int k = 0; k < i2v.size(); k++)
 	{
+		int i = i2v[k];
+		if(i == 0) continue;
+		if(i == gr.num_vertices() - 1) continue;
 		double ll = gr.get_vertex_info(i).length * 1.0 / average_read_length;
 		double wt = 1.0 + ll;
-		if(i == 0) wt = 0;
-		if(i == gr.num_vertices() - 1) wt = 0;
-		expr += wt * verr[i] * verr[i];
+		expr += wt * verr[k] * verr[k];
 	}
 
 	for(int i = 0; i < i2e.size(); i++)
@@ -248,28 +361,18 @@ int smoother::set_objective()
 
 int smoother::update()
 {
-	for(int i = 0; i < vnwt.size(); i++)
+	for(int k = 0; k < vnwt.size(); k++)
 	{
-		double w1 = vnwt[i].get(GRB_DoubleAttr_X);
-		double e1 = verr[i].get(GRB_DoubleAttr_X);
-		double w0 = gr.get_vertex_weight(i);
-		int l0 = gr.get_vertex_info(i).length;
+		int i = i2v[k];
+		double w1 = vnwt[k].get(GRB_DoubleAttr_X);
 		gr.set_vertex_weight(i, w1);
-		//printf("vertex %d, initial weight = %.2lf, error = %.2lf, new weight = %.2lf, length = %.2lf\n", i, w0, e1, w1, l0);
 	}
 
 	for(int i = 0; i < enwt.size(); i++)
 	{
 		double w1 = enwt[i].get(GRB_DoubleAttr_X);
-		double e1 = eerr[i].get(GRB_DoubleAttr_X);
-		double w0 = gr.get_edge_weight(i2e[i]);
-		int l0 = gr.get_edge_info(i2e[i]).length;
 		edge_descriptor e = i2e[i];
-		int s = e->source();
-		int t = e->target();
-		//printf("edge (%d, %d), initial weight = %.2lf, error = %.2lf, new weight = %.2lf, length = %.2lf\n", s, t, w0, e1, w1, l0);
 		gr.set_edge_weight(i2e[i], w1);
 	}
-
 	return 0;
 }
