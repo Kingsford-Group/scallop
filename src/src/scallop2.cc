@@ -1219,6 +1219,7 @@ bool scallop2::join_trivial_edge(edge_descriptor &e)
 	int ll = ls + lt + le;
 	double ave = (ls * as + lt * at + (le + arl) * ae) / (ll + arl);
 
+	printf("join trivial edge %d\n", e2i[e]);
 	if(gr.locate(t) == 0)
 	{
 		gr.set_vertex_weight(s, ave);
@@ -1293,9 +1294,12 @@ bool scallop2::join_trivial_vertex(int i)
 	int arl = average_read_length;
 	double w = (wv * lv + (l1 + arl) * w1 + (l2 + arl) * w2) / (lv + 2 * arl + l1 + l2);
 
+	//printf("join trivial vertex %d, wv = %.2lf, w1 = %.2lf, w2 = %.2lf, lv = %d, l1 = %d, l2 = %d, arl = %d, w = %.2lf\n", i, wv, w1, w2, lv, l1, l2, arl, w);
+
 	gr.set_edge_weight(e1, w);
 	gr.set_edge_weight(e2, w);
 
+	printf("join trivial vertex %d\n", i);
 	decompose_trivial_vertex(i);
 	return true;
 }
