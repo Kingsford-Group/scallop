@@ -20,6 +20,7 @@ uint32_t min_max_splice_boundary_qual = 3;
 uint32_t min_max_left_boundary_qual = 4;
 uint32_t min_max_right_boundary_qual = 4;
 int32_t average_read_length = 100;
+int32_t average_slope_length = 200;
 int num_sample_positions = 100;
 double min_average_overlap = 2;
 int min_max_region_overlap = 5;

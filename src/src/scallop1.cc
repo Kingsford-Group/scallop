@@ -2,7 +2,6 @@
 #include "subsetsum.h"
 #include "subsetsum1.h"
 #include "config.h"
-#include "smoother.h"
 #include "nested_graph.h"
 
 #include <cstdio>
@@ -213,9 +212,6 @@ int scallop1::assemble0()
 {
 	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 
-	smoother sm(gr);
-	sm.smooth();
-
 	//if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 
 	//gr.round_weights();
@@ -346,7 +342,6 @@ bool scallop1::decompose_with_equations(int level)
 
 	if(eqns[0].f == 3) return true;
 
-	smooth_with_equation(eqns[0]);
 	resolve_equation(eqns[0]);
 
 	if(eqns[0].f >= 2) return true;
@@ -800,7 +795,6 @@ bool scallop1::identify_equations2(vector<equation> &eqns)
 		{
 			scallop1 sc;
 			save(sc);
-			smooth_with_equation(eqn);
 			resolve_equation(eqn);
 			load(sc);
 			eqns.push_back(eqn);
@@ -879,7 +873,6 @@ bool scallop1::identify_equations3(vector<equation> &eqns)
 		{
 			scallop1 sc;
 			save(sc);
-			smooth_with_equation(eqn);
 			resolve_equation(eqn);
 			load(sc);
 			eqns.push_back(eqn);
@@ -1067,21 +1060,6 @@ bool scallop1::resolve_vertex_with_equation2(equation &eqn)
 
 	eqn.f = 3;
 	return true;
-}
-
-int scallop1::smooth_with_equation(equation &eqn)
-{
-	return 0;		// TODO
-
-	VE vx, vy;
-	for(int i = 0; i < eqn.s.size(); i++) vx.push_back(i2e[eqn.s[i]]);
-	for(int i = 0; i < eqn.t.size(); i++) vy.push_back(i2e[eqn.t[i]]);
-
-	smoother sm(gr);
-	sm.add_equation(vx, vy);
-	sm.smooth();
-	
-	return 0;
 }
 
 int scallop1::resolve_equation(equation &eqn)

@@ -11,8 +11,10 @@ public:
 public:
 	double stddev;		// standard deviation of read coverage
 	int length;			// length of this partial exon
-	//int sdist;			// dist to s (along the heaviest path)
-	//int tdist;			// dist to t (along the heaviest path)
+	double scalor1;		// not a rectangle
+	double scalor2;		// not a rectangle
+	int length1;		// length of left part
+	int length2;		// length of right part
 };
 
 #endif

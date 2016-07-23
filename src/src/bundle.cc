@@ -253,15 +253,14 @@ int bundle::build_splice_graph(splice_graph &gr) const
 		if(r.ltype == START_BOUNDARY)
 		{
 			edge_descriptor p = gr.add_edge(ss, i + 1);
-			gr.set_edge_weight(p, r.ave_abd);
+			gr.set_edge_weight(p, 0);
 			gr.set_edge_info(p, edge_info());
 		}
 
-		// TODO
 		if(r.rtype == END_BOUNDARY) 
 		{
 			edge_descriptor p = gr.add_edge(i + 1, tt);
-			gr.set_edge_weight(p, r.ave_abd);
+			gr.set_edge_weight(p, 0);
 			gr.set_edge_info(p, edge_info());
 		}
 	}

@@ -74,7 +74,6 @@ private:
 	bool verify_equation_mergable(equation &eqn);
 
 	// resolve equation
-	int smooth_with_equation(equation &eqn);
 	int resolve_equation(equation &eqn);
 	int resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md);
 

@@ -39,6 +39,7 @@ extern uint32_t min_max_splice_boundary_qual;
 extern uint32_t min_max_left_boundary_qual;
 extern uint32_t min_max_right_boundary_qual;
 extern int32_t average_read_length;
+extern int32_t average_slope_length;
 extern int num_sample_positions;
 extern double min_average_overlap;
 extern int min_max_region_overlap;

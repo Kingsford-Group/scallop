@@ -60,14 +60,16 @@ private:
 	bool join_trivial_edge(edge_descriptor &e);
 	bool join_trivial_vertices();
 	bool join_trivial_vertex(int i);
+	bool smooth_trivial_vertices();
+	bool smooth_trivial_vertex(int i);
 	bool decompose_trivial_internal_vertices();
 	bool decompose_trivial_external_vertices();
 	bool decompose_trivial_vertex(int v);
+	bool estimate_scalor(int i);
 
 	// smooth weights
-	int smooth();
-	bool smooth(equation &eqn);
-	int smooth_vertex(int v);
+	int smooth_splice_graph();
+	bool smooth_with_equation(equation &eqn);
 
 	// iteratively decompose
 	int iterate();
