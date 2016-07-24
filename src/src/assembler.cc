@@ -99,6 +99,8 @@ int assembler::process_bundle(bundle_base &bb, int &index, ofstream &fout)
 
 	if(bd.size() >= 100) return 0;
 
+	return 0;
+
 	splice_graph gr;
 	bd.build_splice_graph(gr);
 

@@ -18,12 +18,15 @@ bundle::~bundle()
 int bundle::build()
 {
 	check_left_ascending();
-	build_split_interval_map();
 	infer_junctions();
+	build_junction_graph();
+	draw_junction_graph("jr.tex");
+
+	return 0;
+
+	build_split_interval_map();
 	build_partial_exons();
 	link_partial_exons();
-	//split_boundaries();
-
 	return 0;
 }
 
@@ -47,34 +50,6 @@ int bundle::check_right_ascending()
 		assert(p1 <= p2);
 	}
 	return 0;
-}
-
-int bundle::build_split_interval_map()
-{
-	imap.clear();
-	vector<int64_t> v;
-	for(int i = 0; i < hits.size(); i++)
-	{
-		hits[i].get_matched_intervals(v);
-		for(int k = 0; k < v.size(); k++)
-		{
-			int32_t s = high32(v[k]);
-			int32_t t = low32(v[k]);
-			imap += make_pair(ROI(s, t), 1);
-		}
-	}
-	return 0;
-}
-
-int bundle::locate_hits(int32_t p, int &li)
-{
-	li = -1;
-	hit h(p);
-	vector<hit>::iterator low = lower_bound(hits.begin(), hits.end(), h);
-	vector<hit>::iterator up = upper_bound(hits.begin(), hits.end(), h);
-	if(low == hits.end()) return 0;
-	li = low - hits.begin();
-	return (up - low);
 }
 
 int bundle::infer_junctions()
@@ -110,6 +85,110 @@ int bundle::infer_junctions()
 		junctions.push_back(it->second);
 	}
 	return 0;
+}
+
+int bundle::build_junction_graph()
+{
+	set<int> s;
+	s.insert(lpos);
+	s.insert(rpos);
+	for(int i = 0; i < junctions.size(); i++)
+	{
+		int l = junctions[i].lpos;
+		int r = junctions[i].rpos;
+		if(s.find(l) == s.end()) s.insert(l);
+		if(s.find(r) == s.end()) s.insert(r);
+	}
+	vector<int> v(s.begin(), s.end());
+	sort(v.begin(), v.end());
+
+	// position to vertex
+	map<int, int> p2v;
+	for(int i = 0; i < v.size(); i++)
+	{
+		p2v.insert(PI(v[i], i));
+	}
+
+	// vertices
+	jr.clear();
+	for(int i = 0; i < v.size(); i++)
+	{
+		jr.add_vertex();
+		jr.set_vertex_weight(i, v[i]);
+	}
+
+	// edges: connecting adjacent regions
+	for(int i = 0; i < v.size() - 1; i++)
+	{
+		edge_descriptor p = jr.add_edge(i, i + 1);
+		jr.set_edge_weight(p, -1);
+	}
+
+	// edges: each junction
+	for(int i = 0; i < junctions.size(); i++)
+	{
+		int l = junctions[i].lpos;
+		int r = junctions[i].rpos;
+		assert(p2v.find(l) != p2v.end());
+		assert(p2v.find(r) != p2v.end());
+		edge_descriptor p = jr.add_edge(p2v[l], p2v[r]);
+		jr.set_edge_weight(p, i);
+	}
+
+	return 0;
+}
+
+int bundle::draw_junction_graph(const string &file)
+{
+	char buf[10240];
+
+	MIS mis;
+	for(int i = 0; i < jr.num_vertices(); i++)
+	{
+		double w = jr.get_vertex_weight(i);
+		sprintf(buf, "%.0lf", w);
+		mis.insert(PIS(i, buf));
+	}
+
+	MES mes;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = jr.edges(); it1 != it2; it1++)
+	{
+		double w = jr.get_edge_weight(*it1);
+		sprintf(buf, "%.0lf", w);
+		mes.insert(PES(*it1, buf));
+	}
+
+	jr.draw(file, mis, mes, 3.0);
+	return 0;
+}
+
+int bundle::build_split_interval_map()
+{
+	imap.clear();
+	vector<int64_t> v;
+	for(int i = 0; i < hits.size(); i++)
+	{
+		hits[i].get_matched_intervals(v);
+		for(int k = 0; k < v.size(); k++)
+		{
+			int32_t s = high32(v[k]);
+			int32_t t = low32(v[k]);
+			imap += make_pair(ROI(s, t), 1);
+		}
+	}
+	return 0;
+}
+
+int bundle::locate_hits(int32_t p, int &li)
+{
+	li = -1;
+	hit h(p);
+	vector<hit>::iterator low = lower_bound(hits.begin(), hits.end(), h);
+	vector<hit>::iterator up = upper_bound(hits.begin(), hits.end(), h);
+	if(low == hits.end()) return 0;
+	li = low - hits.begin();
+	return (up - low);
 }
 
 
@@ -167,23 +246,10 @@ int bundle::link_partial_exons()
 	return 0;
 }
 
-/*
-int bundle::split_boundaries()
-{
-	for(int i = 0; i < pexons.size(); i++)
-	{
-		create_split(imap, pexons[i].lpos);
-		create_split(imap, pexons[i].rpos);
-	}
-	return 0;
-}
-*/
-
 int bundle::size() const
 {
 	return pexons.size();
 }
-
 
 int bundle::build_splice_graph(splice_graph &gr) const
 {
@@ -220,6 +286,7 @@ int bundle::build_splice_graph(splice_graph &gr) const
 		assert(x.rpos == y.lpos);
 		int32_t xr = compute_overlap(imap, x.rpos - 1);
 		int32_t yl = compute_overlap(imap, y.lpos);
+		// TODO
 		double wt = xr < yl ? xr : yl;
 		double sd = 1.0;
 		//double sd = 0.5 * x.dev_abd + 0.5 * y.dev_abd;

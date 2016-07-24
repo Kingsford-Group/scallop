@@ -27,7 +27,6 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  junction.h junction.cc \
 				  bundle_base.h bundle_base.cc \
 				  bundle.h bundle.cc \
-				  bundle_extend.h bundle_extend.cc \
 				  path.h path.cc \
 				  smoother.h smoother.cc \
 				  equation.h equation.cc \

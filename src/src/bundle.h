@@ -18,8 +18,10 @@ public:
 	virtual ~bundle();
 
 private:
-	split_interval_map imap;		// interval map
 	vector<junction> junctions;		// splice junctions
+	splice_graph jr;				// junction graph
+	map<int, int> p2v;				// position to vertex of jr
+	split_interval_map imap;		// interval map
 	vector<region> regions;			// regions
 	vector<partial_exon> pexons;	// partial exons
 
@@ -35,14 +37,18 @@ protected:
 	int check_left_ascending();
 	int check_right_ascending();
 
+	// infer boundaries
+	int infer_junctions();
+
+	// junction graph, for paired-end reads
+	int build_junction_graph();
+	int draw_junction_graph(const string &file);
+
 	// build interval map
 	int build_split_interval_map();
 
 	// binary search for a specific given starting point, return count
 	int locate_hits(int32_t p, int &li);
-
-	// infer boundaries
-	int infer_junctions();
 
 	// build regions
 	int build_partial_exons();
