@@ -45,7 +45,6 @@ int smoother::smooth_vertex(int i)
 		if (f != GRB_OPTIMAL) return -1;
 
 		update_weights();
-		//update_scalors();
 	} 
 	catch(GRBException e) 
 	{
@@ -91,7 +90,6 @@ int smoother::smooth()
 		if (f != GRB_OPTIMAL) return -1;
 
 		update_weights();
-		//update_scalors();
 	} 
 	catch(GRBException e) 
 	{
@@ -372,48 +370,6 @@ int smoother::update_weights()
 		double w1 = enwt[i].get(GRB_DoubleAttr_X);
 		edge_descriptor e = i2e[i];
 		gr.set_edge_weight(i2e[i], w1);
-	}
-	return 0;
-}
-
-int smoother::update_scalors()
-{
-	for(int k = 0; k < i2v.size(); k++)
-	{
-		int i = i2v[k];
-		double w1 = 0, w2 = 0;
-		edge_iterator it1, it2;
-		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
-		{
-			w1 += gr.get_edge_weight(*it1);
-		}
-		for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
-		{
-			w2 += gr.get_edge_weight(*it1);
-		}
-
-		vertex_info vi = gr.get_vertex_info(i);
-		if(w1 <= SMIN)
-		{
-			vi.scalor1 = 0;
-			vi.scalor2 = 1;
-		}
-		else if(w2 <= SMIN)
-		{
-			vi.scalor1 = 1;
-			vi.scalor2 = 0;
-		}
-		else if(w1 >= w2) 
-		{
-			vi.scalor1 = 1;
-			vi.scalor2 = w1 / w2;
-		}
-		else
-		{
-			vi.scalor1 = w2 / w1;
-			vi.scalor2 = 1;
-		}
-		gr.set_vertex_info(i, vi);
 	}
 	return 0;
 }

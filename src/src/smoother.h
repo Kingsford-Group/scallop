@@ -54,7 +54,6 @@ private:
 
 	int set_objective();
 	int update_weights();
-	int update_scalors();
 };
 
 #endif
