@@ -26,6 +26,8 @@ public:
 	virtual int build();
 	int build_splice_graph(splice_graph &gr) const;
 	int output_gtf(ofstream &fout, const vector<path> &paths, const string &prefix, int index) const;	
+	int print_5end_coverage() const;
+	int print_3end_coverage() const;
 	int print(int index) const;
 	int size() const;
 

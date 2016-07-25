@@ -37,143 +37,11 @@ int scallop2::clear()
 	return 0;
 }
 
-int scallop2::save(scallop2 &sc)
-{
-	sc.clear();
-
-	sc.name = name;
-	MEE x2y, y2x;
-	sc.gr.copy(gr, x2y, y2x);
-
-	for(MEI::iterator it = e2i.begin(); it != e2i.end(); it++)
-	{
-		edge_descriptor e = it->first;
-		int k = it->second;
-		assert(k >= 0 && k < i2e.size());
-		if(i2e[k] == null_edge)
-		{
-			assert(x2y.find(e) == x2y.end());
-			sc.e2i.insert(PEI(e, k));
-		}
-		else
-		{
-			assert(x2y.find(e) != x2y.end());
-			sc.e2i.insert(PEI(x2y[e], k));
-		}
-	}
-
-	for(int i = 0; i < i2e.size(); i++)
-	{
-		if(i2e[i] == null_edge)
-		{
-			sc.i2e.push_back(null_edge);
-		}
-		else
-		{
-			assert(x2y.find(i2e[i]) != x2y.end());
-			sc.i2e.push_back(x2y[i2e[i]]);
-		}
-	}
-
-	for(MEV::iterator it = mev.begin(); it != mev.end(); it++)
-	{
-		edge_descriptor e = it->first;
-		vector<int> v = it->second;
-		if(x2y.find(e) == x2y.end())
-		{
-			if(e2i.find(e) == e2i.end()) continue;
-			int k = e2i[e];
-			assert(i2e[k] == null_edge);
-			assert(sc.i2e[k] == null_edge);
-			sc.mev.insert(PEV(e, v));
-		}
-		else
-		{
-			int k = e2i[e];
-			assert(i2e[k] == e);
-			assert(sc.e2i[x2y[e]] == k);
-			assert(sc.i2e[k] == x2y[e]);
-			sc.mev.insert(PEV(x2y[e], v));
-		}
-	}
-
-	sc.round = round;
-	sc.paths = paths;
-
-	return 0;
-}
-
-int scallop2::load(scallop2 &sc)
-{
-	clear();
-
-	name = sc.name;
-
-	MEE x2y, y2x;
-	gr.copy(sc.gr, x2y, y2x);
-
-	for(MEI::iterator it = sc.e2i.begin(); it != sc.e2i.end(); it++)
-	{
-		edge_descriptor e = it->first;
-		int k = it->second;
-		assert(k >= 0 && k < sc.i2e.size());
-		if(sc.i2e[k] == null_edge)
-		{
-			assert(x2y.find(e) == x2y.end());
-			e2i.insert(PEI(e, k));
-		}
-		else
-		{
-			assert(x2y.find(e) != x2y.end());
-			e2i.insert(PEI(x2y[e], k));
-		}
-	}
-
-	for(int i = 0; i < sc.i2e.size(); i++)
-	{
-		if(sc.i2e[i] == null_edge)
-		{
-			i2e.push_back(null_edge);
-		}
-		else
-		{
-			assert(x2y.find(sc.i2e[i]) != x2y.end());
-			i2e.push_back(x2y[sc.i2e[i]]);
-		}
-	}
-
-	for(MEV::iterator it = sc.mev.begin(); it != sc.mev.end(); it++)
-	{
-		edge_descriptor e = it->first;
-		vector<int> v = it->second;
-		if(x2y.find(e) == x2y.end())
-		{
-			if(sc.e2i.find(e) == sc.e2i.end()) continue;
-			int k = sc.e2i[e];
-			assert(sc.i2e[k] == null_edge);
-			assert(i2e[k] == null_edge);
-			mev.insert(PEV(e, v));
-		}
-		else
-		{
-			int k = sc.e2i[e];
-			assert(sc.i2e[k] == e);
-			assert(e2i[x2y[e]] == k);
-			assert(i2e[k] == x2y[e]);
-			mev.insert(PEV(x2y[e], v));
-		}
-	}
-
-	round = sc.round;
-	paths = sc.paths;
-
-	return 0;
-}
-
 int scallop2::assemble()
 {
 	int c = classify();
-	//if(c == TRIVIAL) return 0;
+	assemble0();
+	return 0;
 
 	if(algo == "core") return assemble1();
 	if(algo == "full") return assemble2();
@@ -209,12 +77,16 @@ int scallop2::classify()
 
 int scallop2::assemble0()
 {
-	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
-
 	gr.get_edge_indices(i2e, e2i);
 	init_super_edges();
 
 	print();
+
+	rescale_weights();
+
+	print();
+
+	return 0;
 
 	while(true)
 	{
@@ -1423,6 +1295,103 @@ bool scallop2::estimate_scalor(int i)
 	return false;
 }
 
+int scallop2::rescale_weights()
+{
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		rescale_5end_weights(i);
+		rescale_3end_weights(i);
+	}
+	return 0;
+}
+
+int scallop2::rescale_5end_weights(int i)
+{
+	if(i == 0) return 0;
+	if(i == gr.num_vertices() - 1) return 0;
+	if(gr.get_vertex_info(i).length == 0) return 0;
+
+	VE ss;
+	gr.compute_maximum_st_path_w(ss, 0, i);
+	
+	int a = 0;
+	for(int i = 0; i < ss.size(); i++)
+	{
+		edge_descriptor e = ss[i];
+		int s = e->source();
+		a += gr.get_edge_info(e).length;
+		a += gr.get_vertex_info(s).length;
+	}
+
+	int b = average_slope_length;
+	if(a >= b) return 0;
+
+	// rescale vertex weight
+	int c = a + gr.get_vertex_info(i).length;
+	double w = gr.get_vertex_weight(i);
+	double ww = 0;
+	if(c >= b) ww = 2.0 * b * (c - a) * w / (2.0 * b * c - a * a - b * b);
+	else ww = 2.0 * b * w / (a + c);
+	gr.set_vertex_weight(i, ww);
+
+	if(c >= average_slope_length) return 0;
+
+	// rescale edge weight
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
+	{
+		edge_descriptor e = (*it1);
+		w = gr.get_edge_weight(e);
+		ww = b * w / c;
+		gr.set_edge_weight(e, ww);
+	}
+
+	return 0;
+}
+
+int scallop2::rescale_3end_weights(int i)
+{
+	if(i == 0) return 0;
+	if(i == gr.num_vertices() - 1) return 0;
+	if(gr.get_vertex_info(i).length == 0) return 0;
+
+	VE ss;
+	gr.compute_maximum_st_path_w(ss, i, gr.num_vertices() - 1);
+	
+	int a = 0;
+	for(int i = 0; i < ss.size(); i++)
+	{
+		edge_descriptor e = ss[i];
+		int t = e->target();
+		a += gr.get_edge_info(e).length;
+		a += gr.get_vertex_info(t).length;
+	}
+
+	int b = average_slope_length;
+	if(a >= b) return 0;
+
+	// rescale vertex weight
+	int c = a + gr.get_vertex_info(i).length;
+	double w = gr.get_vertex_weight(i);
+	double ww = 0;
+	if(c >= b) ww = 2.0 * b * (c - a) * w / (2.0 * b * c - a * a - b * b);
+	else ww = 2.0 * b * w / (a + c);
+	gr.set_vertex_weight(i, ww);
+
+	if(c >= average_slope_length) return 0;
+
+	// rescale edge weight
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
+	{
+		edge_descriptor e = (*it1);
+		w = gr.get_edge_weight(e);
+		ww = b * w / c;
+		gr.set_edge_weight(e, ww);
+	}
+	return 0;
+}
+
 bool scallop2::decompose_trivial_vertex(int i)
 {
 	if(i == 0) return false;
@@ -1503,6 +1472,139 @@ int scallop2::collect_path(int e)
 	return 0;
 }
 
+int scallop2::save(scallop2 &sc)
+{
+	sc.clear();
+
+	sc.name = name;
+	MEE x2y, y2x;
+	sc.gr.copy(gr, x2y, y2x);
+
+	for(MEI::iterator it = e2i.begin(); it != e2i.end(); it++)
+	{
+		edge_descriptor e = it->first;
+		int k = it->second;
+		assert(k >= 0 && k < i2e.size());
+		if(i2e[k] == null_edge)
+		{
+			assert(x2y.find(e) == x2y.end());
+			sc.e2i.insert(PEI(e, k));
+		}
+		else
+		{
+			assert(x2y.find(e) != x2y.end());
+			sc.e2i.insert(PEI(x2y[e], k));
+		}
+	}
+
+	for(int i = 0; i < i2e.size(); i++)
+	{
+		if(i2e[i] == null_edge)
+		{
+			sc.i2e.push_back(null_edge);
+		}
+		else
+		{
+			assert(x2y.find(i2e[i]) != x2y.end());
+			sc.i2e.push_back(x2y[i2e[i]]);
+		}
+	}
+
+	for(MEV::iterator it = mev.begin(); it != mev.end(); it++)
+	{
+		edge_descriptor e = it->first;
+		vector<int> v = it->second;
+		if(x2y.find(e) == x2y.end())
+		{
+			if(e2i.find(e) == e2i.end()) continue;
+			int k = e2i[e];
+			assert(i2e[k] == null_edge);
+			assert(sc.i2e[k] == null_edge);
+			sc.mev.insert(PEV(e, v));
+		}
+		else
+		{
+			int k = e2i[e];
+			assert(i2e[k] == e);
+			assert(sc.e2i[x2y[e]] == k);
+			assert(sc.i2e[k] == x2y[e]);
+			sc.mev.insert(PEV(x2y[e], v));
+		}
+	}
+
+	sc.round = round;
+	sc.paths = paths;
+
+	return 0;
+}
+
+int scallop2::load(scallop2 &sc)
+{
+	clear();
+
+	name = sc.name;
+
+	MEE x2y, y2x;
+	gr.copy(sc.gr, x2y, y2x);
+
+	for(MEI::iterator it = sc.e2i.begin(); it != sc.e2i.end(); it++)
+	{
+		edge_descriptor e = it->first;
+		int k = it->second;
+		assert(k >= 0 && k < sc.i2e.size());
+		if(sc.i2e[k] == null_edge)
+		{
+			assert(x2y.find(e) == x2y.end());
+			e2i.insert(PEI(e, k));
+		}
+		else
+		{
+			assert(x2y.find(e) != x2y.end());
+			e2i.insert(PEI(x2y[e], k));
+		}
+	}
+
+	for(int i = 0; i < sc.i2e.size(); i++)
+	{
+		if(sc.i2e[i] == null_edge)
+		{
+			i2e.push_back(null_edge);
+		}
+		else
+		{
+			assert(x2y.find(sc.i2e[i]) != x2y.end());
+			i2e.push_back(x2y[sc.i2e[i]]);
+		}
+	}
+
+	for(MEV::iterator it = sc.mev.begin(); it != sc.mev.end(); it++)
+	{
+		edge_descriptor e = it->first;
+		vector<int> v = it->second;
+		if(x2y.find(e) == x2y.end())
+		{
+			if(sc.e2i.find(e) == sc.e2i.end()) continue;
+			int k = sc.e2i[e];
+			assert(sc.i2e[k] == null_edge);
+			assert(i2e[k] == null_edge);
+			mev.insert(PEV(e, v));
+		}
+		else
+		{
+			int k = sc.e2i[e];
+			assert(sc.i2e[k] == e);
+			assert(e2i[x2y[e]] == k);
+			assert(i2e[k] == x2y[e]);
+			mev.insert(PEV(x2y[e], v));
+		}
+	}
+
+	round = sc.round;
+	paths = sc.paths;
+
+	return 0;
+}
+
 int scallop2::print()
 {
 	int n = 0;
@@ -1535,12 +1637,11 @@ int scallop2::draw_splice_graph(const string &file)
 	for(int i = 0; i < gr.num_vertices(); i++)
 	{
 		double w = gr.get_vertex_weight(i);
-		double s1 = gr.get_vertex_info(i).scalor1;
-		double s2 = gr.get_vertex_info(i).scalor2;
+		double d = gr.get_vertex_info(i).stddev;
 		int l = gr.get_vertex_info(i).length;
 		//string s = gr.get_vertex_string(i);
 		//sprintf(buf, "%d:%.0lf:%s", i, w, s.c_str());
-		sprintf(buf, "%d:%.1lf:%d:%.1lf:%.1lf", i, w, l, s1, s2);
+		sprintf(buf, "%d:%.1lf:%d", i, w, l);
 		mis.insert(PIS(i, buf));
 	}
 
@@ -1556,4 +1657,3 @@ int scallop2::draw_splice_graph(const string &file)
 	gr.draw(file, mis, mes, 4.0);
 	return 0;
 }
-

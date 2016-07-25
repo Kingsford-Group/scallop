@@ -24,6 +24,8 @@ int bundle::build()
 	process_hits();
 	build_partial_exons();
 	link_partial_exons();
+	//print_5end_coverage();
+	//print_3end_coverage();
 	//draw_junction_graph("jr.tex");
 	return 0;
 }
@@ -561,5 +563,41 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, const string &
 			fout<<"expression \""<<abd<<"\";"<<endl;
 		}
 	}
+	return 0;
+}
+
+int bundle::print_5end_coverage() const
+{
+	if(pexons.size() == 0) return 0;
+
+	int n = 500;
+	const partial_exon &p = pexons[0];
+	if(p.rpos - p.lpos <= n) return 0;
+
+	int k = 0;
+	for(int32_t i = p.lpos; i < p.lpos + n; i++)
+	{
+		int32_t c = compute_overlap(imap, i);
+		printf("5end coverage %d %d\n", k++, c);
+	}
+
+	return 0;
+}
+
+int bundle::print_3end_coverage() const
+{
+	if(pexons.size() == 0) return 0;
+
+	int n = 500;
+	const partial_exon &p = pexons[pexons.size() - 1];
+	if(p.rpos - p.lpos <= n) return 0;
+
+	int k = 0;
+	for(int32_t i = p.rpos - 1; i >= p.rpos - n; i--)
+	{
+		int32_t c = compute_overlap(imap, i);
+		printf("3end coverage %d %d\n", k++, c);
+	}
+
 	return 0;
 }

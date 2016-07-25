@@ -102,9 +102,6 @@ int assembler::process_bundle(bundle_base &bb, int &index, ofstream &fout)
 	splice_graph gr;
 	bd.build_splice_graph(gr);
 
-	gr.draw("sgraph.tex");
-	return 0;
-
 	scallop2 sc(name, gr);
 
 	sc.assemble();

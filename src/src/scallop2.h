@@ -67,6 +67,11 @@ private:
 	bool decompose_trivial_vertex(int v);
 	bool estimate_scalor(int i);
 
+	// rescale weights (coverage)
+	int rescale_weights();
+	int rescale_5end_weights(int i);
+	int rescale_3end_weights(int i);
+
 	// smooth weights
 	int smooth_splice_graph();
 	bool smooth_with_equation(equation &eqn);
