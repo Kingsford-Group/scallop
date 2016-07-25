@@ -39,10 +39,7 @@ int scallop2::clear()
 
 int scallop2::assemble()
 {
-	int c = classify();
-	assemble0();
-	return 0;
-
+	classify();
 	if(algo == "core") return assemble1();
 	if(algo == "full") return assemble2();
 	if(algo == "greedy") return greedy();
@@ -81,25 +78,7 @@ int scallop2::assemble0()
 	init_super_edges();
 
 	print();
-
 	rescale_weights();
-
-	print();
-
-	return 0;
-
-	while(true)
-	{
-		bool b = false;
-
-		b = join_trivial_vertices();
-		if(b == true) print();
-		if(b == true) continue;
-		
-		break;
-	}
-
-	smooth_splice_graph();
 	print();
 
 	return 0;
@@ -120,9 +99,9 @@ int scallop2::assemble1()
 int scallop2::assemble2()
 {
 	assemble0();
-	return 0;
-
 	int f = iterate();
+
+	return 0;
 
 	greedy_decompose();
 	assert(gr.num_edges() == 0);
@@ -150,15 +129,18 @@ int scallop2::iterate()
 	{
 		bool b = false;
 
-		b = decompose_trivial_internal_vertices();
+		b = smooth_trivial_vertices();
 		if(b == true) print();
 		if(b == true) continue;
+
+		smooth_splice_graph();
+		print();
+
+		break;
 
 		b = decompose_with_equations(1);
 		if(b == true) print();
 		if(b == true) continue;
-
-		break;
 
 		b = decompose_with_equations(2);
 		if(b == true) print();
@@ -166,23 +148,6 @@ int scallop2::iterate()
 
 		break;
 	}
-
-	bool flag = true;
-	while(true)
-	{
-		bool b = false;
-		b = decompose_trivial_external_vertices();
-		if(b == true) flag = true;
-		if(b == true) continue;
-
-		b = decompose_trivial_internal_vertices();
-		if(b == true) flag = true;
-		if(b == true) continue;
-
-		break;
-	}
-
-	if(flag == true) print();
 
 	return 0;
 }
@@ -793,11 +758,6 @@ bool scallop2::resolve_vertex_with_equation2(equation &eqn)
 
 int scallop2::smooth_splice_graph()
 {
-	for(int i = 0; i < gr.num_vertices(); i++)
-	{
-		estimate_scalor(i);
-	}
-
 	smoother sm(gr);
 	sm.smooth();
 	return 0;
@@ -805,11 +765,6 @@ int scallop2::smooth_splice_graph()
 
 bool scallop2::smooth_with_equation(equation &eqn)
 {
-	for(int i = 0; i < gr.num_vertices(); i++)
-	{
-		estimate_scalor(i);
-	}
-
 	VE vx, vy;
 	for(int i = 0; i < eqn.s.size(); i++) vx.push_back(i2e[eqn.s[i]]);
 	for(int i = 0; i < eqn.t.size(); i++) vy.push_back(i2e[eqn.t[i]]);
@@ -1146,9 +1101,6 @@ bool scallop2::join_trivial_vertices()
 {
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
-		bool s = estimate_scalor(i);
-		if(s == true) continue;
-
 		bool b = join_trivial_vertex(i);
 		if(b == true) return true;
 	}
@@ -1191,9 +1143,18 @@ bool scallop2::smooth_trivial_vertices()
 {
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
-		bool s = estimate_scalor(i);
-		if(s == true) continue;
+		if(gr.degree(i) == 0) continue;
+		if(gr.in_degree(i) >= 2 || gr.out_degree(i) >= 2) continue;
+		bool b = smooth_trivial_vertex(i);
+		if(b == true) return true;
+	}
 
+	return false;
+
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		if(gr.degree(i) == 0) continue;
+		if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) continue;
 		bool b = smooth_trivial_vertex(i);
 		if(b == true) return true;
 	}
@@ -1206,8 +1167,9 @@ bool scallop2::smooth_trivial_vertex(int i)
 	sm.smooth_vertex(i);
 
 	printf("smooth trivial vertex %d\n", i);
-	decompose_trivial_vertex(i);
-	return true;
+	print();
+
+	return decompose_trivial_vertex(i);
 }
 
 bool scallop2::decompose_trivial_internal_vertices()
@@ -1236,63 +1198,6 @@ bool scallop2::decompose_trivial_external_vertices()
 		flag = true;
 	}
 	return flag;
-}
-
-bool scallop2::estimate_scalor(int i)
-{
-	VE ss, tt;
-	gr.compute_maximum_st_path_w(ss, 0, i);
-	gr.compute_maximum_st_path_w(tt, i, gr.num_vertices() - 1);
-	
-	int ls = 0, lt = 0;
-	for(int i = 0; i < ss.size(); i++)
-	{
-		edge_descriptor e = ss[i];
-		int s = e->source();
-		ls += gr.get_edge_info(e).length;
-		ls += gr.get_vertex_info(s).length;
-	}
-	for(int i = 0; i < tt.size(); i++)
-	{
-		edge_descriptor e = tt[i];
-		int t = e->target();
-		lt += gr.get_edge_info(e).length;
-		lt += gr.get_vertex_info(t).length;
-	}
-
-	//printf("slope vertex %d, ls = %d, lt = %d, ave = %d\n", i, ls, lt, average_slope_length);
-	vertex_info vi = gr.get_vertex_info(i);
-
-	int length = gr.get_vertex_info(i).length;
-	int smax = ls + length;
-	if(smax > average_slope_length) smax = average_slope_length;
-	if(ls == 0) vi.scalor1 = 0.0;
-	else if(ls < smax) vi.scalor1 = (20 + smax) * 1.0 / (20 + ls);
-	else vi.scalor1 = 1.0;
-
-	if(ls < average_slope_length) vi.length1 = average_slope_length - ls;
-	else vi.length1 = 0;
-
-	if(vi.length1 > length) vi.length1 = length;
-
-	int tmax = lt + length;
-	if(tmax > average_slope_length) tmax = average_slope_length;
-	if(lt == 0) vi.scalor2 = 0.0;
-	else if(lt < tmax) vi.scalor2 = (20 + tmax) * 1.0 / (20 + lt);
-	else vi.scalor2 = 1.0;
-
-	if(lt < average_slope_length) vi.length2 = average_slope_length - lt;
-	else vi.length2 = 0;
-
-	if(vi.length2 > length - vi.length1) vi.length2 = length - vi.length1;
-
-	gr.set_vertex_info(i, vi);
-
-	//printf("vertex %d: ls = %d, lt = %d, length = (%d, %d, %d), scalor = (%.2lf, %.2lf)\n", i, ls, lt, vi.length, vi.length1, vi.length2, vi.scalor1, vi.scalor2);
-
-	if(fabs(vi.scalor1 - 1) > SMIN) return true;
-	if(fabs(vi.scalor2 - 1) > SMIN) return true;
-	return false;
 }
 
 int scallop2::rescale_weights()
@@ -1396,6 +1301,7 @@ bool scallop2::decompose_trivial_vertex(int i)
 {
 	if(i == 0) return false;
 	if(i == gr.num_vertices() - 1) return false;
+	if(gr.degree(i) == 0) return false;
 	if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) return false;
 
 	equation eqn(0);

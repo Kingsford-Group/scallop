@@ -65,7 +65,6 @@ private:
 	bool decompose_trivial_internal_vertices();
 	bool decompose_trivial_external_vertices();
 	bool decompose_trivial_vertex(int v);
-	bool estimate_scalor(int i);
 
 	// rescale weights (coverage)
 	int rescale_weights();
