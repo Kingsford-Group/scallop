@@ -513,8 +513,13 @@ int region::build_partial_exons()
 
 int region::print(int index) const
 {
-	printf("region %d: empty = %c, pos = [%d, %d), core = [%d, %d), bins = %lu\n", 
-			index, empty ? 'T' : 'F', lpos, rpos, lcore, rcore, bins.size());
+	int32_t lc = compute_overlap(*imap, lcore);
+	int32_t rc = compute_overlap(*imap, rcore - 1);
+	printf("region %d: empty = %c, pos = [%d, %d), core = [%d, %d), bins = %lu, coverage = (%d, %d)\n", 
+			index, empty ? 'T' : 'F', lpos, rpos, lcore, rcore, bins.size(), lc, rc);
+
+	return 0;
+
 	/*
 	for(int i = 0; i < seeds.size(); i++)
 	{

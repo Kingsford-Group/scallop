@@ -24,6 +24,7 @@ protected:
 	vector<hit> hits;				// hits
 	int phits;						// number of hits mapped to the positive strand
 	int qhits;						// number of hits mapped to the reverse strand
+	double ave_isize;				// average of all insert size (excluding mapped portion)
 
 public:
 	int add_hit(bam_hdr_t *h, bam1_t *b);

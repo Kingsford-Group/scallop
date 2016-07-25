@@ -46,7 +46,7 @@ bool hit::operator<(const hit &h) const
 	else return false;
 }
 
-int hit::print()
+int hit::print() const
 {
 	// get cigar string
 	ostringstream sstr;
@@ -57,13 +57,13 @@ int hit::print()
 	}
 
 	// print basic information
-	printf("Hit %s: [%d-%d), cigar = %s, flag = %d, quality = %d, strand = %c\n", 
-			qname.c_str(), pos, rpos, sstr.str().c_str(), flag, qual, xs);
+	printf("Hit %s: [%d-%d), mpos = %d, cigar = %s, flag = %d, quality = %d, strand = %c\n", 
+			qname.c_str(), pos, rpos, mpos, sstr.str().c_str(), flag, qual, xs);
 
 	return 0;
 }
 
-int hit::get_splice_positions(vector<int64_t> &v)
+int hit::get_splice_positions(vector<int64_t> &v) const
 {
 	v.clear();
 	int32_t p = pos;
@@ -86,7 +86,7 @@ int hit::get_splice_positions(vector<int64_t> &v)
     return 0;
 }
 
-int hit::get_matched_intervals(vector<int64_t> & v)
+int hit::get_matched_intervals(vector<int64_t> & v) const
 {
 	v.clear();
 	int32_t p = pos;

@@ -1,5 +1,6 @@
 #include <cassert>
 #include <cstdio>
+#include <cmath>
 
 #include "bundle_base.h"
 
@@ -11,6 +12,7 @@ bundle_base::bundle_base()
 	rpos = 0;
 	phits = 0;
 	qhits = 0;
+	ave_isize = 0;
 }
 
 bundle_base::~bundle_base()
@@ -40,6 +42,12 @@ int bundle_base::add_hit(bam_hdr_t *h, bam1_t *b)
 	if(ht.xs == '+') phits++;
 	else if(ht.xs == '-') qhits++;
 
+	if(ht.isize > 0 && ht.isize <= 400)
+	{
+		double isize = ht.mpos - ht.rpos;
+		ave_isize = (ave_isize * (hits.size() - 1) + isize) * 1.0 / hits.size();
+	}
+
 	return 0;
 }
 
@@ -52,6 +60,7 @@ int bundle_base::clear()
 	hits.clear();
 	phits = 0; 
 	qhits = 0;
+	ave_isize = 0;
 	return 0;
 }
 
