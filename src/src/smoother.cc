@@ -45,7 +45,7 @@ int smoother::smooth_vertex(int i)
 		if (f != GRB_OPTIMAL) return -1;
 
 		update_weights();
-		update_scalors();
+		//update_scalors();
 	} 
 	catch(GRBException e) 
 	{
@@ -91,7 +91,7 @@ int smoother::smooth()
 		if (f != GRB_OPTIMAL) return -1;
 
 		update_weights();
-		update_scalors();
+		//update_scalors();
 	} 
 	catch(GRBException e) 
 	{
@@ -295,29 +295,8 @@ int smoother::add_conservation_constraints()
 			eo += enwt[e];
 		}
 
-		vertex_info vi = gr.get_vertex_info(i);
-
-		double r1 = vi.length1 * 1.0 / vi.length;
-		double r2 = vi.length2 * 1.0 / vi.length;
-		double r3 = 1 - r1 - r2;
-
-		assert(r3 >= 0 - SMIN);
-		if(r3 <= 0) r3 = 0;
-
-		GRBLinExpr h = 0;
-		if(vi.scalor1 > SMIN) h = ei * vi.scalor1;
-		else if(vi.scalor2 > SMIN) h = eo * vi.scalor2;
-
-		GRBLinExpr expr;
-		expr += (ei + h) * 0.5 * r1;
-		expr += (eo + h) * 0.5 * r2;
-		expr += h * r3;
-
-		model->addConstr(vnwt[k], GRB_EQUAL, expr);
-		if(vi.scalor1 > SMIN && vi.scalor2 > SMIN)
-		{
-			model->addConstr(ei * vi.scalor1, GRB_EQUAL, eo * vi.scalor2);
-		}
+		model->addConstr(vnwt[k], GRB_EQUAL, ei);
+		model->addConstr(vnwt[k], GRB_EQUAL, eo);
 	}
 	return 0;
 }
@@ -351,18 +330,27 @@ int smoother::add_additional_constraints()
 int smoother::set_objective()
 {
 	GRBQuadExpr expr;
+	double scalor = 10.0;
 	for(int k = 0; k < i2v.size(); k++)
 	{
 		int i = i2v[k];
-		double ll = gr.get_vertex_info(i).length * 1.0 / average_read_length;
+		int len = gr.get_vertex_info(i).length;
+		double ll = len / scalor;
 		double wt = 1.0 + ll;
+		if(i == 0) wt = 0;
+		if(i == gr.num_vertices() - 1) wt = 0;
 		expr += wt * verr[k] * verr[k];
 	}
 
 	for(int i = 0; i < i2e.size(); i++)
 	{
-		double ll = gr.get_edge_info(i2e[i]).length * 1.0 / average_read_length;
+		int len = gr.get_edge_info(i2e[i]).length;
+		double ll = len / scalor;
 		double wt = 1.0 + ll;
+		int s = i2e[i]->source();
+		int t = i2e[i]->target();
+		if(s == 0 && len == 0) wt = 0;
+		if(t == gr.num_vertices() - 1 && len == 0) wt = 0;
 		expr += wt * eerr[i] * eerr[i];
 	}
 
