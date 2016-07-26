@@ -151,15 +151,11 @@ int scallop2::iterate()
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = decompose_with_equations(1);
+		b = decompose_with_equations(0);
 		if(b == true) print();
 		if(b == true) continue;
 
 		break;
-
-		b = decompose_with_equations(2);
-		if(b == true) print();
-		if(b == true) continue;
 	}
 
 	return 0;
@@ -172,6 +168,7 @@ bool scallop2::decompose_with_equations(int level)
 	//gr.round_weights();
 
 	bool b = false;
+	if(level == 0) b = identify_equations0(eqns);
 	if(level == 1) b = identify_equations1(eqns);
 	if(level == 2) b = identify_equations2(eqns);
 
@@ -180,17 +177,13 @@ bool scallop2::decompose_with_equations(int level)
 	sort(eqns.begin(), eqns.end(), equation_cmp1);
 
 	printf("candidate equations: %lu\n", eqns.size());
-	/*
-	for(int i = 0; i < eqns.size(); i++)
-	{
-		eqns[i].print(i);
-	}
-	*/
 
 	equation eqn(0);
 	for(int i = 0; i < eqns.size(); i++)
 	{
 		eqn = eqns[i];
+
+		if(eqn.f == 2 && eqn.d == 0) break;
 
 		if(verify_equation_mergable(eqn) == false) continue;
 		if(verify_equation_nontrivial(eqn) == false) continue;
@@ -533,6 +526,68 @@ int scallop2::identify_equation(const vector<int> &subs, vector<equation> &eqns)
 		eqns.push_back(eqn);
 
 		//return 0;		// only consider one equation
+	}
+	return 0;
+}
+
+int scallop2::identify_equations0(vector<equation> &eqns)
+{
+	typedef pair<double, int> PDI;
+	vector<PDI> vv;
+	for(int i = 0; i < i2e.size(); i++)
+	{
+		edge_descriptor &e = i2e[i];
+		if(e == null_edge) continue;
+		double w = gr.get_edge_weight(e);
+		vv.push_back(PDI(w, i));
+	}
+
+	sort(vv.begin(), vv.end());
+
+	nested_graph nt(gr);
+	for(int i = vv.size() - 1; i >= 1; i--)
+	{
+		int i1 = vv[i].second;
+		double w1 = vv[i].first;
+		edge_descriptor &e1 = i2e[i1];
+		int s1 = e1->source();
+		int t1 = e1->target();
+
+		SE ss, tt;
+		gr.bfs(t1, tt);
+		gr.bfs_reverse(s1, ss);
+
+		for(int j = i - 1; j >= 0; j--)
+		{
+			int i2 = vv[j].second;
+			double w2 = vv[j].first;
+			edge_descriptor &e2 = i2e[i2];
+			int s2 = e2->source();
+			int t2 = e2->target();
+
+			assert(w1 >= w2);
+
+			if(ss.find(e2) != ss.end())
+			{
+				bool b = nt.link(s2, t2, s1, t1);
+				if(b == false) continue;
+			}
+			else if(tt.find(e2) != tt.end())
+			{
+				bool b = nt.link(s1, t1, s2, t2);
+				if(b == false) continue;
+			}
+			else continue;
+
+			equation eqn(w1 - w2);
+			eqn.s.push_back(i1);
+			eqn.t.push_back(i2);
+			eqn.f = 2;
+			eqn.d = 0;
+			eqns.push_back(eqn);
+
+			break;
+		}
 	}
 	return 0;
 }

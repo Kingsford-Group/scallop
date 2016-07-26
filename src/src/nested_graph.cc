@@ -529,6 +529,12 @@ int nested_graph::remove_extra_edge(PEB p)
 	return 0;
 }
 
+bool nested_graph::link(int xs, int xt, int ys, int yt)
+{
+	vector<PI> xp, yp;
+	return link(xs, xt, ys, yt, xp, yp);
+}
+
 bool nested_graph::link(int xs, int xt, int ys, int yt, vector<PI> &xp, vector<PI> &yp)
 {
 	xp.clear();

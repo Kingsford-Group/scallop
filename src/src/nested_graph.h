@@ -28,6 +28,7 @@ public:
 	int clear();
 	int build(directed_graph &gr);
 	int draw(const string &file);
+	bool link(int xs, int xt, int ys, int yt);
 	bool link(int xs, int xt, int ys, int yt, vector<PI> &xp, vector<PI> &yp);
 
 private:

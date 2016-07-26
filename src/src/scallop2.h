@@ -79,6 +79,7 @@ private:
 	bool decompose_with_equations(int level);
 
 	// identify and handle equations 
+	int identify_equations0(vector<equation> &eqns);
 	int identify_equations1(vector<equation> &eqns);
 	int identify_equations2(vector<equation> &eqns);
 	int identify_equation(const vector<int> &subs, vector<equation> &eqns);
