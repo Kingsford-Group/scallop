@@ -89,12 +89,6 @@ private:
 	int resolve_equation(equation &eqn);
 	int resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md);
 
-	// use equation to decompose trivial vertex, new feature
-	bool resolve_vertex_with_equations(vector<equation> &eqns);
-	bool resolve_vertex_with_equation(equation &eqn);
-	bool resolve_vertex_with_equation1(equation &eqn);
-	bool resolve_vertex_with_equation2(equation &eqn);
-
 	// split, and merge
 	int split_edge(int exi, double w);
 	int merge_adjacent_equal_edges(int x, int y);
