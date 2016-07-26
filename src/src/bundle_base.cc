@@ -10,15 +10,14 @@ bundle_base::bundle_base()
 	chrm = "";
 	lpos = INT32_MAX;
 	rpos = 0;
-	phits = 0;
-	qhits = 0;
 	ave_isize = 0;
+	strand = '.';
 }
 
 bundle_base::~bundle_base()
 {}
 
-int bundle_base::add_hit(bam_hdr_t *h, const hit &ht)
+int bundle_base::add_hit(const hit &ht)
 {
 	// store new hit
 	hits.push_back(ht);
@@ -27,7 +26,7 @@ int bundle_base::add_hit(bam_hdr_t *h, const hit &ht)
 	if(ht.pos < lpos) lpos = ht.pos;
 	if(ht.rpos > rpos) rpos = ht.rpos;
 
-	// set chromsome ID and name
+	/*
 	if(tid == -1)
 	{
 		tid = ht.tid;
@@ -36,10 +35,15 @@ int bundle_base::add_hit(bam_hdr_t *h, const hit &ht)
 		strcpy(buf, h->target_name[ht.tid]);
 		chrm = string(buf);
 	}
+	*/
+
+	// set tid
+	if(tid == -1) tid = ht.tid;
 	assert(tid == ht.tid);
 
-	if(ht.xs == '+') phits++;
-	else if(ht.xs == '-') qhits++;
+	// set strand
+	if(strand == '.') strand = ht.xs;
+	assert(strand == ht.xs);
 
 	if(ht.isize > 0 && ht.isize <= 400)
 	{
@@ -56,9 +60,14 @@ int bundle_base::clear()
 	lpos = INT32_MAX;
 	rpos = 0;
 	hits.clear();
-	phits = 0; 
-	qhits = 0;
 	ave_isize = 0;
+	strand = '.';
+	return 0;
+}
+
+int bundle_base::set_chrm(const string &s)
+{
+	chrm = s;
 	return 0;
 }
 

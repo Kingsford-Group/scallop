@@ -19,7 +19,7 @@ public:
 	int assemble_sgr(const string &file);
 	int assemble_gtf(const string &file);
 	int assemble_bam(const string &file);
-	int process_bundle(bundle_base &bb, int &index, ofstream &fout);
+	int process_bundle(bundle_base &bb, bam_hdr_t *h, int &index, ofstream &fout);
 };
 
 #endif

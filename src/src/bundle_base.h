@@ -22,14 +22,14 @@ protected:
 	int32_t lpos;					// the leftmost boundary on reference
 	int32_t rpos;					// the rightmost boundary on reference
 	vector<hit> hits;				// hits
-	int phits;						// number of hits mapped to the positive strand
-	int qhits;						// number of hits mapped to the reverse strand
+	char strand;					// strandness
 	double ave_isize;				// average of all insert size (excluding mapped portion)
 
 public:
-	int add_hit(bam_hdr_t *h, const hit &ht);
+	int add_hit(const hit &ht);
 	int clear();
 
+	int set_chrm(const string &s);
 	int32_t get_tid();
 	int32_t get_rpos();
 	size_t get_num_hits();

@@ -51,29 +51,29 @@ int assembler::assemble_bam(const string &file)
 	bundle_base bb2;		// for - reads
     while(sam_read1(fn, h, b) >= 0)
 	{
-		hit ht(b);
-		//bam1_core_t &p = b->core;
-		if((ht.flag & 0x4) >= 1) continue;		// read is not mapped, TODO
-		if((ht.flag & 0x100) >= 1) continue;		// secondary alignment
-		if(ht.n_cigar < 1) continue;				// should never happen
-		if(ht.n_cigar > 7) continue;				// ignore hits with more than 7 cigar types
+		bam1_core_t &p = b->core;
+		if((p.flag & 0x4) >= 1) continue;			// read is not mapped, TODO
+		if((p.flag & 0x100) >= 1) continue;		// secondary alignment
+		if(p.n_cigar < 1) continue;				// should never happen
+		if(p.n_cigar > MAX_NUM_CIGAR) continue;	// ignore hits with more than 7 cigar types
 		//if(p.qual <= 4) continue;				// ignore hits with quality-score < 5
 		
-		if(bb1.get_num_hits() > 0 && (bb1.get_rpos() + min_bundle_gap < ht.pos || ht.tid != bb1.get_tid()))
+		if(bb1.get_num_hits() > 0 && (bb1.get_rpos() + min_bundle_gap < p.pos || p.tid != bb1.get_tid()))
 		{
-			process_bundle(bb1, index, fout);
+			process_bundle(bb1, h, index, fout);
 		}
 
-		if(bb2.get_num_hits() > 0 && (bb2.get_rpos() + min_bundle_gap < ht.pos || ht.tid != bb2.get_tid()))
+		if(bb2.get_num_hits() > 0 && (bb2.get_rpos() + min_bundle_gap < p.pos || p.tid != bb2.get_tid()))
 		{
-			process_bundle(bb2, index, fout);
+			process_bundle(bb2, h, index, fout);
 		}
 
-		if(ht.xs == '+') bb1.add_hit(h, ht);
-		if(ht.xs == '-') bb2.add_hit(h, ht);
+		hit ht(b);
+		if(ht.xs == '+') bb1.add_hit(ht);
+		if(ht.xs == '-') bb2.add_hit(ht);
     }
-	process_bundle(bb1, index, fout);
-	process_bundle(bb2, index, fout);
+	process_bundle(bb1, h, index, fout);
+	process_bundle(bb2, h, index, fout);
 
     bam_destroy1(b);
     bam_hdr_destroy(h);
@@ -83,13 +83,19 @@ int assembler::assemble_bam(const string &file)
 	return 0;
 }
 
-int assembler::process_bundle(bundle_base &bb, int &index, ofstream &fout)
+int assembler::process_bundle(bundle_base &bb, bam_hdr_t *h, int &index, ofstream &fout)
 {
 	if(bb.get_num_hits() < min_num_hits_in_bundle) 
 	{
 		bb.clear();
 		return 0;
 	}
+
+	char buf[1024];
+	int tid = bb.get_tid();
+	assert(tid >= 0);
+	strcpy(buf, h->target_name[tid]);
+	bb.set_chrm(buf);
 
 	index++;
 
