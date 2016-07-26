@@ -129,14 +129,20 @@ int scallop2::iterate()
 	{
 		bool b = false;
 
-		b = smooth_trivial_vertices();
+		b = join_trivial_vertices();
+		if(b == true) print();
+		if(b == true) continue;
+
+		b = join_trivial_edges();
 		if(b == true) print();
 		if(b == true) continue;
 
 		smooth_splice_graph();
 		print();
 
-		break;
+		b = decompose_trivial_vertices();
+		if(b == true) print();
+		if(b == true) continue;
 
 		b = decompose_with_equations(1);
 		if(b == true) print();
@@ -758,6 +764,7 @@ bool scallop2::resolve_vertex_with_equation2(equation &eqn)
 
 int scallop2::smooth_splice_graph()
 {
+	printf("smooth splice graph\n");
 	smoother sm(gr);
 	sm.smooth();
 	return 0;
@@ -1045,56 +1052,40 @@ bool scallop2::join_trivial_edge(edge_descriptor &e)
 	int s = e->source();
 	int t = e->target();
 
-	double as = gr.get_vertex_weight(s);
-	double at = gr.get_vertex_weight(t);
-	double ae = gr.get_edge_weight(e);
+	double ws = gr.get_vertex_weight(s);
+	double wt = gr.get_vertex_weight(t);
+	double we = gr.get_edge_weight(e);
+
 	int ls = gr.get_vertex_info(s).length;
 	int lt = gr.get_vertex_info(t).length;
 	int le = gr.get_edge_info(e).length;
 
-	int arl = average_read_length;
-	int ll = ls + lt + le;
-	double ave = (ls * as + lt * at + (le + arl) * ae) / (ll + arl);
+	int lsp = ls + pseudo_length_count;
+	int ltp = lt + pseudo_length_count;
+	int lep = le + pseudo_length_count;
+
+	if(ws <= SMIN) lsp = 0;
+	if(wt <= SMIN) ltp = 0;
+	if(we <= SMIN) lep = 0;
+
+	double ww = (lsp * ws + ltp * wt + lep * we) / (lsp + ltp + lep);
+
+	gr.set_vertex_weight(s, ww);
+	gr.set_vertex_info(s, vertex_info(ls + lt + le));
+
+	double ew = 0;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.out_edges(t); it1 != it2; it1++)
+	{
+		ew += gr.get_edge_weight(*it1);
+	}
+	gr.set_edge_weight(e, ew);
+	gr.set_edge_info(e, edge_info(0));
+	gr.set_vertex_info(t, vertex_info(0));
 
 	printf("join trivial edge %d\n", e2i[e]);
-	if(gr.locate(t) == 0)
-	{
-		gr.set_vertex_weight(s, ave);
-		gr.set_vertex_info(s, vertex_info(ll));
-
-		double ew = 0;
-		edge_iterator it1, it2;
-		for(tie(it1, it2) = gr.out_edges(t); it1 != it2; it1++)
-		{
-			ew += gr.get_edge_weight(*it1);
-		}
-		gr.set_edge_weight(e, ew);
-		gr.set_edge_info(e, edge_info(0));
-		gr.set_vertex_info(t, vertex_info(0));
-
-		decompose_trivial_vertex(t);
-		return true;
-	}
-	else if(gr.locate(s) == 0)
-	{
-		gr.set_vertex_weight(t, ave);
-		gr.set_vertex_info(t, vertex_info(ll));
-
-		double ew = 0;
-		edge_iterator it1, it2;
-		for(tie(it1, it2) = gr.in_edges(s); it1 != it2; it1++)
-		{
-			ew += gr.get_edge_weight(*it1);
-		}
-		gr.set_edge_weight(e, ew);
-		gr.set_edge_info(e, edge_info(0));
-		gr.set_vertex_info(s, vertex_info(0));
-
-		decompose_trivial_vertex(s);
-		return true;
-	}
-
-	return false;
+	decompose_trivial_vertex(t);
+	return true;
 }
 
 bool scallop2::join_trivial_vertices()
@@ -1118,18 +1109,20 @@ bool scallop2::join_trivial_vertex(int i)
 	tie(it1, it2) = gr.out_edges(i);
 	edge_descriptor e2 = *it1;
 
-	if(e1->source() == 0) return false;
-	if(e2->target() == gr.num_vertices() - 1) return false;
+	//if(e1->source() == 0) return false;
+	//if(e2->target() == gr.num_vertices() - 1) return false;
 
 	double wv = gr.get_vertex_weight(i);
 	double w1 = gr.get_edge_weight(e1);
 	double w2 = gr.get_edge_weight(e2);
-	int lv = gr.get_vertex_info(i).length;
-	int l1 = gr.get_edge_info(e1).length;
-	int l2 = gr.get_edge_info(e2).length;
+	int lv = gr.get_vertex_info(i).length + pseudo_length_count;
+	int l1 = gr.get_edge_info(e1).length + pseudo_length_count;
+	int l2 = gr.get_edge_info(e2).length + pseudo_length_count;
 
-	int arl = average_read_length;
-	double w = (wv * lv + (l1 + arl) * w1 + (l2 + arl) * w2) / (lv + 2 * arl + l1 + l2);
+	if(w1 <= SMIN) l1 = 0;
+	if(w2 <= SMIN) l2 = 0;
+
+	double w = (wv * lv + w1 * l1 + w2 * l2) / (lv + l1 + l2);
 
 	gr.set_edge_weight(e1, w);
 	gr.set_edge_weight(e2, w);
@@ -1170,34 +1163,6 @@ bool scallop2::smooth_trivial_vertex(int i)
 	print();
 
 	return decompose_trivial_vertex(i);
-}
-
-bool scallop2::decompose_trivial_internal_vertices()
-{
-	bool flag = false;
-	for(int i = 1; i < gr.num_vertices() - 1; i++)
-	{
-		if(gr.degree(i) == 0) continue;
-		if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) continue;
-		if(gr.locate(i) != 0) continue;
-		decompose_trivial_vertex(i);
-		flag = true;
-	}
-	return flag;
-}
-
-bool scallop2::decompose_trivial_external_vertices()
-{
-	bool flag = false;
-	for(int i = 1; i < gr.num_vertices() - 1; i++)
-	{
-		if(gr.degree(i) == 0) continue;
-		if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) continue;
-		if(gr.locate(i) == 0) continue;
-		decompose_trivial_vertex(i);
-		flag = true;
-	}
-	return flag;
 }
 
 int scallop2::rescale_weights()
@@ -1295,6 +1260,16 @@ int scallop2::rescale_3end_weights(int i)
 		gr.set_edge_weight(e, ww);
 	}
 	return 0;
+}
+
+bool scallop2::decompose_trivial_vertices()
+{
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		bool b = decompose_trivial_vertex(i);
+		if(b == true) return true;
+	}
+	return false;
 }
 
 bool scallop2::decompose_trivial_vertex(int i)

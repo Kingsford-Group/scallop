@@ -30,6 +30,7 @@ int min_slope_score = 35;
 int32_t average_read_length = 100;
 int slope_std_bin_num = 30;
 int32_t average_slope_length = 300;
+int pseudo_length_count = 10;
 
 // for algorithm
 int max_dp_table_size = 10000;

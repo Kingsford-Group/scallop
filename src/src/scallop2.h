@@ -62,8 +62,7 @@ private:
 	bool join_trivial_vertex(int i);
 	bool smooth_trivial_vertices();
 	bool smooth_trivial_vertex(int i);
-	bool decompose_trivial_internal_vertices();
-	bool decompose_trivial_external_vertices();
+	bool decompose_trivial_vertices();
 	bool decompose_trivial_vertex(int v);
 
 	// rescale weights (coverage)
