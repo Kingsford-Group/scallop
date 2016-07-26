@@ -74,6 +74,8 @@ int scallop2::classify()
 
 int scallop2::assemble0()
 {
+	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
+
 	gr.get_edge_indices(i2e, e2i);
 	init_super_edges();
 
@@ -1556,6 +1558,6 @@ int scallop2::draw_splice_graph(const string &file)
 		sprintf(buf, "%d:%.1lf:%d", i, w, l);
 		mes.insert(PES(i2e[i], buf));
 	}
-	gr.draw(file, mis, mes, 4.0);
+	gr.draw(file, mis, mes, 4.5);
 	return 0;
 }
