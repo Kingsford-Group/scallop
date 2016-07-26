@@ -18,10 +18,9 @@ bundle_base::bundle_base()
 bundle_base::~bundle_base()
 {}
 
-int bundle_base::add_hit(bam_hdr_t *h, bam1_t *b)
+int bundle_base::add_hit(bam_hdr_t *h, const hit &ht)
 {
-	// create and store new hit
-	hit ht(b);
+	// store new hit
 	hits.push_back(ht);
 
 	// calcuate the boundaries on reference
@@ -47,7 +46,6 @@ int bundle_base::add_hit(bam_hdr_t *h, bam1_t *b)
 		double isize = ht.mpos - ht.rpos;
 		ave_isize = (ave_isize * (hits.size() - 1) + isize) * 1.0 / hits.size();
 	}
-
 	return 0;
 }
 

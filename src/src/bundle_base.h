@@ -27,7 +27,7 @@ protected:
 	double ave_isize;				// average of all insert size (excluding mapped portion)
 
 public:
-	int add_hit(bam_hdr_t *h, bam1_t *b);
+	int add_hit(bam_hdr_t *h, const hit &ht);
 	int clear();
 
 	int32_t get_tid();

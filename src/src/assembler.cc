@@ -47,23 +47,33 @@ int assembler::assemble_bam(const string &file)
 	if(output_file != "") fout.open(output_file);
 
 	int index = -1;
-	bundle_base bb;
+	bundle_base bb1;		// for + reads
+	bundle_base bb2;		// for - reads
     while(sam_read1(fn, h, b) >= 0)
 	{
-		bam1_core_t &p = b->core;
-		if((p.flag & 0x4) >= 1) continue;		// read is not mapped, TODO
-		if((p.flag & 0x100) >= 1) continue;		// secondary alignment
-		if(p.n_cigar < 1) continue;				// should never happen
-		if(p.n_cigar > 7) continue;				// ignore hits with more than 7 cigar types
+		hit ht(b);
+		//bam1_core_t &p = b->core;
+		if((ht.flag & 0x4) >= 1) continue;		// read is not mapped, TODO
+		if((ht.flag & 0x100) >= 1) continue;		// secondary alignment
+		if(ht.n_cigar < 1) continue;				// should never happen
+		if(ht.n_cigar > 7) continue;				// ignore hits with more than 7 cigar types
 		//if(p.qual <= 4) continue;				// ignore hits with quality-score < 5
 		
-		if(bb.get_num_hits() > 0 && (bb.get_rpos() + min_bundle_gap < p.pos || p.tid != bb.get_tid()))
+		if(bb1.get_num_hits() > 0 && (bb1.get_rpos() + min_bundle_gap < ht.pos || ht.tid != bb1.get_tid()))
 		{
-			process_bundle(bb, index, fout);
+			process_bundle(bb1, index, fout);
 		}
-		bb.add_hit(h, b);
+
+		if(bb2.get_num_hits() > 0 && (bb2.get_rpos() + min_bundle_gap < ht.pos || ht.tid != bb2.get_tid()))
+		{
+			process_bundle(bb2, index, fout);
+		}
+
+		if(ht.xs == '+') bb1.add_hit(h, ht);
+		if(ht.xs == '-') bb2.add_hit(h, ht);
     }
-	process_bundle(bb, index, fout);
+	process_bundle(bb1, index, fout);
+	process_bundle(bb2, index, fout);
 
     bam_destroy1(b);
     bam_hdr_destroy(h);

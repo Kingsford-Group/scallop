@@ -11,6 +11,18 @@ hit::hit(int32_t p)
 	xs = '.';
 }
 
+hit::hit(const hit &h)
+	:bam1_core_t(h)
+{
+	rpos = h.rpos;
+	qname = h.qname;
+	xs = h.xs;
+	for(int i = 0; i < MAX_NUM_CIGAR; i++)
+	{
+		cigar[i] = h.cigar[i];
+	}
+}
+
 hit::hit(bam1_t *b)
 	:bam1_core_t(b->core)
 {
