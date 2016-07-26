@@ -35,7 +35,7 @@ int pseudo_length_count = 10;
 // for algorithm
 int max_dp_table_size = 10000;
 int max_num_subsetsum_solutions = 10;
-double max_equation_error_ratio = 0.3;
+double max_equation_error_ratio = 1.0;
 
 //// from command line
 string algo;
