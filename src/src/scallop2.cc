@@ -155,6 +155,10 @@ int scallop2::iterate()
 		if(b == true) print();
 		if(b == true) continue;
 
+		b = decompose_with_equations(1);
+		if(b == true) print();
+		if(b == true) continue;
+
 		break;
 	}
 
