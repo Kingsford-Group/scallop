@@ -518,7 +518,6 @@ int region::print(int index) const
 	printf("region %d: empty = %c, pos = [%d, %d), core = [%d, %d), bins = %lu, coverage = (%d, %d)\n", 
 			index, empty ? 'T' : 'F', lpos, rpos, lcore, rcore, bins.size(), lc, rc);
 
-	return 0;
 
 	/*
 	for(int i = 0; i < seeds.size(); i++)
@@ -530,6 +529,8 @@ int region::print(int index) const
 	{
 		slopes[i].print(i);
 	}
+
+	return 0;
 	for(int i = 0; i < pexons.size(); i++)
 	{
 		pexons[i].print(i);

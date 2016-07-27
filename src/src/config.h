@@ -49,6 +49,7 @@ extern int slope_std_bin_num;
 extern int slope_min_distance;
 extern int min_slope_score;
 extern int pseudo_length_count;
+extern double min_boundary_edge_weight_ratio;
 
 extern string algo;
 extern string input_file;

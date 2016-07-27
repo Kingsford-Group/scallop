@@ -65,6 +65,10 @@ private:
 	bool decompose_trivial_vertices();
 	bool decompose_trivial_vertex(int v);
 
+	// remove false boundary edges
+	bool remove_false_boundary_edges();
+	bool verify_false_boundary_edge(edge_descriptor e);
+
 	// rescale weights (coverage)
 	int rescale_weights();
 	int rescale_5end_weights(int i);

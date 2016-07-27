@@ -147,6 +147,11 @@ int scallop2::iterate()
 	{
 		bool b = false;
 
+		b = remove_false_boundary_edges();
+		if(b == true) smooth_splice_graph();
+		if(b == true) print();
+		if(b == true) continue;
+
 		b = decompose_trivial_vertices();
 		if(b == true) print();
 		if(b == true) continue;
@@ -1201,6 +1206,63 @@ bool scallop2::decompose_trivial_vertex(int i)
 	eqn.print(i);
 
 	resolve_equation(eqn);
+	return true;
+}
+
+bool scallop2::remove_false_boundary_edges()
+{
+	edge_iterator it1, it2;
+	VE v;
+	for(tie(it1, it2) = gr.out_edges(0); it1 != it2; it1++)
+	{
+		v.push_back(*it1);
+	}
+	for(tie(it1, it2) = gr.in_edges(gr.num_vertices() - 1); it1 != it2; it1++)
+	{
+		v.push_back(*it1);
+	}
+
+	for(int i = 0; i < v.size(); i++)
+	{
+		edge_descriptor e = v[i];
+
+
+		bool b = verify_false_boundary_edge(e);
+		if(b == false) continue;
+
+		int k = e2i[e];
+		gr.remove_edge(e);
+		e2i.erase(e);
+		i2e[k] = null_edge;
+
+		return true;
+	}
+	return false;
+}
+
+bool scallop2::verify_false_boundary_edge(edge_descriptor e)
+{
+	int n = gr.num_vertices() - 1;
+	int k = e2i[e];
+	int s = e->source();
+	int t = e->target();
+	int l = gr.get_edge_info(e).length;
+	//printf("verify edge %d = (%d, %d), length = %d, we = %.2lf, wt = %.2lf\n", k, s, t, l, we, wt);
+
+	if(s != 0 && t != n) return false;
+	if(l != 0) return false;
+	if(s == 0 && gr.in_degree(t) == 1) return false;
+	if(t == n && gr.out_degree(t) == 1) return false;
+
+	double we = gr.get_edge_weight(e);
+	double ww = 0;
+	if(s == 0) ww = gr.get_vertex_weight(t);
+	if(t == n) ww = gr.get_vertex_weight(s);
+
+	if(ww <= SMIN) return false;
+	if(we / ww >= min_boundary_edge_weight_ratio) return false;
+
+	printf("remove false boundary edge %d (%.2lf / %.2lf)\n", k, we, ww);
 	return true;
 }
 
