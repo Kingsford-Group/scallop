@@ -29,6 +29,7 @@ my $sn2 = $tp2 / $ref * 100.0;
 my $sp1 = $tp1 / $ss1 * 100.0;
 my $sp2 = $tp2 / $ss2 * 100.0;
 
-my $m = sprintf("reference = %d, scallop = %d / %d, stringtie = %d / %d, sensitivity = (%.2f, %.2f), specificity = (%.2f, %.2f)\n", $ref, $tp1, $ss1, $tp2, $ss2, $sn1, $sn2, $sp1, $sp2);
+my $m = sprintf("reference = %d, prediction = (%d, %d), correct = (%d, %d), sensitivity = (%.2f, %.2f), specificity = (%.2f, %.2f)\n", 
+		$ref, $ss1, $ss2, $tp1, $tp2, $sn1, $sn2, $sp1, $sp2);
 
 print("$m");
