@@ -1,7 +1,7 @@
 #include "compare.h"
 #include <cassert>
 
-bool compare_transcript_structure(const transcript &x, const transcript &y)
+bool compare_structure(const transcript &x, const transcript &y)
 {
 	if(x.exons.size() != y.exons.size()) return false;
 	for(int i = 0; i < x.exons.size(); i++)
@@ -12,30 +12,53 @@ bool compare_transcript_structure(const transcript &x, const transcript &y)
 	return true;
 }
 
-bool compare_transcript_expression(const transcript &x, const transcript &y)
+bool compare_intron_chain(const transcript &x, const transcript &y)
+{
+	if(x.exons.size() != y.exons.size()) return false;
+	for(int i = 0; i < x.exons.size(); i++)
+	{
+		if(i >= 1 && x.exons[i].first != y.exons[i].first) return false;
+		if(i < x.exons.size() - 1 && x.exons[i].second != y.exons[i].second) return false;
+	}
+	return true;
+}
+
+bool compare_expression(const transcript &x, const transcript &y)
 {
 	if(x.expression == y.expression) return true;
 	else return false;
 }
 
-bool compare_transcript(const transcript &x, const transcript &y)
+int compare_gene(const gene &x, const gene &y, int mode)
 {
-	if(compare_transcript_structure(x, y) == false) return false;
-	if(compare_transcript_expression(x, y) == false) return false;
-	return true;
+	return compare_transcripts(x.transcripts, y.transcripts, mode);
 }
 
-int compare_gene(const gene &x, const gene &y)
+int compare_transcripts(const vector<transcript> &x, const vector<transcript> &y, int mode)
 {
 	int cnt = 0;
 	vector<bool> v;
-	v.assign(y.transcripts.size(), false);
-	for(int i = 0; i < x.transcripts.size(); i++)
+	v.assign(y.size(), false);
+	for(int i = 0; i < x.size(); i++)
 	{
-		for(int j = 0; j < y.transcripts.size(); j++)
+		const transcript &t1 = x[i];
+		for(int j = 0; j < y.size(); j++)
 		{
 			if(v[j] == true) continue;
-			if(compare_transcript(x.transcripts[i], y.transcripts[j]) == false) continue;
+			const transcript &t2 = y[j];
+			bool b = false;
+			if(mode == 1)
+			{
+				if(compare_structure(t1, t2) == false) b = false;
+				if(compare_expression(t1, t2) == false) b = false;
+			}
+			if(mode == 2)
+			{
+				b = compare_intron_chain(t1, t2);
+			}
+
+			if(b == false) continue;
+
 			v[j] = true;
 			cnt++;
 			break;
@@ -44,7 +67,7 @@ int compare_gene(const gene &x, const gene &y)
 	return cnt;
 }
 
-int compare_genome(const genome &x, const genome &y)
+int compare_genome1(const genome &x, const genome &y)
 {
 	int gequal = 0;
 	int tequal = 0;
@@ -57,7 +80,7 @@ int compare_genome(const genome &x, const genome &y)
 		if(gx == NULL || gy == NULL) continue;
 		int tx = gx->transcripts.size();
 		int ty = gy->transcripts.size();
-		int t0 = compare_gene(*gx, *gy);
+		int t0 = compare_gene(*gx, *gy, 1);
 		assert(t0 <= tx);
 		assert(t0 <= ty);
 		ttotal += tx;
@@ -71,5 +94,60 @@ int compare_genome(const genome &x, const genome &y)
 	}
 	printf("summary: %d out of %d genes are equal, %d out of %d transcripts are equal\n",
 			gequal, gtotal, tequal, ttotal);
+	return 0;
+}
+
+int compare_genome2(const genome &x, const genome &y)
+{
+	typedef pair< string, vector<transcript> > PSVT;
+	typedef map< string, vector<transcript> > MSVT;
+	MSVT m1;
+	MSVT m2;
+
+	int xtotal = 0;
+	int ytotal = 0;
+	for(int i = 0; i < x.genes.size(); i++)
+	{
+		string chrm = x.genes[i].get_seqname();
+		const vector<transcript> &v = x.genes[i].transcripts;
+		xtotal += v.size();
+		if(m1.find(chrm) == m1.end())
+		{
+			m1.insert(PSVT(chrm, v));
+		}
+		else
+		{
+			m1[chrm].insert(m1[chrm].end(), v.begin(), v.end());
+		}
+	}
+
+	for(int i = 0; i < y.genes.size(); i++)
+	{
+		string chrm = y.genes[i].get_seqname();
+		const vector<transcript> &v = y.genes[i].transcripts;
+		ytotal += v.size();
+		if(m2.find(chrm) == m2.end())
+		{
+			m2.insert(PSVT(chrm, v));
+		}
+		else
+		{
+			m2[chrm].insert(m2[chrm].end(), v.begin(), v.end());
+		}
+	}
+
+	int correct = 0;
+	for(MSVT::iterator it = m1.begin(); it != m1.end(); it++)
+	{
+		const vector<transcript> &v1 = it->second;
+		if(m2.find(it->first) == m2.end()) continue;
+		const vector<transcript> &v2 = m2[it->first];
+
+		correct += compare_transcripts(v1, v2, 2);
+	}
+
+	printf("reference = %d prediction = %d correct = %d sensitivity = %.2lf precision = %.2lf\n", 
+			xtotal, ytotal, correct, correct * 100.0 / xtotal, correct * 100.0 / ytotal);
+
 	return 0;
 }
