@@ -13,12 +13,8 @@ using namespace std;
 // for bam file
 int32_t min_bundle_gap = 50;
 int min_num_hits_in_bundle = 20;
-int32_t min_splice_boundary_hits = 3;
-int32_t min_left_boundary_hits = 4;
-int32_t min_right_boundary_hits = 4;
+int32_t min_splice_boundary_hits = 1;
 uint32_t min_max_splice_boundary_qual = 3;
-uint32_t min_max_left_boundary_qual = 4;
-uint32_t min_max_right_boundary_qual = 4;
 double min_average_overlap = 2;
 int min_max_region_overlap = 5;
 double min_region_coverage = 0.5;
@@ -26,7 +22,7 @@ int max_num_bundles = -1;
 int slope_bin_size = 10;
 int slope_min_bin_num = 9;
 int slope_min_distance = 100;
-int min_slope_score = 35;
+int min_slope_score = 45;
 int32_t average_read_length = 100;
 int slope_std_bin_num = 30;
 int32_t average_slope_length = 300;
@@ -147,25 +143,9 @@ int load_config(const char * conf_file)
 		{
 			min_splice_boundary_hits = (int32_t)atoi(value);
 		}
-		else if(strcmp(key, "min_left_boundary_hits")==0)
-		{
-			min_left_boundary_hits = (int32_t)atoi(value);
-		}
-		else if(strcmp(key, "min_right_boundary_hits")==0)
-		{
-			min_right_boundary_hits = (int32_t)atoi(value);
-		}
 		else if(strcmp(key, "min_max_splice_boundary_qual")==0)
 		{
 			min_max_splice_boundary_qual = (uint32_t)atoi(value);
-		}
-		else if(strcmp(key, "min_max_left_boundary_qual")==0)
-		{
-			min_max_left_boundary_qual = (uint32_t)atoi(value);
-		}
-		else if(strcmp(key, "min_max_right_boundary_qual")==0)
-		{
-			min_max_right_boundary_qual = (uint32_t)atoi(value);
 		}
 		else if(strcmp(key, "average_read_length")==0)
 		{
