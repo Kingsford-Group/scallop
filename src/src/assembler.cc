@@ -69,8 +69,9 @@ int assembler::assemble_bam(const string &file)
 		}
 
 		hit ht(b);
-		if(ht.xs == '+') bb1.add_hit(ht);
-		if(ht.xs == '-') bb2.add_hit(ht);
+
+		if(ht.strand == '+') bb1.add_hit(ht);
+		if(ht.strand == '-') bb2.add_hit(ht);
     }
 	process_bundle(bb1, h, index, fout);
 	process_bundle(bb2, h, index, fout);

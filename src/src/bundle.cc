@@ -358,7 +358,7 @@ int bundle::build_partial_exons()
 		//printf("try region %d\n", i);
 		region r(v[i].first, v[i + 1].first, v[i].second, v[i + 1].second, &imap);
 		vector<partial_exon> vp = r.build();
-		r.print(i);
+		//r.print(i);
 		pexons.insert(pexons.end(), vp.begin(), vp.end());
 	}
 	return 0;

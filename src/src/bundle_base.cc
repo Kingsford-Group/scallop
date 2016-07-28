@@ -42,8 +42,8 @@ int bundle_base::add_hit(const hit &ht)
 	assert(tid == ht.tid);
 
 	// set strand
-	if(strand == '.') strand = ht.xs;
-	assert(strand == ht.xs);
+	if(strand == '.') strand = ht.strand;
+	assert(strand == ht.strand);
 
 	if(ht.isize > 0 && ht.isize <= 400)
 	{
