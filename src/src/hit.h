@@ -47,7 +47,7 @@ public:
 public:
 	int32_t rpos;							// right position mapped to reference [pos, rpos)
 	string qname;							// query name
-	char xs;								// strandness
+	char strand;								// strandness
 	uint32_t cigar[MAX_NUM_CIGAR];			// cigar, use samtools
 
 public:

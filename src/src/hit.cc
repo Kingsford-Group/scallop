@@ -8,7 +8,7 @@
 hit::hit(int32_t p)
 {
 	bam1_core_t::pos = p;
-	xs = '.';
+	strand = '.';
 }
 
 hit::hit(const hit &h)
@@ -16,7 +16,7 @@ hit::hit(const hit &h)
 {
 	rpos = h.rpos;
 	qname = h.qname;
-	xs = h.xs;
+	strand = h.strand;
 	for(int i = 0; i < MAX_NUM_CIGAR; i++)
 	{
 		cigar[i] = h.cigar[i];
@@ -41,11 +41,11 @@ hit::hit(bam1_t *b)
 	memcpy(cigar, bam_get_cigar(b), 4 * n_cigar);
 
 	// get strandness
-	uint8_t *p = bam_aux_get(b, "XS");
-	if(p && (*p) == 'A')
-	{
-		xs = bam_aux2A(p);
-	}
+	strand = '.';
+	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '+';
+	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '+';
+	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '-';
+	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '-';
 }
 
 hit::~hit()
@@ -70,7 +70,7 @@ int hit::print() const
 
 	// print basic information
 	printf("Hit %s: [%d-%d), mpos = %d, cigar = %s, flag = %d, quality = %d, strand = %c\n", 
-			qname.c_str(), pos, rpos, mpos, sstr.str().c_str(), flag, qual, xs);
+			qname.c_str(), pos, rpos, mpos, sstr.str().c_str(), flag, qual, strand);
 
 	return 0;
 }
