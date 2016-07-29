@@ -67,6 +67,10 @@ public:
 	int bfs_w(int s, double w, vector<int> &v, VE &b);
 	int compute_shortest_path_w(int s, int t, double w);
 	int compute_shortest_path_w(int s, int t, double w, VE &p);
+	int compute_closest_path(int s, vector<double> &d);
+	int compute_closest_path(int s, vector<double> &d, vector<int> &b);
+	int compute_closest_path_reverse(int t, vector<double> &d);
+	int compute_closest_path_reverse(int t, vector<double> &d, vector<int> &b);
 	double compute_maximum_path_w(VE &p);
 	double compute_maximum_st_path_w(VE &p, int s, int t);
 	double compute_minimum_weight(const VE &p);

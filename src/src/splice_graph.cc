@@ -440,6 +440,74 @@ int splice_graph::bfs_w(int s, double w, vector<int> &v, VE &b)
 	return 0;
 }
 
+int splice_graph::compute_closest_path(int s, vector<double> &d)
+{
+	vector<int> b;
+	return compute_closest_path(s, d, b);
+}
+
+int splice_graph::compute_closest_path_reverse(int t, vector<double> &d)
+{
+	vector<int> b;
+	return compute_closest_path_reverse(t, d, b);
+}
+
+int splice_graph::compute_closest_path(int s, vector<double> &d, vector<int> &b)
+{
+	int n = num_vertices() - s;
+	d.assign(n, -1);
+	b.assign(n, -1);
+	d[0] = 0;
+	for(int i = s + 1; i < num_vertices(); i++)
+	{
+		double w0 = -1;
+		int b0 = -1;
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = in_edges(i); it1 != it2; it1++)
+		{
+			int ss = (*it1)->source();
+			if(ss < s) continue;
+			int k = ss - s;
+			double ww = get_edge_weight(*it1);
+			if(b0 == -1 || d[k] + ww < w0)
+			{
+				w0 = d[k] + ww;
+				b0 = k;
+			}
+		}
+		d[i - s] = w0;
+		b[i - s] = b0;
+	}
+	return 0;
+}
+
+int splice_graph::compute_closest_path_reverse(int t, vector<double> &d, vector<int> &b)
+{
+	d.assign(t + 1, -1);
+	b.assign(t + 1, -1);
+	d[t] = 0;
+	for(int i = t - 1; i >= 0; i--)
+	{
+		double w0 = -1;
+		int b0 = -1;
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = out_edges(i); it1 != it2; it1++)
+		{
+			int tt = (*it1)->target();
+			if(tt > t) continue;
+			double ww = get_edge_weight(*it1);
+			if(b0 == -1 || d[tt] + ww < w0)
+			{
+				w0 = d[tt] + ww;
+				b0 = tt;
+			}
+		}
+		d[i] = w0;
+		b[i] = b0;
+	}
+	return 0;
+}
+
 int splice_graph::compute_shortest_path_w(int s, int t, double w)
 {
 	vector<int> v;
@@ -727,7 +795,7 @@ int splice_graph::draw(const string &file)
 	for(tie(it1, it2) = edges(); it1 != it2; it1++)
 	{
 		double w = get_edge_weight(*it1);
-		sprintf(buf, "%.2lf", w);
+		sprintf(buf, "%.1lf", w);
 		mes.insert(PES(*it1, buf));
 	}
 	draw(file, mis, mes, 4.5);

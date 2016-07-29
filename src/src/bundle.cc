@@ -414,7 +414,10 @@ int bundle::build_splice_graph(splice_graph &gr) const
 		gr.add_vertex();
 		gr.set_vertex_string(i + 1, r.label());
 		gr.set_vertex_weight(i + 1, r.ave_abd);
-		gr.set_vertex_info(i + 1, vertex_info(length));
+		vertex_info vi;
+		vi.length = length;
+		vi.stddev = r.dev_abd;
+		gr.set_vertex_info(i + 1, vi);
 	}
 
 	gr.add_vertex();

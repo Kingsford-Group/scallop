@@ -65,14 +65,22 @@ private:
 	bool decompose_trivial_vertices();
 	bool decompose_trivial_vertex(int v);
 
-	// remove false boundary edges
-	bool remove_false_boundary_edges();
-	bool verify_false_boundary_edge(edge_descriptor e);
+	// compute shortest distances to source and target 
+	int compute_shortest_source_distances();
+	int compute_shortest_target_distances();
+
+	// build equivalent classes
+	int infer_weights();
+	int infer_weights(const vector<int> &v);
 
 	// rescale weights (coverage)
 	int rescale_weights();
 	int rescale_5end_weights(int i);
 	int rescale_3end_weights(int i);
+
+	// remove false boundary edges
+	bool remove_false_boundary_edges();
+	bool verify_false_boundary_edge(edge_descriptor e);
 
 	// smooth weights
 	int smooth_splice_graph();

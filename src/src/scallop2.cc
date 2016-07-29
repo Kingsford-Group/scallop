@@ -80,6 +80,12 @@ int scallop2::assemble0()
 	init_super_edges();
 
 	print();
+
+	compute_shortest_source_distances();
+	compute_shortest_target_distances();
+	infer_weights();
+	print();
+
 	rescale_weights();
 	print();
 
@@ -101,6 +107,7 @@ int scallop2::assemble1()
 int scallop2::assemble2()
 {
 	assemble0();
+
 	int f = iterate();
 
 	greedy_decompose();
@@ -129,11 +136,11 @@ int scallop2::iterate()
 	{
 		bool b = false;
 
-		b = join_trivial_vertices();
+		b = join_trivial_edges();
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = join_trivial_edges();
+		b = join_trivial_vertices();
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -949,8 +956,8 @@ bool scallop2::join_trivial_edge(edge_descriptor &e)
 	int lt = gr.get_vertex_info(t).length;
 	int le = gr.get_edge_info(e).length;
 
-	int lsp = ls + pseudo_length_count;
-	int ltp = lt + pseudo_length_count;
+	int lsp = (int)(ls * gr.get_vertex_info(s).scalor) + pseudo_length_count;
+	int ltp = (int)(lt * gr.get_vertex_info(t).scalor) + pseudo_length_count;
 	int lep = le + pseudo_length_count;
 
 	if(ws <= SMIN) lsp = 0;
@@ -1028,7 +1035,7 @@ bool scallop2::join_trivial_vertex(int i)
 	double wv = gr.get_vertex_weight(i);
 	double w1 = gr.get_edge_weight(e1);
 	double w2 = gr.get_edge_weight(e2);
-	int lv = gr.get_vertex_info(i).length + pseudo_length_count;
+	int lv = (int)(gr.get_vertex_info(i).length * gr.get_vertex_info(i).scalor) + pseudo_length_count;
 	int l1 = gr.get_edge_info(e1).length + pseudo_length_count;
 	int l2 = gr.get_edge_info(e2).length + pseudo_length_count;
 
@@ -1078,6 +1085,133 @@ bool scallop2::smooth_trivial_vertex(int i)
 	return decompose_trivial_vertex(i);
 }
 
+int scallop2::compute_shortest_source_distances()
+{
+	MED med = gr.get_edge_weights();
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	{
+		int s = (*it1)->source();
+		int le = gr.get_edge_info(*it1).length;
+		int lv = gr.get_vertex_info(s).length;
+		gr.set_edge_weight(*it1, le + lv);
+	}
+
+	vector<double> d;
+	gr.compute_closest_path(0, d);
+
+	assert(d.size() == gr.num_vertices());
+
+	for(int i = 0; i < d.size(); i++)
+	{
+		vertex_info vi = gr.get_vertex_info(i);
+		vi.sdist = d[i];
+		gr.set_vertex_info(i, vi);
+	}
+
+	gr.set_edge_weights(med);
+	return 0;
+}
+
+int scallop2::compute_shortest_target_distances()
+{
+	MED med = gr.get_edge_weights();
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	{
+		int t = (*it1)->target();
+		int le = gr.get_edge_info(*it1).length;
+		int lv = gr.get_vertex_info(t).length;
+		gr.set_edge_weight(*it1, le + lv);
+	}
+
+	vector<double> d;
+	gr.compute_closest_path_reverse(gr.num_vertices() - 1, d);
+
+	assert(d.size() == gr.num_vertices());
+
+	for(int i = 0; i < d.size(); i++)
+	{
+		vertex_info vi = gr.get_vertex_info(i);
+		vi.tdist = d[i];
+		gr.set_vertex_info(i, vi);
+	}
+
+	gr.set_edge_weights(med);
+
+	return 0;
+}
+
+int scallop2::infer_weights()
+{
+	vector<bool> m;
+	m.assign(gr.num_vertices(), false);
+	for(int i = 0; i < gr.num_vertices(); i++)
+	{
+		if(m[i] == true) continue;
+
+		vector<int> v;
+		int x = i;
+		while(x != -1)
+		{
+			assert(m[x] == false);
+			m[x] = true;
+			v.push_back(x);
+			x = gr.compute_out_equivalent_vertex(x);
+		}
+
+		printf("equivalent class %d: ", i);
+		printv(v);
+		printf("\n");
+
+		if(v.size() <= 1) continue;
+
+		infer_weights(v);
+	}
+	return 0;
+}
+
+int scallop2::infer_weights(const vector<int> &v)
+{
+	vector<int> v1;		// trustworthy vertices
+	int n = average_slope_length;
+	int sum = 0;
+	for(int i = 0; i < v.size(); i++)
+	{
+		if(v[i] == 0) continue;
+		if(v[i] == gr.num_vertices() - 1) continue;
+		vertex_info vi = gr.get_vertex_info(v[i]);
+		sum += vi.length;
+		if(vi.sdist >= n && vi.tdist >= n) v1.push_back(v[i]);
+	}
+
+	if(v1.size() == 0) return 0;
+
+	double s1 = 0;
+	double s2 = 0;
+	for(int i = 0; i < v1.size(); i++)
+	{
+		double w = gr.get_vertex_weight(v1[i]);
+		double d = gr.get_vertex_info(v1[i]).stddev;
+		int l = gr.get_vertex_info(v1[i]).length;
+		s1 += w * l / d / d;
+		s2 += l / d / d;
+	}
+	double ave = s1 / s2;
+
+	for(int i = 0; i < v.size(); i++)
+	{
+		if(v[i] == 0) continue;
+		if(v[i] == gr.num_vertices() - 1) continue;
+		gr.set_vertex_weight(v[i], ave);
+		vertex_info vi = gr.get_vertex_info(v[i]);
+		vi.infer = true;
+		vi.scalor = 1.0 * sum / vi.length;
+		gr.set_vertex_info(v[i], vi);
+	}
+	return 0;
+}
+
 int scallop2::rescale_weights()
 {
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
@@ -1115,7 +1249,11 @@ int scallop2::rescale_5end_weights(int i)
 	double ww = 0;
 	if(c >= b) ww = 2.0 * b * (c - a) * w / (2.0 * b * c - a * a - b * b);
 	else ww = 2.0 * b * w / (a + c);
-	gr.set_vertex_weight(i, ww);
+
+	if(gr.get_vertex_info(i).infer == false)
+	{
+		gr.set_vertex_weight(i, ww);
+	}
 
 	if(c >= average_slope_length) return 0;
 
@@ -1159,7 +1297,11 @@ int scallop2::rescale_3end_weights(int i)
 	double ww = 0;
 	if(c >= b) ww = 2.0 * b * (c - a) * w / (2.0 * b * c - a * a - b * b);
 	else ww = 2.0 * b * w / (a + c);
-	gr.set_vertex_weight(i, ww);
+
+	if(gr.get_vertex_info(i).infer == false)
+	{
+		gr.set_vertex_weight(i, ww);
+	}
 
 	if(c >= average_slope_length) return 0;
 
@@ -1490,9 +1632,11 @@ int scallop2::draw_splice_graph(const string &file)
 		double w = gr.get_vertex_weight(i);
 		double d = gr.get_vertex_info(i).stddev;
 		int l = gr.get_vertex_info(i).length;
+		int sd = gr.get_vertex_info(i).sdist;
+		int td = gr.get_vertex_info(i).tdist;
 		//string s = gr.get_vertex_string(i);
 		//sprintf(buf, "%d:%.0lf:%s", i, w, s.c_str());
-		sprintf(buf, "%d:%.1lf:%d", i, w, l);
+		sprintf(buf, "%d:%.1lf:%d:%.1lf:%d:%d", i, w, l, d, sd, td);
 		mis.insert(PIS(i, buf));
 	}
 
