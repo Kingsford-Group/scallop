@@ -1160,12 +1160,11 @@ int scallop2::infer_weights()
 			x = gr.compute_out_equivalent_vertex(x);
 		}
 
-		printf("equivalent class %d: ", i);
-		printv(v);
-		printf("\n");
-
 		if(v.size() <= 1) continue;
 
+		printf("infer weights with equivalent class: ");
+		printv(v);
+		printf("\n");
 		infer_weights(v);
 	}
 	return 0;
