@@ -146,8 +146,9 @@ int compare_genome2(const genome &x, const genome &y)
 		correct += compare_transcripts(v1, v2, 2);
 	}
 
-	printf("reference = %d prediction = %d correct = %d sensitivity = %.2lf precision = %.2lf\n", 
-			xtotal, ytotal, correct, correct * 100.0 / xtotal, correct * 100.0 / ytotal);
+	double s = (xtotal == 0) ? 0 : correct * 100.0 / xtotal;
+	double p = (ytotal == 0) ? 0 : correct * 100.0 / ytotal;
+	printf("reference = %d prediction = %d correct = %d sensitivity = %.2lf precision = %.2lf\n", xtotal, ytotal, correct, s, p);
 
 	return 0;
 }
