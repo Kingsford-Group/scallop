@@ -300,6 +300,37 @@ bool directed_graph::intersect(edge_descriptor ex, edge_descriptor ey)
 	return false;
 }
 
+vector<int> directed_graph::topological_sort_reverse()
+{
+	vector<int> v;
+	vector<int> q;
+	vector<int> vd;
+	for(int i = num_vertices() - 1; i >= 0; i--)
+	{
+		int d = out_degree(i);
+		vd.push_back(d);
+		if(d == 0) q.push_back(i);
+	}
+
+	int k = 0;
+
+	while(k < q.size())
+	{
+		int x = q[k++];
+		v.push_back(x);
+
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = in_edges(x); it1 != it2; it1++)
+		{
+			int t = (*it1)->target();
+			vd[t]--;
+			assert(vd[t] >= 0);
+			if(vd[t] == 0) q.push_back(t);
+		}
+	}
+	return v;
+}
+
 vector<int> directed_graph::topological_sort()
 {
 	vector<int> v;
@@ -474,6 +505,102 @@ int directed_graph::compute_out_partner(int x)
 
 	if(sv.size() == 0) return -1;
 	else return *(sv.begin());
+}
+
+int directed_graph::compute_out_equivalent_vertex(int x)
+{
+	// TODO: Assume that [0, gr.num_vertices() - 1] is a TPO
+	vector<int> q;
+	set<int> s;
+	int k = 0;
+	s.insert(x);
+	q.push_back(x);
+
+	int y = -1;
+	while(k < q.size())
+	{
+		int a = q[k++];
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = out_edges(a); it1 != it2; it1++)
+		{
+			int b = (*it1)->target();
+			if(s.find(b) != s.end()) continue;
+			s.insert(b);
+			if(b > y) 
+			{
+				if(y != -1) q.push_back(y);
+				y = b;
+			}
+			else
+			{
+				q.push_back(b);
+			}
+		}
+	}
+
+	if(y == -1) return -1;
+
+	edge_iterator it1, it2;
+	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
+	{
+		int a = (*it);
+		if(a == x) continue;
+		for(tie(it1, it2) = in_edges(a); it1 != it2; it1++)
+		{
+			int b = (*it1)->source();
+			if(s.find(b) == s.end()) return -1;
+		}
+	}
+
+	return y;
+}
+
+int directed_graph::compute_in_equivalent_vertex(int x)
+{
+	// TODO: Assume that [0, gr.num_vertices() - 1] is a TPO
+	vector<int> q;
+	set<int> s;
+	int k = 0;
+	s.insert(x);
+	q.push_back(x);
+
+	int y = -1;
+	while(k < q.size())
+	{
+		int a = q[k++];
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = in_edges(a); it1 != it2; it1++)
+		{
+			int b = (*it1)->source();
+			if(s.find(b) != s.end()) continue;
+			s.insert(b);
+			if(b < y || y == -1) 
+			{
+				if(y != -1) q.push_back(y);
+				y = b;
+			}
+			else
+			{
+				q.push_back(b);
+			}
+		}
+	}
+
+	if(y == -1) return -1;
+
+	edge_iterator it1, it2;
+	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
+	{
+		int a = (*it);
+		if(a == x) continue;
+		for(tie(it1, it2) = out_edges(a); it1 != it2; it1++)
+		{
+			int b = (*it1)->target();
+			if(s.find(b) == s.end()) return -1;
+		}
+	}
+
+	return y;
 }
 
 int directed_graph::check_nest(int x, int y, const vector<int> &tpo)

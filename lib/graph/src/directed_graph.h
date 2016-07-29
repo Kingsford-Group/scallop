@@ -41,9 +41,12 @@ public:
 	virtual bool check_path(edge_descriptor ex, edge_descriptor ey);
 	virtual bool intersect(edge_descriptor ex, edge_descriptor ey);
 	virtual vector<int> topological_sort();
+	virtual vector<int> topological_sort_reverse();
 	virtual vector<int> topological_sort0();
 	virtual int compute_in_partner(int x);
 	virtual int compute_out_partner(int x);
+	virtual int compute_in_equivalent_vertex(int x);
+	virtual int compute_out_equivalent_vertex(int x);
 	virtual int check_nest(int x, int r, set<edge_descriptor> &vv);
 	virtual int check_nest(int x, int r, set<edge_descriptor> &vv, const vector<int> &tpo);
 	virtual int check_nest(int x, int r, const vector<int> &tpo);
