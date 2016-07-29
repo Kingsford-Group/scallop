@@ -55,6 +55,7 @@ int compare_transcripts(const vector<transcript> &x, const vector<transcript> &y
 			if(mode == 2)
 			{
 				b = compare_intron_chain(t1, t2);
+				if(t1.strand != t2.strand) b = false;
 			}
 
 			if(b == false) continue;
