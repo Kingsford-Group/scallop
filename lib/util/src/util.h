@@ -6,6 +6,7 @@
 #include <sstream>
 #include <cassert>
 #include <vector>
+#include <iostream>
 
 using namespace std;
 
@@ -53,6 +54,16 @@ int reverse(vector<T> &x)
 		x[j] = t;
 		i++;
 		j--;
+	}
+	return 0;
+}
+
+template<typename T>
+int printv(vector<T> &x)
+{
+	for(int i = 0; i < x.size(); i++)
+	{
+		cout<< x[i] <<" ";
 	}
 	return 0;
 }
