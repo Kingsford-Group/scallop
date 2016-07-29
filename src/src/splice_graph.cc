@@ -730,7 +730,7 @@ int splice_graph::draw(const string &file)
 		sprintf(buf, "%.2lf", w);
 		mes.insert(PES(*it1, buf));
 	}
-	draw(file, mis, mes, 3.0);
+	draw(file, mis, mes, 4.5);
 	return 0;
 }
 

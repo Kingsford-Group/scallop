@@ -261,9 +261,9 @@ int region::build_slopes()
 
 		rbin += 3;
 
-		int xx = xo / average_read_length;
-		int yy = yo / average_read_length;
-		int zz = zo / average_read_length;
+		int xx = xo * slope_bin_size / average_read_length;
+		int yy = yo * slope_bin_size / average_read_length;
+		int zz = zo * slope_bin_size / average_read_length;
 
 		int sxy = compute_binomial_score(xx + yy, 0.5, yy);
 		int syz = compute_binomial_score(yy + zz, 0.5, zz);
@@ -273,6 +273,10 @@ int region::build_slopes()
 
 		int syx = compute_binomial_score(xx + yy, 0.5, xx);
 		int szy = compute_binomial_score(yy + zz, 0.5, yy);
+
+		int ppp = lcore + lbin * slope_bin_size;
+		//printf("pos = %d, lbin = %d, rbin = %d, xx = %d, yy = %d, zz = %d, syx = %d, szy = %d\n", ppp, lbin, rbin, xx, yy, zz, syx, szy);
+
 		slope s3(SLOPE3END, lbin, rbin, (syx < szy) ? syx : szy);
 		if(s3.score > min_slope_score) seeds.push_back(s3);
 	}
@@ -290,9 +294,10 @@ int region::build_slopes()
 		lbin++;
 		rbin++;
 
-		int xx = xo / average_read_length;
-		int yy = yo / average_read_length;
-		int zz = zo / average_read_length;
+		int xx = xo * slope_bin_size / average_read_length;
+		int yy = yo * slope_bin_size / average_read_length;
+		int zz = zo * slope_bin_size / average_read_length;
+
 
 		int sxy = compute_binomial_score(xx + yy, 0.5, yy);
 		int syz = compute_binomial_score(yy + zz, 0.5, zz);
@@ -325,9 +330,9 @@ int region::build_slopes()
 
 		lbin += 3;
 
-		int xx = xo / average_read_length;
-		int yy = yo / average_read_length;
-		int zz = zo / average_read_length;
+		int xx = xo * slope_bin_size / average_read_length;
+		int yy = yo * slope_bin_size / average_read_length;
+		int zz = zo * slope_bin_size / average_read_length;
 
 		int sxy = compute_binomial_score(xx + yy, 0.5, yy);
 		int syz = compute_binomial_score(yy + zz, 0.5, zz);
@@ -351,7 +356,7 @@ int region::build_slopes()
 
 		if(s.lpos == lcore || s.rpos == rcore) s.flag = SLOPE_MARGIN;
 		else s.flag = SLOPE_MIDDLE;
-
+		
 		double ave, dev;
 		evaluate_triangle(s.lpos, s.rpos, s.ave, s.dev);
 	}
@@ -381,6 +386,16 @@ int region::select_slopes()
 			if(b == false) break;
 		}
 		if(b == false) continue;
+
+		// Test
+		/*
+		x.print(99);
+		for(int k = x.lpos; k < x.rpos; k++)
+		{
+			int c = compute_overlap(*imap, k);
+			printf("(%d, %d)\n", k, c);
+		}
+		*/
 
 		slopes.push_back(x);
 		sim -= make_pair(ROI(x.lpos, x.rpos), 1);
@@ -413,6 +428,7 @@ int region::build_partial_exons()
 	for(int i = 0; i < slopes.size(); i++)
 	{
 		slope &s = slopes[i];
+
 		if(s.type == SLOPE5END)
 		{
 			int rexon = s.lpos;

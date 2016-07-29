@@ -527,7 +527,8 @@ int scallop2::identify_equation(const vector<int> &subs, vector<equation> &eqns)
 		}
 
 		double err = fabs(wt - w);
-		if(err * 1.0 > 1.0 * sw * max_equation_error_ratio) continue;
+
+		if(err * 1.0 > 1.0 * w * max_equation_error_ratio) continue;
 
 		equation eqn(err);
 		eqn.s = subs;
@@ -588,7 +589,11 @@ int scallop2::identify_equations0(vector<equation> &eqns)
 			}
 			else continue;
 
-			equation eqn(w1 - w2);
+			double err = fabs(w1 - w2);
+			//printf("w1 = %.2lf, w2 = %.2lf, error = %.2lf, ratio = %.2lf\n", w1, w2, err, max_equation_error_ratio);
+			if(err * 1.0 >= 1.0 * w1 * max_equation_error_ratio) continue;
+
+			equation eqn(err);
 			eqn.s.push_back(i1);
 			eqn.t.push_back(i2);
 			eqn.f = 2;

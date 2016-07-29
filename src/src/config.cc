@@ -22,7 +22,7 @@ int max_num_bundles = -1;
 int slope_bin_size = 10;
 int slope_min_bin_num = 9;
 int slope_min_distance = 100;
-int min_slope_score = 45;
+int min_slope_score = 100;
 int32_t average_read_length = 100;
 int slope_std_bin_num = 30;
 int32_t average_slope_length = 300;
@@ -32,7 +32,7 @@ double min_boundary_edge_weight_ratio = 0.05;
 // for algorithm
 int max_dp_table_size = 10000;
 int max_num_subsetsum_solutions = 10;
-double max_equation_error_ratio = 0.3;
+double max_equation_error_ratio = 0.2;
 
 //// from command line
 string algo;
@@ -55,13 +55,7 @@ bool parse_arguments(int argc, const char ** argv)
 	bool b = false;
 	for(int i = 1; i < argc; i++)
 	{
-		if(string(argv[i]) == "-c")
-		{
-			load_config(argv[i + 1]);
-			b = true;
-			i++;
-		}
-		else if(string(argv[i]) == "-a")
+		if(string(argv[i]) == "-a")
 		{
 			algo = string(argv[i + 1]);
 			i++;
@@ -89,24 +83,9 @@ bool parse_arguments(int argc, const char ** argv)
 		{
 			fast_mode = true;
 		}
-		else if(string(argv[i]) == "-s")
+		else if(string(argv[i]) == "-x")
 		{
-			min_gtf_transcripts_num = atoi(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "-sv")
-		{
-			simulation_num_vertices = atoi(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "-se")
-		{
-			simulation_num_edges = atoi(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "-sw")
-		{
-			simulation_max_edge_weight = atoi(argv[i + 1]);
+			min_slope_score = atoi(argv[i + 1]);
 			i++;
 		}
 	}
