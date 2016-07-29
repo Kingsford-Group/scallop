@@ -22,7 +22,7 @@ int max_num_bundles = -1;
 int slope_bin_size = 10;
 int slope_min_bin_num = 9;
 int slope_min_distance = 100;
-int min_slope_score = 100;
+int min_slope_score = 120;
 int32_t average_read_length = 100;
 int slope_std_bin_num = 30;
 int32_t average_slope_length = 300;
@@ -34,20 +34,21 @@ int max_dp_table_size = 10000;
 int max_num_subsetsum_solutions = 10;
 double max_equation_error_ratio = 0.2;
 
+// for simulation
+int simulation_num_vertices;
+int simulation_num_edges;
+int simulation_max_edge_weight;
+
 //// from command line
 string algo;
 string input_file;
 string output_file;
 
-bool output_tex_files;
-string fixed_gene_name;
-int min_gtf_transcripts_num;
-bool fast_mode;
+bool output_tex_files = false;
+string fixed_gene_name = "";
+int min_gtf_transcripts_num = 0;
+bool fast_mode = true;
 
-// for simulation
-int simulation_num_vertices;
-int simulation_num_edges;
-int simulation_max_edge_weight;
 
 bool parse_arguments(int argc, const char ** argv)
 {
