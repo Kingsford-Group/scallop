@@ -44,7 +44,11 @@ int assembler::assemble_bam(const string &file)
     bam1_t *b = bam_init1();
 
 	ofstream fout;
-	if(output_file != "") fout.open(output_file);
+	if(output_file != "")
+	{
+		fout.open(output_file);
+		if(fout.fail()) return 0;
+	}
 
 	int index = -1;
 	bundle_base bb1;		// for + reads
