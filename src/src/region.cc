@@ -414,7 +414,7 @@ int region::build_partial_exons()
 			lexon = rexon;
 			lltype = rrtype;
 			rexon = s.rpos;
-			rrtype = END_BOUNDARY;
+			rrtype = (rexon == rcore) ? rtype : END_BOUNDARY;
 
 			partial_exon pe(lexon, rexon, lltype, rrtype);
 			evaluate_rectangle(pe.lpos, pe.rpos, pe.ave_abd, pe.dev_abd);

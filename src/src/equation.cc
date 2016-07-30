@@ -1,4 +1,5 @@
 #include "equation.h"
+#include "util.h"
 #include <cstdio>
 
 equation::equation(double _e)
@@ -34,10 +35,10 @@ int equation::print(int index)
 	printf("equation %3d: (%2lu, %2lu) edges, error = %3.1lf, f = %d, w = %d, adjacent = %2d, distant = %2d. ", 
 			index, s.size(), t.size(), e, f, w, a, d);
 
-	printf("S = (%d", s[0]);
-	for(int i = 1; i < s.size(); i++) printf(", %d", s[i]);
-	printf("), T = (%d", t[0]);
-	for(int i = 1; i < t.size(); i++) printf(", %d", t[i]);
+	printf("S = (");
+	printv(s);
+	printf("), T = (");
+	printv(t);
 	printf(")\n");
 	
 	return 0;

@@ -1403,7 +1403,7 @@ bool scallop2::verify_false_boundary_edge(edge_descriptor e)
 	if(s != 0 && t != n) return false;
 	if(l != 0) return false;
 	if(s == 0 && gr.in_degree(t) == 1) return false;
-	if(t == n && gr.out_degree(t) == 1) return false;
+	if(t == n && gr.out_degree(s) == 1) return false;
 
 	double we = gr.get_edge_weight(e);
 	double ww = 0;
