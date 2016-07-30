@@ -229,12 +229,21 @@ int region::build_bins()
 
 int region::build_slopes()
 {
-	if(bins.size() < slope_min_bin_num) return 0;
+	for(int i = slope_min_bin_num; i <= slope_max_bin_num; i += 3)
+	{
+		build_slopes(i);
+	}
+	return 0;
+}
 
-	assert(slope_min_bin_num % 3 == 0);
-	int d = slope_min_bin_num / 3;
+int region::build_slopes(int bin_num)
+{
+	if(bins.size() < bin_num) return 0;
 
-	for(int i = 0; i < bins.size() - slope_min_bin_num; i++)
+	assert(bin_num % 3 == 0);
+	int d = bin_num / 3;
+
+	for(int i = 0; i < bins.size() - bin_num; i++)
 	{
 		int xo = 0, yo = 0, zo = 0;
 		for(int k = 0; k < d; k++)
@@ -254,7 +263,7 @@ int region::build_slopes()
 
 		if(score5 > slope_min_score)
 		{
-			slope s5(SLOPE5END, i, i + slope_min_bin_num, score5);
+			slope s5(SLOPE5END, i, i + bin_num, score5);
 			extend_slope(s5);
 			seeds.push_back(s5);
 		}
@@ -266,7 +275,7 @@ int region::build_slopes()
 
 		if(score3 > slope_min_score)
 		{
-			slope s3(SLOPE3END, i, i + slope_min_bin_num, score3);
+			slope s3(SLOPE3END, i, i + bin_num, score3);
 			extend_slope(s3);
 			seeds.push_back(s3);
 		}
@@ -330,6 +339,8 @@ int region::select_slopes()
 			if(b == false) break;
 		}
 		if(b == false) continue;
+
+		x.print(i);
 
 		slopes.push_back(x);
 		sim -= make_pair(ROI(x.lpos, x.rpos), 1);

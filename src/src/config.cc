@@ -11,7 +11,7 @@ using namespace std;
 //// parameters
 
 // for bam file
-int32_t min_bundle_gap = 50;
+int32_t min_bundle_gap = 100;
 int min_num_hits_in_bundle = 20;
 int32_t min_splice_boundary_hits = 1;
 uint32_t min_max_splice_boundary_qual = 3;
@@ -21,6 +21,7 @@ double min_region_coverage = 0.5;
 int max_num_bundles = -1;
 int slope_bin_size = 10;
 int slope_min_bin_num = 9;
+int slope_max_bin_num = 32;
 int slope_min_distance = 100;
 int slope_min_score = 50;
 int slope_flexible_size = 20;

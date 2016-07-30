@@ -43,6 +43,7 @@ private:
 
 	int build_bins();
 	int build_slopes();
+	int build_slopes(int bin_num);
 	int extend_slope(slope &s);
 	int select_slopes();
 	int build_partial_exons();

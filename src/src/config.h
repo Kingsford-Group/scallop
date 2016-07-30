@@ -46,6 +46,7 @@ extern int max_num_subsetsum_solutions;
 extern double max_equation_error_ratio;
 extern int slope_bin_size;
 extern int slope_min_bin_num;
+extern int slope_max_bin_num;
 extern int slope_min_distance;
 extern int slope_min_score;
 extern int slope_flexible_size;
