@@ -236,6 +236,10 @@ int bundle::process_hits()
 	{
 		hit &h = hits[i];
 
+		// TODO use only single pair
+		add_mapped_intervals(h, h.rpos);
+		continue;
+
 		if(h.isize <= 0)
 		{
 			// the second segment

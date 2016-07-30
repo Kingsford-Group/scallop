@@ -194,6 +194,11 @@ bool scallop2::decompose_with_equations(int level)
 
 	printf("candidate equations: %lu\n", eqns.size());
 
+	for(int i = 0; i < eqns.size(); i++)
+	{
+		eqns[i].print(i);
+	}
+
 	equation eqn(0);
 	for(int i = 0; i < eqns.size(); i++)
 	{
@@ -1604,6 +1609,15 @@ int scallop2::print()
 	{
 		if(gr.degree(i) >= 1) n++;
 	}
+
+	/*
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	{
+		edge_descriptor e = (*it1);
+		printf("edge %d (%d, %d), weight = %.2lf\n", e2i[e], e->source(), e->target(), gr.get_edge_weight(e));
+	}
+	*/
 
 	int p1 = gr.compute_num_paths();
 	int p2 = gr.compute_decomp_paths();

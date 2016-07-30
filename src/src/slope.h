@@ -7,7 +7,7 @@ public:
 	slope(int t, int l, int r, int s);
 
 public:
-	int type;			// 5end or 3 end
+	int type;			// 5end or 3end
 	int flag;			// margin or middle
 	int lbin;
 	int rbin;

@@ -15,6 +15,7 @@ using namespace std;
 #define RIGHT_BOUNDARY 4
 #define START_BOUNDARY 5
 #define END_BOUNDARY 6
+#define MIDDLE_CUT 7
 
 #define TRIVIAL 0
 #define NORMAL 1
@@ -45,9 +46,11 @@ extern int max_num_subsetsum_solutions;
 extern double max_equation_error_ratio;
 extern int slope_bin_size;
 extern int slope_min_bin_num;
-extern int slope_std_bin_num;
 extern int slope_min_distance;
-extern int min_slope_score;
+extern int slope_min_score;
+extern int slope_flexible_size;
+extern double slope_acceptance_dev_decrease;
+
 extern int pseudo_length_count;
 extern double min_boundary_edge_weight_ratio;
 
@@ -64,6 +67,7 @@ extern bool fast_mode;
 
 // parse arguments
 bool parse_arguments(int argc, const char ** argv);
+int print_parameters();
 
 // load parameters
 int load_config(const char * conf_file);
