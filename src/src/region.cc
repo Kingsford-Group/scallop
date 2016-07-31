@@ -340,12 +340,14 @@ int region::select_slopes()
 		}
 		if(b == false) continue;
 
-		x.print(i);
 
 		slopes.push_back(x);
 		sim -= make_pair(ROI(x.lpos, x.rpos), 1);
 
 		double d = compute_deviation(sim, slopes);
+
+		x.print(i);
+		//printf("previous dev = %.2lf, current dev = %.2lf\n", dev, d);
 
 		if(d <= dev - dev * slope_acceptance_dev_decrease)
 		{
