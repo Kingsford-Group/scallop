@@ -7,6 +7,7 @@
 #include <cassert>
 #include <vector>
 #include <iostream>
+#include <cmath>
 
 using namespace std;
 
@@ -65,6 +66,34 @@ int printv(vector<T> &x)
 	{
 		cout<< x[i] <<" ";
 	}
+	return 0;
+}
+
+template<typename T>
+int compute_mean_dev(const vector<T> &v, int si, int ti, double &ave, double &dev)
+{
+	ave = -1;
+	dev = -1;
+	if(si >= ti) return 0;
+
+	assert(si >= 0 && si < v.size());
+	assert(ti > 0 && ti <= v.size());
+
+	T sum = 0;
+	for(int i = si; i < ti; i++)
+	{
+		sum += v[i];
+	}
+
+	ave = sum * 1.0 / (ti - si);
+
+	double var;
+	for(int i = si ; i < ti; i++)
+	{
+		var += (v[i] - ave) * (v[i] - ave);
+	}
+
+	dev = sqrt(var / (ti - si));
 	return 0;
 }
 
