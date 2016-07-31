@@ -21,6 +21,7 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  boundary.h boundary.cc \
 				  partial_exon.h partial_exon.cc \
 				  region.h region.cc \
+				  super_region.h super_region.cc \
 				  slope.h slope.cc \
 				  junction.h junction.cc \
 				  bundle_base.h bundle_base.cc \

@@ -7,6 +7,7 @@
 #include "junction.h"
 #include "partial_exon.h"
 #include "path.h"
+#include "super_region.h"
 
 using namespace std;
 
@@ -20,6 +21,7 @@ private:
 	vector<junction> junctions;		// splice junctions
 	splice_graph jr;				// junction graph
 	split_interval_map imap;		// interval map
+	vector<super_region> srs;		// super regions
 	vector<partial_exon> pexons;	// partial exons
 
 public:
@@ -50,10 +52,9 @@ protected:
 	int add_mapped_intervals(const hit &h, int rr);
 	int add_gapped_intervals(const hit &h);
 
-	// binary search for a specific given starting point, return count
-	int locate_hits(int32_t p, int &li);
-
 	// build partial exons
+	int build_super_region(int k, super_region &sr);
+	int build_super_regions();
 	int build_partial_exons();
 
 	// store the corresponding pexons in each junction

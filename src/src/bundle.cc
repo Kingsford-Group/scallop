@@ -21,12 +21,13 @@ int bundle::build()
 	check_left_ascending();
 	infer_junctions();
 	build_junction_graph();
+	draw_junction_graph("jr.tex");
 	process_hits();
-	build_partial_exons();
+	build_super_regions();
+
+	return 0;
+
 	link_partial_exons();
-	//print_5end_coverage();
-	//print_3end_coverage();
-	//draw_junction_graph("jr.tex");
 	return 0;
 }
 
@@ -89,24 +90,24 @@ int bundle::infer_junctions()
 
 int bundle::build_junction_graph()
 {
-	set<int> s;
-	s.insert(lpos);
-	s.insert(rpos);
+	map<int, int> s;
+	s.insert(PI(lpos, START_BOUNDARY));
+	s.insert(PI(rpos, END_BOUNDARY));
 	for(int i = 0; i < junctions.size(); i++)
 	{
 		int l = junctions[i].lpos;
 		int r = junctions[i].rpos;
-		if(s.find(l) == s.end()) s.insert(l);
-		if(s.find(r) == s.end()) s.insert(r);
+		if(s.find(l) == s.end()) s.insert(PI(l, LEFT_SPLICE));
+		if(s.find(r) == s.end()) s.insert(PI(r, RIGHT_SPLICE));
 	}
-	vector<int> v(s.begin(), s.end());
+	vector<PI> v(s.begin(), s.end());
 	sort(v.begin(), v.end());
 
 	// position to vertex
 	map<int, int> p2v;
 	for(int i = 0; i < v.size(); i++)
 	{
-		p2v.insert(PI(v[i], i));
+		p2v.insert(PI(v[i].first, i));
 	}
 
 	// vertices
@@ -114,7 +115,10 @@ int bundle::build_junction_graph()
 	for(int i = 0; i < v.size(); i++)
 	{
 		jr.add_vertex();
-		jr.set_vertex_weight(i, v[i]);
+		vertex_info vi;
+		vi.type == v[i].second;
+		jr.set_vertex_info(i, vi);
+		jr.set_vertex_weight(i, v[i].first);
 	}
 
 	// edges: connecting adjacent regions
@@ -331,39 +335,91 @@ int bundle::add_gapped_intervals(const hit &h)
 	return 0;
 }
 
-int bundle::locate_hits(int32_t p, int &li)
+int bundle::build_super_region(int s, super_region &sr)
 {
-	li = -1;
-	hit h(p);
-	vector<hit>::iterator low = lower_bound(hits.begin(), hits.end(), h);
-	vector<hit>::iterator up = upper_bound(hits.begin(), hits.end(), h);
-	if(low == hits.end()) return 0;
-	li = low - hits.begin();
-	return (up - low);
+	assert(s >= 0 && s < jr.num_vertices() - 1);
+
+	// find the right position
+	int t = s + 1;
+	edge_iterator it1, it2;
+	for(; t < jr.num_vertices() - 1; t++)
+	{
+		bool b = true;
+		for(tie(it1, it2) = jr.in_edges(t); it1 != it2; it1++)
+		{
+			if((*it1)->source() != t - 1) b = false;
+			if(b == false) break;
+		}
+		if(b == false) break;
+
+		for(tie(it1, it2) = jr.out_edges(t); it1 != it2; it1++)
+		{
+			if((*it1)->target() != t + 1) b = false;
+			if(b == false) break;
+		}
+		if(b == false) break;
+	}
+
+	sr.clear();
+
+	for(int i = s; i < t; i += 2)
+	{
+		// check region (i, i + 1)
+		if(jr.out_degree(i) != 1) return 0;
+		if(jr.in_degree(i + 1) != 1) return 0;
+
+		int32_t lpos = (int32_t)(jr.get_vertex_weight(i));
+		int32_t rpos = (int32_t)(jr.get_vertex_weight(i + 1));
+		int ltype = jr.get_vertex_info(i).type; 
+		int rtype = jr.get_vertex_info(i + 1).type; 
+
+		region r(lpos, rpos, ltype, rtype, &imap);
+
+		if(r.empty == true) return 0;
+
+		sr.add_region(r);
+
+		// check region (i + 1, i + 2)
+		if(jr.out_degree(i + 1) != 2) return 0;
+		if(jr.in_degree(i + 2) != 2) return 0;
+
+		lpos = (int32_t)(jr.get_vertex_weight(i + 1));
+		rpos = (int32_t)(jr.get_vertex_weight(i + 2));
+		ltype = jr.get_vertex_info(i + 1).type; 
+		rtype = jr.get_vertex_info(i + 2).type; 
+
+		region r0(lpos, rpos, ltype, rtype, &imap);
+
+		if(r0.empty == false) return 0;
+	}
+	return 0;
+}
+
+int bundle::build_super_regions()
+{
+	for(int k = 0; k < jr.num_vertices() - 1;)
+	{
+		super_region sr(&imap);
+		build_super_region(k, sr);
+		if(sr.size() >= 1) srs.push_back(sr);
+
+		if(sr.size() == 0) k++;
+		else k += sr.size() * 2 - 1;
+	}
+	return 0;
 }
 
 int bundle::build_partial_exons()
 {
-	set<PPI> s;
-	s.insert(PPI(lpos, START_BOUNDARY));
-	s.insert(PPI(rpos, END_BOUNDARY));
-
-	for(int i = 0; i < junctions.size(); i++)
+	for(int i = 0; i < jr.num_vertices() - 1; i++)
 	{
-		s.insert(PPI(junctions[i].lpos, LEFT_SPLICE));
-		s.insert(PPI(junctions[i].rpos, RIGHT_SPLICE));
-	}
-
-	vector<PPI> v(s.begin(), s.end());
-	sort(v.begin(), v.end());
-
-	for(int i = 0; i < v.size() - 1; i++)
-	{
+		// TODO
 		//printf("try region %d\n", i);
-		region r(v[i].first, v[i + 1].first, v[i].second, v[i + 1].second, &imap);
-		vector<partial_exon> vp = r.build();
+		//region r(v[i].first, v[i + 1].first, v[i].second, v[i + 1].second, &imap);
+		//vector<partial_exon> vp;
+		//vector<partial_exon> vp = r.build();
 		//r.print(i);
-		pexons.insert(pexons.end(), vp.begin(), vp.end());
+		//pexons.insert(pexons.end(), vp.begin(), vp.end());
 	}
 	return 0;
 }
@@ -501,6 +557,12 @@ int bundle::print(int index) const
 		hits[i].print();
 	}
 	*/
+
+	// print super regions
+	for(int i = 0; i < srs.size(); i++)
+	{
+		srs[i].print(i);
+	}
 
 	// print junctions 
 	for(int i = 0; i < junctions.size(); i++)

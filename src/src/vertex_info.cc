@@ -8,6 +8,7 @@ vertex_info::vertex_info()
 	tdist = -1;
 	infer = false;
 	scalor = 1.0;
+	type = -1;
 }
 
 vertex_info::vertex_info(int l)
@@ -18,6 +19,7 @@ vertex_info::vertex_info(int l)
 	tdist = -1;
 	infer = false;
 	scalor = 1.0;
+	type = -1;
 }
 
 vertex_info::vertex_info(const vertex_info &vi)
@@ -28,4 +30,5 @@ vertex_info::vertex_info(const vertex_info &vi)
 	tdist = vi.tdist;
 	infer = vi.infer;
 	scalor = vi.scalor;
+	type = vi.type;
 }

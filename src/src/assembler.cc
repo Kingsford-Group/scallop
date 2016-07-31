@@ -120,6 +120,9 @@ int assembler::process_bundle(bundle_base &bb, bam_hdr_t *h, int &index, ofstrea
 
 	if(bd.size() >= 100) return 0;
 
+	// TODO
+	return 0;
+
 	splice_graph gr;
 	bd.build_splice_graph(gr);
 

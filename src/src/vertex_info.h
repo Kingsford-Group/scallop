@@ -15,6 +15,7 @@ public:
 	int tdist;			// shortest distance to t
 	bool infer;			// whether this vertex has been inferred
 	double scalor;		// for inferred vertices
+	int type;			// for various usage
 };
 
 #endif

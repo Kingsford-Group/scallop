@@ -9,13 +9,11 @@
 using namespace std;
 
 // constants
-#define LEFT_SPLICE 1
-#define RIGHT_SPLICE 2
-#define LEFT_BOUNDARY 3
-#define RIGHT_BOUNDARY 4
-#define START_BOUNDARY 5
-#define END_BOUNDARY 6
-#define MIDDLE_CUT 7
+#define START_BOUNDARY 1
+#define END_BOUNDARY 2
+#define LEFT_SPLICE 3
+#define RIGHT_SPLICE 4
+#define MIDDLE_CUT 5
 
 #define TRIVIAL 0
 #define NORMAL 1
