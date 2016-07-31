@@ -37,9 +37,13 @@ private:
 	int build_bins();
 	int build_slopes();
 	int build_slopes(int bin_num);
-	int select_slopes();
+	int extend_slope(slope &s);
+	int evaluate_slope(slope &s);
+	int locate_bin(int x, int &xi, int &xb);
+	int select_slopes(int si, int ti);
+	int adjust_coverage(int si, int ti);
+	int assign_boundaries();
 	int build_partial_exons();
-	double compute_deviation(const split_interval_map &sim, const vector<slope> &ss);
 };
 
 #endif

@@ -12,6 +12,9 @@ region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split
 	lcore = lpos;
 	rcore = rpos;
 
+	end5.clear();
+	end3.clear();
+
 	init();
 	build_bins();
 }
@@ -94,7 +97,52 @@ int region::build_bins()
 		bins[i] = bins[i] / bsize;
 	}
 
-	bins[bnum - 1] = bins[bnum - 1] / (rcore - bsize * bnum + bsize);
+	bins[bnum - 1] = bins[bnum - 1] / (rcore - lcore - bsize * bnum + bsize);
+
+	return 0;
+}
+
+int region::add_boundary(int xi, int type)
+{
+	if(type == SLOPE5END) end5.push_back(xi);
+	if(type == SLOPE3END) end3.push_back(xi);
+	return 0;
+}
+
+int region::build_partial_exons(vector<partial_exon> &pexons)
+{
+	map<int, int> m;
+	for(int i = 0; i < end5.size(); i++)
+	{
+		int p = lpos + end5[i] * slope_bin_size;
+		if(m.find(p) == m.end()) m.insert(PI(p, START_BOUNDARY));
+	}
+
+	for(int i = 0; i < end3.size(); i++)
+	{
+		int p = lpos + end3[i] * slope_bin_size;
+		if(end3[i] == bins.size()) p = rpos;
+		if(m.find(p) == m.end()) m.insert(PI(p, END_BOUNDARY));
+	}
+
+	if(m.find(lpos) == m.end()) m.insert(PI(lpos, ltype));
+	if(m.find(rpos) == m.end()) m.insert(PI(rpos, rtype));
+
+	vector<PI> v(m.begin(), m.end());
+
+	sort(v.begin(), v.end());
+
+	for(int i = 0; i < v.size(); i++)
+	{
+		printf("boundary = %d, type = %d\n", v[i].first, v[i].second);
+	}
+
+	pexons.clear();
+	for(int i = 0; i < v.size() - 1; i++)
+	{
+		partial_exon p(v[i].first, v[i + 1].first, v[i].second, v[i + 1].second);
+		pexons.push_back(p);
+	}
 
 	return 0;
 }
@@ -103,7 +151,7 @@ int region::print(int index) const
 {
 	int32_t lc = compute_overlap(*imap, lcore);
 	int32_t rc = compute_overlap(*imap, rcore - 1);
-	printf("region %d: empty = %c, pos = [%d, %d), core = [%d, %d), bins = %lu, coverage = (%d, %d)\n", 
-			index, empty ? 'T' : 'F', lpos, rpos, lcore, rcore, bins.size(), lc, rc);
+	printf("region %d: empty = %c, type = (%d, %d), pos = [%d, %d), core = [%d, %d), bins = %lu, coverage = (%d, %d)\n", 
+			index, empty ? 'T' : 'F', ltype, rtype, lpos, rpos, lcore, rcore, bins.size(), lc, rc);
 	return 0;
 }

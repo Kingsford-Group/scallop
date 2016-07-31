@@ -43,12 +43,11 @@ extern int max_dp_table_size;
 extern int max_num_subsetsum_solutions;
 extern double max_equation_error_ratio;
 extern int slope_bin_size;
+extern int slope_min_score;
 extern int slope_min_bin_num;
 extern int slope_max_bin_num;
-extern int slope_min_distance;
-extern int slope_min_score;
-extern int slope_flexible_size;
-extern double slope_acceptance_dev_decrease;
+extern int slope_flexible_bin_num;
+extern double slope_acceptance_sigma;
 
 extern int pseudo_length_count;
 extern double min_boundary_edge_weight_ratio;

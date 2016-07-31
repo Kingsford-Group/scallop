@@ -24,9 +24,7 @@ int bundle::build()
 	draw_junction_graph("jr.tex");
 	process_hits();
 	build_super_regions();
-
-	return 0;
-
+	build_partial_exons();
 	link_partial_exons();
 	return 0;
 }
@@ -116,7 +114,7 @@ int bundle::build_junction_graph()
 	{
 		jr.add_vertex();
 		vertex_info vi;
-		vi.type == v[i].second;
+		vi.type = v[i].second;
 		jr.set_vertex_info(i, vi);
 		jr.set_vertex_weight(i, v[i].first);
 	}
@@ -411,15 +409,11 @@ int bundle::build_super_regions()
 
 int bundle::build_partial_exons()
 {
-	for(int i = 0; i < jr.num_vertices() - 1; i++)
+	for(int i = 0; i < srs.size(); i++)
 	{
-		// TODO
-		//printf("try region %d\n", i);
-		//region r(v[i].first, v[i + 1].first, v[i].second, v[i + 1].second, &imap);
-		//vector<partial_exon> vp;
-		//vector<partial_exon> vp = r.build();
-		//r.print(i);
-		//pexons.insert(pexons.end(), vp.begin(), vp.end());
+		super_region &sr = srs[i];
+		sr.build();
+		pexons.insert(pexons.end(), sr.pexons.begin(), sr.pexons.end());
 	}
 	return 0;
 }

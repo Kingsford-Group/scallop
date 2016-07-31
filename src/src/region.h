@@ -27,11 +27,15 @@ public:
 	bool empty;						// whether this region is completely spliced
 
 	vector<int> bins;				// average abundance for bins
+	vector<int> end5;				// list of end5 boundaries (indices of bins)
+	vector<int> end3;				// list of end3 boundaries (indices of bins)
 
 public:
 	int init();
 	int build_bins();
+	int add_boundary(int xi, int type);
 	int print(int index) const;
+	int build_partial_exons(vector<partial_exon> &pexons);
 };
 
 #endif

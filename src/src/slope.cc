@@ -5,6 +5,7 @@ slope::slope(int t, int l, int r, int s)
 	: type(t), lbin(l), rbin(r), score(s)
 {
 	dev = 0;
+	lpos = rpos = 0;
 }
 
 int slope::distance(const slope &s) const
@@ -15,8 +16,8 @@ int slope::distance(const slope &s) const
 
 int slope::print(int index) const
 {
-	printf("slope %d: flag = %d, type = %d, bins = (%d - %d), pos = (%d - %d), score = %d, ave = %.2lf, dev = %.2lf\n", 
-			index, flag, type, lbin, rbin, lpos, rpos, score, ave, dev);
+	printf("slope %d: flag = %s, type = %s, bins = (%d - %d), pos = (%d - %d), score = %d, ave = %.2lf, dev = %.2lf\n", 
+			index, flag == 0 ? "margin" : "middle", type == 0 ? "5end" : "3end", lbin, rbin, lpos, rpos, score, ave, dev);
 	return 0;
 }
 
