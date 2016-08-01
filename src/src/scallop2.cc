@@ -86,8 +86,8 @@ int scallop2::assemble0()
 	infer_weights();
 	print();
 
-	rescale_weights();
-	print();
+	//rescale_weights();
+	//print();
 
 	return 0;
 }
