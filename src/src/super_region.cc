@@ -131,8 +131,22 @@ int super_region::extend_slope(slope &s)
 		break;
 	}
 
-	if(s.lbin < slope_flexible_bin_num) s.lbin = 0;
-	if(s.rbin > bins.size() - slope_flexible_bin_num) s.rbin = bins.size();
+	int f = slope_flexible_bin_num;
+	int xi, xb;
+
+	locate_bin(s.lbin, xi, xb);
+	int n = regions[xi].bins.size();
+	if(n >= 2 * f && xb <= f) s.lbin -= xb;
+	if(n >= 2 * f && xb + f >= n) s.lbin += (n - xb);
+
+	locate_bin(s.rbin - 1, xi, xb);
+	n = regions[xi].bins.size();
+	if(n >= 2 * f && xb < f) s.rbin -= (xb + 1);
+	if(n >= 2 * f && xb + f >= n - 1) s.rbin += (n - xb - 1);
+
+	assert(s.lbin < s.rbin);
+	assert(s.lbin >= 0 && s.lbin < bins.size());
+	assert(s.rbin > 0 && s.rbin <= bins.size());
 
 	return 0;
 }

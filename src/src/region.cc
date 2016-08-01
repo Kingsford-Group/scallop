@@ -140,9 +140,9 @@ int region::build_partial_exons(vector<partial_exon> &pexons)
 	vector<int> pp;
 	for(int i = 0; i < v.size(); i++)
 	{
-		int p = lpos + v[i].first * slope_bin_size;
-		if(v[i].first == bins.size()) p = rpos;
-		assert(p >= lpos && p <= rpos);
+		int p = lcore + v[i].first * slope_bin_size;
+		if(v[i].first == bins.size()) p = rcore;
+		assert(p >= lcore && p <= rcore);
 		pp.push_back(p);
 	}
 
