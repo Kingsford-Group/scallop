@@ -28,7 +28,9 @@ int super_region::build()
 	build_bins();
 	build_slopes();
 	select_slopes(0, bins.size());
+	adjust_coverage();
 	assign_boundaries();
+	assign_coverage();
 	build_partial_exons();
 	return 0;
 }
@@ -193,9 +195,8 @@ int super_region::select_slopes(int si, int ti)
 	if(x.lbin - si >= 5 && fabs(ave1 - x.ave) < dev1 * slope_acceptance_sigma) return 0;
 	if(ti - x.rbin >= 5 && fabs(ave2 - x.ave) < dev2 * slope_acceptance_sigma) return 0;
 
-	adjust_coverage(x.lbin, x.rbin);
-	evaluate_slope(x);
-
+	//adjust_coverage(x.lbin, x.rbin);
+	//evaluate_slope(x);
 	//x.print(k);
 	//printf("select (%d, %d, %.2lf, %.2lf) -> (%d, %d, %.2lf, %.2lf) + (%d, %d, %.2lf, %.2lf)\n", si, ti, ave, dev, si, x.lbin, ave1, dev1, x.rbin, ti, ave2, dev2);
 
@@ -203,9 +204,14 @@ int super_region::select_slopes(int si, int ti)
 	return 0;
 }
 
-int super_region::size() const
+int super_region::adjust_coverage()
 {
-	return regions.size();
+	for(int i = 0; i < slopes.size(); i++)
+	{
+		slope &s = slopes[i];
+		adjust_coverage(s.lbin, s.rbin);
+	}
+	return 0;
 }
 
 int super_region::adjust_coverage(int si, int ti)
@@ -256,6 +262,27 @@ int super_region::assign_boundaries()
 		if(s.type == SLOPE3END) regions[xi].add_boundary(xb + 1, s.type);
 	}
 	return 0;
+}
+
+int super_region::assign_coverage()
+{
+	int k = 0;
+	for(int i = 0; i < regions.size(); i++)
+	{
+		region &r = regions[i];
+		for(int j = 0; j < r.bins.size(); j++)
+		{
+			r.bins[j] = bins[k];
+			k++;
+		}
+	}
+	assert(k == bins.size());
+	return 0;
+}
+
+int super_region::size() const
+{
+	return regions.size();
 }
 
 int super_region::print(int index) const

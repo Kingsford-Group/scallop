@@ -467,10 +467,10 @@ int bundle::build_splice_graph(splice_graph &gr) const
 		assert(length >= 1);
 		gr.add_vertex();
 		gr.set_vertex_string(i + 1, r.label());
-		gr.set_vertex_weight(i + 1, r.ave_abd);
+		gr.set_vertex_weight(i + 1, r.ave);
 		vertex_info vi;
 		vi.length = length;
-		vi.stddev = r.dev_abd;
+		vi.stddev = r.dev;
 		gr.set_vertex_info(i + 1, vi);
 	}
 
@@ -493,7 +493,7 @@ int bundle::build_splice_graph(splice_graph &gr) const
 		// TODO
 		double wt = xr < yl ? xr : yl;
 		double sd = 1.0;
-		//double sd = 0.5 * x.dev_abd + 0.5 * y.dev_abd;
+		//double sd = 0.5 * x.dev + 0.5 * y.dev;
 
 		edge_descriptor p = gr.add_edge(i + 1, i + 2);
 		gr.set_edge_weight(p, wt);
@@ -507,7 +507,7 @@ int bundle::build_splice_graph(splice_graph &gr) const
 		const partial_exon &x = pexons[b.lrgn];
 		const partial_exon &y = pexons[b.rrgn];
 
-		//double sd = 0.5 * x.dev_abd + 0.5 * y.dev_abd;
+		//double sd = 0.5 * x.dev + 0.5 * y.dev;
 		double sd = 1.0;
 		edge_descriptor p = gr.add_edge(b.lrgn + 1, b.rrgn + 1);
 		gr.set_edge_weight(p, b.count);

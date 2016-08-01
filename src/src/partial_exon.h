@@ -18,8 +18,8 @@ public:
 	int ltype;						// type of the left boundary
 	int rtype;						// type of the right boundary
 
-	double ave_abd;					// average abundance
-	double dev_abd;					// standard-deviation of abundance
+	double ave;						// average abundance
+	double dev;						// standard-deviation of abundance
 
 public:
 	string label() const;

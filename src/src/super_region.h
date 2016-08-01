@@ -41,8 +41,10 @@ private:
 	int evaluate_slope(slope &s);
 	int locate_bin(int x, int &xi, int &xb);
 	int select_slopes(int si, int ti);
+	int adjust_coverage();
 	int adjust_coverage(int si, int ti);
 	int assign_boundaries();
+	int assign_coverage();
 	int build_partial_exons();
 };
 

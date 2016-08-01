@@ -112,35 +112,45 @@ int region::add_boundary(int xi, int type)
 int region::build_partial_exons(vector<partial_exon> &pexons)
 {
 	map<int, int> m;
+	typedef pair<int, PI> PPI;
 	for(int i = 0; i < end5.size(); i++)
 	{
-		int p = lpos + end5[i] * slope_bin_size;
+		//int p = lpos + end5[i] * slope_bin_size;
+		int p = end5[i];
 		if(m.find(p) == m.end()) m.insert(PI(p, START_BOUNDARY));
 	}
 
 	for(int i = 0; i < end3.size(); i++)
 	{
-		int p = lpos + end3[i] * slope_bin_size;
-		if(end3[i] == bins.size()) p = rpos;
+		//int p = lpos + end3[i] * slope_bin_size;
+		//if(end3[i] == bins.size()) p = rpos;
+		int p = end3[i];
 		if(m.find(p) == m.end()) m.insert(PI(p, END_BOUNDARY));
 	}
 
-	if(m.find(lpos) == m.end()) m.insert(PI(lpos, ltype));
-	if(m.find(rpos) == m.end()) m.insert(PI(rpos, rtype));
+	//if(m.find(lpos) == m.end()) m.insert(PI(lpos, ltype));
+	//if(m.find(rpos) == m.end()) m.insert(PI(rpos, rtype));
+	if(m.find(0) == m.end()) m.insert(PI(0, ltype));
+	if(m.find(bins.size()) == m.end()) m.insert(PI(bins.size(), rtype));
 
 	vector<PI> v(m.begin(), m.end());
 
 	sort(v.begin(), v.end());
 
+	vector<int> pp;
 	for(int i = 0; i < v.size(); i++)
 	{
-		printf("boundary = %d, type = %d\n", v[i].first, v[i].second);
+		int p = lpos + v[i].first * slope_bin_size;
+		if(v[i].first == bins.size()) p = rpos;
+		assert(p >= lpos && p <= rpos);
+		pp.push_back(p);
 	}
 
 	pexons.clear();
 	for(int i = 0; i < v.size() - 1; i++)
 	{
-		partial_exon p(v[i].first, v[i + 1].first, v[i].second, v[i + 1].second);
+		partial_exon p(pp[i], pp[i + 1], v[i].second, v[i + 1].second);
+		compute_mean_dev(bins, v[i].first, v[i + 1].first, p.ave, p.dev);
 		pexons.push_back(p);
 	}
 
