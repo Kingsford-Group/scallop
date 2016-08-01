@@ -135,6 +135,7 @@ bool parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "-x")
 		{
 			slope_min_score = atoi(argv[i + 1]);
+			slope_extend_score = (int)(0.8 * slope_min_score);
 			i++;
 		}
 	}
