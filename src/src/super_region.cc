@@ -150,29 +150,45 @@ int super_region::extend_slope(slope &s)
 	for(int i = s.lbin - 1; i >= 0; i--)
 	{
 		if(s.type == SLOPE5END && bins[i] < bins[i + 1]) s.lbin = i;
-		if(s.type == SLOPE3END && bins[i] > bins[i + 1]) s.lbin = i;
-		break;
+		else if(s.type == SLOPE3END && bins[i] > bins[i + 1]) s.lbin = i;
+		else if(s.type == SLOPE5END && bins[i] <= tail_coverage) s.lbin = i;
+		else break;
 	}
 	for(int i = s.rbin; i < bins.size(); i++)
 	{
 		if(s.type == SLOPE5END && bins[i] > bins[i - 1]) s.rbin = i + 1;
-		if(s.type == SLOPE3END && bins[i] < bins[i - 1]) s.rbin = i + 1;
-		break;
+		else if(s.type == SLOPE3END && bins[i] < bins[i - 1]) s.rbin = i + 1;
+		else if(s.type == SLOPE3END && bins[i] <= tail_coverage) s.rbin = i + 1;
+		else break;
 	}
 
 	// adjust the starting/end positions
 	int f = slope_flexible_bin_num;
 	int xi, xb;
-
+	int yi, yb;
 	locate_bin(s.lbin, xi, xb);
-	int n = regions[xi].bins.size();
-	if(n >= 2 * f && xb <= f) s.lbin -= xb;
-	if(n >= 2 * f && xb + f >= n) s.lbin += (n - xb);
+	locate_bin(s.rbin - 1, yi, yb);
+	int nx = regions[xi].bins.size();
+	int ny = regions[yi].bins.size();
+	if(nx >= 2 * f && xb <= f) s.lbin -= xb;
+	if(nx >= 2 * f && xb + f >= nx) s.lbin += (nx - xb);
+	if(ny >= 2 * f && yb < f) s.rbin -= (yb + 1);
+	if(ny >= 2 * f && yb + f >= ny - 1) s.rbin += (ny - yb - 1);
 
-	locate_bin(s.rbin - 1, xi, xb);
-	n = regions[xi].bins.size();
-	if(n >= 2 * f && xb < f) s.rbin -= (xb + 1);
-	if(n >= 2 * f && xb + f >= n - 1) s.rbin += (n - xb - 1);
+	// handle start and end boundary
+	locate_bin(s.lbin, xi, xb);
+	locate_bin(s.rbin - 1, yi, yb);
+	nx = regions[xi].bins.size();
+	ny = regions[yi].bins.size();
+	//&& bins[s.lbin] <= 2 * tail_coverage
+	if(s.type == SLOPE5END && regions[xi].ltype == START_BOUNDARY  && xb < average_slope_length / slope_bin_size)
+	{
+		s.lbin -= xb;
+	}
+	if(s.type == SLOPE3END && regions[yi].rtype == END_BOUNDARY  && ny - yb - 1 < average_slope_length / slope_bin_size)
+	{
+		s.rbin += (ny - yb - 1);
+	}
 
 	assert(s.lbin < s.rbin);
 	assert(s.lbin >= 0 && s.lbin < bins.size());
