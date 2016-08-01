@@ -12,11 +12,11 @@ region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split
 	lcore = lpos;
 	rcore = rpos;
 
-	end5.clear();
-	end3.clear();
-
 	init();
 	build_bins();
+
+	adjust.assign(bins.size(), false);
+	boundaries.clear();
 }
 
 region::~region()
@@ -104,34 +104,26 @@ int region::build_bins()
 
 int region::add_boundary(int xi, int type)
 {
-	if(type == SLOPE5END) end5.push_back(xi);
-	if(type == SLOPE3END) end3.push_back(xi);
+	boundaries.push_back(PI(xi, type));
 	return 0;
 }
 
 int region::build_partial_exons(vector<partial_exon> &pexons)
 {
 	map<int, int> m;
-	typedef pair<int, PI> PPI;
-	for(int i = 0; i < end5.size(); i++)
-	{
-		//int p = lpos + end5[i] * slope_bin_size;
-		int p = end5[i];
-		if(m.find(p) == m.end()) m.insert(PI(p, START_BOUNDARY));
-	}
-
-	for(int i = 0; i < end3.size(); i++)
-	{
-		//int p = lpos + end3[i] * slope_bin_size;
-		//if(end3[i] == bins.size()) p = rpos;
-		int p = end3[i];
-		if(m.find(p) == m.end()) m.insert(PI(p, END_BOUNDARY));
-	}
-
+	
 	//if(m.find(lpos) == m.end()) m.insert(PI(lpos, ltype));
 	//if(m.find(rpos) == m.end()) m.insert(PI(rpos, rtype));
 	if(m.find(0) == m.end()) m.insert(PI(0, ltype));
 	if(m.find(bins.size()) == m.end()) m.insert(PI(bins.size(), rtype));
+
+	for(int i = 0; i < boundaries.size(); i++)
+	{
+		//int p = lpos + end5[i] * slope_bin_size;
+		int p = boundaries[i].first;
+		int t = boundaries[i].second;
+		if(m.find(p) == m.end()) m.insert(PI(p, t));
+	}
 
 	vector<PI> v(m.begin(), m.end());
 
@@ -151,6 +143,12 @@ int region::build_partial_exons(vector<partial_exon> &pexons)
 	{
 		partial_exon p(pp[i], pp[i + 1], v[i].second, v[i + 1].second);
 		compute_mean_dev(bins, v[i].first, v[i + 1].first, p.ave, p.dev);
+		p.adjust = true;
+		for(int k = v[i].first; k < v[i + 1].first; k++)
+		{
+			if(adjust[k] == false) p.adjust = false;
+			if(adjust[k] == false) break;
+		}
 		pexons.push_back(p);
 	}
 

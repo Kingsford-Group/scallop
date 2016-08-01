@@ -20,9 +20,9 @@ int min_max_region_overlap = 5;
 double min_region_coverage = 0.5;
 int max_num_bundles = -1;
 int slope_bin_size = 5;
-int slope_min_score = 50;
-int slope_min_bin_num = 60;
-int slope_max_bin_num = 60;
+int slope_min_score = 32;
+int slope_extend_score = 20;
+int slope_min_bin_num = 16;
 int slope_min_distance = 100;
 int slope_flexible_bin_num = 2;
 double slope_acceptance_sigma = 2.0;
@@ -67,10 +67,11 @@ int print_parameters()
 	printf("slope_min_bin_num = %d\n", slope_min_bin_num);
 	printf("slope_min_distance = %d\n", slope_min_distance);
 	printf("slope_min_score = %d\n", slope_min_score);
+	printf("slope_extend_score = %d\n", slope_extend_score);
 	printf("slope_flexible_bin_num = %d\n", slope_flexible_bin_num);
 	printf("slope_acceptance_sigma = %.2lf\n", slope_acceptance_sigma);
-	printf("average_read_length = %d\n", average_read_length);
 	printf("average_slope_length = %d\n", average_slope_length);
+	printf("average_read_length = %d\n", average_read_length);
 	printf("pseudo_length_count = %d\n", pseudo_length_count);
 	printf("min_boundary_edge_weight_ratio = %.2lf\n", min_boundary_edge_weight_ratio);
 

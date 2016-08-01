@@ -36,7 +36,6 @@ public:
 private:
 	int build_bins();
 	int build_slopes();
-	int build_slopes(int bin_num);
 	int extend_slope(slope &s);
 	int evaluate_slope(slope &s);
 	int locate_bin(int x, int &xi, int &xb);
@@ -44,7 +43,6 @@ private:
 	int adjust_coverage();
 	int adjust_coverage(int si, int ti);
 	int assign_boundaries();
-	int assign_coverage();
 	int build_partial_exons();
 };
 

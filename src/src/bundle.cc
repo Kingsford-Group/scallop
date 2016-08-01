@@ -475,6 +475,7 @@ int bundle::build_splice_graph(splice_graph &gr) const
 		vertex_info vi;
 		vi.length = length;
 		vi.stddev = r.dev < 1.0 ? 1.0 : r.dev;
+		vi.adjust = r.adjust;
 		gr.set_vertex_info(i + 1, vi);
 	}
 

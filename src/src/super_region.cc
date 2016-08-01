@@ -30,7 +30,6 @@ int super_region::build()
 	select_slopes(0, bins.size(), 0);
 	adjust_coverage();
 	assign_boundaries();
-	assign_coverage();
 	build_partial_exons();
 	return 0;
 }
@@ -53,19 +52,8 @@ int super_region::build_bins()
 
 int super_region::build_slopes()
 {
-	for(int i = slope_min_bin_num; i <= slope_max_bin_num; i += 4)
-	{
-		build_slopes(i);
-	}
-	std::sort(seeds.begin(), seeds.end(), compare_slope_score);
-	
-	//for(int i = 0; i < seeds.size(); i++) seeds[i].print(i);
+	int bin_num = slope_min_bin_num;
 
-	return 0;
-}
-
-int super_region::build_slopes(int bin_num)
-{
 	if(bins.size() < bin_num) return 0;
 
 	assert(bin_num % 4 == 0);
@@ -115,12 +103,50 @@ int super_region::build_slopes(int bin_num)
 		}
 	}
 
+	std::sort(seeds.begin(), seeds.end(), compare_slope_score);
+
+	//for(int i = 0; i < seeds.size(); i++) seeds[i].print(i);
+
 	return 0;
 }
 
 int super_region::extend_slope(slope &s)
 {
-	// extend the given slope
+	int m = s.rbin - s.lbin;
+	assert(m % 4 == 0);
+	m = m / 4;
+
+	// extend to the left 
+	int p = 0;
+	for(int i = s.lbin; i < s.lbin + m; i++) p += bins[i];
+	for(int i = s.lbin - m; i >= 0; i -= m)
+	{
+		int q = 0;
+		for(int j = i; j < i + m; j++) q += bins[j];
+		int score = 0;
+		if(s.type == SLOPE5END) score = compute_binomial_score(p + q, 0.5, p);
+		if(s.type == SLOPE3END) score = compute_binomial_score(p + q, 0.5, q);
+		if(score >= slope_extend_score) s.lbin -= m;
+		else break;
+		p = q;
+	}
+
+	// extend to the right
+	p = 0;
+	for(int i = s.rbin - m; i < s.rbin; i++) p += bins[i];
+	for(int i = s.rbin; i + m <= bins.size(); i += m)
+	{
+		int q = 0;
+		for(int j = i; j < i + m; j++) q += bins[j];
+		int score = 0;
+		if(s.type == SLOPE5END) score = compute_binomial_score(p + q, 0.5, q);
+		if(s.type == SLOPE3END) score = compute_binomial_score(p + q, 0.5, p);
+		if(score >= slope_extend_score) s.rbin += m;
+		else break;
+		p = q;
+	}
+
+	// further small extend
 	for(int i = s.lbin - 1; i >= 0; i--)
 	{
 		if(s.type == SLOPE5END && bins[i] < bins[i + 1]) s.lbin = i;
@@ -134,6 +160,7 @@ int super_region::extend_slope(slope &s)
 		break;
 	}
 
+	// adjust the starting/end positions
 	int f = slope_flexible_bin_num;
 	int xi, xb;
 
@@ -176,6 +203,7 @@ int super_region::locate_bin(int x, int &xi, int &xb)
 		sum += r.bins.size();
 	}
 
+	//printf("locate %d to (%d, %d), total = %lu\n", x, xi, xb, bins.size());
 	assert(xi >= 0);
 	assert(xb >= 0 && xb < regions[xi].bins.size());
 
@@ -204,8 +232,9 @@ int super_region::select_slopes(int si, int ti, int ss)
 	double ave1, dev1;
 	double ave2, dev2;
 
-	int ssi = (si > x.lbin - slope_max_bin_num) ? si : x.lbin - slope_max_bin_num;
-	int tti = (ti < x.rbin + slope_max_bin_num) ? ti : x.rbin + slope_max_bin_num;
+	int bm = average_slope_length / slope_bin_size;
+	int ssi = (si > x.lbin - bm) ? si : x.lbin - bm;
+	int tti = (ti < x.rbin + bm) ? ti : x.rbin + bm;
 
 	compute_mean_dev(bins, ssi, x.lbin, ave1, dev1);
 	compute_mean_dev(bins, x.rbin, tti, ave2, dev2);
@@ -214,7 +243,8 @@ int super_region::select_slopes(int si, int ti, int ss)
 	bool b2 = (tti - x.rbin >= 5) && (fabs(ave2 - x.ave) < dev2 * slope_acceptance_sigma);
 
 	//x.print(k);
-	//printf("select (%d, %d, %.2lf, %.2lf) -> (%d, %d, %.2lf, %.2lf) + (%d, %d, %.2lf, %.2lf)\n", si, ti, ave, dev, si, x.lbin, ave1, dev1, x.rbin, ti, ave2, dev2);
+	//printf("select flag = (%c, %c): (%d, %d, %.2lf, %.2lf) -> (%d, %d, %.2lf, %.2lf) + (%d, %d, %.2lf, %.2lf)\n", 
+	//		b1 ? 'F' : 'T', b2 ? 'F' : 'T', si, ti, ave, dev, si, x.lbin, ave1, dev1, x.rbin, ti, ave2, dev2);
 
 	if(b1 == false && b2 == false)
 	{
@@ -235,7 +265,28 @@ int super_region::adjust_coverage()
 	for(int i = 0; i < slopes.size(); i++)
 	{
 		slope &s = slopes[i];
+
 		adjust_coverage(s.lbin, s.rbin);
+		evaluate_slope(s);
+
+		s.print(i);
+
+		int xi, xb;
+		int yi, yb;
+		locate_bin(s.lbin, xi, xb);
+		locate_bin(s.rbin - 1, yi, yb);
+
+		int k = s.lbin;
+		for(int ii = xi; ii <= yi; ii++)
+		{
+			int xx = (ii == xi) ? xb : 0;
+			int yy = (ii == yi) ? yb + 1 : regions[ii].bins.size();
+			for(int j = xx; j < yy; j++)
+			{
+				regions[ii].bins[j] = bins[k++];
+				regions[ii].adjust[j] = true;
+			}
+		}
 	}
 	return 0;
 }
@@ -279,30 +330,23 @@ int super_region::assign_boundaries()
 	for(int i = 0; i < slopes.size(); i++)
 	{
 		slope &s = slopes[i];
-		s.print(i);
-
 		int xi, xb;
-		if(s.type == SLOPE5END) locate_bin(s.lbin, xi, xb);
-		if(s.type == SLOPE3END) locate_bin(s.rbin - 1, xi, xb);
-		if(s.type == SLOPE5END) regions[xi].add_boundary(xb, s.type);
-		if(s.type == SLOPE3END) regions[xi].add_boundary(xb + 1, s.type);
-	}
-	return 0;
-}
-
-int super_region::assign_coverage()
-{
-	int k = 0;
-	for(int i = 0; i < regions.size(); i++)
-	{
-		region &r = regions[i];
-		for(int j = 0; j < r.bins.size(); j++)
+		int yi, yb;
+		if(s.type == SLOPE5END)
 		{
-			r.bins[j] = bins[k];
-			k++;
+			locate_bin(s.lbin, xi, xb);
+			locate_bin(s.rbin - 1, yi, yb);
+			regions[xi].add_boundary(xb, START_BOUNDARY);
+			regions[yi].add_boundary(yb + 1, MIDDLE_CUT);
+		}
+		else if(s.type == SLOPE3END)
+		{
+			locate_bin(s.lbin, xi, xb);
+			locate_bin(s.rbin - 1, yi, yb);
+			regions[xi].add_boundary(xb, MIDDLE_CUT);
+			regions[yi].add_boundary(yb + 1, END_BOUNDARY);
 		}
 	}
-	assert(k == bins.size());
 	return 0;
 }
 

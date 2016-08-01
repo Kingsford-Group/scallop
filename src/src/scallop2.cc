@@ -1643,13 +1643,15 @@ int scallop2::draw_splice_graph(const string &file)
 	for(int i = 0; i < gr.num_vertices(); i++)
 	{
 		double w = gr.get_vertex_weight(i);
-		double d = gr.get_vertex_info(i).stddev;
-		int l = gr.get_vertex_info(i).length;
-		int sd = gr.get_vertex_info(i).sdist;
-		int td = gr.get_vertex_info(i).tdist;
+		vertex_info vi = gr.get_vertex_info(i);
+		double d = vi.stddev;
+		int l = vi.length;
+		int sd = vi.sdist;
+		int td = vi.tdist;
+		char a = vi.adjust ? 'T' : 'F';
 		//string s = gr.get_vertex_string(i);
 		//sprintf(buf, "%d:%.0lf:%s", i, w, s.c_str());
-		sprintf(buf, "%d:%.1lf:%d:%.1lf:%d:%d", i, w, l, d, sd, td);
+		sprintf(buf, "%d:%.1lf:%d:%.1lf:%d:%d:%c", i, w, l, d, sd, td, a);
 		mis.insert(PIS(i, buf));
 	}
 

@@ -9,6 +9,8 @@
 
 using namespace std;
 
+typedef pair<int, int> PI;
+
 class region
 {
 public:
@@ -27,8 +29,8 @@ public:
 	bool empty;						// whether this region is completely spliced
 
 	vector<int> bins;				// average abundance for bins
-	vector<int> end5;				// list of end5 boundaries (indices of bins)
-	vector<int> end3;				// list of end3 boundaries (indices of bins)
+	vector<bool> adjust;			// whether bin is adjusted
+	vector<PI> boundaries;			// list of end5 boundaries (indices of bins)
 
 public:
 	int init();
