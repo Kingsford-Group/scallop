@@ -25,6 +25,7 @@ int bundle::build()
 	process_hits();
 	build_super_regions();
 	build_partial_exons();
+	print(99);
 	link_partial_exons();
 	return 0;
 }
@@ -359,6 +360,8 @@ int bundle::build_super_region(int s, super_region &sr)
 	}
 
 	sr.clear();
+
+	if((t - s) % 2 == 0) t--;
 
 	for(int i = s; i < t; i += 2)
 	{
