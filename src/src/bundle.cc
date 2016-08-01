@@ -25,7 +25,6 @@ int bundle::build()
 	process_hits();
 	build_super_regions();
 	build_partial_exons();
-	print(99);
 	link_partial_exons();
 	return 0;
 }
@@ -366,9 +365,6 @@ int bundle::build_super_region(int s, super_region &sr)
 	for(int i = s; i < t; i += 2)
 	{
 		// check region (i, i + 1)
-		if(i != s && jr.out_degree(i) != 1) return 0;
-		if(i != t - 1 && jr.in_degree(i + 1) != 1) return 0;
-
 		int32_t lpos = (int32_t)(jr.get_vertex_weight(i));
 		int32_t rpos = (int32_t)(jr.get_vertex_weight(i + 1));
 		int ltype = jr.get_vertex_info(i).type; 
@@ -381,6 +377,8 @@ int bundle::build_super_region(int s, super_region &sr)
 		sr.add_region(r);
 
 		if(i + 1 >= t) return 0;
+		if(i != s && jr.out_degree(i) != 1) return 0;
+		if(i != t - 1 && jr.in_degree(i + 1) != 1) return 0;
 
 		// check region (i + 1, i + 2)
 		if(jr.out_degree(i + 1) != 2) return 0;
