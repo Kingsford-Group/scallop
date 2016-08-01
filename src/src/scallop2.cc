@@ -1003,7 +1003,7 @@ bool scallop2::join_trivial_edge(edge_descriptor &e)
 		}
 		gr.set_edge_weight(e, ew);
 		gr.set_edge_info(e, edge_info(0));
-		gr.set_vertex_info(t, vertex_info(0));
+		gr.set_vertex_info(s, vertex_info(0));
 
 		printf("join trivial edge %d\n", e2i[e]);
 		decompose_trivial_vertex(s);
