@@ -27,7 +27,7 @@ int super_region::build()
 {
 	build_bins();
 	build_slopes();
-	select_slopes(0, bins.size());
+	select_slopes(0, bins.size(), 0);
 	adjust_coverage();
 	assign_boundaries();
 	assign_coverage();
@@ -58,6 +58,9 @@ int super_region::build_slopes()
 		build_slopes(i);
 	}
 	std::sort(seeds.begin(), seeds.end(), compare_slope_score);
+	
+	//for(int i = 0; i < seeds.size(); i++) seeds[i].print(i);
+
 	return 0;
 }
 
@@ -179,13 +182,13 @@ int super_region::locate_bin(int x, int &xi, int &xb)
 	return 0;
 }
 
-int super_region::select_slopes(int si, int ti)
+int super_region::select_slopes(int si, int ti, int ss)
 {
 	double ave, dev;
 	compute_mean_dev(bins, si, ti, ave, dev);
 
 	int k = -1;
-	for(int i = 0; i < seeds.size(); i++)
+	for(int i = ss; i < seeds.size(); i++)
 	{
 		slope &x = seeds[i];
 		if(x.lbin < si) continue;
@@ -198,23 +201,32 @@ int super_region::select_slopes(int si, int ti)
 
 	slope &x = seeds[k];
 
-	select_slopes(si, x.lbin);
-	select_slopes(x.rbin, ti);
-
 	double ave1, dev1;
 	double ave2, dev2;
-	compute_mean_dev(bins, si, x.lbin, ave1, dev1);
-	compute_mean_dev(bins, x.rbin, ti, ave2, dev2);
 
-	if(x.lbin - si >= 5 && fabs(ave1 - x.ave) < dev1 * slope_acceptance_sigma) return 0;
-	if(ti - x.rbin >= 5 && fabs(ave2 - x.ave) < dev2 * slope_acceptance_sigma) return 0;
+	int ssi = (si > x.lbin - slope_max_bin_num) ? si : x.lbin - slope_max_bin_num;
+	int tti = (ti < x.rbin + slope_max_bin_num) ? ti : x.rbin + slope_max_bin_num;
 
-	//adjust_coverage(x.lbin, x.rbin);
-	//evaluate_slope(x);
+	compute_mean_dev(bins, ssi, x.lbin, ave1, dev1);
+	compute_mean_dev(bins, x.rbin, tti, ave2, dev2);
+
+	bool b1 = (x.lbin - ssi >= 5) && (fabs(ave1 - x.ave) < dev1 * slope_acceptance_sigma);
+	bool b2 = (tti - x.rbin >= 5) && (fabs(ave2 - x.ave) < dev2 * slope_acceptance_sigma);
+
 	//x.print(k);
 	//printf("select (%d, %d, %.2lf, %.2lf) -> (%d, %d, %.2lf, %.2lf) + (%d, %d, %.2lf, %.2lf)\n", si, ti, ave, dev, si, x.lbin, ave1, dev1, x.rbin, ti, ave2, dev2);
 
-	slopes.push_back(x);
+	if(b1 == false && b2 == false)
+	{
+		slopes.push_back(x);
+		select_slopes(si, x.lbin, 0);
+		select_slopes(x.rbin, ti, 0);
+	}
+	else
+	{
+		select_slopes(si, ti, k + 1);
+	}
+
 	return 0;
 }
 

@@ -40,7 +40,7 @@ private:
 	int extend_slope(slope &s);
 	int evaluate_slope(slope &s);
 	int locate_bin(int x, int &xi, int &xb);
-	int select_slopes(int si, int ti);
+	int select_slopes(int si, int ti, int ss);
 	int adjust_coverage();
 	int adjust_coverage(int si, int ti);
 	int assign_boundaries();
