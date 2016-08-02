@@ -117,7 +117,7 @@ private:
 	int build_adjacent_edges(const vector<PI> &p);
 
 	// decompose the graph with greedy algorithm
-	int greedy_decompose();
+	int greedy_decompose(int num);
 
 	// collect existing s-t path e
 	int collect_path(int e);

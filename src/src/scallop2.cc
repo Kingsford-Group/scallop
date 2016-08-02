@@ -99,6 +99,8 @@ int scallop2::assemble1()
 
 	collect_existing_st_paths();
 
+	greedy_decompose(1);
+
 	printf("%s core solution %lu paths, iteration = %d\n", name.c_str(), paths.size(), f);
 
 	return 0;
@@ -110,7 +112,7 @@ int scallop2::assemble2()
 
 	int f = iterate();
 
-	greedy_decompose();
+	greedy_decompose(-1);
 	assert(gr.num_edges() == 0);
 
 	printf("%s full solution %lu paths, iteration = %d\n", name.c_str(), paths.size(), f);
@@ -122,7 +124,7 @@ int scallop2::greedy()
 {
 	assemble0();
 
-	greedy_decompose();
+	greedy_decompose(-1);
 	assert(gr.num_edges() == 0);
 
 	printf("%s greedy solution %lu paths\n", name.c_str(), paths.size());
@@ -1417,16 +1419,20 @@ bool scallop2::verify_false_boundary_edge(edge_descriptor e)
 	return true;
 }
 
-int scallop2::greedy_decompose()
+int scallop2::greedy_decompose(int num)
 {
+	int cnt = 0;
 	while(true)
 	{
+		if(num != -1 && cnt >= num) break;
+
 		VE v;
 		vector<int> vv;
 		double w = gr.compute_maximum_path_w(v);
 		if(w <= 0.0) break;
 		int e = split_merge_path(v, w, vv);
 		collect_path(e);
+		cnt++;
 	}
 	return 0;
 }
