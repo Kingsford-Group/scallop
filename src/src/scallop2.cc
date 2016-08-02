@@ -89,51 +89,6 @@ int scallop2::assemble0()
 	//rescale_weights();
 	//print();
 
-	return 0;
-}
-
-int scallop2::assemble1()
-{
-	assemble0();
-	int f = iterate();
-
-	collect_existing_st_paths();
-
-	greedy_decompose(1);
-
-	printf("%s core solution %lu paths, iteration = %d\n", name.c_str(), paths.size(), f);
-
-	return 0;
-}
-
-int scallop2::assemble2()
-{
-	assemble0();
-
-	int f = iterate();
-
-	greedy_decompose(-1);
-	assert(gr.num_edges() == 0);
-
-	printf("%s full solution %lu paths, iteration = %d\n", name.c_str(), paths.size(), f);
-
-	return 0;
-}
-
-int scallop2::greedy()
-{
-	assemble0();
-
-	greedy_decompose(-1);
-	assert(gr.num_edges() == 0);
-
-	printf("%s greedy solution %lu paths\n", name.c_str(), paths.size());
-
-	return 0;
-}
-
-int scallop2::iterate()
-{
 	while(true)
 	{
 		bool b = false;
@@ -152,6 +107,56 @@ int scallop2::iterate()
 	smooth_splice_graph();
 	print();
 
+
+	return 0;
+}
+
+int scallop2::assemble1()
+{
+	assemble0();
+
+	iterate(false);
+
+	collect_existing_st_paths();
+
+	greedy_decompose(1);
+
+	//iterate(false);
+	//collect_existing_st_paths();
+
+	printf("%s core solution %lu paths\n", name.c_str(), paths.size());
+
+	return 0;
+}
+
+int scallop2::assemble2()
+{
+	assemble0();
+
+	iterate(true);
+
+	//greedy_decompose(-1);
+	assert(gr.num_edges() == 0);
+
+	printf("%s full solution %lu paths\n", name.c_str(), paths.size());
+
+	return 0;
+}
+
+int scallop2::greedy()
+{
+	assemble0();
+
+	greedy_decompose(-1);
+	assert(gr.num_edges() == 0);
+
+	printf("%s greedy solution %lu paths\n", name.c_str(), paths.size());
+
+	return 0;
+}
+
+int scallop2::iterate(bool greedy)
+{
 	while(true)
 	{
 		bool b = false;
@@ -173,7 +178,12 @@ int scallop2::iterate()
 		if(b == true) print();
 		if(b == true) continue;
 
-		break;
+		if(greedy == false) break;
+
+		collect_existing_st_paths();
+		greedy_decompose(1);
+
+		if(gr.num_edges() == 0) break;
 	}
 
 	return 0;

@@ -87,7 +87,7 @@ private:
 	bool smooth_with_equation(equation &eqn);
 
 	// iteratively decompose
-	int iterate();
+	int iterate(bool greedy);
 	bool decompose_with_equations(int level);
 
 	// identify and handle equations 
