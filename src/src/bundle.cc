@@ -238,9 +238,11 @@ int bundle::process_hits()
 	{
 		hit &h = hits[i];
 
-		// TODO use only single pair
-		add_mapped_intervals(h, h.rpos);
-		continue;
+		if(use_paired_end == false)
+		{
+			add_mapped_intervals(h, h.rpos);
+			continue;
+		}
 
 		if(h.isize <= 0)
 		{

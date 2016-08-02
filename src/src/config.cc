@@ -30,11 +30,12 @@ int32_t average_read_length = 100;
 int32_t average_slope_length = 240;
 int pseudo_length_count = 10;
 double min_boundary_edge_weight_ratio = 0.05;
+bool use_paired_end = false;
 
 // for algorithm
 int max_dp_table_size = 10000;
 int max_num_subsetsum_solutions = 10;
-double max_equation_error_ratio = 0.2;
+double max_equation_error_ratio = 0.1;
 
 // for simulation
 int simulation_num_vertices = 0;
@@ -64,6 +65,7 @@ int print_parameters()
 	printf("min_region_coverage = %.2lf\n", min_region_coverage);
 	printf("max_num_bundles = %d\n", max_num_bundles);
 	printf("tail_coverage = %d\n", tail_coverage);
+	printf("use_paired_end = %c\n", use_paired_end ? 'T' : 'F');
 	printf("slope_bin_size = %d\n", slope_bin_size);
 	printf("slope_min_bin_num = %d\n", slope_min_bin_num);
 	printf("slope_min_score = %d\n", slope_min_score);
@@ -128,14 +130,17 @@ bool parse_arguments(int argc, const char ** argv)
 		{
 			output_tex_files = true;
 		}
+		else if(string(argv[i]) == "-p")
+		{
+			use_paired_end = true;
+		}
 		else if(string(argv[i]) == "-f")
 		{
 			fast_mode = true;
 		}
 		else if(string(argv[i]) == "-x")
 		{
-			slope_min_score = atoi(argv[i + 1]);
-			slope_extend_score = (int)(0.8 * slope_min_score);
+			max_equation_error_ratio = atof(argv[i + 1]);
 			i++;
 		}
 	}
