@@ -132,8 +132,9 @@ int region::build_partial_exons(vector<partial_exon> &pexons)
 	vector<int> pp;
 	for(int i = 0; i < v.size(); i++)
 	{
-		int p = lcore + v[i].first * slope_bin_size;
-		if(v[i].first == bins.size()) p = rcore;
+		int p = get_location(v[i].first);
+		//int p = lcore + v[i].first * slope_bin_size;
+		//if(v[i].first == bins.size()) p = rcore;
 		assert(p >= lcore && p <= rcore);
 		pp.push_back(p);
 	}
@@ -153,6 +154,13 @@ int region::build_partial_exons(vector<partial_exon> &pexons)
 	}
 
 	return 0;
+}
+
+int region::get_location(int xb)
+{
+	assert(xb >= 0 && xb <= bins.size());
+	if(xb == bins.size()) return rcore;
+	else return lcore + xb * slope_bin_size;
 }
 
 int region::print(int index) const

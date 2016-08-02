@@ -51,6 +51,8 @@ extern int slope_flexible_bin_num;
 extern double slope_acceptance_sigma;
 extern bool use_paired_end;
 
+extern int infer_min_distance;
+extern int infer_root_distance;
 extern int pseudo_length_count;
 extern double min_boundary_edge_weight_ratio;
 

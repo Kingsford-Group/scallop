@@ -343,12 +343,13 @@ int smoother::set_objective()
 	for(int i = 0; i < i2e.size(); i++)
 	{
 		int len = gr.get_edge_info(i2e[i]).length;
+		bool b = gr.get_edge_info(i2e[i]).infer;
 		double ll = len / scalor;
 		double wt = 1.0 + ll;
 		int s = i2e[i]->source();
 		int t = i2e[i]->target();
-		if(s == 0 && len == 0) wt = 0;
-		if(t == gr.num_vertices() - 1 && len == 0) wt = 0;
+		if(b == false && s == 0 && len == 0) wt = 0;
+		if(b == false && t == gr.num_vertices() - 1 && len == 0) wt = 0;
 		expr += wt * eerr[i] * eerr[i];
 	}
 

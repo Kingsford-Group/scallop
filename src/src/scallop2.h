@@ -70,8 +70,16 @@ private:
 	int compute_shortest_target_distances();
 
 	// build equivalent classes
-	int infer_weights();
-	int infer_weights(const vector<int> &v);
+	bool infer_equivalent_classes();
+	bool infer_equivalent_class(const vector<int> &v);
+	bool infer_trivial_edges();
+	bool infer_trivial_in_edge(int v);
+	bool infer_trivial_out_edge(int v);
+	bool infer_edges();
+	bool infer_in_edges(int v);
+	bool infer_out_edges(int v);
+	bool infer_vertices();
+	bool infer_vertices(edge_descriptor e);
 
 	// rescale weights (coverage)
 	int rescale_weights();

@@ -11,6 +11,8 @@ using namespace std;
 //// parameters
 
 // for bam file
+int32_t average_read_length = 100;
+int32_t average_slope_length = 240;
 int32_t min_bundle_gap = 100;
 int min_num_hits_in_bundle = 20;
 int32_t min_splice_boundary_hits = 1;
@@ -26,16 +28,16 @@ int slope_extend_score = 24;
 int slope_min_bin_num = 16;
 int slope_flexible_bin_num = 2;
 double slope_acceptance_sigma = 2.0;
-int32_t average_read_length = 100;
-int32_t average_slope_length = 240;
 int pseudo_length_count = 10;
-double min_boundary_edge_weight_ratio = 0.05;
 bool use_paired_end = false;
 
 // for algorithm
+int infer_min_distance = 100;
+int infer_root_distance = 50;
 int max_dp_table_size = 10000;
 int max_num_subsetsum_solutions = 10;
 double max_equation_error_ratio = 0.1;
+double min_boundary_edge_weight_ratio = 0.05;
 
 // for simulation
 int simulation_num_vertices = 0;
@@ -75,12 +77,14 @@ int print_parameters()
 	printf("average_slope_length = %d\n", average_slope_length);
 	printf("average_read_length = %d\n", average_read_length);
 	printf("pseudo_length_count = %d\n", pseudo_length_count);
-	printf("min_boundary_edge_weight_ratio = %.2lf\n", min_boundary_edge_weight_ratio);
 
 	// for algorithm
+	printf("infer_min_distance = %d\n", infer_min_distance);
+	printf("infer_root_distance = %d\n", infer_root_distance);
 	printf("max_dp_table_size = %d\n", max_dp_table_size);
 	printf("max_num_subsetsum_solutions = %d\n", max_num_subsetsum_solutions);
 	printf("max_equation_error_ratio = %.2lf\n", max_equation_error_ratio);
+	printf("min_boundary_edge_weight_ratio = %.2lf\n", min_boundary_edge_weight_ratio);
 
 	// for simulation
 	printf("simulation_num_vertices = %d\n", simulation_num_vertices);
@@ -137,6 +141,16 @@ bool parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "-f")
 		{
 			fast_mode = true;
+		}
+		else if(string(argv[i]) == "-sms")
+		{
+			slope_min_score = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "-ses")
+		{
+			slope_extend_score = atoi(argv[i + 1]);
+			i++;
 		}
 		else if(string(argv[i]) == "-x")
 		{

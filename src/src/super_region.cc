@@ -194,6 +194,12 @@ int super_region::extend_slope(slope &s)
 	assert(s.lbin >= 0 && s.lbin < bins.size());
 	assert(s.rbin > 0 && s.rbin <= bins.size());
 
+	locate_bin(s.lbin, xi, xb);
+	locate_bin(s.rbin - 1, yi, yb);
+
+	s.lpos = regions[xi].get_location(xb);
+	s.rpos = regions[yi].get_location(yb + 1);
+
 	return 0;
 }
 
@@ -258,9 +264,9 @@ int super_region::select_slopes(int si, int ti, int ss)
 	bool b1 = (x.lbin - ssi >= 5) && (fabs(ave1 - x.ave) < dev1 * slope_acceptance_sigma);
 	bool b2 = (tti - x.rbin >= 5) && (fabs(ave2 - x.ave) < dev2 * slope_acceptance_sigma);
 
-	//x.print(k);
-	//printf("select flag = (%c, %c): (%d, %d, %.2lf, %.2lf) -> (%d, %d, %.2lf, %.2lf) + (%d, %d, %.2lf, %.2lf)\n", 
-	//		b1 ? 'F' : 'T', b2 ? 'F' : 'T', si, ti, ave, dev, si, x.lbin, ave1, dev1, x.rbin, ti, ave2, dev2);
+	x.print(k);
+	printf("select flag = (%c, %c): (%d, %d, %.2lf, %.2lf) -> (%d, %d, %.2lf, %.2lf) + (%d, %d, %.2lf, %.2lf)\n", 
+			b1 ? 'F' : 'T', b2 ? 'F' : 'T', si, ti, ave, dev, si, x.lbin, ave1, dev1, x.rbin, ti, ave2, dev2);
 
 	if(b1 == false && b2 == false)
 	{
