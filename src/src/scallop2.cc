@@ -1290,44 +1290,56 @@ bool scallop2::infer_equivalent_class(const vector<int> &v)
 bool scallop2::infer_vertices()
 {
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
-		bool b = infer_vertices(*it1);
-		if(b == true) printf("infer vertices with edge %d\n", e2i[*it1]);
-		if(b == true) return true;
+		bool b1 = infer_vertex_with_in_edges(i);
+		bool b2 = infer_vertex_with_out_edges(i);
+		if(b1 || b2) printf("infer vertex %d\n", i);
+		if(b1 || b2) return true;
 	}
 	return false;
 }
 
-bool scallop2::infer_vertices(edge_descriptor e)
+bool scallop2::infer_vertex_with_in_edges(int x)
 {
-	edge_info ei = gr.get_edge_info(e);
-	if(ei.infer == false) return false;
+	vertex_info vi = gr.get_vertex_info(x);
+	if(vi.infer == true) return false;
 
-	double w = gr.get_edge_weight(e);
-
-	bool flag = false;
-	int s = e->source();
-	int t = e->target();
-
-	vertex_info vi = gr.get_vertex_info(s);
-	if(vi.infer == false)
+	edge_iterator it1, it2;
+	double w = 0;
+	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
 	{
-		gr.set_vertex_weight(s, w);
-		vi.infer = true;
-		gr.set_vertex_info(s, vi);
-		flag = true;
+		edge_info ei = gr.get_edge_info(*it1);
+		if(ei.infer == false) return false;
+		w += gr.get_edge_weight(*it1);
 	}
 
-	vi = gr.get_vertex_info(t);
-	if(vi.infer == false)
+	vi.infer = true;
+	gr.set_vertex_weight(x, w);
+	gr.set_vertex_info(x, vi);
+
+	return true;
+}
+
+bool scallop2::infer_vertex_with_out_edges(int x)
+{
+	vertex_info vi = gr.get_vertex_info(x);
+	if(vi.infer == true) return false;
+
+	edge_iterator it1, it2;
+	double w = 0;
+	for(tie(it1, it2) = gr.out_edges(x); it1 != it2; it1++)
 	{
-		gr.set_vertex_weight(t, w);
-		vi.infer = true;
-		gr.set_vertex_info(t, vi);
-		flag = true;
+		edge_info ei = gr.get_edge_info(*it1);
+		if(ei.infer == false) return false;
+		w += gr.get_edge_weight(*it1);
 	}
-	return flag;
+
+	vi.infer = true;
+	gr.set_vertex_weight(x, w);
+	gr.set_vertex_info(x, vi);
+
+	return true;
 }
 
 bool scallop2::infer_trivial_edges()
@@ -1416,12 +1428,15 @@ bool scallop2::infer_in_edges(int v)
 		edge_info ei = gr.get_edge_info(e);
 
 		if(ei.infer == true) ww -= gr.get_edge_weight(e);
-		else if(e->source() == 0) vv1.push_back(e);
+		else if(e->source() == 0 && ei.length == 0) vv1.push_back(e);
 		else vv2.push_back(e);
 	}
 
-	if(ww <= 0.0) return 0;
+	if(ww <= 0.0) return false;
+	if(vv1.size() >= 1) return false;
+	if(vv2.size() == 0) return false;
 
+	/*
 	if(vv2.size() == 0 && vv1.size() == 1)
 	{
 		edge_descriptor e = vv1[0];
@@ -1431,31 +1446,28 @@ bool scallop2::infer_in_edges(int v)
 		gr.set_edge_info(e, ei);
 		return true;
 	}
+	*/
 
-	if(vv1.size() == 0 && vv2.size() >= 1)
+	double sum = 0;
+	for(int i = 0; i < vv2.size(); i++)
 	{
-		double sum = 0;
-		for(int i = 0; i < vv2.size(); i++)
-		{
-			edge_descriptor e = vv2[i];
-			sum += gr.get_edge_weight(e);
-		}
-
-		if(sum <= 1.0) return false;
-
-		for(int i = 0; i < vv2.size(); i++)
-		{
-			edge_descriptor e = vv2[i];
-			edge_info ei = gr.get_edge_info(e);
-			double w2 = gr.get_edge_weight(e) / sum * ww;
-			gr.set_edge_weight(e, w2);
-			ei.infer = true;
-			gr.set_edge_info(e, ei);
-		}
-
-		return true;
+		edge_descriptor e = vv2[i];
+		sum += gr.get_edge_weight(e);
 	}
-	return false;
+
+	if(sum <= SMIN) return false;
+
+	for(int i = 0; i < vv2.size(); i++)
+	{
+		edge_descriptor e = vv2[i];
+		edge_info ei = gr.get_edge_info(e);
+		double w2 = gr.get_edge_weight(e) / sum * ww;
+		gr.set_edge_weight(e, w2);
+		ei.infer = true;
+		gr.set_edge_info(e, ei);
+	}
+
+	return true;
 }
 
 bool scallop2::infer_out_edges(int v)

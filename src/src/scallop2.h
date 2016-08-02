@@ -79,7 +79,8 @@ private:
 	bool infer_in_edges(int v);
 	bool infer_out_edges(int v);
 	bool infer_vertices();
-	bool infer_vertices(edge_descriptor e);
+	bool infer_vertex_with_in_edges(int v);
+	bool infer_vertex_with_out_edges(int v);
 
 	// rescale weights (coverage)
 	int rescale_weights();
