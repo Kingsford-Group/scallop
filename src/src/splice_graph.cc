@@ -802,4 +802,14 @@ int splice_graph::draw(const string &file)
 	return 0;
 }
 
-
+int splice_graph::print_nontrivial_vertices()
+{
+	int k = 0;
+	for(int i = 1; i < num_vertices() - 1; i++)
+	{
+		if(in_degree(i) <= 1) continue;
+		if(out_degree(i) <= 1) continue;
+		printf("nontrivial vertex %d length = %d\n", k++, get_vertex_info(i).length);
+	}
+	return 0;
+}

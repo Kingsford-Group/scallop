@@ -591,6 +591,8 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, const string &
 		double abd = paths[i].abd;
 		if(v.size() < 2) continue;
 
+		if(abd <= transcript_min_expression) continue;
+
 		fout<<chrm.c_str()<<"\t";		// chromosome name
 		fout<<prefix.c_str()<<"\t";		// source
 		fout<<"transcript\t";			// feature

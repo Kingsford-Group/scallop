@@ -82,9 +82,10 @@ public:
 	int round_weights();
 	int locate(int v);
 
-	// draw
+	// draw and print
 	int draw(const string &file);
 	int draw(const string &file, const MIS &mis, const MES &mes, double len);
+	int print_nontrivial_vertices();
 };
 
 #endif

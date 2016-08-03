@@ -56,6 +56,7 @@ extern double infer_min_reliability;
 extern double infer_root_reliability;
 extern int pseudo_length_count;
 extern double min_boundary_edge_weight_ratio;
+extern double transcript_min_expression;
 
 extern string algo;
 extern string input_file;
