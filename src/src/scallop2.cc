@@ -79,12 +79,49 @@ int scallop2::assemble0()
 	gr.get_edge_indices(i2e, e2i);
 	init_super_edges();
 
-	print();
-
 	compute_shortest_source_distances();
 	compute_shortest_target_distances();
+	assign_reliability();
+
+	print();
 
 	infer_equivalent_classes();
+
+	print();
+
+	while(true)
+	{
+		bool b = false;
+
+		b = infer_trivial_edges();
+		//if(b == true) print();
+		if(b == true) continue;
+
+		b = infer_vertices();
+		//if(b == true) print();
+		if(b == true) continue;
+
+		break;
+	}
+
+	print();
+
+	while(true)
+	{
+		bool b = false;
+
+		b = join_trivial_edges();
+		//if(b == true) print();
+		if(b == true) continue;
+
+		b = join_trivial_vertices();
+		//if(b == true) print();
+		if(b == true) continue;
+
+		break;
+	}
+
+	print();
 
 	while(true)
 	{
@@ -109,23 +146,6 @@ int scallop2::assemble0()
 
 	//rescale_weights();
 	//print();
-
-	while(true)
-	{
-		bool b = false;
-
-		b = join_trivial_edges();
-		//if(b == true) print();
-		if(b == true) continue;
-
-		b = join_trivial_vertices();
-		//if(b == true) print();
-		if(b == true) continue;
-
-		break;
-	}
-
-	print();
 
 	smooth_splice_graph();
 	print();
@@ -987,6 +1007,14 @@ bool scallop2::join_trivial_edge(edge_descriptor &e)
 	int s = e->source();
 	int t = e->target();
 
+	bool bs = gr.get_vertex_info(s).infer;
+	bool bt = gr.get_vertex_info(t).infer;
+	double r1 = gr.get_vertex_info(s).reliability;
+	double r2 = gr.get_vertex_info(t).reliability;
+
+	if(bs == false && r1 <= join_min_reliability) return false;
+	if(bt == false && r2 <= join_min_reliability) return false;
+
 	double ws = gr.get_vertex_weight(s);
 	double wt = gr.get_vertex_weight(t);
 	double we = gr.get_edge_weight(e);
@@ -1073,6 +1101,10 @@ bool scallop2::join_trivial_vertex(int i)
 {
 	if(gr.in_degree(i) != 1) return false;
 	if(gr.out_degree(i) != 1) return false;
+
+	double r = gr.get_vertex_info(i).reliability;
+	bool b = gr.get_vertex_info(i).infer;
+	if(b == false && r <= join_min_reliability) return false;
 
 	edge_iterator it1, it2;
 	tie(it1, it2) = gr.in_edges(i);
@@ -1193,6 +1225,21 @@ int scallop2::compute_shortest_target_distances()
 	return 0;
 }
 
+int scallop2::assign_reliability()
+{
+	for(int i = 0; i < gr.num_vertices(); i++)
+	{
+		vertex_info vi = gr.get_vertex_info(i);
+		int d = vi.sdist < vi.tdist ? vi.sdist : vi.tdist;
+		double r = d * 1.0 / average_slope_length;
+		if(r >= 1.0) r = 1.0;
+		if(r <= 0.0) r = 0.0;
+		vi.reliability = r;
+		gr.set_vertex_info(i, vi);
+	}
+	return 0;
+}
+
 bool scallop2::infer_equivalent_classes()
 {
 	vector<bool> m;
@@ -1232,7 +1279,7 @@ bool scallop2::infer_equivalent_class(const vector<int> &v)
 	int sum = 0;
 	bool root = false;
 	int maxi = -1;
-	int maxd = -1;
+	double maxr = 0;
 	for(int i = 0; i < v.size(); i++)
 	{
 		if(v[i] == 0 || v[i] == gr.num_vertices() - 1)
@@ -1242,21 +1289,21 @@ bool scallop2::infer_equivalent_class(const vector<int> &v)
 		}
 		vertex_info vi = gr.get_vertex_info(v[i]);
 		sum += vi.length;
-		int d = vi.sdist < vi.tdist ? vi.sdist : vi.tdist;
-		if(d >= average_slope_length) v1.push_back(v[i]);
-		if(d >= infer_min_distance) v2.push_back(v[i]);
-		if(d > maxd)
+
+		if(vi.reliability >= 1.0) v1.push_back(v[i]);
+		if(vi.reliability >= infer_min_reliability) v2.push_back(v[i]);
+		if(vi.reliability > maxr)
 		{
-			maxd = d;
-			maxi = i;
+			maxr = vi.reliability;
+			maxi = v[i];
 		}
 	}
 
-	printf("INFER %lu %lu %lu max = %d root = %c\n", v.size(), v1.size(), v2.size(), maxd, root ? 'T' : 'F');
+	printf("INFER %lu %lu %lu max = %.2lf root = %c\n", v.size(), v1.size(), v2.size(), maxr, root ? 'T' : 'F');
 
 	if(v1.size() == 0) v1 = v2;
 
-	if(v1.size() == 0 && root == true && maxd >= infer_root_distance)
+	if(v1.size() == 0 && root == true && maxr >= infer_root_reliability)
 	{
 		v1.push_back(maxi);
 	}
@@ -1961,17 +2008,14 @@ int scallop2::draw_splice_graph(const string &file)
 	char buf[10240];
 	for(int i = 0; i < gr.num_vertices(); i++)
 	{
-		double w = gr.get_vertex_weight(i);
 		vertex_info vi = gr.get_vertex_info(i);
-		double d = vi.stddev;
+		double w = gr.get_vertex_weight(i);
 		int l = vi.length;
-		int sd = vi.sdist;
-		int td = vi.tdist;
-		char a = vi.adjust ? 'T' : 'F';
+		double d = vi.reliability;
 		char b = vi.infer ? 'T' : 'F';
 		//string s = gr.get_vertex_string(i);
 		//sprintf(buf, "%d:%.0lf:%s", i, w, s.c_str());
-		sprintf(buf, "%d:%.1lf:%d:%.1lf:%d:%d:%c", i, w, l, d, sd, td, b);
+		sprintf(buf, "%d:%.1lf:%d:%.2lf:%c", i, w, l, d, b);
 		mis.insert(PIS(i, buf));
 	}
 

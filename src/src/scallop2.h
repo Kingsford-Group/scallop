@@ -68,6 +68,7 @@ private:
 	// compute shortest distances to source and target 
 	int compute_shortest_source_distances();
 	int compute_shortest_target_distances();
+	int assign_reliability();
 
 	// build equivalent classes
 	bool infer_equivalent_classes();

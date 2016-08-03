@@ -13,6 +13,7 @@ public:
 	int length;			// length of this partial exon
 	int sdist;			// shortest distance to s
 	int tdist;			// shortest distance to t
+	double reliability;	// whether the coverage is reliable
 	bool infer;			// whether this vertex has been inferred
 	int type;			// for various usage
 	bool adjust;		// whether the coverage of this region has been adjusted 
