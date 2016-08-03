@@ -60,7 +60,7 @@ int reverse(vector<T> &x)
 }
 
 template<typename T>
-int printv(vector<T> &x)
+int printv(const vector<T> &x)
 {
 	for(int i = 0; i < x.size(); i++)
 	{
