@@ -32,8 +32,9 @@ int pseudo_length_count = 10;
 bool use_paired_end = false;
 
 // for algorithm
-int infer_min_distance = 100;
-int infer_root_distance = 50;
+double join_min_reliability = 0.6;
+double infer_min_reliability = 0.6;
+double infer_root_reliability = 0.4;
 int max_dp_table_size = 10000;
 int max_num_subsetsum_solutions = 10;
 double max_equation_error_ratio = 0.1;
@@ -79,8 +80,9 @@ int print_parameters()
 	printf("pseudo_length_count = %d\n", pseudo_length_count);
 
 	// for algorithm
-	printf("infer_min_distance = %d\n", infer_min_distance);
-	printf("infer_root_distance = %d\n", infer_root_distance);
+	printf("join_min_reliability = %.2lf\n", join_min_reliability);
+	printf("infer_min_reliability = %.2lf\n", infer_min_reliability);
+	printf("infer_root_reliability = %.2lf\n", infer_root_reliability);
 	printf("max_dp_table_size = %d\n", max_dp_table_size);
 	printf("max_num_subsetsum_solutions = %d\n", max_num_subsetsum_solutions);
 	printf("max_equation_error_ratio = %.2lf\n", max_equation_error_ratio);
