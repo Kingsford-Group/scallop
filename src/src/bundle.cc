@@ -693,6 +693,8 @@ int bundle::infer_hyper_edges()
 
 				int e1 = search_partial_exons(p1);
 				int e2 = search_partial_exons(p2 - 1);
+				
+				// TODO
 
 				if(e1 <= -1 || e2 <= -1) continue;
 
@@ -701,10 +703,16 @@ int bundle::infer_hyper_edges()
 					list.push_back(j);
 					pi.second++;
 				}
-				if(pi.second > pi.first)
-				{
-					m.insert(pair<string, PI>(s, pi));
-				}
+			}
+
+			h.print();
+			printf(" -> ");
+			for(int k = pi.first; k < pi.second; k++) printf(" %d", list[k]);
+			printf("\n");
+
+			if(pi.second > pi.first)
+			{
+				m.insert(pair<string, PI>(s, pi));
 			}
 		}
 		else
@@ -734,6 +742,12 @@ int bundle::infer_hyper_edges()
 
 			vector<int> vv(sp.begin(), sp.end());
 			hyper_edge he(vv, 1);
+
+			h.print();
+			printf(" -> ");
+			he.print(99);
+			printf("\n");
+
 			map<hyper_edge, int>::iterator it = mhe.find(he);
 			if(it == mhe.end()) mhe.insert(pair<hyper_edge, int>(he, 1));
 			else it->second++;

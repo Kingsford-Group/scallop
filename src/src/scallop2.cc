@@ -23,11 +23,11 @@ scallop2::scallop2(const string &s, splice_graph &g)
 	//assert(gr.check_fully_connected() == true);
 }
 
-scallop2::scallop2(const string &s, splice_graph &g, const vector<hyper_edge> &vhe)
-	: name(s), gr(g)
+scallop2::scallop2(const string &s, splice_graph &g, const vector<hyper_edge> &_vhe)
+	: name(s), gr(g), vhe(_vhe)
 {
 	round = 0;
-	init_hyper_edges(vhe);
+	//init_hyper_edges(vhe);
 	//assert(gr.check_fully_connected() == true);
 }
 
@@ -87,7 +87,11 @@ int scallop2::assemble0()
 	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 
 	gr.get_edge_indices(i2e, e2i);
+
+	print();
+
 	init_super_edges();
+	init_hyper_edges();
 
 	compute_shortest_source_distances();
 	compute_shortest_target_distances();
@@ -315,7 +319,7 @@ int scallop2::init_super_edges()
 	return 0;
 }
 
-int scallop2::init_hyper_edges(const vector<hyper_edge> &vhe)
+int scallop2::init_hyper_edges()
 {
 	hedges.clear();
 	hedges.resize(gr.num_vertices());
@@ -324,22 +328,47 @@ int scallop2::init_hyper_edges(const vector<hyper_edge> &vhe)
 	{
 		const hyper_edge &he = vhe[i];
 		if(he.v.size() <= 1) continue;
-		VE ve;
+
+		he.print(i);
+
+		// expand he.v
+		vector<int> vv;
+		edge_iterator it1, it2;
 		for(int k = 0; k < he.v.size() - 1; k++)
 		{
-			PEB p = gr.edge(he.v[k], he.v[k + 1]);
+			int x = he.v[k];
+			while(x != he.v[k + 1])
+			{
+				vv.push_back(x);
+				if(gr.out_degree(x) != 1) break;
+				tie(it1, it2) = gr.out_edges(x);
+				x = (*it1)->target();
+			}
+		}
+		vv.push_back(he.v[he.v.size() - 1]);
+
+		printf("extend vertices: ");
+		for(int k = 0; k < vv.size(); k++) printf("%d ", vv[k]);
+		printf("\n");
+
+		VE ve;
+		for(int k = 0; k < vv.size() - 1; k++)
+		{
+			PEB p = gr.edge(vv[k], vv[k + 1]);
+			printf("edge (%d -> %d)\n", vv[k], vv[k + 1]);
 			assert(p.second == true);
+			//if(p.second == false) break;
 			ve.push_back(p.first);
 		}
 
-		for(int k = 0; k < ve.size(); k++)
+		for(int k = 0; k < ve.size() - 1; k++)
 		{
 			PEE p(ve[k], ve[k + 1]);
 			int c = he.count;
-			int x = he.v[k + 1];
+			int x = vv[k + 1];
 			MPEEI &m = hedges[x];
 			if(m.find(p) == m.end()) m.insert(PPEEI(p, c));
-			else m[p]++;
+			else m[p] += c;
 		}
 	}
 	return 0;
@@ -370,6 +399,16 @@ int scallop2::decompose_with_hyper_edges()
 int scallop2::decompose_with_hyper_edges(int x)
 {
 	MPEEI &mpi = hedges[x];
+
+	/*
+	for(MPEEI::iterator it = mpi.begin(); it != mpi.end(); it++)
+	{
+		PEE p = it->first;
+		printf("vertex %d, hyper_edge = (%d, %d), count = %d\n", x, e2i[p.first], e2i[p.second], it->second);
+	}
+	return 0;
+	*/
+
 	int c = compute_total_counts(mpi);
 	if(c < min_hyper_edges_count) return 0;
 
@@ -379,11 +418,39 @@ int scallop2::decompose_with_hyper_edges(int x)
 	edge_iterator it1, it2;
 	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
 	{
+		ug.add_vertex();
 		edge_descriptor e = (*it1);
 		e2u.insert(PEI(e, e2u.size()));
 		u2e.push_back(e);
 	}
-	// TODO
+	for(tie(it1, it2) = gr.out_edges(x); it1 != it2; it1++)
+	{
+		ug.add_vertex();
+		edge_descriptor e = (*it1);
+		e2u.insert(PEI(e, e2u.size()));
+		u2e.push_back(e);
+	}
+
+	for(MPEEI::iterator it = mpi.begin(); it != mpi.end(); it++)
+	{
+		edge_descriptor e1 = it->first.first;
+		edge_descriptor e2 = it->first.second;
+		assert(e1->target() == x);
+		assert(e2->source() == x);
+		assert(e2u.find(e1) != e2u.end());
+		assert(e2u.find(e2) != e2u.end());
+		int s = e2u[e1];
+		int t = e2u[e2];
+		assert(s >= 0 && s < gr.in_degree(x));
+		assert(t >= gr.in_degree(x) && t < gr.degree(x));
+		ug.add_edge(s, t);
+	}
+
+	vector< set<int> > vv = ug.compute_connected_components();
+
+	printf("vertex %d, degree = (%d, %d), %lu hyper-edges, %lu connected-components\n",
+			x, gr.in_degree(x), gr.out_degree(x), mpi.size(), vv.size());
+
 	return 0;
 }
 
