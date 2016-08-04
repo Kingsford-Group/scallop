@@ -13,6 +13,8 @@ junction::junction(int64_t _p)
 	min_qual = UINT32_MAX;
 	max_qual = 0;
 	score = 255;
+	lrgn = -1;
+	rrgn = -1;
 }
 
 junction::junction(int64_t _p, int32_t _c, uint32_t _min, uint32_t _max)

@@ -22,13 +22,16 @@ int bundle::build()
 	infer_junctions();
 	build_junction_graph();
 	//infer_hyper_junctions();
-	//draw_junction_graph("jr.tex");
+	draw_junction_graph("jr.tex");
 	//test_junction_graph();
 	process_hits();
 	build_super_regions();
 	build_partial_exons();
-	link_partial_exons();
 	infer_hyper_edges();
+
+	print(99);
+
+	link_partial_exons();
 	return 0;
 }
 
@@ -165,8 +168,11 @@ int bundle::build_junction_graph()
 		int l = junctions[i].lpos;
 		int r = junctions[i].rpos;
 		if(s.find(l) == s.end()) s.insert(PI(l, LEFT_SPLICE));
+		//else if(s[l] == RIGHT_SPLICE) s[l] = LEFT_RIGHT_SPLICE;
 		if(s.find(r) == s.end()) s.insert(PI(r, RIGHT_SPLICE));
+		//else if(s[r] == LEFT_SPLICE) s[r] == LEFT_RIGHT_SPLICE;
 	}
+
 	vector<PI> v(s.begin(), s.end());
 	sort(v.begin(), v.end());
 
@@ -561,8 +567,12 @@ int bundle::build_super_region(int s, super_region &sr)
 		// check region (i, i + 1)
 		int32_t lpos = (int32_t)(jr.get_vertex_weight(i));
 		int32_t rpos = (int32_t)(jr.get_vertex_weight(i + 1));
+
 		int ltype = jr.get_vertex_info(i).type; 
 		int rtype = jr.get_vertex_info(i + 1).type; 
+
+		//if(ltype == LEFT_RIGHT_SPLICE) ltype = RIGHT_SPLICE;
+		//if(rtype == LEFT_RIGHT_SPLICE) rtype = LEFT_SPLICE;
 
 		region r(lpos, rpos, ltype, rtype, &imap);
 
@@ -764,10 +774,20 @@ int bundle::link_partial_exons()
 		MPI::iterator li = rm.find(b.lpos);
 		MPI::iterator ri = lm.find(b.rpos);
 
-		assert(li != rm.end());
-		assert(ri != lm.end());
-		b.lrgn = li->second;
-		b.rrgn = ri->second;
+		b.print(i);
+
+		// TODO
+		//assert(li != rm.end());
+		//assert(ri != lm.end());
+		if(li != rm.end() && ri != lm.end())
+		{
+			b.lrgn = li->second;
+			b.rrgn = ri->second;
+		}
+		else
+		{
+			b.lrgn = b.rrgn = -1;
+		}
 	}
 	return 0;
 }
@@ -830,6 +850,9 @@ int bundle::build_splice_graph(splice_graph &gr) const
 	for(int i = 0; i < junctions.size(); i++)
 	{
 		const junction &b = junctions[i];
+
+		if(b.lrgn < 0 || b.rrgn < 0) continue;
+
 		const partial_exon &x = pexons[b.lrgn];
 		const partial_exon &y = pexons[b.rrgn];
 
