@@ -18,6 +18,7 @@ public:
 	int count;			// # of segments
 
 public:
+	int increase();
 	int print(int index) const;
 };
 

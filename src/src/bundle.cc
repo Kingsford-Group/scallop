@@ -28,9 +28,6 @@ int bundle::build()
 	build_super_regions();
 	build_partial_exons();
 	infer_hyper_edges();
-
-	print(99);
-
 	link_partial_exons();
 	return 0;
 }
@@ -148,11 +145,13 @@ int bundle::infer_hyper_junctions()
 			}
 
 			// super junctions
+			/*
 			printf("super junction: ");
 			printv(vv1);
 			printf(" | ");
 			printv(vv2);
 			printf("\n");
+			*/
 		}
 	}
 	return 0;
@@ -774,8 +773,6 @@ int bundle::link_partial_exons()
 		MPI::iterator li = rm.find(b.lpos);
 		MPI::iterator ri = lm.find(b.rpos);
 
-		b.print(i);
-
 		// TODO
 		//assert(li != rm.end());
 		//assert(ri != lm.end());
@@ -797,7 +794,7 @@ int bundle::size() const
 	return pexons.size();
 }
 
-int bundle::build_splice_graph(splice_graph &gr) const
+int bundle::build_splice_graph(splice_graph &gr, vector<hyper_edge> &vhe) const
 {
 	//if(pexons.size() == 0) return 0;
 	// vertices: start, each region, end
@@ -885,6 +882,14 @@ int bundle::build_splice_graph(splice_graph &gr) const
 		}
 	}
 
+	// hyper-edges
+	vhe.clear();
+	for(int i = 0; i < hedges.size(); i++)
+	{
+		hyper_edge he = hedges[i];
+		he.increase();
+		vhe.push_back(he);
+	}
 	return 0;
 }
 

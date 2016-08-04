@@ -5,12 +5,13 @@
 #include "equation.h"
 #include "splice_graph.h"
 #include "nested_graph.h"
-
-#include "gurobi_c++.h"
+#include "hyper_edge.h"
 
 typedef map< edge_descriptor, vector<int> > MEV;
 typedef pair< edge_descriptor, vector<int> > PEV;
 typedef pair< vector<int>, vector<int> > PVV;
+typedef pair<PEE, int> PPEEI;
+typedef map<PEE, int> MPEEI;
 typedef pair<int, int> PI;
 typedef map<int, int> MI;
 
@@ -20,21 +21,20 @@ class scallop2
 public:
 	scallop2();
 	scallop2(const string &name, splice_graph &gr);
+	scallop2(const string &name, splice_graph &gr, const vector<hyper_edge> &vhe);
 	virtual ~scallop2();
 
 public:
-	string name;			// name for this gene
-	splice_graph gr;		// splice graph
+	string name;						// name for this gene
+	splice_graph gr;					// splice graph
+	vector<MPEEI> hedges;				// hyper edges
 
-	GRBModel *model;		// quadratic solver for smoothing
-	GRBEnv *env;			// quadratic solver for smoothing
+	MEI e2i;							// edge map, from edge to index
+	VE i2e;								// edge map, from index to edge
+	MEV mev;							// super edges
+	int round;							// round in iteration
 
-	MEI e2i;				// edge map, from edge to index
-	VE i2e;					// edge map, from index to edge
-	MEV mev;				// super edges
-	int round;				// round in iteration
-
-	vector<path> paths;		// predicted transcripts
+	vector<path> paths;					// predicted transcripts
 
 public:
 	int clear();
@@ -54,6 +54,12 @@ private:
 
 	// init
 	int init_super_edges();
+
+	// use hyper edges
+	int init_hyper_edges(const vector<hyper_edge> &vhe);
+	int compute_total_counts(const MPEEI &mpi);
+	int decompose_with_hyper_edges();
+	int decompose_with_hyper_edges(int v);
 
 	// decompose trivial edges and vertices
 	bool join_trivial_edges();

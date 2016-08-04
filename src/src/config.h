@@ -58,6 +58,8 @@ extern int pseudo_length_count;
 extern double min_boundary_edge_weight_ratio;
 extern double transcript_min_expression;
 
+extern int min_hyper_edges_count;
+
 extern string algo;
 extern string input_file;
 extern string output_file;

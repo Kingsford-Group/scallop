@@ -121,9 +121,10 @@ int assembler::process_bundle(bundle_base &bb, bam_hdr_t *h, int &index, ofstrea
 	if(bd.size() >= 100) return 0;
 
 	splice_graph gr;
-	bd.build_splice_graph(gr);
+	vector<hyper_edge> vhe;
+	bd.build_splice_graph(gr, vhe);
 
-	scallop2 sc(name, gr);
+	scallop2 sc(name, gr, vhe);
 
 	sc.assemble();
 

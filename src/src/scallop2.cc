@@ -3,6 +3,7 @@
 #include "config.h"
 #include "smoother.h"
 #include "nested_graph.h"
+#include "undirected_graph.h"
 
 #include <cstdio>
 #include <iostream>
@@ -19,6 +20,14 @@ scallop2::scallop2(const string &s, splice_graph &g)
 	: name(s), gr(g)
 {
 	round = 0;
+	//assert(gr.check_fully_connected() == true);
+}
+
+scallop2::scallop2(const string &s, splice_graph &g, const vector<hyper_edge> &vhe)
+	: name(s), gr(g)
+{
+	round = 0;
+	init_hyper_edges(vhe);
 	//assert(gr.check_fully_connected() == true);
 }
 
@@ -40,6 +49,7 @@ int scallop2::clear()
 int scallop2::assemble()
 {
 	classify();
+	if(algo == "basic") return assemble0();
 	if(algo == "core") return assemble1();
 	if(algo == "full") return assemble2();
 	if(algo == "greedy") return greedy();
@@ -105,6 +115,10 @@ int scallop2::assemble0()
 	}
 
 	print();
+
+	decompose_with_hyper_edges();
+
+	return 0;
 
 	while(true)
 	{
@@ -231,6 +245,7 @@ int scallop2::iterate(bool greedy)
 	return 0;
 }
 
+
 bool scallop2::decompose_with_equations(int level)
 {
 	vector<equation> eqns;
@@ -297,6 +312,78 @@ int scallop2::init_super_edges()
 		v.push_back(s);
 		mev.insert(PEV(*it1, v));
 	}
+	return 0;
+}
+
+int scallop2::init_hyper_edges(const vector<hyper_edge> &vhe)
+{
+	hedges.clear();
+	hedges.resize(gr.num_vertices());
+
+	for(int i = 0; i < vhe.size(); i++)
+	{
+		const hyper_edge &he = vhe[i];
+		if(he.v.size() <= 1) continue;
+		VE ve;
+		for(int k = 0; k < he.v.size() - 1; k++)
+		{
+			PEB p = gr.edge(he.v[k], he.v[k + 1]);
+			assert(p.second == true);
+			ve.push_back(p.first);
+		}
+
+		for(int k = 0; k < ve.size(); k++)
+		{
+			PEE p(ve[k], ve[k + 1]);
+			int c = he.count;
+			int x = he.v[k + 1];
+			MPEEI &m = hedges[x];
+			if(m.find(p) == m.end()) m.insert(PPEEI(p, c));
+			else m[p]++;
+		}
+	}
+	return 0;
+}
+
+int scallop2::compute_total_counts(const MPEEI &mpi)
+{
+	int n = 0;
+	MPEEI::const_iterator it;
+	for(it = mpi.begin(); it != mpi.end(); it++)
+	{
+		n += it->second;
+	}
+	return n;
+}
+
+int scallop2::decompose_with_hyper_edges()
+{
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		if(gr.in_degree(i) <= 1) continue;
+		if(gr.out_degree(i) <= 1) continue;
+		decompose_with_hyper_edges(i);
+	}
+	return 0;
+}
+
+int scallop2::decompose_with_hyper_edges(int x)
+{
+	MPEEI &mpi = hedges[x];
+	int c = compute_total_counts(mpi);
+	if(c < min_hyper_edges_count) return 0;
+
+	undirected_graph ug;
+	MEI e2u;
+	VE u2e;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
+	{
+		edge_descriptor e = (*it1);
+		e2u.insert(PEI(e, e2u.size()));
+		u2e.push_back(e);
+	}
+	// TODO
 	return 0;
 }
 

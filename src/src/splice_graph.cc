@@ -47,6 +47,8 @@ int splice_graph::copy(const splice_graph &gr, MEE &x2y, MEE &y2x)
 		y2x.insert(PEE(e, *it));
 	}
 
+	//hedges = gr.hedges();
+
 	return 0;
 }
 
@@ -142,6 +144,17 @@ int splice_graph::set_edge_weights(const MED &med)
 int splice_graph::set_vertex_weights(const vector<double> &v)
 {
 	vwrt = v;
+	return 0;
+}
+
+vector<hyper_edge> splice_graph::get_hyper_edges()
+{
+	return hedges;
+}
+
+int splice_graph::set_hyper_edges(const vector<hyper_edge> &v)
+{
+	hedges = v;
 	return 0;
 }
 

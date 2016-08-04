@@ -40,6 +40,7 @@ int max_num_subsetsum_solutions = 10;
 double max_equation_error_ratio = 0.1;
 double min_boundary_edge_weight_ratio = 0.05;
 double transcript_min_expression = 0.0;
+int min_hyper_edges_count = 20;
 
 // for simulation
 int simulation_num_vertices = 0;
@@ -89,6 +90,7 @@ int print_parameters()
 	printf("max_equation_error_ratio = %.2lf\n", max_equation_error_ratio);
 	printf("min_boundary_edge_weight_ratio = %.2lf\n", min_boundary_edge_weight_ratio);
 	printf("transcript_min_expression = %.2lf\n", transcript_min_expression);
+	printf("min_hyper_edges_count = %d\n", min_hyper_edges_count);
 
 	// for simulation
 	printf("simulation_num_vertices = %d\n", simulation_num_vertices);
