@@ -264,9 +264,9 @@ int super_region::select_slopes(int si, int ti, int ss)
 	bool b1 = (x.lbin - ssi >= 5) && (fabs(ave1 - x.ave) < dev1 * slope_acceptance_sigma);
 	bool b2 = (tti - x.rbin >= 5) && (fabs(ave2 - x.ave) < dev2 * slope_acceptance_sigma);
 
-	x.print(k);
-	printf("select flag = (%c, %c): (%d, %d, %.2lf, %.2lf) -> (%d, %d, %.2lf, %.2lf) + (%d, %d, %.2lf, %.2lf)\n", 
-			b1 ? 'F' : 'T', b2 ? 'F' : 'T', si, ti, ave, dev, si, x.lbin, ave1, dev1, x.rbin, ti, ave2, dev2);
+	//x.print(k);
+	//printf("select flag = (%c, %c): (%d, %d, %.2lf, %.2lf) -> (%d, %d, %.2lf, %.2lf) + (%d, %d, %.2lf, %.2lf)\n", 
+	//	b1 ? 'F' : 'T', b2 ? 'F' : 'T', si, ti, ave, dev, si, x.lbin, ave1, dev1, x.rbin, ti, ave2, dev2);
 
 	if(b1 == false && b2 == false)
 	{

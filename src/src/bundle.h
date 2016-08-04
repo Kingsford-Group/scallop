@@ -6,6 +6,7 @@
 #include "bundle_base.h"
 #include "junction.h"
 #include "partial_exon.h"
+#include "hyper_edge.h"
 #include "path.h"
 #include "super_region.h"
 
@@ -23,6 +24,7 @@ private:
 	split_interval_map imap;		// interval map
 	vector<super_region> srs;		// super regions
 	vector<partial_exon> pexons;	// partial exons
+	vector<hyper_edge> hedges;		// hyper edges
 
 public:
 	virtual int build();
@@ -46,6 +48,9 @@ protected:
 	int draw_junction_graph(const string &file);
 	int search_junction_graph(int32_t p);
 	int traverse_junction_graph(int s, int t, VE &ve);
+	int traverse_junction_graph1(int s, int t, VE &ve);
+	int traverse_junction_graph1(int s, int t);
+	int test_junction_graph();
 
 	// process hits
 	int process_hits();
@@ -56,6 +61,11 @@ protected:
 	int build_super_region(int k, super_region &sr);
 	int build_super_regions();
 	int build_partial_exons();
+	int search_partial_exons(int32_t p);
+
+	// super junctions and super partial_exons;
+	int infer_hyper_junctions();
+	int infer_hyper_edges();
 
 	// store the corresponding pexons in each junction
 	int link_partial_exons();

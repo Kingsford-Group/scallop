@@ -42,6 +42,8 @@ hit::hit(bam1_t *b)
 
 	// get strandness
 	strand = '.';
+	//if(bam_is_rev(b) == true) strand = '-';
+	//else strand = '+';
 	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '+';
 	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '+';
 	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '-';

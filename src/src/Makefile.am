@@ -20,6 +20,7 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  hit.h hit.cc \
 				  boundary.h boundary.cc \
 				  partial_exon.h partial_exon.cc \
+				  hyper_edge.h hyper_edge.cc \
 				  region.h region.cc \
 				  super_region.h super_region.cc \
 				  slope.h slope.cc \
