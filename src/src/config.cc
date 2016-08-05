@@ -40,7 +40,7 @@ int max_num_subsetsum_solutions = 10;
 double max_equation_error_ratio = 0.1;
 double min_boundary_edge_weight_ratio = 0.05;
 double transcript_min_expression = 0.0;
-int min_hyper_edges_count = 20;
+int min_hyper_edges_count = 0;
 
 // for simulation
 int simulation_num_vertices = 0;

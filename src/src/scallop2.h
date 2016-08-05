@@ -6,6 +6,7 @@
 #include "splice_graph.h"
 #include "nested_graph.h"
 #include "hyper_edge.h"
+#include "gateway.h"
 
 typedef map< edge_descriptor, vector<int> > MEV;
 typedef pair< edge_descriptor, vector<int> > PEV;
@@ -21,15 +22,14 @@ class scallop2
 public:
 	scallop2();
 	scallop2(const string &name, splice_graph &gr);
-	scallop2(const string &name, splice_graph &gr, const vector<hyper_edge> &_vhe);
+	scallop2(const string &name, splice_graph &gr, const vector<hyper_edge> &vhe);
 	virtual ~scallop2();
 
 public:
 	string name;						// name for this gene
 	splice_graph gr;					// splice graph
 
-	const vector<hyper_edge> vhe;		
-	vector<MPEEI> hedges;				// hyper edges
+	vector<gateway> gateways;			// constructed gateway
 
 	MEI e2i;							// edge map, from edge to index
 	VE i2e;								// edge map, from index to edge
@@ -56,12 +56,11 @@ private:
 
 	// init
 	int init_super_edges();
-	int init_hyper_edges();
+	int init_gateways(const vector<hyper_edge> &vhe);
 
 	// use hyper edges
-	int compute_total_counts(const MPEEI &mpi);
-	int decompose_with_hyper_edges();
-	int decompose_with_hyper_edges(int v);
+	int decompose_with_gateways();
+	int decompose_with_gateway(int v);
 
 	// decompose trivial edges and vertices
 	bool join_trivial_edges();

@@ -20,14 +20,20 @@ scallop2::scallop2(const string &s, splice_graph &g)
 	: name(s), gr(g)
 {
 	round = 0;
+	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
+	gr.get_edge_indices(i2e, e2i);
+	init_super_edges();
 	//assert(gr.check_fully_connected() == true);
 }
 
-scallop2::scallop2(const string &s, splice_graph &g, const vector<hyper_edge> &_vhe)
-	: name(s), gr(g), vhe(_vhe)
+scallop2::scallop2(const string &s, splice_graph &g, const vector<hyper_edge> &vhe)
+	: name(s), gr(g)
 {
 	round = 0;
-	//init_hyper_edges(vhe);
+	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
+	gr.get_edge_indices(i2e, e2i);
+	init_super_edges();
+	init_gateways(vhe);
 	//assert(gr.check_fully_connected() == true);
 }
 
@@ -84,15 +90,6 @@ int scallop2::classify()
 
 int scallop2::assemble0()
 {
-	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
-
-	gr.get_edge_indices(i2e, e2i);
-
-	print();
-
-	init_super_edges();
-	init_hyper_edges();
-
 	compute_shortest_source_distances();
 	compute_shortest_target_distances();
 	assign_reliability();
@@ -120,7 +117,7 @@ int scallop2::assemble0()
 
 	print();
 
-	decompose_with_hyper_edges();
+	decompose_with_gateways();
 
 	return 0;
 
@@ -319,25 +316,21 @@ int scallop2::init_super_edges()
 	return 0;
 }
 
-int scallop2::init_hyper_edges()
+int scallop2::init_gateways(const vector<hyper_edge> &vhe)
 {
-	hedges.clear();
-	hedges.resize(gr.num_vertices());
+	gateways.clear();
+	gateways.resize(gr.num_vertices());
 
 	for(int i = 0; i < vhe.size(); i++)
 	{
 		const hyper_edge &he = vhe[i];
-		if(he.v.size() <= 1) continue;
-
-		vector<int> vv = he.v;
-
-		//he.print(i);
+		const vector<int> &vv = he.v;
+		if(vv.size() <= 1) continue;
 
 		VE ve;
 		for(int k = 0; k < vv.size() - 1; k++)
 		{
 			PEB p = gr.edge(vv[k], vv[k + 1]);
-			//printf("edge (%d -> %d)\n", vv[k], vv[k + 1]);
 			if(p.second == false) ve.push_back(null_edge);
 			else ve.push_back(p.first);
 		}
@@ -346,71 +339,58 @@ int scallop2::init_hyper_edges()
 		{
 			if(ve[k] == null_edge || ve[k + 1] == null_edge) continue;
 
-			PEE p(ve[k], ve[k + 1]);
+			int e1 = e2i[ve[k]];
+			int e2 = e2i[ve[k + 1]];
 			int c = he.count;
 			int x = vv[k + 1];
-			MPEEI &m = hedges[x];
-			if(m.find(p) == m.end()) m.insert(PPEEI(p, c));
-			else m[p] += c;
+			gateways[x].add_route(PI(e1, e2), c);
 		}
 	}
 	return 0;
 }
 
-int scallop2::compute_total_counts(const MPEEI &mpi)
-{
-	int n = 0;
-	MPEEI::const_iterator it;
-	for(it = mpi.begin(); it != mpi.end(); it++)
-	{
-		n += it->second;
-	}
-	return n;
-}
 
-int scallop2::decompose_with_hyper_edges()
+int scallop2::decompose_with_gateways()
 {
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.in_degree(i) <= 1) continue;
 		if(gr.out_degree(i) <= 1) continue;
-		decompose_with_hyper_edges(i);
+		decompose_with_gateway(i);
 	}
 	return 0;
 }
 
-int scallop2::decompose_with_hyper_edges(int x)
+int scallop2::decompose_with_gateway(int x)
 {
-	MPEEI &mpi = hedges[x];
+	gateway &gw = gateways[x];
 
-	int c = compute_total_counts(mpi);
+	int c = gw.total_counts();
 	if(c < min_hyper_edges_count) return 0;
 
 	undirected_graph ug;
-	MEI e2u;
-	VE u2e;
+	MI e2u;
+	vector<int> u2e;
 	edge_iterator it1, it2;
 	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
 	{
 		ug.add_vertex();
-		edge_descriptor e = (*it1);
-		e2u.insert(PEI(e, e2u.size()));
+		int e = e2i[*it1];
+		e2u.insert(PI(e, e2u.size()));
 		u2e.push_back(e);
 	}
 	for(tie(it1, it2) = gr.out_edges(x); it1 != it2; it1++)
 	{
 		ug.add_vertex();
-		edge_descriptor e = (*it1);
-		e2u.insert(PEI(e, e2u.size()));
+		int e = e2i[*it1];
+		e2u.insert(PI(e, e2u.size()));
 		u2e.push_back(e);
 	}
 
-	for(MPEEI::iterator it = mpi.begin(); it != mpi.end(); it++)
+	for(int i = 0; i < gw.routes.size(); i++)
 	{
-		edge_descriptor e1 = it->first.first;
-		edge_descriptor e2 = it->first.second;
-		assert(e1->target() == x);
-		assert(e2->source() == x);
+		int e1 = gw.routes[i].first;
+		int e2 = gw.routes[i].second;
 		assert(e2u.find(e1) != e2u.end());
 		assert(e2u.find(e2) != e2u.end());
 		int s = e2u[e1];
@@ -422,8 +402,8 @@ int scallop2::decompose_with_hyper_edges(int x)
 
 	vector< set<int> > vv = ug.compute_connected_components();
 
-	printf("vertex %d, degree = (%d, %d), %lu hyper-edges, %lu connected-components, total-count = %d\n",
-			x, gr.in_degree(x), gr.out_degree(x), mpi.size(), vv.size(), c);
+	printf("vertex %d, degree = (%d, %d), %lu routes, %lu connected-components, total-count = %d\n",
+			x, gr.in_degree(x), gr.out_degree(x), gw.routes.size(), vv.size(), c);
 
 	return 0;
 }
