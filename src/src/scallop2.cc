@@ -329,40 +329,23 @@ int scallop2::init_hyper_edges()
 		const hyper_edge &he = vhe[i];
 		if(he.v.size() <= 1) continue;
 
-		he.print(i);
+		vector<int> vv = he.v;
 
-		// expand he.v
-		vector<int> vv;
-		edge_iterator it1, it2;
-		for(int k = 0; k < he.v.size() - 1; k++)
-		{
-			int x = he.v[k];
-			while(x != he.v[k + 1])
-			{
-				vv.push_back(x);
-				if(gr.out_degree(x) != 1) break;
-				tie(it1, it2) = gr.out_edges(x);
-				x = (*it1)->target();
-			}
-		}
-		vv.push_back(he.v[he.v.size() - 1]);
-
-		printf("extend vertices: ");
-		for(int k = 0; k < vv.size(); k++) printf("%d ", vv[k]);
-		printf("\n");
+		//he.print(i);
 
 		VE ve;
 		for(int k = 0; k < vv.size() - 1; k++)
 		{
 			PEB p = gr.edge(vv[k], vv[k + 1]);
-			printf("edge (%d -> %d)\n", vv[k], vv[k + 1]);
-			assert(p.second == true);
-			//if(p.second == false) break;
-			ve.push_back(p.first);
+			//printf("edge (%d -> %d)\n", vv[k], vv[k + 1]);
+			if(p.second == false) ve.push_back(null_edge);
+			else ve.push_back(p.first);
 		}
 
 		for(int k = 0; k < ve.size() - 1; k++)
 		{
+			if(ve[k] == null_edge || ve[k + 1] == null_edge) continue;
+
 			PEE p(ve[k], ve[k + 1]);
 			int c = he.count;
 			int x = vv[k + 1];
@@ -399,15 +382,6 @@ int scallop2::decompose_with_hyper_edges()
 int scallop2::decompose_with_hyper_edges(int x)
 {
 	MPEEI &mpi = hedges[x];
-
-	/*
-	for(MPEEI::iterator it = mpi.begin(); it != mpi.end(); it++)
-	{
-		PEE p = it->first;
-		printf("vertex %d, hyper_edge = (%d, %d), count = %d\n", x, e2i[p.first], e2i[p.second], it->second);
-	}
-	return 0;
-	*/
 
 	int c = compute_total_counts(mpi);
 	if(c < min_hyper_edges_count) return 0;
@@ -448,8 +422,8 @@ int scallop2::decompose_with_hyper_edges(int x)
 
 	vector< set<int> > vv = ug.compute_connected_components();
 
-	printf("vertex %d, degree = (%d, %d), %lu hyper-edges, %lu connected-components\n",
-			x, gr.in_degree(x), gr.out_degree(x), mpi.size(), vv.size());
+	printf("vertex %d, degree = (%d, %d), %lu hyper-edges, %lu connected-components, total-count = %d\n",
+			x, gr.in_degree(x), gr.out_degree(x), mpi.size(), vv.size(), c);
 
 	return 0;
 }

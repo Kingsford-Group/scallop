@@ -21,8 +21,8 @@ int bundle::build()
 	check_left_ascending();
 	infer_junctions();
 	build_junction_graph();
-	//infer_hyper_junctions();
 	draw_junction_graph("jr.tex");
+	//infer_hyper_junctions();
 	//test_junction_graph();
 	process_hits();
 	build_super_regions();
@@ -434,101 +434,99 @@ int bundle::process_hits()
 	for(int i = 0; i < hits.size(); i++)
 	{
 		hit &h = hits[i];
+		vector<int64_t> vv;
 
-		if(use_paired_end == false)
-		{
-			add_mapped_intervals(h, h.rpos);
-			continue;
-		}
+		if(use_paired_end == false || h.isize < 0) h.get_matched_intervals(vv);
+		else compute_read1_intervals(h, vv);
 
-		if(h.isize <= 0)
+		for(int k = 0; k < vv.size(); k++)
 		{
-			// the second segment
-			add_mapped_intervals(h, h.rpos);
-		}
-		else if(h.rpos > h.mpos)
-		{
-			// two segments overlap
-			add_mapped_intervals(h, h.mpos);
-		}
-		else
-		{
-			// two independent segments
-			add_mapped_intervals(h, h.rpos);
-			add_gapped_intervals(h);
+			int32_t s = high32(vv[k]);
+			int32_t t = low32(vv[k]);
+			imap += make_pair(ROI(s, t), 1);
 		}
 	}
 	return 0;
 }
 
-int bundle::add_mapped_intervals(const hit &h, int32_t rr)
+bool bundle::verify_unique_mapping(const hit &h)
 {
+	//printf("verify hit: ");
+	if(h.mpos < h.rpos) return true;
+
+	int li = search_junction_graph(h.rpos - 1);
+	if(li < 0) return false;
+	assert(li >= 0 && li < jr.num_vertices() - 1);
+
+	int32_t l1 = (int32_t)(jr.get_vertex_weight(li));
+	int32_t l2 = (int32_t)(jr.get_vertex_weight(li + 1));
+	assert(h.rpos - 1 >= l1 && h.rpos - 1 < l2);
+	
+	//printf("li = %d, l1 = %d, l2 = %d\n", li, l1, l2);
+	if(h.mpos < l2) return true;
+
+	int ri = search_junction_graph(h.mpos);
+	if(ri < 0) return false;
+
+	assert(ri >= 0 && ri < jr.num_vertices() - 1);
+	assert(ri > li);
+
+	int32_t r1 = (int32_t)(jr.get_vertex_weight(ri));
+	int32_t r2 = (int32_t)(jr.get_vertex_weight(ri + 1));
+	assert(h.mpos >= r1 && h.mpos < r2);
+
+	int d1 = r1 - l2;
+	assert(d1 >= 0);
+
+	int d2 = traverse_junction_graph1(li + 1, ri);
+
+	//printf("ri = %d, r1 = %d, r2 = %d\n", ri, r1, r2);
+	//printf("d1 = %d, d2 = %d\n", d1, d2);
+
+	if(d2 <= -1 || d1 < d2) return true;
+	else return false;
+}
+
+int bundle::compute_read1_intervals(const hit &h, vector<int64_t> &vv)
+{
+	//assert(verify_unique_mapping(h) == true);
+	vv.clear();
+	if(h.isize < 0) return 0;
+
 	vector<int64_t> v;
 	h.get_matched_intervals(v);
 	for(int k = 0; k < v.size(); k++)
 	{
 		int32_t s = high32(v[k]);
 		int32_t t = low32(v[k]);
-		if(s >= rr) s = rr;
-		if(t >= rr) t = rr;
-		imap += make_pair(ROI(s, t), 1);
+		if(s >= h.mpos) break;
+		if(t >= h.mpos) t = h.mpos;
+		vv.push_back(v[k]);
 	}
-	return 0;
-}
 
-int bundle::add_gapped_intervals(const hit &h)
-{
-	assert(h.rpos <= h.mpos);
+	if(h.rpos >= h.mpos) return 0;
+
 	int li = search_junction_graph(h.rpos - 1);
-	if(li < 0) return -1;
 	assert(li >= 0 && li < jr.num_vertices() - 1);
 	int32_t l1 = (int32_t)(jr.get_vertex_weight(li));
 	int32_t l2 = (int32_t)(jr.get_vertex_weight(li + 1));
 	assert(h.rpos - 1 >= l1 && h.rpos - 1 < l2);
 	
-	if(h.mpos < l2)
+	if(h.mpos <= l2)
 	{
-		imap += make_pair(ROI(h.rpos, h.mpos), 1);
+		vv.push_back(pack(h.rpos, h.mpos));
 		return 0;
 	}
 
 	int ri = search_junction_graph(h.mpos);
-	if(ri < 0) return -1;
 	assert(ri >= 0 && ri < jr.num_vertices() - 1);
 	assert(ri > li);
 	int32_t r1 = (int32_t)(jr.get_vertex_weight(ri));
 	int32_t r2 = (int32_t)(jr.get_vertex_weight(ri + 1));
 	assert(h.mpos >= r1 && h.mpos < r2);
 
-	imap += make_pair(ROI(h.rpos, l2), 1);
-	imap += make_pair(ROI(r1, h.mpos), 1);
-
-	VE ve;
-	int ss = traverse_junction_graph(li + 1, ri, ve);
-
-	//int ms = (int)(ave_isize) - (l2 - h.rpos) - (h.mpos - r1);
-	//if(fabs(ms - ss) >= 100) return 0;
-	//printf("span hit: remaining insert size = %d, best insert size = %d, li = %d, ri = %d\n", ms, ss, li, ri);
-
-	assert(ss >= 0);
-
-	for(int k = 0; k < ve.size(); k++)
-	{
-		edge_descriptor e = ve[k];
-		int id = jr.get_edge_weight(e);
-		if(id < 0)
-		{
-			int32_t l = (int32_t)jr.get_vertex_weight(e->source());
-			int32_t r = (int32_t)jr.get_vertex_weight(e->target());
-			imap += make_pair(ROI(l, r), 1);
-		}
-		else
-		{
-			assert(id >= 0 && id < junctions.size());
-			junctions[id].count++;
-		}
-	}
-	
+	vv.push_back(pack(h.rpos, l2));
+	vv.push_back(pack(r1, h.mpos));
 	return 0;
 }
 
@@ -649,39 +647,14 @@ int bundle::infer_hyper_edges()
 	for(int i = 0; i < hits.size(); i++)
 	{
 		hit &h = hits[i];
-		h.get_matched_intervals(v);
+
+		if(h.isize >= 0 && verify_unique_mapping(h) == false) continue;
+
+		if(h.isize < 0) h.get_matched_intervals(v);
+		else compute_read1_intervals(h, v);
+
 		if(v.size() == 0) continue;
 		string s = h.qname;
-
-		if(h.isize > 0 && h.rpos < h.mpos)
-		{
-			int li = search_junction_graph(h.rpos - 1);
-			if(li < 0) continue;
-			assert(li >= 0 && li < jr.num_vertices() - 1);
-
-			int32_t l1 = (int32_t)(jr.get_vertex_weight(li));
-			int32_t l2 = (int32_t)(jr.get_vertex_weight(li + 1));
-			assert(h.rpos - 1 >= l1 && h.rpos - 1 < l2);
-
-			if(h.mpos > l2)
-			{
-				int ri = search_junction_graph(h.mpos);
-				if(ri < 0) continue;
-
-				assert(ri >= 0 && ri < jr.num_vertices() - 1);
-				assert(ri > li);
-				int32_t r1 = (int32_t)(jr.get_vertex_weight(ri));
-				int32_t r2 = (int32_t)(jr.get_vertex_weight(ri + 1));
-				assert(h.mpos >= r1 && h.mpos < r2);
-				
-				int d1 = r1 - l2;
-				assert(d1 >= 0);
-
-				int d2 = traverse_junction_graph1(li, ri);
-				
-				if(d2 >= 0 && d1 > d2) continue;
-			}
-		}
 
 		if(m.find(s) == m.end())
 		{
@@ -694,8 +667,6 @@ int bundle::infer_hyper_edges()
 				int e1 = search_partial_exons(p1);
 				int e2 = search_partial_exons(p2 - 1);
 				
-				// TODO
-
 				if(e1 <= -1 || e2 <= -1) continue;
 
 				for(int j = e1; j <= e2; j++) 
@@ -705,10 +676,12 @@ int bundle::infer_hyper_edges()
 				}
 			}
 
+			/*
 			h.print();
 			printf(" -> ");
 			for(int k = pi.first; k < pi.second; k++) printf(" %d", list[k]);
 			printf("\n");
+			*/
 
 			if(pi.second > pi.first)
 			{
@@ -743,10 +716,12 @@ int bundle::infer_hyper_edges()
 			vector<int> vv(sp.begin(), sp.end());
 			hyper_edge he(vv, 1);
 
+			/*
 			h.print();
 			printf(" -> ");
 			he.print(99);
 			printf("\n");
+			*/
 
 			map<hyper_edge, int>::iterator it = mhe.find(he);
 			if(it == mhe.end()) mhe.insert(pair<hyper_edge, int>(he, 1));

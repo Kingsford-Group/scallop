@@ -111,6 +111,7 @@ int hit::get_matched_intervals(vector<int64_t> & v) const
 
 		// must be flanked by matchings (with minimum length requirement of MIN_LEN_FLANK: TODO)
 		if(bam_cigar_op(cigar[k]) != BAM_CMATCH) continue;
+		if(bam_cigar_oplen(cigar[k]) <= MIN_LEN_FLANK) continue;
 
 		int32_t s = p - bam_cigar_oplen(cigar[k]);
 		v.push_back(pack(s, p));

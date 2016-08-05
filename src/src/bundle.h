@@ -54,8 +54,8 @@ protected:
 
 	// process hits
 	int process_hits();
-	int add_mapped_intervals(const hit &h, int rr);
-	int add_gapped_intervals(const hit &h);
+	bool verify_unique_mapping(const hit &h);
+	int compute_read1_intervals(const hit &h, vector<int64_t> &vv);
 
 	// build partial exons
 	int build_super_region(int k, super_region &sr);
