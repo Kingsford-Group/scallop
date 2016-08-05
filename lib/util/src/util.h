@@ -20,6 +20,7 @@ using namespace std;
 typedef map<int32_t, int> MPI;
 typedef pair<int32_t, int> PPI;
 typedef pair<int, int> PI;
+typedef map<int, int> MI;
 
 // common small functions
 template<typename T>
