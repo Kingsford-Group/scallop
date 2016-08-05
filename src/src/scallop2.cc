@@ -280,7 +280,8 @@ bool scallop2::decompose_with_equations(int level)
 
 		scallop2 sc;
 		save(sc);
-		bool b = smooth_with_equation(eqn);
+
+		bool b = smooth_splice_graph(eqn);
 		if(b == true) resolve_equation(eqn);
 		load(sc);
 
@@ -291,7 +292,7 @@ bool scallop2::decompose_with_equations(int level)
 
 	printf("smooth with equation\n");
 	eqn.print(99);
-	smooth_with_equation(eqn);
+	smooth_splice_graph(eqn);
 	print();
 
 	printf("resolve with equation\n");
@@ -353,6 +354,8 @@ int scallop2::decompose_with_gateways()
 {
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
+		vertex_info vi = gr.get_vertex_info(i);
+		if(vi.infer == false && vi.reliability <= infer_min_reliability) continue;
 		if(gr.in_degree(i) <= 1) continue;
 		if(gr.out_degree(i) <= 1) continue;
 		decompose_with_gateway(i);
@@ -429,15 +432,30 @@ bool scallop2::decompose_with_gateway(int x)
 
 	if(eqns.size() == 0) return false;
 
+	bool b = smooth_vertex(x, eqns);
+	if(b == false) return false;
+
+	printf("smooth vertex %d for decomposing\n", x);
+	print();
+
 	for(int i = 0; i < eqns.size(); i++)
 	{
 		printf("decompose with gateway of vertex %d\n", x);
 		eqns[i].print(i);
-		smooth_trivial_equation(eqns[i]);
-		resolve_equation(eqns[i]);
+
+		vector<int> ve;
+		resolve_equation(eqns[i], ve);
+
+		for(int k = 0; k < ve.size(); k++)
+		{
+			edge_descriptor e = i2e[ve[k]];
+			edge_info ei = gr.get_edge_info(e);
+			ei.infer = true;
+			gr.set_edge_info(e, ei);
+		}
 	}
 
-	return 0;
+	return true;
 }
 
 int scallop2::split_merge_path(const VE &p, double wx, vector<int> &vv)
@@ -504,6 +522,9 @@ int scallop2::merge_adjacent_equal_edges(int x, int y)
 
 	gr.set_edge_weight(p, wx0);
 	gr.set_edge_info(p, edge_info(lxy));
+
+	double wv = gr.get_vertex_weight(xt);
+	gr.set_vertex_weight(xt, wv - wx0);
 
 	vector<int> v = mev[xx];
 	v.insert(v.end(), mev[yy].begin(), mev[yy].end());
@@ -860,27 +881,65 @@ int scallop2::identify_equations2(vector<equation> &eqns)
 	return 0;
 }
 
-int scallop2::smooth_splice_graph()
+bool scallop2::smooth_splice_graph()
 {
-	printf("smooth splice graph\n");
-	smoother sm(gr);
-	sm.smooth();
-	return 0;
+	vector<equation> eqns;
+	return smooth_splice_graph(eqns);
 }
 
-bool scallop2::smooth_with_equation(equation &eqn)
+bool scallop2::smooth_splice_graph(const equation &eqn)
 {
-	VE vx, vy;
-	for(int i = 0; i < eqn.s.size(); i++) vx.push_back(i2e[eqn.s[i]]);
-	for(int i = 0; i < eqn.t.size(); i++) vy.push_back(i2e[eqn.t[i]]);
+	vector<equation> eqns;
+	eqns.push_back(eqn);
+	return smooth_splice_graph(eqns);
+}
 
+bool scallop2::smooth_splice_graph(const vector<equation> &eqns)
+{
 	smoother sm(gr);
-	sm.add_equation(vx, vy);
+	for(int k = 0; k < eqns.size(); k++)
+	{
+		const equation &eqn = eqns[k];
+
+		VE vx, vy;
+		for(int i = 0; i < eqn.s.size(); i++) vx.push_back(i2e[eqn.s[i]]);
+		for(int i = 0; i < eqn.t.size(); i++) vy.push_back(i2e[eqn.t[i]]);
+
+		sm.add_equation(vx, vy);
+	}
+
 	bool f = sm.smooth();
 
 	if(f == 0) return true;
 	else return false;
 }
+
+bool scallop2::smooth_vertex(int v)
+{
+	vector<equation> eqns;
+	return smooth_vertex(v, eqns);
+}
+
+bool scallop2::smooth_vertex(int v, const vector<equation> &eqns)
+{
+	smoother sm(gr);
+	for(int k = 0; k < eqns.size(); k++)
+	{
+		const equation &eqn = eqns[k];
+
+		VE vx, vy;
+		for(int i = 0; i < eqn.s.size(); i++) vx.push_back(i2e[eqn.s[i]]);
+		for(int i = 0; i < eqn.t.size(); i++) vy.push_back(i2e[eqn.t[i]]);
+
+		sm.add_equation(vx, vy);
+	}
+
+	bool f = sm.smooth_vertex(v);
+
+	if(f == 0) return true;
+	else return false;
+}
+
 
 bool scallop2::smooth_trivial_equation(const equation &e)
 {
@@ -938,24 +997,28 @@ bool scallop2::smooth_trivial_equation(const equation &e)
 	for(int i = 0; i < eqn.t.size(); i++)
 	{
 		edge_descriptor e = i2e[eqn.t[i]];
-		gr.set_edge_weight(e, ww1[i + 1]);
+		gr.set_edge_weight(e, ww1[i]);
 	}
 
 	return 0;
 }
 
-
-
 int scallop2::resolve_equation(equation &eqn)
+{
+	vector<int> ve;
+	return resolve_equation(eqn, ve);
+}
+
+int scallop2::resolve_equation(equation &eqn, vector<int> &ve)
 {
 	vector<int> s = eqn.s;
 	vector<int> t = eqn.t;
 	eqn.a = eqn.d = 0;
-	eqn.f = resolve_equation(s, t, eqn.a, eqn.d);
+	eqn.f = resolve_equation(s, t, eqn.a, eqn.d, ve);
 	return 0;
 }
 
-int scallop2::resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md)
+int scallop2::resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md, vector<int> &ve)
 {
 	if(s.size() == 0 && t.size() == 0) return 2;
 
@@ -985,7 +1048,8 @@ int scallop2::resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md)
 			v.push_back(y);
 
 			vector<int> vv;
-			split_merge_path(v, ww, vv);
+			int ee = split_merge_path(v, ww, vv);
+			ve.push_back(ee);
 
 			ma++;
 
@@ -1000,7 +1064,7 @@ int scallop2::resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md)
 			if(vv[1] == y) t.erase(t.begin() + j);
 			else t[j] = vv[1];
 
-			int f = resolve_equation(s, t, ma, md);
+			int f = resolve_equation(s, t, ma, md, ve);
 			if(f == 2) return 2;
 			else return 1;
 		}
@@ -1051,7 +1115,8 @@ int scallop2::resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md)
 			if(c == true) continue;
 
 			vector<int> vv;
-			split_merge_path(p, ww, vv);
+			int ee = split_merge_path(p, ww, vv);
+			ve.push_back(ee);
 
 			//// printf("connect (distant) edge pair (%d, %d)\n", x, y);
 
@@ -1068,7 +1133,7 @@ int scallop2::resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md)
 			if(vv[n] == y) t.erase(t.begin() + j);
 			else t[j] = vv[n];
 
-			int f = resolve_equation(s, t, ma, md);
+			int f = resolve_equation(s, t, ma, md, ve);
 			if(f == 2) return 2;
 			else return 1;
 		}
@@ -1340,39 +1405,6 @@ bool scallop2::join_trivial_vertex(int i)
 	printf("join trivial vertex %d\n", i);
 	decompose_trivial_vertex(i);
 	return true;
-}
-
-bool scallop2::smooth_trivial_vertices()
-{
-	for(int i = 1; i < gr.num_vertices() - 1; i++)
-	{
-		if(gr.degree(i) == 0) continue;
-		if(gr.in_degree(i) >= 2 || gr.out_degree(i) >= 2) continue;
-		bool b = smooth_trivial_vertex(i);
-		if(b == true) return true;
-	}
-
-	return false;
-
-	for(int i = 1; i < gr.num_vertices() - 1; i++)
-	{
-		if(gr.degree(i) == 0) continue;
-		if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) continue;
-		bool b = smooth_trivial_vertex(i);
-		if(b == true) return true;
-	}
-	return false;
-}
-
-bool scallop2::smooth_trivial_vertex(int i)
-{
-	smoother sm(gr);
-	sm.smooth_vertex(i);
-
-	printf("smooth trivial vertex %d\n", i);
-	print();
-
-	return decompose_trivial_vertex(i);
 }
 
 int scallop2::compute_shortest_source_distances()

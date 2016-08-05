@@ -67,8 +67,6 @@ private:
 	bool join_trivial_edge(edge_descriptor &e);
 	bool join_trivial_vertices();
 	bool join_trivial_vertex(int i);
-	bool smooth_trivial_vertices();
-	bool smooth_trivial_vertex(int i);
 	bool decompose_trivial_vertices();
 	bool decompose_trivial_vertex(int v);
 
@@ -100,8 +98,11 @@ private:
 	bool verify_false_boundary_edge(edge_descriptor e);
 
 	// smooth weights
-	int smooth_splice_graph();
-	bool smooth_with_equation(equation &eqn);
+	bool smooth_splice_graph();
+	bool smooth_splice_graph(const equation &eqn);
+	bool smooth_splice_graph(const vector<equation> &eqns);
+	bool smooth_vertex(int v);
+	bool smooth_vertex(int v, const vector<equation> &eqns);
 	bool smooth_trivial_equation(const equation &eqn);
 
 	// iteratively decompose
@@ -118,15 +119,16 @@ private:
 
 	// resolve equation
 	int resolve_equation(equation &eqn);
-	int resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md);
+	int resolve_equation(equation &eqn, vector<int> &ve);
+	int resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md, vector<int> &ve);
 	double compute_equation_error_ratio(equation &eqn);
 
 	// split, and merge
 	int split_edge(int exi, double w);
 	int merge_adjacent_equal_edges(int x, int y);
+	int merge_adjacent_edges(int x, int y);
 	int split_merge_path(const vector<int> &p, double ww, vector<int> &vv);
 	int split_merge_path(const VE &p, double ww, vector<int> &vv);
-	int merge_adjacent_edges(int x, int y);
 
 	// check, and make two edges adjacent
 	bool check_adjacent_mergable(int ex, int ey, vector<PI> &p);
