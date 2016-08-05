@@ -8,6 +8,7 @@ using namespace std;
 class equation
 {
 public:
+	equation();
 	equation(double);
 	equation(const vector<int> &, const vector<int> &);
 	equation(const vector<int> &, const vector<int> &, double);

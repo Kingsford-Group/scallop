@@ -60,7 +60,7 @@ private:
 
 	// use hyper edges
 	int decompose_with_gateways();
-	int decompose_with_gateway(int v);
+	bool decompose_with_gateway(int v);
 
 	// decompose trivial edges and vertices
 	bool join_trivial_edges();
@@ -102,6 +102,7 @@ private:
 	// smooth weights
 	int smooth_splice_graph();
 	bool smooth_with_equation(equation &eqn);
+	bool smooth_trivial_equation(const equation &eqn);
 
 	// iteratively decompose
 	int iterate(bool greedy);
@@ -118,6 +119,7 @@ private:
 	// resolve equation
 	int resolve_equation(equation &eqn);
 	int resolve_equation(vector<int> &s, vector<int> &t, int &ma, int &md);
+	double compute_equation_error_ratio(equation &eqn);
 
 	// split, and merge
 	int split_edge(int exi, double w);

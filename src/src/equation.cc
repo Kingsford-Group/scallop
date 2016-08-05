@@ -2,6 +2,15 @@
 #include "util.h"
 #include <cstdio>
 
+equation::equation()
+{
+	e = 0;
+	f = 0;
+	a = 0;
+	d = 0;
+	w = 0;
+}
+
 equation::equation(double _e)
 	:e(_e)
 {

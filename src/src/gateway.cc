@@ -38,3 +38,21 @@ int gateway::add_route(const PI &p, int c)
 	counts.push_back(c);
 	return 0;
 }
+
+int gateway::replace_in_edge(int ex, int ey)
+{
+	for(int i = 0; i < routes.size(); i++)
+	{
+		if(routes[i].first == ex) routes[i].first = ey;
+	}
+	return 0;
+}
+
+int gateway::replace_out_edge(int ex, int ey)
+{
+	for(int i = 0; i < routes.size(); i++)
+	{
+		if(routes[i].second == ex) routes[i].second = ey;
+	}
+	return 0;
+}

@@ -97,9 +97,6 @@ int scallop2::assemble0()
 	print();
 
 	infer_equivalent_classes();
-
-	print();
-
 	while(true)
 	{
 		bool b = false;
@@ -117,10 +114,6 @@ int scallop2::assemble0()
 
 	print();
 
-	decompose_with_gateways();
-
-	return 0;
-
 	while(true)
 	{
 		bool b = false;
@@ -137,6 +130,12 @@ int scallop2::assemble0()
 	}
 
 	print();
+
+	decompose_with_gateways();
+
+	print();
+
+	return 0;
 
 	while(true)
 	{
@@ -361,12 +360,12 @@ int scallop2::decompose_with_gateways()
 	return 0;
 }
 
-int scallop2::decompose_with_gateway(int x)
+bool scallop2::decompose_with_gateway(int x)
 {
 	gateway &gw = gateways[x];
 
 	int c = gw.total_counts();
-	if(c < min_hyper_edges_count) return 0;
+	if(c < min_hyper_edges_count) return false;
 
 	undirected_graph ug;
 	MI e2u;
@@ -402,8 +401,41 @@ int scallop2::decompose_with_gateway(int x)
 
 	vector< set<int> > vv = ug.compute_connected_components();
 
+	gw.print(x);
 	printf("vertex %d, degree = (%d, %d), %lu routes, %lu connected-components, total-count = %d\n",
 			x, gr.in_degree(x), gr.out_degree(x), gw.routes.size(), vv.size(), c);
+
+	if(vv.size() <= 1) return false;
+
+	vector<equation> eqns;
+	for(int i = 0; i < vv.size(); i++)
+	{
+		equation eqn;
+		for(set<int>::iterator it = vv[i].begin(); it != vv[i].end(); it++)
+		{
+			int v = (*it);
+			if(v < gr.in_degree(x)) eqn.s.push_back(u2e[v]);
+			else eqn.t.push_back(u2e[v]);
+		}
+
+		if(eqn.s.size() <= 0 || eqn.t.size() <= 0) continue;
+		if(eqn.s.size() >= 2 && eqn.t.size() >= 2) continue;
+
+		double r = compute_equation_error_ratio(eqn);
+		if(r <= -1 || r >= max_equation_error_ratio) continue;
+
+		eqns.push_back(eqn);
+	}
+
+	if(eqns.size() == 0) return false;
+
+	for(int i = 0; i < eqns.size(); i++)
+	{
+		printf("decompose with gateway of vertex %d\n", x);
+		eqns[i].print(i);
+		smooth_trivial_equation(eqns[i]);
+		resolve_equation(eqns[i]);
+	}
 
 	return 0;
 }
@@ -490,6 +522,9 @@ int scallop2::merge_adjacent_equal_edges(int x, int y)
 	i2e[y] = null_edge;
 	gr.remove_edge(xx);
 	gr.remove_edge(yy);
+
+	gateways[xs].replace_out_edge(x, n);
+	gateways[yt].replace_in_edge(y, n);
 
 	return n;
 }
@@ -846,6 +881,70 @@ bool scallop2::smooth_with_equation(equation &eqn)
 	if(f == 0) return true;
 	else return false;
 }
+
+bool scallop2::smooth_trivial_equation(const equation &e)
+{
+	equation eqn = e;
+	if(eqn.s.size() >= 2 && eqn.t.size() == 1)
+	{
+		vector<int> v = eqn.s;
+		eqn.s = eqn.t;
+		eqn.t = v;
+		return smooth_trivial_equation(eqn);
+	}
+
+	if(eqn.s.size() != 1) return false;
+	if(eqn.t.size() <= 0) return false;
+
+	vector<double> cc;
+	vector<double> ww;
+	for(int i = 0; i < eqn.s.size(); i++)
+	{
+		edge_descriptor e = i2e[eqn.s[i]];
+		double w = gr.get_edge_weight(e);
+		double c = gr.get_edge_info(e).length + pseudo_length_count;
+		ww.push_back(w);
+		cc.push_back(c);
+	}
+	for(int i = 0; i < eqn.t.size(); i++)
+	{
+		edge_descriptor e = i2e[eqn.t[i]];
+		double w = gr.get_edge_weight(e);
+		double c = gr.get_edge_info(e).length + pseudo_length_count;
+		ww.push_back(w);
+		cc.push_back(c);
+	}
+
+	vector<double> ww1;
+
+	double w0 = 0, c0 = 1.0;
+	for(int i = 1; i < ww.size(); i++) c0 += (cc[0] / cc[i]);
+	for(int i = 1; i < ww.size(); i++) w0 += (ww[i] + ww[0] * cc[0] / cc[i]);
+
+	ww1.push_back(w0 / c0);
+
+	for(int i = 1; i < ww.size(); i++)
+	{
+		double w = (cc[0] * ww[0] + cc[i] * ww[i] - cc[0] * ww1[0] ) / cc[i];
+		ww1.push_back(w);
+	}
+
+	for(int i = 0; i < eqn.s.size(); i++)
+	{
+		edge_descriptor e = i2e[eqn.s[i]];
+		gr.set_edge_weight(e, ww1[i]);
+	}
+
+	for(int i = 0; i < eqn.t.size(); i++)
+	{
+		edge_descriptor e = i2e[eqn.t[i]];
+		gr.set_edge_weight(e, ww1[i + 1]);
+	}
+
+	return 0;
+}
+
+
 
 int scallop2::resolve_equation(equation &eqn)
 {
@@ -2074,6 +2173,30 @@ int scallop2::load(scallop2 &sc)
 	paths = sc.paths;
 
 	return 0;
+}
+
+double scallop2::compute_equation_error_ratio(equation &eqn)
+{
+	double w1 = 0;
+	double w2 = 0;
+	for(int i = 0; i < eqn.s.size(); i++)
+	{
+		assert(i2e[eqn.s[i]] != null_edge);
+		edge_descriptor e = i2e[eqn.s[i]];
+		w1 += gr.get_edge_weight(e);
+	}
+	for(int i = 0; i < eqn.t.size(); i++)
+	{
+		assert(i2e[eqn.t[i]] != null_edge);
+		edge_descriptor e = i2e[eqn.t[i]];
+		w2 += gr.get_edge_weight(e);
+	}
+
+	eqn.e = fabs(w1 - w2);
+
+	if(w1 <= SMIN && w2 <= SMIN) return -1;
+	double w = w1 > w2 ? w1 : w2;
+	return eqn.e * 1.0 / w;
 }
 
 int scallop2::print()
