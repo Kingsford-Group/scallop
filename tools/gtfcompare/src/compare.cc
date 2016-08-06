@@ -42,6 +42,7 @@ int compare_transcripts(const vector<transcript> &x, const vector<transcript> &y
 	for(int i = 0; i < x.size(); i++)
 	{
 		const transcript &t1 = x[i];
+		bool flag = false;
 		for(int j = 0; j < y.size(); j++)
 		{
 			if(v[j] == true) continue;
@@ -60,10 +61,15 @@ int compare_transcripts(const vector<transcript> &x, const vector<transcript> &y
 
 			if(b == false) continue;
 
+			printf("transcript TRUE expression = %d predicted = %d\n", t1.expression, t2.expression);
+
+			flag = true;
 			v[j] = true;
 			cnt++;
 			break;
 		}
+
+		if(flag == false) printf("transcript FALSE expression = %d\n", t1.expression);
 	}
 	return cnt;
 }
