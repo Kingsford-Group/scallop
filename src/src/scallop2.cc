@@ -181,10 +181,12 @@ int scallop2::assemble2()
 {
 	assemble0();
 
-	iterate(true);
+	iterate(false);
+	collect_existing_st_paths();
 
-	//greedy_decompose(-1);
-	assert(gr.num_edges() == 0);
+	greedy_decompose(-1);
+
+	//assert(gr.num_edges() == 0);
 
 	printf("%s full solution %lu paths\n", name.c_str(), paths.size());
 
@@ -2123,7 +2125,12 @@ int scallop2::greedy_decompose(int num)
 		VE v;
 		vector<int> vv;
 		double w = gr.compute_maximum_path_w(v);
+
+		printf("w = %.2lf, min = %.2lf\n", w, transcript_min_expression);
+
 		if(w <= 0.0) break;
+		if(w <= transcript_min_expression) break;
+
 		int e = split_merge_path(v, w, vv);
 		collect_path(e);
 		cnt++;

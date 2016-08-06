@@ -925,6 +925,8 @@ int bundle::print(int index) const
 
 int bundle::output_gtf(ofstream &fout, const vector<path> &paths, const string &prefix, int index) const
 {
+	printf("AAAAAAAAAAAAAA\n");
+
 	fout.precision(2);
 	fout<<fixed;
 
@@ -933,8 +935,6 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, const string &
 		const vector<int> &v = paths[i].v;
 		double abd = paths[i].abd;
 		if(v.size() < 2) continue;
-
-		if(abd <= transcript_min_expression) continue;
 
 		fout<<chrm.c_str()<<"\t";		// chromosome name
 		fout<<prefix.c_str()<<"\t";		// source
