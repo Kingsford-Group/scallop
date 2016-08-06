@@ -193,8 +193,6 @@ int scallop2::assemble2()
 
 int scallop2::greedy()
 {
-	assemble0();
-
 	greedy_decompose(-1);
 	assert(gr.num_edges() == 0);
 
