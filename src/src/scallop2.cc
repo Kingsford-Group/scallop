@@ -132,14 +132,7 @@ int scallop2::assemble0()
 		}
 
 		if(f == true) print();
-
-		while(true)
-		{
-			b = decompose_vertices();
-			if(b == true) print();
-			if(b == true) continue;
-			break;
-		}
+		if(f == true) continue;
 
 		f = false;
 		while(true)
@@ -152,6 +145,10 @@ int scallop2::assemble0()
 
 		if(f == true) print();
 		if(f == true) continue;
+
+		b = decompose_vertices();
+		if(b == true) print();
+		if(b == true) continue;
 
 		break;
 	}
@@ -363,8 +360,6 @@ bool scallop2::decompose_vertex(int x)
 {
 	gateway &gw = gateways[x];
 
-	gw.print(x);
-
 	double c = gw.total_counts();
 	if(c < min_hyper_edges_count) return false;
 
@@ -374,6 +369,7 @@ bool scallop2::decompose_vertex(int x)
 	edge_iterator it1, it2;
 	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
 	{
+		if(gr.get_edge_info(*it1).length == 0 && (*it1)->source() == 0) return false;
 		ug.add_vertex();
 		int e = e2i[*it1];
 		e2u.insert(PI(e, e2u.size()));
@@ -381,6 +377,7 @@ bool scallop2::decompose_vertex(int x)
 	}
 	for(tie(it1, it2) = gr.out_edges(x); it1 != it2; it1++)
 	{
+		if(gr.get_edge_info(*it1).length == 0 && (*it1)->target() == gr.num_vertices() - 1) return false;
 		ug.add_vertex();
 		int e = e2i[*it1];
 		e2u.insert(PI(e, e2u.size()));
@@ -392,134 +389,73 @@ bool scallop2::decompose_vertex(int x)
 		int e1 = gw.routes[i].first;
 		int e2 = gw.routes[i].second;
 
-		// TODO
-		if(e2u.find(e1) == e2u.end()) return false;
-		if(e2u.find(e2) == e2u.end()) return false;
+		assert(e2u.find(e1) != e2u.end());
+		assert(e2u.find(e2) != e2u.end());
 
 		int s = e2u[e1];
 		int t = e2u[e2];
 		assert(s >= 0 && s < gr.in_degree(x));
 		assert(t >= gr.in_degree(x) && t < gr.degree(x));
 
-		printf("add edge %d -> %d\n", s, t);
 		ug.add_edge(s, t);
 	}
 
 	vector< set<int> > vv = ug.compute_connected_components();
 
-	vector<equation> eqns;
-	vector<undirected_graph> vugs;
+	int k = -1;
+	equation eqn0;
+	double r0 = 1.0;
 	for(int i = 0; i < vv.size(); i++)
 	{
+		int kk = -1;
 		equation eqn;
 		for(set<int>::iterator it = vv[i].begin(); it != vv[i].end(); it++)
 		{
 			int v = (*it);
-			if(v < gr.in_degree(x)) eqn.s.push_back(u2e[v]);
-			else eqn.t.push_back(u2e[v]);
+			int e = u2e[v];
+			if(ug.degree(v) == 1) kk = v;
+			if(v < gr.in_degree(x)) eqn.s.push_back(e);
+			else eqn.t.push_back(e);
 		}
+
 		if(eqn.s.size() <= 0 || eqn.t.size() <= 0) continue;
+		if(kk == -1) continue;
 
 		double r = compute_equation_error_ratio(eqn);
-
 		if(r <= -1 || r >= max_gateway_error_ratio) continue;
+		if(r > r0) continue;
 
-		undirected_graph ug2 = ug;
-
-		for(int k = 0; k < ug2.num_vertices(); k++)
-		{
-			if(vv[i].find(k) != vv[i].end()) continue;
-			ug2.clear_vertex(k);
-		}
-
-		vugs.push_back(ug2);
-		eqns.push_back(eqn);
+		eqn0 = eqn;
+		r0 = r;
+		k = kk;
 	}
 
-	if(eqns.size() == 0) return false;
+	if(k == -1) return false;
 
-	bool b = smooth_vertex(x, eqns);
+	bool b = smooth_vertex(x, eqn0);
 	if(b == false) return false;
 
-	for(int i = 0; i < eqns.size(); i++)
-	{
-		printf("decompose vertex %d\n", x);
-		eqns[i].print(i);
+	printf("smooth vertex %d with equation\n", x);
+	eqn0.print(99);
+	gw.print(x);
 
-		undirected_graph ug2 = vugs[i];
-		vector<int> ve;
+	assert(ug.degree(k) == 1);
+	tie(it1, it2) = ug.out_edges(k);
+	int t = (*it1)->target();
+	assert(k != t);
+	int xx = u2e[k];
+	int yy = u2e[t];
 
-		decompose_vertex(x, ug2, u2e, e2u, ve);
+	printf("decompose vertex %d\n", x);
+	printf("merge adjacent edges (%d, %d)\n", xx, yy);
 
-		for(int k = 0; k < ve.size(); k++)
-		{
-			edge_descriptor e = i2e[ve[k]];
-			edge_info ei = gr.get_edge_info(e);
-			ei.infer = true;
-			gr.set_edge_info(e, ei);
-		}
+	int ee = merge_adjacent_edges(xx, yy);
+	edge_info ei = gr.get_edge_info(i2e[ee]);
+	ei.infer = true;
+	gr.set_edge_info(i2e[ee], ei);
 
-		gw.remove_in_edges(eqns[i].s);
-	}
+	gw.print(x);
 
-	return true;
-}
-
-bool scallop2::decompose_vertex(int x, undirected_graph &ug, const vector<int> &u2e, const MI &e2u, vector<int> &ve)
-{
-	int nv = 0;
-	for(int i = 0; i < ug.num_vertices(); i++)
-	{
-		if(ug.degree(i) >= 1) nv++;
-	}
-	if(nv != ug.num_edges() + 1) return false;
-
-	vector< set<int> > v = ug.compute_connected_components();
-	if(v.size() != 1) return false;
-
-	while(true)
-	{
-		edge_iterator it1, it2;
-		edge_descriptor e = null_edge;
-		for(tie(it1, it2) = ug.edges(); it1 != it2; it1++)
-		{
-			e = (*it1);
-			if(ug.degree(e->source()) == 1) break;
-			if(ug.degree(e->target()) == 1) break;
-		}
-		if(e == null_edge) break;
-
-		int s = e->source() < e->target() ? e->source() : e->target();
-		int t = e->source() > e->target() ? e->source() : e->target();
-
-		int ss = u2e[s];
-		int tt = u2e[t];
-
-		edge_descriptor es = i2e[ss];
-		edge_descriptor et = i2e[tt];
-
-		assert(es != null_edge);
-		assert(et != null_edge);
-		assert(es->target() == x);
-		assert(et->source() == x);
-
-		double ws = gr.get_edge_weight(es);
-		double wt = gr.get_edge_weight(et);
-
-		if(ug.degree(s) == 1) assert(ws <= wt);
-		if(ug.degree(t) == 1) assert(wt <= ws);
-
-		double ww = ws < wt ? ws : wt;
-
-		vector<int> v;
-		v.push_back(ss);
-		v.push_back(tt);
-
-		int ee = split_merge_path(v, ww);
-		ve.push_back(ee);
-
-		ug.remove_edge(e);
-	}
 	return true;
 }
 
@@ -615,9 +551,6 @@ int scallop2::merge_adjacent_equal_edges(int x, int y)
 	gr.remove_edge(xx);
 	gr.remove_edge(yy);
 
-	gateways[xs].replace_out_edge(x, n);
-	gateways[yt].replace_in_edge(y, n);
-
 	return n;
 }
 
@@ -629,14 +562,32 @@ int scallop2::merge_adjacent_edges(int x, int y)
 	edge_descriptor xx = i2e[x];
 	edge_descriptor yy = i2e[y];
 
+	int xs = xx->source();
+	int xt = xx->target();
+	int ys = yy->source();
+	int yt = yy->target();
+
+	if(xt != ys) return merge_adjacent_edges(y, x);
+	assert(xt == ys);
+
 	double wx = gr.get_edge_weight(xx);
 	double wy = gr.get_edge_weight(yy);
 	double ww = (wx <= wy) ? wx : wy;
 
-	split_edge(x, ww);
-	split_edge(y, ww);
+	int x1 = split_edge(x, ww);
+	int y1 = split_edge(y, ww);
 
-	return merge_adjacent_equal_edges(x, y);
+	gateways[xs].split_out_edge(x, x1, ww / wx);
+	gateways[yt].split_in_edge(y, y1, ww / wy);
+
+	int xy = merge_adjacent_equal_edges(x, y);
+
+	gateways[xs].replace_out_edge(x, xy);
+	gateways[yt].replace_in_edge(y, xy);
+	gateways[xt].remove_in_edge(x);
+	gateways[xt].remove_out_edge(y);
+
+	return xy;
 }
 
 int scallop2::split_edge(int ei, double w)
@@ -666,10 +617,6 @@ int scallop2::split_edge(int ei, double w)
 	int n = i2e.size();
 	i2e.push_back(p2);
 	e2i.insert(PEI(p2, n));
-
-	double r = w / ww;
-	gateways[s].split_out_edge(ei, n, r);
-	gateways[t].split_in_edge(ei, n, r);
 
 	return n;
 }
@@ -983,7 +930,7 @@ bool scallop2::smooth_splice_graph(const vector<equation> &eqns)
 		sm.add_equation(vx, vy);
 	}
 
-	bool f = sm.smooth();
+	int f = sm.smooth();
 
 	if(f == 0) return true;
 	else return false;
@@ -992,6 +939,13 @@ bool scallop2::smooth_splice_graph(const vector<equation> &eqns)
 bool scallop2::smooth_vertex(int v)
 {
 	vector<equation> eqns;
+	return smooth_vertex(v, eqns);
+}
+
+bool scallop2::smooth_vertex(int v, const equation &eqn)
+{
+	vector<equation> eqns;
+	eqns.push_back(eqn);
 	return smooth_vertex(v, eqns);
 }
 
@@ -1009,12 +963,89 @@ bool scallop2::smooth_vertex(int v, const vector<equation> &eqns)
 		sm.add_equation(vx, vy);
 	}
 
-	bool f = sm.smooth_vertex(v);
+	int f = sm.smooth_vertex(v);
 
 	if(f == 0) return true;
 	else return false;
 }
 
+bool scallop2::smooth_vertex0(int v, const vector<equation> &eqns)
+{
+	if(gr.get_vertex_info(v).infer == false && gr.get_vertex_info(v).reliability <= infer_min_reliability) return false;
+	
+	map<int, bool> m1, m2;
+	double sum1 = 0, sum2 = 0;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.in_edges(v); it1 != it2; it1++)
+	{
+		int e = e2i[*it1];
+		m1.insert(pair<int, bool>(e, false));
+		sum1 += gr.get_edge_weight(*it1);
+	}
+	for(tie(it1, it2) = gr.out_edges(v); it1 != it2; it1++)
+	{
+		int e = e2i[*it1];
+		m2.insert(pair<int, bool>(e, false));
+		sum2 += gr.get_edge_weight(*it1);
+	}
+
+	if(sum1 <= SMIN) return false;
+	if(sum2 <= SMIN) return false;
+
+	vector<double> vv1, vv2;
+	for(int i = 0; i < eqns.size(); i++)
+	{
+		const equation &eqn = eqns[i];
+		double s1 = 0, s2 = 0;
+		for(int k = 0; k < eqn.s.size(); k++)
+		{
+			int e = eqn.s[k];
+			assert(m1.find(e) != m1.end());
+			assert(m1[e] == false);
+			m1[e] = true;
+			s1 += gr.get_edge_weight(i2e[e]);
+		}
+		for(int k = 0; k < eqn.t.size(); k++)
+		{
+			int e = eqn.t[k];
+			assert(m2.find(e) != m2.end());
+			assert(m2[e] == false);
+			m2[e] = true;
+			s2 += gr.get_edge_weight(i2e[e]);
+		}
+		vv1.push_back(s1);
+		vv2.push_back(s2);
+	}
+
+	vector<int> v1, v2;
+	double s1 = 0, s2 = 0;
+	for(map<int, bool>::iterator it = m1.begin(); it != m1.end(); it++)
+	{
+		if(it->second == true) continue;
+		v1.push_back(it->first);
+		s1 += gr.get_edge_weight(i2e[it->first]);
+	}
+	for(map<int, bool>::iterator it = m2.begin(); it != m2.end(); it++)
+	{
+		if(it->second == true) continue;
+		v2.push_back(it->first);
+		s2 += gr.get_edge_weight(i2e[it->first]);
+	}
+
+	double w = gr.get_vertex_weight(v);
+	for(int i = 0; i < eqns.size(); i++)
+	{
+		double ww = (vv1[i] / sum1 + vv2[i] / sum2) * 0.5 * w;
+		distribute_weights(ww, eqns[i].s);
+		distribute_weights(ww, eqns[i].t);
+	}
+
+	double ww = (s1 / sum1 + s2 / sum2) * 0.5 * w;
+	distribute_weights(ww, v1);
+	distribute_weights(ww, v2);
+
+	return true;
+}
 
 bool scallop2::smooth_trivial_equation(const equation &e)
 {
@@ -1804,36 +1835,7 @@ bool scallop2::infer_in_edges(int v)
 	if(vv1.size() >= 1) return false;
 	if(vv2.size() == 0) return false;
 
-	/*
-	if(vv2.size() == 0 && vv1.size() == 1)
-	{
-		edge_descriptor e = vv1[0];
-		edge_info ei = gr.get_edge_info(e);
-		gr.set_edge_weight(e, ww);
-		ei.infer = true;
-		gr.set_edge_info(e, ei);
-		return true;
-	}
-	*/
-
-	double sum = 0;
-	for(int i = 0; i < vv2.size(); i++)
-	{
-		edge_descriptor e = vv2[i];
-		sum += gr.get_edge_weight(e);
-	}
-
-	if(sum <= SMIN) return false;
-
-	for(int i = 0; i < vv2.size(); i++)
-	{
-		edge_descriptor e = vv2[i];
-		edge_info ei = gr.get_edge_info(e);
-		double w2 = gr.get_edge_weight(e) / sum * ww;
-		gr.set_edge_weight(e, w2);
-		ei.infer = true;
-		gr.set_edge_info(e, ei);
-	}
+	distribute_weights(ww, vv2);
 
 	return true;
 }
@@ -1861,43 +1863,54 @@ bool scallop2::infer_out_edges(int v)
 		else vv2.push_back(e);
 	}
 
-	if(ww <= 0.0) return 0;
+	if(ww <= 0.0) return false;
+	if(vv1.size() >= 1) return false;
+	if(vv2.size() == 0) return false;
 
-	if(vv2.size() == 0 && vv1.size() == 1)
+	distribute_weights(ww, vv2);
+
+	return true;
+}
+
+int scallop2::distribute_weights(double ww, const vector<int> &ve)
+{
+	VE v;
+	for(int i = 0; i < ve.size(); i++)
 	{
-		edge_descriptor e = vv1[0];
+		edge_descriptor e = i2e[ve[i]];
+		assert(e != null_edge);
+		v.push_back(e);
+	}
+	distribute_weights(ww, v);
+	return 0;
+}
+
+int scallop2::distribute_weights(double ww, const VE &ve)
+{
+	if(ve.size() == 0) return 0;
+
+	double sum = 0;
+	for(int i = 0; i < ve.size(); i++)
+	{
+		edge_descriptor e = ve[i];
+		sum += gr.get_edge_weight(e);
+	}
+
+	if(sum <= SMIN) return 0;
+
+	for(int i = 0; i < ve.size(); i++)
+	{
+		edge_descriptor e = ve[i];
 		edge_info ei = gr.get_edge_info(e);
-		gr.set_edge_weight(e, ww);
+		double w2 = gr.get_edge_weight(e) / sum * ww;
+		gr.set_edge_weight(e, w2);
 		ei.infer = true;
 		gr.set_edge_info(e, ei);
-		return true;
 	}
 
-	if(vv1.size() == 0 && vv2.size() >= 1)
-	{
-		double sum = 0;
-		for(int i = 0; i < vv2.size(); i++)
-		{
-			edge_descriptor e = vv2[i];
-			sum += gr.get_edge_weight(e);
-		}
-
-		if(sum <= 1.0) return false;
-
-		for(int i = 0; i < vv2.size(); i++)
-		{
-			edge_descriptor e = vv2[i];
-			edge_info ei = gr.get_edge_info(e);
-			double w2 = gr.get_edge_weight(e) / sum * ww;
-			gr.set_edge_weight(e, w2);
-			ei.infer = true;
-			gr.set_edge_info(e, ei);
-		}
-
-		return true;
-	}
-	return false;
+	return 0;
 }
+
 
 int scallop2::rescale_weights()
 {
@@ -2008,6 +2021,7 @@ bool scallop2::decompose_trivial_vertices()
 {
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
+		if(gr.in_degree(i) == 0) continue;
 		bool b = decompose_trivial_vertex(i);
 		if(b == true) return true;
 	}
@@ -2022,32 +2036,26 @@ bool scallop2::decompose_trivial_vertex(int i)
 
 bool scallop2::decompose_trivial_vertex(int i, vector<int> &ve)
 {
-	ve.clear();
 	if(i == 0) return false;
 	if(i == gr.num_vertices() - 1) return false;
-	if(gr.degree(i) == 0) return false;
 	if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) return false;
+	if(gr.degree(i) == 0) return true;
 
-	equation eqn(0);
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
+	if(ve.size() == 0)
 	{
-		edge_descriptor e = *it1;
-		int ei = e2i[e];
-		eqn.s.push_back(ei);
-	}
-	for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
-	{
-		edge_descriptor e = *it1;
-		int ei = e2i[e];
-		eqn.t.push_back(ei);
+		printf("decompose trivial vertex %d\n", i);
 	}
 
-	printf("decompose trivial vertex %d\n", i);
-	//eqn.print(i);
+	edge_iterator it1, it2, it3, it4;
+	tie(it1, it2) = gr.in_edges(i);
+	tie(it3, it4) = gr.out_edges(i);
+	int e1 = e2i[*it1];
+	int e2 = e2i[*it3];
 
-	resolve_equation(eqn, ve);
-	return true;
+	int ee = merge_adjacent_edges(e1, e2);
+	ve.push_back(ee);
+
+	return decompose_trivial_vertex(i, ve);
 }
 
 bool scallop2::remove_false_boundary_edges()

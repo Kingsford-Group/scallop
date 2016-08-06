@@ -62,7 +62,6 @@ private:
 	// use hyper edges
 	bool decompose_vertices();
 	bool decompose_vertex(int x);
-	bool decompose_vertex(int x, undirected_graph &ug, const vector<int> &u2e, const MI &e2u, vector<int> &ve);
 
 	// decompose trivial edges and vertices
 	bool join_trivial_edges();
@@ -90,6 +89,8 @@ private:
 	bool infer_vertices();
 	bool infer_vertex_with_in_edges(int v);
 	bool infer_vertex_with_out_edges(int v);
+	int distribute_weights(double sum, const VE &ve);
+	int distribute_weights(double sum, const vector<int> &ve);
 
 	// rescale weights (coverage)
 	int rescale_weights();
@@ -105,7 +106,9 @@ private:
 	bool smooth_splice_graph(const equation &eqn);
 	bool smooth_splice_graph(const vector<equation> &eqns);
 	bool smooth_vertex(int v);
+	bool smooth_vertex(int v, const equation &eqn);
 	bool smooth_vertex(int v, const vector<equation> &eqns);
+	bool smooth_vertex0(int v, const vector<equation> &eqns);
 	bool smooth_trivial_equation(const equation &eqn);
 
 	// iteratively decompose
