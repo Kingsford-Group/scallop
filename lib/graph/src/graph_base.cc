@@ -16,6 +16,11 @@ graph_base::~graph_base()
 	clear();
 }
 
+graph_base::graph_base(const graph_base &gr)
+{
+	//copy(gr); !!!
+}
+
 int graph_base::copy(const graph_base &gr)
 {
 	clear();

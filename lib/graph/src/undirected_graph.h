@@ -13,6 +13,7 @@ class undirected_graph : public graph_base
 public:
 	undirected_graph();
 	undirected_graph(const graph_base &gr);
+	undirected_graph(const undirected_graph &gr);
 	virtual ~undirected_graph();
 
 public:

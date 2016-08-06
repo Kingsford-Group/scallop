@@ -71,12 +71,12 @@ int vertex_base::print() const
 	printf("in-edges = ( ");
 	for(edge_iterator it = si.begin(); it != si.end(); it++)
 	{
-		printf("%d ", (*it)->source());
+		printf("[%d, %d] ", (*it)->source(), (*it)->target());
 	}
 	printf("), out-edges = ( ");
 	for(edge_iterator it = so.begin(); it != so.end(); it++)
 	{
-		printf("%d ", (*it)->target());
+		printf("[%d, %d] ", (*it)->source(), (*it)->target());
 	}
 	printf(")\n");
 	return 0;
