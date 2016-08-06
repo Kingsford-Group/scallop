@@ -59,7 +59,7 @@ private:
 	int init_gateways(const vector<hyper_edge> &vhe);
 
 	// use hyper edges
-	int decompose_with_gateways();
+	bool decompose_with_gateways();
 	bool decompose_with_gateway(int v);
 
 	// decompose trivial edges and vertices
@@ -69,6 +69,7 @@ private:
 	bool join_trivial_vertex(int i);
 	bool decompose_trivial_vertices();
 	bool decompose_trivial_vertex(int v);
+	bool decompose_trivial_vertex(int v, vector<int> &ve);
 
 	// compute shortest distances to source and target 
 	int compute_shortest_source_distances();

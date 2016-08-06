@@ -97,69 +97,64 @@ int scallop2::assemble0()
 	print();
 
 	infer_equivalent_classes();
-	while(true)
-	{
-		bool b = false;
-
-		b = infer_trivial_edges();
-		//if(b == true) print();
-		if(b == true) continue;
-
-		b = infer_vertices();
-		//if(b == true) print();
-		if(b == true) continue;
-
-		break;
-	}
-
-	print();
 
 	while(true)
 	{
+		bool f = false;
 		bool b = false;
+		while(true)
+		{
+			b = infer_trivial_edges();
+			if(b == true) f = true;
+			if(b == true) continue;
 
-		b = join_trivial_edges();
-		//if(b == true) print();
-		if(b == true) continue;
+			b = infer_vertices();
+			if(b == true) f = true;
+			if(b == true) continue;
 
-		b = join_trivial_vertices();
-		//if(b == true) print();
-		if(b == true) continue;
+			break;
+		}
+
+		if(f == true) print();
+
+		f = false;
+		while(true)
+		{
+			b = join_trivial_edges();
+			if(b == true) f = true;
+			if(b == true) continue;
+
+			b = join_trivial_vertices();
+			if(b == true) f = true;
+			if(b == true) continue;
+
+			break;
+		}
+
+		if(f == true) print();
+
+		while(true)
+		{
+			b = decompose_with_gateways();
+			if(b == true) print();
+			if(b == true) continue;
+			break;
+		}
+
+		f = false;
+		while(true)
+		{
+			b = infer_edges();
+			if(b == true) f = true;
+			if(b == true) continue;
+			break;
+		}
+
+		if(f == true) print();
+		if(f == true) continue;
 
 		break;
 	}
-
-	print();
-
-	decompose_with_gateways();
-
-	print();
-
-	return 0;
-
-	while(true)
-	{
-		bool b = false;
-
-		b = infer_trivial_edges();
-		//if(b == true) print();
-		if(b == true) continue;
-
-		b = infer_vertices();
-		//if(b == true) print();
-		if(b == true) continue;
-
-		b = infer_edges();
-		//if(b == true) print();
-		if(b == true) continue;
-
-		break;
-	}
-
-	print();
-
-	//rescale_weights();
-	//print();
 
 	smooth_splice_graph();
 	print();
@@ -350,7 +345,7 @@ int scallop2::init_gateways(const vector<hyper_edge> &vhe)
 }
 
 
-int scallop2::decompose_with_gateways()
+bool scallop2::decompose_with_gateways()
 {
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
@@ -358,16 +353,17 @@ int scallop2::decompose_with_gateways()
 		if(vi.infer == false && vi.reliability <= infer_min_reliability) continue;
 		if(gr.in_degree(i) <= 1) continue;
 		if(gr.out_degree(i) <= 1) continue;
-		decompose_with_gateway(i);
+		bool b = decompose_with_gateway(i);
+		if(b == true) return true;
 	}
-	return 0;
+	return false;
 }
 
 bool scallop2::decompose_with_gateway(int x)
 {
 	gateway &gw = gateways[x];
 
-	int c = gw.total_counts();
+	double c = gw.total_counts();
 	if(c < min_hyper_edges_count) return false;
 
 	undirected_graph ug;
@@ -393,8 +389,11 @@ bool scallop2::decompose_with_gateway(int x)
 	{
 		int e1 = gw.routes[i].first;
 		int e2 = gw.routes[i].second;
-		assert(e2u.find(e1) != e2u.end());
-		assert(e2u.find(e2) != e2u.end());
+
+		// TODO
+		if(e2u.find(e1) == e2u.end()) return false;
+		if(e2u.find(e2) == e2u.end()) return false;
+
 		int s = e2u[e1];
 		int t = e2u[e2];
 		assert(s >= 0 && s < gr.in_degree(x));
@@ -403,10 +402,6 @@ bool scallop2::decompose_with_gateway(int x)
 	}
 
 	vector< set<int> > vv = ug.compute_connected_components();
-
-	gw.print(x);
-	printf("vertex %d, degree = (%d, %d), %lu routes, %lu connected-components, total-count = %d\n",
-			x, gr.in_degree(x), gr.out_degree(x), gw.routes.size(), vv.size(), c);
 
 	if(vv.size() <= 1) return false;
 
@@ -425,7 +420,7 @@ bool scallop2::decompose_with_gateway(int x)
 		if(eqn.s.size() >= 2 && eqn.t.size() >= 2) continue;
 
 		double r = compute_equation_error_ratio(eqn);
-		if(r <= -1 || r >= max_equation_error_ratio) continue;
+		if(r <= -1 || r >= max_gateway_error_ratio) continue;
 
 		eqns.push_back(eqn);
 	}
@@ -435,8 +430,13 @@ bool scallop2::decompose_with_gateway(int x)
 	bool b = smooth_vertex(x, eqns);
 	if(b == false) return false;
 
+	/*
+	gw.print(x);
+	printf("vertex %d, degree = (%d, %d), %lu routes, %lu connected-components, total-count = %.1lf\n",
+			x, gr.in_degree(x), gr.out_degree(x), gw.routes.size(), vv.size(), c);
+
 	printf("smooth vertex %d for decomposing\n", x);
-	print();
+	*/
 
 	for(int i = 0; i < eqns.size(); i++)
 	{
@@ -453,6 +453,8 @@ bool scallop2::decompose_with_gateway(int x)
 			ei.infer = true;
 			gr.set_edge_info(e, ei);
 		}
+
+		gw.remove_in_edges(eqns[i].s);
 	}
 
 	return true;
@@ -595,6 +597,10 @@ int scallop2::split_edge(int ei, double w)
 	int n = i2e.size();
 	i2e.push_back(p2);
 	e2i.insert(PEI(p2, n));
+
+	double r = w / ww;
+	gateways[s].split_out_edge(ei, n, r);
+	gateways[t].split_in_edge(ei, n, r);
 
 	return n;
 }
@@ -1403,7 +1409,14 @@ bool scallop2::join_trivial_vertex(int i)
 	gr.set_edge_weight(e2, w);
 
 	printf("join trivial vertex %d\n", i);
-	decompose_trivial_vertex(i);
+	vector<int> ve;
+	decompose_trivial_vertex(i, ve);
+	assert(ve.size() == 1);
+	edge_descriptor e = i2e[ve[0]];
+	edge_info ei = gr.get_edge_info(e);
+	ei.infer = gr.get_vertex_info(i).infer;
+	gr.set_edge_info(e, ei);
+
 	return true;
 }
 
@@ -1538,7 +1551,7 @@ bool scallop2::infer_equivalent_class(const vector<int> &v)
 		}
 	}
 
-	printf("INFER %lu %lu %lu max = %.2lf root = %c\n", v.size(), v1.size(), v2.size(), maxr, root ? 'T' : 'F');
+	//printf("INFER %lu %lu %lu max = %.2lf root = %c\n", v.size(), v1.size(), v2.size(), maxr, root ? 'T' : 'F');
 
 	if(v1.size() == 0) v1 = v2;
 
@@ -1934,6 +1947,13 @@ bool scallop2::decompose_trivial_vertices()
 
 bool scallop2::decompose_trivial_vertex(int i)
 {
+	vector<int> ve;
+	return decompose_trivial_vertex(i, ve);
+}
+
+bool scallop2::decompose_trivial_vertex(int i, vector<int> &ve)
+{
+	ve.clear();
 	if(i == 0) return false;
 	if(i == gr.num_vertices() - 1) return false;
 	if(gr.degree(i) == 0) return false;
@@ -1955,9 +1975,9 @@ bool scallop2::decompose_trivial_vertex(int i)
 	}
 
 	printf("decompose trivial vertex %d\n", i);
-	eqn.print(i);
+	//eqn.print(i);
 
-	resolve_equation(eqn);
+	resolve_equation(eqn, ve);
 	return true;
 }
 

@@ -42,6 +42,7 @@ extern int max_num_bundles;
 extern int max_dp_table_size;
 extern int max_num_subsetsum_solutions;
 extern double max_equation_error_ratio;
+extern double max_gateway_error_ratio;
 extern int tail_coverage;
 extern int slope_bin_size;
 extern int slope_min_score;

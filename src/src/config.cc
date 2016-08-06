@@ -38,9 +38,10 @@ double infer_root_reliability = 0.4;
 int max_dp_table_size = 10000;
 int max_num_subsetsum_solutions = 10;
 double max_equation_error_ratio = 0.1;
+double max_gateway_error_ratio = 0.2;
 double min_boundary_edge_weight_ratio = 0.05;
 double transcript_min_expression = 0.0;
-int min_hyper_edges_count = 0;
+int min_hyper_edges_count = 20;
 
 // for simulation
 int simulation_num_vertices = 0;
@@ -88,6 +89,7 @@ int print_parameters()
 	printf("max_dp_table_size = %d\n", max_dp_table_size);
 	printf("max_num_subsetsum_solutions = %d\n", max_num_subsetsum_solutions);
 	printf("max_equation_error_ratio = %.2lf\n", max_equation_error_ratio);
+	printf("max_gateway_error_ratio = %.2lf\n", max_gateway_error_ratio);
 	printf("min_boundary_edge_weight_ratio = %.2lf\n", min_boundary_edge_weight_ratio);
 	printf("transcript_min_expression = %.2lf\n", transcript_min_expression);
 	printf("min_hyper_edges_count = %d\n", min_hyper_edges_count);
