@@ -135,7 +135,7 @@ int scallop2::assemble0()
 
 		while(true)
 		{
-			b = decompose_with_gateways();
+			b = decompose_vertices();
 			if(b == true) print();
 			if(b == true) continue;
 			break;
@@ -345,7 +345,7 @@ int scallop2::init_gateways(const vector<hyper_edge> &vhe)
 }
 
 
-bool scallop2::decompose_with_gateways()
+bool scallop2::decompose_vertices()
 {
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
@@ -353,15 +353,17 @@ bool scallop2::decompose_with_gateways()
 		if(vi.infer == false && vi.reliability <= infer_min_reliability) continue;
 		if(gr.in_degree(i) <= 1) continue;
 		if(gr.out_degree(i) <= 1) continue;
-		bool b = decompose_with_gateway(i);
+		bool b = decompose_vertex(i);
 		if(b == true) return true;
 	}
 	return false;
 }
 
-bool scallop2::decompose_with_gateway(int x)
+bool scallop2::decompose_vertex(int x)
 {
 	gateway &gw = gateways[x];
+
+	gw.print(x);
 
 	double c = gw.total_counts();
 	if(c < min_hyper_edges_count) return false;
@@ -398,14 +400,15 @@ bool scallop2::decompose_with_gateway(int x)
 		int t = e2u[e2];
 		assert(s >= 0 && s < gr.in_degree(x));
 		assert(t >= gr.in_degree(x) && t < gr.degree(x));
+
+		printf("add edge %d -> %d\n", s, t);
 		ug.add_edge(s, t);
 	}
 
 	vector< set<int> > vv = ug.compute_connected_components();
 
-	if(vv.size() <= 1) return false;
-
 	vector<equation> eqns;
+	vector<undirected_graph> vugs;
 	for(int i = 0; i < vv.size(); i++)
 	{
 		equation eqn;
@@ -415,13 +418,21 @@ bool scallop2::decompose_with_gateway(int x)
 			if(v < gr.in_degree(x)) eqn.s.push_back(u2e[v]);
 			else eqn.t.push_back(u2e[v]);
 		}
-
 		if(eqn.s.size() <= 0 || eqn.t.size() <= 0) continue;
-		if(eqn.s.size() >= 2 && eqn.t.size() >= 2) continue;
 
 		double r = compute_equation_error_ratio(eqn);
+
 		if(r <= -1 || r >= max_gateway_error_ratio) continue;
 
+		undirected_graph ug2 = ug;
+
+		for(int k = 0; k < ug2.num_vertices(); k++)
+		{
+			if(vv[i].find(k) != vv[i].end()) continue;
+			ug2.clear_vertex(k);
+		}
+
+		vugs.push_back(ug2);
 		eqns.push_back(eqn);
 	}
 
@@ -430,21 +441,15 @@ bool scallop2::decompose_with_gateway(int x)
 	bool b = smooth_vertex(x, eqns);
 	if(b == false) return false;
 
-	/*
-	gw.print(x);
-	printf("vertex %d, degree = (%d, %d), %lu routes, %lu connected-components, total-count = %.1lf\n",
-			x, gr.in_degree(x), gr.out_degree(x), gw.routes.size(), vv.size(), c);
-
-	printf("smooth vertex %d for decomposing\n", x);
-	*/
-
 	for(int i = 0; i < eqns.size(); i++)
 	{
-		printf("decompose with gateway of vertex %d\n", x);
+		printf("decompose vertex %d\n", x);
 		eqns[i].print(i);
 
+		undirected_graph ug2 = vugs[i];
 		vector<int> ve;
-		resolve_equation(eqns[i], ve);
+
+		decompose_vertex(x, ug2, u2e, e2u, ve);
 
 		for(int k = 0; k < ve.size(); k++)
 		{
@@ -458,6 +463,70 @@ bool scallop2::decompose_with_gateway(int x)
 	}
 
 	return true;
+}
+
+bool scallop2::decompose_vertex(int x, undirected_graph &ug, const vector<int> &u2e, const MI &e2u, vector<int> &ve)
+{
+	int nv = 0;
+	for(int i = 0; i < ug.num_vertices(); i++)
+	{
+		if(ug.degree(i) >= 1) nv++;
+	}
+	if(nv != ug.num_edges() + 1) return false;
+
+	vector< set<int> > v = ug.compute_connected_components();
+	if(v.size() != 1) return false;
+
+	while(true)
+	{
+		edge_iterator it1, it2;
+		edge_descriptor e = null_edge;
+		for(tie(it1, it2) = ug.edges(); it1 != it2; it1++)
+		{
+			e = (*it1);
+			if(ug.degree(e->source()) == 1) break;
+			if(ug.degree(e->target()) == 1) break;
+		}
+		if(e == null_edge) break;
+
+		int s = e->source() < e->target() ? e->source() : e->target();
+		int t = e->source() > e->target() ? e->source() : e->target();
+
+		int ss = u2e[s];
+		int tt = u2e[t];
+
+		edge_descriptor es = i2e[ss];
+		edge_descriptor et = i2e[tt];
+
+		assert(es != null_edge);
+		assert(et != null_edge);
+		assert(es->target() == x);
+		assert(et->source() == x);
+
+		double ws = gr.get_edge_weight(es);
+		double wt = gr.get_edge_weight(et);
+
+		if(ug.degree(s) == 1) assert(ws <= wt);
+		if(ug.degree(t) == 1) assert(wt <= ws);
+
+		double ww = ws < wt ? ws : wt;
+
+		vector<int> v;
+		v.push_back(ss);
+		v.push_back(tt);
+
+		int ee = split_merge_path(v, ww);
+		ve.push_back(ee);
+
+		ug.remove_edge(e);
+	}
+	return true;
+}
+
+int scallop2::split_merge_path(const vector<int> &p, double ww)
+{
+	vector<int> vv;
+	return split_merge_path(p, ww, vv);
 }
 
 int scallop2::split_merge_path(const VE &p, double wx, vector<int> &vv)

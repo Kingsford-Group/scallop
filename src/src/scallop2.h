@@ -7,6 +7,7 @@
 #include "nested_graph.h"
 #include "hyper_edge.h"
 #include "gateway.h"
+#include "undirected_graph.h"
 
 typedef map< edge_descriptor, vector<int> > MEV;
 typedef pair< edge_descriptor, vector<int> > PEV;
@@ -59,8 +60,9 @@ private:
 	int init_gateways(const vector<hyper_edge> &vhe);
 
 	// use hyper edges
-	bool decompose_with_gateways();
-	bool decompose_with_gateway(int v);
+	bool decompose_vertices();
+	bool decompose_vertex(int x);
+	bool decompose_vertex(int x, undirected_graph &ug, const vector<int> &u2e, const MI &e2u, vector<int> &ve);
 
 	// decompose trivial edges and vertices
 	bool join_trivial_edges();
@@ -128,6 +130,7 @@ private:
 	int split_edge(int exi, double w);
 	int merge_adjacent_equal_edges(int x, int y);
 	int merge_adjacent_edges(int x, int y);
+	int split_merge_path(const vector<int> &p, double ww);
 	int split_merge_path(const vector<int> &p, double ww, vector<int> &vv);
 	int split_merge_path(const VE &p, double ww, vector<int> &vv);
 
