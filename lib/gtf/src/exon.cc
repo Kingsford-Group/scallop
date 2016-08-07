@@ -29,7 +29,7 @@ int exon::parse(const string &s)
 	sstr>>buf;
 	feature.assign(buf);
 	sstr>>start>>end;
-	end++;			// TODO check gtf end is inclusive
+	start--;			// gtf: (from 1, both inclusive)
 	sstr>>buf;
 	if(buf[0] == '.') score = -1;
 	else score = atof(buf);
