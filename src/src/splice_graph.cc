@@ -132,17 +132,6 @@ int splice_graph::set_vertex_weights(const vector<double> &v)
 	return 0;
 }
 
-vector<hyper_edge> splice_graph::get_hyper_edges()
-{
-	return hedges;
-}
-
-int splice_graph::set_hyper_edges(const vector<hyper_edge> &v)
-{
-	hedges = v;
-	return 0;
-}
-
 edge_descriptor splice_graph::compute_maximum_edge_w()
 {
 	edge_iterator it1, it2;

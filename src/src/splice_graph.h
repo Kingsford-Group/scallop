@@ -4,7 +4,6 @@
 #include "directed_graph.h"
 #include "vertex_info.h"
 #include "edge_info.h"
-#include "hyper_edge.h"
 
 #include <map>
 #include <cassert>
@@ -24,7 +23,6 @@ public:
 	virtual ~splice_graph();
 
 private:
-	vector<hyper_edge> hedges;
 	vector<double> vwrt;
 	vector<vertex_info> vinf;
 	MED ewrt;
@@ -46,9 +44,6 @@ public:
 	vector<double> get_vertex_weights() const;
 	int set_edge_weights(const MED & med);
 	int set_vertex_weights(const vector<double> &v);
-
-	vector<hyper_edge> get_hyper_edges();
-	int set_hyper_edges(const vector<hyper_edge> &v);
 
 	// modify the splice_graph
 	int clear();
