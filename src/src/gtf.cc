@@ -32,29 +32,33 @@ int gtf::build_split_interval_map()
 
 int gtf::add_vertices(splice_graph &gr)
 {
+	PI32 pi = get_bounds();
 	double sum = compute_sum_expression();
 	gr.add_vertex();
-	gr.set_vertex_string(0, "");
+	vertex_info vi0;
+	vi0.lpos = pi.first;
+	vi0.rpos = pi.first;
 	gr.set_vertex_weight(0, sum);
-	gr.set_vertex_info(0, vertex_info());
+	gr.set_vertex_info(0, vi0);
 
 	SIMI it;
 	for(it = imap.begin(); it != imap.end(); it++)
 	{
 		gr.add_vertex();
-		string l = tostring(lower(it->first) % 100000);
-		string r = tostring((upper(it->first) - 1) % 100000);
-		string s = l + "-" + r;
-		gr.set_vertex_string(gr.num_vertices() - 1, s);
+		vertex_info vi;
+		vi.length = upper(it->first) - lower(it->first);
+		vi.lpos = lower(it->first);
+		vi.rpos = upper(it->first);
 		gr.set_vertex_weight(gr.num_vertices() - 1, it->second);
-		int length = upper(it->first) - lower(it->first);
-		gr.set_vertex_info(gr.num_vertices() - 1, vertex_info(length));
+		gr.set_vertex_info(gr.num_vertices() - 1, vi);
 	}
 
 	gr.add_vertex();
-	gr.set_vertex_string(gr.num_vertices() - 1, "");
+	vertex_info vin;
+	vin.lpos = pi.second;
+	vin.rpos = pi.second;
 	gr.set_vertex_weight(gr.num_vertices() - 1, sum);
-	gr.set_vertex_info(gr.num_vertices() - 1, vertex_info());
+	gr.set_vertex_info(gr.num_vertices() - 1, vin);
 	return 0;
 }
 
@@ -135,7 +139,7 @@ int gtf::output_gtf(ofstream &fout, const vector<path> &paths, const string &pre
 		fout<<chrm.c_str()<<"\t";					// chromosome name
 		fout<<prefix.c_str()<<"\t";					// source
 		fout<<"transcript\t";						// feature
-		fout<<lower(si->first)<<"\t";				// left position
+		fout<<lower(si->first) + 1<<"\t";			// left position
 		fout<<upper(ti->first)<<"\t";				// right position
 		fout<<1000<<"\t";							// score
 		fout<<"+\t";								// strand
@@ -159,8 +163,8 @@ int gtf::output_gtf(ofstream &fout, const vector<path> &paths, const string &pre
 			fout<<chrm.c_str()<<"\t";			// chromosome name
 			fout<<prefix.c_str()<<"\t";			// source
 			fout<<"exon\t";						// feature
-			fout<<lower(it->first)<<"\t";		// left position
-			fout<<upper(it->first) - 1<<"\t";	// right position
+			fout<<lower(it->first) + 1<<"\t";	// left position
+			fout<<upper(it->first)<<"\t";		// right position
 			fout<<1000<<"\t";					// score
 			fout<<"+\t";						// strand
 			fout<<".\t";						// frame

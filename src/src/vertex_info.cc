@@ -10,6 +10,8 @@ vertex_info::vertex_info()
 	infer = false;
 	type = -1;
 	adjust = false;
+	lpos = 0;
+	rpos = 0;
 }
 
 vertex_info::vertex_info(int l)
@@ -22,6 +24,8 @@ vertex_info::vertex_info(int l)
 	infer = false;
 	type = -1;
 	adjust = false;
+	lpos = 0;
+	rpos = 0;
 }
 
 vertex_info::vertex_info(const vertex_info &vi)
@@ -34,4 +38,6 @@ vertex_info::vertex_info(const vertex_info &vi)
 	infer = vi.infer;
 	type = vi.type;
 	adjust = vi.adjust;
+	lpos = vi.lpos;
+	rpos = vi.rpos;
 }

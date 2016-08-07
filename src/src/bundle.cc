@@ -788,18 +788,21 @@ int bundle::build_splice_graph(splice_graph &gr, vector<hyper_edge> &vhe) const
 	//if(pexons.size() == 0) return 0;
 	// vertices: start, each region, end
 	gr.add_vertex();
-	gr.set_vertex_string(0, "");
+	vertex_info vi0;
+	vi0.lpos = lpos;
+	vi0.rpos = lpos;
 	gr.set_vertex_weight(0, 0);
-	gr.set_vertex_info(0, vertex_info());
+	gr.set_vertex_info(0, vi0);
 	for(int i = 0; i < pexons.size(); i++)
 	{
 		const partial_exon &r = pexons[i];
 		int length = r.rpos - r.lpos;
 		assert(length >= 1);
 		gr.add_vertex();
-		gr.set_vertex_string(i + 1, r.label());
 		gr.set_vertex_weight(i + 1, r.ave);
 		vertex_info vi;
+		vi.lpos = r.lpos;
+		vi.rpos = r.rpos;
 		vi.length = length;
 		vi.stddev = r.dev < 1.0 ? 1.0 : r.dev;
 		vi.adjust = r.adjust;
@@ -807,9 +810,11 @@ int bundle::build_splice_graph(splice_graph &gr, vector<hyper_edge> &vhe) const
 	}
 
 	gr.add_vertex();
-	gr.set_vertex_string(pexons.size() + 1, "");
+	vertex_info vin;
+	vin.lpos = rpos;
+	vin.rpos = rpos;
 	gr.set_vertex_weight(pexons.size() + 1, 0);
-	gr.set_vertex_info(pexons.size() + 1, vertex_info());
+	gr.set_vertex_info(pexons.size() + 1, vin);
 
 	// edges: connecting adjacent pexons => e2w
 	for(int i = 0; i < (int)(pexons.size()) - 1; i++)
@@ -925,8 +930,6 @@ int bundle::print(int index) const
 
 int bundle::output_gtf(ofstream &fout, const vector<path> &paths, const string &prefix, int index) const
 {
-	printf("AAAAAAAAAAAAAA\n");
-
 	fout.precision(2);
 	fout<<fixed;
 
@@ -939,7 +942,7 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, const string &
 		fout<<chrm.c_str()<<"\t";		// chromosome name
 		fout<<prefix.c_str()<<"\t";		// source
 		fout<<"transcript\t";			// feature
-		fout<<lpos<<"\t";				// left position
+		fout<<lpos + 1<<"\t";			// left position
 		fout<<rpos<<"\t";				// right position
 		fout<<1000<<"\t";				// score, now as abundance
 		fout<<strand<<"\t";				// strand

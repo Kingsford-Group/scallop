@@ -25,7 +25,6 @@ int splice_graph::copy(const splice_graph &gr, MEE &x2y, MEE &y2x)
 	for(int i = 0; i < gr.num_vertices(); i++)
 	{
 		add_vertex();
-		set_vertex_string(i, gr.get_vertex_string(i));
 		set_vertex_weight(i, gr.get_vertex_weight(i));
 		set_vertex_info(i, gr.get_vertex_info(i));
 	}
@@ -55,12 +54,6 @@ int splice_graph::copy(const splice_graph &gr, MEE &x2y, MEE &y2x)
 splice_graph::~splice_graph()
 {}
 
-string splice_graph::get_vertex_string(int v) const
-{
-	assert(v >= 0 && v < vstr.size());
-	return vstr[v];
-}
-
 double splice_graph::get_vertex_weight(int v) const
 {
 	assert(v >= 0 && v < vwrt.size());
@@ -85,14 +78,6 @@ edge_info splice_graph::get_edge_info(edge_base *e) const
 	MEIF::const_iterator it = einf.find(e);
 	assert(it != einf.end());
 	return it->second;
-}
-
-int splice_graph::set_vertex_string(int v, string s) 
-{
-	assert(v >= 0 && v < vv.size());
-	if(vstr.size() != vv.size()) vstr.resize(vv.size());
-	vstr[v] = s;
-	return 0;
 }
 
 int splice_graph::set_vertex_weight(int v, double w) 
@@ -208,7 +193,6 @@ int splice_graph::build(const string &file)
 		sstr>>name>>weight>>vi.length;
 
 		add_vertex();
-		set_vertex_string(i, name);
 		set_vertex_weight(i, weight);
 		set_vertex_info(i, vi);
 	}
@@ -250,7 +234,7 @@ int splice_graph::write(const string &file) const
 	fin<<n<<endl;
 	for(int i = 0; i < n; i++)
 	{
-		string name = get_vertex_string(i);
+		string name = "TODO";
 		double weight = get_vertex_weight(i);
 		vertex_info vi = get_vertex_info(i);
 		fin<<name.c_str()<<" "<<weight<<" "<<vi.length<<endl;
@@ -275,7 +259,6 @@ int splice_graph::simulate(int nv, int ne, int mw)
 	for(int i = 0; i < nv; i++)
 	{
 		add_vertex();
-		vstr.push_back("v" + tostring(i));
 		vinf.push_back(vertex_info());
 		vwrt.push_back(0);
 	}
@@ -799,7 +782,10 @@ int splice_graph::draw(const string &file)
 	for(int i = 0; i < num_vertices(); i++)
 	{
 		double w = get_vertex_weight(i);
-		sprintf(buf, "%.1lf:%s", w, vstr[i].c_str());
+		vertex_info vi = get_vertex_info(i);
+		int ll = vi.lpos % 100000;
+		int rr = vi.rpos % 100000;
+		sprintf(buf, "%.1lf:%d-%d", w, ll, rr);
 		mis.insert(PIS(i, buf));
 	}
 

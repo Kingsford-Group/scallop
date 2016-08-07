@@ -25,7 +25,6 @@ public:
 
 private:
 	vector<hyper_edge> hedges;
-	vector<string> vstr;
 	vector<double> vwrt;
 	vector<vertex_info> vinf;
 	MED ewrt;
@@ -33,13 +32,11 @@ private:
 
 public:
 	// get and set properties
-	string get_vertex_string(int v) const;
 	double get_vertex_weight(int v) const;
 	double get_edge_weight(edge_base *e) const;
 	vertex_info get_vertex_info(int v) const;
 	edge_info get_edge_info(edge_base *e) const;
 
-	int set_vertex_string(int v, string s);
 	int set_vertex_weight(int v, double w);
 	int set_vertex_info(int v, const vertex_info &vi);
 	int set_edge_weight(edge_base *e, double w);
