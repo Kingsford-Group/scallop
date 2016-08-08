@@ -16,7 +16,7 @@ using namespace boost;
 scallop2::scallop2()
 {}
 
-scallop2::scallop2(const string &s, splice_graph &g)
+scallop2::scallop2(const string &s, const splice_graph &g)
 	: name(s), gr(g)
 {
 	round = 0;
@@ -26,7 +26,7 @@ scallop2::scallop2(const string &s, splice_graph &g)
 	//assert(gr.check_fully_connected() == true);
 }
 
-scallop2::scallop2(const string &s, splice_graph &g, const vector<hyper_edge> &vhe)
+scallop2::scallop2(const string &s, const splice_graph &g, const vector<hyper_edge> &vhe)
 	: name(s), gr(g)
 {
 	round = 0;

@@ -24,11 +24,10 @@ using namespace std;
 #define SLOPE_MARGIN 0
 #define SLOPE_MIDDLE 1
 
-// pre-defined parameters
 #define MAX_NUM_CIGAR 7
-#define MIN_LEN_FLANK 1
 
 // user-defined parameters
+extern int min_flank_length;
 extern int32_t min_bundle_gap;
 extern int min_num_hits_in_bundle;
 extern int32_t min_splice_boundary_hits;
@@ -63,9 +62,11 @@ extern int min_hyper_edges_count;
 
 extern string algo;
 extern string input_file;
+extern string ref_file;
 extern string output_file;
 extern bool output_tex_files;
 extern string fixed_gene_name;
+
 extern int min_gtf_transcripts_num;
 extern int simulation_num_vertices;
 extern int simulation_num_edges;

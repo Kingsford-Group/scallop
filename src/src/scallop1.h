@@ -17,7 +17,7 @@ class scallop1
 {
 public:
 	scallop1();
-	scallop1(const string &name, splice_graph &gr);
+	scallop1(const string &name, const splice_graph &gr);
 	virtual ~scallop1();
 
 public:

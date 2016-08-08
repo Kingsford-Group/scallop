@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include "hit.h"
+#include "config.h"
 
 hit::hit(int32_t p)
 {
@@ -86,13 +87,13 @@ int hit::get_splice_positions(vector<int64_t> &v) const
 		if (bam_cigar_type(bam_cigar_op(cigar[k]))&2)
 			p += bam_cigar_oplen(cigar[k]);
 
-		// must be flanked by matchings (with minimum length requirement of MIN_LEN_FLANK: TODO)
+		// must be flanked by matchings (with minimum length requirement of min_flank_length: TODO)
 		if(k == 0 || k == n_cigar - 1) continue;
 		if(bam_cigar_op(cigar[k]) != BAM_CREF_SKIP) continue;
 		if(bam_cigar_op(cigar[k-1]) != BAM_CMATCH) continue;
 		if(bam_cigar_op(cigar[k+1]) != BAM_CMATCH) continue;
-		if(bam_cigar_oplen(cigar[k-1]) <= MIN_LEN_FLANK) continue;
-		if(bam_cigar_oplen(cigar[k+1]) <= MIN_LEN_FLANK) continue;
+		if(bam_cigar_oplen(cigar[k-1]) <= min_flank_length) continue;
+		if(bam_cigar_oplen(cigar[k+1]) <= min_flank_length) continue;
 
 		int32_t s = p - bam_cigar_oplen(cigar[k]);
 		v.push_back(pack(s, p));
@@ -109,9 +110,9 @@ int hit::get_matched_intervals(vector<int64_t> & v) const
 		if (bam_cigar_type(bam_cigar_op(cigar[k]))&2)
 			p += bam_cigar_oplen(cigar[k]);
 
-		// must be flanked by matchings (with minimum length requirement of MIN_LEN_FLANK: TODO)
+		// must be flanked by matchings (with minimum length requirement of min_flank_length: TODO)
 		if(bam_cigar_op(cigar[k]) != BAM_CMATCH) continue;
-		if(bam_cigar_oplen(cigar[k]) <= MIN_LEN_FLANK) continue;
+		if(bam_cigar_oplen(cigar[k]) <= min_flank_length) continue;
 
 		int32_t s = p - bam_cigar_oplen(cigar[k]);
 		v.push_back(pack(s, p));

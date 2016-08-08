@@ -10,6 +10,7 @@
 #include "gtf.h"
 #include "genome.h"
 #include "nested_graph.h"
+#include "sgraph_compare.h"
 
 assembler::assembler()
 {
@@ -125,8 +126,18 @@ int assembler::process_bundle(bundle_base &bb, bam_hdr_t *h, int &index, ofstrea
 	bd.build_splice_graph(gr, vhe);
 
 	scallop2 sc(name, gr, vhe);
-
 	sc.assemble();
+
+	if(ref_file != "")
+	{
+		genome g(ref_file);
+		gtf gg(g.genes[0]);
+		splice_graph gt;
+		gg.build_splice_graph(gt);
+
+		sgraph_compare sgc(gt, gr);
+		sgc.compare();
+	}
 
 	if(output_file != "") bd.output_gtf(fout, sc.paths, algo, index);
 

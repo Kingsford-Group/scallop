@@ -12,6 +12,7 @@ public:
 	double stddev;
 	int length;
 	bool infer;
+	int type;
 };
 
 #endif

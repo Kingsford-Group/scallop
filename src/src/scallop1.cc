@@ -15,7 +15,7 @@ using namespace boost;
 scallop1::scallop1()
 {}
 
-scallop1::scallop1(const string &s, splice_graph &g)
+scallop1::scallop1(const string &s, const splice_graph &g)
 	: name(s), gr(g)
 {
 	round = 0;

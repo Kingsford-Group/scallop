@@ -11,6 +11,7 @@ using namespace std;
 //// parameters
 
 // for bam file
+int min_flank_length = 1;
 int32_t average_read_length = 100;
 int32_t average_slope_length = 240;
 int32_t min_bundle_gap = 100;
@@ -51,6 +52,7 @@ int simulation_max_edge_weight = 0;
 //// from command line
 string algo;
 string input_file;
+string ref_file;
 string output_file;
 
 bool output_tex_files = false;
@@ -62,6 +64,7 @@ int print_parameters()
 {
 	// for bam file
 	printf("parameters:\n");
+	printf("min_flank_length = %d\n", min_flank_length);
 	printf("min_bundle_gap = %d\n", min_bundle_gap);
 	printf("min_num_hits_in_bundle = %d\n", min_num_hits_in_bundle);
 	printf("min_splice_boundary_hits = %d\n", min_splice_boundary_hits);
@@ -102,6 +105,7 @@ int print_parameters()
 	// for command
 	printf("algo = %s\n", algo.c_str());
 	printf("input_file = %s\n", input_file.c_str());
+	printf("ref_file = %s\n", ref_file.c_str());
 	printf("output_file = %s\n", output_file.c_str());
 	printf("output_tex_files = %c\n", output_tex_files ? 'T' : 'F');
 	printf("fixed_gene_name = %s\n", fixed_gene_name.c_str());
@@ -123,14 +127,19 @@ bool parse_arguments(int argc, const char ** argv)
 			algo = string(argv[i + 1]);
 			i++;
 		}
+		else if(string(argv[i]) == "-i")
+		{
+			input_file = string(argv[i + 1]);
+			i++;
+		}
 		else if(string(argv[i]) == "-o")
 		{
 			output_file = string(argv[i + 1]);
 			i++;
 		}
-		else if(string(argv[i]) == "-i")
+		else if(string(argv[i]) == "-r")
 		{
-			input_file = string(argv[i + 1]);
+			ref_file = string(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "-g")
@@ -145,20 +154,6 @@ bool parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "-p")
 		{
 			use_paired_end = true;
-		}
-		else if(string(argv[i]) == "-f")
-		{
-			fast_mode = true;
-		}
-		else if(string(argv[i]) == "-sms")
-		{
-			slope_min_score = atoi(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "-ses")
-		{
-			slope_extend_score = atoi(argv[i + 1]);
-			i++;
 		}
 		else if(string(argv[i]) == "-x")
 		{
