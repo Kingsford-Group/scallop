@@ -31,6 +31,7 @@ int slope_flexible_bin_num = 2;
 double slope_acceptance_sigma = 2.0;
 int pseudo_length_count = 10;
 bool use_paired_end = false;
+int max_equations_each_iteration = 50;
 
 // for algorithm
 double join_min_reliability = 0.6;
@@ -96,6 +97,7 @@ int print_parameters()
 	printf("min_boundary_edge_weight_ratio = %.2lf\n", min_boundary_edge_weight_ratio);
 	printf("transcript_min_expression = %.2lf\n", transcript_min_expression);
 	printf("min_hyper_edges_count = %d\n", min_hyper_edges_count);
+	printf("max_equations_each_iteration = %d\n", max_equations_each_iteration);
 
 	// for simulation
 	printf("simulation_num_vertices = %d\n", simulation_num_vertices);
@@ -159,6 +161,13 @@ bool parse_arguments(int argc, const char ** argv)
 		{
 			transcript_min_expression = atof(argv[i + 1]);
 			i++;
+		}
+		else if(string(argv[i]) == "-R")
+		{
+			// default setting for real dataset
+			min_splice_boundary_hits = 3;
+			slope_min_score = 100;
+			slope_extend_score = 40;
 		}
 	}
 

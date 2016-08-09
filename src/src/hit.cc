@@ -118,6 +118,16 @@ int hit::get_matched_intervals(vector<int64_t> & v) const
 		v.push_back(pack(s, p));
 	}
 
+	// TODO: debug
+	/*
+	int32_t sum = 0;
+	for(int i = 0; i < v.size(); i++)
+	{
+		sum += high32(v[i]) - low32(v[i]);
+	}
+	printf("read %s matched size = %d\n", qname.c_str(), sum);
+	*/
+
     return 0;
 }
 

@@ -255,10 +255,12 @@ bool scallop2::decompose_with_equations(int level)
 
 	printf("candidate equations: %lu\n", eqns.size());
 
+	/*
 	for(int i = 0; i < eqns.size(); i++)
 	{
 		eqns[i].print(i);
 	}
+	*/
 
 	equation eqn(0);
 	for(int i = 0; i < eqns.size(); i++)
@@ -278,6 +280,7 @@ bool scallop2::decompose_with_equations(int level)
 		load(sc);
 
 		if(eqn.f == 2 && eqn.d == 0) break;
+		if(i >= max_equations_each_iteration) break;
 	}
 
 	if(eqn.f != 2 || eqn.d != 0) return false;
@@ -2125,8 +2128,6 @@ int scallop2::greedy_decompose(int num)
 		VE v;
 		vector<int> vv;
 		double w = gr.compute_maximum_path_w(v);
-
-		printf("w = %.2lf, min = %.2lf\n", w, transcript_min_expression);
 
 		if(w <= 0.0) break;
 		if(w <= transcript_min_expression) break;

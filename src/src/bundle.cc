@@ -974,7 +974,7 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, const string &
 			fout<<".\t";						// frame
 			fout<<"gene_id \""<<algo.c_str()<<"."<<index<<"\"; ";
 			fout<<"transcript_id \""<<algo.c_str()<<"."<<index<<"."<<i + 1<<"\"; ";
-			fout<<"exon_number \""<<cnt<<"\"; ";
+			fout<<"exon_number \""<<++cnt<<"\"; ";
 			fout<<"expression \""<<abd<<"\";"<<endl;
 		}
 	}

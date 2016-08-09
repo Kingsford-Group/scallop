@@ -40,6 +40,7 @@ extern double min_region_coverage;
 extern int max_num_bundles;
 extern int max_dp_table_size;
 extern int max_num_subsetsum_solutions;
+extern int max_equations_each_iteration;
 extern double max_equation_error_ratio;
 extern double max_gateway_error_ratio;
 extern int tail_coverage;

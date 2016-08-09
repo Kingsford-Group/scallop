@@ -261,14 +261,16 @@ int super_region::select_slopes(int si, int ti, int ss)
 	compute_mean_dev(bins, ssi, x.lbin, ave1, dev1);
 	compute_mean_dev(bins, x.rbin, tti, ave2, dev2);
 
-	bool b1 = (x.lbin - ssi >= 5) && (fabs(ave1 - x.ave) < dev1 * slope_acceptance_sigma);
-	bool b2 = (tti - x.rbin >= 5) && (fabs(ave2 - x.ave) < dev2 * slope_acceptance_sigma);
+	bool b1 = (x.lbin - ssi >= 5) && (x.type == SLOPE5END) && (x.ave <= ave1 + dev1 * slope_acceptance_sigma);
+	bool b2 = (x.lbin - ssi >= 5) && (x.type == SLOPE3END) && (x.ave >= ave1 - dev1 * slope_acceptance_sigma);
+	bool b3 = (tti - x.rbin >= 5) && (x.type == SLOPE5END) && (x.ave <= ave2 - dev2 * slope_acceptance_sigma);
+	bool b4 = (tti - x.rbin >= 5) && (x.type == SLOPE3END) && (x.ave >= ave2 + dev2 * slope_acceptance_sigma);
 
 	//x.print(k);
 	//printf("select flag = (%c, %c): (%d, %d, %.2lf, %.2lf) -> (%d, %d, %.2lf, %.2lf) + (%d, %d, %.2lf, %.2lf)\n", 
 	//	b1 ? 'F' : 'T', b2 ? 'F' : 'T', si, ti, ave, dev, si, x.lbin, ave1, dev1, x.rbin, ti, ave2, dev2);
 
-	if(b1 == false && b2 == false)
+	if(b1 == false && b2 == false && b3 == false && b4 == false)
 	{
 		slopes.push_back(x);
 		select_slopes(si, x.lbin, 0);
