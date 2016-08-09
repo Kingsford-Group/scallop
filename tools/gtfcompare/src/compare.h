@@ -21,4 +21,7 @@ int compare_transcripts(const vector<transcript> &x, const vector<transcript> &y
 int compare_genome1(const genome &x, const genome &y);
 int compare_genome2(const genome &x, const genome &y);
 
+// remove single exon transcripts
+int remove_single_exon_transcripts(genome &gm);
+
 #endif

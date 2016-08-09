@@ -1,6 +1,15 @@
 #include "compare.h"
 #include <cassert>
 
+int remove_single_exon_transcripts(genome &gm)
+{
+	for(int i = 0; i < gm.genes.size(); i++)
+	{
+		gm.genes[i].remove_single_exon_transcripts();
+	}
+	return 0;
+}
+
 bool compare_structure(const transcript &x, const transcript &y)
 {
 	if(x.exons.size() != y.exons.size()) return false;
@@ -56,12 +65,13 @@ int compare_transcripts(const vector<transcript> &x, const vector<transcript> &y
 			if(mode == 2)
 			{
 				b = compare_intron_chain(t1, t2);
-				if(t1.strand != t2.strand) b = false;
+				//if(t1.strand != t2.strand) b = false;
 			}
 
 			if(b == false) continue;
 
-			printf("transcript TRUE expression = %d predicted = %d\n", t1.expression, t2.expression);
+			printf("%s %s matched, reference expression = %d predicted expression = %d, strands = (%c, %c)\n", 
+					t1.transcript_id.c_str(), t2.transcript_id.c_str(), t1.expression, t2.expression, t1.strand, t2.strand);
 
 			flag = true;
 			v[j] = true;
@@ -69,7 +79,7 @@ int compare_transcripts(const vector<transcript> &x, const vector<transcript> &y
 			break;
 		}
 
-		if(flag == false) printf("transcript FALSE expression = %d\n", t1.expression);
+		//if(flag == false) printf("transcript FALSE expression = %d\n", t1.expression);
 	}
 	return cnt;
 }
@@ -159,3 +169,4 @@ int compare_genome2(const genome &x, const genome &y)
 
 	return 0;
 }
+

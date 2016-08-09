@@ -22,6 +22,9 @@ int main(int argc, const char **argv)
 	genome g1(argv[1]);
 	genome g2(argv[2]);
 
+	remove_single_exon_transcripts(g1);
+	remove_single_exon_transcripts(g2);
+
 	if(mode == 1) compare_genome1(g1, g2);
 	if(mode == 2) compare_genome2(g1, g2);
 
