@@ -43,7 +43,7 @@ int compare_gene(const gene &x, const gene &y, int mode)
 	return compare_transcripts(x.transcripts, y.transcripts, mode);
 }
 
-int compare_transcripts(const vector<transcript> &x, const vector<transcript> &y, int mode)
+int compare_transcripts(const vector<transcript> &y, const vector<transcript> &x, int mode)
 {
 	int cnt = 0;
 	vector<bool> v;
@@ -70,8 +70,10 @@ int compare_transcripts(const vector<transcript> &x, const vector<transcript> &y
 
 			if(b == false) continue;
 
-			printf("%s %s matched, reference expression = %d predicted expression = %d, strands = (%c, %c)\n", 
-					t1.transcript_id.c_str(), t2.transcript_id.c_str(), t1.expression, t2.expression, t1.strand, t2.strand);
+			//printf("%s %s matched, reference expression = %d predicted expression = %d, strands = (%c, %c)\n", 
+			//	t1.transcript_id.c_str(), t2.transcript_id.c_str(), t1.expression, t2.expression, t1.strand, t2.strand);
+
+			printf("TRUE %s %s\n", t1.transcript_id.c_str(), t2.transcript_id.c_str());
 
 			flag = true;
 			v[j] = true;
@@ -79,7 +81,7 @@ int compare_transcripts(const vector<transcript> &x, const vector<transcript> &y
 			break;
 		}
 
-		//if(flag == false) printf("transcript FALSE expression = %d\n", t1.expression);
+		if(flag == false) printf("FALSE %s\n", t1.transcript_id.c_str());
 	}
 	return cnt;
 }
