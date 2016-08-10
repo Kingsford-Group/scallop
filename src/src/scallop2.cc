@@ -2050,12 +2050,38 @@ bool scallop2::decompose_trivial_vertex(int i, vector<int> &ve)
 	}
 
 	edge_iterator it1, it2, it3, it4;
+
+	/*
+	double sum1 = 0, sum2 = 0;
+	for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
+	{
+		printf("in  edge %d weight = %.12lf\n", e2i[*it1], gr.get_edge_weight(*it1));
+		sum1 += gr.get_edge_weight(*it1);
+	}
+	for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
+	{
+		printf("out edge %d weight = %.12lf\n", e2i[*it1], gr.get_edge_weight(*it1));
+		sum2 += gr.get_edge_weight(*it1);
+	}
+	printf("sum1 = %.12lf, sum2 = %.12lf\n", sum1, sum2);
+	*/
+
 	tie(it1, it2) = gr.in_edges(i);
 	tie(it3, it4) = gr.out_edges(i);
+
 	int e1 = e2i[*it1];
 	int e2 = e2i[*it3];
 
+	int d1 = gr.in_degree(i);
+	int d2 = gr.out_degree(i);
+
 	int ee = merge_adjacent_edges(e1, e2);
+
+	printf("degree = (%d, %d), e1 = %d, e2 = %d, ee = %d, degree' = (%d, %d)\n", d1, d2, e1, e2, ee,
+			gr.in_degree(i), gr.out_degree(i));
+
+	assert(gr.in_degree(i) < d1 || gr.out_degree(i) < d2);
+
 	ve.push_back(ee);
 
 	return decompose_trivial_vertex(i, ve);

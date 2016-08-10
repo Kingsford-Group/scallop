@@ -17,6 +17,7 @@ int main(int argc, const char **argv)
 	parse_arguments(argc, argv);
 	print_parameters();
 
+
 	assembler asmbl;
 	asmbl.process();
 

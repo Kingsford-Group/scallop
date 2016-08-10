@@ -23,6 +23,7 @@ int min_max_region_overlap = 5;
 double min_region_coverage = 0.5;
 int max_num_bundles = -1;
 int tail_coverage = 8;
+bool identify_slopes = true;
 int slope_bin_size = 5;
 int slope_min_score = 30;
 int slope_extend_score = 24;
@@ -76,6 +77,7 @@ int print_parameters()
 	printf("max_num_bundles = %d\n", max_num_bundles);
 	printf("tail_coverage = %d\n", tail_coverage);
 	printf("use_paired_end = %c\n", use_paired_end ? 'T' : 'F');
+	printf("identify_slopes = %c\n", identify_slopes ? 'T' : 'F');
 	printf("slope_bin_size = %d\n", slope_bin_size);
 	printf("slope_min_bin_num = %d\n", slope_min_bin_num);
 	printf("slope_min_score = %d\n", slope_min_score);
@@ -166,8 +168,9 @@ bool parse_arguments(int argc, const char ** argv)
 		{
 			// default setting for real dataset
 			min_splice_boundary_hits = 3;
-			slope_min_score = 100;
-			slope_extend_score = 40;
+			identify_slopes = false;
+			min_num_hits_in_bundle = 50;
+			min_bundle_gap = 50;
 		}
 	}
 

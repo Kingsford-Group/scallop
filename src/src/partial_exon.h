@@ -21,7 +21,7 @@ public:
 	double ave;						// average abundance
 	double dev;						// standard-deviation of abundance
 
-	bool adjust;					// whether the coverage has been adjusted
+	bool adjust;
 
 public:
 	string label() const;

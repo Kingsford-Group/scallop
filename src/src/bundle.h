@@ -22,6 +22,7 @@ private:
 	vector<junction> junctions;		// splice junctions
 	splice_graph jr;				// junction graph
 	split_interval_map imap;		// interval map
+	vector<region> rs;				// super regions
 	vector<super_region> srs;		// super regions
 	vector<partial_exon> pexons;	// partial exons
 	vector<hyper_edge> hedges;		// hyper edges
@@ -59,8 +60,8 @@ protected:
 
 	// build partial exons
 	int build_super_region(int k, super_region &sr);
-	int build_super_regions();
-	int build_partial_exons();
+	int build_partial_exons1();
+	int build_partial_exons2();
 	int search_partial_exons(int32_t p);
 
 	// super junctions and super partial_exons;

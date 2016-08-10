@@ -8,8 +8,6 @@ using namespace std;
 
 typedef pair<int, int> PI;
 
-#define SMIN 0.00001
-
 // for given v compute all subsetsums 
 // and then backtrace for given targets
 class subsetsum1

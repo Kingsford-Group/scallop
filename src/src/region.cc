@@ -110,6 +110,8 @@ int region::add_boundary(int xi, int type)
 
 int region::build_partial_exons(vector<partial_exon> &pexons)
 {
+	if(empty == true) return 0;
+
 	map<int, int> m;
 	
 	//if(m.find(lpos) == m.end()) m.insert(PI(lpos, ltype));

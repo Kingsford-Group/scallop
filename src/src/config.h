@@ -33,6 +33,7 @@ extern int min_num_hits_in_bundle;
 extern int32_t min_splice_boundary_hits;
 extern uint32_t min_max_splice_boundary_qual;
 extern int32_t average_read_length;
+extern bool identify_slopes;
 extern int32_t average_slope_length;
 extern double min_average_overlap;
 extern int min_max_region_overlap;

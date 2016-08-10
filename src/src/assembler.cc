@@ -54,6 +54,8 @@ int assembler::assemble_bam(const string &file)
 	int index = -1;
 	bundle_base bb1;		// for + reads
 	bundle_base bb2;		// for - reads
+
+	bool terminate = false;
     while(sam_read1(fn, h, b) >= 0)
 	{
 		bam1_core_t &p = b->core;
@@ -65,12 +67,14 @@ int assembler::assemble_bam(const string &file)
 		
 		if(bb1.get_num_hits() > 0 && (bb1.get_rpos() + min_bundle_gap < p.pos || p.tid != bb1.get_tid()))
 		{
-			process_bundle(bb1, h, index, fout);
+			int f = process_bundle(bb1, h, index, fout);
+			if(f == 1) break;
 		}
 
 		if(bb2.get_num_hits() > 0 && (bb2.get_rpos() + min_bundle_gap < p.pos || p.tid != bb2.get_tid()))
 		{
-			process_bundle(bb2, h, index, fout);
+			int f = process_bundle(bb2, h, index, fout);
+			if(f == 1) break;
 		}
 
 		hit ht(b);
@@ -106,6 +110,7 @@ int assembler::process_bundle(bundle_base &bb, bam_hdr_t *h, int &index, ofstrea
 	index++;
 
 	string name = "bundle." + tostring(index);
+
 	if(fixed_gene_name != "" && name != fixed_gene_name)
 	{
 		bb.clear();
@@ -141,7 +146,9 @@ int assembler::process_bundle(bundle_base &bb, bam_hdr_t *h, int &index, ofstrea
 
 	if(output_file != "") bd.output_gtf(fout, sc.paths, algo, index);
 
-	return 0;
+
+	if(fixed_gene_name != "" && name == fixed_gene_name) return 1;
+	else return 0;
 }
 
 int assembler::assemble_gtf(const string &file)

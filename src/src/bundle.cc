@@ -21,14 +21,16 @@ int bundle::build()
 	check_left_ascending();
 	infer_junctions();
 	build_junction_graph();
-	draw_junction_graph("jr.tex");
+	//draw_junction_graph("jr.tex");
 	//infer_hyper_junctions();
 	//test_junction_graph();
 	process_hits();
-	build_super_regions();
-	build_partial_exons();
-	infer_hyper_edges();
+
+	if(identify_slopes == false) build_partial_exons1();
+	else build_partial_exons2();
+
 	link_partial_exons();
+	infer_hyper_edges();
 	return 0;
 }
 
@@ -597,7 +599,37 @@ int bundle::build_super_region(int s, super_region &sr)
 	return 0;
 }
 
-int bundle::build_super_regions()
+int bundle::build_partial_exons1()
+{
+	rs.clear();
+
+	for(int k = 0; k < jr.num_vertices() - 1; k++)
+	{
+		int32_t lpos = (int32_t)(jr.get_vertex_weight(k));
+		int32_t rpos = (int32_t)(jr.get_vertex_weight(k + 1));
+
+		int ltype = jr.get_vertex_info(k).type; 
+		int rtype = jr.get_vertex_info(k + 1).type; 
+
+		//if(ltype == LEFT_RIGHT_SPLICE) ltype = RIGHT_SPLICE;
+		//if(rtype == LEFT_RIGHT_SPLICE) rtype = LEFT_SPLICE;
+
+		region r(lpos, rpos, ltype, rtype, &imap);
+		rs.push_back(r);
+	}
+
+	for(int i = 0; i < rs.size(); i++)
+	{
+		region &r = rs[i];
+		vector<partial_exon> v;
+		r.build_partial_exons(v);
+		pexons.insert(pexons.end(), v.begin(), v.end());
+	}
+
+	return 0;
+}
+
+int bundle::build_partial_exons2()
 {
 	for(int k = 0; k < jr.num_vertices() - 1;)
 	{
@@ -608,17 +640,14 @@ int bundle::build_super_regions()
 		if(sr.size() == 0) k++;
 		else k += sr.size() * 2 - 1;
 	}
-	return 0;
-}
 
-int bundle::build_partial_exons()
-{
 	for(int i = 0; i < srs.size(); i++)
 	{
 		super_region &sr = srs[i];
 		sr.build();
 		pexons.insert(pexons.end(), sr.pexons.begin(), sr.pexons.end());
 	}
+
 	return 0;
 }
 
@@ -799,7 +828,7 @@ int bundle::build_splice_graph(splice_graph &gr, vector<hyper_edge> &vhe) const
 		int length = r.rpos - r.lpos;
 		assert(length >= 1);
 		gr.add_vertex();
-		gr.set_vertex_weight(i + 1, r.ave);
+		gr.set_vertex_weight(i + 1, r.ave < 1.0 ? 1.0 : r.ave);
 		vertex_info vi;
 		vi.lpos = r.lpos;
 		vi.rpos = r.rpos;
@@ -833,7 +862,7 @@ int bundle::build_splice_graph(splice_graph &gr, vector<hyper_edge> &vhe) const
 		//double sd = 0.5 * x.dev + 0.5 * y.dev;
 
 		edge_descriptor p = gr.add_edge(i + 1, i + 2);
-		gr.set_edge_weight(p, wt);
+		gr.set_edge_weight(p, wt < 1.0 ? 1.0 : wt);
 		gr.set_edge_info(p, edge_info());
 	}
 
@@ -850,6 +879,7 @@ int bundle::build_splice_graph(splice_graph &gr, vector<hyper_edge> &vhe) const
 		//double sd = 0.5 * x.dev + 0.5 * y.dev;
 		double sd = 1.0;
 		edge_descriptor p = gr.add_edge(b.lrgn + 1, b.rrgn + 1);
+		assert(b.count >= 1);
 		gr.set_edge_weight(p, b.count);
 		gr.set_edge_info(p, edge_info());
 	}
@@ -893,20 +923,16 @@ int bundle::print(int index) const
 	printf("tid = %d, #hits = %lu, range = %s:%d-%d, orient = %c %s\n",
 			tid, hits.size(), chrm.c_str(), lpos, rpos, strand, (pexons.size() >= 100 ? "[monster]" : ""));
 	// print hits
-	/*
 	for(int i = 0; i < hits.size(); i++)
 	{
 		hits[i].print();
 	}
-	*/
 
-	// print super regions
-	/*
-	for(int i = 0; i < srs.size(); i++)
+	// print regions
+	for(int i = 0; i < rs.size(); i++)
 	{
-		srs[i].print(i);
+		rs[i].print(i);
 	}
-	*/
 
 	// print junctions 
 	for(int i = 0; i < junctions.size(); i++)
@@ -920,6 +946,7 @@ int bundle::print(int index) const
 		pexons[i].print(i);
 	}
 
+	// print hyper edges
 	for(int i = 0; i < hedges.size(); i++)
 	{
 		hedges[i].print(i);
