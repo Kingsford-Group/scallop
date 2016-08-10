@@ -146,10 +146,10 @@ int region::build_partial_exons(vector<partial_exon> &pexons)
 	{
 		partial_exon p(pp[i], pp[i + 1], v[i].second, v[i + 1].second);
 		compute_mean_dev(bins, v[i].first, v[i + 1].first, p.ave, p.dev);
-		p.adjust = true;
+		//p.adjust = true;
 		for(int k = v[i].first; k < v[i + 1].first; k++)
 		{
-			if(adjust[k] == false) p.adjust = false;
+			//if(adjust[k] == false) p.adjust = false;
 			if(adjust[k] == false) break;
 		}
 		pexons.push_back(p);

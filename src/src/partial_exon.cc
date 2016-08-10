@@ -4,7 +4,6 @@
 partial_exon::partial_exon(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype)
 	: lpos(_lpos), rpos(_rpos), ltype(_ltype), rtype(_rtype)
 {
-	adjust = false;
 }
 
 string partial_exon::label() const
@@ -16,7 +15,7 @@ string partial_exon::label() const
 
 int partial_exon::print(int index) const
 {
-	printf("partial_exon %d: [%d-%d), type = (%d, %d), length = %d, ave-abd = %.1lf, std-abd = %.1lf, adjust = %c\n",
-			index, lpos, rpos, ltype, rtype, rpos - lpos, ave, dev, adjust ? 'T' : 'F');
+	printf("partial_exon %d: [%d-%d), type = (%d, %d), length = %d, ave-abd = %.1lf, std-abd = %.1lf\n",
+			index, lpos, rpos, ltype, rtype, rpos - lpos, ave, dev);
 	return 0;
 }

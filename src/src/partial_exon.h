@@ -21,8 +21,6 @@ public:
 	double ave;						// average abundance
 	double dev;						// standard-deviation of abundance
 
-	bool adjust;
-
 public:
 	string label() const;
 	int print(int index) const;
