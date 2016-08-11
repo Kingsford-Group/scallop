@@ -491,12 +491,13 @@ int bundle::build_regions()
 
 int bundle::build_partial_exons()
 {
+	pexons.clear();
 	for(int i = 0; i < regions.size(); i++)
 	{
 		region &r = regions[i];
-		vector<partial_exon> v;
-		r.build_partial_exons(v);
-		pexons.insert(pexons.end(), v.begin(), v.end());
+		if(r.empty == true) continue;
+		partial_exon pe(r.lcore, r.rcore, r.ltype, r.rtype);
+		pexons.push_back(pe);
 	}
 
 	return 0;
@@ -589,7 +590,7 @@ int bundle::build_hyper_edges()
 				}
 			}
 
-			// super junctions
+			// hyper junctions
 
 			if(sp.size() <= 2) continue;
 

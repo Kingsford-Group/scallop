@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include <vector>
 #include "interval_map.h"
-#include "slope.h"
 #include "partial_exon.h"
 
 using namespace std;
@@ -29,17 +28,9 @@ public:
 	int32_t rcore;					// right core position
 	bool empty;						// whether this region is completely spliced
 
-	vector<int> bins;				// average abundance for bins
-	vector<bool> adjust;			// whether bin is adjusted
-	vector<PI> boundaries;			// list of end5 boundaries (indices of bins)
-
 public:
 	int init();
-	int build_bins();
-	int add_boundary(int xi, int type);
-	int get_location(int xb);
 	int print(int index) const;
-	int build_partial_exons(vector<partial_exon> &pexons);
 };
 
 #endif
