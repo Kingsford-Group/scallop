@@ -19,18 +19,11 @@ bundle::~bundle()
 int bundle::build()
 {
 	check_left_ascending();
-	infer_junctions();
+	build_junctions();
 	build_junction_graph();
-	//draw_junction_graph("jr.tex");
-	//infer_hyper_junctions();
-	//test_junction_graph();
-	process_hits();
-
-	if(identify_slopes == false) build_partial_exons1();
-	else build_partial_exons2();
-
+	align_hits();
+	build_hyper_edges();
 	link_partial_exons();
-	infer_hyper_edges();
 	return 0;
 }
 
@@ -56,9 +49,9 @@ int bundle::check_right_ascending()
 	return 0;
 }
 
-int bundle::infer_junctions()
+int bundle::build_junctions()
 {
-	map<int64_t, junction> m;
+	map<int64_t, int> m;
 	vector<int64_t> v;
 	for(int i = 0; i < hits.size(); i++)
 	{
@@ -67,118 +60,42 @@ int bundle::infer_junctions()
 		for(int k = 0; k < v.size(); k++)
 		{
 			int64_t p = v[k];
-			if(m.find(p) == m.end()) 
-			{
-				junction sp(p, 1, hits[i].qual, hits[i].qual);
-				m.insert(pair<int64_t, junction>(p, sp));
-			}
-			else
-			{
-				m[p].count++;
-				if(hits[i].qual < m[p].min_qual) m[p].min_qual = hits[i].qual;
-				if(hits[i].qual > m[p].max_qual) m[p].max_qual = hits[i].qual;
-			}
+			if(m.find(p) == m.end()) m.insert(pair<int64_t, int>(p, 1));
+			else m[p]++;
 		}
 	}
 
-	map<int64_t, junction>::iterator it;
+	map<int64_t, int>::iterator it;
 	for(it = m.begin(); it != m.end(); it++)
 	{
-		if(it->second.count < min_splice_boundary_hits) continue;
-		if(it->second.max_qual < min_max_splice_boundary_qual) continue;
-		junctions.push_back(it->second);
-	}
-	return 0;
-}
-
-int bundle::infer_hyper_junctions()
-{
-	map<int64_t, int> p2i;
-	for(int i = 0; i < junctions.size(); i++)
-	{
-		junction &jc = junctions[i];
-		int64_t p = pack(jc.lpos, jc.rpos);
-		p2i.insert(pair<int64_t, int>(p, i));
-	}
-
-	vector<int> list;
-	map<string, PI> m;
-	vector<int64_t> v;
-	for(int i = 0; i < hits.size(); i++)
-	{
-		hits[i].get_splice_positions(v);
-		if(v.size() == 0) continue;
-		string s = hits[i].qname;
-
-		if(m.find(s) == m.end())
-		{
-			PI pi(list.size(), list.size());
-			for(int k = 0; k < v.size(); k++)
-			{
-				int64_t p = v[k];
-				if(p2i.find(p) == p2i.end()) continue;
-				list.push_back(p2i[p]);
-				pi.second++;
-			}
-			if(pi.second > pi.first)
-			{
-				m.insert(pair<string, PI>(s, pi));
-			}
-		}
-		else
-		{
-			int l = m[s].first;
-			int r = m[s].second;
-			vector<int> vv1(list.begin() + l, list.begin() + r);
-			vector<int> vv2;
-			for(int k = 0; k < v.size(); k++)
-			{
-				int64_t p = v[k];
-				if(p2i.find(p) == p2i.end()) continue;
-				vv2.push_back(p2i[p]);
-
-				bool b = true;
-				for(int j = l; j < r; j++)
-				{
-					if(list[j] == p2i[p]) b = false;
-					if(b == false) break;
-				}
-				//if(b == true) vv1.push_back(p2i[p]);
-			}
-
-			// super junctions
-			/*
-			printf("super junction: ");
-			printv(vv1);
-			printf(" | ");
-			printv(vv2);
-			printf("\n");
-			*/
-		}
+		if(it->second < min_splice_boundary_hits) continue;
+		junctions.push_back(junction(it->first, it->second));
 	}
 	return 0;
 }
 
 int bundle::build_junction_graph()
 {
-	map<int, int> s;
+	MPI s;
 	s.insert(PI(lpos, START_BOUNDARY));
 	s.insert(PI(rpos, END_BOUNDARY));
 	for(int i = 0; i < junctions.size(); i++)
 	{
-		int l = junctions[i].lpos;
-		int r = junctions[i].rpos;
+		int32_t l = junctions[i].lpos;
+		int32_t r = junctions[i].rpos;
+
 		if(s.find(l) == s.end()) s.insert(PI(l, LEFT_SPLICE));
-		//else if(s[l] == RIGHT_SPLICE) s[l] = LEFT_RIGHT_SPLICE;
+		else if(s[l] == RIGHT_SPLICE) s[l] = LEFT_RIGHT_SPLICE;
+
 		if(s.find(r) == s.end()) s.insert(PI(r, RIGHT_SPLICE));
-		//else if(s[r] == LEFT_SPLICE) s[r] == LEFT_RIGHT_SPLICE;
+		else if(s[r] == LEFT_SPLICE) s[r] = LEFT_RIGHT_SPLICE;
 	}
 
-	vector<PI> v(s.begin(), s.end());
+	vector<PPI> v(s.begin(), s.end());
 	sort(v.begin(), v.end());
 
 	// position to vertex
-	map<int, int> p2v;
+	MPI p2v;
 	for(int i = 0; i < v.size(); i++)
 	{
 		p2v.insert(PI(v[i].first, i));
@@ -190,27 +107,31 @@ int bundle::build_junction_graph()
 	{
 		jr.add_vertex();
 		vertex_info vi;
+		vi.pos = v[i].first;
 		vi.type = v[i].second;
 		jr.set_vertex_info(i, vi);
-		jr.set_vertex_weight(i, v[i].first);
 	}
 
 	// edges: connecting adjacent regions
 	for(int i = 0; i < v.size() - 1; i++)
 	{
 		edge_descriptor p = jr.add_edge(i, i + 1);
-		jr.set_edge_weight(p, -1);
+		edge_info ei;
+		ei.jid = -1;
+		jr.set_edge_info(p, ei);
 	}
 
 	// edges: each junction
 	for(int i = 0; i < junctions.size(); i++)
 	{
-		int l = junctions[i].lpos;
-		int r = junctions[i].rpos;
+		int32_t l = junctions[i].lpos;
+		int32_t r = junctions[i].rpos;
 		assert(p2v.find(l) != p2v.end());
 		assert(p2v.find(r) != p2v.end());
 		edge_descriptor p = jr.add_edge(p2v[l], p2v[r]);
-		jr.set_edge_weight(p, i);
+		edge_info ei;
+		ei.jid = i;
+		jr.set_edge_info(p, ei);
 	}
 
 	return 0;
@@ -223,8 +144,8 @@ int bundle::draw_junction_graph(const string &file)
 	MIS mis;
 	for(int i = 0; i < jr.num_vertices(); i++)
 	{
-		double w = jr.get_vertex_weight(i);
-		sprintf(buf, "%.0lf", w);
+		int32_t p = jr.get_vertex_info(i).pos;
+		sprintf(buf, "%d", p);
 		mis.insert(PIS(i, buf));
 	}
 
@@ -232,8 +153,8 @@ int bundle::draw_junction_graph(const string &file)
 	edge_iterator it1, it2;
 	for(tie(it1, it2) = jr.edges(); it1 != it2; it1++)
 	{
-		double w = jr.get_edge_weight(*it1);
-		sprintf(buf, "%.0lf", w);
+		int jid = jr.get_edge_info(*it1).jid;
+		sprintf(buf, "%d", jid);
 		mes.insert(PES(*it1, buf));
 	}
 
@@ -271,8 +192,8 @@ int bundle::search_junction_graph(int32_t p)
 	while(l < r)
 	{
 		int m = (l + r) / 2;
-		int32_t p1 = (int32_t)(jr.get_vertex_weight(m));
-		int32_t p2 = (int32_t)(jr.get_vertex_weight(m + 1));
+		int32_t p1 = jr.get_vertex_info(m).pos;
+		int32_t p2 = jr.get_vertex_info(m + 1).pos;
 		assert(p1 < p2);
 		if(p >= p1 && p < p2) return m;
 		if(p < p1) r = m;
@@ -312,11 +233,11 @@ int bundle::traverse_junction_graph1(int s, int t, VE &ve)
 			if(ss < s) continue;
 
 			double w = 0;
-			int id = (int)(jr.get_edge_weight(*it1));
+			int id = jr.get_edge_info(*it1).jid;
 			if(id < 0) 
 			{
 				assert(ss == k - 1);
-				w = jr.get_vertex_weight(k) - jr.get_vertex_weight(ss);
+				w = jr.get_vertex_info(k).pos - jr.get_vertex_info(ss).pos;
 
 				if(v1[ss - s] + w < ww1)
 				{
@@ -368,7 +289,7 @@ int bundle::traverse_junction_graph1(int s, int t, VE &ve)
 	while(ve2[k] != null_edge)
 	{
 		ve.push_back(ve2[k]);
-		int id = (int)(jr.get_edge_weight(ve2[k]));
+		int id = jr.get_edge_info(ve2[k]).jid;
 		k = ve2[k]->source() - s;
 		if(id < 0) break;
 	}
@@ -402,11 +323,11 @@ int bundle::traverse_junction_graph(int s, int t, VE &ve)
 			if(ss < s) continue;
 
 			double w = 0;
-			int id = (int)(jr.get_edge_weight(*it1));
+			int id = jr.get_edge_info(*it1).jid;
 			if(id < 0) 
 			{
 				assert(ss == k - 1);
-				w = jr.get_vertex_weight(k) - jr.get_vertex_weight(ss);
+				w = jr.get_vertex_info(k).pos - jr.get_vertex_info(ss).pos;
 			}
 
 			if(v1[ss - s] + w < ww)
@@ -430,22 +351,38 @@ int bundle::traverse_junction_graph(int s, int t, VE &ve)
 	return (int)(v1[t - s]);
 }
 
-int bundle::process_hits()
+int bundle::align_hits()
 {
 	imap.clear();
+	jmap.clear();
 	for(int i = 0; i < hits.size(); i++)
 	{
 		hit &h = hits[i];
-		vector<int64_t> vv;
+		vector<int64_t> vm;
+		vector<int64_t> vi;
+		vector<int64_t> vd;
 
-		if(use_paired_end == false || h.isize < 0) h.get_matched_intervals(vv);
-		else compute_read1_intervals(h, vv);
+		h.get_mid_intervals(vm, vi, vd);
 
-		for(int k = 0; k < vv.size(); k++)
+		for(int k = 0; k < vm.size(); k++)
 		{
-			int32_t s = high32(vv[k]);
-			int32_t t = low32(vv[k]);
+			int32_t s = high32(vm[k]);
+			int32_t t = low32(vm[k]);
 			imap += make_pair(ROI(s, t), 1);
+		}
+
+		for(int k = 0; k < vi.size(); k++)
+		{
+			int32_t s = high32(vi[k]);
+			int32_t t = low32(vi[k]);
+			jmap += make_pair(ROI(s, t), 1);
+		}
+
+		for(int k = 0; k < vd.size(); k++)
+		{
+			int32_t s = high32(vd[k]);
+			int32_t t = low32(vd[k]);
+			jmap += make_pair(ROI(s, t), 1);
 		}
 	}
 	return 0;
@@ -453,7 +390,7 @@ int bundle::process_hits()
 
 bool bundle::verify_unique_mapping(const hit &h)
 {
-	//printf("verify hit: ");
+	if((h.flag & 0x8) >= 1) return true;
 	if(h.mpos < h.rpos) return true;
 
 	int li = search_junction_graph(h.rpos - 1);
@@ -491,27 +428,28 @@ bool bundle::verify_unique_mapping(const hit &h)
 
 int bundle::compute_read1_intervals(const hit &h, vector<int64_t> &vv)
 {
-	//assert(verify_unique_mapping(h) == true);
+	assert(verify_unique_mapping(h) == true);
+
 	vv.clear();
 	if(h.isize < 0) return 0;
 
-	vector<int64_t> v;
-	h.get_matched_intervals(v);
-	for(int k = 0; k < v.size(); k++)
+	vector<int64_t> vm;
+	h.get_matched_intervals(vm);
+	for(int k = 0; k < vm.size(); k++)
 	{
-		int32_t s = high32(v[k]);
-		int32_t t = low32(v[k]);
+		int32_t s = high32(vm[k]);
+		int32_t t = low32(vm[k]);
 		if(s >= h.mpos) break;
 		if(t >= h.mpos) t = h.mpos;
-		vv.push_back(v[k]);
+		vv.push_back(vm[k]);
 	}
 
 	if(h.rpos >= h.mpos) return 0;
 
 	int li = search_junction_graph(h.rpos - 1);
 	assert(li >= 0 && li < jr.num_vertices() - 1);
-	int32_t l1 = (int32_t)(jr.get_vertex_weight(li));
-	int32_t l2 = (int32_t)(jr.get_vertex_weight(li + 1));
+	int32_t l1 = jr.get_vertex_info(li).pos;
+	int32_t l2 = jr.get_vertex_info(li + 1).pos;
 	assert(h.rpos - 1 >= l1 && h.rpos - 1 < l2);
 	
 	if(h.mpos <= l2)
@@ -523,8 +461,8 @@ int bundle::compute_read1_intervals(const hit &h, vector<int64_t> &vv)
 	int ri = search_junction_graph(h.mpos);
 	assert(ri >= 0 && ri < jr.num_vertices() - 1);
 	assert(ri > li);
-	int32_t r1 = (int32_t)(jr.get_vertex_weight(ri));
-	int32_t r2 = (int32_t)(jr.get_vertex_weight(ri + 1));
+	int32_t r1 = jr.get_vertex_info(ri).pos;
+	int32_t r2 = jr.get_vertex_info(ri + 1).pos;
 	assert(h.mpos >= r1 && h.mpos < r2);
 
 	vv.push_back(pack(h.rpos, l2));
@@ -532,77 +470,8 @@ int bundle::compute_read1_intervals(const hit &h, vector<int64_t> &vv)
 	return 0;
 }
 
-int bundle::build_super_region(int s, super_region &sr)
+int bundle::build_regions()
 {
-	assert(s >= 0 && s < jr.num_vertices() - 1);
-
-	// find the right position
-	int t = s + 1;
-	edge_iterator it1, it2;
-	for(; t < jr.num_vertices() - 1; t++)
-	{
-		bool b = true;
-		for(tie(it1, it2) = jr.in_edges(t); it1 != it2; it1++)
-		{
-			if((*it1)->source() != t - 1) b = false;
-			if(b == false) break;
-		}
-		if(b == false) break;
-
-		for(tie(it1, it2) = jr.out_edges(t); it1 != it2; it1++)
-		{
-			if((*it1)->target() != t + 1) b = false;
-			if(b == false) break;
-		}
-		if(b == false) break;
-	}
-
-	sr.clear();
-
-	if((t - s) % 2 == 0) t--;
-
-	for(int i = s; i < t; i += 2)
-	{
-		// check region (i, i + 1)
-		int32_t lpos = (int32_t)(jr.get_vertex_weight(i));
-		int32_t rpos = (int32_t)(jr.get_vertex_weight(i + 1));
-
-		int ltype = jr.get_vertex_info(i).type; 
-		int rtype = jr.get_vertex_info(i + 1).type; 
-
-		//if(ltype == LEFT_RIGHT_SPLICE) ltype = RIGHT_SPLICE;
-		//if(rtype == LEFT_RIGHT_SPLICE) rtype = LEFT_SPLICE;
-
-		region r(lpos, rpos, ltype, rtype, &imap);
-
-		if(r.empty == true) return 0;
-
-		sr.add_region(r);
-
-		if(i + 1 >= t) return 0;
-		if(i != s && jr.out_degree(i) != 1) return 0;
-		if(i != t - 1 && jr.in_degree(i + 1) != 1) return 0;
-
-		// check region (i + 1, i + 2)
-		if(jr.out_degree(i + 1) != 2) return 0;
-		if(jr.in_degree(i + 2) != 2) return 0;
-
-		lpos = (int32_t)(jr.get_vertex_weight(i + 1));
-		rpos = (int32_t)(jr.get_vertex_weight(i + 2));
-		ltype = jr.get_vertex_info(i + 1).type; 
-		rtype = jr.get_vertex_info(i + 2).type; 
-
-		region r0(lpos, rpos, ltype, rtype, &imap);
-
-		if(r0.empty == false) return 0;
-	}
-	return 0;
-}
-
-int bundle::build_partial_exons1()
-{
-	rs.clear();
-
 	for(int k = 0; k < jr.num_vertices() - 1; k++)
 	{
 		int32_t lpos = (int32_t)(jr.get_vertex_weight(k));
@@ -611,41 +480,23 @@ int bundle::build_partial_exons1()
 		int ltype = jr.get_vertex_info(k).type; 
 		int rtype = jr.get_vertex_info(k + 1).type; 
 
-		//if(ltype == LEFT_RIGHT_SPLICE) ltype = RIGHT_SPLICE;
-		//if(rtype == LEFT_RIGHT_SPLICE) rtype = LEFT_SPLICE;
+		if(ltype == LEFT_RIGHT_SPLICE) ltype = RIGHT_SPLICE;
+		if(rtype == LEFT_RIGHT_SPLICE) rtype = LEFT_SPLICE;
 
-		region r(lpos, rpos, ltype, rtype, &imap);
-		rs.push_back(r);
-	}
-
-	for(int i = 0; i < rs.size(); i++)
-	{
-		region &r = rs[i];
-		vector<partial_exon> v;
-		r.build_partial_exons(v);
-		pexons.insert(pexons.end(), v.begin(), v.end());
+		regions.push_back(region(lpos, rpos, ltype, rtype, &imap, &jmap));
 	}
 
 	return 0;
 }
 
-int bundle::build_partial_exons2()
+int bundle::build_partial_exons()
 {
-	for(int k = 0; k < jr.num_vertices() - 1;)
+	for(int i = 0; i < regions.size(); i++)
 	{
-		super_region sr(&imap);
-		build_super_region(k, sr);
-		if(sr.size() >= 1) srs.push_back(sr);
-
-		if(sr.size() == 0) k++;
-		else k += sr.size() * 2 - 1;
-	}
-
-	for(int i = 0; i < srs.size(); i++)
-	{
-		super_region &sr = srs[i];
-		sr.build();
-		pexons.insert(pexons.end(), sr.pexons.begin(), sr.pexons.end());
+		region &r = regions[i];
+		vector<partial_exon> v;
+		r.build_partial_exons(v);
+		pexons.insert(pexons.end(), v.begin(), v.end());
 	}
 
 	return 0;
@@ -667,7 +518,7 @@ int bundle::search_partial_exons(int32_t x)
 	return -1;
 }
 
-int bundle::infer_hyper_edges()
+int bundle::build_hyper_edges()
 {
 	vector<int> list;
 	map<string, PI> m;
@@ -791,17 +642,17 @@ int bundle::link_partial_exons()
 		MPI::iterator li = rm.find(b.lpos);
 		MPI::iterator ri = lm.find(b.rpos);
 
-		// TODO
-		//assert(li != rm.end());
-		//assert(ri != lm.end());
+		assert(li != rm.end());
+		assert(ri != lm.end());
+
 		if(li != rm.end() && ri != lm.end())
 		{
-			b.lrgn = li->second;
-			b.rrgn = ri->second;
+			b.lexon = li->second;
+			b.rexon = ri->second;
 		}
 		else
 		{
-			b.lrgn = b.rrgn = -1;
+			b.lexon = b.rexon = -1;
 		}
 	}
 	return 0;
@@ -871,14 +722,14 @@ int bundle::build_splice_graph(splice_graph &gr, vector<hyper_edge> &vhe) const
 	{
 		const junction &b = junctions[i];
 
-		if(b.lrgn < 0 || b.rrgn < 0) continue;
+		if(b.lexon < 0 || b.rexon < 0) continue;
 
-		const partial_exon &x = pexons[b.lrgn];
-		const partial_exon &y = pexons[b.rrgn];
+		const partial_exon &x = pexons[b.lexon];
+		const partial_exon &y = pexons[b.rexon];
 
 		//double sd = 0.5 * x.dev + 0.5 * y.dev;
 		double sd = 1.0;
-		edge_descriptor p = gr.add_edge(b.lrgn + 1, b.rrgn + 1);
+		edge_descriptor p = gr.add_edge(b.lexon + 1, b.rexon + 1);
 		assert(b.count >= 1);
 		gr.set_edge_weight(p, b.count);
 		gr.set_edge_info(p, edge_info());
@@ -929,9 +780,9 @@ int bundle::print(int index) const
 	}
 
 	// print regions
-	for(int i = 0; i < rs.size(); i++)
+	for(int i = 0; i < regions.size(); i++)
 	{
-		rs[i].print(i);
+		regions[i].print(i);
 	}
 
 	// print junctions 
@@ -1008,38 +859,3 @@ int bundle::output_gtf(ofstream &fout, const vector<path> &paths, const string &
 	return 0;
 }
 
-int bundle::print_5end_coverage() const
-{
-	if(pexons.size() == 0) return 0;
-
-	int n = 500;
-	const partial_exon &p = pexons[0];
-	if(p.rpos - p.lpos <= n) return 0;
-
-	int k = 0;
-	for(int32_t i = p.lpos; i < p.lpos + n; i++)
-	{
-		int32_t c = compute_overlap(imap, i);
-		printf("5end coverage %d %d\n", k++, c);
-	}
-
-	return 0;
-}
-
-int bundle::print_3end_coverage() const
-{
-	if(pexons.size() == 0) return 0;
-
-	int n = 500;
-	const partial_exon &p = pexons[pexons.size() - 1];
-	if(p.rpos - p.lpos <= n) return 0;
-
-	int k = 0;
-	for(int32_t i = p.rpos - 1; i >= p.rpos - n; i--)
-	{
-		int32_t c = compute_overlap(imap, i);
-		printf("3end coverage %d %d\n", k++, c);
-	}
-
-	return 0;
-}

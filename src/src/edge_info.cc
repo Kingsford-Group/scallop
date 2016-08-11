@@ -5,6 +5,7 @@ edge_info::edge_info()
 {
 	infer = false;
 	type = 0;
+	jid = -1;
 }
 
 edge_info::edge_info(int l)
@@ -12,6 +13,7 @@ edge_info::edge_info(int l)
 {
 	infer = false;
 	type = 0;
+	jid = -1;
 }
 
 edge_info::edge_info(const edge_info &ei)
@@ -20,4 +22,5 @@ edge_info::edge_info(const edge_info &ei)
 	length = ei.length;
 	infer = ei.infer;
 	type = ei.type;
+	jid = ei.jid;
 }

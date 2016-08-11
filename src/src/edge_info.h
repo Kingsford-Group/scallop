@@ -13,6 +13,7 @@ public:
 	int length;
 	bool infer;
 	int type;
+	int jid;		// junction id
 };
 
 #endif

@@ -14,7 +14,7 @@ typedef pair<int, int> PI;
 class region
 {
 public:
-	region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_imap);
+	region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_imap, const split_interval_map *_jmap);
 	~region();
 
 public:
@@ -22,7 +22,8 @@ public:
 	int32_t rpos;					// the rightmost boundary on reference
 	int ltype;						// type of the left boundary
 	int rtype;						// type of the right boundary
-	const split_interval_map *imap;	// pointer to a interval map
+	const split_interval_map *imap;	// pointer to match interval map
+	const split_interval_map *jmap;	// pointer to indel interval map
 
 	int32_t lcore;					// left core position
 	int32_t rcore;					// right core position

@@ -5,6 +5,8 @@
 #include <vector>
 #include <string>
 
+#include "interval_map.h"
+
 using namespace std;
 
 class partial_exon
@@ -17,6 +19,8 @@ public:
 	int32_t rpos;					// the rightmost boundary on reference
 	int ltype;						// type of the left boundary
 	int rtype;						// type of the right boundary
+
+	split_interval_map imap;		// interval map
 
 	double ave;						// average abundance
 	double dev;						// standard-deviation of abundance

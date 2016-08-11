@@ -53,6 +53,7 @@ public:
 public:
 	int print() const;
 	int get_splice_positions(vector<int64_t> &v) const;
+	int get_mid_intervals(vector<int64_t> &vm, vector<int64_t> &vi, vector<int64_t> &vd) const;
 	int get_matched_intervals(vector<int64_t> &v) const;
 };
 

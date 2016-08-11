@@ -101,7 +101,6 @@ int hit::get_splice_positions(vector<int64_t> &v) const
 		if (bam_cigar_type(bam_cigar_op(cigar[k]))&2)
 			p += bam_cigar_oplen(cigar[k]);
 
-		// must be flanked by matchings (with minimum length requirement of min_flank_length: TODO)
 		if(k == 0 || k == n_cigar - 1) continue;
 		if(bam_cigar_op(cigar[k]) != BAM_CREF_SKIP) continue;
 		if(bam_cigar_op(cigar[k-1]) != BAM_CMATCH) continue;
@@ -115,34 +114,43 @@ int hit::get_splice_positions(vector<int64_t> &v) const
     return 0;
 }
 
-int hit::get_matched_intervals(vector<int64_t> & v) const
+int hit::get_mid_intervals(vector<int64_t> &vm, vector<int64_t> &vi, vector<int64_t> &vd) const
 {
-	v.clear();
+	vm.clear();
+	vi.clear();
+	vd.clear();
 	int32_t p = pos;
     for(int k = 0; k < n_cigar; k++)
 	{
 		if (bam_cigar_type(bam_cigar_op(cigar[k]))&2)
+		{
 			p += bam_cigar_oplen(cigar[k]);
+		}
 
-		// must be flanked by matchings (with minimum length requirement of min_flank_length: TODO)
-		if(bam_cigar_op(cigar[k]) != BAM_CMATCH) continue;
-		if(bam_cigar_oplen(cigar[k]) <= min_flank_length) continue;
+		if(bam_cigar_op(cigar[k]) == BAM_CMATCH)
+		{
+			int32_t s = p - bam_cigar_oplen(cigar[k]);
+			vm.push_back(pack(s, p));
+		}
 
-		int32_t s = p - bam_cigar_oplen(cigar[k]);
-		v.push_back(pack(s, p));
+		if(bam_cigar_op(cigar[k]) == BAM_CINS)
+		{
+			vi.push_back(pack(p - 1, p + 1));
+		}
+
+		if(bam_cigar_op(cigar[k]) == BAM_CDEL)
+		{
+			int32_t s = p - bam_cigar_oplen(cigar[k]);
+			vd.push_back(pack(s, p));
+		}
 	}
-
-	// TODO: debug
-	/*
-	int32_t sum = 0;
-	for(int i = 0; i < v.size(); i++)
-	{
-		sum += high32(v[i]) - low32(v[i]);
-	}
-	printf("read %s matched size = %d\n", qname.c_str(), sum);
-	*/
-
     return 0;
+}
+
+int hit::get_matched_intervals(vector<int64_t> &v) const
+{
+	vector<int64_t> vi, vd;
+	return get_mid_intervals(v, vi, vd);
 }
 
 /*

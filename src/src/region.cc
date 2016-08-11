@@ -6,8 +6,8 @@
 
 using namespace std;
 
-region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_imap)
-	:lpos(_lpos), rpos(_rpos), imap(_imap), ltype(_ltype), rtype(_rtype)
+region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_imap, const split_interval_map *_jmap)
+	:lpos(_lpos), rpos(_rpos), imap(_imap), jmap(_jmap), ltype(_ltype), rtype(_rtype)
 {
 	lcore = lpos;
 	rcore = rpos;

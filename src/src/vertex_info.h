@@ -11,6 +11,7 @@ public:
 	vertex_info(const vertex_info &vi);
 
 public:
+	int32_t pos;		// position
 	int32_t lpos;		// left position
 	int32_t rpos;		// right position
 	double stddev;		// standard deviation of read coverage

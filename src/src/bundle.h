@@ -21,9 +21,9 @@ public:
 private:
 	vector<junction> junctions;		// splice junctions
 	splice_graph jr;				// junction graph
-	split_interval_map imap;		// interval map
-	vector<region> rs;				// super regions
-	vector<super_region> srs;		// super regions
+	split_interval_map imap;		// match interval map
+	split_interval_map jmap;		// indel interval map
+	vector<region> regions;			// regions
 	vector<partial_exon> pexons;	// partial exons
 	vector<hyper_edge> hedges;		// hyper edges
 
@@ -31,8 +31,6 @@ public:
 	virtual int build();
 	int build_splice_graph(splice_graph &gr, vector<hyper_edge> &vhe) const;
 	int output_gtf(ofstream &fout, const vector<path> &paths, const string &prefix, int index) const;	
-	int print_5end_coverage() const;
-	int print_3end_coverage() const;
 	int print(int index) const;
 	int size() const;
 
@@ -41,10 +39,8 @@ protected:
 	int check_left_ascending();
 	int check_right_ascending();
 
-	// infer boundaries
-	int infer_junctions();
-
 	// junction graph, for paired-end reads
+	int build_junctions();
 	int build_junction_graph();
 	int draw_junction_graph(const string &file);
 	int search_junction_graph(int32_t p);
@@ -54,19 +50,17 @@ protected:
 	int test_junction_graph();
 
 	// process hits
-	int process_hits();
+	int align_hits();
 	bool verify_unique_mapping(const hit &h);
 	int compute_read1_intervals(const hit &h, vector<int64_t> &vv);
 
 	// build partial exons
-	int build_super_region(int k, super_region &sr);
-	int build_partial_exons1();
-	int build_partial_exons2();
-	int search_partial_exons(int32_t p);
+	int build_regions();
+	int build_partial_exons();
 
 	// super junctions and super partial_exons;
-	int infer_hyper_junctions();
-	int infer_hyper_edges();
+	int build_hyper_edges();
+	int search_partial_exons(int32_t p);
 
 	// store the corresponding pexons in each junction
 	int link_partial_exons();

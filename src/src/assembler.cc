@@ -59,11 +59,12 @@ int assembler::assemble_bam(const string &file)
     while(sam_read1(fn, h, b) >= 0)
 	{
 		bam1_core_t &p = b->core;
-		if((p.flag & 0x4) >= 1) continue;			// read is not mapped, TODO
-		if((p.flag & 0x100) >= 1) continue;		// secondary alignment
-		if(p.n_cigar < 1) continue;				// should never happen
-		if(p.n_cigar > MAX_NUM_CIGAR) continue;	// ignore hits with more than 7 cigar types
-		//if(p.qual <= 4) continue;				// ignore hits with quality-score < 5
+
+		if((p.flag & 0x4) >= 1) continue;			// read is not mapped
+		if((p.flag & 0x100) >= 1) continue;			// secondary alignment
+		if(p.n_cigar < 1) continue;					// should never happen
+		if(p.n_cigar > MAX_NUM_CIGAR) continue;		// ignore hits with more than 7 cigar types
+		//if(p.qual <= min_quality_score) continue;	// ignore hits with quality-score < 5
 		
 		if(bb1.get_num_hits() > 0 && (bb1.get_rpos() + min_bundle_gap < p.pos || p.tid != bb1.get_tid()))
 		{

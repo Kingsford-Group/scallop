@@ -13,7 +13,8 @@ using namespace std;
 #define END_BOUNDARY 2
 #define LEFT_SPLICE 3
 #define RIGHT_SPLICE 4
-#define MIDDLE_CUT 5
+#define LEFT_RIGHT_SPLICE 5
+#define MIDDLE_CUT 6
 
 #define TRIVIAL 0
 #define NORMAL 1
