@@ -22,6 +22,8 @@ int bundle::build()
 	build_junctions();
 	build_junction_graph();
 	align_hits();
+	build_regions();
+	build_partial_exons();
 	build_hyper_edges();
 	link_partial_exons();
 	return 0;
@@ -175,7 +177,7 @@ int bundle::test_junction_graph()
 			{
 				int s = ve[k]->source();
 				int t = ve[k]->target();
-				int id = (int)(jr.get_edge_weight(ve[k]));
+				int id = jr.get_edge_info(ve[k]).jid;
 				printf("(%d, %d, %d) <- ", s, t, id);
 			}
 			printf(" START\n");
@@ -364,6 +366,8 @@ int bundle::align_hits()
 
 		h.get_mid_intervals(vm, vi, vd);
 
+		h.print();
+
 		for(int k = 0; k < vm.size(); k++)
 		{
 			int32_t s = high32(vm[k]);
@@ -375,6 +379,7 @@ int bundle::align_hits()
 		{
 			int32_t s = high32(vi[k]);
 			int32_t t = low32(vi[k]);
+			printf("add insertion (%d, %d)\n", s, t);
 			jmap += make_pair(ROI(s, t), 1);
 		}
 
@@ -382,9 +387,18 @@ int bundle::align_hits()
 		{
 			int32_t s = high32(vd[k]);
 			int32_t t = low32(vd[k]);
+			printf("add deletion (%d, %d)\n", s, t);
 			jmap += make_pair(ROI(s, t), 1);
 		}
 	}
+
+	// Test jmap
+	SIMI::iterator jit;
+	for(jit = jmap.begin(); jit != jmap.end(); jit++)
+	{
+		printf("jmap (%d, %d) -> %d\n", lower(jit->first), upper(jit->first), jit->second);
+	}
+
 	return 0;
 }
 
@@ -397,8 +411,8 @@ bool bundle::verify_unique_mapping(const hit &h)
 	if(li < 0) return false;
 	assert(li >= 0 && li < jr.num_vertices() - 1);
 
-	int32_t l1 = (int32_t)(jr.get_vertex_weight(li));
-	int32_t l2 = (int32_t)(jr.get_vertex_weight(li + 1));
+	int32_t l1 = jr.get_vertex_info(li).pos;
+	int32_t l2 = jr.get_vertex_info(li + 1).pos;
 	assert(h.rpos - 1 >= l1 && h.rpos - 1 < l2);
 	
 	//printf("li = %d, l1 = %d, l2 = %d\n", li, l1, l2);
@@ -410,8 +424,8 @@ bool bundle::verify_unique_mapping(const hit &h)
 	assert(ri >= 0 && ri < jr.num_vertices() - 1);
 	assert(ri > li);
 
-	int32_t r1 = (int32_t)(jr.get_vertex_weight(ri));
-	int32_t r2 = (int32_t)(jr.get_vertex_weight(ri + 1));
+	int32_t r1 = jr.get_vertex_info(ri).pos;
+	int32_t r2 = jr.get_vertex_info(ri + 1).pos;
 	assert(h.mpos >= r1 && h.mpos < r2);
 
 	int d1 = r1 - l2;
@@ -474,8 +488,8 @@ int bundle::build_regions()
 {
 	for(int k = 0; k < jr.num_vertices() - 1; k++)
 	{
-		int32_t lpos = (int32_t)(jr.get_vertex_weight(k));
-		int32_t rpos = (int32_t)(jr.get_vertex_weight(k + 1));
+		int32_t lpos = jr.get_vertex_info(k).pos;
+		int32_t rpos = jr.get_vertex_info(k + 1).pos;
 
 		int ltype = jr.get_vertex_info(k).type; 
 		int rtype = jr.get_vertex_info(k + 1).type; 
@@ -496,7 +510,8 @@ int bundle::build_partial_exons()
 	{
 		region &r = regions[i];
 		if(r.empty == true) continue;
-		partial_exon pe(r.lcore, r.rcore, r.ltype, r.rtype);
+		partial_exon pe(r.lpos, r.rpos, r.ltype, r.rtype);
+		evaluate_rectangle(imap, r.lpos, r.rpos, pe.ave, pe.dev);
 		pexons.push_back(pe);
 	}
 
@@ -775,10 +790,12 @@ int bundle::print(int index) const
 	printf("tid = %d, #hits = %lu, range = %s:%d-%d, orient = %c %s\n",
 			tid, hits.size(), chrm.c_str(), lpos, rpos, strand, (pexons.size() >= 100 ? "[monster]" : ""));
 	// print hits
+	/*
 	for(int i = 0; i < hits.size(); i++)
 	{
 		hits[i].print();
 	}
+	*/
 
 	// print regions
 	for(int i = 0; i < regions.size(); i++)

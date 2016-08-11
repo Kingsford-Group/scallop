@@ -24,12 +24,18 @@ public:
 	const split_interval_map *imap;	// pointer to match interval map
 	const split_interval_map *jmap;	// pointer to indel interval map
 
-	int32_t lcore;					// left core position
-	int32_t rcore;					// right core position
 	bool empty;						// whether this region is completely spliced
+	int32_t lmid;					// >= 0, if reads starts from lpos
+	int32_t rmid;					// >= 0, if reads ends at rpos
+
+private:
+	SIMI lit;
+	SIMI rit;
 
 public:
-	int init();
+	int check_left_region();
+	int check_right_region();
+	bool empty_subregion(int32_t p1, int32_t p2);
 	int print(int index) const;
 };
 

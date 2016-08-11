@@ -147,7 +147,6 @@ int assembler::process_bundle(bundle_base &bb, bam_hdr_t *h, int &index, ofstrea
 
 	if(output_file != "") bd.output_gtf(fout, sc.paths, algo, index);
 
-
 	if(fixed_gene_name != "" && name == fixed_gene_name) return 1;
 	else return 0;
 }

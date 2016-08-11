@@ -37,6 +37,8 @@ extern int32_t average_read_length;
 extern bool identify_slopes;
 extern int32_t average_slope_length;
 extern double min_average_overlap;
+extern double max_indel_ratio;
+extern int32_t min_subregion_length;
 extern int min_max_region_overlap;
 extern double min_region_coverage;
 extern int max_num_bundles;
