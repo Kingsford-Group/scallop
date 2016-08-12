@@ -1,5 +1,6 @@
 #include "compare.h"
 #include <cassert>
+#include <cmath>
 
 int remove_single_exon_transcripts(genome &gm)
 {
@@ -24,10 +25,18 @@ bool compare_structure(const transcript &x, const transcript &y)
 bool compare_intron_chain(const transcript &x, const transcript &y)
 {
 	if(x.exons.size() != y.exons.size()) return false;
+	double diff1;
+	double diff2;
 	for(int i = 0; i < x.exons.size(); i++)
 	{
-		if(i >= 1 && x.exons[i].first != y.exons[i].first) return false;
-		if(i < x.exons.size() - 1 && x.exons[i].second != y.exons[i].second) return false;
+		if(i == 0) diff1 = 200;
+		else diff1 = 0.5;
+
+		if(i == x.exons.size() - 1) diff2 = 200;
+		else diff2 = 0.5;
+
+		if(fabs(x.exons[i].first - y.exons[i].first) > diff1) return false;
+		if(fabs(x.exons[i].second - y.exons[i].second) > diff2) return false;
 	}
 	return true;
 }
