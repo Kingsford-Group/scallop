@@ -37,6 +37,7 @@ public:
 	int check_right_region();
 	bool empty_subregion(int32_t p1, int32_t p2);
 	int print(int index) const;
+	int build_partial_exons(vector<partial_exon> &pexons);
 };
 
 #endif

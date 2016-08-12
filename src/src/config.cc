@@ -15,9 +15,9 @@ int min_flank_length = 1;
 int32_t average_read_length = 100;
 int32_t average_slope_length = 240;
 int32_t min_bundle_gap = 100;
-int min_num_hits_in_bundle = 20;
+int min_num_hits_in_bundle = 10;
 int32_t min_splice_boundary_hits = 1;
-uint32_t min_max_splice_boundary_qual = 3;
+uint32_t min_mapping_quality = 5;
 double max_indel_ratio = 0.2;
 double min_average_overlap = 3.0;
 int32_t min_subregion_length = 50;
@@ -72,7 +72,7 @@ int print_parameters()
 	printf("min_bundle_gap = %d\n", min_bundle_gap);
 	printf("min_num_hits_in_bundle = %d\n", min_num_hits_in_bundle);
 	printf("min_splice_boundary_hits = %d\n", min_splice_boundary_hits);
-	printf("min_max_splice_boundary_qual = %d\n", min_max_splice_boundary_qual);
+	printf("min_mapping_quality = %d\n", min_mapping_quality);
 	printf("min_average_overlap = %.2lf\n", min_average_overlap);
 	printf("max_indel_ratio = %.2lf\n", max_indel_ratio);
 	printf("min_subregion_length = %d\n", min_subregion_length);
@@ -171,9 +171,9 @@ bool parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "-R")
 		{
 			// default setting for real dataset
-			min_splice_boundary_hits = 3;
+			min_splice_boundary_hits = 2;
 			identify_slopes = false;
-			min_num_hits_in_bundle = 50;
+			min_num_hits_in_bundle = 20;
 			min_bundle_gap = 50;
 		}
 	}

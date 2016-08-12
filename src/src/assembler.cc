@@ -64,7 +64,7 @@ int assembler::assemble_bam(const string &file)
 		if((p.flag & 0x100) >= 1) continue;			// secondary alignment
 		if(p.n_cigar < 1) continue;					// should never happen
 		if(p.n_cigar > MAX_NUM_CIGAR) continue;		// ignore hits with more than 7 cigar types
-		//if(p.qual <= min_quality_score) continue;	// ignore hits with quality-score < 5
+		if(p.qual < min_mapping_quality) continue;	// ignore hits with quality-score < 5
 		
 		if(bb1.get_num_hits() > 0 && (bb1.get_rpos() + min_bundle_gap < p.pos || p.tid != bb1.get_tid()))
 		{
@@ -142,7 +142,7 @@ int assembler::process_bundle(bundle_base &bb, bam_hdr_t *h, int &index, ofstrea
 		gg.build_splice_graph(gt);
 
 		sgraph_compare sgc(gt, gr);
-		sgc.compare();
+		sgc.compare(string("compare.") + tostring(index) + string(".tex"));
 	}
 
 	if(output_file != "") bd.output_gtf(fout, sc.paths, algo, index);

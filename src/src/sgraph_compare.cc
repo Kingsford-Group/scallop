@@ -6,7 +6,7 @@ sgraph_compare::sgraph_compare(const splice_graph &g1, const splice_graph &g2)
 	:gr1(g1), gr2(g2)
 {}
 
-int sgraph_compare::compare()
+int sgraph_compare::compare(const string &file)
 {
 	imap.clear();
 	build_split_interval_map(gr1);
@@ -18,7 +18,7 @@ int sgraph_compare::compare()
 	add_existing_edges(gr1, gr3, 3);
 	add_existing_edges(gr2, gr3, 4);
 
-	draw(gr3, "compare.tex");
+	draw(gr3, file);
 
 	identify_unique_boundary_edges();
 

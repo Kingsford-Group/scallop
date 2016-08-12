@@ -16,6 +16,10 @@ region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split
 	check_left_region();
 	check_right_region();
 	if(lmid == lpos && rmid == rpos) empty = true;
+
+	print(99);
+	if(lmid != rpos) assert(lmid < rmid);
+	if(rmid != lpos) assert(lmid < rmid);
 }
 
 region::~region()
@@ -57,7 +61,7 @@ int region::check_right_region()
 
 	int32_t epsilon = 1;
 	if(rtype == LEFT_SPLICE) rmid = rpos - epsilon;
-	else if(rpos != upper(lit->first)) return 0;
+	else if(rpos != upper(rit->first)) return 0;
 
 	SIMI it = rit;
 	while(true)
@@ -102,6 +106,52 @@ bool region::empty_subregion(int32_t p1, int32_t p2)
 	if(indel * 1.0 * ratio > max_indel_ratio) return true;
 
 	return false;
+}
+
+int region::build_partial_exons(vector<partial_exon> &pexons)
+{
+	pexons.clear();
+
+	if(empty == true) return 0;
+	if(lmid != rpos) assert(lmid < rmid);
+	if(rmid != lpos) assert(lmid < rmid);
+
+	if(lmid == rpos)
+	{
+		partial_exon pe(lpos, rpos, ltype, rtype);
+		evaluate_rectangle(*imap, pe.lpos, pe.rpos, pe.ave, pe.dev);
+		pexons.push_back(pe);
+		return 0;
+	}
+
+	if(lmid == lpos)
+	{
+		assert(rmid < rpos);
+		assert(rmid > lpos);
+		partial_exon pe(rmid, rpos, START_BOUNDARY, rtype);
+		evaluate_rectangle(*imap, pe.lpos, pe.rpos, pe.ave, pe.dev);
+		pexons.push_back(pe);
+		return 0;
+	}
+
+	assert(lpos < lmid && lmid < rpos);
+
+	if(lpos < lmid)
+	{
+		partial_exon pe(lpos, lmid, ltype, END_BOUNDARY);
+		evaluate_rectangle(*imap, pe.lpos, pe.rpos, pe.ave, pe.dev);
+		pexons.push_back(pe);
+	}
+
+	if(rmid < rpos)
+	{
+		assert(lmid <= rmid);
+		partial_exon pe(rmid, rpos, START_BOUNDARY, rtype);
+		evaluate_rectangle(*imap, pe.lpos, pe.rpos, pe.ave, pe.dev);
+		pexons.push_back(pe);
+	}
+
+	return 0;
 }
 
 int region::print(int index) const

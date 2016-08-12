@@ -509,10 +509,9 @@ int bundle::build_partial_exons()
 	for(int i = 0; i < regions.size(); i++)
 	{
 		region &r = regions[i];
-		if(r.empty == true) continue;
-		partial_exon pe(r.lpos, r.rpos, r.ltype, r.rtype);
-		evaluate_rectangle(imap, r.lpos, r.rpos, pe.ave, pe.dev);
-		pexons.push_back(pe);
+		vector<partial_exon> v;
+		r.build_partial_exons(v);
+		pexons.insert(pexons.end(), v.begin(), v.end());
 	}
 
 	return 0;
