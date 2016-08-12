@@ -25,15 +25,22 @@ bool compare_structure(const transcript &x, const transcript &y)
 bool compare_intron_chain(const transcript &x, const transcript &y)
 {
 	if(x.exons.size() != y.exons.size()) return false;
-	double diff1;
-	double diff2;
+	
+	if(x.exons.size() == 0) return false;
+
+	if(x.exons.size() == 1)
+	{
+		if(fabs(x.exons[0].first - y.exons[0].first) > 100) return false;
+		if(fabs(x.exons[0].second - y.exons[0].second) > 100) return false;
+		return true;
+	}
+
 	for(int i = 0; i < x.exons.size(); i++)
 	{
-		if(i == 0) diff1 = 200;
-		else diff1 = 0.5;
-
-		if(i == x.exons.size() - 1) diff2 = 200;
-		else diff2 = 0.5;
+		double diff1 = 0.5;
+		double diff2 = 0.5;
+		if(i == 0) diff1 = 9999999999;
+		if(i == x.exons.size() - 1) diff2 = 9999999999;
 
 		if(fabs(x.exons[i].first - y.exons[i].first) > diff1) return false;
 		if(fabs(x.exons[i].second - y.exons[i].second) > diff2) return false;
@@ -74,7 +81,7 @@ int compare_transcripts(const vector<transcript> &y, const vector<transcript> &x
 			if(mode == 2)
 			{
 				b = compare_intron_chain(t1, t2);
-				//if(t1.strand != t2.strand) b = false;
+				if(t1.strand != t2.strand) b = false;
 			}
 
 			if(b == false) continue;
