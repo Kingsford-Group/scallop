@@ -30,6 +30,7 @@ using namespace std;
 // user-defined parameters
 extern int min_flank_length;
 extern int32_t min_bundle_gap;
+extern int32_t min_subregion_gap;
 extern int min_num_hits_in_bundle;
 extern int32_t min_splice_boundary_hits;
 extern uint32_t min_mapping_quality;
@@ -62,6 +63,7 @@ extern double infer_root_reliability;
 extern int pseudo_length_count;
 extern double min_boundary_edge_weight_ratio;
 extern double transcript_min_expression;
+extern bool strand_reverse;
 
 extern int min_hyper_edges_count;
 

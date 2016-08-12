@@ -13,7 +13,7 @@ typedef pair<int, int> PI;
 class region
 {
 public:
-	region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_imap, const split_interval_map *_jmap);
+	region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_mmap, const split_interval_map *_imap);
 	~region();
 
 public:
@@ -21,18 +21,21 @@ public:
 	int32_t rpos;					// the rightmost boundary on reference
 	int ltype;						// type of the left boundary
 	int rtype;						// type of the right boundary
-	const split_interval_map *imap;	// pointer to match interval map
-	const split_interval_map *jmap;	// pointer to indel interval map
+	const split_interval_map *mmap;	// pointer to match interval map
+	const split_interval_map *imap;	// pointer to indel interval map
 
 	bool empty;						// whether this region is completely spliced
 	int32_t lmid;					// >= 0, if reads starts from lpos
 	int32_t rmid;					// >= 0, if reads ends at rpos
+	join_interval_map jmap;			// subregion intervals
 
 private:
 	SIMI lit;
 	SIMI rit;
 
 public:
+	int build_join_interval_map();
+	int smooth_join_interval_map();
 	int check_left_region();
 	int check_right_region();
 	bool empty_subregion(int32_t p1, int32_t p2);

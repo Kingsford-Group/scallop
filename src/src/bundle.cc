@@ -355,8 +355,8 @@ int bundle::traverse_junction_graph(int s, int t, VE &ve)
 
 int bundle::align_hits()
 {
+	mmap.clear();
 	imap.clear();
-	jmap.clear();
 	for(int i = 0; i < hits.size(); i++)
 	{
 		hit &h = hits[i];
@@ -366,38 +366,36 @@ int bundle::align_hits()
 
 		h.get_mid_intervals(vm, vi, vd);
 
-		h.print();
-
 		for(int k = 0; k < vm.size(); k++)
 		{
 			int32_t s = high32(vm[k]);
 			int32_t t = low32(vm[k]);
-			imap += make_pair(ROI(s, t), 1);
+			mmap += make_pair(ROI(s, t), 1);
 		}
 
 		for(int k = 0; k < vi.size(); k++)
 		{
 			int32_t s = high32(vi[k]);
 			int32_t t = low32(vi[k]);
-			printf("add insertion (%d, %d)\n", s, t);
-			jmap += make_pair(ROI(s, t), 1);
+			imap += make_pair(ROI(s, t), 1);
 		}
 
 		for(int k = 0; k < vd.size(); k++)
 		{
 			int32_t s = high32(vd[k]);
 			int32_t t = low32(vd[k]);
-			printf("add deletion (%d, %d)\n", s, t);
-			jmap += make_pair(ROI(s, t), 1);
+			imap += make_pair(ROI(s, t), 1);
 		}
 	}
 
-	// Test jmap
+	// Test imap
+	/*
 	SIMI::iterator jit;
-	for(jit = jmap.begin(); jit != jmap.end(); jit++)
+	for(jit = imap.begin(); jit != imap.end(); jit++)
 	{
-		printf("jmap (%d, %d) -> %d\n", lower(jit->first), upper(jit->first), jit->second);
+		printf("imap (%d, %d) -> %d\n", lower(jit->first), upper(jit->first), jit->second);
 	}
+	*/
 
 	return 0;
 }
@@ -415,7 +413,6 @@ bool bundle::verify_unique_mapping(const hit &h)
 	int32_t l2 = jr.get_vertex_info(li + 1).pos;
 	assert(h.rpos - 1 >= l1 && h.rpos - 1 < l2);
 	
-	//printf("li = %d, l1 = %d, l2 = %d\n", li, l1, l2);
 	if(h.mpos < l2) return true;
 
 	int ri = search_junction_graph(h.mpos);
@@ -432,9 +429,6 @@ bool bundle::verify_unique_mapping(const hit &h)
 	assert(d1 >= 0);
 
 	int d2 = traverse_junction_graph1(li + 1, ri);
-
-	//printf("ri = %d, r1 = %d, r2 = %d\n", ri, r1, r2);
-	//printf("d1 = %d, d2 = %d\n", d1, d2);
 
 	if(d2 <= -1 || d1 < d2) return true;
 	else return false;
@@ -497,7 +491,7 @@ int bundle::build_regions()
 		if(ltype == LEFT_RIGHT_SPLICE) ltype = RIGHT_SPLICE;
 		if(rtype == LEFT_RIGHT_SPLICE) rtype = LEFT_SPLICE;
 
-		regions.push_back(region(lpos, rpos, ltype, rtype, &imap, &jmap));
+		regions.push_back(region(lpos, rpos, ltype, rtype, &mmap, &imap));
 	}
 
 	return 0;
@@ -720,8 +714,8 @@ int bundle::build_splice_graph(splice_graph &gr, vector<hyper_edge> &vhe) const
 		if(x.rpos != y.lpos) continue;
 
 		assert(x.rpos == y.lpos);
-		int32_t xr = compute_overlap(imap, x.rpos - 1);
-		int32_t yl = compute_overlap(imap, y.lpos);
+		int32_t xr = compute_overlap(mmap, x.rpos - 1);
+		int32_t yl = compute_overlap(mmap, y.lpos);
 		// TODO
 		double wt = xr < yl ? xr : yl;
 		double sd = 1.0;
@@ -786,8 +780,19 @@ int bundle::build_splice_graph(splice_graph &gr, vector<hyper_edge> &vhe) const
 int bundle::print(int index) const
 {
 	printf("\nBundle %d: ", index);
-	printf("tid = %d, #hits = %lu, range = %s:%d-%d, orient = %c %s\n",
-			tid, hits.size(), chrm.c_str(), lpos, rpos, strand, (pexons.size() >= 100 ? "[monster]" : ""));
+
+	// statistic xs
+	int n0 = 0, np = 0, nq = 0;
+	for(int i = 0; i < hits.size(); i++)
+	{
+		if(hits[i].xs == '.') n0++;
+		if(hits[i].xs == '+') np++;
+		if(hits[i].xs == '-') nq++;
+	}
+
+	printf("tid = %d, #hits = %lu, range = %s:%d-%d, orient = %c (%d, %d, %d) %s\n",
+			tid, hits.size(), chrm.c_str(), lpos, rpos, strand, n0, np, nq, (pexons.size() >= 100 ? "[monster]" : ""));
+
 	// print hits
 	/*
 	for(int i = 0; i < hits.size(); i++)

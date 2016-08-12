@@ -15,6 +15,7 @@ int min_flank_length = 1;
 int32_t average_read_length = 100;
 int32_t average_slope_length = 240;
 int32_t min_bundle_gap = 100;
+int32_t min_subregion_gap = 10;
 int min_num_hits_in_bundle = 10;
 int32_t min_splice_boundary_hits = 1;
 uint32_t min_mapping_quality = 5;
@@ -25,7 +26,7 @@ int min_max_region_overlap = 5;
 double min_region_coverage = 0.5;
 int max_num_bundles = -1;
 int tail_coverage = 8;
-bool identify_slopes = true;
+bool identify_slopes = false;
 int slope_bin_size = 5;
 int slope_min_score = 30;
 int slope_extend_score = 24;
@@ -47,6 +48,7 @@ double max_gateway_error_ratio = 0.3;
 double min_boundary_edge_weight_ratio = 0.05;
 double transcript_min_expression = 15.0;
 int min_hyper_edges_count = 20;
+bool strand_reverse = false;
 
 // for simulation
 int simulation_num_vertices = 0;
@@ -70,6 +72,7 @@ int print_parameters()
 	printf("parameters:\n");
 	printf("min_flank_length = %d\n", min_flank_length);
 	printf("min_bundle_gap = %d\n", min_bundle_gap);
+	printf("min_subregion_gap = %d\n", min_subregion_gap);
 	printf("min_num_hits_in_bundle = %d\n", min_num_hits_in_bundle);
 	printf("min_splice_boundary_hits = %d\n", min_splice_boundary_hits);
 	printf("min_mapping_quality = %d\n", min_mapping_quality);
@@ -91,6 +94,7 @@ int print_parameters()
 	printf("average_slope_length = %d\n", average_slope_length);
 	printf("average_read_length = %d\n", average_read_length);
 	printf("pseudo_length_count = %d\n", pseudo_length_count);
+	printf("strand_reverse = %c\n", strand_reverse ? 'T' : 'F');
 
 	// for algorithm
 	printf("join_min_reliability = %.2lf\n", join_min_reliability);
@@ -163,6 +167,10 @@ bool parse_arguments(int argc, const char ** argv)
 		{
 			use_paired_end = true;
 		}
+		else if(string(argv[i]) == "-s")
+		{
+			strand_reverse = true;
+		}
 		else if(string(argv[i]) == "-x")
 		{
 			transcript_min_expression = atof(argv[i + 1]);
@@ -172,9 +180,9 @@ bool parse_arguments(int argc, const char ** argv)
 		{
 			// default setting for real dataset
 			min_splice_boundary_hits = 2;
-			identify_slopes = false;
 			min_num_hits_in_bundle = 20;
 			min_bundle_gap = 50;
+			min_mapping_quality = 1;
 		}
 	}
 

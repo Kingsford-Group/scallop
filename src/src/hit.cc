@@ -10,6 +10,7 @@ hit::hit(int32_t p)
 {
 	bam1_core_t::pos = p;
 	strand = '.';
+	xs = '.';
 }
 
 hit::hit(const hit &h)
@@ -18,6 +19,7 @@ hit::hit(const hit &h)
 	rpos = h.rpos;
 	qname = h.qname;
 	strand = h.strand;
+	xs = h.xs;
 	for(int i = 0; i < MAX_NUM_CIGAR; i++)
 	{
 		cigar[i] = h.cigar[i];
@@ -42,22 +44,24 @@ hit::hit(bam1_t *b)
 	memcpy(cigar, bam_get_cigar(b), 4 * n_cigar);
 
 	// get strandness
-	strand = '.';
+	xs = '.';
 	uint8_t *p = bam_aux_get(b, "XS");
-	if(p && (*p) == 'A')
-	{
-		strand = bam_aux2A(p);
-	}
+	if(p && (*p) == 'A') xs = bam_aux2A(p);
 
 	/*
 	if(bam_is_rev(b) == true) strand = '-';
 	else strand = '+';
+	*/
 
 	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '+';
-	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '+';
 	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '-';
+	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '+';
 	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '-';
 
+	if(strand_reverse == true && strand == '+') strand = '-';
+	else if(strand_reverse == true && strand == '-') strand = '+';
+
+	/*
 	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '-';
 	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '-';
 	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '+';
