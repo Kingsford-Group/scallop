@@ -81,15 +81,17 @@ int compare_transcripts(const vector<transcript> &y, const vector<transcript> &x
 			if(mode == 2)
 			{
 				b = compare_intron_chain(t1, t2);
+
+				if(b == true)
+				{
+					printf("TRUE %s %s %s %c %s %s %s %c\n", t1.gene_id.c_str(), t1.transcript_id.c_str(), t1.label().c_str(), t1.strand, 
+							t2.gene_id.c_str(), t2.transcript_id.c_str(), t2.label().c_str(), t2.strand);
+				}
+
 				if(t1.strand != t2.strand) b = false;
 			}
 
 			if(b == false) continue;
-
-			//printf("%s %s matched, reference expression = %d predicted expression = %d, strands = (%c, %c)\n", 
-			//	t1.transcript_id.c_str(), t2.transcript_id.c_str(), t1.expression, t2.expression, t1.strand, t2.strand);
-
-			printf("TRUE %s %s %s %s\n", t1.gene_id.c_str(), t1.transcript_id.c_str(), t1.label().c_str(), t2.transcript_id.c_str());
 
 			flag = true;
 			v[j] = true;
@@ -97,7 +99,7 @@ int compare_transcripts(const vector<transcript> &y, const vector<transcript> &x
 			break;
 		}
 
-		if(flag == false) printf("FALSE %s %s %s\n", t1.gene_id.c_str(), t1.transcript_id.c_str(), t1.label().c_str());
+		if(flag == false) printf("FALSE %s %s %s %c\n", t1.gene_id.c_str(), t1.transcript_id.c_str(), t1.label().c_str(), t1.strand);
 	}
 	return cnt;
 }
