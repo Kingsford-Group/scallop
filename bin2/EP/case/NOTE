@@ -1,7 +1,0 @@
-1123: good example, our algorithm might work
-10011: hard case because of splicing events on 3end
-10121: low coverage, splice graph structure issues
-10084: low coverage, identify boundaries of genes
-10071: positive and negative strand
-10116: positive and negative strand
-10146: tiny partial exon, spanned by reads
