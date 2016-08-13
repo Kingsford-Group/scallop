@@ -8,7 +8,6 @@ using namespace std;
 region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_mmap, const split_interval_map *_imap)
 	:lpos(_lpos), rpos(_rpos), mmap(_mmap), imap(_imap), ltype(_ltype), rtype(_rtype)
 {
-	tie(lit, rit) = locate_boundary_iterators(*mmap, lpos, rpos);
 
 	build_join_interval_map();
 	smooth_join_interval_map();
@@ -22,6 +21,9 @@ region::~region()
 int region::build_join_interval_map()
 {
 	jmap.clear();
+
+	SIMI lit, rit;
+	tie(lit, rit) = locate_boundary_iterators(*mmap, lpos, rpos);
 	if(lit == mmap->end() || rit == mmap->end()) return 0;
 
 	SIMI it = lit;

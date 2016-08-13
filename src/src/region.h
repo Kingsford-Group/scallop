@@ -24,8 +24,6 @@ private:
 	const split_interval_map *mmap;	// pointer to match interval map
 	const split_interval_map *imap;	// pointer to indel interval map
 	join_interval_map jmap;			// subregion intervals
-	SIMI lit;						// start pointer to mmap
-	SIMI rit;						// end pointer to mmap
 
 public:
 	vector<partial_exon> pexons;
