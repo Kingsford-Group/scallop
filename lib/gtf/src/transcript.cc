@@ -69,6 +69,14 @@ PI32 transcript::get_bounds() const
 	return PI32(p, q);
 }
 
+string transcript::label() const
+{
+	char buf[10240];
+	PI32 p = get_bounds();
+	sprintf(buf, "%s:%d-%d", seqname.c_str(), p.first, p.second);
+	return string(buf);
+}
+
 int transcript::write(ofstream &fout) const
 {
 	fout.precision(2);

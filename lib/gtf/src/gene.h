@@ -26,6 +26,7 @@ public:
 	int sort();
 	int clear();
 	int set_gene_id(const string &id);
+	int remove_single_exon_transcripts();
 
 	// fetch information
 	string get_gene_id() const;

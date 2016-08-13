@@ -69,6 +69,18 @@ int gene::set_gene_id(const string &id)
 	return 0;
 }
 
+int gene::remove_single_exon_transcripts()
+{
+	vector<transcript> vv;
+	for(int i = 0; i < transcripts.size(); i++)
+	{
+		if(transcripts[i].exons.size() <= 1) continue;
+		vv.push_back(transcripts[i]);
+	}
+	transcripts = vv;
+	return 0;
+}
+
 int gene::sort()
 {
 	std::sort(exons.begin(), exons.end());

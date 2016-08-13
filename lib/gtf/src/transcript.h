@@ -37,6 +37,7 @@ public:
 	int write(ofstream &fout) const;
 	int length() const;
 	PI32 get_bounds() const;
+	string label() const;
 };
 
 #endif
