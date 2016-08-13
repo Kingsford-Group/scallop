@@ -12,6 +12,7 @@ region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split
 
 	build_join_interval_map();
 	smooth_join_interval_map();
+
 	build_partial_exons();
 }
 
@@ -23,9 +24,12 @@ int region::build_join_interval_map()
 	jmap.clear();
 	if(lit == mmap->end() || rit == mmap->end()) return 0;
 
-	for(SIMI it = lit; it != rit; it++)
+	SIMI it = lit;
+	while(true)
 	{
 		jmap += make_pair(it->first, 1);
+		if(it == rit) break;
+		it++;
 	}
 
 	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
@@ -38,8 +42,6 @@ int region::build_join_interval_map()
 
 int region::smooth_join_interval_map()
 {
-	if(lit == mmap->end() || rit == mmap->end()) return 0;
-
 	vector<PI32> v;
 	int32_t p = lpos;
 	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
@@ -51,7 +53,7 @@ int region::smooth_join_interval_map()
 		if(p1 - p <= min_subregion_gap) v.push_back(PI32(p, p1));
 		p = p2;
 	}
-	if(rpos - p <= min_subregion_gap) v.push_back(PI32(p, rpos));
+	if(p < rpos && rpos - p <= min_subregion_gap) v.push_back(PI32(p, rpos));
 
 	for(int i = 0; i < v.size(); i++)
 	{
@@ -148,5 +150,11 @@ int region::print(int index) const
 	int32_t rc = compute_overlap(*mmap, rpos - 1);
 	printf("region %d: partial-exons = %lu, type = (%d, %d), pos = [%d, %d), boundary coverage = (%d, %d)\n", 
 			index, pexons.size(), ltype, rtype, lpos, rpos, lc, rc);
+
+	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
+	{
+		printf(" [%d, %d) -> %d\n", lower(it->first), upper(it->first), it->second);
+	}
+
 	return 0;
 }
