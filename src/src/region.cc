@@ -8,19 +8,11 @@ using namespace std;
 region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_mmap, const split_interval_map *_imap)
 	:lpos(_lpos), rpos(_rpos), mmap(_mmap), imap(_imap), ltype(_ltype), rtype(_rtype)
 {
-	empty = false;
-
 	tie(lit, rit) = locate_boundary_iterators(*mmap, lpos, rpos);
-	if(lit == mmap->end() || rit == mmap->end()) empty = true;
 
 	build_join_interval_map();
-
-	check_left_region();
-	check_right_region();
-	if(lmid == lpos && rmid == rpos) empty = true;
-
-	if(lmid != rpos) assert(lmid < rmid);
-	if(rmid != lpos) assert(lmid < rmid);
+	smooth_join_interval_map();
+	build_partial_exons();
 }
 
 region::~region()
@@ -29,18 +21,24 @@ region::~region()
 int region::build_join_interval_map()
 {
 	jmap.clear();
-	if(empty == true) return 0;
+	if(lit == mmap->end() || rit == mmap->end()) return 0;
 
 	for(SIMI it = lit; it != rit; it++)
 	{
 		jmap += make_pair(it->first, 1);
 	}
+
+	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
+	{
+		assert(it->second == 1);
+	}
+
 	return 0;
 }
 
 int region::smooth_join_interval_map()
 {
-	if(empty == true) return 0;
+	if(lit == mmap->end() || rit == mmap->end()) return 0;
 
 	vector<PI32> v;
 	int32_t p = lpos;
@@ -53,64 +51,17 @@ int region::smooth_join_interval_map()
 		if(p1 - p <= min_subregion_gap) v.push_back(PI32(p, p1));
 		p = p2;
 	}
-	// TODO
-	return 0;
-}
+	if(rpos - p <= min_subregion_gap) v.push_back(PI32(p, rpos));
 
-int region::check_left_region()
-{
-	lmid = lpos;
-	if(empty == true) return 0;
-
-	int32_t epsilon = 1;
-	if(ltype == RIGHT_SPLICE) lmid = lpos + epsilon;
-	else if(lpos != lower(lit->first)) return 0;
-
-	SIMI it = lit;
-	while(true)
+	for(int i = 0; i < v.size(); i++)
 	{
-		if(lower(it->first) > lmid + epsilon) break;
-		lmid = upper(it->first);
-		if(it == rit) break;
-		it++;
+		jmap += make_pair(ROI(v[i].first, v[i].second), 1);
 	}
 
-	if(lmid >= rpos) lmid = rpos;
-	if(lmid == rpos) return 0;
-
-	bool b = empty_subregion(lpos, lmid);
-	if(b == true && ltype != RIGHT_SPLICE) lmid = lpos;
-
-	if(ltype == RIGHT_SPLICE) assert(lmid > lpos);
-
-	return 0;
-}
-
-int region::check_right_region()
-{
-	rmid = rpos;
-	if(empty == true) return 0;
-
-	int32_t epsilon = 1;
-	if(rtype == LEFT_SPLICE) rmid = rpos - epsilon;
-	else if(rpos != upper(rit->first)) return 0;
-
-	SIMI it = rit;
-	while(true)
+	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
 	{
-		if(upper(it->first) < rmid - epsilon) break;
-		rmid = lower(it->first);
-		if(it == lit) break;
-		it--;
+		assert(it->second == 1);
 	}
-
-	if(rmid <= lpos) rmid = lpos;
-	if(rmid == lpos) return 0;
-
-	bool b = empty_subregion(rmid, rpos);
-	if(b == true && rtype != LEFT_SPLICE) rmid = rpos;
-
-	if(rtype == LEFT_SPLICE) assert(rmid < rpos);
 
 	return 0;
 }
@@ -140,15 +91,11 @@ bool region::empty_subregion(int32_t p1, int32_t p2)
 	return false;
 }
 
-int region::build_partial_exons(vector<partial_exon> &pexons)
+int region::build_partial_exons()
 {
 	pexons.clear();
 
-	if(empty == true) return 0;
-	if(lmid != rpos) assert(lmid < rmid);
-	if(rmid != lpos) assert(lmid < rmid);
-
-	if(lmid == rpos)
+	if(jmap.size() == 1 && lower(jmap.begin()->first) == lpos && upper(jmap.begin()->first) == rpos)
 	{
 		partial_exon pe(lpos, rpos, ltype, rtype);
 		evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev);
@@ -156,30 +103,39 @@ int region::build_partial_exons(vector<partial_exon> &pexons)
 		return 0;
 	}
 
-	if(lmid == lpos)
+	if(ltype == RIGHT_SPLICE && jmap.find(ROI(lpos, lpos + 1)) == jmap.end())
 	{
-		assert(rmid < rpos);
-		assert(rmid > lpos);
-		partial_exon pe(rmid, rpos, START_BOUNDARY, rtype);
-		evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev);
-		pexons.push_back(pe);
-		return 0;
-	}
-
-	assert(lpos < lmid && lmid < rpos);
-
-	if(lpos < lmid)
-	{
-		partial_exon pe(lpos, lmid, ltype, END_BOUNDARY);
-		evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev);
+		partial_exon pe(lpos, lpos + 1, ltype, END_BOUNDARY);
+		pe.ave = 1.0;
+		pe.dev = 1.0;
 		pexons.push_back(pe);
 	}
 
-	if(rmid < rpos)
+	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
 	{
-		assert(lmid <= rmid);
-		partial_exon pe(rmid, rpos, START_BOUNDARY, rtype);
+		int32_t p1 = lower(it->first);
+		int32_t p2 = upper(it->first);
+		assert(p1 < p2);
+		
+		bool b = empty_subregion(p1, p2);
+		if(p1 == lpos && ltype == RIGHT_SPLICE) b = false;
+		if(p2 == rpos && rtype == LEFT_SPLICE) b = false;
+
+		if(b == true) continue;
+
+		int lt = (p1 == lpos) ? ltype : START_BOUNDARY;
+		int rt = (p2 == rpos) ? rtype : END_BOUNDARY;
+
+		partial_exon pe(p1, p2, lt, rt);
 		evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev);
+		pexons.push_back(pe);
+	}
+
+	if(rtype == LEFT_SPLICE && jmap.find(ROI(rpos - 1, rpos)) == jmap.end())
+	{
+		partial_exon pe(rpos - 1, rpos, START_BOUNDARY, rtype);
+		pe.ave = 1.0;
+		pe.dev = 1.0;
 		pexons.push_back(pe);
 	}
 
@@ -190,7 +146,7 @@ int region::print(int index) const
 {
 	int32_t lc = compute_overlap(*mmap, lpos);
 	int32_t rc = compute_overlap(*mmap, rpos - 1);
-	printf("region %d: empty = %c, type = (%d, %d), pos = [%d, %d), mid = [%d, %d), boundary coverage = (%d, %d)\n", 
-			index, empty ? 'T' : 'F', ltype, rtype, lpos, rpos, lmid, rmid, lc, rc);
+	printf("region %d: partial-exons = %lu, type = (%d, %d), pos = [%d, %d), boundary coverage = (%d, %d)\n", 
+			index, pexons.size(), ltype, rtype, lpos, rpos, lc, rc);
 	return 0;
 }

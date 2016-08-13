@@ -18,6 +18,7 @@ bundle::~bundle()
 
 int bundle::build()
 {
+	compute_strand();
 	check_left_ascending();
 	build_junctions();
 	build_junction_graph();
@@ -26,6 +27,22 @@ int bundle::build()
 	build_partial_exons();
 	build_hyper_edges();
 	link_partial_exons();
+	return 0;
+}
+
+int bundle::compute_strand()
+{
+	int n0 = 0, np = 0, nq = 0;
+	for(int i = 0; i < hits.size(); i++)
+	{
+		if(hits[i].xs == '.') n0++;
+		if(hits[i].xs == '+') np++;
+		if(hits[i].xs == '-') nq++;
+	}
+
+	if(np > nq) strand = '+';
+	if(np < nq) strand = '-';
+
 	return 0;
 }
 
@@ -503,9 +520,7 @@ int bundle::build_partial_exons()
 	for(int i = 0; i < regions.size(); i++)
 	{
 		region &r = regions[i];
-		vector<partial_exon> v;
-		r.build_partial_exons(v);
-		pexons.insert(pexons.end(), v.begin(), v.end());
+		pexons.insert(pexons.end(), r.pexons.begin(), r.pexons.end());
 	}
 
 	return 0;

@@ -39,6 +39,9 @@ protected:
 	int check_left_ascending();
 	int check_right_ascending();
 
+	// compute strand
+	int compute_strand();
+
 	// junction graph, for paired-end reads
 	int build_junctions();
 	int build_junction_graph();

@@ -167,7 +167,7 @@ bool parse_arguments(int argc, const char ** argv)
 		{
 			use_paired_end = true;
 		}
-		else if(string(argv[i]) == "-s")
+		else if(string(argv[i]) == "-RF")
 		{
 			strand_reverse = true;
 		}
