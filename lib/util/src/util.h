@@ -17,6 +17,8 @@ using namespace std;
 #define low32(x) (int32_t)(((x) << 32) >> 32)
 
 // definitions
+typedef map<int32_t, int32_t> MI32;
+typedef pair<int32_t, int32_t> PI32;
 typedef map<int32_t, int> MPI;
 typedef pair<int32_t, int> PPI;
 typedef pair<int, int> PI;
