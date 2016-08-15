@@ -16,7 +16,7 @@ public:
 	region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_mmap, const split_interval_map *_imap);
 	~region();
 
-private:
+public:
 	int32_t lpos;					// the leftmost boundary on reference
 	int32_t rpos;					// the rightmost boundary on reference
 	int ltype;						// type of the left boundary
@@ -25,8 +25,7 @@ private:
 	const split_interval_map *imap;	// pointer to indel interval map
 	join_interval_map jmap;			// subregion intervals
 
-public:
-	vector<partial_exon> pexons;
+	vector<partial_exon> pexons;	// generated partial exons
 
 public:
 	int print(int index) const;

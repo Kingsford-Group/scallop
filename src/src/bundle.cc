@@ -24,6 +24,9 @@ int bundle::build()
 	build_junction_graph();
 	align_hits();
 	build_regions();
+
+	iterate();
+
 	build_partial_exons();
 	build_hyper_edges();
 	link_partial_exons();
@@ -68,6 +71,41 @@ int bundle::check_right_ascending()
 	return 0;
 }
 
+int bundle::iterate()
+{
+	while(true)
+	{
+		set<int> s;
+		for(int k = 0; k < regions.size(); k++)
+		{
+			region &r = regions[k];
+			if(r.pexons.size() >= 1) continue;
+
+			for(int i = 0; i < junctions.size(); i++)
+			{
+				junction &jc = junctions[i];
+				if(jc.rpos == r.lpos) s.insert(i);
+				if(jc.lpos == r.rpos) s.insert(i);
+			}
+		}
+
+		if(s.size() == 0) return 0;
+
+		vector<junction> vv;
+		for(int i = 0; i < junctions.size(); i++)
+		{
+			if(s.find(i) != s.end()) continue;
+			vv.push_back(junctions[i]);
+		}
+		junctions = vv;
+
+		build_junction_graph();
+		build_regions();
+	}
+	
+	return 0;
+}
+
 int bundle::build_junctions()
 {
 	map<int64_t, int> m;
@@ -95,6 +133,8 @@ int bundle::build_junctions()
 
 int bundle::build_junction_graph()
 {
+	jr.clear();
+
 	MPI s;
 	s.insert(PI(lpos, START_BOUNDARY));
 	s.insert(PI(rpos, END_BOUNDARY));
@@ -497,6 +537,7 @@ int bundle::compute_read1_intervals(const hit &h, vector<int64_t> &vv)
 
 int bundle::build_regions()
 {
+	regions.clear();
 	for(int k = 0; k < jr.num_vertices() - 1; k++)
 	{
 		int32_t lpos = jr.get_vertex_info(k).pos;

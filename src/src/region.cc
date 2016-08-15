@@ -83,7 +83,7 @@ bool region::empty_subregion(int32_t p1, int32_t p2)
 
 	int32_t sum = compute_sum_overlap(*mmap, it1, it2);
 	double ratio = sum * 1.0 / (p2 - p1);
-	if(ratio < min_average_overlap) return true;
+	if(ratio < min_subregion_overlap) return true;
 
 	int32_t indel = 0;
 	SIMI jit1 = imap->lower_bound(ROI(p1, p1 + 1));

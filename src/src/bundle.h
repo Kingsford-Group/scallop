@@ -58,6 +58,7 @@ protected:
 	int compute_read1_intervals(const hit &h, vector<int64_t> &vv);
 
 	// build partial exons
+	int iterate();
 	int build_regions();
 	int build_partial_exons();
 
