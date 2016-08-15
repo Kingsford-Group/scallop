@@ -153,10 +153,12 @@ int region::print(int index) const
 	printf("region %d: partial-exons = %lu, type = (%d, %d), pos = [%d, %d), boundary coverage = (%d, %d)\n", 
 			index, pexons.size(), ltype, rtype, lpos, rpos, lc, rc);
 
+	/*
 	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
 	{
 		printf(" [%d, %d) -> %d\n", lower(it->first), upper(it->first), it->second);
 	}
+	*/
 
 	return 0;
 }

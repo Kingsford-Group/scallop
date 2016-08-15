@@ -112,8 +112,9 @@ private:
 	bool smooth_trivial_equation(const equation &eqn);
 
 	// iteratively decompose
-	int iterate(bool greedy);
+	int iterate(bool t);
 	bool decompose_with_equations(int level);
+	bool remove_smallest_edge();
 
 	// identify and handle equations 
 	int identify_equations0(vector<equation> &eqns);

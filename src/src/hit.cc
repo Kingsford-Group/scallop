@@ -110,8 +110,8 @@ int hit::get_splice_positions(vector<int64_t> &v) const
 		if(bam_cigar_op(cigar[k]) != BAM_CREF_SKIP) continue;
 		if(bam_cigar_op(cigar[k-1]) != BAM_CMATCH) continue;
 		if(bam_cigar_op(cigar[k+1]) != BAM_CMATCH) continue;
-		if(bam_cigar_oplen(cigar[k-1]) <= min_flank_length) continue;
-		if(bam_cigar_oplen(cigar[k+1]) <= min_flank_length) continue;
+		if(bam_cigar_oplen(cigar[k-1]) < min_flank_length) continue;
+		if(bam_cigar_oplen(cigar[k+1]) < min_flank_length) continue;
 
 		int32_t s = p - bam_cigar_oplen(cigar[k]);
 		v.push_back(pack(s, p));

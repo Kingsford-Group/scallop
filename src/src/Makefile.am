@@ -19,7 +19,6 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  subsetsum1.h subsetsum1.cc \
 				  config.h config.cc \
 				  hit.h hit.cc \
-				  boundary.h boundary.cc \
 				  partial_exon.h partial_exon.cc \
 				  hyper_edge.h hyper_edge.cc \
 				  gateway.h gateway.cc \

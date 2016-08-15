@@ -163,13 +163,12 @@ int scallop2::assemble1()
 {
 	assemble0();
 
-	iterate(false);
+	iterate(true);
 
 	collect_existing_st_paths();
 
 	greedy_decompose(1);
 
-	//iterate(false);
 	//collect_existing_st_paths();
 
 	printf("%s core solution %lu paths\n", name.c_str(), paths.size());
@@ -182,6 +181,7 @@ int scallop2::assemble2()
 	assemble0();
 
 	iterate(false);
+
 	collect_existing_st_paths();
 
 	greedy_decompose(-1);
@@ -203,7 +203,7 @@ int scallop2::greedy()
 	return 0;
 }
 
-int scallop2::iterate(bool greedy)
+int scallop2::iterate(bool t)
 {
 	while(true)
 	{
@@ -226,12 +226,13 @@ int scallop2::iterate(bool greedy)
 		if(b == true) print();
 		if(b == true) continue;
 
-		if(greedy == false) break;
+		if(t == false) break;
 
-		collect_existing_st_paths();
-		greedy_decompose(1);
+		b = remove_smallest_edge();
+		if(b == true) print();
+		if(b == true) continue;
 
-		if(gr.num_edges() == 0) break;
+		break;
 	}
 
 	return 0;
@@ -293,6 +294,37 @@ bool scallop2::decompose_with_equations(int level)
 	printf("resolve with equation\n");
 	eqn.print(99);
 	resolve_equation(eqn);
+
+	return true;
+}
+
+bool scallop2::remove_smallest_edge()
+{
+	edge_descriptor ee = null_edge;
+	double ww = DBL_MAX;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	{
+		edge_descriptor e = (*it1);
+		double w = gr.get_edge_weight(e);
+		if(e->source() == 0 && e->target() == gr.num_vertices() - 1) continue;
+		if(w >= ww) continue;
+		if(gr.in_degree(e->target()) == 1) continue;
+		if(gr.out_degree(e->source()) == 1) continue;
+		ee = e;
+		ww = w;
+	}
+
+	if(ee == null_edge) return false;
+
+	int x = e2i[ee];
+	printf("remove smallest edge %d, weight = %.2lf\n", x, ww);
+
+	e2i.erase(ee);
+	i2e[x] = null_edge;
+	gr.remove_edge(ee);
+
+	smooth_splice_graph();
 
 	return true;
 }

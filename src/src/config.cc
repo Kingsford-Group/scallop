@@ -11,7 +11,7 @@ using namespace std;
 //// parameters
 
 // for bam file
-int min_flank_length = 1;
+int min_flank_length = 5;
 int32_t average_read_length = 100;
 int32_t average_slope_length = 240;
 int32_t min_bundle_gap = 100;
@@ -183,6 +183,7 @@ bool parse_arguments(int argc, const char ** argv)
 			min_num_hits_in_bundle = 20;
 			min_bundle_gap = 50;
 			min_mapping_quality = 1;
+			max_equation_error_ratio = 0.1;
 		}
 	}
 
