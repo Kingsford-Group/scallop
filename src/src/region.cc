@@ -5,13 +5,12 @@
 
 using namespace std;
 
-region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_mmap, const split_interval_map *_imap)
-	:lpos(_lpos), rpos(_rpos), mmap(_mmap), imap(_imap), ltype(_ltype), rtype(_rtype)
+region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_mmap, const split_interval_map *_imap, bool _inclusive)
+	:lpos(_lpos), rpos(_rpos), mmap(_mmap), imap(_imap), ltype(_ltype), rtype(_rtype), inclusive(_inclusive)
 {
 
 	build_join_interval_map();
 	smooth_join_interval_map();
-
 	build_partial_exons();
 }
 
@@ -99,7 +98,11 @@ int region::build_partial_exons()
 {
 	pexons.clear();
 
-	if(jmap.size() == 1 && lower(jmap.begin()->first) == lpos && upper(jmap.begin()->first) == rpos)
+	if(jmap.size() == 0) return 0;
+
+	//printf("size = %lu, size2 = %lu, [%d, %d), [%d, %d)\n", jmap.size(), distance(jmap.begin(), jmap.end()), lower(jmap.begin()->first), upper(jmap.begin()->first), lpos, rpos);
+
+	if(lower(jmap.begin()->first) == lpos && upper(jmap.begin()->first) == rpos)
 	{
 		partial_exon pe(lpos, rpos, ltype, rtype);
 		evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev);
@@ -107,7 +110,7 @@ int region::build_partial_exons()
 		return 0;
 	}
 
-	if(ltype == RIGHT_SPLICE && jmap.find(ROI(lpos, lpos + 1)) == jmap.end())
+	if(inclusive == true && ltype == RIGHT_SPLICE && jmap.find(ROI(lpos, lpos + 1)) == jmap.end())
 	{
 		partial_exon pe(lpos, lpos + 1, ltype, END_BOUNDARY);
 		pe.ave = 1.0;
@@ -122,8 +125,11 @@ int region::build_partial_exons()
 		assert(p1 < p2);
 		
 		bool b = empty_subregion(p1, p2);
-		if(p1 == lpos && ltype == RIGHT_SPLICE) b = false;
-		if(p2 == rpos && rtype == LEFT_SPLICE) b = false;
+
+		//printf("subregion [%d, %d), empty = %c\n", p1, p2, b ? 'T' : 'F');
+
+		if(inclusive == true && p1 == lpos && ltype == RIGHT_SPLICE) b = false;
+		if(inclusive == true && p2 == rpos && rtype == LEFT_SPLICE) b = false;
 
 		if(b == true) continue;
 
@@ -135,7 +141,7 @@ int region::build_partial_exons()
 		pexons.push_back(pe);
 	}
 
-	if(rtype == LEFT_SPLICE && jmap.find(ROI(rpos - 1, rpos)) == jmap.end())
+	if(inclusive && rtype == LEFT_SPLICE && jmap.find(ROI(rpos - 1, rpos)) == jmap.end())
 	{
 		partial_exon pe(rpos - 1, rpos, START_BOUNDARY, rtype);
 		pe.ave = 1.0;
@@ -144,6 +150,20 @@ int region::build_partial_exons()
 	}
 
 	return 0;
+}
+
+bool region::left_inclusive()
+{
+	if(pexons.size() == 0) return false;
+	if(pexons[0].lpos == lpos) return true;
+	else return false;
+}
+
+bool region::right_inclusive()
+{
+	if(pexons.size() == 0) return false;
+	if(pexons[pexons.size() - 1].rpos == rpos) return true;
+	else return false;
 }
 
 int region::print(int index) const

@@ -13,10 +13,11 @@ typedef pair<int, int> PI;
 class region
 {
 public:
-	region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_mmap, const split_interval_map *_imap);
+	region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_mmap, const split_interval_map *_imap, bool _inclusive);
 	~region();
 
 public:
+	bool inclusive;					// include SPLICE_RIGHT/LEFT
 	int32_t lpos;					// the leftmost boundary on reference
 	int32_t rpos;					// the rightmost boundary on reference
 	int ltype;						// type of the left boundary
@@ -29,6 +30,8 @@ public:
 
 public:
 	int print(int index) const;
+	bool left_inclusive();
+	bool right_inclusive();
 
 private:
 	int build_join_interval_map();

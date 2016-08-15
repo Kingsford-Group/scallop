@@ -24,9 +24,7 @@ int bundle::build()
 	build_junction_graph();
 	align_hits();
 	build_regions();
-
 	iterate();
-
 	build_partial_exons();
 	build_hyper_edges();
 	link_partial_exons();
@@ -79,21 +77,28 @@ int bundle::iterate()
 		for(int k = 0; k < regions.size(); k++)
 		{
 			region &r = regions[k];
-			if(r.pexons.size() >= 1) continue;
+			bool b1 = r.left_inclusive();
+			bool b2 = r.right_inclusive();
 
 			for(int i = 0; i < junctions.size(); i++)
 			{
 				junction &jc = junctions[i];
-				if(jc.rpos == r.lpos) s.insert(i);
-				if(jc.lpos == r.rpos) s.insert(i);
+				if(jc.rpos == r.lpos && b1 == false) s.insert(i);
+				if(jc.lpos == r.rpos && b2 == false) s.insert(i);
 			}
 		}
 
 		if(s.size() == 0) return 0;
 
+		assert(false);
+
+		//for(int i = 0; i < regions.size(); i++) regions[i].print(i);
+
 		vector<junction> vv;
 		for(int i = 0; i < junctions.size(); i++)
 		{
+			printf("%s ", s.find(i) != s.end() ? "REMOVE" : "KEEP");
+			junctions[i].print(i);
 			if(s.find(i) != s.end()) continue;
 			vv.push_back(junctions[i]);
 		}
@@ -549,7 +554,7 @@ int bundle::build_regions()
 		if(ltype == LEFT_RIGHT_SPLICE) ltype = RIGHT_SPLICE;
 		if(rtype == LEFT_RIGHT_SPLICE) rtype = LEFT_SPLICE;
 
-		regions.push_back(region(lpos, rpos, ltype, rtype, &mmap, &imap));
+		regions.push_back(region(lpos, rpos, ltype, rtype, &mmap, &imap, true));
 	}
 
 	return 0;

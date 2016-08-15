@@ -181,7 +181,7 @@ bool parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "-R")
 		{
 			// default setting for real dataset
-			min_splice_boundary_hits = 2;
+			min_splice_boundary_hits = 1;
 			min_num_hits_in_bundle = 20;
 			min_bundle_gap = 50;
 			min_mapping_quality = 1;
