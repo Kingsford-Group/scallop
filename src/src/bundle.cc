@@ -97,8 +97,8 @@ int bundle::iterate()
 		vector<junction> vv;
 		for(int i = 0; i < junctions.size(); i++)
 		{
-			printf("%s ", s.find(i) != s.end() ? "REMOVE" : "KEEP");
-			junctions[i].print(i);
+			//printf("%s ", s.find(i) != s.end() ? "REMOVE" : "KEEP");
+			//junctions[i].print(i);
 			if(s.find(i) != s.end()) continue;
 			vv.push_back(junctions[i]);
 		}
