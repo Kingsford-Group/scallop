@@ -187,8 +187,9 @@ bool parse_arguments(int argc, const char ** argv)
 			min_mapping_quality = 1;
 			max_equation_error_ratio = 0.1;
 			min_subregion_gap = 10;
-			min_subregion_length = 75;
-			min_subregion_overlap = 10.0;
+			min_subregion_length = 50;
+			min_subregion_overlap = 3.0;
+			min_flank_length = 1;
 		}
 	}
 
