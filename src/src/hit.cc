@@ -44,10 +44,6 @@ hit::hit(bam1_t *b)
 	memcpy(cigar, bam_get_cigar(b), 4 * n_cigar);
 
 	// get strandness
-	xs = '.';
-	uint8_t *p = bam_aux_get(b, "XS");
-	if(p && (*p) == 'A') xs = bam_aux2A(p);
-
 	/*
 	if(bam_is_rev(b) == true) strand = '-';
 	else strand = '+';
@@ -61,6 +57,11 @@ hit::hit(bam1_t *b)
 
 	if(strand_reverse == true && strand == '+') strand = '-';
 	else if(strand_reverse == true && strand == '-') strand = '+';
+
+	xs = '.';
+	uint8_t *p = bam_aux_get(b, "XS");
+	if(p && (*p) == 'A') xs = bam_aux2A(p);
+	if(xs == '-' || xs == '+') strand = xs;
 
 	/*
 	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '-';
