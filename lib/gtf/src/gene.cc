@@ -112,6 +112,12 @@ PI32 gene::get_bounds() const
 	return PI32(l, r);
 }
 
+char gene::get_strand() const
+{
+	if(exons.size() == 0) return '.';
+	return exons[0].strand;
+}
+
 int gene::write(ofstream &fout) const
 {
 	for(int i = 0; i < transcripts.size(); i++)

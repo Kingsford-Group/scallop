@@ -31,6 +31,7 @@ public:
 	// fetch information
 	string get_gene_id() const;
 	string get_seqname() const;
+	char get_strand() const;
 	set<int32_t> get_exon_boundaries() const;
 	PI32 get_bounds() const;
 
