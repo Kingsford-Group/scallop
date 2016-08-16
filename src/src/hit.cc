@@ -61,7 +61,7 @@ hit::hit(bam1_t *b)
 	xs = '.';
 	uint8_t *p = bam_aux_get(b, "XS");
 	if(p && (*p) == 'A') xs = bam_aux2A(p);
-	if(xs == '-' || xs == '+') strand = xs;
+	//if(xs == '-' || xs == '+') strand = xs;
 
 	/*
 	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '-';
