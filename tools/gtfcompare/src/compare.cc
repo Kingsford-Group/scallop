@@ -104,6 +104,22 @@ int compare_transcripts(const vector<transcript> &y, const vector<transcript> &x
 	return cnt;
 }
 
+int compare_gene_bounds(const gene &x, const gene &y)
+{
+	if(x.get_seqname() != y.get_seqname()) return 0;
+	PI32 px = x.get_bounds();
+	PI32 py = y.get_bounds();
+	assert(px.first < px.second);
+	assert(py.first < py.second);
+
+	if(py.first < px.first && px.first < py.second && py.second < px.second) printf("%s %c %s:%d-%d %s %c %s:%d-%d overlap1\n", x.get_gene_id().c_str(), x.get_strand(), x.get_seqname().c_str(), px.first, px.second, y.get_gene_id().c_str(), y.get_strand(), y.get_seqname().c_str(), py.first, py.second);
+	if(px.first < py.first && py.first < px.second && px.second < py.second) printf("%s %c %s:%d-%d %s %c %s:%d-%d overlap2\n", x.get_gene_id().c_str(), x.get_strand(), x.get_seqname().c_str(), px.first, px.second, y.get_gene_id().c_str(), y.get_strand(), y.get_seqname().c_str(), py.first, py.second);
+	if(px.first <= py.first && px.second >= py.second) printf("%s %c %s:%d-%d %s %c %s:%d-%d inclusive1\n", x.get_gene_id().c_str(), x.get_strand(), x.get_seqname().c_str(), px.first, px.second, y.get_gene_id().c_str(), y.get_strand(), y.get_seqname().c_str(), py.first, py.second);
+	if(py.first <= px.first && py.second >= px.second) printf("%s %c %s:%d-%d %s %c %s:%d-%d inclusive2\n", x.get_gene_id().c_str(), x.get_strand(), x.get_seqname().c_str(), px.first, px.second, y.get_gene_id().c_str(), y.get_strand(), y.get_seqname().c_str(), py.first, py.second);
+
+	return 0;
+}
+
 int compare_genome1(const genome &x, const genome &y)
 {
 	int gequal = 0;
@@ -186,6 +202,61 @@ int compare_genome2(const genome &x, const genome &y)
 	double s = (xtotal == 0) ? 0 : correct * 100.0 / xtotal;
 	double p = (ytotal == 0) ? 0 : correct * 100.0 / ytotal;
 	printf("reference = %d prediction = %d correct = %d sensitivity = %.2lf precision = %.2lf\n", xtotal, ytotal, correct, s, p);
+
+	return 0;
+}
+
+int compare_genome3(const genome &x, const genome &y)
+{
+	typedef pair< string, vector<int> > PSVI;
+	typedef map< string, vector<int> > MSVI;
+	MSVI m1;
+	MSVI m2;
+
+	for(int i = 0; i < x.genes.size(); i++)
+	{
+		string chrm = x.genes[i].get_seqname();
+		if(m1.find(chrm) == m1.end())
+		{
+			vector<int> v;
+			v.push_back(i);
+			m1.insert(PSVI(chrm, v));
+		}
+		else
+		{
+			m1[chrm].push_back(i);
+		}
+	}
+
+	for(int i = 0; i < y.genes.size(); i++)
+	{
+		string chrm = y.genes[i].get_seqname();
+		if(m2.find(chrm) == m2.end())
+		{
+			vector<int> v;
+			v.push_back(i);
+			m2.insert(PSVI(chrm, v));
+		}
+		else
+		{
+			m2[chrm].push_back(i);
+		}
+	}
+
+	for(MSVI::iterator it = m1.begin(); it != m1.end(); it++)
+	{
+		vector<int> v1 = it->second;
+		if(m2.find(it->first) == m2.end()) continue;
+		vector<int> v2 = m2[it->first];
+
+		for(int i = 0; i < v1.size(); i++)
+		{
+			for(int j = 0; j < v2.size(); j++)
+			{
+				compare_gene_bounds(x.genes[v1[i]], y.genes[v2[j]]);
+			}
+		}
+	}
 
 	return 0;
 }

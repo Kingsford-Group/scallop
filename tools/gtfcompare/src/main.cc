@@ -27,6 +27,7 @@ int main(int argc, const char **argv)
 
 	if(mode == 1) compare_genome1(g1, g2);
 	if(mode == 2) compare_genome2(g1, g2);
+	if(mode == 3) compare_genome3(g1, g2);
 
     return 0;
 }
