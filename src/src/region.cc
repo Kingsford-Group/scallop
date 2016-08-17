@@ -74,7 +74,7 @@ bool region::empty_subregion(int32_t p1, int32_t p2)
 	assert(p1 < p2);
 	assert(p1 >= lpos && p2 <= rpos);
 
-	printf(" region = [%d, %d), subregion [%d, %d), length = %d\n", lpos, rpos, p1, p2, p2 - p1);
+	//printf(" region = [%d, %d), subregion [%d, %d), length = %d\n", lpos, rpos, p1, p2, p2 - p1);
 	if(p2 - p1 < min_subregion_length) return true;
 
 	SIMI it1, it2;
@@ -83,7 +83,7 @@ bool region::empty_subregion(int32_t p1, int32_t p2)
 
 	int32_t sum = compute_sum_overlap(*mmap, it1, it2);
 	double ratio = sum * 1.0 / (p2 - p1);
-	printf(" region = [%d, %d), subregion [%d, %d), overlap = %.2lf\n", lpos, rpos, p1, p2, ratio);
+	//printf(" region = [%d, %d), subregion [%d, %d), overlap = %.2lf\n", lpos, rpos, p1, p2, ratio);
 	if(ratio < min_subregion_overlap) return true;
 
 	int32_t indel = 0;
@@ -91,7 +91,7 @@ bool region::empty_subregion(int32_t p1, int32_t p2)
 	SIMI jit2 = imap->upper_bound(ROI(p2 - 1, p2));
 	for(SIMI jit = jit1; jit != jit2; jit++) indel += jit->second;
 
-	printf(" region = [%d, %d), subregion [%d, %d), indel = %d\n", lpos, rpos, p1, p2, indel);
+	//printf(" region = [%d, %d), subregion [%d, %d), indel = %d\n", lpos, rpos, p1, p2, indel);
 	if(indel * 1.0 / (p2 - p1) > max_indel_ratio) return true;
 
 	return false;
@@ -129,7 +129,7 @@ int region::build_partial_exons()
 		
 		bool b = empty_subregion(p1, p2);
 
-		printf(" subregion [%d, %d), empty = %c\n", p1, p2, b ? 'T' : 'F');
+		//printf(" subregion [%d, %d), empty = %c\n", p1, p2, b ? 'T' : 'F');
 
 		if(inclusive == true && p1 == lpos && ltype == RIGHT_SPLICE) b = false;
 		if(inclusive == true && p2 == rpos && rtype == LEFT_SPLICE) b = false;

@@ -15,7 +15,7 @@ assembler::assembler()
     hdr = sam_hdr_read(sfn);
     b1t = bam_init1();
 	terminate = false;
-	index = 0;
+	index = -1;
 	if(output_file != "") fout.open(output_file);
 }
 
@@ -62,8 +62,10 @@ int assembler::add_hit(const hit &ht)
 		assert(bb.hits.size() >= 1);
 		assert(bb.strand != '.');
 
-		if(bb.overlap(ht) == false) continue;
-		if(bb.strand != ht.strand) continue;
+		//if(bb.overlap(ht) == false) continue;
+		if(ht.strand != bb.strand) continue;
+		if(ht.tid != bb.tid) continue;
+		if(ht.pos > bb.rpos + min_bundle_gap) continue;
 
 		bb.add_hit(ht);
 		b = true;
@@ -85,7 +87,8 @@ int assembler::truncate(const hit &ht)
 	for(int i = 0; i < vbb.size(); i++)
 	{
 		bundle_base &bb = vbb[i];
-		if(ht.pos < bb.rpos && ht.tid == bb.tid) continue;
+		//if(ht.pos < bb.rpos && ht.tid == bb.tid) continue;
+		if(ht.pos <= bb.rpos + min_bundle_gap && ht.tid == bb.tid) continue;
 
 		process(bb);
 		vbb.erase(vbb.begin() + i);
@@ -98,9 +101,6 @@ int assembler::process(const bundle_base &bb)
 {
 	if(bb.hits.size() < min_num_hits_in_bundle) return 0;
 
-	string name = "bundle." + tostring(index);
-	if(fixed_gene_name != "" && name != fixed_gene_name) return 0;
-
 	char buf[1024];
 	assert(bb.tid >= 0);
 	strcpy(buf, hdr->target_name[bb.tid]);
@@ -110,10 +110,15 @@ int assembler::process(const bundle_base &bb)
 	bd.chrm = string(buf);
 	bd.build();
 
-	if(bd.num_junctions() <= 0 && ignore_single_exon_transcripts) return 0;
 	if(bd.num_partial_exons() >= 100) return 0;
+	if(bd.num_junctions() <= 0 && ignore_single_exon_transcripts) return 0;
 
-	bd.print(index++);
+	index++;
+
+	string name = "bundle." + tostring(index);
+	if(fixed_gene_name != "" && name != fixed_gene_name) return 0;
+
+	bd.print(index);
 
 	splice_graph gr;
 	vector<hyper_edge> vhe;
