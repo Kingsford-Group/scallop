@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include "bundle_base.h"
+#include "bundle.h"
 
 using namespace std;
 
@@ -13,13 +14,26 @@ public:
 	assembler();
 	~assembler();
 
-public:
-	int process();
+private:
+	samFile *sfn;
+	bam_hdr_t *hdr;
+	bam1_t *b1t;
+	
+	ofstream fout;
+	int index;
 
-	int assemble_sgr(const string &file);
-	int assemble_gtf(const string &file);
-	int assemble_bam(const string &file);
-	int process_bundle(bundle_base &bb, bam_hdr_t *h, int &index, ofstream &fout);
+	vector<bundle_base> vbb;
+
+	bool terminate;
+
+public:
+	int assemble();
+
+private:
+	int add_hit(const hit &ht);
+	int truncate(const hit &ht);
+	int process(const bundle_base &bb);
+	int compare(splice_graph &gr);
 };
 
 #endif

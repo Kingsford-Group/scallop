@@ -58,8 +58,4 @@ public:
 	int get_matched_intervals(vector<int64_t> &v) const;
 };
 
-// for sorting
-//inline bool hit_compare_left(const hit &x, const hit &y);
-//inline bool hit_compare_right(const hit &x, const hit &y);
-
 #endif

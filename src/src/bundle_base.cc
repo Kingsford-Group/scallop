@@ -10,7 +10,6 @@ bundle_base::bundle_base()
 	chrm = "";
 	lpos = INT32_MAX;
 	rpos = 0;
-	ave_isize = 0;
 	strand = '.';
 }
 
@@ -26,17 +25,6 @@ int bundle_base::add_hit(const hit &ht)
 	if(ht.pos < lpos) lpos = ht.pos;
 	if(ht.rpos > rpos) rpos = ht.rpos;
 
-	/*
-	if(tid == -1)
-	{
-		tid = ht.tid;
-		assert(chrm == "");
-		char buf[1024];
-		strcpy(buf, h->target_name[ht.tid]);
-		chrm = string(buf);
-	}
-	*/
-
 	// set tid
 	if(tid == -1) tid = ht.tid;
 	assert(tid == ht.tid);
@@ -45,12 +33,41 @@ int bundle_base::add_hit(const hit &ht)
 	if(strand == '.') strand = ht.strand;
 	assert(strand == ht.strand);
 
-	if(ht.isize > 0 && ht.isize <= 400)
+	// add intervals
+	vector<int64_t> vm;
+	vector<int64_t> vi;
+	vector<int64_t> vd;
+	ht.get_mid_intervals(vm, vi, vd);
+
+	for(int k = 0; k < vm.size(); k++)
 	{
-		double isize = ht.mpos - ht.rpos;
-		ave_isize = (ave_isize * (hits.size() - 1) + isize) * 1.0 / hits.size();
+		int32_t s = high32(vm[k]);
+		int32_t t = low32(vm[k]);
+		mmap += make_pair(ROI(s, t), 1);
 	}
+
+	for(int k = 0; k < vi.size(); k++)
+	{
+		int32_t s = high32(vi[k]);
+		int32_t t = low32(vi[k]);
+		imap += make_pair(ROI(s, t), 1);
+	}
+
+	for(int k = 0; k < vd.size(); k++)
+	{
+		int32_t s = high32(vd[k]);
+		int32_t t = low32(vd[k]);
+		imap += make_pair(ROI(s, t), 1);
+	}
+
 	return 0;
+}
+
+bool bundle_base::overlap(const hit &ht) const
+{
+	if(mmap.find(ROI(ht.pos, ht.pos + 1)) != mmap.end()) return true;
+	if(mmap.find(ROI(ht.rpos - 1, ht.rpos)) != mmap.end()) return true;
+	return false;
 }
 
 int bundle_base::clear()
@@ -59,29 +76,10 @@ int bundle_base::clear()
 	chrm = "";
 	lpos = INT32_MAX;
 	rpos = 0;
-	hits.clear();
-	ave_isize = 0;
 	strand = '.';
+	hits.clear();
+	mmap.clear();
+	imap.clear();
 	return 0;
 }
 
-int bundle_base::set_chrm(const string &s)
-{
-	chrm = s;
-	return 0;
-}
-
-int32_t bundle_base::get_tid()
-{
-	return tid;
-}
-
-int32_t bundle_base::get_rpos()
-{
-	return rpos;
-}
-
-size_t bundle_base::get_num_hits()
-{
-	return hits.size();
-}

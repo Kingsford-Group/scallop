@@ -19,12 +19,11 @@ bundle::~bundle()
 int bundle::build()
 {
 	compute_strand();
-	check_left_ascending();
+	//check_left_ascending();
 	build_junctions();
 	build_junction_graph();
-	align_hits();
 	build_regions();
-	iterate();
+	//iterate();
 	build_partial_exons();
 	build_hyper_edges();
 	link_partial_exons();

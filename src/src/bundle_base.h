@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "hit.h"
+#include "interval_map.h"
 
 using namespace std;
 
@@ -16,23 +17,20 @@ public:
 	bundle_base();
 	virtual ~bundle_base();
 
-protected:
+public:
 	int32_t tid;					// chromosome ID
 	string chrm;					// chromosome name
 	int32_t lpos;					// the leftmost boundary on reference
 	int32_t rpos;					// the rightmost boundary on reference
-	vector<hit> hits;				// hits
 	char strand;					// strandness
-	double ave_isize;				// average of all insert size (excluding mapped portion)
+	vector<hit> hits;				// hits
+	split_interval_map mmap;		// matched interval map
+	split_interval_map imap;		// indel interval map
 
 public:
 	int add_hit(const hit &ht);
+	bool overlap(const hit &ht) const;
 	int clear();
-
-	int set_chrm(const string &s);
-	int32_t get_tid();
-	int32_t get_rpos();
-	size_t get_num_hits();
 };
 
 #endif

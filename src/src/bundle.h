@@ -21,8 +21,8 @@ public:
 private:
 	vector<junction> junctions;		// splice junctions
 	splice_graph jr;				// junction graph
-	split_interval_map mmap;		// match interval map
-	split_interval_map imap;		// indel interval map
+	//split_interval_map mmap;		// match interval map
+	//split_interval_map imap;		// indel interval map
 	vector<region> regions;			// regions
 	vector<partial_exon> pexons;	// partial exons
 	vector<hyper_edge> hedges;		// hyper edges

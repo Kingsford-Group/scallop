@@ -197,7 +197,7 @@ bool parse_arguments(int argc, const char ** argv)
 			min_splice_boundary_hits = 2;
 			min_num_hits_in_bundle = 20;
 			min_bundle_gap = 50;
-			min_mapping_quality = 1;
+			min_mapping_quality = 5;
 			max_equation_error_ratio = 0.1;
 			min_subregion_gap = 10;
 			min_subregion_length = 75;
