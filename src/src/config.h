@@ -57,6 +57,7 @@ extern int slope_min_bin_num;
 extern int slope_flexible_bin_num;
 extern double slope_acceptance_sigma;
 extern bool use_paired_end;
+extern bool ignore_single_exon_transcripts;
 
 extern double join_min_reliability;
 extern double infer_min_reliability;

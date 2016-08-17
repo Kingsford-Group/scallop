@@ -32,7 +32,8 @@ public:
 	int build_splice_graph(splice_graph &gr, vector<hyper_edge> &vhe) const;
 	int output_gtf(ofstream &fout, const vector<path> &paths, const string &prefix, int index) const;	
 	int print(int index) const;
-	int size() const;
+	size_t num_partial_exons() const;
+	size_t num_junctions() const;
 
 protected:
 	// check whether hits are sorted
@@ -68,6 +69,7 @@ protected:
 
 	// store the corresponding pexons in each junction
 	int link_partial_exons();
+
 };
 
 #endif

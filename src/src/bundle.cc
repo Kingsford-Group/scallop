@@ -7,6 +7,7 @@
 #include "bundle.h"
 #include "binomial.h"
 #include "region.h"
+#include "config.h"
 
 bundle::bundle(const bundle_base &bb)
 	: bundle_base(bb)
@@ -21,6 +22,9 @@ int bundle::build()
 	compute_strand();
 	//check_left_ascending();
 	build_junctions();
+
+	if(junctions.size() <= 0 && ignore_single_exon_transcripts == true) return 0;
+
 	build_junction_graph();
 	build_regions();
 	//iterate();
@@ -727,9 +731,14 @@ int bundle::link_partial_exons()
 	return 0;
 }
 
-int bundle::size() const
+size_t bundle::num_partial_exons() const
 {
 	return pexons.size();
+}
+
+size_t bundle::num_junctions() const
+{
+	return junctions.size();
 }
 
 int bundle::build_splice_graph(splice_graph &gr, vector<hyper_edge> &vhe) const

@@ -15,7 +15,7 @@ assembler::assembler()
     hdr = sam_hdr_read(sfn);
     b1t = bam_init1();
 	terminate = false;
-	index = -1;
+	index = 0;
 	if(output_file != "") fout.open(output_file);
 }
 
@@ -98,7 +98,7 @@ int assembler::process(const bundle_base &bb)
 {
 	if(bb.hits.size() < min_num_hits_in_bundle) return 0;
 
-	string name = "bundle." + tostring(index++);
+	string name = "bundle." + tostring(index);
 	if(fixed_gene_name != "" && name != fixed_gene_name) return 0;
 
 	char buf[1024];
@@ -109,9 +109,11 @@ int assembler::process(const bundle_base &bb)
 
 	bd.chrm = string(buf);
 	bd.build();
-	bd.print(index);
 
-	if(bd.size() >= 100) return 0;
+	if(bd.num_junctions() <= 0 && ignore_single_exon_transcripts) return 0;
+	if(bd.num_partial_exons() >= 100) return 0;
+
+	bd.print(index++);
 
 	splice_graph gr;
 	vector<hyper_edge> vhe;

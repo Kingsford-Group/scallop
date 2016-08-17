@@ -50,6 +50,7 @@ double min_boundary_edge_weight_ratio = 0.05;
 double transcript_min_expression = 15.0;
 int min_hyper_edges_count = 20;
 bool strand_reverse = false;
+bool ignore_single_exon_transcripts = false;
 
 // for simulation
 int simulation_num_vertices = 0;
@@ -97,6 +98,7 @@ int print_parameters()
 	printf("average_read_length = %d\n", average_read_length);
 	printf("pseudo_length_count = %d\n", pseudo_length_count);
 	printf("strand_reverse = %c\n", strand_reverse ? 'T' : 'F');
+	printf("ignore_single_exon_transcripts = %c\n", ignore_single_exon_transcripts ? 'T' : 'F');
 
 	// for algorithm
 	printf("join_min_reliability = %.2lf\n", join_min_reliability);
@@ -172,6 +174,10 @@ bool parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "-RF")
 		{
 			strand_reverse = true;
+		}
+		else if(string(argv[i]) == "-m")
+		{
+			ignore_single_exon_transcripts = true;
 		}
 		else if(string(argv[i]) == "-x")
 		{
