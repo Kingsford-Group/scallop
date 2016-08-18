@@ -27,7 +27,7 @@ public:
 
 public:
 	virtual int build();
-	int output_gtf(ofstream &fout, const vector<path> &paths, const string &prefix, int index) const;	
+	int output_transcript(ofstream &fout, const path &p, const string &gid, const string &tid) const;	
 	int print(int index) const;
 
 private:

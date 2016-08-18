@@ -113,23 +113,37 @@ int assembler::process(const bundle_base &bb)
 	if(bd.junctions.size() <= 0 && ignore_single_exon_transcripts) return 0;
 
 	index++;
-
-	string name = "bundle." + tostring(index);
-	if(fixed_gene_name != "" && name != fixed_gene_name) return 0;
-
 	bd.print(index);
 
-	// TODO
-	return 0;
+	for(int k = 0; k < bd.sg.subs.size(); k++)
+	{
+		string name = "bundle." + tostring(index) + "." + tostring(k);
 
-	if(ref_file != "") compare(bd.sg.gr);
+		if(fixed_gene_name != "" && name != fixed_gene_name) continue;
 
-	scallop2 sc(name, bd.sg.gr);
-	sc.assemble();
+		splice_graph &gr = bd.sg.subs[k];
 
-	if(output_file != "") bd.output_gtf(fout, sc.paths, algo, index);
+		if(ref_file != "") compare(gr);
 
-	if(fixed_gene_name != "" && name == fixed_gene_name) terminate = true;
+		scallop2 sc(name, gr);
+		sc.assemble();
+
+		if(output_file != "")
+		{
+			for(int i = 0; i < sc.paths.size(); i++)
+			{
+				string tid = name + "." + tostring(i);
+				path p;
+				p.v = bd.sg.get_root_vertices(k, sc.paths[i].v);
+				p.abd = sc.paths[i].abd;
+				bd.output_transcript(fout, p, name, tid);
+			}
+		}
+
+		if(fixed_gene_name != "" && name == fixed_gene_name) terminate = true;
+
+		if(terminate == true) return 0;
+	}
 
 	return 0;
 }

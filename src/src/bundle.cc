@@ -29,8 +29,8 @@ int bundle::build()
 	build_regions();
 	build_partial_exons();
 	link_partial_exons();
-	build_splice_graph(sg.gr);
-	build_hyper_edges(sg.gr.vhe);
+	build_splice_graph(sg.root);
+	build_hyper_edges(sg.root.vhe);
 	sg.build();
 	return 0;
 }
@@ -801,7 +801,7 @@ int bundle::print(int index) const
 	}
 
 	printf("tid = %d, #hits = %lu, #partial-exons = %lu, #subgraphs = %lu, range = %s:%d-%d, orient = %c (%d, %d, %d)\n",
-			tid, hits.size(), pexons.size(), sg.subgraphs.size() - 2, chrm.c_str(), lpos, rpos, strand, n0, np, nq);
+			tid, hits.size(), pexons.size(), sg.subs.size(), chrm.c_str(), lpos, rpos, strand, n0, np, nq);
 
 	// print hits
 	/*
@@ -829,58 +829,62 @@ int bundle::print(int index) const
 		pexons[i].print(i);
 	}
 
+	sg.print();
+
 	return 0;
 }
 
-int bundle::output_gtf(ofstream &fout, const vector<path> &paths, const string &prefix, int index) const
+int bundle::output_transcript(ofstream &fout, const path &p, const string &gid, const string &tid) const
 {
 	fout.precision(2);
 	fout<<fixed;
 
-	for(int i = 0; i < paths.size(); i++)
+	const vector<int> &v = p.v;
+	double abd = p.abd;
+
+	assert(v[0] == 0);
+	assert(v[v.size() - 1] == pexons.size() + 1);
+	if(v.size() < 2) return 0;
+
+	int ss = v[1];
+	int tt = v[v.size() - 2];
+	int32_t ll = pexons[ss - 1].lpos;
+	int32_t rr = pexons[tt - 1].rpos;
+
+	fout<<chrm.c_str()<<"\t";		// chromosome name
+	fout<<algo.c_str()<<"\t";		// source
+	fout<<"transcript\t";			// feature
+	fout<<ll + 1<<"\t";				// left position
+	fout<<rr<<"\t";					// right position
+	fout<<1000<<"\t";				// score, now as abundance
+	fout<<strand<<"\t";				// strand
+	fout<<".\t";					// frame
+	fout<<"gene_id \""<<gid.c_str()<<"\"; ";
+	fout<<"transcript_id \""<<tid.c_str()<<"\"; ";
+	fout<<"expression \""<<abd<<"\";"<<endl;
+
+	join_interval_map jmap;
+	for(int k = 1; k < v.size() - 1; k++)
 	{
-		const vector<int> &v = paths[i].v;
-		double abd = paths[i].abd;
-		if(v.size() < 2) continue;
+		const partial_exon &r = pexons[v[k] - 1];
+		jmap += make_pair(ROI(r.lpos, r.rpos), 1);
+	}
 
-		fout<<chrm.c_str()<<"\t";		// chromosome name
-		fout<<prefix.c_str()<<"\t";		// source
-		fout<<"transcript\t";			// feature
-		fout<<lpos + 1<<"\t";			// left position
-		fout<<rpos<<"\t";				// right position
-		fout<<1000<<"\t";				// score, now as abundance
-		fout<<strand<<"\t";				// strand
-		fout<<".\t";					// frame
-		fout<<"gene_id \""<<algo.c_str()<<"."<<index<<"\"; ";
-		fout<<"transcript_id \""<<algo.c_str()<<"."<<index<<"."<<i + 1<<"\"; ";
+	int cnt = 0;
+	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
+	{
+		fout<<chrm.c_str()<<"\t";			// chromosome name
+		fout<<algo.c_str()<<"\t";			// source
+		fout<<"exon\t";						// feature
+		fout<<lower(it->first) + 1<<"\t";	// left position
+		fout<<upper(it->first)<<"\t";		// right position
+		fout<<1000<<"\t";					// score
+		fout<<strand<<"\t";					// strand
+		fout<<".\t";						// frame
+		fout<<"gene_id \""<<gid.c_str()<<"\"; ";
+		fout<<"transcript_id \""<<tid.c_str()<<"\"; ";
+		fout<<"exon_number \""<<++cnt<<"\"; ";
 		fout<<"expression \""<<abd<<"\";"<<endl;
-
-		assert(v[0] == 0);
-		assert(v[v.size() - 1] == pexons.size() + 1);
-
-		join_interval_map jmap;
-		for(int k = 1; k < v.size() - 1; k++)
-		{
-			const partial_exon &r = pexons[v[k] - 1];
-			jmap += make_pair(ROI(r.lpos, r.rpos), 1);
-		}
-
-		int cnt = 0;
-		for(JIMI it = jmap.begin(); it != jmap.end(); it++)
-		{
-			fout<<chrm.c_str()<<"\t";			// chromosome name
-			fout<<prefix.c_str()<<"\t";			// source
-			fout<<"exon\t";						// feature
-			fout<<lower(it->first) + 1<<"\t";	// left position
-			fout<<upper(it->first)<<"\t";		// right position
-			fout<<1000<<"\t";					// score
-			fout<<strand<<"\t";					// strand
-			fout<<".\t";						// frame
-			fout<<"gene_id \""<<algo.c_str()<<"."<<index<<"\"; ";
-			fout<<"transcript_id \""<<algo.c_str()<<"."<<index<<"."<<i + 1<<"\"; ";
-			fout<<"exon_number \""<<++cnt<<"\"; ";
-			fout<<"expression \""<<abd<<"\";"<<endl;
-		}
 	}
 	return 0;
 }
