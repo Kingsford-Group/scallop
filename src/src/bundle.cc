@@ -20,17 +20,18 @@ bundle::~bundle()
 int bundle::build()
 {
 	compute_strand();
-	//check_left_ascending();
+	check_left_ascending();
 	build_junctions();
 
 	if(junctions.size() <= 0 && ignore_single_exon_transcripts == true) return 0;
 
 	build_junction_graph();
 	build_regions();
-	//iterate();
 	build_partial_exons();
-	build_hyper_edges();
 	link_partial_exons();
+	build_splice_graph(sg.gr);
+	build_hyper_edges(sg.gr.vhe);
+	sg.build();
 	return 0;
 }
 
@@ -69,48 +70,6 @@ int bundle::check_right_ascending()
 		int32_t p2 = hits[i].rpos;
 		assert(p1 <= p2);
 	}
-	return 0;
-}
-
-int bundle::iterate()
-{
-	while(true)
-	{
-		set<int> s;
-		for(int k = 0; k < regions.size(); k++)
-		{
-			region &r = regions[k];
-			bool b1 = r.left_inclusive();
-			bool b2 = r.right_inclusive();
-
-			for(int i = 0; i < junctions.size(); i++)
-			{
-				junction &jc = junctions[i];
-				if(jc.rpos == r.lpos && b1 == false) s.insert(i);
-				if(jc.lpos == r.rpos && b2 == false) s.insert(i);
-			}
-		}
-
-		if(s.size() == 0) return 0;
-
-		assert(false);
-
-		//for(int i = 0; i < regions.size(); i++) regions[i].print(i);
-
-		vector<junction> vv;
-		for(int i = 0; i < junctions.size(); i++)
-		{
-			//printf("%s ", s.find(i) != s.end() ? "REMOVE" : "KEEP");
-			//junctions[i].print(i);
-			if(s.find(i) != s.end()) continue;
-			vv.push_back(junctions[i]);
-		}
-		junctions = vv;
-
-		build_junction_graph();
-		build_regions();
-	}
-	
 	return 0;
 }
 
@@ -591,7 +550,7 @@ int bundle::search_partial_exons(int32_t x)
 	return -1;
 }
 
-int bundle::build_hyper_edges()
+int bundle::build_hyper_edges(vector<hyper_edge> &vhe)
 {
 	vector<int> list;
 	map<string, PI> m;
@@ -682,12 +641,13 @@ int bundle::build_hyper_edges()
 		}
 	}
 
-	hedges.clear();
+	vhe.clear();
 	for(map<hyper_edge, int>::iterator it = mhe.begin(); it != mhe.end(); it++)
 	{
 		hyper_edge he = it->first;
 		he.count = it->second;
-		hedges.push_back(he);
+		he.increase();
+		vhe.push_back(he);
 	}
 
 	return 0;
@@ -731,19 +691,8 @@ int bundle::link_partial_exons()
 	return 0;
 }
 
-size_t bundle::num_partial_exons() const
+int bundle::build_splice_graph(splice_graph &gr)
 {
-	return pexons.size();
-}
-
-size_t bundle::num_junctions() const
-{
-	return junctions.size();
-}
-
-int bundle::build_splice_graph(splice_graph &gr, vector<hyper_edge> &vhe) const
-{
-	//if(pexons.size() == 0) return 0;
 	// vertices: start, each region, end
 	gr.add_vertex();
 	vertex_info vi0;
@@ -835,14 +784,6 @@ int bundle::build_splice_graph(splice_graph &gr, vector<hyper_edge> &vhe) const
 		}
 	}
 
-	// hyper-edges
-	vhe.clear();
-	for(int i = 0; i < hedges.size(); i++)
-	{
-		hyper_edge he = hedges[i];
-		he.increase();
-		vhe.push_back(he);
-	}
 	return 0;
 }
 
@@ -859,8 +800,8 @@ int bundle::print(int index) const
 		if(hits[i].xs == '-') nq++;
 	}
 
-	printf("tid = %d, #hits = %lu, #partial-exons = %lu, range = %s:%d-%d, orient = %c (%d, %d, %d)\n",
-			tid, hits.size(), pexons.size(), chrm.c_str(), lpos, rpos, strand, n0, np, nq);
+	printf("tid = %d, #hits = %lu, #partial-exons = %lu, #subgraphs = %lu, range = %s:%d-%d, orient = %c (%d, %d, %d)\n",
+			tid, hits.size(), pexons.size(), sg.subgraphs.size() - 2, chrm.c_str(), lpos, rpos, strand, n0, np, nq);
 
 	// print hits
 	/*
@@ -886,12 +827,6 @@ int bundle::print(int index) const
 	for(int i = 0; i < pexons.size(); i++)
 	{
 		pexons[i].print(i);
-	}
-
-	// print hyper edges
-	for(int i = 0; i < hedges.size(); i++)
-	{
-		hedges[i].print(i);
 	}
 
 	return 0;

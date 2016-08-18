@@ -23,17 +23,7 @@ scallop2::scallop2(const string &s, const splice_graph &g)
 	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 	gr.get_edge_indices(i2e, e2i);
 	init_super_edges();
-	//assert(gr.check_fully_connected() == true);
-}
-
-scallop2::scallop2(const string &s, const splice_graph &g, const vector<hyper_edge> &vhe)
-	: name(s), gr(g)
-{
-	round = 0;
-	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
-	gr.get_edge_indices(i2e, e2i);
-	init_super_edges();
-	init_gateways(vhe);
+	init_gateways(gr.vhe);
 	//assert(gr.check_fully_connected() == true);
 }
 

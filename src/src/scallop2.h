@@ -23,7 +23,6 @@ class scallop2
 public:
 	scallop2();
 	scallop2(const string &name, const splice_graph &gr);
-	scallop2(const string &name, const splice_graph &gr, const vector<hyper_edge> &vhe);
 	virtual ~scallop2();
 
 public:

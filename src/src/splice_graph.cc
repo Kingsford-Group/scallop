@@ -46,8 +46,19 @@ int splice_graph::copy(const splice_graph &gr, MEE &x2y, MEE &y2x)
 		y2x.insert(PEE(e, *it));
 	}
 
-	//hedges = gr.hedges();
+	vhe = gr.vhe;
 
+	return 0;
+}
+
+int splice_graph::clear()
+{
+	directed_graph::clear();
+	vwrt.clear();
+	vinf.clear();
+	ewrt.clear();
+	einf.clear();
+	vhe.clear();
 	return 0;
 }
 
@@ -146,16 +157,6 @@ edge_descriptor splice_graph::compute_maximum_edge_w()
 		max_edge = *it1;
 	}
 	return max_edge;
-}
-
-int splice_graph::clear()
-{
-	directed_graph::clear();
-	vwrt.clear();
-	vinf.clear();
-	ewrt.clear();
-	einf.clear();
-	return 0;
 }
 
 int splice_graph::build(const string &file)
@@ -384,6 +385,32 @@ bool splice_graph::check_fully_connected()
 	if(s.size() != num_vertices()) return false;
 	if(t.size() != num_vertices()) return false;
 	return true;
+}
+
+int splice_graph::compute_independent_subgraphs()
+{
+	int num = 0;
+	edge_iterator it1, it2;
+	set<int> ss;
+	ss.insert(num_vertices() - 1);
+	for(tie(it1, it2) = in_edges(num_vertices() - 1); it1 != it2; it1++)
+	{
+		int x = (*it1)->source();
+		ss.insert(x);
+	}
+	
+	for(tie(it1, it2) = out_edges(0); it1 != it2; it1++)
+	{
+		int x = (*it1)->target();
+		while(true)
+		{
+			if(ss.find(x) != ss.end()) num++;
+			if(ss.find(x) != ss.end()) break;
+			x = compute_out_equivalent_vertex(x);
+			if(x == -1) break;
+		}
+	}
+	return num;
 }
 
 int splice_graph::bfs_w(int s, double w, vector<int> &v, VE &b)

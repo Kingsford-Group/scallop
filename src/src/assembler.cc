@@ -110,8 +110,7 @@ int assembler::process(const bundle_base &bb)
 	bd.chrm = string(buf);
 	bd.build();
 
-	//if(bd.num_partial_exons() >= 100) return 0;
-	if(bd.num_junctions() <= 0 && ignore_single_exon_transcripts) return 0;
+	if(bd.junctions.size() <= 0 && ignore_single_exon_transcripts) return 0;
 
 	index++;
 
@@ -123,13 +122,9 @@ int assembler::process(const bundle_base &bb)
 	// TODO
 	return 0;
 
-	splice_graph gr;
-	vector<hyper_edge> vhe;
-	bd.build_splice_graph(gr, vhe);
+	if(ref_file != "") compare(bd.sg.gr);
 
-	if(ref_file != "") compare(gr);
-
-	scallop2 sc(name, gr, vhe);
+	scallop2 sc(name, bd.sg.gr);
 	sc.assemble();
 
 	if(output_file != "") bd.output_gtf(fout, sc.paths, algo, index);
