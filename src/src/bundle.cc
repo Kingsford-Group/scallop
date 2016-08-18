@@ -859,8 +859,8 @@ int bundle::print(int index) const
 		if(hits[i].xs == '-') nq++;
 	}
 
-	printf("tid = %d, #hits = %lu, range = %s:%d-%d, orient = %c (%d, %d, %d) %s\n",
-			tid, hits.size(), chrm.c_str(), lpos, rpos, strand, n0, np, nq, (pexons.size() >= 100 ? "[monster]" : ""));
+	printf("tid = %d, #hits = %lu, #partial-exons = %lu, range = %s:%d-%d, orient = %c (%d, %d, %d)\n",
+			tid, hits.size(), pexons.size(), chrm.c_str(), lpos, rpos, strand, n0, np, nq);
 
 	// print hits
 	/*

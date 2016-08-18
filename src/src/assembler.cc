@@ -110,7 +110,7 @@ int assembler::process(const bundle_base &bb)
 	bd.chrm = string(buf);
 	bd.build();
 
-	if(bd.num_partial_exons() >= 100) return 0;
+	//if(bd.num_partial_exons() >= 100) return 0;
 	if(bd.num_junctions() <= 0 && ignore_single_exon_transcripts) return 0;
 
 	index++;
@@ -119,6 +119,9 @@ int assembler::process(const bundle_base &bb)
 	if(fixed_gene_name != "" && name != fixed_gene_name) return 0;
 
 	bd.print(index);
+
+	// TODO
+	return 0;
 
 	splice_graph gr;
 	vector<hyper_edge> vhe;
@@ -144,11 +147,13 @@ int assembler::compare(splice_graph &gr)
 	if(g.genes.size() <= 0) return 0;
 
 	gtf gg(g.genes[0]);
+
 	splice_graph gt;
 	gg.build_splice_graph(gt);
 
 	sgraph_compare sgc(gt, gr);
-	sgc.compare(string("compare.") + tostring(index) + string(".tex"));
+	sgc.compare("compare.tex");
+	//sgc.compare(string("compare.") + tostring(index) + string(".tex"));
 
 	return 0;
 }

@@ -22,6 +22,7 @@ public:
 	int build_splice_graph(splice_graph &gr);
 	int output_gtf(ofstream &fout, const vector<path> &paths, const string &prefix) const;	
 	int output_gtf(ofstream &fout) const;	
+	int print() const;
 
 private:
 	int build_split_interval_map();

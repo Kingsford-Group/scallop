@@ -21,6 +21,7 @@ int gtf::build_split_interval_map()
 	for(int i = 0; i < transcripts.size(); i++)
 	{
 		transcript &t = transcripts[i];
+		if(t.expression == 0) t.expression = 1;
 		for(int j = 0; j < t.exons.size(); j++)
 		{
 			PI32 p = t.exons[j];
@@ -180,5 +181,14 @@ int gtf::output_gtf(ofstream &fout, const vector<path> &paths, const string &pre
 int gtf::output_gtf(ofstream &fout) const
 {
 	write(fout);
+	return 0;
+}
+
+int gtf::print() const
+{
+	for(SIMI it = imap.begin(); it != imap.end(); it++)
+	{
+		printf("[%d, %d) -> %d\n", lower(it->first), upper(it->first), it->second);
+	}
 	return 0;
 }
