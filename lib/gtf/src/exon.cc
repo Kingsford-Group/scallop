@@ -39,6 +39,7 @@ int exon::parse(const string &s)
 	frame = buf[0];
 
 	char buf2[10240];
+	expression = 0;
 	while(sstr.eof() == false)
 	{
 		sstr>>buf;
