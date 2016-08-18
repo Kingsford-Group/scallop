@@ -2409,8 +2409,8 @@ int scallop2::print()
 	if(output_tex_files == true)
 	{
 		draw_splice_graph(name + "." + tostring(round) + ".tex");
-		nested_graph nt(gr);
-		nt.draw(name + "." + tostring(round) + ".nt.tex");
+		//nested_graph nt(gr);
+		//nt.draw(name + "." + tostring(round) + ".nt.tex");
 	}
 
 	round++;
