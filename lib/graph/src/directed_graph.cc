@@ -709,7 +709,9 @@ int directed_graph::draw(const string &file, const MIS &mis, const MES &mes, dou
 	char sy[1024];
 	double pos = 0;
 
-	vector<int> tp = topological_sort();
+	vector<int> tp;
+	//tp = topological_sort();
+	for(int i = 0; i < num_vertices(); i++) tp.push_back(i);
 	for(int ii = 0; ii < tp.size(); ii++)
 	{
 		int i = tp[ii];
