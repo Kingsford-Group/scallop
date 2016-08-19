@@ -45,6 +45,7 @@ int scallop2::clear()
 int scallop2::assemble()
 {
 	classify();
+	if(gr.num_vertices() > 100) return greedy();
 	if(algo == "basic") return assemble0();
 	if(algo == "core") return assemble1();
 	if(algo == "full") return assemble2();
