@@ -828,3 +828,26 @@ int splice_graph::print_nontrivial_vertices()
 	}
 	return 0;
 }
+
+int splice_graph::print()
+{
+	for(int i = 0; i < num_vertices(); i++)
+	{
+		if(degree(i) <= 1) continue;
+		vertex_info vi = get_vertex_info(i);
+		edge_iterator it1, it2;
+		printf("vertex %d, range = [%d, %d), length = %d\n", i, vi.lpos, vi.rpos, vi.rpos - vi.lpos);
+		printf(" in-vertices ="); 
+		for(tie(it1, it2) = in_edges(i); it1 != it2; it1++)
+		{
+			printf(" %d, ", (*it1)->source());
+		}
+		printf("\n out-vertices = ");
+		for(tie(it1, it2) = out_edges(i); it1 != it2; it1++)
+		{
+			printf(" %d, ", (*it1)->target());
+		}
+		printf("\n");
+	}
+	return 0;
+}

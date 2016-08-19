@@ -205,10 +205,10 @@ bool parse_arguments(int argc, const char ** argv)
 			min_mapping_quality = 5;
 			max_equation_error_ratio = 0.1;
 			min_subregion_gap = 10;
-			min_bundle_gap = 50;
+			min_bundle_gap = 20;
 			min_subregion_length = 75;
 			min_subregion_overlap = 10.0;
-			min_flank_length = 5;
+			min_flank_length = 8;
 		}
 	}
 

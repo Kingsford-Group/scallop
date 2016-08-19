@@ -2101,8 +2101,8 @@ bool scallop2::decompose_trivial_vertex(int i, vector<int> &ve)
 
 	int ee = merge_adjacent_edges(e1, e2);
 
-	printf("degree = (%d, %d), e1 = %d, e2 = %d, ee = %d, degree' = (%d, %d)\n", d1, d2, e1, e2, ee,
-			gr.in_degree(i), gr.out_degree(i));
+	//printf("degree = (%d, %d), e1 = %d, e2 = %d, ee = %d, degree' = (%d, %d)\n", d1, d2, e1, e2, ee,
+	//		gr.in_degree(i), gr.out_degree(i));
 
 	assert(gr.in_degree(i) < d1 || gr.out_degree(i) < d2);
 

@@ -88,6 +88,7 @@ public:
 	int draw(const string &file);
 	int draw(const string &file, const MIS &mis, const MES &mes, double len);
 	int print_nontrivial_vertices();
+	int print();
 };
 
 #endif

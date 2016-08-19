@@ -40,7 +40,7 @@ bool junction::operator<(const junction &x) const
 
 int junction::print(int index) const
 {
-	printf("junction %d: region = [%d, %d), %d -> %d, count = %d\n", 
-			index, lpos, rpos, lexon, rexon, count);
+	printf("junction %d: region = [%d, %d), %d -> %d, length = %d, count = %d\n", 
+			index, lpos, rpos, lexon, rexon, rpos - lpos, count);
 	return 0;
 }

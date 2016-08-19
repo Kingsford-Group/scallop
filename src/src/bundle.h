@@ -28,7 +28,7 @@ public:
 public:
 	virtual int build();
 	int output_transcript(ofstream &fout, const path &p, const string &gid, const string &tid) const;	
-	int print(int index) const;
+	int print(int index);
 
 private:
 	// check whether hits are sorted

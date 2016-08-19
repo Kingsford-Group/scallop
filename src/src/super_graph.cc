@@ -157,15 +157,17 @@ vector<int> super_graph::get_root_vertices(int s, const vector<int> &x) const
 	return vv;
 }
 
-int super_graph::print() const
+int super_graph::print()
 {
 	for(int i = 0; i < subs.size(); i++)
 	{
-		const splice_graph &gr = subs[i];
+		splice_graph &gr = subs[i];
 		int32_t lpos = gr.get_vertex_info(0).lpos;
 		int32_t rpos = gr.get_vertex_info(gr.num_vertices() - 1).rpos;
 
 		printf("subgraph %d, #vertices = %lu / %lu, range = [%d, %d)\n", i, gr.num_vertices() - 2, root.num_vertices() - 2, lpos, rpos);
+		// TODO
+		//gr.print();
 	}
 	return 0;
 }

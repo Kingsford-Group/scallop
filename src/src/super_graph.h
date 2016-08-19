@@ -27,7 +27,7 @@ private:
 
 public:
 	int build();
-	int print() const;
+	int print();
 	int get_root_vertex(int sub, int x) const;
 	vector<int> get_root_vertices(int sub, const vector<int> &x) const;
 

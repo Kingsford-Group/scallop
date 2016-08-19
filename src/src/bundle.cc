@@ -92,7 +92,11 @@ int bundle::build_junctions()
 	map<int64_t, int>::iterator it;
 	for(it = m.begin(); it != m.end(); it++)
 	{
-		if(it->second < min_splice_boundary_hits) continue;
+		//if(it->second < min_splice_boundary_hits) continue;
+		int32_t len = low32(it->first) - high32(it->first);
+		int n = (int)(log10(len)) - 1; //100->1, 1000->2, 10000->3
+		if(it->second <= 0) continue;
+		if(it->second < n) continue;
 		junctions.push_back(junction(it->first, it->second));
 	}
 	return 0;
@@ -787,7 +791,7 @@ int bundle::build_splice_graph(splice_graph &gr)
 	return 0;
 }
 
-int bundle::print(int index) const
+int bundle::print(int index)
 {
 	printf("\nBundle %d: ", index);
 
