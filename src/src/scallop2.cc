@@ -186,6 +186,8 @@ int scallop2::assemble2()
 
 int scallop2::greedy()
 {
+	assemble0();
+
 	greedy_decompose(-1);
 	//assert(gr.num_edges() == 0);
 
@@ -2443,7 +2445,8 @@ int scallop2::draw_splice_graph(const string &file)
 		edge_info ei = gr.get_edge_info(i2e[i]);
 		int l = ei.length;
 		char b = ei.infer ? 'T' : 'F';
-		sprintf(buf, "%d:%.1lf:%d:%c", i, w, l, b);
+		//sprintf(buf, "%d:%.1lf:%d:%c", i, w, l, b);
+		sprintf(buf, "%.0lf", w);
 		mes.insert(PES(i2e[i], buf));
 	}
 	gr.draw(file, mis, mes, 4.5);
