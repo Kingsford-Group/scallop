@@ -30,7 +30,7 @@ int bundle::build()
 	build_partial_exons();
 	link_partial_exons();
 	build_splice_graph(sg.root);
-	build_hyper_edges(sg.root.vhe);
+	build_hyper_edges(sg.vhe);
 	sg.build();
 	return 0;
 }
@@ -558,93 +558,98 @@ int bundle::search_partial_exons(int32_t x)
 
 int bundle::build_hyper_edges(vector<hyper_edge> &vhe)
 {
-	vector<int> list;
-	map<string, PI> m;
-	vector<int64_t> v;
-	map<hyper_edge, int> mhe;
+	vector<int> list;			// list of index of partial-exons
+	map<string, PI> m;			// hit-id to region of list
 	for(int i = 0; i < hits.size(); i++)
 	{
 		hit &h = hits[i];
 
-		if(h.isize >= 0 && verify_unique_mapping(h) == false) continue;
+		if((h.flag & 0x4) >= 1) continue;		// sequence is unmapped
 
-		if(h.isize < 0) h.get_matched_intervals(v);
-		else compute_read1_intervals(h, v);
+		vector<int64_t> v;
+		char c;
+		//if(h.isize >= 0 && verify_unique_mapping(h) == false) continue;
+		if(h.isize < 0) 
+		{
+			h.get_matched_intervals(v);
+			c = 'B';
+		}
+		else if(verify_unique_mapping(h) == false) 
+		{
+			h.get_matched_intervals(v);
+			c = 'C';
+		}
+		else 
+		{
+			compute_read1_intervals(h, v);
+			c = 'A';
+		}
 
 		if(v.size() == 0) continue;
-		string s = h.qname;
 
-		if(m.find(s) == m.end())
+		string s = h.qname + string(1, c);
+		if(m.find(s) != m.end()) continue;
+
+		//h.print();
+		//printf("current string = %s\n", s.c_str());
+
+		PI pi(list.size(), list.size());
+		for(int k = 0; k < v.size(); k++)
 		{
-			PI pi(list.size(), list.size());
-			for(int k = 0; k < v.size(); k++)
+			int32_t p1 = high32(v[k]);
+			int32_t p2 = low32(v[k]);
+
+			int e1 = search_partial_exons(p1);
+			int e2 = search_partial_exons(p2 - 1);
+
+			if(e1 <= -1 || e2 <= -1) continue;
+
+			for(int j = e1; j <= e2; j++) 
 			{
-				int32_t p1 = high32(v[k]);
-				int32_t p2 = low32(v[k]);
-
-				int e1 = search_partial_exons(p1);
-				int e2 = search_partial_exons(p2 - 1);
-				
-				if(e1 <= -1 || e2 <= -1) continue;
-
-				for(int j = e1; j <= e2; j++) 
-				{
-					list.push_back(j);
-					pi.second++;
-				}
-			}
-
-			/*
-			h.print();
-			printf(" -> ");
-			for(int k = pi.first; k < pi.second; k++) printf(" %d", list[k]);
-			printf("\n");
-			*/
-
-			if(pi.second > pi.first)
-			{
-				m.insert(pair<string, PI>(s, pi));
+				list.push_back(j);
+				pi.second++;
 			}
 		}
-		else
+
+		if(pi.second > pi.first) m.insert(pair<string, PI>(s, pi));
+	}
+
+	map<hyper_edge, int> mhe;	// hyper_edge and count
+	set<string> ss;				// processed set of hits
+
+	for(map<string, PI>::iterator it = m.begin(); it != m.end(); it++)
+	{
+		string s1 = it->first;
+		if(ss.find(s1) != ss.end()) continue;
+
+		int l1 = m[s1].first;
+		int r1 = m[s1].second;
+		set<int> sp(list.begin() + l1, list.begin() + r1);
+
+		char c1 = s1[s1.size() - 1];
+		char c2 = (c1 == 'A') ? 'B' : (c1 == 'B' ? 'A' : 'D');
+		string s2 = s1.substr(0, s1.size() - 1) + string(1, c2);
+
+		assert(ss.find(s2) == ss.end());
+
+		if(m.find(s2) != m.end())
 		{
-			int l = m[s].first;
-			int r = m[s].second;
-			set<int> sp(list.begin() + l, list.begin() + r);
-			for(int k = 0; k < v.size(); k++)
-			{
-				int32_t p1 = high32(v[k]);
-				int32_t p2 = low32(v[k]);
-
-				int e1 = search_partial_exons(p1);
-				int e2 = search_partial_exons(p2 - 1);
-
-				if(e1 <= -1 || e2 <= -1) continue;
-
-				for(int j = e1; j <= e2; j++) 
-				{
-					if(sp.find(j) == sp.end()) sp.insert(j);
-				}
-			}
-
-			// hyper junctions
-
-			if(sp.size() <= 2) continue;
-
-			vector<int> vv(sp.begin(), sp.end());
-			hyper_edge he(vv, 1);
-
-			/*
-			h.print();
-			printf(" -> ");
-			he.print(99);
-			printf("\n");
-			*/
-
-			map<hyper_edge, int>::iterator it = mhe.find(he);
-			if(it == mhe.end()) mhe.insert(pair<hyper_edge, int>(he, 1));
-			else it->second++;
+			int l2 = m[s2].first;
+			int r2 = m[s2].second;
+			sp.insert(list.begin() + l2, list.begin() + r2);
 		}
+
+		ss.insert(s1);
+		ss.insert(s2);
+
+		if(sp.size() <= 1) continue;
+
+		vector<int> vv(sp.begin(), sp.end());
+		hyper_edge he(vv, 1);
+
+		map<hyper_edge, int>::iterator mit = mhe.find(he);
+		if(mit == mhe.end()) mhe.insert(pair<hyper_edge, int>(he, 1));
+		else mit->second++;
 	}
 
 	vhe.clear();
@@ -729,27 +734,6 @@ int bundle::build_splice_graph(splice_graph &gr)
 	gr.set_vertex_weight(pexons.size() + 1, 0);
 	gr.set_vertex_info(pexons.size() + 1, vin);
 
-	// edges: connecting adjacent pexons => e2w
-	for(int i = 0; i < (int)(pexons.size()) - 1; i++)
-	{
-		const partial_exon &x = pexons[i];
-		const partial_exon &y = pexons[i + 1];
-
-		if(x.rpos != y.lpos) continue;
-
-		assert(x.rpos == y.lpos);
-		int32_t xr = compute_overlap(mmap, x.rpos - 1);
-		int32_t yl = compute_overlap(mmap, y.lpos);
-		// TODO
-		double wt = xr < yl ? xr : yl;
-		double sd = 1.0;
-		//double sd = 0.5 * x.dev + 0.5 * y.dev;
-
-		edge_descriptor p = gr.add_edge(i + 1, i + 2);
-		gr.set_edge_weight(p, wt < 1.0 ? 1.0 : wt);
-		gr.set_edge_info(p, edge_info());
-	}
-
 	// edges: each junction => and e2w
 	for(int i = 0; i < junctions.size(); i++)
 	{
@@ -760,11 +744,32 @@ int bundle::build_splice_graph(splice_graph &gr)
 		const partial_exon &x = pexons[b.lexon];
 		const partial_exon &y = pexons[b.rexon];
 
-		//double sd = 0.5 * x.dev + 0.5 * y.dev;
-		double sd = 1.0;
 		edge_descriptor p = gr.add_edge(b.lexon + 1, b.rexon + 1);
 		assert(b.count >= 1);
 		gr.set_edge_weight(p, b.count);
+		gr.set_edge_info(p, edge_info());
+	}
+
+	// edges: connecting adjacent pexons => e2w
+	for(int i = 0; i < (int)(pexons.size()) - 1; i++)
+	{
+		const partial_exon &x = pexons[i];
+		const partial_exon &y = pexons[i + 1];
+
+		if(x.rpos != y.lpos) continue;
+
+		assert(x.rpos == y.lpos);
+		
+		// TODO
+		int xd = gr.out_degree(i + 1);
+		int yd = gr.in_degree(i + 2);
+		double wt = (xd < yd) ? x.ave : y.ave;
+		//int32_t xr = compute_overlap(mmap, x.rpos - 1);
+		//int32_t yl = compute_overlap(mmap, y.lpos);
+		//double wt = xr < yl ? xr : yl;
+
+		edge_descriptor p = gr.add_edge(i + 1, i + 2);
+		gr.set_edge_weight(p, wt < 1.0 ? 1.0 : wt);
 		gr.set_edge_info(p, edge_info());
 	}
 
@@ -806,8 +811,8 @@ int bundle::print(int index)
 		if(hits[i].xs == '-') nq++;
 	}
 
-	printf("tid = %d, #hits = %lu, #partial-exons = %lu, #subgraphs = %lu, range = %s:%d-%d, orient = %c (%d, %d, %d)\n",
-			tid, hits.size(), pexons.size(), sg.subs.size(), chrm.c_str(), lpos, rpos, strand, n0, np, nq);
+	printf("tid = %d, #hits = %lu, #partial-exons = %lu, #subgraphs = %lu, #couples = %lu, range = %s:%d-%d, orient = %c (%d, %d, %d)\n",
+			tid, hits.size(), pexons.size(), sg.subs.size(), sg.cps.size(), chrm.c_str(), lpos, rpos, strand, n0, np, nq);
 
 	// print hits
 	/*
@@ -894,4 +899,5 @@ int bundle::output_transcript(ofstream &fout, const path &p, const string &gid, 
 	}
 	return 0;
 }
+
 

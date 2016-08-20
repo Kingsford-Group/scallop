@@ -187,7 +187,7 @@ int scallop2::assemble2()
 int scallop2::greedy()
 {
 	greedy_decompose(-1);
-	assert(gr.num_edges() == 0);
+	//assert(gr.num_edges() == 0);
 
 	printf("%s greedy solution %lu paths\n", name.c_str(), paths.size());
 
@@ -345,7 +345,7 @@ int scallop2::init_gateways(const vector<hyper_edge> &vhe)
 	{
 		const hyper_edge &he = vhe[i];
 		const vector<int> &vv = he.v;
-		if(vv.size() <= 1) continue;
+		if(vv.size() <= 2) continue;
 
 		VE ve;
 		for(int k = 0; k < vv.size() - 1; k++)
@@ -361,14 +361,13 @@ int scallop2::init_gateways(const vector<hyper_edge> &vhe)
 
 			int e1 = e2i[ve[k]];
 			int e2 = e2i[ve[k + 1]];
-			int c = he.count;
+			int c = vhe[i].count;
 			int x = vv[k + 1];
 			gateways[x].add_route(PI(e1, e2), c);
 		}
 	}
 	return 0;
 }
-
 
 bool scallop2::decompose_vertices()
 {

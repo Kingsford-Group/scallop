@@ -92,8 +92,8 @@ int hit::print() const
 	}
 
 	// print basic information
-	printf("Hit %s: [%d-%d), mpos = %d, cigar = %s, flag = %d, quality = %d, strand = %c\n", 
-			qname.c_str(), pos, rpos, mpos, sstr.str().c_str(), flag, qual, strand);
+	printf("Hit %s: [%d-%d), mpos = %d, cigar = %s, flag = %d, quality = %d, strand = %c, isize = %d\n", 
+			qname.c_str(), pos, rpos, mpos, sstr.str().c_str(), flag, qual, strand, isize);
 
 	return 0;
 }

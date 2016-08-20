@@ -208,7 +208,7 @@ bool parse_arguments(int argc, const char ** argv)
 			min_bundle_gap = 20;
 			min_subregion_length = 75;
 			min_subregion_overlap = 10.0;
-			min_flank_length = 8;
+			min_flank_length = 5;
 		}
 	}
 

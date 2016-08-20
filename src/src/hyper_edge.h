@@ -2,6 +2,7 @@
 #define __HYPER_EDGE_H__
 
 #include <vector>
+#include "graph_base.h"
 
 using namespace std;
 
@@ -14,7 +15,8 @@ public:
 	bool operator<(const hyper_edge &h) const;
 
 public:
-	vector<int> v;		// vertices
+	vector<int> v;		// list of vertices
+	VE ve;				// list of edges
 	int count;			// # of segments
 
 public:
