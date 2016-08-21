@@ -137,12 +137,14 @@ int router::run_ilp1()
 	{
 		for(int i = 0; i < bvars.size(); i++)
 		{
-			int b = (int)(bvars[i].get(GRB_DoubleAttr_X));
+			double b0 = bvars[i].get(GRB_DoubleAttr_X);
+			int b = (bvars[i].get(GRB_DoubleAttr_X) >= 0.5) ? 1 : 0;
 			double p = pvars[i].get(GRB_DoubleAttr_X);
 			double q = qvars[i].get(GRB_DoubleAttr_X);
 
-			if(b == 1) assert(q <= 0.001);
-			if(b == 0) assert(p <= 0.001);
+			//printf("b = %e, p = %e, q = %e\n", b0, p, q);
+			//if(b == 1) assert(q <= 0.001);
+			//if(b == 0) assert(p <= 0.001);
 			if(b == 1 && i < gr.in_degree(root)) pv1.push_back(u2e[i]);
 			if(b == 1 && i >=gr.in_degree(root)) pv2.push_back(u2e[i]);
 			if(b == 0 && i < gr.in_degree(root)) qv1.push_back(u2e[i]);
