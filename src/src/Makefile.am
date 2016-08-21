@@ -22,7 +22,7 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  hit.h hit.cc \
 				  partial_exon.h partial_exon.cc \
 				  hyper_edge.h hyper_edge.cc \
-				  gateway.h gateway.cc \
+				  router.h router.cc \
 				  region.h region.cc \
 				  slope.h slope.cc \
 				  junction.h junction.cc \
@@ -34,5 +34,6 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  gtf.h gtf.cc \
 				  scallop1.h scallop1.cc \
 				  scallop2.h scallop2.cc \
+				  scallop3.h scallop3.cc \
 				  assembler.h assembler.cc \
 				  main.cc
