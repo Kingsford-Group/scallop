@@ -59,6 +59,7 @@ private:
 
 	// super junctions and super partial_exons;
 	int build_hyper_edges(vector<hyper_edge> &vhe);
+	int build_hyper_edges0(vector<hyper_edge> &vhe);
 	int build_splice_graph(splice_graph &gr);
 	int search_partial_exons(int32_t p);
 

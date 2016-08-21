@@ -558,6 +558,67 @@ int bundle::search_partial_exons(int32_t x)
 
 int bundle::build_hyper_edges(vector<hyper_edge> &vhe)
 {
+	split_interval_map pmap;
+	for(int i = 0; i < pexons.size(); i++)
+	{
+		partial_exon &p = pexons[i];
+		pmap += make_pair(ROI(p.lpos, p.rpos), i + 1);
+	}
+
+	map<hyper_edge, int> mhe;
+	for(int i = 0; i < hits.size(); i++)
+	{
+		hit &h = hits[i];
+
+		if((h.flag & 0x4) >= 1) continue;
+
+		vector<int64_t> v;
+		h.get_matched_intervals(v);
+		if(v.size() == 0) continue;
+
+		set<int> sp;
+		for(int k = 0; k < v.size(); k++)
+		{
+			int32_t p1 = high32(v[k]);
+			int32_t p2 = low32(v[k]);
+
+			SIMI it1 = pmap.find(ROI(p1, p1 + 1));
+			SIMI it2 = pmap.find(ROI(p2 - 1, p2));
+			if(it1 == pmap.end()) continue;
+			if(it2 == pmap.end()) continue;
+
+			assert(it1->second >= 1);
+			assert(it2->second >= 1);
+			for(int j = it1->second - 1; j <= it2->second - 1; j++) 
+			{
+				sp.insert(j);
+			}
+		}
+
+		if(sp.size() <= 2) continue;
+
+		vector<int> vv(sp.begin(), sp.end());
+		hyper_edge he(vv, 1);
+
+		map<hyper_edge, int>::iterator mit = mhe.find(he);
+		if(mit == mhe.end()) mhe.insert(pair<hyper_edge, int>(he, 1));
+		else mit->second++;
+	}
+
+	vhe.clear();
+	for(map<hyper_edge, int>::iterator it = mhe.begin(); it != mhe.end(); it++)
+	{
+		hyper_edge he = it->first;
+		he.count = it->second;
+		he.increase();
+		vhe.push_back(he);
+	}
+
+	return 0;
+}
+
+int bundle::build_hyper_edges0(vector<hyper_edge> &vhe)
+{
 	vector<int> list;			// list of index of partial-exons
 	map<string, PI> m;			// hit-id to region of list
 	for(int i = 0; i < hits.size(); i++)
