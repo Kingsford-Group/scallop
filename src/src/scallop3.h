@@ -1,13 +1,10 @@
 #ifndef __SCALLOP3_H__
 #define __SCALLOP3_H__
 
-#include "path.h"
-#include "equation.h"
 #include "splice_graph.h"
-#include "nested_graph.h"
-#include "hyper_edge.h"
+#include "equation.h"
 #include "router.h"
-#include "undirected_graph.h"
+#include "path.h"
 
 typedef map< edge_descriptor, vector<int> > MEV;
 typedef pair< edge_descriptor, vector<int> > PEV;
@@ -44,7 +41,18 @@ public:
 private:
 	// trivial, or hard
 	int classify();
-	int divide();
+
+	// decompose
+	int iterate();
+	bool decompose();
+	bool decompose_trivial_vertex(int v);
+	bool decompose_trivial_vertex(int v, vector<int> &ve);
+	int split_edge(int exi, double w);
+	int merge_adjacent_edges(int x, int y);
+	int merge_adjacent_equal_edges(int x, int y);
+
+	// smooth vertex
+	bool smooth_vertex(int v, const vector<equation> &eqns);
 
 	// init
 	int init_super_edges();

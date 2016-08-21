@@ -1,6 +1,7 @@
 #include "router.h"
 #include "util.h"
 #include "gurobi_c++.h"
+#include "smoother.h"
 #include <cstdio>
 #include <algorithm>
 #include <set>
@@ -9,26 +10,24 @@ router::router(int r, splice_graph &g, MEI &ei, VE &ie)
 	:root(r), gr(g), e2i(ei), i2e(ie)
 {
 	build_indices();
-	pratio = -1;
-	pvalue = -1;
+	eqns.clear();
 }
 
-int router::divide()
+double router::divide()
 {
-	if(gr.in_degree(root) <= 1) return 0;
-	if(gr.out_degree(root) <= 1) return 0;
-
-	run_ilp1();
-	evaluate_partition();
-	print();
-	printf("\n");
-
-	run_ilp2();
-	evaluate_partition();
-	print();
-	printf("\n");
-
-	return 0;
+	eqns.clear();
+	if(gr.in_degree(root) >= 2 && gr.out_degree(root) >= 2)
+	{
+		run_ilp2();
+	}
+	else
+	{
+		equation eqn;
+		for(int i = 0; i < gr.in_degree(root); i++) eqn.s.push_back(u2e[i]);
+		for(int i = gr.in_degree(root); i < gr.degree(root); i++) eqn.t.push_back(u2e[i]);
+		eqns.push_back(eqn);
+	}
+	return evaluate();
 }
 
 int router::run_ilp1()
@@ -129,31 +128,32 @@ int router::run_ilp1()
 
 	int f = model->get(GRB_IntAttr_Status);
 
-	pv1.clear();
-	pv2.clear();
-	qv1.clear();
-	qv2.clear();
 	if(f == GRB_OPTIMAL)
 	{
+		equation p, q;
 		for(int i = 0; i < bvars.size(); i++)
 		{
+			/*
 			double b0 = bvars[i].get(GRB_DoubleAttr_X);
-			int b = (bvars[i].get(GRB_DoubleAttr_X) >= 0.5) ? 1 : 0;
 			double p = pvars[i].get(GRB_DoubleAttr_X);
 			double q = qvars[i].get(GRB_DoubleAttr_X);
-
-			//printf("b = %e, p = %e, q = %e\n", b0, p, q);
-			//if(b == 1) assert(q <= 0.001);
-			//if(b == 0) assert(p <= 0.001);
-			if(b == 1 && i < gr.in_degree(root)) pv1.push_back(u2e[i]);
-			if(b == 1 && i >=gr.in_degree(root)) pv2.push_back(u2e[i]);
-			if(b == 0 && i < gr.in_degree(root)) qv1.push_back(u2e[i]);
-			if(b == 0 && i >=gr.in_degree(root)) qv2.push_back(u2e[i]);
+			printf("b = %e, p = %e, q = %e\n", b0, p, q);
+			if(b == 1) assert(q <= 0.001);
+			if(b == 0) assert(p <= 0.001);
+			*/
+			int b = (bvars[i].get(GRB_DoubleAttr_X) >= 0.5) ? 1 : 0;
+			if(b == 1 && i < gr.in_degree(root)) p.s.push_back(u2e[i]);
+			if(b == 1 && i >=gr.in_degree(root)) p.t.push_back(u2e[i]);
+			if(b == 0 && i < gr.in_degree(root)) q.s.push_back(u2e[i]);
+			if(b == 0 && i >=gr.in_degree(root)) q.t.push_back(u2e[i]);
 		}
+		eqns.push_back(p);
+		eqns.push_back(q);
 	}
 
 	delete model;
 	delete env;
+	return 0;
 }
 
 int router::run_ilp2()
@@ -237,48 +237,43 @@ int router::run_ilp2()
 
 	int f = model->get(GRB_IntAttr_Status);
 
-	pv1.clear();
-	pv2.clear();
-	qv1.clear();
-	qv2.clear();
 	if(f == GRB_OPTIMAL)
 	{
+		equation p, q;
 		for(int i = 0; i < bvars.size(); i++)
 		{
 			int b = (int)(bvars[i].get(GRB_DoubleAttr_X));
-			if(b == 1 && i < gr.in_degree(root)) pv1.push_back(u2e[i]);
-			if(b == 1 && i >=gr.in_degree(root)) pv2.push_back(u2e[i]);
-			if(b == 0 && i < gr.in_degree(root)) qv1.push_back(u2e[i]);
-			if(b == 0 && i >=gr.in_degree(root)) qv2.push_back(u2e[i]);
+			if(b == 1 && i < gr.in_degree(root)) p.s.push_back(u2e[i]);
+			if(b == 1 && i >=gr.in_degree(root)) p.t.push_back(u2e[i]);
+			if(b == 0 && i < gr.in_degree(root)) q.s.push_back(u2e[i]);
+			if(b == 0 && i >=gr.in_degree(root)) q.t.push_back(u2e[i]);
 		}
+		eqns.push_back(p);
+		eqns.push_back(q);
 	}
 
 	delete model;
 	delete env;
+	return 0;
 }
 
-int router::evaluate_partition()
+double router::evaluate()
 {
-	if(pv1.size() <= 0 || pv2.size() <= 0) return 0;
-	if(qv1.size() <= 0 || qv2.size() <= 0) return 0;
+	double ratio = -1;
+	for(int i = 0; i < eqns.size(); i++)
+	{
+		equation &p = eqns[i];
+		double pw1 = 0, pw2 = 0;
+		for(int i = 0; i < p.s.size(); i++) pw1 += gr.get_edge_weight(i2e[p.s[i]]);
+		for(int i = 0; i < p.t.size(); i++) pw2 += gr.get_edge_weight(i2e[p.t[i]]);
 
-	double pw1 = 0, pw2 = 0;
-	double qw1 = 0, qw2 = 0;
+		assert(pw1 >= SMIN && pw2 >= SMIN);
+		p.e = (pw1 > pw2) ? (pw1 / pw2) : (pw2 / pw1);
 
-	for(int i = 0; i < pv1.size(); i++) pw1 += gr.get_edge_weight(i2e[pv1[i]]);
-	for(int i = 0; i < pv2.size(); i++) pw2 += gr.get_edge_weight(i2e[pv2[i]]);
-	for(int i = 0; i < qv1.size(); i++) qw1 += gr.get_edge_weight(i2e[qv1[i]]);
-	for(int i = 0; i < qv2.size(); i++) qw2 += gr.get_edge_weight(i2e[qv2[i]]);
+		if(ratio < p.e) ratio = p.e;
+	}
 
-	double pr = (pw1 > pw2) ? (pw1 / pw2) : (pw2 / pw1);
-	double qr = (qw1 > qw2) ? (qw1 / qw2) : (qw2 / qw1);
-	pratio = (pr < qr) ? qr : pr;
-
-	double pw = fabs(pw1 - pw2);
-	double qw = fabs(qw1 - qw2);
-	pvalue = (pw < qw) ? qw : pw;
-
-	return 0;
+	return ratio;
 }
 
 int router::build_indices()
@@ -454,15 +449,6 @@ int router::print() const
 	{
 		printf(" route %d (%d, %d), count = %.1lf\n", i, routes[i].first, routes[i].second, counts[i]);
 	}
-	printf("divide vertex %d, pratio = %.2lf, pvalue = %.2lf, pv1 = ( ", root, pratio, pvalue);
-	printv(pv1);
-	printf("), pv2 = ( ");
-	printv(pv2);
-	printf("), qv1 = ( ");
-	printv(qv1);
-	printf("), qv2 = ( ");
-	printv(qv2);
-	printf(")\n");
 	return 0;
 }
 

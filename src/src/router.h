@@ -4,7 +4,7 @@
 #include <vector>
 #include "util.h"
 #include "splice_graph.h"
-#include "undirected_graph.h"
+#include "equation.h"
 
 using namespace std;
 
@@ -24,22 +24,17 @@ public:
 	MI e2u;						// edge to index
 	vector<int> u2e;			// index to edge
 
-	double pratio;				// partition ratio
-	double pvalue;				// partition absolute difference
-	vector<int> pv1;			// partition 1, left side
-	vector<int> pv2;			// partition 1, right side
-	vector<int> qv1;			// partition 2, left side
-	vector<int> qv2;			// partition 2, right side
+	vector<equation> eqns;		// divide results
 
 public:
 	// build indices
 	int build_indices();
 
 	// divide
-	int divide();
+	double divide();
+	double evaluate();				// compute pvalue and pratio
 	int run_ilp1();					// with multiplier ratio
 	int run_ilp2();					// with difference ratio
-	int evaluate_partition();		// compute pvalue and pratio
 
 	// modify routes
 	int add_route(const PI &p, double c);
