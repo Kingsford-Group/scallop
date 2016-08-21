@@ -23,7 +23,8 @@ scallop2::scallop2(const string &s, const splice_graph &g)
 	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 	gr.get_edge_indices(i2e, e2i);
 	init_super_edges();
-	init_gateways(gr.vhe);
+	init_routers(gr.vhe);
+	print();
 	//assert(gr.check_fully_connected() == true);
 }
 
@@ -44,6 +45,7 @@ int scallop2::clear()
 
 int scallop2::assemble()
 {
+	return 0;
 	classify();
 	if(gr.num_vertices() > 100) return greedy();
 	if(algo == "basic") return assemble0();
@@ -338,10 +340,10 @@ int scallop2::init_super_edges()
 	return 0;
 }
 
-int scallop2::init_gateways(const vector<hyper_edge> &vhe)
+int scallop2::init_routers(const vector<hyper_edge> &vhe)
 {
-	gateways.clear();
-	gateways.resize(gr.num_vertices());
+	routers.clear();
+	for(int i = 0; i < gr.num_vertices(); i++) routers.push_back(router(i, gr, e2i, i2e));
 
 	for(int i = 0; i < vhe.size(); i++)
 	{
@@ -365,7 +367,7 @@ int scallop2::init_gateways(const vector<hyper_edge> &vhe)
 			int e2 = e2i[ve[k + 1]];
 			int c = vhe[i].count;
 			int x = vv[k + 1];
-			gateways[x].add_route(PI(e1, e2), c);
+			routers[x].add_route(PI(e1, e2), c);
 		}
 	}
 	return 0;
@@ -387,7 +389,7 @@ bool scallop2::decompose_vertices()
 
 bool scallop2::decompose_vertex(int x)
 {
-	gateway &gw = gateways[x];
+	router &gw = routers[x];
 
 	double c = gw.total_counts();
 	if(c < min_hyper_edges_count) return false;
@@ -451,7 +453,7 @@ bool scallop2::decompose_vertex(int x)
 		if(kk == -1) continue;
 
 		double r = compute_equation_error_ratio(eqn);
-		if(r <= -1 || r >= max_gateway_error_ratio) continue;
+		if(r <= -1 || r >= max_router_error_ratio) continue;
 		if(r > r0) continue;
 
 		eqn0 = eqn;
@@ -466,7 +468,7 @@ bool scallop2::decompose_vertex(int x)
 
 	printf("smooth vertex %d with equation\n", x);
 	eqn0.print(99);
-	gw.print(x);
+	gw.print();
 
 	assert(ug.degree(k) == 1);
 	tie(it1, it2) = ug.out_edges(k);
@@ -483,7 +485,7 @@ bool scallop2::decompose_vertex(int x)
 	ei.infer = true;
 	gr.set_edge_info(i2e[ee], ei);
 
-	gw.print(x);
+	gw.print();
 
 	return true;
 }
@@ -606,15 +608,15 @@ int scallop2::merge_adjacent_edges(int x, int y)
 	int x1 = split_edge(x, ww);
 	int y1 = split_edge(y, ww);
 
-	gateways[xs].split_out_edge(x, x1, ww / wx);
-	gateways[yt].split_in_edge(y, y1, ww / wy);
+	routers[xs].split_out_edge(x, x1, ww / wx);
+	routers[yt].split_in_edge(y, y1, ww / wy);
 
 	int xy = merge_adjacent_equal_edges(x, y);
 
-	gateways[xs].replace_out_edge(x, xy);
-	gateways[yt].replace_in_edge(y, xy);
-	gateways[xt].remove_in_edge(x);
-	gateways[xt].remove_out_edge(y);
+	routers[xs].replace_out_edge(x, xy);
+	routers[yt].replace_in_edge(y, xy);
+	routers[xt].remove_in_edge(x);
+	routers[xt].remove_out_edge(y);
 
 	return xy;
 }
@@ -2394,6 +2396,13 @@ int scallop2::print()
 		if(gr.degree(i) >= 1) n++;
 	}
 
+	for(int i = 0; i < routers.size(); i++)
+	{
+		router &gt = routers[i];
+		if(gt.routes.size() <= 0) continue;
+		gt.print();
+	}
+
 	/*
 	edge_iterator it1, it2;
 	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
@@ -2433,7 +2442,8 @@ int scallop2::draw_splice_graph(const string &file)
 		char b = vi.infer ? 'T' : 'F';
 		//string s = gr.get_vertex_string(i);
 		//sprintf(buf, "%d:%.0lf:%s", i, w, s.c_str());
-		sprintf(buf, "%d:%.1lf:%d:%.2lf:%c", i, w, l, d, b);
+		//sprintf(buf, "%d:%.1lf:%d:%.2lf:%c", i, w, l, d, b);
+		sprintf(buf, "%d:%.0lf:%d", i, w, l);
 		mis.insert(PIS(i, buf));
 	}
 
@@ -2446,7 +2456,7 @@ int scallop2::draw_splice_graph(const string &file)
 		int l = ei.length;
 		char b = ei.infer ? 'T' : 'F';
 		//sprintf(buf, "%d:%.1lf:%d:%c", i, w, l, b);
-		sprintf(buf, "%.0lf", w);
+		sprintf(buf, "%d:%.0lf", i, w);
 		mes.insert(PES(i2e[i], buf));
 	}
 	gr.draw(file, mis, mes, 4.5);

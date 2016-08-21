@@ -783,14 +783,14 @@ int bundle::build_splice_graph(splice_graph &gr)
 		if(r.ltype == START_BOUNDARY)
 		{
 			edge_descriptor p = gr.add_edge(ss, i + 1);
-			gr.set_edge_weight(p, 0);
+			gr.set_edge_weight(p, r.ave < 1.0 ? 1.0 : r.ave);
 			gr.set_edge_info(p, edge_info());
 		}
 
 		if(r.rtype == END_BOUNDARY) 
 		{
 			edge_descriptor p = gr.add_edge(i + 1, tt);
-			gr.set_edge_weight(p, 0);
+			gr.set_edge_weight(p, r.ave < 1.0 ? 1.0 : r.ave);
 			gr.set_edge_info(p, edge_info());
 		}
 	}

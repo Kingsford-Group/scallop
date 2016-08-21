@@ -6,7 +6,7 @@
 #include "splice_graph.h"
 #include "nested_graph.h"
 #include "hyper_edge.h"
-#include "gateway.h"
+#include "router.h"
 #include "undirected_graph.h"
 
 typedef map< edge_descriptor, vector<int> > MEV;
@@ -29,7 +29,7 @@ public:
 	string name;						// name for this gene
 	splice_graph gr;					// splice graph
 
-	vector<gateway> gateways;			// constructed gateway
+	vector<router> routers;				// constructed router
 
 	MEI e2i;							// edge map, from edge to index
 	VE i2e;								// edge map, from index to edge
@@ -56,7 +56,7 @@ private:
 
 	// init
 	int init_super_edges();
-	int init_gateways(const vector<hyper_edge> &vhe);
+	int init_routers(const vector<hyper_edge> &vhe);
 
 	// use hyper edges
 	bool decompose_vertices();

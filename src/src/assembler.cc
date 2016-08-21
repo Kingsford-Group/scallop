@@ -6,7 +6,7 @@
 #include "gtf.h"
 #include "config.h"
 #include "assembler.h"
-#include "scallop2.h"
+#include "scallop3.h"
 #include "sgraph_compare.h"
 
 assembler::assembler()
@@ -125,7 +125,7 @@ int assembler::process(const bundle_base &bb)
 
 		if(ref_file != "") compare(gr);
 
-		scallop2 sc(name, gr);
+		scallop3 sc(name, gr);
 		sc.assemble();
 
 		if(output_file != "")
