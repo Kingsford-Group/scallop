@@ -53,6 +53,7 @@ public:
 
 	// draw
 	int draw(const string &file, const MIS &mis, const MES &mes, double len);
+	int draw(const string &file, const MIS &mis, const MES &mes, double len, const vector<int> &topo);
 };
 
 #endif

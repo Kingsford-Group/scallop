@@ -690,6 +690,13 @@ int directed_graph::check_nest(int x, int y, set<edge_descriptor> &se, const vec
 
 int directed_graph::draw(const string &file, const MIS &mis, const MES &mes, double len)
 {
+	vector<int> tp;
+	for(int i = 0; i < num_vertices(); i++) tp.push_back(i);
+	return draw(file, mis, mes, len, tp);
+}
+
+int directed_graph::draw(const string &file, const MIS &mis, const MES &mes, double len, const vector<int> &tp)
+{
 	ofstream fout(file.c_str());
 	if(fout.fail())
 	{
@@ -709,9 +716,6 @@ int directed_graph::draw(const string &file, const MIS &mis, const MES &mes, dou
 	char sy[1024];
 	double pos = 0;
 
-	vector<int> tp;
-	//tp = topological_sort();
-	for(int i = 0; i < num_vertices(); i++) tp.push_back(i);
 	for(int ii = 0; ii < tp.size(); ii++)
 	{
 		int i = tp[ii];
