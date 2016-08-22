@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <iostream>
 #include <cfloat>
+#include <algorithm>
 
 scallop3::scallop3()
 {}
@@ -27,6 +28,7 @@ int scallop3::assemble()
 {
 	classify();
 	iterate();
+	collect_existing_st_paths();
 	return 0;
 }
 
@@ -62,7 +64,7 @@ bool scallop3::decompose()
 	router &rt = routers[root];
 
 	if(root == -1) return false;
-	if(ratio <= 0 || ratio >= 2) return false;
+	if(ratio <= 0) return false;
 
 	printf("split vertex %d, ratio = %.2lf, degree = (%d, %d), eqns = %lu\n", root, ratio, gr.in_degree(root), gr.out_degree(root), rt.eqns.size());
 	for(int i = 0;i < rt.eqns.size(); i++) rt.eqns[i].print(99);
@@ -360,36 +362,18 @@ int scallop3::balance_vertex(int v)
 	assert(w1 >= SMIN);
 	assert(w2 >= SMIN);
 
-	double r = sqrt(w2 / w1);
-	double m = DBL_MAX;
-	for(tie(it1, it2) = gr.in_edges(v); it1 != it2; it1++)
-	{
-		double w = gr.get_edge_weight(*it1);
-		gr.set_edge_weight(*it1, w * r);
-		if(w * r < m)  m = w * r;
-	}
-	for(tie(it1, it2) = gr.out_edges(v); it1 != it2; it1++)
-	{
-		double w = gr.get_edge_weight(*it1);
-		gr.set_edge_weight(*it1, w / r);
-		if(w / r < m) m = w / r;
-	}
-
-	if(m >= 1.0) return 0;
-
-	int n1 = gr.in_degree(v);
-	int n2 = gr.out_degree(v);
-	double d = n1 * 1.0 / n2;
+	double r1 = (w1 > w2) ? 1.0 : w2 / w1;
+	double r2 = (w1 < w2) ? 1.0 : w1 / w2;
 
 	for(tie(it1, it2) = gr.in_edges(v); it1 != it2; it1++)
 	{
 		double w = gr.get_edge_weight(*it1);
-		gr.set_edge_weight(*it1, w + 1.0);
+		gr.set_edge_weight(*it1, w * r1);
 	}
 	for(tie(it1, it2) = gr.out_edges(v); it1 != it2; it1++)
 	{
 		double w = gr.get_edge_weight(*it1);
-		gr.set_edge_weight(*it1, w + d);
+		gr.set_edge_weight(*it1, w * r2);
 	}
 
 	return 0;
@@ -412,7 +396,7 @@ int scallop3::split_vertex(int x, const vector<int> &xe, const vector<int> &ye)
 	gr.set_vertex_info(n - 1, gr.get_vertex_info(x));
 
 	v2v.push_back(v2v[n - 1]);
-	v2v[n - 1] = x;
+	v2v[n - 1] = v2v[x];
 
 	edge_iterator it1, it2;
 	VE ve;
@@ -456,6 +440,62 @@ int scallop3::split_vertex(int x, const vector<int> &xe, const vector<int> &ye)
 	return 0;
 }
 
+vector<int> scallop3::topological_sort()
+{
+	vector<PI> v;
+	for(int i = 0; i < v2v.size(); i++)
+	{
+		v.push_back(PI(v2v[i], i));
+	}
+	sort(v.begin(), v.end());
+
+	vector<int> vv;
+	for(int i = 0; i < v.size(); i++)
+	{
+		vv.push_back(v[i].second);
+	}
+
+	return vv;
+}
+
+int scallop3::collect_existing_st_paths()
+{
+	for(int i = 0; i < i2e.size(); i++)
+	{
+		if(i2e[i] == null_edge) continue;
+		if(i2e[i]->source() != 0) continue;
+		if(i2e[i]->target() != gr.num_vertices() - 1) continue;
+		collect_path(i);
+	}
+	return 0;
+}
+
+int scallop3::collect_path(int e)
+{
+	assert(mev.find(i2e[e]) != mev.end());
+	vector<int> v0 = mev[i2e[e]];
+	vector<int> v;
+	for(int i = 0; i < v0.size(); i++) v.push_back(v2v[v0[i]]);
+
+	sort(v.begin(), v.end());
+
+	int n = v2v[gr.num_vertices() - 1];
+	assert(v[0] == 0);
+	assert(v[v.size() - 1] < n);
+	v.push_back(n);
+
+	path p;
+	p.abd = gr.get_edge_weight(i2e[e]);
+	p.v = v;
+	paths.push_back(p);
+
+	gr.remove_edge(i2e[e]);
+	e2i.erase(i2e[e]);
+	i2e[e] = null_edge;
+
+	return 0;
+}
+
 int scallop3::print()
 {
 	int n = 0;
@@ -467,6 +507,10 @@ int scallop3::print()
 	int p1 = gr.compute_num_paths();
 	int p2 = gr.compute_decomp_paths();
 	printf("statistics: %lu edges, %d vertices, total %d paths, %d required\n", gr.num_edges(), n, p1, p2);
+
+	//for(int i = 0; i < v2v.size(); i++) printf("%d->%d, ", i, v2v[i]);
+	//printf("\n");
+
 	printf("finish round %d\n\n", round);
 
 	if(output_tex_files == true)
@@ -511,6 +555,8 @@ int scallop3::draw_splice_graph(const string &file)
 		sprintf(buf, "%d:%.0lf", i, w);
 		mes.insert(PES(i2e[i], buf));
 	}
-	gr.draw(file, mis, mes, 4.5);
+	
+	vector<int> tp = topological_sort();
+	gr.draw(file, mis, mes, 4.5, tp);
 	return 0;
 }

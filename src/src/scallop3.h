@@ -61,6 +61,11 @@ private:
 	int init_vertex_map();
 	int init_routers(const vector<hyper_edge> &vhe);
 
+	// topology
+	vector<int> topological_sort();
+	int collect_path(int e);
+	int collect_existing_st_paths();
+
 	// print and draw
 	int print();
 	int draw_splice_graph(const string &file);

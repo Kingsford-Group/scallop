@@ -785,6 +785,11 @@ int splice_graph::round_weights()
 	return 0;
 }
 
+int splice_graph::draw(const string &file, const MIS &mis, const MES &mes, double len, const vector<int> &tp)
+{
+	return directed_graph::draw(file, mis, mes, len, tp);
+}
+
 int splice_graph::draw(const string &file, const MIS &mis, const MES &mes, double len)
 {
 	return directed_graph::draw(file, mis, mes, len);
