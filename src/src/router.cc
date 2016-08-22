@@ -9,15 +9,27 @@
 router::router(int r, splice_graph &g, MEI &ei, VE &ie)
 	:root(r), gr(g), e2i(ei), i2e(ie)
 {
+	touched = true;
 }
 
+router::router(int r, splice_graph &g, MEI &ei, VE &ie, GRBEnv *_env)
+	:root(r), gr(g), e2i(ei), i2e(ie), env(_env)
+{
+	touched = true;
+}
+
+/*
 router::router(const router &rt)
-	:root(rt.root), gr(rt.gr), e2i(rt.e2i), i2e(rt.i2e)
+	:root(rt.root), gr(rt.gr), e2i(rt.e2i), i2e(rt.i2e), env(rt.env), touched(rt.touched)
 {
 }
+*/
 
 router& router::operator=(const router &rt)
 {
+	touched = rt.touched;
+	env = rt.env;
+
 	root = rt.root;
 	gr = rt.gr;
 	e2i = rt.e2i;
@@ -29,32 +41,49 @@ router& router::operator=(const router &rt)
 	e2u = rt.e2u;
 	u2e = rt.u2e;
 
+	ratio = rt.ratio;
 	eqns = rt.eqns;
 
 	return (*this);
 }
 
-double router::divide()
+int router::update()
 {
+	if(touched == false) return 0;
+	update_routes();
 	build_indices();
+	divide();
+	evaluate();
+	touched = false;
+	return 0;
+}
+
+int router::divide()
+{
 	eqns.clear();
+	ratio = -1;
 	if(gr.in_degree(root) >= 2 && gr.out_degree(root) >= 2)
 	{
+		printf("run ilp2\n");
 		run_ilp2();
+		printf("--------------\n");
+		for(int i = 0; i < eqns.size(); i++) eqns[i].print(88);
 	}
 	else if(gr.in_degree(root) >= 1 && gr.out_degree(root) >= 1)
 	{
 		equation eqn;
 		for(int i = 0; i < gr.in_degree(root); i++) eqn.s.push_back(u2e[i]);
 		for(int i = gr.in_degree(root); i < gr.degree(root); i++) eqn.t.push_back(u2e[i]);
+		assert(eqn.s.size() >= 1);
+		assert(eqn.t.size() >= 1);
 		eqns.push_back(eqn);
 	}
-	return evaluate();
+	return 0;
 }
 
 int router::run_ilp1()
 {
-	GRBEnv *env = new GRBEnv();
+	//GRBEnv *env = new GRBEnv();
 	GRBModel *model = new GRBModel(*env);
 
 	// ratio variables
@@ -174,13 +203,12 @@ int router::run_ilp1()
 	}
 
 	delete model;
-	delete env;
+	//delete env;
 	return 0;
 }
 
 int router::run_ilp2()
 {
-	GRBEnv *env = new GRBEnv();
 	GRBModel *model = new GRBModel(*env);
 
 	// ratio variables
@@ -264,7 +292,7 @@ int router::run_ilp2()
 		equation p, q;
 		for(int i = 0; i < bvars.size(); i++)
 		{
-			int b = (int)(bvars[i].get(GRB_DoubleAttr_X));
+			int b = (bvars[i].get(GRB_DoubleAttr_X) >= 0.5) ? 1 : 0;
 			if(b == 1 && i < gr.in_degree(root)) p.s.push_back(u2e[i]);
 			if(b == 1 && i >=gr.in_degree(root)) p.t.push_back(u2e[i]);
 			if(b == 0 && i < gr.in_degree(root)) q.s.push_back(u2e[i]);
@@ -275,21 +303,30 @@ int router::run_ilp2()
 	}
 
 	delete model;
-	delete env;
 	return 0;
 }
 
-double router::evaluate()
+int router::evaluate()
 {
-	double ratio = -1;
+	ratio = -1;
 	for(int i = 0; i < eqns.size(); i++)
 	{
 		equation &p = eqns[i];
-		//printf("root = %d\n", root);
-		//p.print(99);
+		printf("root = %d, ", root);
+		p.print(99);
 		double pw1 = 0, pw2 = 0;
-		for(int i = 0; i < p.s.size(); i++) pw1 += gr.get_edge_weight(i2e[p.s[i]]);
-		for(int i = 0; i < p.t.size(); i++) pw2 += gr.get_edge_weight(i2e[p.t[i]]);
+		for(int i = 0; i < p.s.size(); i++)
+		{
+			double w = gr.get_edge_weight(i2e[p.s[i]]);
+			printf(" edge %d, weight = %e\n", p.s[i], w);
+			pw1 += w;
+		}
+		for(int i = 0; i < p.t.size(); i++) 
+		{
+			double w = gr.get_edge_weight(i2e[p.t[i]]);
+			printf(" edge %d, weight = %e\n", p.t[i], w);
+			pw2 += w;
+		}
 
 		assert(pw1 >= SMIN && pw2 >= SMIN);
 		p.e = (pw1 > pw2) ? (pw1 / pw2) : (pw2 / pw1);
@@ -297,7 +334,7 @@ double router::evaluate()
 		if(ratio < p.e) ratio = p.e;
 	}
 
-	return ratio;
+	return 0;
 }
 
 int router::build_indices()
@@ -352,7 +389,7 @@ int router::remove_route(const PI &p)
 	return 0;
 }
 
-int router::update()
+int router::update_routes()
 {
 	vector<PI> vv;
 	vector<double> cc;
@@ -374,7 +411,6 @@ int router::update()
 	routes = vv;
 	counts = cc;
 	
-	build_indices();
 	return 0;
 }
 
@@ -494,7 +530,7 @@ double router::total_counts() const
 
 int router::print() const
 {
-	printf("router %d, #routes = %lu, total-counts = %.1lf\n", root, routes.size(), total_counts());
+	printf("router %d, #routes = %lu, total-counts = %.1lf, ratio = %.2lf\n", root, routes.size(), total_counts(), ratio);
 	for(int i = 0; i < routes.size(); i++)
 	{
 		printf(" route %d (%d, %d), count = %.1lf\n", i, routes[i].first, routes[i].second, counts[i]);

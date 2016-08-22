@@ -5,6 +5,7 @@
 #include "equation.h"
 #include "router.h"
 #include "path.h"
+#include "gurobi_c++.h"
 
 typedef map< edge_descriptor, vector<int> > MEV;
 typedef pair< edge_descriptor, vector<int> > PEV;
@@ -26,6 +27,7 @@ public:
 	string name;						// name for this gene
 	splice_graph gr;					// splice graph
 
+	GRBEnv *env;						// GRB environment
 	vector<router> routers;				// constructed router
 
 	MEI e2i;							// edge map, from edge to index

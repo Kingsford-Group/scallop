@@ -59,7 +59,7 @@ int simulation_num_edges = 0;
 int simulation_max_edge_weight = 0;
 
 //// from command line
-string algo;
+string algo = "shao";
 string input_file;
 string ref_file;
 string output_file;

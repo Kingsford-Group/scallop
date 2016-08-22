@@ -12,6 +12,7 @@ scallop3::scallop3()
 scallop3::scallop3(const string &s, const splice_graph &g)
 	: name(s), gr(g)
 {
+	env = new GRBEnv();
 	round = 0;
 	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 	gr.get_edge_indices(i2e, e2i);
@@ -22,7 +23,9 @@ scallop3::scallop3(const string &s, const splice_graph &g)
 }
 
 scallop3::~scallop3()
-{}
+{
+	delete env;
+}
 
 int scallop3::assemble()
 {
@@ -38,6 +41,7 @@ int scallop3::iterate()
 	{
 		bool b	= false;
 		b = decompose();
+
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -52,8 +56,12 @@ bool scallop3::decompose()
 	double ratio = -1;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
+		if(gr.degree(i) == 0) continue;
 		router &rt = routers[i];
-		double r = rt.divide();
+		printf("UPDATE root %d, degree = (%d, %d), #eqns = %lu\n", i, gr.in_degree(i), gr.out_degree(i), rt.eqns.size());
+		rt.update();
+		double r = rt.ratio;
+		printf("RATIO = %.2lf, #eqns = %lu\n", r, rt.eqns.size());
 		if(r < 0) continue;
 		if(ratio >= 0 && ratio < r) continue;
 		assert(rt.eqns.size() >= 1);
@@ -136,7 +144,7 @@ int scallop3::init_vertex_map()
 int scallop3::init_routers(const vector<hyper_edge> &vhe)
 {
 	routers.clear();
-	for(int i = 0; i < gr.num_vertices(); i++) routers.push_back(router(i, gr, e2i, i2e));
+	for(int i = 0; i < gr.num_vertices(); i++) routers.push_back(router(i, gr, e2i, i2e, env));
 
 	for(int i = 0; i < vhe.size(); i++)
 	{
@@ -266,6 +274,9 @@ int scallop3::merge_adjacent_equal_edges(int x, int y)
 	routers[xt].remove_in_edge(x);
 	routers[ys].remove_out_edge(y);
 	routers[yt].remove_in_edge(y);
+	routers[xs].touched = true;
+	routers[xt].touched = true;
+	routers[yt].touched = true;
 
 	return n;
 }
@@ -292,20 +303,7 @@ int scallop3::merge_adjacent_edges(int x, int y)
 
 	int x1 = split_edge(x, ww);
 	int y1 = split_edge(y, ww);
-
-	/*
-	routers[xs].split_out_edge(x, x1, ww / wx);
-	routers[yt].split_in_edge(y, y1, ww / wy);
-	*/
-
 	int xy = merge_adjacent_equal_edges(x, y);
-
-	/*
-	routers[xs].replace_out_edge(x, xy);
-	routers[yt].replace_in_edge(y, xy);
-	routers[xt].remove_in_edge(x);
-	routers[xt].remove_out_edge(y);
-	*/
 
 	return xy;
 }
@@ -340,6 +338,8 @@ int scallop3::split_edge(int ei, double w)
 
 	routers[s].remove_out_edge(ei);
 	routers[t].remove_in_edge(ei);
+	routers[s].touched = true;
+	routers[t].touched = true;
 
 	return n;
 }
@@ -434,8 +434,8 @@ int scallop3::split_vertex(int x, const vector<int> &xe, const vector<int> &ye)
 	routers.push_back(routers[n - 1]);
 	routers[n - 1] = routers[x];
 	routers[n - 1].root = n - 1;
-	routers[n - 1].update();
-	routers[x].update();
+	routers[n - 1].touched = true;
+	routers[x].touched = true;
 
 	return 0;
 }

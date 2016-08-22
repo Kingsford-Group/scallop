@@ -118,6 +118,11 @@ int assembler::process(const bundle_base &bb)
 	for(int k = 0; k < bd.sg.subs.size(); k++)
 	{
 		string name = "bundle." + tostring(index) + "." + tostring(k);
+		/*
+		int slen = fixed_gene_name.size();
+		if(slen > name.size()) slen = name.size();
+		string ss = name.substr(0, slen);
+		*/
 
 		if(fixed_gene_name != "" && name != fixed_gene_name) continue;
 

@@ -5,17 +5,22 @@
 #include "util.h"
 #include "splice_graph.h"
 #include "equation.h"
+#include "gurobi_c++.h"
 
 using namespace std;
 
 class router
 {
 public:
+	router(int r, splice_graph &g, MEI &ei, VE &ie, GRBEnv *env);
 	router(int r, splice_graph &g, MEI &ei, VE &ie);
-	router(const router &rt);
+	//router(const router &rt);
 	router& operator=(const router &rt);
 
 public:
+	GRBEnv *env;				// GRB environment
+
+	bool touched;				// whether it has been touched
 	int root;					// central vertex
 	splice_graph &gr;			// reference splice graph
 	MEI &e2i;					// reference map of edge to index
@@ -26,15 +31,17 @@ public:
 	MI e2u;						// edge to index
 	vector<int> u2e;			// index to edge
 
+	double ratio;				// worst ratio
 	vector<equation> eqns;		// divide results
 
 public:
-	// build indices
-	int build_indices();
+	// recompute everything
+	int update();
 
-	// divide
-	double divide();
-	double evaluate();				// compute pvalue and pratio
+	int update_routes();			// remove false routes
+	int build_indices();
+	int divide();
+	int evaluate();					// compute pvalue and pratio
 	int run_ilp1();					// with multiplier ratio
 	int run_ilp2();					// with difference ratio
 
@@ -49,7 +56,6 @@ public:
 	int remove_out_edges(const vector<int> &v);
 	int remove_in_edge(int x);
 	int remove_out_edge(int x);
-	int update();
 
 	// print and stats
 	int print() const;
