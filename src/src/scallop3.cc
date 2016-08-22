@@ -1,6 +1,5 @@
 #include "scallop3.h"
 #include "config.h"
-#include "smoother.h"
 
 #include <cstdio>
 #include <iostream>
@@ -16,6 +15,7 @@ scallop3::scallop3(const string &s, const splice_graph &g)
 	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 	gr.get_edge_indices(i2e, e2i);
 	init_super_edges();
+	init_vertex_map();
 	init_routers(gr.vhe);
 	print();
 }
@@ -26,7 +26,21 @@ scallop3::~scallop3()
 int scallop3::assemble()
 {
 	classify();
-	decompose();
+	iterate();
+	return 0;
+}
+
+int scallop3::iterate()
+{
+	while(true)
+	{
+		bool b	= false;
+		b = decompose();
+		if(b == true) print();
+		if(b == true) continue;
+
+		break;
+	}
 	return 0;
 }
 
@@ -40,18 +54,30 @@ bool scallop3::decompose()
 		double r = rt.divide();
 		if(r < 0) continue;
 		if(ratio >= 0 && ratio < r) continue;
+		assert(rt.eqns.size() >= 1);
 		root = i;
 		ratio = r;
 	}
 
+	router &rt = routers[root];
+
 	if(root == -1) return false;
+	if(ratio <= 0 || ratio >= 2) return false;
 
-	printf("best ratio = %.2lf, root = %d\n", ratio, root);
+	printf("split vertex %d, ratio = %.2lf, degree = (%d, %d), eqns = %lu\n", root, ratio, gr.in_degree(root), gr.out_degree(root), rt.eqns.size());
+	for(int i = 0;i < rt.eqns.size(); i++) rt.eqns[i].print(99);
 
-	bool b = smooth_vertex(root, routers[root].eqns);
-	if(b == false) return false;
+	if(rt.eqns.size() == 1)
+	{
+		balance_vertex(root);
+		decompose_trivial_vertex(root);
+	}
+	else
+	{
+		split_vertex(root, rt.eqns[0].s, rt.eqns[0].t);
+	}
 
-	return 0;
+	return true;
 }
 
 int scallop3::classify()
@@ -91,6 +117,16 @@ int scallop3::init_super_edges()
 		int s = (*it1)->source();
 		v.push_back(s);
 		mev.insert(PEV(*it1, v));
+	}
+	return 0;
+}
+
+int scallop3::init_vertex_map()
+{
+	v2v.clear();
+	for(int i = 0; i < gr.num_vertices(); i++)
+	{
+		v2v.push_back(i);
 	}
 	return 0;
 }
@@ -142,11 +178,6 @@ bool scallop3::decompose_trivial_vertex(int i, vector<int> &ve)
 	if(i == gr.num_vertices() - 1) return false;
 	if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) return false;
 	if(gr.degree(i) == 0) return true;
-
-	if(ve.size() == 0)
-	{
-		printf("decompose trivial vertex %d\n", i);
-	}
 
 	edge_iterator it1, it2, it3, it4;
 
@@ -229,6 +260,11 @@ int scallop3::merge_adjacent_equal_edges(int x, int y)
 	gr.remove_edge(xx);
 	gr.remove_edge(yy);
 
+	routers[xs].remove_out_edge(x);
+	routers[xt].remove_in_edge(x);
+	routers[ys].remove_out_edge(y);
+	routers[yt].remove_in_edge(y);
+
 	return n;
 }
 
@@ -255,15 +291,19 @@ int scallop3::merge_adjacent_edges(int x, int y)
 	int x1 = split_edge(x, ww);
 	int y1 = split_edge(y, ww);
 
+	/*
 	routers[xs].split_out_edge(x, x1, ww / wx);
 	routers[yt].split_in_edge(y, y1, ww / wy);
+	*/
 
 	int xy = merge_adjacent_equal_edges(x, y);
 
+	/*
 	routers[xs].replace_out_edge(x, xy);
 	routers[yt].replace_in_edge(y, xy);
 	routers[xt].remove_in_edge(x);
 	routers[xt].remove_out_edge(y);
+	*/
 
 	return xy;
 }
@@ -296,27 +336,124 @@ int scallop3::split_edge(int ei, double w)
 	i2e.push_back(p2);
 	e2i.insert(PEI(p2, n));
 
+	routers[s].remove_out_edge(ei);
+	routers[t].remove_in_edge(ei);
+
 	return n;
 }
 
-bool scallop3::smooth_vertex(int v, const vector<equation> &eqns)
+int scallop3::balance_vertex(int v)
 {
-	smoother sm(gr);
-	for(int k = 0; k < eqns.size(); k++)
+	edge_iterator it1, it2;
+	double w1 = 0, w2 = 0;
+	for(tie(it1, it2) = gr.in_edges(v); it1 != it2; it1++)
 	{
-		const equation &eqn = eqns[k];
-
-		VE vx, vy;
-		for(int i = 0; i < eqn.s.size(); i++) vx.push_back(i2e[eqn.s[i]]);
-		for(int i = 0; i < eqn.t.size(); i++) vy.push_back(i2e[eqn.t[i]]);
-
-		sm.add_equation(vx, vy);
+		double w = gr.get_edge_weight(*it1);
+		w1 += w;
+	}
+	for(tie(it1, it2) = gr.out_edges(v); it1 != it2; it1++)
+	{
+		double w = gr.get_edge_weight(*it1);
+		w2 += w;
 	}
 
-	int f = sm.smooth_vertex(v);
+	assert(w1 >= SMIN);
+	assert(w2 >= SMIN);
 
-	if(f == 0) return true;
-	else return false;
+	double r = sqrt(w2 / w1);
+	double m = DBL_MAX;
+	for(tie(it1, it2) = gr.in_edges(v); it1 != it2; it1++)
+	{
+		double w = gr.get_edge_weight(*it1);
+		gr.set_edge_weight(*it1, w * r);
+		if(w * r < m)  m = w * r;
+	}
+	for(tie(it1, it2) = gr.out_edges(v); it1 != it2; it1++)
+	{
+		double w = gr.get_edge_weight(*it1);
+		gr.set_edge_weight(*it1, w / r);
+		if(w / r < m) m = w / r;
+	}
+
+	if(m >= 1.0) return 0;
+
+	int n1 = gr.in_degree(v);
+	int n2 = gr.out_degree(v);
+	double d = n1 * 1.0 / n2;
+
+	for(tie(it1, it2) = gr.in_edges(v); it1 != it2; it1++)
+	{
+		double w = gr.get_edge_weight(*it1);
+		gr.set_edge_weight(*it1, w + 1.0);
+	}
+	for(tie(it1, it2) = gr.out_edges(v); it1 != it2; it1++)
+	{
+		double w = gr.get_edge_weight(*it1);
+		gr.set_edge_weight(*it1, w + d);
+	}
+
+	return 0;
+}
+
+int scallop3::split_vertex(int x, const vector<int> &xe, const vector<int> &ye)
+{
+	assert(x != 0);
+	assert(x != gr.num_vertices() - 1);
+	if(xe.size() <= 0) return 0;
+	if(ye.size() <= 0) return 0;
+
+	int n = gr.num_vertices();
+	assert(v2v.size() == n);
+
+	gr.add_vertex();
+	gr.set_vertex_weight(n, gr.get_vertex_weight(n - 1));
+	gr.set_vertex_info(n, gr.get_vertex_info(n - 1));
+	gr.set_vertex_weight(n - 1, gr.get_vertex_weight(x));
+	gr.set_vertex_info(n - 1, gr.get_vertex_info(x));
+
+	v2v.push_back(v2v[n - 1]);
+	v2v[n - 1] = x;
+
+	edge_iterator it1, it2;
+	VE ve;
+	for(tie(it1, it2) = gr.in_edges(n - 1); it1 != it2; it1++) ve.push_back(*it1);
+	for(int i = 0; i < ve.size(); i++)
+	{
+		edge_descriptor e = ve[i];
+		int s = e->source(); 
+		int t = e->target();
+		assert(t == n - 1);
+		gr.move_edge(e, s, n);
+	}
+	assert(gr.degree(n - 1) == 0);
+
+	for(int i = 0; i < xe.size(); i++)
+	{
+		edge_descriptor e = i2e[xe[i]];
+		assert(e != null_edge);
+		int s = e->source();
+		int t = e->target();
+		assert(t == x);
+		gr.move_edge(e, s, n - 1);
+	}
+
+	for(int i = 0; i < ye.size(); i++)
+	{
+		edge_descriptor e = i2e[ye[i]];
+		assert(e != null_edge);
+		int s = e->source();
+		int t = e->target();
+		assert(s == x);
+		gr.move_edge(e, n - 1, t);
+	}
+
+	routers.push_back(routers[n - 1]);
+	routers[n - 1] = routers[x];
+	routers[n - 1].root = n - 1;
+	routers[n - 1].update();
+	routers[x].update();
+
+	return 0;
 }
 
 int scallop3::print()

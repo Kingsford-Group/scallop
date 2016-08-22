@@ -26,11 +26,12 @@ public:
 	string name;						// name for this gene
 	splice_graph gr;					// splice graph
 
-	vector<router> routers;			// constructed router
+	vector<router> routers;				// constructed router
 
 	MEI e2i;							// edge map, from edge to index
 	VE i2e;								// edge map, from index to edge
 	MEV mev;							// super edges
+	vector<int> v2v;					// vertex map
 	int round;							// round in iteration
 
 	vector<path> paths;					// predicted transcripts
@@ -41,21 +42,23 @@ public:
 private:
 	// trivial, or hard
 	int classify();
+	int iterate();
 
 	// decompose
-	int iterate();
 	bool decompose();
 	bool decompose_trivial_vertex(int v);
 	bool decompose_trivial_vertex(int v, vector<int> &ve);
+	int split_vertex(int x, const vector<int> &xe, const vector<int> &ye);
 	int split_edge(int exi, double w);
 	int merge_adjacent_edges(int x, int y);
 	int merge_adjacent_equal_edges(int x, int y);
 
-	// smooth vertex
-	bool smooth_vertex(int v, const vector<equation> &eqns);
+	// balance vertex
+	int balance_vertex(int v);
 
 	// init
 	int init_super_edges();
+	int init_vertex_map();
 	int init_routers(const vector<hyper_edge> &vhe);
 
 	// print and draw

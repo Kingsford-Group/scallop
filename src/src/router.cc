@@ -9,18 +9,40 @@
 router::router(int r, splice_graph &g, MEI &ei, VE &ie)
 	:root(r), gr(g), e2i(ei), i2e(ie)
 {
-	build_indices();
-	eqns.clear();
+}
+
+router::router(const router &rt)
+	:root(rt.root), gr(rt.gr), e2i(rt.e2i), i2e(rt.i2e)
+{
+}
+
+router& router::operator=(const router &rt)
+{
+	root = rt.root;
+	gr = rt.gr;
+	e2i = rt.e2i;
+	i2e = rt.i2e;
+
+	routes = rt.routes;
+	counts = rt.counts;
+	
+	e2u = rt.e2u;
+	u2e = rt.u2e;
+
+	eqns = rt.eqns;
+
+	return (*this);
 }
 
 double router::divide()
 {
+	build_indices();
 	eqns.clear();
 	if(gr.in_degree(root) >= 2 && gr.out_degree(root) >= 2)
 	{
 		run_ilp2();
 	}
-	else
+	else if(gr.in_degree(root) >= 1 && gr.out_degree(root) >= 1)
 	{
 		equation eqn;
 		for(int i = 0; i < gr.in_degree(root); i++) eqn.s.push_back(u2e[i]);
@@ -263,6 +285,8 @@ double router::evaluate()
 	for(int i = 0; i < eqns.size(); i++)
 	{
 		equation &p = eqns[i];
+		//printf("root = %d\n", root);
+		//p.print(99);
 		double pw1 = 0, pw2 = 0;
 		for(int i = 0; i < p.s.size(); i++) pw1 += gr.get_edge_weight(i2e[p.s[i]]);
 		for(int i = 0; i < p.t.size(); i++) pw2 += gr.get_edge_weight(i2e[p.t[i]]);
@@ -325,6 +349,32 @@ int router::remove_route(const PI &p)
 			return 0;
 		}
 	}
+	return 0;
+}
+
+int router::update()
+{
+	vector<PI> vv;
+	vector<double> cc;
+
+	for(int i = 0; i < routes.size(); i++)
+	{
+		PI &p = routes[i];
+		double c = counts[i];
+		edge_descriptor e1 = i2e[p.first];
+		edge_descriptor e2 = i2e[p.second];
+		assert(e1 != null_edge);
+		assert(e2 != null_edge);
+		if(e1->target() != root) continue;
+		if(e2->source() != root) continue;
+		vv.push_back(p);
+		cc.push_back(c);
+	}
+
+	routes = vv;
+	counts = cc;
+	
+	build_indices();
 	return 0;
 }
 

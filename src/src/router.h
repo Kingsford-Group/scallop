@@ -12,6 +12,8 @@ class router
 {
 public:
 	router(int r, splice_graph &g, MEI &ei, VE &ie);
+	router(const router &rt);
+	router& operator=(const router &rt);
 
 public:
 	int root;					// central vertex
@@ -47,6 +49,7 @@ public:
 	int remove_out_edges(const vector<int> &v);
 	int remove_in_edge(int x);
 	int remove_out_edge(int x);
+	int update();
 
 	// print and stats
 	int print() const;
