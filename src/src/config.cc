@@ -62,6 +62,8 @@ int simulation_max_edge_weight = 0;
 string algo = "shao";
 string input_file;
 string ref_file;
+string ref_file1;
+string ref_file2;
 string output_file;
 
 bool output_tex_files = false;
@@ -124,6 +126,8 @@ int print_parameters()
 	printf("algo = %s\n", algo.c_str());
 	printf("input_file = %s\n", input_file.c_str());
 	printf("ref_file = %s\n", ref_file.c_str());
+	printf("ref_file1 = %s\n", ref_file1.c_str());
+	printf("ref_file2 = %s\n", ref_file2.c_str());
 	printf("output_file = %s\n", output_file.c_str());
 	printf("output_tex_files = %c\n", output_tex_files ? 'T' : 'F');
 	printf("fixed_gene_name = %s\n", fixed_gene_name.c_str());
@@ -160,6 +164,18 @@ bool parse_arguments(int argc, const char ** argv)
 			ref_file = string(argv[i + 1]);
 			i++;
 		}
+		else if(string(argv[i]) == "-r1")
+		{
+			ref_file1 = string(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "-r2")
+		{
+			ref_file2 = string(argv[i + 1]);
+			i++;
+		}
+
+
 		else if(string(argv[i]) == "-g")
 		{
 			fixed_gene_name = string(argv[i + 1]);

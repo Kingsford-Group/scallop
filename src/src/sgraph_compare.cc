@@ -20,7 +20,8 @@ int sgraph_compare::compare(const string &file)
 
 	draw(gr3, file);
 
-	identify_unique_boundary_edges();
+	compare_boundary_edges();
+	compare_splice_positions();
 
 	return 0;
 }
@@ -145,33 +146,132 @@ int sgraph_compare::search_splice_graph(splice_graph &gr, int32_t p)
 	return -1;
 }
 
-int sgraph_compare::identify_unique_boundary_edges()
+int sgraph_compare::compare_boundary_edges()
 {
+	int tp = 0, fp = 0, fn = 0;
+
 	edge_iterator it1, it2;
 	for(tie(it1, it2) = gr3.out_edges(0); it1 != it2; it1++)
 	{
-		bool b = verify_unique_5end_edge(gr3, *it1);
-		if(b == false) continue;
-
 		double w = gr3.get_edge_weight(*it1);
 		edge_info ei = gr3.get_edge_info(*it1);
-
-		string s = (ei.type == 3) ? "reference" : "prediction";
-		printf("unique 5end %s edge, weight = %.2lf\n", s.c_str(), w);
+		int t = (*it1)->target();
+		int32_t p = gr3.get_vertex_info(t).lpos;
+		assert(ei.type == 3 || ei.type == 4);
+		bool b = verify_unique_5end_edge(gr3, *it1);
+		if(b == true)
+		{
+			if(ei.type == 3)
+			{
+				fn++;
+				printf("FN 5end boundary, weight = %.2lf, pos = %d\n", w, p);
+			}
+			else
+			{
+				fp++;
+				printf("FP 5end boundary, weight = %.2lf, pos = %d\n", w, p);
+			}
+		}
+		else
+		{
+			tp++;
+			printf("TP 5end boundary, weight = %.2lf, pos = %d\n", w, p);
+		}
 	}
 
 	for(tie(it1, it2) = gr3.in_edges(gr3.num_vertices() - 1); it1 != it2; it1++)
 	{
-		bool b = verify_unique_3end_edge(gr3, *it1);
-		if(b == false) continue;
-
 		double w = gr3.get_edge_weight(*it1);
 		edge_info ei = gr3.get_edge_info(*it1);
-
-		string s = (ei.type == 3) ? "reference" : "prediction";
-		printf("unique 3end %s edge, weight = %.2lf\n", s.c_str(), w);
+		int s = (*it1)->source();
+		int32_t p = gr3.get_vertex_info(s).rpos;
+		bool b = verify_unique_3end_edge(gr3, *it1);
+		if(b == true)
+		{
+			if(ei.type == 3)
+			{
+				fn++;
+				printf("FN 3end boundary, weight = %.2lf, pos = %d\n", w, p);
+			}
+			else
+			{
+				fp++;
+				printf("FP 3end boundary, weight = %.2lf, pos = %d\n", w, p);
+			}
+		}
+		else
+		{
+			tp++;
+			printf("TP 3end boundary, weight = %.2lf, pos = %d\n", w, p);
+		}
 	}
 
+	printf("summary boundary edges: TP = %d FP = %d FN = %d\n", tp, fp, fn);
+	return 0;
+}
+
+int sgraph_compare::compare_splice_positions()
+{
+	int tp = 0, fp = 0, fn = 0;
+	for(int i = 1; i < gr1.num_vertices() - 1; i++)
+	{
+		vertex_info vi = gr1.get_vertex_info(i);
+		if(vi.lpos > gr1.get_vertex_info(i - 1).rpos)
+		{
+			int p = search_splice_graph(gr2, vi.lpos);
+			if(p < 0 || gr2.get_vertex_info(p).lpos != vi.lpos)
+			{
+				fn++;
+				printf("FN left position, length = %d, [%d, %d)\n", vi.rpos - vi.lpos, vi.lpos, vi.rpos);
+			}
+			else
+			{
+				tp++;
+				printf("TP left position, length = %d, [%d, %d)\n", vi.rpos - vi.lpos, vi.lpos, vi.rpos);
+			}
+		}
+
+		if(vi.rpos < gr1.get_vertex_info(i + 1).lpos)
+		{
+			int p = search_splice_graph(gr2, vi.rpos - 1);
+			if(p < 0 || gr2.get_vertex_info(p).rpos != vi.rpos)
+			{
+				fn++;
+				printf("FN right position, length = %d, [%d, %d)\n", vi.rpos - vi.lpos, vi.lpos, vi.rpos);
+			}
+			else
+			{
+				tp++;
+				printf("TP right position, length = %d, [%d, %d)\n", vi.rpos - vi.lpos, vi.lpos, vi.rpos);
+			}
+		}
+	}
+
+	for(int i = 1; i < gr2.num_vertices() - 1; i++)
+	{
+		vertex_info vi = gr2.get_vertex_info(i);
+		if(vi.lpos > gr2.get_vertex_info(i - 1).rpos)
+		{
+			int p = search_splice_graph(gr1, vi.lpos);
+			if(p < 0 || gr1.get_vertex_info(p).lpos != vi.lpos)
+			{
+				fp++;
+				printf("FP left position, length = %d, [%d, %d)\n", vi.rpos - vi.lpos, vi.lpos, vi.rpos);
+			}
+		}
+
+		if(vi.rpos < gr2.get_vertex_info(i + 1).lpos)
+		{
+			int p = search_splice_graph(gr1, vi.rpos - 1);
+			if(p < 0 || gr1.get_vertex_info(p).rpos != vi.rpos)
+			{
+				fp++;
+				printf("FP right position, length = %d, [%d, %d)\n", vi.rpos - vi.lpos, vi.lpos, vi.rpos);
+			}
+		}
+	}
+
+	printf("summary splice positions: TP = %d FP = %d FN = %d\n", tp, fp, fn);
 	return 0;
 }
 

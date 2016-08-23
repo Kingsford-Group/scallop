@@ -33,7 +33,7 @@ private:
 	int add_hit(const hit &ht);
 	int truncate(const hit &ht);
 	int process(const bundle_base &bb);
-	int compare(splice_graph &gr);
+	int compare(splice_graph &gr, const string &ref, const string &tex);
 };
 
 #endif

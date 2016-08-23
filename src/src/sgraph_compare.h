@@ -26,10 +26,12 @@ private:
 	int add_inner_edges(splice_graph &gt, splice_graph &gr, int type);
 	int add_existing_edges(splice_graph &gt, splice_graph &gr, int type);
 	int search_splice_graph(splice_graph &gr, int32_t p);
-	int draw(splice_graph &gr, const string &file);
-	int identify_unique_boundary_edges();
+
+	int compare_splice_positions();
+	int compare_boundary_edges();
 	bool verify_unique_5end_edge(splice_graph &gr, edge_descriptor e);
 	bool verify_unique_3end_edge(splice_graph &gr, edge_descriptor e);
+	int draw(splice_graph &gr, const string &file);
 };
 
 #endif

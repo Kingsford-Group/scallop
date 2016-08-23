@@ -73,6 +73,8 @@ extern int min_hyper_edges_count;
 extern string algo;
 extern string input_file;
 extern string ref_file;
+extern string ref_file1;
+extern string ref_file2;
 extern string output_file;
 extern bool output_tex_files;
 extern string fixed_gene_name;

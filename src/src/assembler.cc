@@ -6,6 +6,7 @@
 #include "gtf.h"
 #include "config.h"
 #include "assembler.h"
+#include "scallop2.h"
 #include "scallop3.h"
 #include "sgraph_compare.h"
 
@@ -115,6 +116,9 @@ int assembler::process(const bundle_base &bb)
 	index++;
 	bd.print(index);
 
+	if(ref_file1 != "" && bd.strand == '+') compare(bd.sg.root, ref_file1, "compare1.tex");
+	if(ref_file2 != "" && bd.strand == '-') compare(bd.sg.root, ref_file2, "compare2.tex");
+
 	for(int k = 0; k < bd.sg.subs.size(); k++)
 	{
 		string name = "bundle." + tostring(index) + "." + tostring(k);
@@ -128,36 +132,36 @@ int assembler::process(const bundle_base &bb)
 
 		splice_graph &gr = bd.sg.subs[k];
 
-		if(ref_file != "") compare(gr);
-
-		scallop3 sc(name, gr);
-		sc.assemble();
-
-		if(output_file != "")
+		if(algo != "shao")
 		{
-			for(int i = 0; i < sc.paths.size(); i++)
+			scallop3 sc(name, gr);
+			sc.assemble();
+
+			if(output_file != "")
 			{
-				string tid = name + "." + tostring(i);
-				path p;
-				p.v = bd.sg.get_root_vertices(k, sc.paths[i].v);
-				p.abd = sc.paths[i].abd;
-				bd.output_transcript(fout, p, name, tid);
+				for(int i = 0; i < sc.paths.size(); i++)
+				{
+					string tid = name + "." + tostring(i);
+					path p;
+					p.v = bd.sg.get_root_vertices(k, sc.paths[i].v);
+					p.abd = sc.paths[i].abd;
+					bd.output_transcript(fout, p, name, tid);
+				}
 			}
 		}
 
 		if(fixed_gene_name != "" && name == fixed_gene_name) terminate = true;
-
 		if(terminate == true) return 0;
 	}
 
 	return 0;
 }
 
-int assembler::compare(splice_graph &gr)
+int assembler::compare(splice_graph &gr, const string &file, const string &texfile)
 {
-	if(ref_file == "") return 0;
+	if(file == "") return 0;
 
-	genome g(ref_file);
+	genome g(file);
 	if(g.genes.size() <= 0) return 0;
 
 	gtf gg(g.genes[0]);
@@ -166,7 +170,7 @@ int assembler::compare(splice_graph &gr)
 	gg.build_splice_graph(gt);
 
 	sgraph_compare sgc(gt, gr);
-	sgc.compare("compare.tex");
+	sgc.compare(texfile);
 	//sgc.compare(string("compare.") + tostring(index) + string(".tex"));
 
 	return 0;
