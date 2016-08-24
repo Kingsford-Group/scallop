@@ -1,5 +1,4 @@
 #include "scallop1.h"
-#include "subsetsum.h"
 #include "subsetsum1.h"
 #include "config.h"
 #include "nested_graph.h"

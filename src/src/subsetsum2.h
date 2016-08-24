@@ -8,6 +8,7 @@ using namespace std;
 
 typedef pair<int, int> PI;
 
+// find pairs of subsets of v that sum close to each other
 class subsetsum2
 {
 public:

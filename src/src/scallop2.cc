@@ -1,5 +1,5 @@
 #include "scallop2.h"
-#include "subsetsum.h"
+#include "subsetsum3.h"
 #include "config.h"
 #include "smoother.h"
 #include "nested_graph.h"
@@ -789,7 +789,7 @@ int scallop2::identify_equation(const vector<int> &subs, vector<equation> &eqns)
 		v.push_back(xi[i].first);
 	}
 
-	subsetsum sss(v);
+	subsetsum3 sss(v);
 	sss.solve();
 
 	if(sss.subsets.size() == 0) return 0;

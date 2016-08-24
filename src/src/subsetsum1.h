@@ -8,8 +8,8 @@ using namespace std;
 
 typedef pair<int, int> PI;
 
-// for given v compute all subsetsums 
-// and then backtrace for given targets
+// for given s compute all subsetsums 
+// and then backtrace for each given t
 class subsetsum1
 {
 public:

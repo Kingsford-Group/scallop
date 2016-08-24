@@ -44,9 +44,9 @@ int equation::print(int index)
 	printf("equation %3d: (%2lu, %2lu) edges, error = %3.1lf, f = %d, w = %d, adjacent = %2d, distant = %2d. ", 
 			index, s.size(), t.size(), e, f, w, a, d);
 
-	printf("S = (");
+	printf("S = ( ");
 	printv(s);
-	printf("), T = (");
+	printf("), T = ( ");
 	printv(t);
 	printf(")\n");
 	
