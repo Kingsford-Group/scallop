@@ -216,7 +216,10 @@ int sgraph_compare::compare_splice_positions()
 	for(int i = 1; i < gr1.num_vertices() - 1; i++)
 	{
 		vertex_info vi = gr1.get_vertex_info(i);
-		if(vi.lpos > gr1.get_vertex_info(i - 1).rpos)
+		PEB p1 = gr1.edge(0, i);
+		PEB p2 = gr1.edge(i, gr1.num_vertices() - 1);
+
+		if(p1.second == false && vi.lpos > gr1.get_vertex_info(i - 1).rpos)
 		{
 			int p = search_splice_graph(gr2, vi.lpos);
 			if(p < 0 || gr2.get_vertex_info(p).lpos != vi.lpos)
@@ -231,7 +234,7 @@ int sgraph_compare::compare_splice_positions()
 			}
 		}
 
-		if(vi.rpos < gr1.get_vertex_info(i + 1).lpos)
+		if(p2.second == false && vi.rpos < gr1.get_vertex_info(i + 1).lpos)
 		{
 			int p = search_splice_graph(gr2, vi.rpos - 1);
 			if(p < 0 || gr2.get_vertex_info(p).rpos != vi.rpos)
@@ -250,7 +253,10 @@ int sgraph_compare::compare_splice_positions()
 	for(int i = 1; i < gr2.num_vertices() - 1; i++)
 	{
 		vertex_info vi = gr2.get_vertex_info(i);
-		if(vi.lpos > gr2.get_vertex_info(i - 1).rpos)
+		PEB p1 = gr2.edge(0, i);
+		PEB p2 = gr2.edge(i, gr2.num_vertices() - 1);
+
+		if(p1.second == false && vi.lpos > gr2.get_vertex_info(i - 1).rpos)
 		{
 			int p = search_splice_graph(gr1, vi.lpos);
 			if(p < 0 || gr1.get_vertex_info(p).lpos != vi.lpos)
@@ -260,7 +266,7 @@ int sgraph_compare::compare_splice_positions()
 			}
 		}
 
-		if(vi.rpos < gr2.get_vertex_info(i + 1).lpos)
+		if(p2.second == false && vi.rpos < gr2.get_vertex_info(i + 1).lpos)
 		{
 			int p = search_splice_graph(gr1, vi.rpos - 1);
 			if(p < 0 || gr1.get_vertex_info(p).rpos != vi.rpos)

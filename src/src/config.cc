@@ -14,13 +14,13 @@ using namespace std;
 int min_flank_length = 5;
 int32_t average_read_length = 100;
 int32_t average_slope_length = 240;
-int32_t min_bundle_gap = 100;
-int min_num_hits_in_bundle = 10;
+int32_t min_bundle_gap = 50;
+int min_num_hits_in_bundle = 20;
 int32_t min_splice_boundary_hits = 1;
-uint32_t min_mapping_quality = 5;
+uint32_t min_mapping_quality = 1;
 double max_indel_ratio = 0.2;
-int32_t min_subregion_gap = 50;
-int32_t min_subregion_length = 75;
+int32_t min_subregion_gap = 10;
+int32_t min_subregion_length = 50;
 double min_subregion_overlap = 10.0;
 double min_average_overlap = 3.0;
 int min_max_region_overlap = 5;
@@ -212,19 +212,19 @@ bool parse_arguments(int argc, const char ** argv)
 			max_equation_error_ratio = 0.1;
 			min_subregion_gap = 10;
 			min_subregion_length = 50;
-			min_subregion_overlap = 3.0;
-			min_flank_length = 1;
+			min_subregion_overlap = 10.0;
+			min_flank_length = 5;
 		}
 		else if(string(argv[i]) == "-R")
 		{
 			// default setting for real alignment
-			min_splice_boundary_hits = 2;
+			min_splice_boundary_hits = 1;
 			min_num_hits_in_bundle = 20;
-			min_mapping_quality = 5;
+			min_bundle_gap = 50;
+			min_mapping_quality = 1;
 			max_equation_error_ratio = 0.1;
 			min_subregion_gap = 10;
-			min_bundle_gap = 20;
-			min_subregion_length = 75;
+			min_subregion_length = 50;
 			min_subregion_overlap = 10.0;
 			min_flank_length = 5;
 		}
