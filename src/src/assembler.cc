@@ -45,8 +45,7 @@ int assembler::assemble()
 		hit ht(b1t);
 		if(ht.strand == '.') continue;	// TODO
 
-		// TODO TODO
-		//truncate(ht);
+		truncate(ht);
 		add_hit(ht);
     }
 
@@ -67,9 +66,7 @@ int assembler::add_hit(const hit &ht)
 		//if(bb.overlap(ht) == false) continue;
 		if(ht.strand != bb.strand) continue;
 		if(ht.tid != bb.tid) continue;
-
-		// TODO TODO
-		//if(ht.pos > bb.rpos + min_bundle_gap) continue;
+		if(ht.pos > bb.rpos + min_bundle_gap) continue;
 
 		bb.add_hit(ht);
 		b = true;

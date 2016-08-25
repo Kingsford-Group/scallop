@@ -34,8 +34,17 @@ int subsetsum4::rescale()
 	double r1 = ubound * 1.0 / s1;
 	double r2 = ubound * 1.0 / s2;
 
-	for(int i = 0; i < source.size(); i++) source[i].first = (int)(source[i].first * r1);
-	for(int i = 0; i < target.size(); i++) target[i].first = (int)(target[i].first * r2);
+	for(int i = 0; i < source.size(); i++) 
+	{
+		source[i].first = (int)(source[i].first * r1);
+		if(source[i].first <= 0) source[i].first = 1;
+	}
+
+	for(int i = 0; i < target.size(); i++) 
+	{
+		target[i].first = (int)(target[i].first * r2);
+		if(target[i].first <= 0) target[i].first = 1;
+	}
 
 	s1 = 0, s2 = 0;
 	for(int i = 0; i < source.size(); i++) s1 += source[i].first;
@@ -132,10 +141,23 @@ int subsetsum4::optimize()
 
 	sort(v.begin(), v.end());
 
+	/*
+	printf("source: ");
+	for(int i = 0; i < source.size(); i++) printf("%d:%d, ", source[i].second, source[i].first);
+	printf("\n");
+	printf("target: ");
+	for(int i = 0; i < target.size(); i++) printf("%d:%d, ", target[i].second, target[i].first);
+	printf("\n");
+
+	for(int k = 0; k < v.size(); k++) printf("%d:%d ", v[k].first, v[k].second);
+	printf("\n");
+	*/
+
 	int d = INT_MAX;
 	int k = -1;
 	for(int i = 0; i < v.size() - 1; i++)
 	{
+		if(v[i].second == v[i + 1].second) continue;
 		if(v[i + 1].first - v[i].first >= d) continue;
 		d = v[i + 1].first - v[i].first;
 		k = i;
@@ -143,15 +165,20 @@ int subsetsum4::optimize()
 
 	assert(k != -1);
 
-	eqn.e = d;
 	if(v[k].second == 1) backtrace(v[k].first, source, table1, eqn.s);
-	else  backtrace(v[k].first, target, table2, eqn.s);
+	else  backtrace(v[k].first, target, table2, eqn.t);
 
-	if(v[k + 1].second == 1) backtrace(v[k + 1].first, source, table1, eqn.t);
+	if(v[k + 1].second == 1) backtrace(v[k + 1].first, source, table1, eqn.s);
 	else  backtrace(v[k + 1].first, target, table2, eqn.t);
 
-	return 0;
+	int s = 0;
+	for(int i = 0; i < source.size(); i++) s += source[i].first;
+	for(int i = 0; i < target.size(); i++) s += target[i].first;
 
+	s = s / 2.0;
+	eqn.e = d * 1.0 / s;
+
+	return 0;
 }
 
 int subsetsum4::print()
@@ -211,17 +238,18 @@ int subsetsum4::print()
 
 int subsetsum4::test()
 {
+	//118:0 1:1 63:2 1:3 
+	//57:4 237:5 
+
 	vector<PI> v;
-	v.push_back(PI(5, 1));
-	v.push_back(PI(6, 2));
-	v.push_back(PI(8, 3));
-	v.push_back(PI(3, 4));
+	v.push_back(PI(118, 0));
+	v.push_back(PI(1, 1));
+	v.push_back(PI(63, 2));
+	v.push_back(PI(1, 3));
 
 	vector<PI> t;
-	t.push_back(PI(3, 1));
-	t.push_back(PI(17, 3));
-	t.push_back(PI(9, 4));
-	t.push_back(PI(16, 5));
+	t.push_back(PI(57, 4));
+	t.push_back(PI(237, 5));
 
 	subsetsum4 sss(v, t);
 	sss.solve();

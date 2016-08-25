@@ -2,6 +2,8 @@
 #include "util.h"
 #include "gurobi_c++.h"
 #include "smoother.h"
+#include "subsetsum4.h"
+#include "undirected_graph.h"
 #include <cstdio>
 #include <algorithm>
 #include <set>
@@ -49,7 +51,7 @@ router& router::operator=(const router &rt)
 
 int router::update()
 {
-	if(touched == false) return 0;
+	//if(touched == false) return 0;
 	update_routes();
 	build_indices();
 	divide();
@@ -64,20 +66,109 @@ int router::divide()
 	ratio = -1;
 	if(gr.in_degree(root) >= 2 && gr.out_degree(root) >= 2)
 	{
-		printf("run ilp2\n");
-		run_ilp2();
-		printf("--------------\n");
-		for(int i = 0; i < eqns.size(); i++) eqns[i].print(88);
+		run_subsetsum();
 	}
 	else if(gr.in_degree(root) >= 1 && gr.out_degree(root) >= 1)
 	{
-		equation eqn;
-		for(int i = 0; i < gr.in_degree(root); i++) eqn.s.push_back(u2e[i]);
-		for(int i = gr.in_degree(root); i < gr.degree(root); i++) eqn.t.push_back(u2e[i]);
-		assert(eqn.s.size() >= 1);
-		assert(eqn.t.size() >= 1);
-		eqns.push_back(eqn);
+		add_single_equation();
 	}
+	return 0;
+}
+
+int router::add_single_equation()
+{
+	equation eqn;
+	for(int i = 0; i < gr.in_degree(root); i++) eqn.s.push_back(u2e[i]);
+	for(int i = gr.in_degree(root); i < gr.degree(root); i++) eqn.t.push_back(u2e[i]);
+	assert(eqn.s.size() >= 1);
+	assert(eqn.t.size() >= 1);
+	eqns.push_back(eqn);
+	return 0;
+}
+
+int router::run_subsetsum()
+{
+	undirected_graph ug;
+	for(int i = 0; i < u2e.size(); i++) ug.add_vertex();
+	for(int i = 0; i < routes.size(); i++)
+	{
+		int e1 = routes[i].first;
+		int e2 = routes[i].second;
+		assert(e2u.find(e1) != e2u.end());
+		assert(e2u.find(e2) != e2u.end());
+		int s = e2u[e1];
+		int t = e2u[e2];
+		assert(s >= 0 && s < gr.in_degree(root));
+		assert(t >= gr.in_degree(root) && t < gr.degree(root));
+		ug.add_edge(s, t);
+	}
+
+	vector< set<int> > vv = ug.compute_connected_components();
+
+	vector<PI> ss;
+	vector<PI> tt;
+	for(int i = 0; i < vv.size(); i++)
+	{
+		double ww = 0;
+		for(set<int>::iterator it = vv[i].begin(); it != vv[i].end(); it++)
+		{
+			edge_descriptor e = i2e[u2e[*it]];
+			assert(e != null_edge);
+			double w = gr.get_edge_weight(e);
+			if(e->source() == root) w = 0 - w;
+			else assert(e->target() == root);
+			ww += w;
+		}
+		if(ww >= 0) ss.push_back(PI((int)(ww), i));
+		else tt.push_back(PI((int)(0 - ww), i));
+	}
+
+	if(ss.size() <= 1 || tt.size() <= 1) return 0;
+
+	subsetsum4 sss(ss, tt);
+	sss.solve();
+
+	equation eqn1;
+	for(int i = 0; i < sss.eqn.s.size(); i++)
+	{
+		int k = sss.eqn.s[i];
+		for(set<int>::iterator it = vv[k].begin(); it != vv[k].end(); it++)
+		{
+			int e = *it;
+			if(e < gr.in_degree(root)) eqn1.s.push_back(u2e[e]);
+			else eqn1.t.push_back(u2e[e]);
+		}
+	}
+	for(int i = 0; i < sss.eqn.t.size(); i++)
+	{
+		int k = sss.eqn.t[i];
+		for(set<int>::iterator it = vv[k].begin(); it != vv[k].end(); it++)
+		{
+			int e = *it;
+			if(e < gr.in_degree(root)) eqn1.s.push_back(u2e[e]);
+			else eqn1.t.push_back(u2e[e]);
+		}
+	}
+
+	set<int> s1(eqn1.s.begin(), eqn1.s.end());
+	set<int> s2(eqn1.t.begin(), eqn1.t.end());
+	equation eqn2;
+	for(int i = 0; i < gr.in_degree(root); i++)
+	{
+		int e = u2e[i];
+		if(s1.find(e) != s1.end()) continue;
+		eqn2.s.push_back(e);
+	}
+	for(int i = gr.in_degree(root); i < gr.degree(root); i++)
+	{
+		int e = u2e[i];
+		if(s2.find(e) != s2.end()) continue;
+		eqn2.t.push_back(e);
+	}
+
+	eqns.push_back(eqn1);
+	eqns.push_back(eqn2);
+
 	return 0;
 }
 
@@ -312,19 +403,15 @@ int router::evaluate()
 	for(int i = 0; i < eqns.size(); i++)
 	{
 		equation &p = eqns[i];
-		printf("root = %d, ", root);
-		p.print(99);
 		double pw1 = 0, pw2 = 0;
 		for(int i = 0; i < p.s.size(); i++)
 		{
 			double w = gr.get_edge_weight(i2e[p.s[i]]);
-			printf(" edge %d, weight = %e\n", p.s[i], w);
 			pw1 += w;
 		}
 		for(int i = 0; i < p.t.size(); i++) 
 		{
 			double w = gr.get_edge_weight(i2e[p.t[i]]);
-			printf(" edge %d, weight = %e\n", p.t[i], w);
 			pw2 += w;
 		}
 
@@ -333,7 +420,6 @@ int router::evaluate()
 
 		if(ratio < p.e) ratio = p.e;
 	}
-
 	return 0;
 }
 
@@ -531,10 +617,21 @@ double router::total_counts() const
 int router::print() const
 {
 	printf("router %d, #routes = %lu, total-counts = %.1lf, ratio = %.2lf\n", root, routes.size(), total_counts(), ratio);
+	printf("in-edges = ( ");
+	for(int i = 0; i < gr.in_degree(root); i++) printf("%d ", u2e[i]);
+	printf("), out-edges = ( ");
+	for(int i = gr.in_degree(root); i < gr.degree(root); i++) printf("%d ", u2e[i]);
+	printf(")\n");
+
+	for(int i = 0; i < eqns.size(); i++) eqns[i].print(i);
+	printf("\n");
+
+	/*
 	for(int i = 0; i < routes.size(); i++)
 	{
-		printf(" route %d (%d, %d), count = %.1lf\n", i, routes[i].first, routes[i].second, counts[i]);
+		printf("route %d (%d, %d), count = %.1lf\n", i, routes[i].first, routes[i].second, counts[i]);
 	}
+	*/
 	return 0;
 }
 

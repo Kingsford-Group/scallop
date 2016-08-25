@@ -39,9 +39,9 @@ equation::equation(const vector<int> &_s, const vector<int> &_t, double _e)
 	w = 0;
 }
 
-int equation::print(int index)
+int equation::print(int index) const
 {
-	printf("equation %3d: (%2lu, %2lu) edges, error = %3.1lf, f = %d, w = %d, adjacent = %2d, distant = %2d. ", 
+	printf("equation %3d: (%2lu, %2lu) edges, error = %.2lf, f = %d, w = %d, adjacent = %2d, distant = %2d. ", 
 			index, s.size(), t.size(), e, f, w, a, d);
 
 	printf("S = ( ");

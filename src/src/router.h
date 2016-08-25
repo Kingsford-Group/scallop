@@ -39,11 +39,13 @@ public:
 	int update();
 
 	int update_routes();			// remove false routes
-	int build_indices();
-	int divide();
-	int evaluate();					// compute pvalue and pratio
+	int build_indices();			// build u2e and e2u
+	int divide();					// split *this, fill eqns
+	int add_single_equation();		// cannot be divided
+	int run_subsetsum();			// use subsetsum4
 	int run_ilp1();					// with multiplier ratio
 	int run_ilp2();					// with difference ratio
+	int evaluate();					// evaluate eqns
 
 	// modify routes
 	int add_route(const PI &p, double c);

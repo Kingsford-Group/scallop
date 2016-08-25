@@ -58,10 +58,9 @@ bool scallop3::decompose()
 	{
 		if(gr.degree(i) == 0) continue;
 		router &rt = routers[i];
-		printf("UPDATE root %d, degree = (%d, %d), #eqns = %lu\n", i, gr.in_degree(i), gr.out_degree(i), rt.eqns.size());
 		rt.update();
+
 		double r = rt.ratio;
-		printf("RATIO = %.2lf, #eqns = %lu\n", r, rt.eqns.size());
 		if(r < 0) continue;
 		if(ratio >= 0 && ratio < r) continue;
 		assert(rt.eqns.size() >= 1);

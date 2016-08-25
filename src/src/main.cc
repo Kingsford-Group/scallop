@@ -13,6 +13,7 @@
 #include "scallop1.h"
 #include "gtf.h"
 #include "genome.h"
+#include "subsetsum4.h"
 
 using namespace std;
 
@@ -23,6 +24,9 @@ int process_sgr();
 
 int main(int argc, const char **argv)
 {
+	//subsetsum4::test();
+	//return 0;
+
 	srand(time(0));
 	parse_arguments(argc, argv);
 	print_parameters();

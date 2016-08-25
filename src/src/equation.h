@@ -14,7 +14,7 @@ public:
 	equation(const vector<int> &, const vector<int> &, double);
 
 public:
-	int print(int index);
+	int print(int index) const;
 
 public:
 	vector<int> s;		// subs
