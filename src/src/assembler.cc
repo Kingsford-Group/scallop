@@ -88,7 +88,6 @@ int assembler::truncate(const hit &ht)
 	for(int i = 0; i < vbb.size(); i++)
 	{
 		bundle_base &bb = vbb[i];
-		//if(ht.pos < bb.rpos && ht.tid == bb.tid) continue;
 		if(ht.pos <= bb.rpos + min_bundle_gap && ht.tid == bb.tid) continue;
 
 		process(bb);
