@@ -312,11 +312,9 @@ int super_graph::print()
 		//gr.print();
 	}
 
-	/*
 	for(int i = 0; i < vhe.size(); i++)
 	{
 		vhe[i].print(i);
 	}
-	*/
 	return 0;
 }

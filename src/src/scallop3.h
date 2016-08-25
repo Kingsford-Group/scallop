@@ -45,9 +45,10 @@ private:
 	// trivial, or hard
 	int classify();
 	int iterate();
+	bool split_vertex();
+	bool decompose_trivial_vertex();
 
 	// decompose
-	bool decompose();
 	bool decompose_trivial_vertex(int v);
 	bool decompose_trivial_vertex(int v, vector<int> &ve);
 	int split_vertex(int x, const vector<int> &xe, const vector<int> &ye);

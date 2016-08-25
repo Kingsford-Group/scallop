@@ -40,8 +40,11 @@ int scallop3::iterate()
 	while(true)
 	{
 		bool b	= false;
-		b = decompose();
+		b = split_vertex();
+		if(b == true) print();
+		if(b == true) continue;
 
+		b = decompose_trivial_vertex();
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -50,41 +53,70 @@ int scallop3::iterate()
 	return 0;
 }
 
-bool scallop3::decompose()
+bool scallop3::split_vertex()
+{
+	int root = -1;
+	double ratio = -1;
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		if(gr.in_degree(i) <= 1) continue;
+		if(gr.out_degree(i) <= 1) continue;
+
+		router &rt = routers[i];
+		rt.update();
+		rt.print();
+
+		double r = rt.ratio;
+		if(r < 0) continue;
+		if(ratio >= 0 && ratio < r) continue;
+		root = i;
+		ratio = r;
+	}
+
+	if(root == -1) return false;
+	if(ratio <= 0) return false;
+
+	router &rt = routers[root];
+	assert(rt.eqns.size() == 2);
+
+	printf("split vertex %d, ratio = %.2lf, degree = (%d, %d), eqns = %lu\n", root, ratio, gr.in_degree(root), gr.out_degree(root), rt.eqns.size());
+	for(int i = 0;i < rt.eqns.size(); i++) rt.eqns[i].print(99);
+
+	split_vertex(root, rt.eqns[0].s, rt.eqns[0].t);
+
+	return true;
+}
+
+bool scallop3::decompose_trivial_vertex()
 {
 	int root = -1;
 	double ratio = -1;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.degree(i) == 0) continue;
+		if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) continue;
+
 		router &rt = routers[i];
 		rt.update();
 
 		double r = rt.ratio;
 		if(r < 0) continue;
 		if(ratio >= 0 && ratio < r) continue;
-		assert(rt.eqns.size() >= 1);
 		root = i;
 		ratio = r;
 	}
 
-	router &rt = routers[root];
-
 	if(root == -1) return false;
 	if(ratio <= 0) return false;
 
-	printf("split vertex %d, ratio = %.2lf, degree = (%d, %d), eqns = %lu\n", root, ratio, gr.in_degree(root), gr.out_degree(root), rt.eqns.size());
+	router &rt = routers[root];
+	assert(rt.eqns.size() == 1);
+
+	printf("decompose trivial vertex %d, ratio = %.2lf, degree = (%d, %d), eqns = %lu\n", root, ratio, gr.in_degree(root), gr.out_degree(root), rt.eqns.size());
 	for(int i = 0;i < rt.eqns.size(); i++) rt.eqns[i].print(99);
 
-	if(rt.eqns.size() == 1)
-	{
-		balance_vertex(root);
-		decompose_trivial_vertex(root);
-	}
-	else
-	{
-		split_vertex(root, rt.eqns[0].s, rt.eqns[0].t);
-	}
+	balance_vertex(root);
+	decompose_trivial_vertex(root);
 
 	return true;
 }

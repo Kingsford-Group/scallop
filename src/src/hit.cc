@@ -159,6 +159,11 @@ int hit::get_matched_intervals(vector<int64_t> &v) const
 	return get_mid_intervals(v, vi, vd);
 }
 
+bool hit_compare_by_name(const hit &x, const hit &y)
+{
+	return x.qname < y.qname;
+}
+
 /*
 inline bool hit_compare_left(const hit &x, const hit &y)
 {

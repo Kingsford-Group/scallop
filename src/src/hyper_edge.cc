@@ -39,7 +39,7 @@ int hyper_edge::increase()
 int hyper_edge::print(int index) const
 {
 	printf("hyper edge %d: count = %d, vertices = ", index, count);
-	for(int i = 0; i < v.size(); i++) printf("%d ", v[i] + 1);
+	for(int i = 0; i < v.size(); i++) printf("%d ", v[i]);
 	printf("\n");
 	return 0;
 }

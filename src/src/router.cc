@@ -88,6 +88,7 @@ int router::add_single_equation()
 
 int router::run_subsetsum()
 {
+	// build bipartite graph
 	undirected_graph ug;
 	for(int i = 0; i < u2e.size(); i++) ug.add_vertex();
 	for(int i = 0; i < routes.size(); i++)
@@ -104,6 +105,27 @@ int router::run_subsetsum()
 	}
 
 	vector< set<int> > vv = ug.compute_connected_components();
+
+	// smooth weights (locally)
+	vector<double> vw;
+	double sum1 = 0, sum2 = 0;
+	for(int i = 0; i < u2e.size(); i++)
+	{
+		edge_descriptor e = i2e[u2e[i]];
+		assert(e != null_edge);
+		double w = gr.get_edge_weight(e);
+		if(i < gr.in_degree(root)) sum1 += w;
+		else sum2 += w;
+		vw.push_back(w);
+	}
+
+	// TODO TODO
+
+	double r1 = (sum1 > sum2) ? 1.0 : sum2 / sum1;
+	double r2 = (sum1 < sum2) ? 1.0 : sum1 / sum2;
+
+	for(int i = 0; i < vw1.size(); i++) vw1[i] *= r1;
+	for(int i = 0; i < vw2.size(); i++) vw2[i] *= r2;
 
 	vector<PI> ss;
 	vector<PI> tt;
@@ -623,15 +645,14 @@ int router::print() const
 	for(int i = gr.in_degree(root); i < gr.degree(root); i++) printf("%d ", u2e[i]);
 	printf(")\n");
 
-	for(int i = 0; i < eqns.size(); i++) eqns[i].print(i);
-	printf("\n");
-
-	/*
 	for(int i = 0; i < routes.size(); i++)
 	{
 		printf("route %d (%d, %d), count = %.1lf\n", i, routes[i].first, routes[i].second, counts[i]);
 	}
-	*/
+
+	for(int i = 0; i < eqns.size(); i++) eqns[i].print(i);
+
+	printf("\n");
 	return 0;
 }
 

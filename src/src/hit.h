@@ -58,4 +58,6 @@ public:
 	int get_matched_intervals(vector<int64_t> &v) const;
 };
 
+bool hit_compare_by_name(const hit &x, const hit &y);
+
 #endif

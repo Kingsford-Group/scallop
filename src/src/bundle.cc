@@ -26,11 +26,14 @@ int bundle::build()
 	if(junctions.size() <= 0 && ignore_single_exon_transcripts == true) return 0;
 
 	build_junction_graph();
+
+	draw_junction_graph("jr.tex");
+
 	build_regions();
 	build_partial_exons();
 	link_partial_exons();
 	build_splice_graph(sg.root);
-	build_hyper_edges(sg.vhe);
+	build_hyper_edges2(sg.vhe);
 	sg.build();
 	return 0;
 }
@@ -460,6 +463,9 @@ bool bundle::verify_unique_mapping(const hit &h)
 
 	int d2 = traverse_junction_graph1(li + 1, ri);
 
+	//h.print();
+	//printf("li = %d, ri = %d, d1 = %d, d2 = %d\n", li, ri, d1, d2);
+
 	if(d2 <= -1 || d1 < d2) return true;
 	else return false;
 }
@@ -556,7 +562,7 @@ int bundle::search_partial_exons(int32_t x)
 	return -1;
 }
 
-int bundle::build_hyper_edges(vector<hyper_edge> &vhe)
+int bundle::build_hyper_edges1(vector<hyper_edge> &vhe)
 {
 	split_interval_map pmap;
 	for(int i = 0; i < pexons.size(); i++)
@@ -617,100 +623,70 @@ int bundle::build_hyper_edges(vector<hyper_edge> &vhe)
 	return 0;
 }
 
-int bundle::build_hyper_edges0(vector<hyper_edge> &vhe)
+int bundle::build_hyper_edges2(vector<hyper_edge> &vhe)
 {
-	vector<int> list;			// list of index of partial-exons
-	map<string, PI> m;			// hit-id to region of list
+	sort(hits.begin(), hits.end(), hit_compare_by_name);
+
+	split_interval_map pmap;
+	for(int i = 0; i < pexons.size(); i++)
+	{
+		partial_exon &p = pexons[i];
+		pmap += make_pair(ROI(p.lpos, p.rpos), i + 1);
+	}
+
+	map<hyper_edge, int> mhe;
+	string qname;
+	set<int> sp;
 	for(int i = 0; i < hits.size(); i++)
 	{
 		hit &h = hits[i];
+		
+		bool unique = true;
+		if(h.isize > 0) unique = verify_unique_mapping(h);
+
+		if(h.qname != qname || unique == false)
+		{
+			if(sp.size() > 2)
+			{
+				vector<int> vv(sp.begin(), sp.end());
+				hyper_edge he(vv, 1);
+
+				map<hyper_edge, int>::iterator mit = mhe.find(he);
+				if(mit == mhe.end()) mhe.insert(pair<hyper_edge, int>(he, 1));
+				else mit->second++;
+			}
+			sp.clear();
+		}
+
+		qname = h.qname;
+		if(unique == false) qname += "SHAO";
 
 		if((h.flag & 0x4) >= 1) continue;		// sequence is unmapped
 
 		vector<int64_t> v;
-		char c;
-		//if(h.isize >= 0 && verify_unique_mapping(h) == false) continue;
-		if(h.isize < 0) 
-		{
-			h.get_matched_intervals(v);
-			c = 'B';
-		}
-		else if(verify_unique_mapping(h) == false) 
-		{
-			h.get_matched_intervals(v);
-			c = 'C';
-		}
-		else 
-		{
-			compute_read1_intervals(h, v);
-			c = 'A';
-		}
+		if(h.isize < 0) h.get_matched_intervals(v);
+		else if(unique == false) h.get_matched_intervals(v);
+		else compute_read1_intervals(h, v);
 
-		if(v.size() == 0) continue;
-
-		string s = h.qname + string(1, c);
-		if(m.find(s) != m.end()) continue;
-
-		//h.print();
-		//printf("current string = %s\n", s.c_str());
-
-		PI pi(list.size(), list.size());
 		for(int k = 0; k < v.size(); k++)
 		{
 			int32_t p1 = high32(v[k]);
 			int32_t p2 = low32(v[k]);
 
-			int e1 = search_partial_exons(p1);
-			int e2 = search_partial_exons(p2 - 1);
+			SIMI it1 = pmap.find(ROI(p1, p1 + 1));
+			SIMI it2 = pmap.find(ROI(p2 - 1, p2));
+			if(it1 == pmap.end()) continue;
+			if(it2 == pmap.end()) continue;
 
-			if(e1 <= -1 || e2 <= -1) continue;
+			assert(it1->second >= 1);
+			assert(it2->second >= 1);
 
-			for(int j = e1; j <= e2; j++) 
+			//printf("qname = %s, [%d, %d), pexons = [%d, %d]\n", h.qname.c_str(), p1, p2, it1->second - 1, it2->second - 1);
+			for(int j = it1->second - 1; j <= it2->second - 1; j++) 
 			{
-				list.push_back(j);
-				pi.second++;
+				sp.insert(j);
 			}
 		}
-
-		if(pi.second > pi.first) m.insert(pair<string, PI>(s, pi));
-	}
-
-	map<hyper_edge, int> mhe;	// hyper_edge and count
-	set<string> ss;				// processed set of hits
-
-	for(map<string, PI>::iterator it = m.begin(); it != m.end(); it++)
-	{
-		string s1 = it->first;
-		if(ss.find(s1) != ss.end()) continue;
-
-		int l1 = m[s1].first;
-		int r1 = m[s1].second;
-		set<int> sp(list.begin() + l1, list.begin() + r1);
-
-		char c1 = s1[s1.size() - 1];
-		char c2 = (c1 == 'A') ? 'B' : (c1 == 'B' ? 'A' : 'D');
-		string s2 = s1.substr(0, s1.size() - 1) + string(1, c2);
-
-		assert(ss.find(s2) == ss.end());
-
-		if(m.find(s2) != m.end())
-		{
-			int l2 = m[s2].first;
-			int r2 = m[s2].second;
-			sp.insert(list.begin() + l2, list.begin() + r2);
-		}
-
-		ss.insert(s1);
-		ss.insert(s2);
-
-		if(sp.size() <= 1) continue;
-
-		vector<int> vv(sp.begin(), sp.end());
-		hyper_edge he(vv, 1);
-
-		map<hyper_edge, int>::iterator mit = mhe.find(he);
-		if(mit == mhe.end()) mhe.insert(pair<hyper_edge, int>(he, 1));
-		else mit->second++;
 	}
 
 	vhe.clear();
