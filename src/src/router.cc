@@ -55,7 +55,6 @@ int router::update()
 	update_routes();
 	build_indices();
 	divide();
-	evaluate();
 	touched = false;
 	return 0;
 }
@@ -78,10 +77,23 @@ int router::divide()
 int router::add_single_equation()
 {
 	equation eqn;
-	for(int i = 0; i < gr.in_degree(root); i++) eqn.s.push_back(u2e[i]);
-	for(int i = gr.in_degree(root); i < gr.degree(root); i++) eqn.t.push_back(u2e[i]);
+	double sum1 = 0, sum2 = 0;
+	for(int i = 0; i < gr.in_degree(root); i++)
+	{
+		eqn.s.push_back(u2e[i]);
+		sum1 += gr.get_edge_weight(i2e[u2e[i]]);
+	}
+	for(int i = gr.in_degree(root); i < gr.degree(root); i++)
+	{
+		eqn.t.push_back(u2e[i]);
+		sum2 += gr.get_edge_weight(i2e[u2e[i]]);
+	}
 	assert(eqn.s.size() >= 1);
 	assert(eqn.t.size() >= 1);
+	
+	ratio = fabs(sum1 - sum2) / (sum1 + sum2);
+	eqn.e = ratio;
+
 	eqns.push_back(eqn);
 	return 0;
 }
@@ -119,13 +131,11 @@ int router::run_subsetsum()
 		vw.push_back(w);
 	}
 
-	// TODO TODO
-
 	double r1 = (sum1 > sum2) ? 1.0 : sum2 / sum1;
 	double r2 = (sum1 < sum2) ? 1.0 : sum1 / sum2;
 
-	for(int i = 0; i < vw1.size(); i++) vw1[i] *= r1;
-	for(int i = 0; i < vw2.size(); i++) vw2[i] *= r2;
+	for(int i = 0; i < gr.in_degree(root); i++) vw[i] *= r1;
+	for(int i = gr.in_degree(root); i < gr.degree(root); i++) vw[i] *= r2;
 
 	vector<PI> ss;
 	vector<PI> tt;
@@ -134,18 +144,12 @@ int router::run_subsetsum()
 		double ww = 0;
 		for(set<int>::iterator it = vv[i].begin(); it != vv[i].end(); it++)
 		{
-			edge_descriptor e = i2e[u2e[*it]];
-			assert(e != null_edge);
-			double w = gr.get_edge_weight(e);
-			if(e->source() == root) w = 0 - w;
-			else assert(e->target() == root);
+			double w = vw[*it];
 			ww += w;
 		}
 		if(ww >= 0) ss.push_back(PI((int)(ww), i));
 		else tt.push_back(PI((int)(0 - ww), i));
 	}
-
-	if(ss.size() <= 1 || tt.size() <= 1) return 0;
 
 	subsetsum4 sss(ss, tt);
 	sss.solve();
@@ -188,7 +192,17 @@ int router::run_subsetsum()
 		eqn2.t.push_back(e);
 	}
 
+	if(eqn2.s.size() <= 0 || eqn2.t.size() <= 0) return 0;
+	if(eqn1.s.size() <= 0 && eqn1.t.size() <= 0) return 0;
+
+	ratio = sss.eqn.e;
+
+	eqn1.e = ratio;
 	eqns.push_back(eqn1);
+
+	if(eqn1.s.size() <= 0 || eqn1.t.size() <= 0) return 0;
+
+	eqn2.e = ratio;
 	eqns.push_back(eqn2);
 
 	return 0;

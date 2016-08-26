@@ -64,7 +64,7 @@ bool scallop3::split_vertex()
 
 		router &rt = routers[i];
 		rt.update();
-		rt.print();
+		//rt.print();
 
 		double r = rt.ratio;
 		if(r < 0) continue;
@@ -74,15 +74,27 @@ bool scallop3::split_vertex()
 	}
 
 	if(root == -1) return false;
-	if(ratio <= 0) return false;
 
 	router &rt = routers[root];
-	assert(rt.eqns.size() == 2);
+	assert(rt.eqns.size() >= 1);
 
 	printf("split vertex %d, ratio = %.2lf, degree = (%d, %d), eqns = %lu\n", root, ratio, gr.in_degree(root), gr.out_degree(root), rt.eqns.size());
 	for(int i = 0;i < rt.eqns.size(); i++) rt.eqns[i].print(99);
 
-	split_vertex(root, rt.eqns[0].s, rt.eqns[0].t);
+	if(rt.eqns.size() == 2)
+	{
+		equation &eqn = rt.eqns[0];
+		assert(eqn.s.size() >= 1);
+		assert(eqn.t.size() >= 1);
+		split_vertex(root, eqn.s, eqn.t);
+	}
+	else if(rt.eqns.size() == 1)
+	{
+		equation &eqn = rt.eqns[0];
+		if(eqn.s.size() == 1 && eqn.t.size() == 0) remove_edge(eqn.s[0]);
+		else if(eqn.s.size() == 0 && eqn.t.size() == 1) remove_edge(eqn.t[0]);
+		else assert(false);
+	}
 
 	return true;
 }
@@ -98,6 +110,7 @@ bool scallop3::decompose_trivial_vertex()
 
 		router &rt = routers[i];
 		rt.update();
+		//rt.print();
 
 		double r = rt.ratio;
 		if(r < 0) continue;
@@ -107,7 +120,6 @@ bool scallop3::decompose_trivial_vertex()
 	}
 
 	if(root == -1) return false;
-	if(ratio <= 0) return false;
 
 	router &rt = routers[root];
 	assert(rt.eqns.size() == 1);
@@ -294,22 +306,31 @@ int scallop3::merge_adjacent_equal_edges(int x, int y)
 	assert(e2i[p] == n);
 	assert(e2i[i2e[n]] == n);
 
-	e2i.erase(xx);
-	e2i.erase(yy);
-	i2e[x] = null_edge;
-	i2e[y] = null_edge;
-	gr.remove_edge(xx);
-	gr.remove_edge(yy);
-
-	routers[xs].remove_out_edge(x);
-	routers[xt].remove_in_edge(x);
-	routers[ys].remove_out_edge(y);
-	routers[yt].remove_in_edge(y);
-	routers[xs].touched = true;
-	routers[xt].touched = true;
-	routers[yt].touched = true;
+	routers[xs].replace_out_edge(x, n);
+	routers[yt].replace_in_edge(y, n);
+	remove_edge(x);
+	remove_edge(y);
 
 	return n;
+}
+
+int scallop3::remove_edge(int e)
+{
+	edge_descriptor ee = i2e[e];
+	assert(ee != null_edge);
+	int s = ee->source();
+	int t = ee->target();
+
+	e2i.erase(ee);
+	i2e[e] = null_edge;
+	gr.remove_edge(ee);
+
+	routers[s].remove_out_edge(e);
+	routers[t].remove_in_edge(e);
+	routers[s].touched = true;
+	routers[t].touched = true;
+
+	return 0;
 }
 
 int scallop3::merge_adjacent_edges(int x, int y)

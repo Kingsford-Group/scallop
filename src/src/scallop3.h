@@ -55,6 +55,7 @@ private:
 	int split_edge(int exi, double w);
 	int merge_adjacent_edges(int x, int y);
 	int merge_adjacent_equal_edges(int x, int y);
+	int remove_edge(int e);
 
 	// balance vertex
 	int balance_vertex(int v);

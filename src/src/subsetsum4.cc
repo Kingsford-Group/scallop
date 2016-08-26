@@ -50,8 +50,8 @@ int subsetsum4::rescale()
 	for(int i = 0; i < source.size(); i++) s1 += source[i].first;
 	for(int i = 0; i < target.size(); i++) s2 += target[i].first;
 
-	ubound1 = s1 - 1;
-	ubound2 = s2 - 1;
+	ubound1 = s1;		// TODO -1
+	ubound2 = s2;		// TODO -1
 
 	sort(source.begin(), source.end());
 	sort(target.begin(), target.end());
@@ -128,6 +128,7 @@ int subsetsum4::optimize()
 	vector<PI> v;
 	int n1 = source.size();
 	int n2 = target.size();
+	v.push_back(PI(0, 0));
 	for(int i = 1; i <= ubound1; i++)
 	{
 		if(table1[n1][i] < 0) continue;
@@ -159,6 +160,14 @@ int subsetsum4::optimize()
 	{
 		if(v[i].second == v[i + 1].second) continue;
 		if(v[i + 1].first - v[i].first >= d) continue;
+
+		bool b1 = false, b2 = false;
+		if(v[i].second == 1 && v[i].first == ubound1) b1 = true;
+		if(v[i].second == 2 && v[i].first == ubound2) b1 = true;
+		if(v[i + 1].second == 1 && v[i + 1].first == ubound1) b2 = true;
+		if(v[i + 1].second == 2 && v[i + 1].first == ubound2) b2 = true;
+		if(b1 == true && b2 == true) continue;
+
 		d = v[i + 1].first - v[i].first;
 		k = i;
 	}
@@ -166,10 +175,10 @@ int subsetsum4::optimize()
 	assert(k != -1);
 
 	if(v[k].second == 1) backtrace(v[k].first, source, table1, eqn.s);
-	else  backtrace(v[k].first, target, table2, eqn.t);
+	else if(v[k].second == 2) backtrace(v[k].first, target, table2, eqn.t);
 
 	if(v[k + 1].second == 1) backtrace(v[k + 1].first, source, table1, eqn.s);
-	else  backtrace(v[k + 1].first, target, table2, eqn.t);
+	else if(v[k + 1].second == 2) backtrace(v[k + 1].first, target, table2, eqn.t);
 
 	int s = 0;
 	for(int i = 0; i < source.size(); i++) s += source[i].first;
@@ -242,14 +251,11 @@ int subsetsum4::test()
 	//57:4 237:5 
 
 	vector<PI> v;
-	v.push_back(PI(118, 0));
-	v.push_back(PI(1, 1));
-	v.push_back(PI(63, 2));
-	v.push_back(PI(1, 3));
+	v.push_back(PI(10, 1));
+	v.push_back(PI(10, 2));
 
 	vector<PI> t;
-	t.push_back(PI(57, 4));
-	t.push_back(PI(237, 5));
+	t.push_back(PI(20, 1));
 
 	subsetsum4 sss(v, t);
 	sss.solve();

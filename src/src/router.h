@@ -14,7 +14,6 @@ class router
 public:
 	router(int r, splice_graph &g, MEI &ei, VE &ie, GRBEnv *env);
 	router(int r, splice_graph &g, MEI &ei, VE &ie);
-	//router(const router &rt);
 	router& operator=(const router &rt);
 
 public:
