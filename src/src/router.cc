@@ -522,8 +522,8 @@ int router::update_routes()
 		double c = counts[i];
 		edge_descriptor e1 = i2e[p.first];
 		edge_descriptor e2 = i2e[p.second];
-		assert(e1 != null_edge);
-		assert(e2 != null_edge);
+		if(e1 == null_edge) continue;
+		if(e2 == null_edge) continue;
 		if(e1->target() != root) continue;
 		if(e2->source() != root) continue;
 		vv.push_back(p);

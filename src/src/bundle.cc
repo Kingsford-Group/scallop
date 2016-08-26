@@ -642,7 +642,7 @@ int bundle::build_hyper_edges2(vector<hyper_edge> &vhe)
 		hit &h = hits[i];
 		
 		bool unique = true;
-		if(h.isize > 0) unique = verify_unique_mapping(h);
+		if(h.isize >= 0) unique = verify_unique_mapping(h);
 
 		if(h.qname != qname || unique == false)
 		{
