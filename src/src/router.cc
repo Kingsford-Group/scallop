@@ -3,7 +3,6 @@
 #include "gurobi_c++.h"
 #include "smoother.h"
 #include "subsetsum4.h"
-#include "undirected_graph.h"
 #include <cstdio>
 #include <algorithm>
 #include <set>
@@ -11,25 +10,15 @@
 router::router(int r, splice_graph &g, MEI &ei, VE &ie)
 	:root(r), gr(g), e2i(ei), i2e(ie)
 {
-	touched = true;
 }
 
 router::router(int r, splice_graph &g, MEI &ei, VE &ie, GRBEnv *_env)
 	:root(r), gr(g), e2i(ei), i2e(ie), env(_env)
 {
-	touched = true;
 }
-
-/*
-router::router(const router &rt)
-	:root(rt.root), gr(rt.gr), e2i(rt.e2i), i2e(rt.i2e), env(rt.env), touched(rt.touched)
-{
-}
-*/
 
 router& router::operator=(const router &rt)
 {
-	touched = rt.touched;
 	env = rt.env;
 
 	root = rt.root;
@@ -49,13 +38,14 @@ router& router::operator=(const router &rt)
 	return (*this);
 }
 
-int router::update()
+int router::build(bool p)
 {
-	//if(touched == false) return 0;
+	phasing = p;
 	update_routes();
 	build_indices();
-	divide();
-	touched = false;
+	build_bipartite_graph();
+	stats();
+	//divide();
 	return 0;
 }
 
@@ -67,7 +57,10 @@ int router::divide()
 	{
 		run_subsetsum();
 	}
-	else if(gr.in_degree(root) >= 1 && gr.out_degree(root) >= 1)
+
+	if(phasing == true) return 0;
+
+	if(gr.in_degree(root) >= 1 && gr.out_degree(root) >= 1)
 	{
 		add_single_equation();
 	}
@@ -98,10 +91,9 @@ int router::add_single_equation()
 	return 0;
 }
 
-int router::run_subsetsum()
+int router::build_bipartite_graph()
 {
-	// build bipartite graph
-	undirected_graph ug;
+	ug.clear();
 	for(int i = 0; i < u2e.size(); i++) ug.add_vertex();
 	for(int i = 0; i < routes.size(); i++)
 	{
@@ -115,7 +107,11 @@ int router::run_subsetsum()
 		assert(t >= gr.in_degree(root) && t < gr.degree(root));
 		ug.add_edge(s, t);
 	}
+	return 0;
+}
 
+int router::run_subsetsum()
+{
 	vector< set<int> > vv = ug.compute_connected_components();
 
 	// smooth weights (locally)
@@ -670,3 +666,19 @@ int router::print() const
 	return 0;
 }
 
+int router::stats()
+{
+	vector< set<int> > vv = ug.compute_connected_components();
+	
+	int x1 = 0, x2 = 0;
+	for(int i = 0; i < vv.size(); i++)
+	{
+		if(vv[i].size() <= 1) x1++;
+		else x2++;
+	}
+
+	printf("vertex = %d, indegree = %d, outdegree = %d, routes = %lu, counts = %.0lf, components = %lu, phased = %d, single = %d\n", 
+			root, gr.in_degree(root), gr.out_degree(root), routes.size(), total_counts(), vv.size(), x2, x1);
+
+	return 0;
+}

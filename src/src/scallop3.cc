@@ -29,6 +29,9 @@ scallop3::~scallop3()
 
 int scallop3::assemble()
 {
+	stats();
+	return 0;
+
 	classify();
 	iterate();
 	collect_existing_st_paths();
@@ -63,7 +66,7 @@ bool scallop3::split_vertex()
 		if(gr.out_degree(i) <= 1) continue;
 
 		router &rt = routers[i];
-		rt.update();
+		rt.build(true);
 		//rt.print();
 
 		double r = rt.ratio;
@@ -109,7 +112,7 @@ bool scallop3::decompose_trivial_vertex()
 		if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) continue;
 
 		router &rt = routers[i];
-		rt.update();
+		rt.build(true);
 		//rt.print();
 
 		double r = rt.ratio;
@@ -327,8 +330,6 @@ int scallop3::remove_edge(int e)
 
 	routers[s].remove_out_edge(e);
 	routers[t].remove_in_edge(e);
-	routers[s].touched = true;
-	routers[t].touched = true;
 
 	return 0;
 }
@@ -390,8 +391,6 @@ int scallop3::split_edge(int ei, double w)
 
 	routers[s].remove_out_edge(ei);
 	routers[t].remove_in_edge(ei);
-	routers[s].touched = true;
-	routers[t].touched = true;
 
 	return n;
 }
@@ -486,8 +485,6 @@ int scallop3::split_vertex(int x, const vector<int> &xe, const vector<int> &ye)
 	routers.push_back(routers[n - 1]);
 	routers[n - 1] = routers[x];
 	routers[n - 1].root = n - 1;
-	routers[n - 1].touched = true;
-	routers[x].touched = true;
 
 	return 0;
 }
@@ -545,6 +542,15 @@ int scallop3::collect_path(int e)
 	e2i.erase(i2e[e]);
 	i2e[e] = null_edge;
 
+	return 0;
+}
+
+int scallop3::stats()
+{
+	for(int i = 1; i < routers.size() - 1; i++)
+	{
+		routers[i].build(true);
+	}
 	return 0;
 }
 

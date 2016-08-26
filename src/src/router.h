@@ -6,6 +6,7 @@
 #include "splice_graph.h"
 #include "equation.h"
 #include "gurobi_c++.h"
+#include "undirected_graph.h"
 
 using namespace std;
 
@@ -19,7 +20,6 @@ public:
 public:
 	GRBEnv *env;				// GRB environment
 
-	bool touched;				// whether it has been touched
 	int root;					// central vertex
 	splice_graph &gr;			// reference splice graph
 	MEI &e2i;					// reference map of edge to index
@@ -29,16 +29,19 @@ public:
 	vector<double> counts;		// reads spanning each route
 	MI e2u;						// edge to index
 	vector<int> u2e;			// index to edge
+	undirected_graph ug;		// bipartite graph
 
+	bool phasing;				// only use routes to divide
 	double ratio;				// worst ratio
 	vector<equation> eqns;		// divide results
 
 public:
 	// recompute everything
-	int update();
+	int build(bool phasing);
 
 	int update_routes();			// remove false routes
 	int build_indices();			// build u2e and e2u
+	int build_bipartite_graph();	// build bipartite graph
 	int divide();					// split *this, fill eqns
 	int add_single_equation();		// cannot be divided
 	int run_subsetsum();			// use subsetsum4
@@ -60,6 +63,7 @@ public:
 
 	// print and stats
 	int print() const;
+	int stats();
 	double total_counts() const;
 };
 

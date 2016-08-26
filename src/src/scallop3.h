@@ -72,6 +72,7 @@ private:
 
 	// print and draw
 	int print();
+	int stats();
 	int draw_splice_graph(const string &file);
 };
 
