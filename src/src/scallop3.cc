@@ -119,6 +119,9 @@ bool scallop3::split_vertex(bool hyper)
 
 		router rt(i, gr, e2i, i2e, p);
 		rt.build();
+
+		rt.print();
+
 		if(rt.status != 4) continue;
 		assert(rt.ratio >= 0);
 		assert(rt.eqns.size() == 2);
@@ -133,7 +136,7 @@ bool scallop3::split_vertex(bool hyper)
 	if(root == -1) return false;
 
 	printf("split vertex %d, hyper = %c, ratio = %.2lf, degree = (%d, %d)\n", 
-			hyper ? 'T' : 'F', root, ratio, gr.in_degree(root), gr.out_degree(root));
+			root, hyper ? 'T' : 'F', ratio, gr.in_degree(root), gr.out_degree(root));
 
 	for(int i = 0; i < eqns.size(); i++) eqns[i].print(99);
 

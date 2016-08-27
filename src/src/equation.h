@@ -15,6 +15,7 @@ public:
 
 public:
 	int print(int index) const;
+	int clear();
 
 public:
 	vector<int> s;		// subs

@@ -42,10 +42,7 @@ public:
 	int build_indices();					// build u2e and e2u
 	int build_bipartite_graph();			// build bipartite graph
 	int add_single_equation();				// cannot be divided
-	int run_subsetsum();					// use subsetsum4
-	int run_ilp1();							// with multiplier ratio
-	int run_ilp2();							// with difference ratio
-
+	int split();							// use subsetsum4
 	bool balance();							// balance weight with tree
 	vector<PI> build_tree_order();			// compute tree order
 

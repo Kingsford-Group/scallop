@@ -39,6 +39,18 @@ equation::equation(const vector<int> &_s, const vector<int> &_t, double _e)
 	w = 0;
 }
 
+int equation::clear()
+{
+	s.clear();
+	t.clear();
+	e = 0;
+	f = 0;
+	a = 0;
+	d = 0;
+	w = 0;
+	return 0;
+}
+
 int equation::print(int index) const
 {
 	printf("equation %3d: (%2lu, %2lu) edges, error = %.2lf, f = %d, w = %d, adjacent = %2d, distant = %2d. ", 
