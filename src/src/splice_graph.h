@@ -2,7 +2,6 @@
 #define __SPLICE_GRAPH_H__
 
 #include "directed_graph.h"
-#include "hyper_edge.h"
 #include "vertex_info.h"
 #include "edge_info.h"
 
@@ -22,9 +21,6 @@ public:
 	splice_graph();
 	splice_graph(const splice_graph &gr);
 	virtual ~splice_graph();
-
-public:
-	vector<hyper_edge> vhe;
 
 private:
 	vector<double> vwrt;

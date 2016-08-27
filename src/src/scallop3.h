@@ -2,10 +2,10 @@
 #define __SCALLOP3_H__
 
 #include "splice_graph.h"
+#include "hyper_set.h"
 #include "equation.h"
 #include "router.h"
 #include "path.h"
-#include "gurobi_c++.h"
 
 typedef map< edge_descriptor, vector<int> > MEV;
 typedef pair< edge_descriptor, vector<int> > PEV;
@@ -20,26 +20,23 @@ class scallop3
 {
 public:
 	scallop3();
-	scallop3(const string &name, const splice_graph &gr);
+	scallop3(const string &name, const splice_graph &gr, const hyper_set &hs);
 	virtual ~scallop3();
+
+public:
+	int assemble();
 
 public:
 	string name;						// name for this gene
 	splice_graph gr;					// splice graph
-
-	GRBEnv *env;						// GRB environment
-	vector<router> routers;				// constructed router
-
 	MEI e2i;							// edge map, from edge to index
 	VE i2e;								// edge map, from index to edge
 	MEV mev;							// super edges
 	vector<int> v2v;					// vertex map
+	hyper_set hs;						// hyper edges
 	int round;							// round in iteration
-
 	vector<path> paths;					// predicted transcripts
-
-public:
-	int assemble();
+	vector<router> routers;
 
 private:
 	// trivial, or hard
@@ -61,9 +58,8 @@ private:
 	int balance_vertex(int v);
 
 	// init
-	int init_super_edges();
 	int init_vertex_map();
-	int init_routers(const vector<hyper_edge> &vhe);
+	int init_super_edges();
 
 	// topology
 	vector<int> topological_sort();

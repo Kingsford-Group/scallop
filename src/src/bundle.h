@@ -1,14 +1,14 @@
 #ifndef __BUNDLE_H__
 #define __BUNDLE_H__
 
-#include "super_graph.h"
 #include "interval_map.h"
 #include "bundle_base.h"
 #include "junction.h"
+#include "region.h"
 #include "partial_exon.h"
-#include "hyper_edge.h"
+#include "splice_graph.h"
+#include "hyper_set.h"
 #include "path.h"
-#include "super_region.h"
 
 using namespace std;
 
@@ -23,11 +23,13 @@ public:
 	splice_graph jr;				// junction graph
 	vector<region> regions;			// regions
 	vector<partial_exon> pexons;	// partial exons
-	super_graph sg;					// super_graph
+	splice_graph gr;				// splice graph
+	hyper_set hs;					// hyper edges
 
 public:
 	virtual int build();
 	int output_transcript(ofstream &fout, const path &p, const string &gid, const string &tid) const;	
+	int output_transcripts(ofstream &fout, const vector<path> &p, const string &gid) const;	
 	int print(int index);
 
 private:
@@ -58,9 +60,9 @@ private:
 	int build_partial_exons();
 
 	// super junctions and super partial_exons;
-	int build_hyper_edges1(vector<hyper_edge> &vhe);	// single end
-	int build_hyper_edges2(vector<hyper_edge> &vhe);	// paired end
-	int build_splice_graph(splice_graph &gr);
+	int build_hyper_edges1();	// single end
+	int build_hyper_edges2();	// paired end
+	int build_splice_graph();
 	int search_partial_exons(int32_t p);
 
 	// store the corresponding pexons in each junction

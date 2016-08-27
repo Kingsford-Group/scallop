@@ -12,26 +12,25 @@ router::router(int r, splice_graph &g, MEI &ei, VE &ie)
 {
 }
 
-router::router(int r, splice_graph &g, MEI &ei, VE &ie, GRBEnv *_env)
-	:root(r), gr(g), e2i(ei), i2e(ie), env(_env)
+router::router(int r, splice_graph &g, MEI &ei, VE &ie, const vector<PI> &p)
+	:root(r), gr(g), e2i(ei), i2e(ie), routes(p)
 {
 }
 
+
 router& router::operator=(const router &rt)
 {
-	env = rt.env;
-
 	root = rt.root;
 	gr = rt.gr;
 	e2i = rt.e2i;
 	i2e = rt.i2e;
 
 	routes = rt.routes;
-	counts = rt.counts;
 	
 	e2u = rt.e2u;
 	u2e = rt.u2e;
 
+	phasing = rt.phasing;
 	ratio = rt.ratio;
 	eqns = rt.eqns;
 
@@ -41,7 +40,6 @@ router& router::operator=(const router &rt)
 int router::build(bool p)
 {
 	phasing = p;
-	update_routes();
 	build_indices();
 	build_bipartite_graph();
 	stats();
@@ -206,7 +204,7 @@ int router::run_subsetsum()
 
 int router::run_ilp1()
 {
-	//GRBEnv *env = new GRBEnv();
+	GRBEnv *env = new GRBEnv();
 	GRBModel *model = new GRBModel(*env);
 
 	// ratio variables
@@ -326,12 +324,13 @@ int router::run_ilp1()
 	}
 
 	delete model;
-	//delete env;
+	delete env;
 	return 0;
 }
 
 int router::run_ilp2()
 {
+	GRBEnv *env = new GRBEnv();
 	GRBModel *model = new GRBModel(*env);
 
 	// ratio variables
@@ -426,32 +425,7 @@ int router::run_ilp2()
 	}
 
 	delete model;
-	return 0;
-}
-
-int router::evaluate()
-{
-	ratio = -1;
-	for(int i = 0; i < eqns.size(); i++)
-	{
-		equation &p = eqns[i];
-		double pw1 = 0, pw2 = 0;
-		for(int i = 0; i < p.s.size(); i++)
-		{
-			double w = gr.get_edge_weight(i2e[p.s[i]]);
-			pw1 += w;
-		}
-		for(int i = 0; i < p.t.size(); i++) 
-		{
-			double w = gr.get_edge_weight(i2e[p.t[i]]);
-			pw2 += w;
-		}
-
-		assert(pw1 >= SMIN && pw2 >= SMIN);
-		p.e = (pw1 > pw2) ? (pw1 / pw2) : (pw2 / pw1);
-
-		if(ratio < p.e) ratio = p.e;
-	}
+	delete env;
 	return 0;
 }
 
@@ -477,178 +451,9 @@ int router::build_indices()
 	return 0;
 }
 
-int router::add_route(const PI &p, double c)
-{
-	for(int i = 0; i < routes.size(); i++)
-	{
-		if(routes[i] == p)
-		{
-			counts[i] += c;
-			return 0;
-		}
-	}
-
-	routes.push_back(p);
-	counts.push_back(c);
-	return 0;
-}
-
-int router::remove_route(const PI &p)
-{
-	for(int i = 0; i < routes.size(); i++)
-	{
-		if(routes[i] == p)
-		{
-			routes.erase(routes.begin() + i);
-			counts.erase(counts.begin() + i);
-			return 0;
-		}
-	}
-	return 0;
-}
-
-int router::update_routes()
-{
-	vector<PI> vv;
-	vector<double> cc;
-
-	for(int i = 0; i < routes.size(); i++)
-	{
-		PI &p = routes[i];
-		double c = counts[i];
-		edge_descriptor e1 = i2e[p.first];
-		edge_descriptor e2 = i2e[p.second];
-		if(e1 == null_edge) continue;
-		if(e2 == null_edge) continue;
-		if(e1->target() != root) continue;
-		if(e2->source() != root) continue;
-		vv.push_back(p);
-		cc.push_back(c);
-	}
-
-	routes = vv;
-	counts = cc;
-	
-	return 0;
-}
-
-int router::replace_in_edge(int ex, int ey)
-{
-	for(int i = 0; i < routes.size(); i++)
-	{
-		if(routes[i].first == ex) routes[i].first = ey;
-	}
-	return 0;
-}
-
-int router::replace_out_edge(int ex, int ey)
-{
-	for(int i = 0; i < routes.size(); i++)
-	{
-		if(routes[i].second == ex) routes[i].second = ey;
-	}
-	return 0;
-}
-
-int router::split_in_edge(int ex, int ey, double r)
-{
-	assert(r >= 0 && r <= 1.0);
-	if(ex == ey) return 0;
-	int n = routes.size();
-	for(int i = 0; i < n; i++)
-	{
-		if(routes[i].first == ex)
-		{
-			add_route(PI(ey, routes[i].second), (1.0 - r) * counts[i]);
-			counts[i] *= r;
-		}
-	}
-	return 0;
-}
-
-int router::split_out_edge(int ex, int ey, double r)
-{
-	assert(r >= 0 && r <= 1.0);
-	if(ex == ey) return 0;
-	int n = routes.size();
-	for(int i = 0; i < n; i++)
-	{
-		if(routes[i].second == ex)
-		{
-			add_route(PI(routes[i].first, ey), (1.0 - r) * counts[i]);
-			counts[i] *= r;
-		}
-	}
-	return 0;
-}
-
-int router::remove_in_edges(const vector<int> &v)
-{
-	set<int> s(v.begin(), v.end());
-
-	vector<PI> vv;
-	vector<double> cc;
-	for(int i = 0; i < routes.size(); i++)
-	{
-		int x = routes[i].first;
-		if(s.find(x) != s.end()) continue;
-		vv.push_back(routes[i]);
-		cc.push_back(counts[i]);
-	}
-
-	routes = vv;
-	counts = cc;
-
-	return 0;
-}
-
-int router::remove_out_edges(const vector<int> &v)
-{
-	set<int> s(v.begin(), v.end());
-
-	vector<PI> vv;
-	vector<double> cc;
-	for(int i = 0; i < routes.size(); i++)
-	{
-		int x = routes[i].second;
-		if(s.find(x) != s.end()) continue;
-		vv.push_back(routes[i]);
-		cc.push_back(counts[i]);
-	}
-
-	routes = vv;
-	counts = cc;
-
-	return 0;
-}
-
-int router::remove_in_edge(int x)
-{
-	vector<int> v;
-	v.push_back(x);
-	return remove_in_edges(v);
-}
-
-int router::remove_out_edge(int x)
-{
-	vector<int> v;
-	v.push_back(x);
-	return remove_out_edges(v);
-}
-
-double router::total_counts() const
-{
-	double s = 0;
-	for(int i = 0; i < counts.size(); i++)
-	{
-		s += counts[i];
-	}
-	return s;
-}
-
 int router::print() const
 {
-	printf("router %d, #routes = %lu, total-counts = %.1lf, ratio = %.2lf\n", root, routes.size(), total_counts(), ratio);
+	printf("router %d, #routes = %lu, ratio = %.2lf\n", root, routes.size(), ratio);
 	printf("in-edges = ( ");
 	for(int i = 0; i < gr.in_degree(root); i++) printf("%d ", u2e[i]);
 	printf("), out-edges = ( ");
@@ -657,7 +462,7 @@ int router::print() const
 
 	for(int i = 0; i < routes.size(); i++)
 	{
-		printf("route %d (%d, %d), count = %.1lf\n", i, routes[i].first, routes[i].second, counts[i]);
+		printf("route %d (%d, %d)\n", i, routes[i].first, routes[i].second);
 	}
 
 	for(int i = 0; i < eqns.size(); i++) eqns[i].print(i);
@@ -677,8 +482,8 @@ int router::stats()
 		else x2++;
 	}
 
-	printf("vertex = %d, indegree = %d, outdegree = %d, routes = %lu, counts = %.0lf, components = %lu, phased = %d, single = %d\n", 
-			root, gr.in_degree(root), gr.out_degree(root), routes.size(), total_counts(), vv.size(), x2, x1);
+	printf("vertex = %d, indegree = %d, outdegree = %d, routes = %lu, components = %lu, phased = %d, single = %d\n", 
+			root, gr.in_degree(root), gr.out_degree(root), routes.size(), vv.size(), x2, x1);
 
 	return 0;
 }

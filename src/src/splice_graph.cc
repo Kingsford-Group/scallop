@@ -46,8 +46,6 @@ int splice_graph::copy(const splice_graph &gr, MEE &x2y, MEE &y2x)
 		y2x.insert(PEE(e, *it));
 	}
 
-	vhe = gr.vhe;
-
 	return 0;
 }
 
@@ -58,7 +56,6 @@ int splice_graph::clear()
 	vinf.clear();
 	ewrt.clear();
 	einf.clear();
-	vhe.clear();
 	return 0;
 }
 

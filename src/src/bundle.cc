@@ -27,14 +27,13 @@ int bundle::build()
 
 	build_junction_graph();
 
-	draw_junction_graph("jr.tex");
+	//draw_junction_graph("jr.tex");
 
 	build_regions();
 	build_partial_exons();
 	link_partial_exons();
-	build_splice_graph(sg.root);
-	build_hyper_edges2(sg.vhe);
-	sg.build();
+	build_splice_graph();
+	build_hyper_edges2();
 	return 0;
 }
 
@@ -562,7 +561,7 @@ int bundle::search_partial_exons(int32_t x)
 	return -1;
 }
 
-int bundle::build_hyper_edges1(vector<hyper_edge> &vhe)
+int bundle::build_hyper_edges1()
 {
 	split_interval_map pmap;
 	for(int i = 0; i < pexons.size(); i++)
@@ -571,7 +570,7 @@ int bundle::build_hyper_edges1(vector<hyper_edge> &vhe)
 		pmap += make_pair(ROI(p.lpos, p.rpos), i + 1);
 	}
 
-	map<hyper_edge, int> mhe;
+	hs.clear();
 	for(int i = 0; i < hits.size(); i++)
 	{
 		hit &h = hits[i];
@@ -602,28 +601,13 @@ int bundle::build_hyper_edges1(vector<hyper_edge> &vhe)
 		}
 
 		if(sp.size() <= 2) continue;
-
-		vector<int> vv(sp.begin(), sp.end());
-		hyper_edge he(vv, 1);
-
-		map<hyper_edge, int>::iterator mit = mhe.find(he);
-		if(mit == mhe.end()) mhe.insert(pair<hyper_edge, int>(he, 1));
-		else mit->second++;
-	}
-
-	vhe.clear();
-	for(map<hyper_edge, int>::iterator it = mhe.begin(); it != mhe.end(); it++)
-	{
-		hyper_edge he = it->first;
-		he.count = it->second;
-		he.increase();
-		vhe.push_back(he);
+		hs.add_node_list(sp);
 	}
 
 	return 0;
 }
 
-int bundle::build_hyper_edges2(vector<hyper_edge> &vhe)
+int bundle::build_hyper_edges2()
 {
 	sort(hits.begin(), hits.end(), hit_compare_by_name);
 
@@ -634,7 +618,8 @@ int bundle::build_hyper_edges2(vector<hyper_edge> &vhe)
 		pmap += make_pair(ROI(p.lpos, p.rpos), i + 1);
 	}
 
-	map<hyper_edge, int> mhe;
+	hs.clear();
+
 	string qname;
 	set<int> sp;
 	for(int i = 0; i < hits.size(); i++)
@@ -646,15 +631,7 @@ int bundle::build_hyper_edges2(vector<hyper_edge> &vhe)
 
 		if(h.qname != qname || unique == false)
 		{
-			if(sp.size() > 2)
-			{
-				vector<int> vv(sp.begin(), sp.end());
-				hyper_edge he(vv, 1);
-
-				map<hyper_edge, int>::iterator mit = mhe.find(he);
-				if(mit == mhe.end()) mhe.insert(pair<hyper_edge, int>(he, 1));
-				else mit->second++;
-			}
+			if(sp.size() > 2) hs.add_node_list(sp);
 			sp.clear();
 		}
 
@@ -687,15 +664,6 @@ int bundle::build_hyper_edges2(vector<hyper_edge> &vhe)
 				sp.insert(j);
 			}
 		}
-	}
-
-	vhe.clear();
-	for(map<hyper_edge, int>::iterator it = mhe.begin(); it != mhe.end(); it++)
-	{
-		hyper_edge he = it->first;
-		he.count = it->second;
-		he.increase();
-		vhe.push_back(he);
 	}
 
 	return 0;
@@ -739,8 +707,10 @@ int bundle::link_partial_exons()
 	return 0;
 }
 
-int bundle::build_splice_graph(splice_graph &gr)
+int bundle::build_splice_graph()
 {
+	gr.clear();
+
 	// vertices: start, each region, end
 	gr.add_vertex();
 	vertex_info vi0;
@@ -848,8 +818,8 @@ int bundle::print(int index)
 		if(hits[i].xs == '-') nq++;
 	}
 
-	printf("tid = %d, #hits = %lu, #partial-exons = %lu, #subgraphs = %lu, #couples = %lu, range = %s:%d-%d, orient = %c (%d, %d, %d)\n",
-			tid, hits.size(), pexons.size(), sg.subs.size(), sg.cps.size(), chrm.c_str(), lpos, rpos, strand, n0, np, nq);
+	printf("tid = %d, #hits = %lu, #partial-exons = %lu, range = %s:%d-%d, orient = %c (%d, %d, %d)\n",
+			tid, hits.size(), pexons.size(), chrm.c_str(), lpos, rpos, strand, n0, np, nq);
 
 	// print hits
 	/*
@@ -877,8 +847,19 @@ int bundle::print(int index)
 		pexons[i].print(i);
 	}
 
-	sg.print();
+	// print hyper-edges
+	hs.print();
 
+	return 0;
+}
+
+int bundle::output_transcripts(ofstream &fout, const vector<path> &p, const string &gid) const
+{
+	for(int i = 0; i < p.size(); i++)
+	{
+		string tid = gid + "." + tostring(i);
+		output_transcript(fout, p[i], gid, tid);
+	}
 	return 0;
 }
 

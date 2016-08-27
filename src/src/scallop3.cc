@@ -9,22 +9,20 @@
 scallop3::scallop3()
 {}
 
-scallop3::scallop3(const string &s, const splice_graph &g)
-	: name(s), gr(g)
+scallop3::scallop3(const string &s, const splice_graph &g, const hyper_set &h)
+	: name(s), gr(g), hs(h)
 {
-	env = new GRBEnv();
 	round = 0;
 	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 	gr.get_edge_indices(i2e, e2i);
+	hs.build(gr, e2i);
 	init_super_edges();
 	init_vertex_map();
-	init_routers(gr.vhe);
 	print();
 }
 
 scallop3::~scallop3()
 {
-	delete env;
 }
 
 int scallop3::assemble()
@@ -65,7 +63,8 @@ bool scallop3::split_vertex()
 		if(gr.in_degree(i) <= 1) continue;
 		if(gr.out_degree(i) <= 1) continue;
 
-		router &rt = routers[i];
+		vector<PI> p = hs.get_routes(i, gr, e2i);
+		router rt(i, gr, e2i, i2e, p);
 		rt.build(true);
 		//rt.print();
 
@@ -78,7 +77,9 @@ bool scallop3::split_vertex()
 
 	if(root == -1) return false;
 
-	router &rt = routers[root];
+	vector<PI> p = hs.get_routes(root, gr, e2i);
+	router rt(root, gr, e2i, i2e, p);
+	rt.build(true);
 	assert(rt.eqns.size() >= 1);
 
 	printf("split vertex %d, ratio = %.2lf, degree = (%d, %d), eqns = %lu\n", root, ratio, gr.in_degree(root), gr.out_degree(root), rt.eqns.size());
@@ -111,7 +112,7 @@ bool scallop3::decompose_trivial_vertex()
 		if(gr.degree(i) == 0) continue;
 		if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) continue;
 
-		router &rt = routers[i];
+		router rt(i, gr, e2i, i2e);
 		rt.build(true);
 		//rt.print();
 
@@ -124,7 +125,8 @@ bool scallop3::decompose_trivial_vertex()
 
 	if(root == -1) return false;
 
-	router &rt = routers[root];
+	router rt(root, gr, e2i, i2e);
+	rt.build(true);
 	assert(rt.eqns.size() == 1);
 
 	printf("decompose trivial vertex %d, ratio = %.2lf, degree = (%d, %d), eqns = %lu\n", root, ratio, gr.in_degree(root), gr.out_degree(root), rt.eqns.size());
@@ -183,41 +185,6 @@ int scallop3::init_vertex_map()
 	for(int i = 0; i < gr.num_vertices(); i++)
 	{
 		v2v.push_back(i);
-	}
-	return 0;
-}
-
-int scallop3::init_routers(const vector<hyper_edge> &vhe)
-{
-	routers.clear();
-	for(int i = 0; i < gr.num_vertices(); i++) routers.push_back(router(i, gr, e2i, i2e, env));
-
-	for(int i = 0; i < vhe.size(); i++)
-	{
-		const hyper_edge &he = vhe[i];
-		const vector<int> &vv = he.v;
-		if(vv.size() <= 2) continue;
-
-		VE ve;
-		for(int k = 0; k < vv.size() - 1; k++)
-		{
-			PEB p = gr.edge(vv[k], vv[k + 1]);
-			if(p.second == false) ve.push_back(null_edge);
-			else ve.push_back(p.first);
-		}
-
-		for(int k = 0; k < ve.size() - 1; k++)
-		{
-			if(ve[k] == null_edge || ve[k + 1] == null_edge) continue;
-
-			int e1 = e2i[ve[k]];
-			int e2 = e2i[ve[k + 1]];
-			int c = vhe[i].count;
-			int x = vv[k + 1];
-
-			if(c < min_router_count) continue;
-			routers[x].add_route(PI(e1, e2), c);
-		}
 	}
 	return 0;
 }
@@ -309,8 +276,10 @@ int scallop3::merge_adjacent_equal_edges(int x, int y)
 	assert(e2i[p] == n);
 	assert(e2i[i2e[n]] == n);
 
+	/*
 	routers[xs].replace_out_edge(x, n);
 	routers[yt].replace_in_edge(y, n);
+	*/
 	remove_edge(x);
 	remove_edge(y);
 
@@ -328,8 +297,10 @@ int scallop3::remove_edge(int e)
 	i2e[e] = null_edge;
 	gr.remove_edge(ee);
 
+	/*
 	routers[s].remove_out_edge(e);
 	routers[t].remove_in_edge(e);
+	*/
 
 	return 0;
 }
@@ -389,8 +360,10 @@ int scallop3::split_edge(int ei, double w)
 	i2e.push_back(p2);
 	e2i.insert(PEI(p2, n));
 
+	/*
 	routers[s].remove_out_edge(ei);
 	routers[t].remove_in_edge(ei);
+	*/
 
 	return n;
 }
@@ -482,9 +455,11 @@ int scallop3::split_vertex(int x, const vector<int> &xe, const vector<int> &ye)
 		gr.move_edge(e, n - 1, t);
 	}
 
+	/*
 	routers.push_back(routers[n - 1]);
 	routers[n - 1] = routers[x];
 	routers[n - 1].root = n - 1;
+	*/
 
 	return 0;
 }
@@ -547,9 +522,12 @@ int scallop3::collect_path(int e)
 
 int scallop3::stats()
 {
-	for(int i = 1; i < routers.size() - 1; i++)
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
-		routers[i].build(true);
+		vector<PI> p = hs.get_routes(i, gr, e2i);
+		router rt(i, gr, e2i, i2e, p);
+		rt.build(true);
+		rt.stats();
 	}
 	return 0;
 }
