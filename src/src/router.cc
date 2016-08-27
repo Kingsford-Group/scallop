@@ -217,8 +217,6 @@ int router::split()
 		subsetsum4 sss(ss, tt);
 		sss.solve();
 
-		sss.eqn.print(99);
-
 		eqn1.e = sss.eqn.e;
 		for(int i = 0; i < sss.eqn.s.size(); i++)
 		{
@@ -241,11 +239,16 @@ int router::split()
 			}
 		}
 	}
-	
+
+
 	equation eqn2;
-	if(eqn0.e < 0 && eqn1.e < 0) return 0;
-	if(eqn1.e < 0 || eqn1.e > eqn0.e) eqn2 = eqn0;
-	if(eqn0.e < 0 || eqn0.e > eqn1.e) eqn2 = eqn1;
+	if(eqn0.e < -0.5 && eqn1.e < -0.5) return 0;
+
+	if(eqn1.e < -0.5) eqn2 = eqn0;
+	else if(eqn0.e < -0.5) eqn2 = eqn1;
+	else if(eqn0.e > eqn1.e) eqn2 = eqn1;
+	else eqn2 = eqn0;
+
 	assert(eqn2.s.size() >= 1);
 	assert(eqn2.t.size() >= 1);
 

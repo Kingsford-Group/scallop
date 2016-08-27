@@ -120,8 +120,6 @@ bool scallop3::split_vertex(bool hyper)
 		router rt(i, gr, e2i, i2e, p);
 		rt.build();
 
-		rt.print();
-
 		if(rt.status != 4) continue;
 		assert(rt.ratio >= 0);
 		assert(rt.eqns.size() == 2);
