@@ -40,6 +40,7 @@ public:
 	int replace(const vector<int> &x, int e);
 	int remove(int e);
 	int remove(const vector<int> &x);
+	int remove(const set<int> &x);
 };
 
 #endif

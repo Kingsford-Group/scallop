@@ -43,12 +43,13 @@ private:
 	int classify();
 	int iterate();
 	bool decompose_tree();
-	bool split_vertex();
+	bool split_vertex(bool hyper);
+	bool remove_edge();
 	bool decompose_trivial_vertex();
 
 	// decompose
 	bool decompose_trivial_vertex(int v);
-	bool decompose_trivial_vertex(int v, vector<int> &ve);
+	bool decompose_trivial_vertex(int v, vector<PI> &ve0, vector<int> &ve1);
 	int split_vertex(int x, const vector<int> &xe, const vector<int> &ye);
 	int split_edge(int exi, double w);
 	int merge_adjacent_edges(int x, int y);

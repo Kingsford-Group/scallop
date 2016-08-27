@@ -40,26 +40,46 @@ router& router::operator=(const router &rt)
 
 int router::build()
 {
-	build_indices();
-	build_bipartite_graph();
-	if(status == 1 || status == 2) return 0;
-	divide();
-	return 0;
-}
+	assert(gr.in_degree(root) >= 1);
+	assert(gr.out_degree(root) >= 1);
 
-int router::divide()
-{
 	eqns.clear();
 	ratio = -1;
-	if(gr.in_degree(root) >= 2 && gr.out_degree(root) >= 2)
-	{
-		run_subsetsum();
-	}
+	status = -1;
 
-	if(gr.in_degree(root) >= 1 && gr.out_degree(root) >= 1)
+	build_indices();
+
+	if(gr.in_degree(root) == 1 || gr.out_degree(root) == 1)
 	{
 		add_single_equation();
+		status = 0;
+		return 0;
 	}
+
+	build_bipartite_graph();
+	vector< set<int> > vv = ug.compute_connected_components();
+
+	if(vv.size() == 1)
+	{
+		if(routes.size() == u2e.size() - 1) status = 1;
+		else if(routes.size() >= u2e.size()) status = 2;
+		else assert(false);
+		return 0;
+	}
+
+	run_subsetsum();
+
+	if(eqns.size() == 1)
+	{
+		assert(eqns[0].s.size() == 0 || eqns[0].t.size() == 0);
+		status = 3;
+	}
+	else
+	{
+		assert(eqns.size() == 2);
+		status = 4;
+	}
+
 	return 0;
 }
 
@@ -102,14 +122,6 @@ int router::build_bipartite_graph()
 		assert(s >= 0 && s < gr.in_degree(root));
 		assert(t >= gr.in_degree(root) && t < gr.degree(root));
 		ug.add_edge(s, t);
-	}
-
-	vector< set<int> > vv = ug.compute_connected_components();
-	if(vv.size() == 1)
-	{
-		if(routes.size() == u2e.size() - 1) status = 1;
-		else if(routes.size() >= u2e.size()) status = 2;
-		else assert(false);
 	}
 
 	return 0;

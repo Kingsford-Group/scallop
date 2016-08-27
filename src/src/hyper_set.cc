@@ -195,6 +195,11 @@ int hyper_set::replace(const vector<int> &v, int e)
 	return 0;
 }
 
+int hyper_set::remove(const set<int> &s)
+{
+	return remove(vector<int>(s.begin(), s.end()));
+}
+
 int hyper_set::remove(const vector<int> &v)
 {
 	for(int i = 0; i < v.size(); i++) remove(v[i]);
@@ -210,6 +215,7 @@ int hyper_set::remove(int e)
 		int k = (*it);
 		vector<int> &vv = edges[k];
 		assert(vv.size() >= 1);
+
 		if(vv[0] == e) vv.erase(vv.begin());
 		else if(vv[vv.size() - 1] == e) vv.pop_back();
 		else assert(false);
