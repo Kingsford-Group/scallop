@@ -45,6 +45,7 @@ double infer_root_reliability = 0.4;
 int max_dp_table_size = 10000;
 int max_num_subsetsum_solutions = 10;
 double max_equation_error_ratio = 0.1;
+double max_split_error_ratio = 0.2;
 double max_router_error_ratio = 0.3;
 int min_router_count = 1;
 double min_boundary_edge_weight_ratio = 0.05;
@@ -110,6 +111,7 @@ int print_parameters()
 	printf("max_dp_table_size = %d\n", max_dp_table_size);
 	printf("max_num_subsetsum_solutions = %d\n", max_num_subsetsum_solutions);
 	printf("max_equation_error_ratio = %.2lf\n", max_equation_error_ratio);
+	printf("max_split_error_ratio = %.2lf\n", max_split_error_ratio);
 	printf("max_router_error_ratio = %.2lf\n", max_router_error_ratio);
 	printf("min_router_count = %d\n", min_router_count);
 	printf("min_boundary_edge_weight_ratio = %.2lf\n", min_boundary_edge_weight_ratio);
@@ -201,32 +203,6 @@ bool parse_arguments(int argc, const char ** argv)
 		{
 			transcript_min_expression = atof(argv[i + 1]);
 			i++;
-		}
-		else if(string(argv[i]) == "-T")
-		{
-			// default setting for true alignment
-			min_splice_boundary_hits = 1;
-			min_num_hits_in_bundle = 20;
-			min_bundle_gap = 50;
-			min_mapping_quality = 1;
-			max_equation_error_ratio = 0.1;
-			min_subregion_gap = 10;
-			min_subregion_length = 50;
-			min_subregion_overlap = 10.0;
-			min_flank_length = 5;
-		}
-		else if(string(argv[i]) == "-R")
-		{
-			// default setting for real alignment
-			min_splice_boundary_hits = 1;
-			min_num_hits_in_bundle = 20;
-			min_bundle_gap = 50;
-			min_mapping_quality = 1;
-			max_equation_error_ratio = 0.1;
-			min_subregion_gap = 10;
-			min_subregion_length = 50;
-			min_subregion_overlap = 10.0;
-			min_flank_length = 5;
 		}
 	}
 

@@ -629,6 +629,12 @@ int bundle::build_hyper_edges2()
 		bool unique = true;
 		if(h.isize >= 0) unique = verify_unique_mapping(h);
 
+		printf("sp = ( ");
+		printv(vector<int>(sp.begin(), sp.end()));
+		printf(")\n");
+
+		h.print();
+
 		if(h.qname != qname || unique == false)
 		{
 			if(sp.size() > 2) hs.add_node_list(sp);
@@ -654,15 +660,22 @@ int bundle::build_hyper_edges2()
 			SIMI it2 = pmap.find(ROI(p2 - 1, p2));
 			if(it1 == pmap.end()) continue;
 			if(it2 == pmap.end()) continue;
-
 			assert(it1->second >= 1);
 			assert(it2->second >= 1);
+			int aa = it1->second - 1;
+			int bb = it2->second - 1;
+			
+			int32_t pp1 = upper(it1->first);
+			int32_t pp2 = lower(it2->first);
+
+			assert(pp1 >= p1);
+			assert(pp2 <= p2 - 1);
+
+			if(pp1 - p1 < min_flank_length) aa++;
+			if(p2 - 1 - pp2 < min_flank_length) bb--;
 
 			//printf("qname = %s, [%d, %d), pexons = [%d, %d]\n", h.qname.c_str(), p1, p2, it1->second - 1, it2->second - 1);
-			for(int j = it1->second - 1; j <= it2->second - 1; j++) 
-			{
-				sp.insert(j);
-			}
+			for(int j = aa; j <= bb; j++) sp.insert(j);
 		}
 	}
 

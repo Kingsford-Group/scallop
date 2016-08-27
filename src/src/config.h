@@ -48,6 +48,7 @@ extern int max_dp_table_size;
 extern int max_num_subsetsum_solutions;
 extern int max_equations_each_iteration;
 extern double max_equation_error_ratio;
+extern double max_split_error_ratio;
 extern double max_router_error_ratio;
 extern int min_router_count;
 extern int tail_coverage;

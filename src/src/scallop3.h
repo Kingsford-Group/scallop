@@ -41,13 +41,15 @@ public:
 private:
 	// trivial, or hard
 	int classify();
+
+	// iterate
 	int iterate();
 	bool decompose_tree();
 	bool split_vertex(bool hyper);
 	bool remove_edge();
 	bool decompose_trivial_vertex();
 
-	// decompose
+	// graph modify routines
 	bool decompose_trivial_vertex(int v);
 	bool decompose_trivial_vertex(int v, vector<PI> &ve0, vector<int> &ve1);
 	int split_vertex(int x, const vector<int> &xe, const vector<int> &ye);
@@ -55,8 +57,6 @@ private:
 	int merge_adjacent_edges(int x, int y);
 	int merge_adjacent_equal_edges(int x, int y);
 	int remove_edge(int e);
-
-	// balance vertex
 	int balance_vertex(int v);
 
 	// init
@@ -64,9 +64,12 @@ private:
 	int init_super_edges();
 
 	// topology
-	vector<int> topological_sort();
+	int greedy_decompose(int num);
+	int split_merge_path(const VE &p, double w, vector<int> &v);
+	int split_merge_path(const vector<int> &p, double w, vector<int> &v);
 	int collect_path(int e);
 	int collect_existing_st_paths();
+	vector<int> topological_sort();
 
 	// print and draw
 	int print();
