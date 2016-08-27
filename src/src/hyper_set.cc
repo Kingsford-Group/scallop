@@ -140,13 +140,81 @@ int hyper_set::purify()
 		for(set<int>::iterator it = s.begin(); it != s.end(); it++)
 		{
 			if((*it) == i) continue;
-			bool b = consecutive_subset(edges[*it], v);
-			assert(b == true);
+			int b = consecutive_subset(edges[*it], v);
+			assert(b >= 0);
 		}
 		if(s.size() >= 2) continue;
 		vv.push_back(v);
 	}
 	edges = vv;
+	return 0;
+}
+
+int hyper_set::replace(int x, int y, int e)
+{
+	vector<int> v;
+	v.push_back(x);
+	v.push_back(y);
+	replace(v, e);
+	return 0;
+}
+
+int hyper_set::replace(const vector<int> &v, int e)
+{
+	if(v.size() == 0) return 0;
+	set<int> s = get_intersection(v);
+	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
+	{
+		int k = (*it);
+		vector<int> &vv = edges[k];
+		int b = consecutive_subset(vv, v);
+		assert(b >= 0);
+		vv[b] = e;
+		vv.erase(vv.begin() + b + 1, vv.begin() + b + v.size());
+
+		for(int i = 0; i < v.size(); i++) 
+		{
+			int x = v[i];
+			assert(e2s.find(x) != e2s.end());
+			assert(e2s[x].find(k) != e2s[x].end());
+			e2s[x].erase(k);
+		}
+
+		if(e2s.find(e) == e2s.end())
+		{
+			set<int> ss;
+			ss.insert(k);
+			e2s.insert(PISI(e, ss));
+		}
+		else
+		{
+			e2s[e].insert(k);
+		}
+	}
+
+	return 0;
+}
+
+int hyper_set::remove(const vector<int> &v)
+{
+	for(int i = 0; i < v.size(); i++) remove(v[i]);
+	return 0;
+}
+
+int hyper_set::remove(int e)
+{
+	if(e2s.find(e) == e2s.end()) return 0;
+	set<int> s = e2s[e];
+	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
+	{
+		int k = (*it);
+		vector<int> &vv = edges[k];
+		assert(vv.size() >= 1);
+		if(vv[0] == e) vv.erase(vv.begin());
+		else if(vv[vv.size() - 1] == e) vv.pop_back();
+		else assert(false);
+	}
+	e2s.erase(e);
 	return 0;
 }
 
@@ -170,3 +238,5 @@ int hyper_set::print()
 	}
 	return 0;
 }
+
+

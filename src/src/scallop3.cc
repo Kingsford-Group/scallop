@@ -27,9 +27,6 @@ scallop3::~scallop3()
 
 int scallop3::assemble()
 {
-	stats();
-	return 0;
-
 	classify();
 	iterate();
 	collect_existing_st_paths();
@@ -41,9 +38,11 @@ int scallop3::iterate()
 	while(true)
 	{
 		bool b	= false;
-		b = split_vertex();
+		b = decompose_tree();
 		if(b == true) print();
 		if(b == true) continue;
+
+		break;
 
 		b = decompose_trivial_vertex();
 		if(b == true) print();
@@ -52,6 +51,49 @@ int scallop3::iterate()
 		break;
 	}
 	return 0;
+}
+
+bool scallop3::decompose_tree()
+{
+	int root = -1;
+	vector<PI> order;
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		if(gr.in_degree(i) <= 1) continue;
+		if(gr.out_degree(i) <= 1) continue;
+
+		vector<PI> p = hs.get_routes(i, gr, e2i);
+		router rt(i, gr, e2i, i2e, p);
+		rt.build();
+
+		if(rt.status != 1) continue;
+		if(rt.balance() == false) continue;
+
+		root = i;
+		order = rt.build_tree_order();
+		break;
+	}
+
+	if(root == -1) return false;
+
+	printf("decompose tree %d, degree = (%d, %d)\n", root, gr.in_degree(root), gr.out_degree(root));
+
+	set<int> s;
+	for(int i = 0; i < order.size(); i++)
+	{
+		int x = order[i].first;
+		int y = order[i].second;
+		int e = merge_adjacent_edges(x, y);
+		hs.replace(x, y, e);
+		s.insert(x);
+		s.insert(y);
+		printf(" merge adjacent edge (%d, %d) -> %d\n", x, y, e);
+	}
+
+	hs.remove(vector<int>(s.begin(), s.end()));
+
+	assert(gr.degree(root) == 0);
+	return true;
 }
 
 bool scallop3::split_vertex()
@@ -65,7 +107,7 @@ bool scallop3::split_vertex()
 
 		vector<PI> p = hs.get_routes(i, gr, e2i);
 		router rt(i, gr, e2i, i2e, p);
-		rt.build(true);
+		rt.build();
 		//rt.print();
 
 		double r = rt.ratio;
@@ -79,7 +121,7 @@ bool scallop3::split_vertex()
 
 	vector<PI> p = hs.get_routes(root, gr, e2i);
 	router rt(root, gr, e2i, i2e, p);
-	rt.build(true);
+	rt.build();
 	assert(rt.eqns.size() >= 1);
 
 	printf("split vertex %d, ratio = %.2lf, degree = (%d, %d), eqns = %lu\n", root, ratio, gr.in_degree(root), gr.out_degree(root), rt.eqns.size());
@@ -113,7 +155,7 @@ bool scallop3::decompose_trivial_vertex()
 		if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) continue;
 
 		router rt(i, gr, e2i, i2e);
-		rt.build(true);
+		rt.build();
 		//rt.print();
 
 		double r = rt.ratio;
@@ -126,7 +168,7 @@ bool scallop3::decompose_trivial_vertex()
 	if(root == -1) return false;
 
 	router rt(root, gr, e2i, i2e);
-	rt.build(true);
+	rt.build();
 	assert(rt.eqns.size() == 1);
 
 	printf("decompose trivial vertex %d, ratio = %.2lf, degree = (%d, %d), eqns = %lu\n", root, ratio, gr.in_degree(root), gr.out_degree(root), rt.eqns.size());
@@ -327,7 +369,7 @@ int scallop3::merge_adjacent_edges(int x, int y)
 
 	int x1 = split_edge(x, ww);
 	int y1 = split_edge(y, ww);
-	int xy = merge_adjacent_equal_edges(x, y);
+	int xy = merge_adjacent_equal_edges(x1, y1);
 
 	return xy;
 }
@@ -348,10 +390,10 @@ int scallop3::split_edge(int ei, double w)
 	edge_descriptor p2 = gr.add_edge(s, t);
 	edge_info eif = gr.get_edge_info(ee);
 
-	gr.set_edge_weight(ee, w);
-	gr.set_edge_info(ee, eif);
-	gr.set_edge_weight(p2, ww - w);
-	gr.set_edge_info(p2, eif);
+	gr.set_edge_weight(ee, ww - w);		// old edge
+	gr.set_edge_info(ee, eif);			// old edge
+	gr.set_edge_weight(p2, w);			// new edge
+	gr.set_edge_info(p2, eif);			// new edge
 
 	if(mev.find(p2) != mev.end()) mev[p2] = mev[ee];
 	else mev.insert(PEV(p2, mev[ee]));
@@ -526,7 +568,7 @@ int scallop3::stats()
 	{
 		vector<PI> p = hs.get_routes(i, gr, e2i);
 		router rt(i, gr, e2i, i2e, p);
-		rt.build(true);
+		rt.build();
 		rt.stats();
 	}
 	return 0;

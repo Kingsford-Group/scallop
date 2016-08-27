@@ -42,6 +42,7 @@ private:
 	// trivial, or hard
 	int classify();
 	int iterate();
+	bool decompose_tree();
 	bool split_vertex();
 	bool decompose_trivial_vertex();
 

@@ -34,6 +34,12 @@ public:
 	vector<PI> get_routes(int x, directed_graph &gr, MEI &e2i);
 	int purify();
 	int print();
+
+public:
+	int replace(int x, int y, int e);
+	int replace(const vector<int> &x, int e);
+	int remove(int e);
+	int remove(const vector<int> &x);
 };
 
 #endif

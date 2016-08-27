@@ -27,13 +27,16 @@ public:
 	vector<int> u2e;			// index to edge
 	undirected_graph ug;		// bipartite graph
 
-	bool phasing;				// only use routes to divide
 	double ratio;				// worst ratio
 	vector<equation> eqns;		// divide results
 
+	// 1: ug is a tree
+	// 2: ug has a single component, but not a tree
+	int status;					
+
 public:
 	// recompute everything
-	int build(bool phasing);
+	int build();
 
 	int build_indices();					// build u2e and e2u
 	int build_bipartite_graph();			// build bipartite graph
@@ -42,6 +45,8 @@ public:
 	int run_subsetsum();					// use subsetsum4
 	int run_ilp1();							// with multiplier ratio
 	int run_ilp2();							// with difference ratio
+	bool balance();							// balance weight with tree
+	vector<PI> build_tree_order();			// compute tree order
 
 	// print and stats
 	int print() const;

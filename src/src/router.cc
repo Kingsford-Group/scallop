@@ -8,12 +8,12 @@
 #include <set>
 
 router::router(int r, splice_graph &g, MEI &ei, VE &ie)
-	:root(r), gr(g), e2i(ei), i2e(ie)
+	:root(r), gr(g), e2i(ei), i2e(ie), status(0)
 {
 }
 
 router::router(int r, splice_graph &g, MEI &ei, VE &ie, const vector<PI> &p)
-	:root(r), gr(g), e2i(ei), i2e(ie), routes(p)
+	:root(r), gr(g), e2i(ei), i2e(ie), routes(p), status(0)
 {
 }
 
@@ -30,20 +30,20 @@ router& router::operator=(const router &rt)
 	e2u = rt.e2u;
 	u2e = rt.u2e;
 
-	phasing = rt.phasing;
 	ratio = rt.ratio;
 	eqns = rt.eqns;
+
+	status = rt.status;
 
 	return (*this);
 }
 
-int router::build(bool p)
+int router::build()
 {
-	phasing = p;
 	build_indices();
 	build_bipartite_graph();
-	stats();
-	//divide();
+	if(status == 1 || status == 2) return 0;
+	divide();
 	return 0;
 }
 
@@ -55,8 +55,6 @@ int router::divide()
 	{
 		run_subsetsum();
 	}
-
-	if(phasing == true) return 0;
 
 	if(gr.in_degree(root) >= 1 && gr.out_degree(root) >= 1)
 	{
@@ -105,6 +103,15 @@ int router::build_bipartite_graph()
 		assert(t >= gr.in_degree(root) && t < gr.degree(root));
 		ug.add_edge(s, t);
 	}
+
+	vector< set<int> > vv = ug.compute_connected_components();
+	if(vv.size() == 1)
+	{
+		if(routes.size() == u2e.size() - 1) status = 1;
+		else if(routes.size() >= u2e.size()) status = 2;
+		else assert(false);
+	}
+
 	return 0;
 }
 
@@ -427,6 +434,110 @@ int router::run_ilp2()
 	delete model;
 	delete env;
 	return 0;
+}
+
+bool router::balance()
+{
+	assert(status == 1);
+
+	GRBEnv *env = new GRBEnv();
+	GRBModel *model = new GRBModel(*env);
+
+	// routes weight variables
+	vector<GRBVar> rvars;
+	for(int i = 0; i < routes.size(); i++)
+	{
+		GRBVar rvar = model->addVar(1.0, GRB_INFINITY, 0, GRB_CONTINUOUS);
+		rvars.push_back(rvar);
+	}
+
+	// new weights variables
+	vector<GRBVar> wvars;
+	for(int i = 0; i < u2e.size(); i++)
+	{
+		GRBVar wvar = model->addVar(1.0, GRB_INFINITY, 0, GRB_CONTINUOUS);
+		wvars.push_back(wvar);
+	}
+	model->update();
+
+	// expression for each edge
+	vector<GRBLinExpr> exprs(u2e.size());
+	for(int i = 0; i < routes.size(); i++)
+	{
+		int e1 = routes[i].first;
+		int e2 = routes[i].second;
+		int u1 = e2u[e1];
+		int u2 = e2u[e2];
+		exprs[u1] += rvars[i];
+		exprs[u2] += rvars[i];
+	}
+
+	for(int i = 0; i < u2e.size(); i++)
+	{
+		model->addConstr(exprs[i], GRB_EQUAL, wvars[i]);
+	}
+
+	// objective 
+	GRBQuadExpr obj;
+	for(int i = 0; i < u2e.size(); i++)
+	{
+		double w = gr.get_edge_weight(i2e[u2e[i]]);
+		obj += (wvars[i] - w) * (wvars[i] - w);
+	}
+
+	model->setObjective(obj, GRB_MINIMIZE);
+	model->getEnv().set(GRB_IntParam_OutputFlag, 0);
+	model->update();
+
+	model->optimize();
+
+	int f = model->get(GRB_IntAttr_Status);
+	if(f != GRB_OPTIMAL)
+	{
+		delete model;
+		delete env;
+		return false;
+	}
+
+	for(int i = 0; i < wvars.size(); i++)
+	{
+		double w = wvars[i].get(GRB_DoubleAttr_X);
+		gr.set_edge_weight(i2e[u2e[i]], w);
+	}
+
+	delete model;
+	delete env;
+	return true;
+}
+
+vector<PI> router::build_tree_order()
+{
+	assert(status == 1);
+	vector<PI> v;
+	undirected_graph ug2 = ug;
+	while(true)
+	{
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = ug2.edges(); it1 != it2; it1++)
+		{
+			int s = (*it1)->source();
+			int t = (*it1)->target();
+			assert(s != t);
+			if(s > t) 
+			{
+				s = (*it1)->target();
+				t = (*it1)->source();
+			}
+			if(ug2.degree(s) != 1 && ug2.degree(t) != 1) continue;
+
+			v.push_back(PI(u2e[s], u2e[t]));
+			ug2.remove_edge(*it1);
+			break;
+		}
+		if(ug2.num_edges() == 0) break;
+	}
+	assert(v.size() == routes.size());
+	return v;
 }
 
 int router::build_indices()
