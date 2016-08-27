@@ -9,11 +9,9 @@ scallop_LDFLAGS = -pg -L$(HTSLIB) -L$(GUROBI_HOME)/lib -L$(GTFDIR) -L$(GRAPHDIR)
 scallop_LDADD = -lhts -lz -lgurobi_c++ -lgurobi -lgtf -lgraph -lutil
 
 scallop_SOURCES = splice_graph.h splice_graph.cc \
-				  super_graph.h super_graph.cc \
 				  sgraph_compare.h sgraph_compare.cc \
 				  vertex_info.h vertex_info.cc \
 				  edge_info.h edge_info.cc \
-				  nested_graph.h nested_graph.cc \
 				  interval_map.h interval_map.cc \
 				  binomial.h binomial.cc \
 				  subsetsum1.h subsetsum1.cc \
@@ -22,7 +20,7 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  config.h config.cc \
 				  hit.h hit.cc \
 				  partial_exon.h partial_exon.cc \
-				  hyper_edge.h hyper_edge.cc \
+				  hyper_set.h hyper_set.cc \
 				  router.h router.cc \
 				  region.h region.cc \
 				  slope.h slope.cc \
@@ -33,8 +31,8 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  smoother.h smoother.cc \
 				  equation.h equation.cc \
 				  gtf.h gtf.cc \
+				  nested_graph.h nested_graph.cc \
 				  scallop1.h scallop1.cc \
-				  scallop2.h scallop2.cc \
 				  scallop3.h scallop3.cc \
 				  assembler.h assembler.cc \
 				  main.cc

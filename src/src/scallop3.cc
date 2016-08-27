@@ -50,7 +50,6 @@ int scallop3::iterate()
 		if(b == true) print();
 		if(b == true) continue;
 
-
 		b = split_vertex(false);
 		if(b == true) print();
 		if(b == true) continue;
