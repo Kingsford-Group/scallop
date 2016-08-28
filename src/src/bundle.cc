@@ -31,6 +31,7 @@ int bundle::build()
 
 	build_regions();
 	build_partial_exons();
+	build_partial_exon_map();
 	link_partial_exons();
 	build_splice_graph();
 	build_hyper_edges2();
@@ -432,87 +433,6 @@ int bundle::align_hits()
 	return 0;
 }
 
-bool bundle::verify_unique_mapping(const hit &h)
-{
-	if((h.flag & 0x8) >= 1) return true;
-	if(h.mpos < h.rpos) return true;
-
-	int li = search_junction_graph(h.rpos - 1);
-	if(li < 0) return false;
-	assert(li >= 0 && li < jr.num_vertices() - 1);
-
-	int32_t l1 = jr.get_vertex_info(li).pos;
-	int32_t l2 = jr.get_vertex_info(li + 1).pos;
-	assert(h.rpos - 1 >= l1 && h.rpos - 1 < l2);
-	
-	if(h.mpos < l2) return true;
-
-	int ri = search_junction_graph(h.mpos);
-	if(ri < 0) return false;
-
-	assert(ri >= 0 && ri < jr.num_vertices() - 1);
-	assert(ri > li);
-
-	int32_t r1 = jr.get_vertex_info(ri).pos;
-	int32_t r2 = jr.get_vertex_info(ri + 1).pos;
-	assert(h.mpos >= r1 && h.mpos < r2);
-
-	int d1 = r1 - l2;
-	assert(d1 >= 0);
-
-	int d2 = traverse_junction_graph1(li + 1, ri);
-
-	//h.print();
-	//printf("li = %d, ri = %d, d1 = %d, d2 = %d\n", li, ri, d1, d2);
-
-	if(d2 <= -1 || d1 < d2) return true;
-	else return false;
-}
-
-int bundle::compute_read1_intervals(const hit &h, vector<int64_t> &vv)
-{
-	assert(verify_unique_mapping(h) == true);
-
-	vv.clear();
-	if(h.isize < 0) return 0;
-
-	vector<int64_t> vm;
-	h.get_matched_intervals(vm);
-	for(int k = 0; k < vm.size(); k++)
-	{
-		int32_t s = high32(vm[k]);
-		int32_t t = low32(vm[k]);
-		if(s >= h.mpos) break;
-		if(t >= h.mpos) t = h.mpos;
-		vv.push_back(vm[k]);
-	}
-
-	if(h.rpos >= h.mpos) return 0;
-
-	int li = search_junction_graph(h.rpos - 1);
-	assert(li >= 0 && li < jr.num_vertices() - 1);
-	int32_t l1 = jr.get_vertex_info(li).pos;
-	int32_t l2 = jr.get_vertex_info(li + 1).pos;
-	assert(h.rpos - 1 >= l1 && h.rpos - 1 < l2);
-	
-	if(h.mpos <= l2)
-	{
-		vv.push_back(pack(h.rpos, h.mpos));
-		return 0;
-	}
-
-	int ri = search_junction_graph(h.mpos);
-	assert(ri >= 0 && ri < jr.num_vertices() - 1);
-	assert(ri > li);
-	int32_t r1 = jr.get_vertex_info(ri).pos;
-	int32_t r2 = jr.get_vertex_info(ri + 1).pos;
-	assert(h.mpos >= r1 && h.mpos < r2);
-
-	vv.push_back(pack(h.rpos, l2));
-	vv.push_back(pack(r1, h.mpos));
-	return 0;
-}
-
 int bundle::build_regions()
 {
 	regions.clear();
@@ -541,40 +461,57 @@ int bundle::build_partial_exons()
 		region &r = regions[i];
 		pexons.insert(pexons.end(), r.pexons.begin(), r.pexons.end());
 	}
-
 	return 0;
 }
 
-int bundle::search_partial_exons(int32_t x)
+int bundle::build_partial_exon_map()
 {
-	int l = 0;
-	int r = pexons.size() - 1;
-	while(l <= r)
-	{
-		int m = (l + r) / 2;
-		partial_exon &p = pexons[m];
-		if(x >= p.lpos && x < p.rpos) return m;
-
-		if(x < p.lpos) r = m - 1;
-		if(x >= p.rpos) l = m + 1;
-	}
-	return -1;
-}
-
-int bundle::build_hyper_edges1()
-{
-	split_interval_map pmap;
+	pmap.clear();
 	for(int i = 0; i < pexons.size(); i++)
 	{
 		partial_exon &p = pexons[i];
 		pmap += make_pair(ROI(p.lpos, p.rpos), i + 1);
 	}
+	return 0;
+}
 
+int bundle::locate_left_partial_exon(int32_t x)
+{
+	SIMI it = pmap.find(ROI(x, x + 1));
+	if(it == pmap.end()) return -1;
+	assert(it->second >= 1);
+	assert(it->second <= pexons.size());
+
+	int k = it->second - 1;
+	int32_t p = upper(it->first);
+	assert(p >= x);
+
+	if(p - x < min_flank_length) k++;
+	if(k >= pexons.size()) return -1;
+	return k;
+}
+
+int bundle::locate_right_partial_exon(int32_t x)
+{
+	SIMI it = pmap.find(ROI(x - 1, x));
+	if(it == pmap.end()) return -1;
+	assert(it->second >= 1);
+	assert(it->second <= pexons.size());
+
+	int k = it->second - 1;
+	int32_t p = lower(it->first);
+	assert(p < x);
+
+	if(x - p <= min_flank_length) k--;
+	return k;
+}
+
+int bundle::build_hyper_edges1()
+{
 	hs.clear();
 	for(int i = 0; i < hits.size(); i++)
 	{
 		hit &h = hits[i];
-
 		if((h.flag & 0x4) >= 1) continue;
 
 		vector<int64_t> v;
@@ -587,17 +524,11 @@ int bundle::build_hyper_edges1()
 			int32_t p1 = high32(v[k]);
 			int32_t p2 = low32(v[k]);
 
-			SIMI it1 = pmap.find(ROI(p1, p1 + 1));
-			SIMI it2 = pmap.find(ROI(p2 - 1, p2));
-			if(it1 == pmap.end()) continue;
-			if(it2 == pmap.end()) continue;
+			int k1 = locate_left_partial_exon(p1);
+			int k2 = locate_right_partial_exon(p2);
+			if(k1 < 0 || k2 < 0) continue;
 
-			assert(it1->second >= 1);
-			assert(it2->second >= 1);
-			for(int j = it1->second - 1; j <= it2->second - 1; j++) 
-			{
-				sp.insert(j);
-			}
+			for(int j = k1; j <= k2; j++) sp.insert(j);
 		}
 
 		if(sp.size() <= 2) continue;
@@ -611,72 +542,50 @@ int bundle::build_hyper_edges2()
 {
 	sort(hits.begin(), hits.end(), hit_compare_by_name);
 
-	split_interval_map pmap;
-	for(int i = 0; i < pexons.size(); i++)
-	{
-		partial_exon &p = pexons[i];
-		pmap += make_pair(ROI(p.lpos, p.rpos), i + 1);
-	}
-
 	hs.clear();
 
 	string qname;
-	set<int> sp;
+	vector<int> sp;
 	for(int i = 0; i < hits.size(); i++)
 	{
 		hit &h = hits[i];
 		
-		bool unique = true;
-		if(h.isize >= 0) unique = verify_unique_mapping(h);
-
+		/*
 		printf("sp = ( ");
-		printv(vector<int>(sp.begin(), sp.end()));
+		printv(sp);
 		printf(")\n");
-
 		h.print();
+		*/
 
-		if(h.qname != qname || unique == false)
+		if(h.qname != qname)
 		{
-			if(sp.size() > 2) hs.add_node_list(sp);
+			set<int> s(sp.begin(), sp.end());
+			if(s.size() > 2) hs.add_node_list(s);
 			sp.clear();
 		}
 
 		qname = h.qname;
-		if(unique == false) qname += "SHAO";
 
-		if((h.flag & 0x4) >= 1) continue;		// sequence is unmapped
+		if((h.flag & 0x4) >= 1) continue;
 
 		vector<int64_t> v;
-		if(h.isize < 0) h.get_matched_intervals(v);
-		else if(unique == false) h.get_matched_intervals(v);
-		else compute_read1_intervals(h, v);
+		h.get_matched_intervals(v);
 
+		vector<int> sp2;
 		for(int k = 0; k < v.size(); k++)
 		{
 			int32_t p1 = high32(v[k]);
 			int32_t p2 = low32(v[k]);
 
-			SIMI it1 = pmap.find(ROI(p1, p1 + 1));
-			SIMI it2 = pmap.find(ROI(p2 - 1, p2));
-			if(it1 == pmap.end()) continue;
-			if(it2 == pmap.end()) continue;
-			assert(it1->second >= 1);
-			assert(it2->second >= 1);
-			int aa = it1->second - 1;
-			int bb = it2->second - 1;
-			
-			int32_t pp1 = upper(it1->first);
-			int32_t pp2 = lower(it2->first);
+			int k1 = locate_left_partial_exon(p1);
+			int k2 = locate_right_partial_exon(p2);
+			if(k1 < 0 || k2 < 0) continue;
 
-			assert(pp1 >= p1);
-			assert(pp2 <= p2 - 1);
-
-			if(pp1 - p1 < min_flank_length) aa++;
-			if(p2 - 1 - pp2 < min_flank_length) bb--;
-
-			//printf("qname = %s, [%d, %d), pexons = [%d, %d]\n", h.qname.c_str(), p1, p2, it1->second - 1, it2->second - 1);
-			for(int j = aa; j <= bb; j++) sp.insert(j);
+			for(int j = k1; j <= k2; j++) sp2.push_back(j);
 		}
+
+		if(sp.size() >= 1 && sp2.size() >= 1 && sp.back() + 1 < sp2[0]) sp.clear();
+		sp.insert(sp.end(), sp2.begin(), sp2.end());
 	}
 
 	return 0;

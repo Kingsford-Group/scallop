@@ -172,6 +172,7 @@ int router::split()
 
 		eqn0.clear();
 		eqn0.e = r;
+		assert(eqn0.e >= 0);
 		for(set<int>::iterator it = s.begin(); it != s.end(); it++)
 		{
 			int e = *it;
@@ -187,12 +188,12 @@ int router::split()
 		set<int> &s = vv[tt[k].second];
 		if(s.size() <= 1) continue;
 
-		double r = ss[k].first * 1.0 / (sum1 * r1);
+		double r = tt[k].first * 1.0 / (sum1 * r1);
 		if(eqn0.e >= 0 && r >= eqn0.e) continue;
 
 		eqn0.clear();
 		eqn0.e = r;
-
+		assert(eqn0.e >= 0);
 		for(set<int>::iterator it = s.begin(); it != s.end(); it++)
 		{
 			int e = *it;
@@ -218,6 +219,7 @@ int router::split()
 		sss.solve();
 
 		eqn1.e = sss.eqn.e;
+		assert(eqn1.e >= 0);
 		for(int i = 0; i < sss.eqn.s.size(); i++)
 		{
 			int k = sss.eqn.s[i];
@@ -243,6 +245,7 @@ int router::split()
 
 	equation eqn2;
 	if(eqn0.e < -0.5 && eqn1.e < -0.5) return 0;
+	assert(eqn0.e >= 0 || eqn1.e >= 0);
 
 	if(eqn1.e < -0.5) eqn2 = eqn0;
 	else if(eqn0.e < -0.5) eqn2 = eqn1;

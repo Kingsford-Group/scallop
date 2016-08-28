@@ -161,7 +161,9 @@ int hit::get_matched_intervals(vector<int64_t> &v) const
 
 bool hit_compare_by_name(const hit &x, const hit &y)
 {
-	return x.qname < y.qname;
+	if(x.qname < y.qname) return true;
+	if(x.qname > y.qname) return false;
+	return (x.pos < y.pos);
 }
 
 /*

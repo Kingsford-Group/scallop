@@ -23,6 +23,7 @@ public:
 	splice_graph jr;				// junction graph
 	vector<region> regions;			// regions
 	vector<partial_exon> pexons;	// partial exons
+	split_interval_map pmap;		// partial exon map
 	splice_graph gr;				// splice graph
 	hyper_set hs;					// hyper edges
 
@@ -50,20 +51,18 @@ private:
 	int traverse_junction_graph1(int s, int t);
 	int test_junction_graph();
 
-	// process hits
-	int align_hits();
-	bool verify_unique_mapping(const hit &h);
-	int compute_read1_intervals(const hit &h, vector<int64_t> &vv);
-
 	// build partial exons
+	int align_hits();
 	int build_regions();
 	int build_partial_exons();
+	int build_partial_exon_map();
+	int locate_left_partial_exon(int32_t x);
+	int locate_right_partial_exon(int32_t x);
 
 	// super junctions and super partial_exons;
 	int build_hyper_edges1();	// single end
 	int build_hyper_edges2();	// paired end
 	int build_splice_graph();
-	int search_partial_exons(int32_t p);
 
 	// store the corresponding pexons in each junction
 	int link_partial_exons();

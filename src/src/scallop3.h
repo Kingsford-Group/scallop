@@ -65,8 +65,8 @@ private:
 
 	// topology
 	int greedy_decompose(int num);
-	int split_merge_path(const VE &p, double w, vector<int> &v);
-	int split_merge_path(const vector<int> &p, double w, vector<int> &v);
+	int split_merge_path(const VE &p, double w);
+	int split_merge_path(const vector<int> &p, double w);
 	int collect_path(int e);
 	int collect_existing_st_paths();
 	vector<int> topological_sort();

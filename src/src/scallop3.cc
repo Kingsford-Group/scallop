@@ -39,11 +39,11 @@ int scallop3::iterate()
 	while(true)
 	{
 		bool b	= false;
-		b = decompose_tree();
+		b = split_vertex(true);
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = split_vertex(true);
+		b = decompose_tree();
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -329,26 +329,26 @@ bool scallop3::decompose_trivial_vertex(int i, vector<PI> &ve0, vector<int> &ve1
 
 int scallop3::greedy_decompose(int num)
 {
+	printf("greedy decomposing %d\n", num);
 	int cnt = 0;
 	while(true)
 	{
 		if(num != -1 && cnt >= num) break;
 
 		VE v;
-		vector<int> vv;
 		double w = gr.compute_maximum_path_w(v);
 
 		if(w <= 0.0) break;
 		if(w <= transcript_min_expression) break;
 
-		int e = split_merge_path(v, w, vv);
+		int e = split_merge_path(v, w);
 		collect_path(e);
 		cnt++;
 	}
 	return 0;
 }
 
-int scallop3::split_merge_path(const VE &p, double wx, vector<int> &vv)
+int scallop3::split_merge_path(const VE &p, double wx)
 {
 	vector<int> v;
 	for(int i = 0; i < p.size(); i++)
@@ -357,21 +357,17 @@ int scallop3::split_merge_path(const VE &p, double wx, vector<int> &vv)
 		assert(e2i.find(p[i]) != e2i.end());
 		v.push_back(e2i[p[i]]);
 	}
-	return split_merge_path(v, wx, vv);
+	return split_merge_path(v, wx);
 }
 
-int scallop3::split_merge_path(const vector<int> &p, double ww, vector<int> &vv)
+int scallop3::split_merge_path(const vector<int> &p, double ww)
 {
-	vv.clear();
 	if(p.size() == 0) return -1;
-	int ee = p[0];
-	int x = split_edge(p[0], ww);
-	vv.push_back(x);
+	int ee = split_edge(p[0], ww);
 	for(int i = 1; i < p.size(); i++)
 	{
-		x = split_edge(p[i], ww);
-		vv.push_back(x);
-		ee = merge_adjacent_equal_edges(ee, p[i]);
+		int x = split_edge(p[i], ww);
+		ee = merge_adjacent_equal_edges(ee, x);
 	}
 	return ee;
 }
