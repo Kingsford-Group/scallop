@@ -22,6 +22,12 @@ undirected_graph::undirected_graph(const undirected_graph &gr)
 	copy(gr);
 }
 
+undirected_graph& undirected_graph::operator=(const graph_base &gr)
+{
+	copy(gr);
+	return (*this);
+}
+
 undirected_graph::~undirected_graph()
 {
 }

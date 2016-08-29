@@ -18,6 +18,12 @@ directed_graph::directed_graph(const graph_base &gr)
 	copy(gr);
 }
 
+directed_graph& directed_graph::operator=(const graph_base &gr)
+{
+	copy(gr);
+	return (*this);
+}
+
 directed_graph::~directed_graph()
 {
 }

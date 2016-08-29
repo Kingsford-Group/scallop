@@ -14,6 +14,7 @@ public:
 	undirected_graph();
 	undirected_graph(const graph_base &gr);
 	undirected_graph(const undirected_graph &gr);
+	undirected_graph& operator=(const graph_base &gr);
 	virtual ~undirected_graph();
 
 public:
