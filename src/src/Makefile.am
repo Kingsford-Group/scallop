@@ -9,6 +9,7 @@ scallop_LDFLAGS = -pg -L$(HTSLIB) -L$(GUROBI_HOME)/lib -L$(GTFDIR) -L$(GRAPHDIR)
 scallop_LDADD = -lhts -lz -lgurobi_c++ -lgurobi -lgtf -lgraph -lutil
 
 scallop_SOURCES = splice_graph.h splice_graph.cc \
+				  super_graph.h super_graph.cc \
 				  sgraph_compare.h sgraph_compare.cc \
 				  vertex_info.h vertex_info.cc \
 				  edge_info.h edge_info.cc \

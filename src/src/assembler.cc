@@ -9,6 +9,7 @@
 #include "scallop2.h"
 #include "scallop3.h"
 #include "sgraph_compare.h"
+#include "super_graph.h"
 
 assembler::assembler()
 {
@@ -121,6 +122,10 @@ int assembler::process(const bundle_base &bb)
 	string gid= "bundle." + tostring(index);
 
 	if(fixed_gene_name != "" && gid != fixed_gene_name) return 0;
+
+	super_graph sg(bd.gr);
+	sg.build();
+	sg.print();
 
 	if(algo != "shao")
 	{
