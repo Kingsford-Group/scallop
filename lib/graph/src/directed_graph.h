@@ -12,8 +12,8 @@ class directed_graph : public graph_base
 {
 public:
 	directed_graph();
-	directed_graph(const graph_base &gr);
-	directed_graph& operator=(const graph_base &gr);
+	directed_graph(const directed_graph &gr);
+	directed_graph& operator=(const directed_graph &gr);
 	virtual ~directed_graph();
 
 public:

@@ -13,12 +13,12 @@ using namespace std;
 directed_graph::directed_graph()
 {}
 
-directed_graph::directed_graph(const graph_base &gr)
+directed_graph::directed_graph(const directed_graph &gr)
 {
 	copy(gr);
 }
 
-directed_graph& directed_graph::operator=(const graph_base &gr)
+directed_graph& directed_graph::operator=(const directed_graph &gr)
 {
 	copy(gr);
 	return (*this);

@@ -12,17 +12,12 @@ using namespace std;
 undirected_graph::undirected_graph()
 {}
 
-undirected_graph::undirected_graph(const graph_base &gr)
-{
-	copy(gr);
-}
-
 undirected_graph::undirected_graph(const undirected_graph &gr)
 {
 	copy(gr);
 }
 
-undirected_graph& undirected_graph::operator=(const graph_base &gr)
+undirected_graph& undirected_graph::operator=(const undirected_graph &gr)
 {
 	copy(gr);
 	return (*this);
