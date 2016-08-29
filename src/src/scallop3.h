@@ -39,42 +39,40 @@ public:
 	vector<router> routers;
 
 private:
-	// trivial, or hard
+	// init
 	int classify();
+	int init_vertex_map();
+	int init_super_edges();
 
-	// iterate
-	int iterate();
-	bool decompose_tree();
+	// resolve iteratively
+	bool resolve_hyper_tree();
 	bool split_vertex(bool hyper);
+	bool resolve_trivial_vertex();
 	bool remove_edge();
-	bool decompose_trivial_vertex();
 
-	// graph modify routines
-	bool decompose_trivial_vertex(int v);
-	bool decompose_trivial_vertex(int v, vector<PI> &ve0, vector<int> &ve1);
+	// smooth vertex
+	bool balance_vertex(undirected_graph &ug, const vector<int> &u2e);
+	int balance_vertex(int x);
+
+	// decomposing subroutines
+	int decompose_tree(undirected_graph &ug, const vector<int> &u2e);
+	int decompose_trivial_vertex(int v);
 	int split_vertex(int x, const vector<int> &xe, const vector<int> &ye);
 	int split_edge(int exi, double w);
 	int merge_adjacent_edges(int x, int y);
 	int merge_adjacent_equal_edges(int x, int y);
 	int remove_edge(int e);
-	int balance_vertex(int v);
-
-	// init
-	int init_vertex_map();
-	int init_super_edges();
-
-	// topology
-	int greedy_decompose(int num);
 	int split_merge_path(const VE &p, double w);
 	int split_merge_path(const vector<int> &p, double w);
 	int collect_path(int e);
 	int collect_existing_st_paths();
-	vector<int> topological_sort();
+	int greedy_decompose(int num);
 
 	// print and draw
 	int print();
 	int stats();
 	int draw_splice_graph(const string &file);
+	vector<int> topological_sort();
 };
 
 #endif

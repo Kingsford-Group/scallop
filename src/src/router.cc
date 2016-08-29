@@ -361,7 +361,7 @@ vector<PI> router::build_tree_order()
 {
 	assert(status == 1);
 	vector<PI> v;
-	undirected_graph ug2 = ug;
+	undirected_graph ug2(ug);
 	while(true)
 	{
 		edge_iterator it1, it2;

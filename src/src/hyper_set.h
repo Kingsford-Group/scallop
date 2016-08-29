@@ -36,6 +36,7 @@ public:
 	int print();
 
 public:
+	int replace(int x, int e);
 	int replace(int x, int y, int e);
 	int replace(const vector<int> &x, int e);
 	int remove(int e);

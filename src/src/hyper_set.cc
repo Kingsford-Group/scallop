@@ -150,6 +150,14 @@ int hyper_set::purify()
 	return 0;
 }
 
+int hyper_set::replace(int x, int e)
+{
+	vector<int> v;
+	v.push_back(x);
+	replace(v, e);
+	return 0;
+}
+
 int hyper_set::replace(int x, int y, int e)
 {
 	vector<int> v;

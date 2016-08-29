@@ -1,5 +1,6 @@
 #include "scallop3.h"
 #include "config.h"
+#include "gurobi_c++.h"
 
 #include <cstdio>
 #include <iostream>
@@ -28,14 +29,7 @@ scallop3::~scallop3()
 int scallop3::assemble()
 {
 	classify();
-	iterate();
-	collect_existing_st_paths();
-	greedy_decompose(-1);
-	return 0;
-}
 
-int scallop3::iterate()
-{
 	while(true)
 	{
 		bool b	= false;
@@ -43,11 +37,11 @@ int scallop3::iterate()
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = decompose_tree();
+		b = resolve_hyper_tree();
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = decompose_trivial_vertex();
+		b = resolve_trivial_vertex();
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -57,13 +51,18 @@ int scallop3::iterate()
 
 		break;
 	}
+
+	collect_existing_st_paths();
+	greedy_decompose(-1);
+
 	return 0;
 }
 
-bool scallop3::decompose_tree()
+bool scallop3::resolve_hyper_tree()
 {
 	int root = -1;
-	vector<PI> order;
+	undirected_graph ug;
+	vector<int> u2e;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.in_degree(i) <= 1) continue;
@@ -74,31 +73,19 @@ bool scallop3::decompose_tree()
 		rt.build();
 
 		if(rt.status != 1) continue;
-		if(rt.balance() == false) continue;
+		if(balance_vertex(rt.ug, rt.u2e) == false) continue;
 
 		root = i;
-		order = rt.build_tree_order();
+		ug = rt.ug;
+		u2e = rt.u2e;
 		break;
 	}
 
 	if(root == -1) return false;
 
-	printf("decompose tree %d, degree = (%d, %d)\n", root, gr.in_degree(root), gr.out_degree(root));
+	printf("decompose hyper tree %d, degree = (%d, %d)\n", root, gr.in_degree(root), gr.out_degree(root));
 
-	set<int> s;
-	for(int i = 0; i < order.size(); i++)
-	{
-		int x = order[i].first;
-		int y = order[i].second;
-		int e = merge_adjacent_edges(x, y);
-		hs.replace(x, y, e);
-		s.insert(x);
-		s.insert(y);
-		printf(" merge adjacent edge (%d, %d) -> %d\n", x, y, e);
-	}
-
-	hs.remove(s);
-
+	decompose_tree(ug, u2e);
 	assert(gr.degree(root) == 0);
 	return true;
 }
@@ -120,6 +107,7 @@ bool scallop3::split_vertex(bool hyper)
 
 		router rt(i, gr, e2i, i2e, p);
 		rt.build();
+		//rt.print();
 
 		if(rt.status != 4) continue;
 		assert(rt.ratio >= 0);
@@ -191,7 +179,7 @@ bool scallop3::remove_edge()
 	return true;
 }
 
-bool scallop3::decompose_trivial_vertex()
+bool scallop3::resolve_trivial_vertex()
 {
 	int root = -1;
 	double ratio = -1;
@@ -218,24 +206,7 @@ bool scallop3::decompose_trivial_vertex()
 	printf("decompose trivial vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
 	eqn.print(77);
 
-	balance_vertex(root);
-
-	vector<PI> ve0;
-	vector<int> ve1;
-	decompose_trivial_vertex(root, ve0, ve1);
-
-	assert(ve0.size() == ve1.size());
-	set<int> s;
-	for(int i = 0; i < ve0.size(); i++)
-	{
-		int x = ve0[i].first;
-		int y = ve0[i].second;
-		int e = ve1[i];
-		hs.replace(x, y, e);
-		s.insert(x);
-		s.insert(y);
-	}
-	hs.remove(s);
+	decompose_trivial_vertex(root);
 	assert(gr.degree(root) == 0);
 
 	return true;
@@ -292,39 +263,80 @@ int scallop3::init_vertex_map()
 	return 0;
 }
 
-bool scallop3::decompose_trivial_vertex(int i)
+int scallop3::decompose_tree(undirected_graph &ug, const vector<int> &u2e)
 {
-	vector<PI> ve0;
-	vector<int> ve1;
-	return decompose_trivial_vertex(i, ve0, ve1);
+	undirected_graph ug2(ug);
+	while(true)
+	{
+		int x = -1, y = -1;
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = ug2.edges(); it1 != it2; it1++)
+		{
+			int s = (*it1)->source();
+			int t = (*it1)->target();
+			assert(s != t);
+			if(s > t) 
+			{
+				s = (*it1)->target();
+				t = (*it1)->source();
+			}
+			if(ug2.degree(s) != 1 && ug2.degree(t) != 1) continue;
+
+			x = s;
+			y = t;
+			ug2.remove_edge(*it1);
+			break;
+		}
+
+		if(x == -1 || y == -1) break;
+
+		int xx = u2e[x];
+		int yy = u2e[y];
+		int e = merge_adjacent_edges(xx, yy);
+		hs.replace(xx, yy, e);
+		if(ug.degree(x) == 1) hs.replace(xx, e);
+		if(ug.degree(y) == 1) hs.replace(yy, e);
+	}
+
+	assert(ug2.num_edges() == 0);
+
+	for(int i = 0; i < u2e.size(); i++)
+	{
+		int e = u2e[i];
+		hs.remove(e);
+	}
+	return 0;
 }
 
-bool scallop3::decompose_trivial_vertex(int i, vector<PI> &ve0, vector<int> &ve1)
+int scallop3::decompose_trivial_vertex(int x)
 {
-	if(i == 0) return false;
-	if(i == gr.num_vertices() - 1) return false;
-	if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) return false;
-	if(gr.degree(i) == 0) return true;
+	vector<int> u2e;
+	undirected_graph ug;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
+	{
+		int e = e2i[*it1];
+		u2e.push_back(e);
+		ug.add_vertex();
+	}
+	for(tie(it1, it2) = gr.out_edges(x); it1 != it2; it1++)
+	{
+		int e = e2i[*it1];
+		u2e.push_back(e);
+		ug.add_vertex();
+	}
 
-	edge_iterator it1, it2, it3, it4;
+	for(int i = 0; i < gr.in_degree(x); i++)
+	{
+		for(int j = 0; j < gr.out_degree(x); j++)
+		{
+			ug.add_edge(i, j + gr.in_degree(x));
+		}
+	}
 
-	tie(it1, it2) = gr.in_edges(i);
-	tie(it3, it4) = gr.out_edges(i);
-
-	int e1 = e2i[*it1];
-	int e2 = e2i[*it3];
-
-	int d1 = gr.in_degree(i);
-	int d2 = gr.out_degree(i);
-
-	int ee = merge_adjacent_edges(e1, e2);
-
-	assert(gr.in_degree(i) < d1 || gr.out_degree(i) < d2);
-
-	ve0.push_back(PI(e1, e2));
-	ve1.push_back(ee);
-
-	return decompose_trivial_vertex(i, ve0, ve1);
+	balance_vertex(x);
+	decompose_tree(ug, u2e);
+	return 0;
 }
 
 int scallop3::greedy_decompose(int num)
@@ -498,12 +510,87 @@ int scallop3::split_edge(int ei, double w)
 	i2e.push_back(p2);
 	e2i.insert(PEI(p2, n));
 
-	/*
-	routers[s].remove_out_edge(ei);
-	routers[t].remove_in_edge(ei);
-	*/
-
 	return n;
+}
+
+bool scallop3::balance_vertex(undirected_graph &ug, const vector<int> & u2e)
+{
+	GRBEnv *env = new GRBEnv();
+	GRBModel *model = new GRBModel(*env);
+
+	// edge list of ug
+	VE ve;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = ug.edges(); it1 != it2; it1++)
+	{
+		edge_descriptor e = (*it1);
+		ve.push_back(e);
+	}
+
+	// routes weight variables
+	vector<GRBVar> rvars;
+	for(int i = 0; i < ve.size(); i++)
+	{
+		GRBVar rvar = model->addVar(1.0, GRB_INFINITY, 0, GRB_CONTINUOUS);
+		rvars.push_back(rvar);
+	}
+
+	// new weights variables
+	vector<GRBVar> wvars;
+	for(int i = 0; i < u2e.size(); i++)
+	{
+		GRBVar wvar = model->addVar(1.0, GRB_INFINITY, 0, GRB_CONTINUOUS);
+		wvars.push_back(wvar);
+	}
+	model->update();
+
+	// expression for each edge
+	vector<GRBLinExpr> exprs(u2e.size());
+	for(int i = 0; i < ve.size(); i++)
+	{
+		edge_descriptor e = ve[i];
+		int u1 = e->source();
+		int u2 = e->target();
+		exprs[u1] += rvars[i];
+		exprs[u2] += rvars[i];
+	}
+
+	for(int i = 0; i < u2e.size(); i++)
+	{
+		model->addConstr(exprs[i], GRB_EQUAL, wvars[i]);
+	}
+
+	// objective 
+	GRBQuadExpr obj;
+	for(int i = 0; i < u2e.size(); i++)
+	{
+		double w = gr.get_edge_weight(i2e[u2e[i]]);
+		obj += (wvars[i] - w) * (wvars[i] - w);
+	}
+
+	model->setObjective(obj, GRB_MINIMIZE);
+	model->getEnv().set(GRB_IntParam_OutputFlag, 0);
+	model->update();
+
+	model->optimize();
+
+	int f = model->get(GRB_IntAttr_Status);
+	if(f != GRB_OPTIMAL)
+	{
+		delete model;
+		delete env;
+		return false;
+	}
+
+	for(int i = 0; i < wvars.size(); i++)
+	{
+		double w = wvars[i].get(GRB_DoubleAttr_X);
+		gr.set_edge_weight(i2e[u2e[i]], w);
+	}
+
+	delete model;
+	delete env;
+	return true;
 }
 
 int scallop3::balance_vertex(int v)
@@ -593,12 +680,6 @@ int scallop3::split_vertex(int x, const vector<int> &xe, const vector<int> &ye)
 		gr.move_edge(e, n - 1, t);
 	}
 
-	/*
-	routers.push_back(routers[n - 1]);
-	routers[n - 1] = routers[x];
-	routers[n - 1].root = n - 1;
-	*/
-
 	return 0;
 }
 
@@ -682,10 +763,7 @@ int scallop3::print()
 	int p2 = gr.compute_decomp_paths();
 	printf("statistics: %lu edges, %d vertices, total %d paths, %d required\n", gr.num_edges(), n, p1, p2);
 
-	//for(int i = 0; i < v2v.size(); i++) printf("%d->%d, ", i, v2v[i]);
-	//printf("\n");
-
-	printf("finish round %d\n\n", round);
+	hs.print();
 
 	if(output_tex_files == true)
 	{
@@ -693,6 +771,8 @@ int scallop3::print()
 		//nested_graph nt(gr);
 		//nt.draw(name + "." + tostring(round) + ".nt.tex");
 	}
+
+	printf("finish round %d\n\n", round);
 
 	round++;
 
