@@ -46,9 +46,9 @@ private:
 
 	// resolve iteratively
 	bool resolve_hyper_tree();
-	bool split_vertex(bool hyper);
+	bool resolve_hyper_vertex();
+	bool resolve_normal_vertex();
 	bool resolve_trivial_vertex();
-	bool remove_edge();
 
 	// smooth vertex
 	bool balance_vertex(undirected_graph &ug, const vector<int> &u2e);
@@ -67,6 +67,7 @@ private:
 	int collect_path(int e);
 	int collect_existing_st_paths();
 	int greedy_decompose(int num);
+	double compute_smallest_edge(int x, int &e);
 
 	// print and draw
 	int print();

@@ -33,7 +33,7 @@ int scallop3::assemble()
 	while(true)
 	{
 		bool b	= false;
-		b = split_vertex(true);
+		b = resolve_hyper_vertex();
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -45,7 +45,7 @@ int scallop3::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = split_vertex(false);
+		b = resolve_normal_vertex();
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -90,7 +90,7 @@ bool scallop3::resolve_hyper_tree()
 	return true;
 }
 
-bool scallop3::split_vertex(bool hyper)
+bool scallop3::resolve_hyper_vertex()
 {
 	int root = -1;
 	double ratio = -1;
@@ -102,8 +102,7 @@ bool scallop3::split_vertex(bool hyper)
 
 		vector<PI> p = hs.get_routes(i, gr, e2i);
 
-		if(hyper == true && p.size() <= 0) continue;
-		if(hyper == false && p.size() >= 1) continue;
+		if(p.size() <= 0) continue;
 
 		router rt(i, gr, e2i, i2e, p);
 		rt.build();
@@ -123,8 +122,7 @@ bool scallop3::split_vertex(bool hyper)
 	if(root == -1) return false;
 	if(ratio > max_split_error_ratio) return false;
 
-	printf("split vertex %d, hyper = %c, ratio = %.2lf, degree = (%d, %d)\n", 
-			root, hyper ? 'T' : 'F', ratio, gr.in_degree(root), gr.out_degree(root));
+	printf("split hyper vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
 
 	for(int i = 0; i < eqns.size(); i++) eqns[i].print(99);
 
@@ -137,11 +135,11 @@ bool scallop3::split_vertex(bool hyper)
 	return true;
 }
 
-bool scallop3::remove_edge()
+bool scallop3::resolve_normal_vertex()
 {
 	int root = -1;
-	double ratio = -1;
-	equation eqn;
+	double ratio1 = -1;
+	vector<equation> eqns;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.in_degree(i) <= 1) continue;
@@ -149,32 +147,53 @@ bool scallop3::remove_edge()
 
 		vector<PI> p = hs.get_routes(i, gr, e2i);
 
+		if(p.size() >= 1) continue;
+
 		router rt(i, gr, e2i, i2e, p);
 		rt.build();
+		//rt.print();
 
-		if(rt.status != 3) continue;
+		if(rt.status != 4) continue;
 		assert(rt.ratio >= 0);
-		assert(rt.eqns.size() == 1);
+		assert(rt.eqns.size() == 2);
 
-		if(ratio >= 0 && ratio < rt.ratio) continue;
+		if(ratio1 >= 0 && ratio1 < rt.ratio) continue;
 
 		root = i;
-		ratio = rt.ratio;
-		eqn = rt.eqns[0];
+		ratio1 = rt.ratio;
+		eqns = rt.eqns;
 	}
 
 	if(root == -1) return false;
 
-	printf("remove edge of vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
-	eqn.print(88);
+	int se;
+	double ratio2 = compute_smallest_edge(root, se);
+	double sw = gr.get_edge_weight(i2e[se]);
 
-	int e = -1;
-	if(eqn.s.size() == 1 && eqn.t.size() == 0) e = eqn.s[0];
-	else if(eqn.s.size() == 0 && eqn.t.size() == 1) e = eqn.t[0];
-	else assert(false);
+	double ratio = (ratio1 < ratio2) ? ratio1 : ratio2;
 
-	remove_edge(e);
-	hs.remove(e);
+	if(ratio > max_split_error_ratio) return false;
+
+	if(ratio1 < ratio2 || sw >= 10.0)
+	{
+		printf("split normal vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
+
+		for(int i = 0; i < eqns.size(); i++) eqns[i].print(99);
+
+		equation &eqn = eqns[0];
+		assert(eqn.s.size() >= 1);
+		assert(eqn.t.size() >= 1);
+
+		split_vertex(root, eqn.s, eqn.t);
+	}
+	else
+	{
+		assert(se >= 0);
+		printf("remove small edge %d of vertex %d, weight = %.2lf, ratio = %.2lf, degree = (%d, %d)\n", se, root, sw, ratio, gr.in_degree(root), gr.out_degree(root));
+
+		remove_edge(se);
+		hs.remove(se);
+	}
 
 	return true;
 }
@@ -737,6 +756,46 @@ int scallop3::collect_path(int e)
 	i2e[e] = null_edge;
 
 	return 0;
+}
+
+double scallop3::compute_smallest_edge(int x, int &e)
+{
+	e = -1;
+	edge_iterator it1, it2;
+	double sum1 = 0;
+	double sum2 = 0;
+	double ratio = DBL_MAX;
+	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
+	{
+		double w = gr.get_edge_weight(*it1);
+		sum1 += w;
+	}
+	for(tie(it1, it2) = gr.out_edges(x); it1 != it2; it1++)
+	{
+		double w = gr.get_edge_weight(*it1);
+		sum2 += w;
+	}
+
+	assert(sum1 >= SMIN);
+	assert(sum2 >= SMIN);
+	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
+	{
+		double w = gr.get_edge_weight(*it1);
+		double r = w * 1.0 / sum1;
+		if(r >= ratio) continue;
+		ratio = r;
+		e = e2i[*it1];
+	}
+	for(tie(it1, it2) = gr.out_edges(x); it1 != it2; it1++)
+	{
+		double w = gr.get_edge_weight(*it1);
+		double r = w * 1.0 / sum2;
+		if(r >= ratio) continue;
+		ratio = r;
+		e = e2i[*it1];
+	}
+	assert(e >= 0);
+	return ratio;
 }
 
 int scallop3::stats()
