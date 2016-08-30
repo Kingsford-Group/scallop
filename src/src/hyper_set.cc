@@ -11,11 +11,22 @@ int hyper_set::clear()
 
 int hyper_set::add_node_list(const set<int> &s)
 {
+	return add_node_list(s, 1);
+}
+
+int hyper_set::add_node_list(const set<int> &s, int c)
+{
 	vector<int> v(s.begin(), s.end());
+	return add_node_list(v, c);
+}
+
+int hyper_set::add_node_list(const vector<int> &s, int c)
+{
+	vector<int> v = s;
 	sort(v.begin(), v.end());
 	for(int i = 0; i < v.size(); i++) v[i]++;
-	if(nodes.find(v) == nodes.end()) nodes.insert(PVII(v, 1));
-	else nodes[v]++;
+	if(nodes.find(v) == nodes.end()) nodes.insert(PVII(v, c));
+	else nodes[v] += c;
 	return 0;
 }
 

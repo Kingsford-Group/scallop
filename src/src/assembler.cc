@@ -119,23 +119,38 @@ int assembler::process(const bundle_base &bb)
 	if(ref_file1 != "" && bd.strand == '+') compare(bd.gr, ref_file1, "compare1.tex");
 	if(ref_file2 != "" && bd.strand == '-') compare(bd.gr, ref_file2, "compare2.tex");
 
-	string gid= "bundle." + tostring(index);
-
-	if(fixed_gene_name != "" && gid != fixed_gene_name) return 0;
-
-	super_graph sg(bd.gr);
+	super_graph sg(bd.gr, bd.hs);
 	sg.build();
-	sg.print();
 
-	if(algo != "shao")
+	for(int k = 0; k < sg.subs.size(); k++)
 	{
-		scallop3 sc(gid, bd.gr, bd.hs);
-		sc.assemble();
-		if(output_file != "") bd.output_transcripts(fout, sc.paths, gid); 
-	}
+		string gid = "bundle." + tostring(index) + "." + tostring(k);
+		if(fixed_gene_name != "" && gid != fixed_gene_name) return 0;
 
-	if(fixed_gene_name != "" && gid == fixed_gene_name) terminate = true;
-	if(terminate == true) return 0;
+		splice_graph &gr = sg.subs[k];
+		hyper_set &hs = sg.hss[k];
+
+		if(algo != "shao")
+		{
+			scallop3 sc(gid, gr, hs);
+			sc.assemble();
+
+			if(output_file != "")
+			{
+				for(int i = 0; i < sc.paths.size(); i++)
+				{
+					string tid = gid + "." + tostring(i);
+					path p;
+					p.v = sg.get_root_vertices(k, sc.paths[i].v);
+					p.abd = sc.paths[i].abd;
+					bd.output_transcript(fout, p, gid, tid);
+				}
+			}
+		}
+
+		if(fixed_gene_name != "" && gid == fixed_gene_name) terminate = true;
+		if(terminate == true) return 0;
+	}
 
 	return 0;
 }

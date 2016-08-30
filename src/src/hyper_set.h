@@ -26,6 +26,8 @@ public:
 public:
 	int clear();
 	int add_node_list(const set<int> &s);
+	int add_node_list(const set<int> &s, int c);
+	int add_node_list(const vector<int> &s, int c);
 	int build(directed_graph &gr, MEI &e2i);
 	int build_edges(directed_graph &gr, MEI &e2i);
 	int build_index();
