@@ -16,6 +16,7 @@ scallop3::scallop3(const string &s, const splice_graph &g, const hyper_set &h)
 	round = 0;
 	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 	gr.get_edge_indices(i2e, e2i);
+	add_pseudo_hyper_edges();
 	hs.build(gr, e2i);
 	init_super_edges();
 	init_vertex_map();
@@ -256,6 +257,40 @@ int scallop3::classify()
 
 	if(p0 == p1) return TRIVIAL;
 	else return NORMAL;
+}
+
+int scallop3::add_pseudo_hyper_edges()
+{
+	for(int k = 1; k < gr.num_vertices() - 1; k++)
+	{
+		int s = -1, t = -1;
+		double w1 = 0, w2 = 0;
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = gr.in_edges(k); it1 != it2; it1++)
+		{
+			double w = gr.get_edge_weight(*it1);
+			if(w <= w1) continue;
+			w1 = w;
+			s = (*it1)->source();
+		}
+		for(tie(it1, it2) = gr.out_edges(k); it1 != it2; it1++)
+		{
+			double w = gr.get_edge_weight(*it1);
+			if(w <= w2) continue;
+			w2 = w;
+			t = (*it1)->target();
+		}
+		if(s == -1 || t == -1) continue;
+		if(w1 <= 10.0 || w2 <= 10.0) continue;
+
+		vector<int> v;
+		v.push_back(s);
+		v.push_back(k);
+		v.push_back(t);
+		
+		hs.add_node_list(v, 1);
+	}
+	return 0;
 }
 
 

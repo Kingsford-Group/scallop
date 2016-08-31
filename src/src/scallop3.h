@@ -43,6 +43,7 @@ private:
 	int classify();
 	int init_vertex_map();
 	int init_super_edges();
+	int add_pseudo_hyper_edges();
 
 	// resolve iteratively
 	bool resolve_hyper_tree();

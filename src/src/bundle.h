@@ -60,8 +60,8 @@ private:
 	int locate_right_partial_exon(int32_t x);
 
 	// super junctions and super partial_exons;
-	int build_hyper_edges1();	// single end
-	int build_hyper_edges2();	// paired end
+	int build_hyper_edges1();			// single end
+	int build_hyper_edges2();			// paired end
 	int build_splice_graph();
 
 	// store the corresponding pexons in each junction
