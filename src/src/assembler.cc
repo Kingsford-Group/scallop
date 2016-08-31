@@ -114,11 +114,6 @@ int assembler::process(const bundle_base &bb)
 	if(bd.junctions.size() <= 0 && ignore_single_exon_transcripts) return 0;
 
 	index++;
-	bd.print(index);
-
-	if(ref_file != "") compare(bd.gr, ref_file, "compare.tex");
-	if(ref_file1 != "" && bd.strand == '+') compare(bd.gr, ref_file1, "compare1.tex");
-	if(ref_file2 != "" && bd.strand == '-') compare(bd.gr, ref_file2, "compare2.tex");
 
 	super_graph sg(bd.gr, bd.hs);
 	sg.build();
@@ -126,10 +121,16 @@ int assembler::process(const bundle_base &bb)
 	for(int k = 0; k < sg.subs.size(); k++)
 	{
 		string gid = "bundle." + tostring(index) + "." + tostring(k);
-		if(fixed_gene_name != "" && gid != fixed_gene_name) return 0;
+		if(fixed_gene_name != "" && gid != fixed_gene_name) continue;
 
 		splice_graph &gr = sg.subs[k];
 		hyper_set &hs = sg.hss[k];
+
+		bd.print(index);
+
+		if(ref_file != "") compare(gr, ref_file, "compare.tex");
+		if(ref_file1 != "" && bd.strand == '+') compare(gr, ref_file1, "compare1.tex");
+		if(ref_file2 != "" && bd.strand == '-') compare(gr, ref_file2, "compare2.tex");
 
 		if(algo != "shao")
 		{

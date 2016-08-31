@@ -44,12 +44,14 @@ int region::build_join_interval_map()
 int region::smooth_join_interval_map()
 {
 	int32_t gap = min_subregion_gap;
+	/*
 	bool b1 = false, b2 = false;
 	if(ltype == START_BOUNDARY) b1 = true;
 	if(ltype == RIGHT_SPLICE) b1 = true;
 	if(rtype == END_BOUNDARY) b2 = true;
 	if(rtype == LEFT_SPLICE) b2 = true;
 	if(b1 == true && b2 == true) gap = min_bundle_gap;
+	*/
 
 	vector<PI32> v;
 	int32_t p = lpos;

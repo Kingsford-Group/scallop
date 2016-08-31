@@ -61,8 +61,8 @@ int router::build()
 
 	if(vv.size() == 1)
 	{
-		if(routes.size() == u2e.size() - 1) status = 1;
-		else if(routes.size() >= u2e.size()) status = 2;
+		if(ug.num_edges() == ug.num_vertices() - 1) status = 1;
+		else if(ug.num_edges() >= u2e.size()) status = 2;
 		else assert(false);
 		return 0;
 	}
@@ -117,6 +117,32 @@ int router::build_bipartite_graph()
 		assert(t >= gr.in_degree(root) && t < gr.degree(root));
 		ug.add_edge(s, t);
 	}
+
+	// also connect the two max-edges
+	int e1 = -1, e2 = -1;
+	double w1 = 0, w2 = 0;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.in_edges(root); it1 != it2; it1++)
+	{
+		double w = gr.get_edge_weight(*it1);
+		if(w <= w1) continue;
+		w1 = w;
+		e1 = e2i[*it1];
+	}
+	for(tie(it1, it2) = gr.out_edges(root); it1 != it2; it1++)
+	{
+		double w = gr.get_edge_weight(*it1);
+		if(w <= w2) continue;
+		w2 = w;
+		e2 = e2i[*it1];
+	}
+	assert(e1 != -1);
+	assert(e2 != -1);
+
+	PEB p = ug.edge(e2u[e1], e2u[e2]);
+	if(p.second == true) return 0;
+
+	ug.add_edge(e2u[e1], e2u[e2]);
 
 	return 0;
 }

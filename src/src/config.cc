@@ -19,7 +19,7 @@ int min_num_hits_in_bundle = 20;
 int32_t min_splice_boundary_hits = 1;
 uint32_t min_mapping_quality = 1;
 double max_indel_ratio = 0.2;
-int32_t min_subregion_gap = 10;
+int32_t min_subregion_gap = 3;
 int32_t min_subregion_length = 50;
 double min_subregion_overlap = 10.0;
 double min_average_overlap = 3.0;
@@ -176,8 +176,6 @@ bool parse_arguments(int argc, const char ** argv)
 			ref_file2 = string(argv[i + 1]);
 			i++;
 		}
-
-
 		else if(string(argv[i]) == "-g")
 		{
 			fixed_gene_name = string(argv[i + 1]);

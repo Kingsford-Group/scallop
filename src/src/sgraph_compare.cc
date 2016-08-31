@@ -434,6 +434,7 @@ int sgraph_compare::draw(splice_graph &gr, const string &file)
 		if(ei.type == 3) bend = -40;
 
 		string line = "line width = 0.12cm, gray, ";
+		if(e->source() == 0 || e->target() == gr.num_vertices() - 1) line = "line width = 0.12cm, gray, densely dotted, ";
 
 		fout<<"\\draw[->,"<< line.c_str() <<"bend right = "<< bend <<"] ("<<sx<<") to node[gray, label=below:{" << d << "}]{} "<<"("<<sy<<");\n";
 	}
@@ -458,6 +459,7 @@ int sgraph_compare::draw(splice_graph &gr, const string &file)
 		if(ei.type == 4) bend = -40;
 
 		string line = "line width = 0.02cm, red,";
+		if(e->source() == 0 || e->target() == gr.num_vertices() - 1) line = "line width = 0.02cm, red, densely dotted, ";
 
 		fout<<"\\draw[->,"<< line.c_str() <<"bend right = "<< bend <<"] ("<<sx<<") to node[red, label=above:{" << d << "}]{} "<<"("<<sy<<");\n";
 	}
