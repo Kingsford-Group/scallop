@@ -123,10 +123,11 @@ int assembler::process(const bundle_base &bb)
 		string gid = "bundle." + tostring(index) + "." + tostring(k);
 		if(fixed_gene_name != "" && gid != fixed_gene_name) continue;
 
+		if(k == 0 || fixed_gene_name != "") bd.print(index);
+
 		splice_graph &gr = sg.subs[k];
 		hyper_set &hs = sg.hss[k];
 
-		bd.print(index);
 
 		if(ref_file != "") compare(gr, ref_file, "compare.tex");
 		if(ref_file1 != "" && bd.strand == '+') compare(gr, ref_file1, "compare1.tex");
