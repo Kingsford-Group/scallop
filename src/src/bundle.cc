@@ -8,6 +8,7 @@
 #include "binomial.h"
 #include "region.h"
 #include "config.h"
+#include "util.h"
 
 bundle::bundle(const bundle_base &bb)
 	: bundle_base(bb)
@@ -22,6 +23,7 @@ int bundle::build()
 	compute_strand();
 	check_left_ascending();
 	build_junctions();
+	//build_clips();
 
 	if(junctions.size() <= 0 && ignore_single_exon_transcripts == true) return 0;
 
@@ -96,14 +98,49 @@ int bundle::build_junctions()
 	for(it = m.begin(); it != m.end(); it++)
 	{
 		if(it->second < min_splice_boundary_hits) continue;
-		/*
-		int32_t len = low32(it->first) - high32(it->first);
-		int n = (int)(log10(len)) - 1; //100->1, 1000->2, 10000->3
-		if(it->second <= 0) continue;
-		if(it->second < n) continue;
-		*/
 		junctions.push_back(junction(it->first, it->second));
 	}
+	return 0;
+}
+
+int bundle::build_clips()
+{
+	MPI llsoft, rrsoft, llhard, rrhard;
+	for(int i = 0; i < hits.size(); i++)
+	{
+		PI soft, hard;
+		hits[i].get_clips(soft, hard);
+
+		if(soft.first != -1)
+		{
+			if(llsoft.find(soft.first) == llsoft.end()) llsoft.insert(PPI(soft.first, 1));
+			else llsoft[soft.first]++;
+		}
+
+		if(soft.second != -1)
+		{
+			if(rrsoft.find(soft.second) == rrsoft.end()) rrsoft.insert(PPI(soft.second, 1));
+			else rrsoft[soft.second]++;
+		}
+
+		if(hard.first != -1)
+		{
+			if(llhard.find(hard.first) == llhard.end()) llhard.insert(PPI(hard.first, 1));
+			else llhard[hard.first]++;
+		}
+
+		if(hard.second != -1)
+		{
+			if(rrhard.find(hard.second) == rrhard.end()) rrhard.insert(PPI(hard.second, 1));
+			else rrhard[hard.second]++;
+		}
+	}
+
+	for(MPI::iterator it = llsoft.begin(); it != llsoft.end(); it++) lsoft.push_back(PPI(it->first, it->second));
+	for(MPI::iterator it = rrsoft.begin(); it != rrsoft.end(); it++) rsoft.push_back(PPI(it->first, it->second));
+	for(MPI::iterator it = llhard.begin(); it != llhard.end(); it++) lhard.push_back(PPI(it->first, it->second));
+	for(MPI::iterator it = rrhard.begin(); it != rrhard.end(); it++) rhard.push_back(PPI(it->first, it->second));
+
 	return 0;
 }
 
@@ -679,8 +716,10 @@ int bundle::build_splice_graph()
 
 		edge_descriptor p = gr.add_edge(b.lexon + 1, b.rexon + 1);
 		assert(b.count >= 1);
+		edge_info ei;
+		ei.weight = b.count;
+		gr.set_edge_info(p, ei);
 		gr.set_edge_weight(p, b.count);
-		gr.set_edge_info(p, edge_info());
 	}
 
 	// edges: connecting adjacent pexons => e2w
@@ -702,8 +741,11 @@ int bundle::build_splice_graph()
 		//double wt = xr < yl ? xr : yl;
 
 		edge_descriptor p = gr.add_edge(i + 1, i + 2);
-		gr.set_edge_weight(p, wt < 1.0 ? 1.0 : wt);
-		gr.set_edge_info(p, edge_info());
+		double w = (wt < 1.0) ? 1.0 : wt;
+		gr.set_edge_weight(p, w);
+		edge_info ei;
+		ei.weight = w;
+		gr.set_edge_info(p, ei);
 	}
 
 	// edges: connecting start/end and pexons
@@ -716,15 +758,21 @@ int bundle::build_splice_graph()
 		if(r.ltype == START_BOUNDARY)
 		{
 			edge_descriptor p = gr.add_edge(ss, i + 1);
-			gr.set_edge_weight(p, r.ave < 1.0 ? 1.0 : r.ave);
-			gr.set_edge_info(p, edge_info());
+			double w = (r.ave < 1.0) ? 1.0 : r.ave;
+			gr.set_edge_weight(p, w);
+			edge_info ei;
+			ei.weight = w;
+			gr.set_edge_info(p, ei);
 		}
 
 		if(r.rtype == END_BOUNDARY) 
 		{
 			edge_descriptor p = gr.add_edge(i + 1, tt);
-			gr.set_edge_weight(p, r.ave < 1.0 ? 1.0 : r.ave);
-			gr.set_edge_info(p, edge_info());
+			double w = (r.ave < 1.0) ? 1.0 : r.ave;
+			gr.set_edge_weight(p, w);
+			edge_info ei;
+			ei.weight = w;
+			gr.set_edge_info(p, ei);
 		}
 	}
 
@@ -775,6 +823,12 @@ int bundle::print(int index)
 
 	// print hyper-edges
 	hs.print();
+
+	// print clips
+	for(int i = 0; i < lsoft.size(); i++) printf("left  soft clips: pos = %s:%d, counts = %d\n", chrm.c_str(), lsoft[i].first, lsoft[i].second);
+	for(int i = 0; i < rsoft.size(); i++) printf("right soft clips: pos = %s:%d, counts = %d\n", chrm.c_str(), rsoft[i].first, rsoft[i].second);
+	for(int i = 0; i < lhard.size(); i++) printf("left  hard clips: pos = %s:%d, counts = %d\n", chrm.c_str(), lhard[i].first, lhard[i].second);
+	for(int i = 0; i < rhard.size(); i++) printf("right hard clips: pos = %s:%d, counts = %d\n", chrm.c_str(), rhard[i].first, rhard[i].second);
 
 	return 0;
 }

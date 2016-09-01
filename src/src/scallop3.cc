@@ -34,6 +34,11 @@ int scallop3::assemble()
 	while(true)
 	{
 		bool b	= false;
+
+		b = resolve_ignorable_edges();
+		if(b == true) print();
+		if(b == true) continue;
+
 		b = resolve_hyper_vertex();
 		if(b == true) print();
 		if(b == true) continue;
@@ -176,7 +181,7 @@ bool scallop3::resolve_normal_vertex()
 	if(ratio > max_split_error_ratio) return false;
 
 	// TODO
-	if(ratio1 < ratio2 || true || sw >= 5.0)
+	if(ratio1 < ratio2 || sw > max_ignorable_edge_weight)
 	{
 		printf("split normal vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
 
@@ -198,6 +203,42 @@ bool scallop3::resolve_normal_vertex()
 	}
 
 	return true;
+}
+
+bool scallop3::resolve_ignorable_edges()
+{
+	bool flag = false;
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		if(gr.in_degree(i) <= 1) continue;
+		if(gr.out_degree(i) <= 1) continue;
+
+		int ei;
+		double ratio = compute_smallest_edge(i, ei);
+		edge_descriptor e = i2e[ei];
+		double w = gr.get_edge_weight(e);
+
+		if(w > max_ignorable_edge_weight) continue;
+		if(e->source() == i)
+		{
+			if(hs.left_extend(ei) == true) continue;
+			if(gr.in_degree(e->target()) <= 1) continue;
+		}
+		else if(e->target() == i)
+		{
+			if(hs.right_extend(ei) == true) continue;
+			if(gr.out_degree(e->source()) <= 1) continue;
+		}
+		else assert(false);
+
+		printf("remove ignorable edge %d of vertex %d, weight = %.2lf, ratio = %.2lf, degree = (%d, %d)\n", 
+				ei, i, w, ratio, gr.in_degree(i), gr.out_degree(i));
+
+		remove_edge(ei);
+		hs.remove(ei);
+		flag = true;
+	}
+	return flag;
 }
 
 bool scallop3::resolve_trivial_vertex()
@@ -282,11 +323,13 @@ int scallop3::add_pseudo_hyper_edges()
 		}
 		if(s == -1 || t == -1) continue;
 		if(w1 <= 10.0 || w2 <= 10.0) continue;
+		if(s == 0) continue;
+		if(t == gr.num_vertices() - 1) continue;
 
 		vector<int> v;
-		v.push_back(s);
-		v.push_back(k);
-		v.push_back(t);
+		v.push_back(s - 1);
+		v.push_back(k - 1);
+		v.push_back(t - 1);
 		
 		hs.add_node_list(v, 1);
 	}
@@ -858,7 +901,7 @@ int scallop3::print()
 	int p2 = gr.compute_decomp_paths();
 	printf("statistics: %lu edges, %d vertices, total %d paths, %d required\n", gr.num_edges(), n, p1, p2);
 
-	hs.print();
+	//hs.print();
 
 	if(output_tex_files == true)
 	{

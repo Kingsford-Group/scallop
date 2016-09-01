@@ -28,6 +28,8 @@ int region::build_join_interval_map()
 	SIMI it = lit;
 	while(true)
 	{
+		// TODO
+		//if(it->second >= 2) 
 		jmap += make_pair(it->first, 1);
 		if(it == rit) break;
 		it++;

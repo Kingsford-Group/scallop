@@ -243,6 +243,34 @@ int hyper_set::remove(int e)
 	return 0;
 }
 
+bool hyper_set::left_extend(int e)
+{
+	if(e2s.find(e) == e2s.end()) return false;
+	set<int> s = e2s[e];
+	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
+	{
+		int k = (*it);
+		vector<int> &vv = edges[k];
+		assert(vv.size() >= 1);
+		if(vv[0] != e) return true;
+	}
+	return false;
+}
+
+bool hyper_set::right_extend(int e)
+{
+	if(e2s.find(e) == e2s.end()) return false;
+	set<int> s = e2s[e];
+	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
+	{
+		int k = (*it);
+		vector<int> &vv = edges[k];
+		assert(vv.size() >= 1);
+		if(vv[vv.size() - 1] != e) return true;
+	}
+	return false;
+}
+
 int hyper_set::print()
 {
 	//printf("PRINT HYPER_SET\n");

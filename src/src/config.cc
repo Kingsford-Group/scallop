@@ -12,6 +12,7 @@ using namespace std;
 
 // for bam file
 int min_flank_length = 5;
+int min_clip_length = 5;
 int32_t average_read_length = 100;
 int32_t average_slope_length = 240;
 int32_t min_bundle_gap = 50;
@@ -37,6 +38,7 @@ double slope_acceptance_sigma = 2.0;
 int pseudo_length_count = 10;
 bool use_paired_end = false;
 int max_equations_each_iteration = 50;
+double max_ignorable_edge_weight = 5.0;
 
 // for algorithm
 double join_min_reliability = 0.6;
@@ -77,6 +79,7 @@ int print_parameters()
 	// for bam file
 	printf("parameters:\n");
 	printf("min_flank_length = %d\n", min_flank_length);
+	printf("min_clip_length = %d\n", min_clip_length);
 	printf("min_bundle_gap = %d\n", min_bundle_gap);
 	printf("min_subregion_gap = %d\n", min_subregion_gap);
 	printf("min_num_hits_in_bundle = %d\n", min_num_hits_in_bundle);
@@ -103,6 +106,7 @@ int print_parameters()
 	printf("pseudo_length_count = %d\n", pseudo_length_count);
 	printf("strand_reverse = %c\n", strand_reverse ? 'T' : 'F');
 	printf("ignore_single_exon_transcripts = %c\n", ignore_single_exon_transcripts ? 'T' : 'F');
+	printf("max_ignorable_edge_weight = %.2lf\n", max_ignorable_edge_weight);
 
 	// for algorithm
 	printf("join_min_reliability = %.2lf\n", join_min_reliability);

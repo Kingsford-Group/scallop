@@ -56,6 +56,7 @@ public:
 	int get_splice_positions(vector<int64_t> &v) const;
 	int get_mid_intervals(vector<int64_t> &vm, vector<int64_t> &vi, vector<int64_t> &vd) const;
 	int get_matched_intervals(vector<int64_t> &v) const;
+	int get_clips(PI32 &soft, PI32 &hard) const;
 };
 
 bool hit_compare_by_name(const hit &x, const hit &y);

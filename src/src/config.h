@@ -29,6 +29,7 @@ using namespace std;
 
 // user-defined parameters
 extern int min_flank_length;
+extern int min_clip_length;
 extern int32_t min_bundle_gap;
 extern int32_t min_subregion_gap;
 extern double min_subregion_overlap;
@@ -60,6 +61,7 @@ extern int slope_flexible_bin_num;
 extern double slope_acceptance_sigma;
 extern bool use_paired_end;
 extern bool ignore_single_exon_transcripts;
+extern double max_ignorable_edge_weight;
 
 extern double join_min_reliability;
 extern double infer_min_reliability;

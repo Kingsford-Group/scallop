@@ -46,6 +46,7 @@ private:
 	int add_pseudo_hyper_edges();
 
 	// resolve iteratively
+	bool resolve_ignorable_edges();
 	bool resolve_hyper_tree();
 	bool resolve_hyper_vertex();
 	bool resolve_normal_vertex();
