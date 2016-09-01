@@ -221,17 +221,9 @@ bool scallop3::resolve_ignorable_edges()
 		double w = gr.get_edge_weight(e);
 
 		if(w > max_ignorable_edge_weight) continue;
-		if(e->source() == i)
-		{
-			if(hs.left_extend(ei) == true) continue;
-			if(gr.in_degree(e->target()) <= 1) continue;
-		}
-		else if(e->target() == i)
-		{
-			if(hs.right_extend(ei) == true) continue;
-			if(gr.out_degree(e->source()) <= 1) continue;
-		}
-		else assert(false);
+		if(hs.left_extend(ei) == true && hs.right_extend(ei) == true) continue;
+		if(e->source() == i && gr.in_degree(e->target()) <= 1) continue;
+		if(e->target() == i && gr.out_degree(e->source()) <= 1) continue;
 
 		printf("remove ignorable edge %d of vertex %d, weight = %.2lf, ratio = %.2lf, degree = (%d, %d)\n", 
 				ei, i, w, ratio, gr.in_degree(i), gr.out_degree(i));

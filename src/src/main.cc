@@ -24,11 +24,6 @@ int process_sgr();
 
 int main(int argc, const char **argv)
 {
-	/*
-	subsetsum4::test();
-	return 0;
-	*/
-
 	srand(time(0));
 	parse_arguments(argc, argv);
 	print_parameters();

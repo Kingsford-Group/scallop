@@ -260,10 +260,12 @@ int subsetsum4::test()
 
 	vector<PI> v;
 	v.push_back(PI(10, 1));
-	v.push_back(PI(10, 2));
+	v.push_back(PI(20, 2));
+	v.push_back(PI(39, 3));
 
 	vector<PI> t;
-	t.push_back(PI(20, 1));
+	t.push_back(PI(29, 1));
+	t.push_back(PI(54, 2));
 
 	subsetsum4 sss(v, t);
 	sss.solve();
