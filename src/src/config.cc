@@ -38,7 +38,7 @@ double slope_acceptance_sigma = 2.0;
 int pseudo_length_count = 10;
 bool use_paired_end = false;
 int max_equations_each_iteration = 50;
-double max_ignorable_edge_weight = 5.0;
+double max_ignorable_edge_weight = 5.5;
 
 // for algorithm
 double join_min_reliability = 0.6;

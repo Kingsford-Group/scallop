@@ -183,7 +183,7 @@ bool scallop3::resolve_normal_vertex()
 	if(ratio > max_split_error_ratio) return false;
 
 	// TODO
-	if(ratio1 < ratio2 || sw > max_ignorable_edge_weight)
+	if(ratio1 < ratio2 || sw > 2 * max_ignorable_edge_weight)
 	{
 		printf("split normal vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
 
