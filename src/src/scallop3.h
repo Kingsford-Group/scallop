@@ -44,6 +44,8 @@ private:
 	int init_vertex_map();
 	int init_super_edges();
 	int add_pseudo_hyper_edges();
+	int extend_isolated_start_boundaries();
+	int extend_isolated_end_boundaries();
 
 	// resolve iteratively
 	bool resolve_ignorable_edges();
