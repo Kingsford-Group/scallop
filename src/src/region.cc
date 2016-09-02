@@ -5,8 +5,8 @@
 
 using namespace std;
 
-region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_mmap, const split_interval_map *_imap, bool _inclusive)
-	:lpos(_lpos), rpos(_rpos), mmap(_mmap), imap(_imap), ltype(_ltype), rtype(_rtype), inclusive(_inclusive)
+region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_mmap, const split_interval_map *_imap)
+	:lpos(_lpos), rpos(_rpos), mmap(_mmap), imap(_imap), ltype(_ltype), rtype(_rtype)
 {
 
 	build_join_interval_map();
@@ -46,13 +46,14 @@ int region::build_join_interval_map()
 int region::smooth_join_interval_map()
 {
 	int32_t gap = min_subregion_gap;
+
 	/*
 	bool b1 = false, b2 = false;
 	if(ltype == START_BOUNDARY) b1 = true;
 	if(ltype == RIGHT_SPLICE) b1 = true;
 	if(rtype == END_BOUNDARY) b2 = true;
 	if(rtype == LEFT_SPLICE) b2 = true;
-	if(b1 == true && b2 == true) gap = min_bundle_gap;
+	if(b1 == true && b2 == true) gap = 2 * min_subregion_gap;
 	*/
 
 	vector<PI32> v;
@@ -126,7 +127,7 @@ int region::build_partial_exons()
 		return 0;
 	}
 
-	if(inclusive == true && ltype == RIGHT_SPLICE && jmap.find(ROI(lpos, lpos + 1)) == jmap.end())
+	if(ltype == RIGHT_SPLICE && jmap.find(ROI(lpos, lpos + 1)) == jmap.end())
 	{
 		partial_exon pe(lpos, lpos + 1, ltype, END_BOUNDARY);
 		pe.ave = 1.0;
@@ -144,8 +145,8 @@ int region::build_partial_exons()
 
 		//printf(" subregion [%d, %d), empty = %c\n", p1, p2, b ? 'T' : 'F');
 
-		if(inclusive == true && p1 == lpos && ltype == RIGHT_SPLICE) b = false;
-		if(inclusive == true && p2 == rpos && rtype == LEFT_SPLICE) b = false;
+		if(p1 == lpos && ltype == RIGHT_SPLICE) b = false;
+		if(p2 == rpos && rtype == LEFT_SPLICE) b = false;
 
 		if(b == true) continue;
 
@@ -157,7 +158,7 @@ int region::build_partial_exons()
 		pexons.push_back(pe);
 	}
 
-	if(inclusive && rtype == LEFT_SPLICE && jmap.find(ROI(rpos - 1, rpos)) == jmap.end())
+	if(rtype == LEFT_SPLICE && jmap.find(ROI(rpos - 1, rpos)) == jmap.end())
 	{
 		partial_exon pe(rpos - 1, rpos, START_BOUNDARY, rtype);
 		pe.ave = 1.0;

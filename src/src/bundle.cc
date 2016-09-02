@@ -484,7 +484,7 @@ int bundle::build_regions()
 		if(ltype == LEFT_RIGHT_SPLICE) ltype = RIGHT_SPLICE;
 		if(rtype == LEFT_RIGHT_SPLICE) rtype = LEFT_SPLICE;
 
-		regions.push_back(region(lpos, rpos, ltype, rtype, &mmap, &imap, true));
+		regions.push_back(region(lpos, rpos, ltype, rtype, &mmap, &imap));
 	}
 
 	return 0;
