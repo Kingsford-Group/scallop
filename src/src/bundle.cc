@@ -758,7 +758,9 @@ int bundle::build_splice_graph()
 		if(r.ltype == START_BOUNDARY)
 		{
 			edge_descriptor p = gr.add_edge(ss, i + 1);
-			double w = (r.ave < 1.0) ? 1.0 : r.ave;
+			double w = r.ave;
+			if(i >= 1 && pexons[i - 1].rpos == r.lpos) w -= pexons[i - 1].ave;
+			if(w < 1.0) w = 1.0;
 			gr.set_edge_weight(p, w);
 			edge_info ei;
 			ei.weight = w;
@@ -768,7 +770,9 @@ int bundle::build_splice_graph()
 		if(r.rtype == END_BOUNDARY) 
 		{
 			edge_descriptor p = gr.add_edge(i + 1, tt);
-			double w = (r.ave < 1.0) ? 1.0 : r.ave;
+			double w = r.ave;
+			if(i < pexons.size() - 1 && pexons[i + 1].lpos == r.rpos) w -= pexons[i + 1].ave;
+			if(w < 1.0) w = 1.0;
 			gr.set_edge_weight(p, w);
 			edge_info ei;
 			ei.weight = w;

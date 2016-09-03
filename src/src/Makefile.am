@@ -14,7 +14,6 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  vertex_info.h vertex_info.cc \
 				  edge_info.h edge_info.cc \
 				  interval_map.h interval_map.cc \
-				  binomial.h binomial.cc \
 				  subsetsum1.h subsetsum1.cc \
 				  subsetsum3.h subsetsum3.cc \
 				  subsetsum4.h subsetsum4.cc \
@@ -23,6 +22,7 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  partial_exon.h partial_exon.cc \
 				  hyper_set.h hyper_set.cc \
 				  router.h router.cc \
+				  binomial.h binomial.cc \
 				  region.h region.cc \
 				  slope.h slope.cc \
 				  junction.h junction.cc \
