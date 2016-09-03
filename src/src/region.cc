@@ -220,7 +220,7 @@ int region::build_partial_exons()
 		int32_t p1 = identify_boundary(true);
 		int32_t p2 = identify_boundary(false);
 
-		if(p1 < 0 && p2 < 0)
+		if(ltype == START_BOUNDARY || rtype == END_BOUNDARY || (p1 < 0 && p2 < 0))
 		{
 			partial_exon pe(lpos, rpos, ltype, rtype);
 			evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev);
