@@ -217,14 +217,23 @@ int region::build_partial_exons()
 
 	if(lower(jmap.begin()->first) == lpos && upper(jmap.begin()->first) == rpos)
 	{
-		int32_t p1 = identify_boundary(true);
-		int32_t p2 = identify_boundary(false);
-
-		if(ltype == START_BOUNDARY || rtype == END_BOUNDARY || (p1 < 0 && p2 < 0))
+		if(ltype == START_BOUNDARY || rtype == END_BOUNDARY)
 		{
 			partial_exon pe(lpos, rpos, ltype, rtype);
 			evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev);
 			pexons.push_back(pe);
+			return 0;
+		}
+
+		int32_t p1 = identify_boundary(true);
+		int32_t p2 = identify_boundary(false);
+
+		if(p1 < 0 && p2 < 0)
+		{
+			partial_exon pe(lpos, rpos, ltype, rtype);
+			evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev);
+			pexons.push_back(pe);
+			return 0;
 		}
 		else if(p1 > 0)
 		{
