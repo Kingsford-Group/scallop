@@ -39,6 +39,8 @@ int pseudo_length_count = 10;
 bool use_paired_end = false;
 int max_equations_each_iteration = 50;
 double max_ignorable_edge_weight = 5.5;
+int min_boundary_score = 1000;
+double min_boundary_sigma = 3.0;
 
 // for algorithm
 double join_min_reliability = 0.6;
@@ -47,7 +49,7 @@ double infer_root_reliability = 0.4;
 int max_dp_table_size = 10000;
 int max_num_subsetsum_solutions = 10;
 double max_equation_error_ratio = 0.1;
-double max_split_error_ratio = 0.2;
+double max_split_error_ratio = 0.1;
 double max_router_error_ratio = 0.3;
 int min_router_count = 1;
 double min_boundary_edge_weight_ratio = 0.05;
@@ -107,6 +109,8 @@ int print_parameters()
 	printf("strand_reverse = %c\n", strand_reverse ? 'T' : 'F');
 	printf("ignore_single_exon_transcripts = %c\n", ignore_single_exon_transcripts ? 'T' : 'F');
 	printf("max_ignorable_edge_weight = %.2lf\n", max_ignorable_edge_weight);
+	printf("min_boundary_score = %d\n", min_boundary_score);
+	printf("min_boundary_signma = %.2lf\n", min_boundary_sigma);
 
 	// for algorithm
 	printf("join_min_reliability = %.2lf\n", join_min_reliability);

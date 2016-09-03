@@ -169,7 +169,7 @@ int32_t region::identify_boundary(bool tag)
 	}
 
 	if(pos == -1) return -1;
-	if(score < 1000) return -1;
+	if(score < min_boundary_score) return -1;
 
 	int32_t p = lpos;
 	double var1 = 0, var2 = 0;
@@ -198,8 +198,8 @@ int32_t region::identify_boundary(bool tag)
 	double dev1 = sqrt(var1 / len1);
 	double dev2 = sqrt(var2 / len2);
 
-	if(tag == true && ave1 < ave2 + 3.0 * dev2) return -1;
-	if(tag == false && ave2 < ave1 + 3.0 * dev1) return -1;
+	if(tag == true && ave1 < ave2 + min_boundary_sigma * dev2) return -1;
+	if(tag == false && ave2 < ave1 + min_boundary_sigma * dev1) return -1;
 
 	printf("%s-position: region = %d-%d, score = %d, pos = %d, len = (%d, %d) ave = (%.1lf, %.1lf), dev = (%.1lf, %.1lf)\n", 
 			tag ? "end" : "start", lpos, rpos, score, pos, len1, len2, ave1, ave2, dev1, dev2);

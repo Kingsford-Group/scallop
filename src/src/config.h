@@ -62,6 +62,8 @@ extern double slope_acceptance_sigma;
 extern bool use_paired_end;
 extern bool ignore_single_exon_transcripts;
 extern double max_ignorable_edge_weight;
+extern int min_boundary_score;
+extern double min_boundary_sigma;
 
 extern double join_min_reliability;
 extern double infer_min_reliability;
