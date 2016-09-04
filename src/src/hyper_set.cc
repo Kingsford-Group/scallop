@@ -287,6 +287,24 @@ bool hyper_set::right_extend(int e)
 	return false;
 }
 
+bool hyper_set::left_extend(const set<int> &s)
+{
+	for(set<int>::const_iterator it = s.begin(); it != s.end(); it++)
+	{
+		if(left_extend(*it) == true) return true;
+	}
+	return false;
+}
+
+bool hyper_set::right_extend(const set<int> &s)
+{
+	for(set<int>::const_iterator it = s.begin(); it != s.end(); it++)
+	{
+		if(right_extend(*it) == true) return true;
+	}
+	return false;
+}
+
 int hyper_set::print()
 {
 	//printf("PRINT HYPER_SET\n");

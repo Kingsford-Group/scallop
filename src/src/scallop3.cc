@@ -161,7 +161,8 @@ bool scallop3::resolve_hyper_edge()
 		set<int> s;
 
 		s = hs.get_successors(e);
-		if(s.size() >= 2)
+
+		if(s.size() >= 2 && hs.right_extend(s) == false)
 		{
 			v1.push_back(e);
 			v2.insert(v2.begin(), s.begin(), s.end());
@@ -170,7 +171,7 @@ bool scallop3::resolve_hyper_edge()
 		}
 
 		s = hs.get_predecessors(e);
-		if(s.size() >= 2)
+		if(s.size() >= 2 && hs.left_extend(s) == false)
 		{
 			v1.insert(v1.begin(), s.begin(), s.end());
 			v2.push_back(e);
