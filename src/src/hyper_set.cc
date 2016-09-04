@@ -122,6 +122,22 @@ set<int> hyper_set::get_successors(int e)
 	return s;
 }
 
+set<int> hyper_set::get_predecessors(int e)
+{
+	set<int> s;
+	if(e2s.find(e) == e2s.end()) return s;
+	set<int> &ss = e2s[e];
+	for(set<int>::iterator it = ss.begin(); it != ss.end(); it++)
+	{
+		vector<int> &v = edges[*it];
+		for(int i = 0; i < v.size(); i++)
+		{
+			if(v[i] == e && i >= 1) s.insert(v[i - 1]);
+		}
+	}
+	return s;
+}
+
 vector<PI> hyper_set::get_routes(int x, directed_graph &gr, MEI &e2i)
 {
 	edge_iterator it1, it2;

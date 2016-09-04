@@ -109,6 +109,7 @@ int router::build_bipartite_graph()
 	{
 		int e1 = routes[i].first;
 		int e2 = routes[i].second;
+		printf("root = %d, e1 = %d, e2 = %d\n", root, e1, e2);
 		assert(e2u.find(e1) != e2u.end());
 		assert(e2u.find(e2) != e2u.end());
 		int s = e2u[e1];

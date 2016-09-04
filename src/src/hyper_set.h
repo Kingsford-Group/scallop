@@ -33,6 +33,7 @@ public:
 	int build_index();
 	set<int> get_intersection(const vector<int> &v);
 	set<int> get_successors(int e);
+	set<int> get_predecessors(int e);
 	vector<PI> get_routes(int x, directed_graph &gr, MEI &e2i);
 	int purify();
 	int print();

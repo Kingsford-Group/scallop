@@ -53,6 +53,7 @@ private:
 	bool resolve_hyper_vertex();
 	bool resolve_normal_vertex();
 	bool resolve_trivial_vertex();
+	bool resolve_hyper_edge();
 
 	// smooth vertex
 	bool balance_vertex(undirected_graph &ug, const vector<int> &u2e);

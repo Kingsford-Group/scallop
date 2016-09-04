@@ -57,10 +57,17 @@ int scallop3::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
+		b = resolve_hyper_edge();
+		if(b == true) print();
+		if(b == true) continue;
+
 		break;
 	}
 
 	collect_existing_st_paths();
+
+	print();
+
 	greedy_decompose(-1);
 
 	return 0;
@@ -140,6 +147,106 @@ bool scallop3::resolve_hyper_vertex()
 
 	split_vertex(root, eqn.s, eqn.t);
 
+	return true;
+}
+
+bool scallop3::resolve_hyper_edge()
+{
+	edge_iterator it1, it2;
+	vector<int> v1, v2;
+	int root = -1;
+	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	{
+		int e = e2i[*it1];
+		set<int> s;
+
+		s = hs.get_successors(e);
+		if(s.size() >= 2)
+		{
+			v1.push_back(e);
+			v2.insert(v2.begin(), s.begin(), s.end());
+			root = (*it1)->target();
+			break;
+		}
+
+		s = hs.get_predecessors(e);
+		if(s.size() >= 2)
+		{
+			v1.insert(v1.begin(), s.begin(), s.end());
+			v2.push_back(e);
+			root = (*it1)->source();
+			break;
+		}
+	}
+
+	if(v1.size() == 0 || v2.size() == 0) return false;
+
+	printf("resolve hyper edge ( ");
+	printv(v1);
+	printf("), ( ");
+	printv(v2);
+	printf(")\n");
+
+	assert(v1.size() == 1 || v2.size() == 1);
+
+	balance_vertex(root);
+
+	vector<double> w1;
+	vector<double> w2;
+	double sum1 = 0, sum2 = 0;
+	for(int i = 0; i < v1.size(); i++)
+	{
+		double w = gr.get_edge_weight(i2e[v1[i]]);
+		w1.push_back(w);
+		sum1 += w;
+	}
+	for(int i = 0; i < v2.size(); i++)
+	{
+		double w = gr.get_edge_weight(i2e[v2[i]]);
+		w2.push_back(w);
+		sum2 += w;
+	}
+
+	double r1 = (sum1 < sum2) ? 1.0 : sum2 / sum1;
+	double r2 = (sum1 > sum2) ? 1.0 : sum1 / sum2;
+
+	for(int i = 0; i < w1.size(); i++) w1[i] *= r1;
+	for(int i = 0; i < w2.size(); i++) w2[i] *= r2;
+
+	set<int> ss;
+	for(int i = 0; i < w1.size(); i++)
+	{
+		for(int j = 0; j < w2.size(); j++)
+		{
+			double w = (w1[i] < w2[j]) ? w1[i] : w2[j];
+
+			double t1 = gr.get_edge_weight(i2e[v1[i]]);
+			double t2 = gr.get_edge_weight(i2e[v2[j]]);
+			int k1 = split_edge(v1[i], w);
+			int k2 = split_edge(v2[j], w);
+			int x = merge_adjacent_equal_edges(k1, k2);
+
+			printf(" split (%d, %d), w = %.2lf, weight = (%.2lf, %.2lf), (%.2lf, %.2lf) -> (%d, %d) -> %d\n", v1[i], v2[j], 
+					w, w1[i], w2[j], t1, t2, k1, k2, x);
+
+			hs.replace(v1[i], v2[j], x);
+			if(k1 == v1[i]) hs.remove(v1[i]);
+			if(k2 == v2[j]) hs.remove(v2[j]);
+			//if(k1 == v1[i]) hs.replace(v1[i], x);
+			//if(k2 == v2[j]) hs.replace(v2[j], x);
+		}
+	}
+
+	/*
+	if(sum1 <= sum2)
+	{
+		for(int i = 0; i < v1.size(); i++) hs.remove(v1[i]);
+	}
+	else
+	{
+		for(int i = 0; i < v2.size(); i++) hs.remove(v2[i]);
+	}
+	*/
 	return true;
 }
 
@@ -998,7 +1105,7 @@ int scallop3::print()
 	int p2 = gr.compute_decomp_paths();
 	printf("statistics: %lu edges, %d vertices, total %d paths, %d required\n", gr.num_edges(), n, p1, p2);
 
-	//hs.print();
+	hs.print();
 
 	if(output_tex_files == true)
 	{
