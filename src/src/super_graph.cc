@@ -218,7 +218,7 @@ bool super_graph::remove_single_read(splice_graph &gr)
 
 int super_graph::build_cuts(splice_graph &gr)
 {
-	vector< vector<double> > cuts;
+	vector<SE> cuts;
 	cuts.resize(gr.num_vertices() - 1);
 	edge_iterator it1, it2;
 	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
@@ -229,18 +229,63 @@ int super_graph::build_cuts(splice_graph &gr)
 		if(s == 0) continue;
 		if(t == gr.num_vertices() - 1) continue;
 		double w = gr.get_edge_weight(e);
-
-		for(int k = s; k < t; k++) cuts[k].push_back(w);
+		for(int k = s; k < t; k++) cuts[k].insert(e);
 	}
 
-	for(int k = 0; k < cuts.size(); k++)
+	vector<int> ss, tt;
+	for(tie(it1, it2) = gr.out_edges(0); it1 != it2; it1++)
 	{
-		int32_t p1 = gr.get_vertex_info(k).rpos;
-		int32_t p2 = gr.get_vertex_info(k + 1).lpos;
-		double ave, dev;
-		compute_mean_dev(cuts[k], 0, cuts[k].size(), ave, dev);
-		printf(" cuts after vertex %d, pos = (%d, %d], num = %lu, mean = %.2lf, dev = %.2lf\n", k, p1, p2, cuts[k].size(), ave, dev);
+		int t = (*it1)->target();
+		ss.push_back(t);
 	}
+	for(tie(it1, it2) = gr.in_edges(gr.num_vertices() - 1); it1 != it2; it1++)
+	{
+		int s = (*it1)->source();
+		tt.push_back(s);
+	}
+
+	for(int i = 0; i < ss.size(); i++)
+	{
+		int s = ss[i];
+		for(int j = 0; j < tt.size(); j++)
+		{
+			int t = tt[j];
+			if(s >= t) continue;
+
+			SE &sse = cuts[s - 1];
+			SE &tte = cuts[t];
+			int cnt1 = 0, cnt2 = 0;
+			double sum1 = 0, sum2 = 0;
+			for(SE::iterator it = sse.begin(); it != sse.end(); it++)
+			{
+				edge_descriptor e = (*it);
+				if(tte.find(e) != tte.end()) continue;
+				cnt1++;
+				sum1 += gr.get_edge_weight(e);	
+			}
+			for(SE::iterator it = tte.begin(); it != tte.end(); it++)
+			{
+				edge_descriptor e = (*it);
+				if(sse.find(e) != sse.end()) continue;
+				cnt2++;
+				sum2 += gr.get_edge_weight(e);	
+			}
+
+			int32_t p1 = gr.get_vertex_info(s).lpos;
+			int32_t p2 = gr.get_vertex_info(t).rpos;
+
+			int msize = 5;
+			if(s <= 1 && t >= gr.num_vertices() - 2) continue;
+			if(sum1 + sum2 > 5.0) continue;
+			if(t - s + 1 < msize) continue;
+			if(cnt1 >= 1 && s < 5) continue;
+			if(cnt2 >= 1 && gr.num_vertices() - 1 - t < 5) continue;
+	
+			printf(" cuts [%d, %d] out of %lu, cnt = (%d, %d), sum = (%.0lf, %.0lf), pos = %d-%d\n", 
+					s, t, gr.num_vertices(), cnt1, cnt2, sum1, sum2, p1, p2);
+		}
+	}
+
 	return 0;
 }
 
