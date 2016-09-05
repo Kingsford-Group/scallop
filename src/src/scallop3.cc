@@ -57,7 +57,7 @@ int scallop3::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_hyper_edge();
+		b = resolve_hyper_edge1();
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -150,7 +150,62 @@ bool scallop3::resolve_hyper_vertex()
 	return true;
 }
 
-bool scallop3::resolve_hyper_edge()
+bool scallop3::resolve_hyper_edge0()
+{
+	int ee1 = -1, ee2 = -1, root = -1;
+	for(int i = 1; i < gr.num_vertices(); i++)
+	{
+		ee1 = ee2 = root = -1;
+		double ww = 0;
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
+		{
+			int e1 = e2i[*it1];
+			int e2 = -1;
+			double w1 = gr.get_edge_weight(*it1);
+			double w2 = 0;
+			set<int> s = hs.get_successors(e1);
+			if(s.size() <= 0) continue;
+			for(set<int>::iterator it = s.begin(); it != s.end(); it++)
+			{
+				double w = gr.get_edge_weight(i2e[*it]);
+				if(w >= w1 && hs.left_extend(e1)) continue;
+				if(w <= w1 && hs.right_extend(*it)) continue;
+				if(w <= w2) continue;
+				w2 = w;
+				e2 = (*it);
+			}
+			if(e1 == -1 || e2 == -1) continue;
+			if(w1 <= ww || w2 <= ww) continue;
+			ee1 = e1;
+			ee2 = e2;
+			ww = (w1 < w2) ? w1 : w2;
+		}
+		if(ee1 == -1 || ee2 == -1) continue;
+		root = i;
+		break;
+	}
+
+	if(root == -1) return false;
+
+	double ww1 = gr.get_edge_weight(i2e[ee1]);
+	double ww2 = gr.get_edge_weight(i2e[ee2]);
+	double ww = (ww1 <= ww2) ? ww1 : ww2;
+
+	int k1 = split_edge(ee1, ww);
+	int k2 = split_edge(ee2, ww);
+	int x = merge_adjacent_equal_edges(k1, k2);
+
+	printf(" resolve hyper edge (%d, %d) of vertex %d, weight = (%.2lf, %.2lf) -> (%d, %d) -> %d\n", ee1, ee2, root, ww1, ww2, k1, k2, x);
+
+	hs.replace(ee1, ee2, x);
+	if(k1 == ee1) hs.remove(ee1);
+	if(k2 == ee2) hs.remove(ee2);
+
+	return true;
+}
+
+bool scallop3::resolve_hyper_edge1()
 {
 	edge_iterator it1, it2;
 	vector<int> v1, v2;
@@ -1106,7 +1161,7 @@ int scallop3::print()
 	int p2 = gr.compute_decomp_paths();
 	printf("statistics: %lu edges, %d vertices, total %d paths, %d required\n", gr.num_edges(), n, p1, p2);
 
-	hs.print();
+	//hs.print();
 
 	if(output_tex_files == true)
 	{

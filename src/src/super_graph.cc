@@ -11,6 +11,7 @@ super_graph::~super_graph()
 
 int super_graph::build()
 {
+	while(remove_single_read(root));
 	build_undirected_graph();
 	split_splice_graph();
 	return 0;
@@ -186,6 +187,63 @@ vector<int> super_graph::get_root_vertices(int s, const vector<int> &x) const
 	return vv;
 }
 
+bool super_graph::remove_single_read(splice_graph &gr)
+{
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	{
+		edge_descriptor e = (*it1);
+		int s = e->source();
+		int t = e->target();
+		if(s == 0) continue;
+		if(t == gr.num_vertices() - 1) continue;
+		if(gr.out_degree(s) <= 1) continue;
+		if(gr.in_degree(t) <= 1) continue;
+		if(t == s + 1) continue;
+		int32_t s1 = gr.get_vertex_info(s).rpos;
+		int32_t s2 = gr.get_vertex_info(s + 1).lpos;
+		int32_t t1 = gr.get_vertex_info(t - 1).rpos;
+		int32_t t2 = gr.get_vertex_info(t).lpos;
+		if(s1 != s2) continue;
+		if(t1 != t2) continue;
+		double w = gr.get_edge_weight(e);
+		if(w >= 1.5) continue;
+
+		printf("remove single read %d -> %d\n", s, t);
+		gr.remove_edge(e);
+		return true;
+	}
+	return false;
+}
+
+int super_graph::build_cuts(splice_graph &gr)
+{
+	vector< vector<double> > cuts;
+	cuts.resize(gr.num_vertices() - 1);
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	{
+		edge_descriptor e = (*it1);
+		int s = e->source();
+		int t = e->target();
+		if(s == 0) continue;
+		if(t == gr.num_vertices() - 1) continue;
+		double w = gr.get_edge_weight(e);
+
+		for(int k = s; k < t; k++) cuts[k].push_back(w);
+	}
+
+	for(int k = 0; k < cuts.size(); k++)
+	{
+		int32_t p1 = gr.get_vertex_info(k).rpos;
+		int32_t p2 = gr.get_vertex_info(k + 1).lpos;
+		double ave, dev;
+		compute_mean_dev(cuts[k], 0, cuts[k].size(), ave, dev);
+		printf(" cuts after vertex %d, pos = (%d, %d], num = %lu, mean = %.2lf, dev = %.2lf\n", k, p1, p2, cuts[k].size(), ave, dev);
+	}
+	return 0;
+}
+
 int super_graph::build_maximum_path_graph(splice_graph &gr, undirected_graph &mg)
 {
 	mg.clear();
@@ -321,8 +379,10 @@ int super_graph::print()
 
 		vector< set<int> > vv = mg.compute_connected_components();
 
-		printf(" subgraph %d, #vertices = %lu / %lu, starting = %d, ending = %d, %lu components, range = [%d, %d)\n", 
+		printf("subgraph %d, #vertices = %lu / %lu, starting = %d, ending = %d, %lu components, range = [%d, %d)\n", 
 				i, gr.num_vertices() - 2, root.num_vertices() - 2, d0, dn, vv.size(), lpos, rpos);
+
+		build_cuts(gr);
 	}
 	return 0;
 }
