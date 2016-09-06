@@ -447,9 +447,9 @@ int scallop3::classify()
 
 	printf("vertices = %lu, edges = %lu, p0 = %ld, p1 = %ld\n", gr.num_vertices(), gr.num_edges(), p0, p1);
 
-	assert(p0 >= p1);
+	//assert(p0 >= p1);
 
-	bool b = (p0 == p1) ? true : false;
+	bool b = (p0 <= p1) ? true : false;
 
 	printf("\nprocess %s %s\n", name.c_str(), b ? "TRIVIAL" : "NORMAL");
 

@@ -37,11 +37,13 @@ public:
 private:
 	int build_undirected_graph();
 	int split_splice_graph();
-	int build_single_splice_graph(splice_graph &gr, hyper_set &hs, const set<int> &v, int index);
+	int split_single_splice_graph(splice_graph &gr, hyper_set &hs, const set<int> &v, int index);
+	bool cut_splice_graph();
+	bool cut_single_splice_graph(splice_graph &gr, int index);
+	bool remove_single_read(splice_graph &gr);
+	int refine_splice_graph(splice_graph &gr);
 
 	// analysis the structure
-	bool remove_single_read(splice_graph &gr);
-	int build_cuts(splice_graph &gr);
 	int build_maximum_path_graph(splice_graph &gr, undirected_graph &mg);
 	double compute_maximum_path1(splice_graph &gr, int s, int &t);
 	double compute_maximum_path2(splice_graph &gr, int t, int &s);

@@ -11,9 +11,20 @@ super_graph::~super_graph()
 
 int super_graph::build()
 {
-	while(remove_single_read(root));
-	build_undirected_graph();
-	split_splice_graph();
+	while(true)
+	{
+		subs.clear();
+		hss.clear();
+		while(remove_single_read(root));
+		build_undirected_graph();
+		split_splice_graph();
+
+		print();
+
+		bool b = cut_splice_graph();
+		if(b == false) break;
+		refine_splice_graph(root);
+	}
 	return 0;
 }
 
@@ -43,6 +54,8 @@ int super_graph::build_undirected_graph()
 int super_graph::split_splice_graph()
 {
 	vector< set<int> > vv = ug.compute_connected_components();
+	a2b.clear();
+	b2a.clear();
 	int index = 0;
 	for(int k = 0; k < vv.size(); k++)
 	{
@@ -51,7 +64,7 @@ int super_graph::split_splice_graph()
 		if(s.size() == 1 && *(s.begin()) == root.num_vertices() - 1) continue;
 		splice_graph gr;
 		hyper_set hs;
-		build_single_splice_graph(gr, hs, s, index);
+		split_single_splice_graph(gr, hs, s, index);
 		subs.push_back(gr);
 		hss.push_back(hs);
 		index++;
@@ -59,7 +72,7 @@ int super_graph::split_splice_graph()
 	return 0;
 }
 
-int super_graph::build_single_splice_graph(splice_graph &gr, hyper_set &hs, const set<int> &ss, int index)
+int super_graph::split_single_splice_graph(splice_graph &gr, hyper_set &hs, const set<int> &ss, int index)
 {
 	//printf("build single splice graph with index = %d\n", index);
 	gr.clear();
@@ -209,14 +222,26 @@ bool super_graph::remove_single_read(splice_graph &gr)
 		double w = gr.get_edge_weight(e);
 		if(w >= 1.5) continue;
 
-		printf("remove single read %d -> %d\n", s, t);
+		//printf("remove single read %d -> %d\n", s, t);
+
 		gr.remove_edge(e);
 		return true;
 	}
 	return false;
 }
 
-int super_graph::build_cuts(splice_graph &gr)
+bool super_graph::cut_splice_graph()
+{
+	bool flag = false;
+	for(int i = 0; i < subs.size(); i++)
+	{
+		bool b = cut_single_splice_graph(subs[i], i);
+		if(b == true) flag = true;
+	}
+	return flag;
+}
+
+bool super_graph::cut_single_splice_graph(splice_graph &gr, int index)
 {
 	vector<SE> cuts;
 	cuts.resize(gr.num_vertices() - 1);
@@ -244,6 +269,12 @@ int super_graph::build_cuts(splice_graph &gr)
 		tt.push_back(s);
 	}
 
+	double max_sum = 3.0;
+	int min_size = 8;
+
+	double ksum = max_sum + 1.0;
+	int ks = -1, kt = -1;
+	VE ke;
 	for(int i = 0; i < ss.size(); i++)
 	{
 		int s = ss[i];
@@ -256,10 +287,12 @@ int super_graph::build_cuts(splice_graph &gr)
 			SE &tte = cuts[t];
 			int cnt1 = 0, cnt2 = 0;
 			double sum1 = 0, sum2 = 0;
+			VE v;
 			for(SE::iterator it = sse.begin(); it != sse.end(); it++)
 			{
 				edge_descriptor e = (*it);
 				if(tte.find(e) != tte.end()) continue;
+				v.push_back(e);
 				cnt1++;
 				sum1 += gr.get_edge_weight(e);	
 			}
@@ -267,26 +300,49 @@ int super_graph::build_cuts(splice_graph &gr)
 			{
 				edge_descriptor e = (*it);
 				if(sse.find(e) != sse.end()) continue;
+				v.push_back(e);
 				cnt2++;
-				sum2 += gr.get_edge_weight(e);	
+				sum2 += gr.get_edge_weight(e);
 			}
 
 			int32_t p1 = gr.get_vertex_info(s).lpos;
 			int32_t p2 = gr.get_vertex_info(t).rpos;
 
-			int msize = 5;
 			if(s <= 1 && t >= gr.num_vertices() - 2) continue;
-			if(sum1 + sum2 > 5.0) continue;
-			if(t - s + 1 < msize) continue;
-			if(cnt1 >= 1 && s < 5) continue;
-			if(cnt2 >= 1 && gr.num_vertices() - 1 - t < 5) continue;
-	
-			printf(" cuts [%d, %d] out of %lu, cnt = (%d, %d), sum = (%.0lf, %.0lf), pos = %d-%d\n", 
-					s, t, gr.num_vertices(), cnt1, cnt2, sum1, sum2, p1, p2);
+			if(sum1 + sum2 > max_sum) continue;
+			if(t - s + 1 < min_size) continue;
+			if(cnt1 >= 1 && s < min_size) continue;
+			if(cnt2 >= 1 && gr.num_vertices() - 1 - t < min_size) continue;
+
+			//printf(" cuts [%d, %d] out of %lu, cnt = (%d, %d), sum = (%.0lf, %.0lf), pos = %d-%d\n", s, t, gr.num_vertices(), cnt1, cnt2, sum1, sum2, p1, p2);
+
+			if(sum1 + sum2 < ksum)
+			{
+				ks = s;
+				kt = t;
+				ke = v;
+				ksum = sum1 + sum2;
+			}
 		}
 	}
 
-	return 0;
+	if(ks == -1 || kt == -1) return false;
+
+	printf("cut subgraph %d, vertices = [%d, %d] / %lu, #edges = %.0lf\n", index, ks, kt, gr.num_vertices(), ksum);
+
+	for(int i = 0; i < ke.size(); i++)
+	{
+		edge_descriptor e = ke[i];
+		int s = e->source();
+		int t = e->target();
+		int ss = b2a[PI(index, s)];
+		int tt = b2a[PI(index, t)];
+		PEB p = root.edge(ss, tt);
+		assert(p.second == true);
+		root.remove_edge(p.first);
+	}
+
+	return true;
 }
 
 int super_graph::build_maximum_path_graph(splice_graph &gr, undirected_graph &mg)
@@ -403,6 +459,22 @@ double super_graph::compute_maximum_path2(splice_graph &gr, int t, int &s)
 	return ww;
 }
 
+int super_graph::refine_splice_graph(splice_graph &gr)
+{
+	while(true)
+	{
+		bool b = false;
+		for(int i = 1; i < gr.num_vertices() - 1; i++)
+		{
+			if(gr.degree(i) == 0) continue;
+			if(gr.in_degree(i) >= 1 && gr.out_degree(i) >= 1) continue;
+			gr.clear_vertex(i);
+			b = true;
+		}
+		if(b == false) break;
+	}
+	return 0;
+}
 
 int super_graph::print()
 {
@@ -410,6 +482,7 @@ int super_graph::print()
 	int dn = root.in_degree(root.num_vertices() - 1);
 	printf("super graph, %lu vertices, starting = %d, ending = %d, %lu subgraphs\n",
 			root.num_vertices(), d0, dn, subs.size());
+
 	for(int i = 0; i < subs.size(); i++)
 	{
 		splice_graph &gr = subs[i];
@@ -419,15 +492,8 @@ int super_graph::print()
 		int32_t lpos = gr.get_vertex_info(0).lpos;
 		int32_t rpos = gr.get_vertex_info(gr.num_vertices() - 1).rpos;
 
-		undirected_graph mg;
-		build_maximum_path_graph(gr, mg);
-
-		vector< set<int> > vv = mg.compute_connected_components();
-
-		printf("subgraph %d, #vertices = %lu / %lu, starting = %d, ending = %d, %lu components, range = [%d, %d)\n", 
-				i, gr.num_vertices() - 2, root.num_vertices() - 2, d0, dn, vv.size(), lpos, rpos);
-
-		build_cuts(gr);
+		printf("subgraph %d, #vertices = %lu / %lu, #starting = %d, #ending = %d, range = [%d, %d)\n", 
+				i, gr.num_vertices() - 2, root.num_vertices() - 2, d0, dn, lpos, rpos);
 	}
 	return 0;
 }
