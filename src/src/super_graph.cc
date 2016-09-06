@@ -269,10 +269,10 @@ bool super_graph::cut_single_splice_graph(splice_graph &gr, int index)
 		tt.push_back(s);
 	}
 
-	double max_sum = 3.0;
-	int min_size = 8;
+	double max_sum = 3;
+	int min_size = 5;
 
-	double ksum = max_sum + 1.0;
+	double ksum = max_sum + 1.0, kave = 0, kmin = 0;
 	int ks = -1, kt = -1;
 	VE ke;
 	for(int i = 0; i < ss.size(); i++)
@@ -282,6 +282,7 @@ bool super_graph::cut_single_splice_graph(splice_graph &gr, int index)
 		{
 			int t = tt[j];
 			if(s >= t) continue;
+			if(t - s + 1 < min_size) continue;
 
 			SE &sse = cuts[s - 1];
 			SE &tte = cuts[t];
@@ -305,16 +306,34 @@ bool super_graph::cut_single_splice_graph(splice_graph &gr, int index)
 				sum2 += gr.get_edge_weight(e);
 			}
 
+			//if(cnt1 >= 1 && s < min_size) continue;
+			//if(cnt2 >= 1 && gr.num_vertices() - 1 - t < min_size) continue;
+			if(sum1 + sum2 > max_sum) continue;
+			if(s <= 1 && t >= gr.num_vertices() - 2) continue;
+
+			double ave = 0, min = DBL_MAX;
+			for(int k = s; k < t; k++)
+			{
+				SE &se = cuts[k];
+				double w = 0;
+				for(SE::iterator it = se.begin(); it != se.end(); it++)
+				{
+					edge_descriptor e = (*it);
+					if(sse.find(e) != sse.end()) continue;
+					if(tte.find(e) != tte.end()) continue;
+					w += gr.get_edge_weight(e);
+				}
+				ave += w;
+				if(w < min) min = w;
+			}
+			ave /= (t - s);
+			if(3.0 * (sum1 + sum2) >= ave) continue;
+
+			/*
 			int32_t p1 = gr.get_vertex_info(s).lpos;
 			int32_t p2 = gr.get_vertex_info(t).rpos;
-
-			if(s <= 1 && t >= gr.num_vertices() - 2) continue;
-			if(sum1 + sum2 > max_sum) continue;
-			if(t - s + 1 < min_size) continue;
-			if(cnt1 >= 1 && s < min_size) continue;
-			if(cnt2 >= 1 && gr.num_vertices() - 1 - t < min_size) continue;
-
-			//printf(" cuts [%d, %d] out of %lu, cnt = (%d, %d), sum = (%.0lf, %.0lf), pos = %d-%d\n", s, t, gr.num_vertices(), cnt1, cnt2, sum1, sum2, p1, p2);
+			printf(" cuts [%d, %d] out of %lu, cnt = (%d, %d), sum = (%.0lf, %.0lf), pos = %d-%d\n", s, t, gr.num_vertices(), cnt1, cnt2, sum1, sum2, p1, p2);
+			*/
 
 			if(sum1 + sum2 < ksum)
 			{
@@ -322,13 +341,15 @@ bool super_graph::cut_single_splice_graph(splice_graph &gr, int index)
 				kt = t;
 				ke = v;
 				ksum = sum1 + sum2;
+				kave = ave;
+				kmin = min;
 			}
 		}
 	}
 
 	if(ks == -1 || kt == -1) return false;
 
-	printf("cut subgraph %d, vertices = [%d, %d] / %lu, #edges = %.0lf\n", index, ks, kt, gr.num_vertices(), ksum);
+	printf("cut subgraph %d, vertices = [%d, %d] / %lu, #edges = %.0lf, ave = %.2lf, min = %.2lf\n", index, ks, kt, gr.num_vertices(), ksum, kave, kmin);
 
 	for(int i = 0; i < ke.size(); i++)
 	{
