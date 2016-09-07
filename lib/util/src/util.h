@@ -100,4 +100,26 @@ int compute_mean_dev(const vector<T> &v, int si, int ti, double &ave, double &de
 	return 0;
 }
 
+template<typename T>
+int consecutive_subset(const vector<T> &ref, const vector<T> &x)
+{
+	if(x.size() == 0) return 0;
+	if(ref.size() == 0) return -1;
+	int k = -1;
+	for(int i = 0; i < ref.size(); i++)
+	{
+		if(ref[i] != x[0]) continue;
+		k = i;
+		break;
+	}
+	if(k == -1) return -1;
+
+	for(int i = 0; i < x.size(); i++)
+	{
+		if(i + k >= ref.size()) return -1;
+		if(x[i] != ref[i + k]) return -1;
+	}
+	return k;
+}
+
 #endif

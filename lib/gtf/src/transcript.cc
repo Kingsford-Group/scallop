@@ -90,7 +90,7 @@ int transcript::write(ofstream &fout) const
 	fout<<seqname.c_str()<<"\t";				// chromosome name
 	fout<<source.c_str()<<"\t";					// source
 	fout<<"transcript\t";						// feature
-	fout<<lpos<<"\t";							// left position
+	fout<<lpos + 1<<"\t";							// left position
 	fout<<rpos<<"\t";							// right position
 	fout<<1000<<"\t";							// score, now as expression
 	fout<<strand<<"\t";					// strand
@@ -104,8 +104,8 @@ int transcript::write(ofstream &fout) const
 		fout<<seqname.c_str()<<"\t";		// chromosome name
 		fout<<source.c_str()<<"\t";			// source
 		fout<<"exon\t";						// feature
-		fout<<exons[k].first<<"\t";			// left position
-		fout<<exons[k].second - 1<<"\t";	// right position
+		fout<<exons[k].first + 1<<"\t";			// left position
+		fout<<exons[k].second<<"\t";	// right position
 		fout<<1000<<"\t";					// score, now as expression
 		fout<<strand<<"\t";					// strand
 		fout<<".\t";						// frame

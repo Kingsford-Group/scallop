@@ -90,6 +90,8 @@ int genome::read(const string &file)
 	}
 	*/
 
+	write("test.gtf");
+
 	return 0;
 }
 

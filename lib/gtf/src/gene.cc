@@ -81,6 +81,17 @@ int gene::remove_single_exon_transcripts()
 	return 0;
 }
 
+int gene::remove_transcripts(double expression)
+{
+	vector<transcript> vv;
+	for(int i = 0; i < transcripts.size(); i++)
+	{
+		if(transcripts[i].expression < expression) continue;
+		vv.push_back(transcripts[i]);
+	}
+	transcripts = vv;
+	return 0;
+}
 int gene::sort()
 {
 	std::sort(exons.begin(), exons.end());
