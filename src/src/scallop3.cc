@@ -422,7 +422,12 @@ bool scallop3::resolve_trivial_vertex()
 
 	if(root == -1) return false;
 
-	printf("decompose trivial vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
+	int e = -1;
+	double r = compute_smallest_edge(root, e);
+	double w = gr.get_edge_weight(i2e[e]);
+	printf("decompose trivial vertex %d, ratio = %.2lf, degree = (%d, %d), smallest edge weight = %.2lf, ratio = %.2lf\n",
+			root, ratio, gr.in_degree(root), gr.out_degree(root), w, r);
+
 	eqn.print(77);
 
 	decompose_trivial_vertex(root);
@@ -699,7 +704,7 @@ int scallop3::decompose_trivial_vertex(int x)
 
 int scallop3::greedy_decompose(int num)
 {
-	printf("greedy decomposing %d\n", num);
+	int n1 = paths.size();
 	int cnt = 0;
 	while(true)
 	{
@@ -715,6 +720,8 @@ int scallop3::greedy_decompose(int num)
 		collect_path(e);
 		cnt++;
 	}
+	int n2 = paths.size();
+	printf("greedy decomposing produces %d / %d paths\n", n2 - n1, n2);
 	return 0;
 }
 

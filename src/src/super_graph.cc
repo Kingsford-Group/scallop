@@ -16,6 +16,8 @@ int super_graph::build()
 		subs.clear();
 		hss.clear();
 		while(remove_single_read(root));
+		refine_splice_graph(root);
+
 		build_undirected_graph();
 		split_splice_graph();
 
@@ -206,22 +208,22 @@ bool super_graph::remove_single_read(splice_graph &gr)
 	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
+		double w = gr.get_edge_weight(e);
+		if(w >= 1.5) continue;
+
 		int s = e->source();
 		int t = e->target();
 		if(s == 0) continue;
 		if(t == gr.num_vertices() - 1) continue;
+		if(t == s + 1) continue;
 		if(gr.out_degree(s) <= 1) continue;
 		if(gr.in_degree(t) <= 1) continue;
-		if(t == s + 1) continue;
 		int32_t s1 = gr.get_vertex_info(s).rpos;
 		int32_t s2 = gr.get_vertex_info(s + 1).lpos;
 		int32_t t1 = gr.get_vertex_info(t - 1).rpos;
 		int32_t t2 = gr.get_vertex_info(t).lpos;
 		if(s1 != s2) continue;
 		if(t1 != t2) continue;
-		double w = gr.get_edge_weight(e);
-		if(w >= 1.5) continue;
-
 		//printf("remove single read %d -> %d\n", s, t);
 
 		gr.remove_edge(e);
