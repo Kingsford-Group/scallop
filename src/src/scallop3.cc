@@ -73,6 +73,61 @@ int scallop3::assemble()
 	return 0;
 }
 
+bool scallop3::resolve_hyper_vertex()
+{
+	int root = -1;
+	double ratio1 = -1;
+	vector<equation> eqns;
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		if(gr.in_degree(i) <= 1) continue;
+		if(gr.out_degree(i) <= 1) continue;
+
+		vector<PI> p = hs.get_routes(i, gr, e2i);
+
+		if(p.size() <= 0) continue;
+
+		router rt(i, gr, e2i, i2e, p);
+		rt.build();
+		//rt.print();
+
+		if(rt.status != 4) continue;
+		assert(rt.ratio >= 0);
+		assert(rt.eqns.size() == 2);
+
+		if(ratio1 >= 0 && ratio1 < rt.ratio) continue;
+
+		root = i;
+		ratio1 = rt.ratio;
+		eqns = rt.eqns;
+	}
+
+	if(root == -1) return false;
+	
+	/*
+	int se;
+	double ratio2 = compute_smallest_edge(root, se);
+	double sw = gr.get_edge_weight(i2e[se]);
+	if(i2e[se]->source() == root && hs.left_extend(se)) ratio2 = ratio1 + 1;
+	if(i2e[se]->target() == root && hs.right_extend(se)) ratio2 = ratio1 + 1;
+	if(gr.out_degree(i2e[se]->source()) <= 1) ratio2 = ratio1 + 1;
+	if(gr.in_degree(i2e[se]->target()) <= 1) ratio2 = ratio1 + 1;
+	if(ratio > max_split_error_ratio) return false;
+	*/
+
+	printf("split hyper vertex %d, ratio1 = %.2lf, degree = (%d, %d)\n", root, ratio1, gr.in_degree(root), gr.out_degree(root));
+
+	for(int i = 0; i < eqns.size(); i++) eqns[i].print(99);
+
+	equation &eqn = eqns[0];
+	assert(eqn.s.size() >= 1);
+	assert(eqn.t.size() >= 1);
+
+	split_vertex(root, eqn.s, eqn.t);
+
+	return true;
+}
+
 bool scallop3::resolve_hyper_tree()
 {
 	int root = -1;
@@ -102,51 +157,6 @@ bool scallop3::resolve_hyper_tree()
 
 	decompose_tree(ug, u2e);
 	assert(gr.degree(root) == 0);
-	return true;
-}
-
-bool scallop3::resolve_hyper_vertex()
-{
-	int root = -1;
-	double ratio = -1;
-	vector<equation> eqns;
-	for(int i = 1; i < gr.num_vertices() - 1; i++)
-	{
-		if(gr.in_degree(i) <= 1) continue;
-		if(gr.out_degree(i) <= 1) continue;
-
-		vector<PI> p = hs.get_routes(i, gr, e2i);
-
-		if(p.size() <= 0) continue;
-
-		router rt(i, gr, e2i, i2e, p);
-		rt.build();
-		//rt.print();
-
-		if(rt.status != 4) continue;
-		assert(rt.ratio >= 0);
-		assert(rt.eqns.size() == 2);
-
-		if(ratio >= 0 && ratio < rt.ratio) continue;
-
-		root = i;
-		ratio = rt.ratio;
-		eqns = rt.eqns;
-	}
-
-	if(root == -1) return false;
-	if(ratio > max_split_error_ratio) return false;
-
-	printf("split hyper vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
-
-	for(int i = 0; i < eqns.size(); i++) eqns[i].print(99);
-
-	equation &eqn = eqns[0];
-	assert(eqn.s.size() >= 1);
-	assert(eqn.t.size() >= 1);
-
-	split_vertex(root, eqn.s, eqn.t);
-
 	return true;
 }
 
@@ -288,21 +298,8 @@ bool scallop3::resolve_hyper_edge1()
 			hs.replace(v1[i], v2[j], x);
 			if(k1 == v1[i]) hs.remove(v1[i]);
 			if(k2 == v2[j]) hs.remove(v2[j]);
-			//if(k1 == v1[i]) hs.replace(v1[i], x);
-			//if(k2 == v2[j]) hs.replace(v2[j], x);
 		}
 	}
-
-	/*
-	if(sum1 <= sum2)
-	{
-		for(int i = 0; i < v1.size(); i++) hs.remove(v1[i]);
-	}
-	else
-	{
-		for(int i = 0; i < v2.size(); i++) hs.remove(v2[i]);
-	}
-	*/
 	return true;
 }
 
@@ -340,12 +337,13 @@ bool scallop3::resolve_normal_vertex()
 	int se;
 	double ratio2 = compute_smallest_edge(root, se);
 	double sw = gr.get_edge_weight(i2e[se]);
+	//if(gr.out_degree(i2e[se]->source()) <= 1) ratio2 = ratio1 + 1;
+	//if(gr.in_degree(i2e[se]->target()) <= 1) ratio2 = ratio1 + 1;
 
 	double ratio = (ratio1 < ratio2) ? ratio1 : ratio2;
 
 	if(ratio > max_split_error_ratio) return false;
 
-	// TODO
 	if(ratio1 < ratio2 || sw > 2 * max_ignorable_edge_weight)
 	{
 		printf("split normal vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
@@ -384,9 +382,9 @@ bool scallop3::resolve_ignorable_edges()
 		double w = gr.get_edge_weight(e);
 
 		if(w > max_ignorable_edge_weight) continue;
-		if(hs.left_extend(ei) == true && hs.right_extend(ei) == true) continue;
 		if(e->source() == i && gr.in_degree(e->target()) <= 1) continue;
 		if(e->target() == i && gr.out_degree(e->source()) <= 1) continue;
+		if(hs.left_extend(ei) == true && hs.right_extend(ei) == true) continue;
 
 		printf("remove ignorable edge %d of vertex %d, weight = %.2lf, ratio = %.2lf, degree = (%d, %d)\n", 
 				ei, i, w, ratio, gr.in_degree(i), gr.out_degree(i));
