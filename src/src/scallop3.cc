@@ -73,6 +73,38 @@ int scallop3::assemble()
 	return 0;
 }
 
+bool scallop3::resolve_hyper_tree()
+{
+	int root = -1;
+	undirected_graph ug;
+	vector<int> u2e;
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		if(gr.in_degree(i) <= 1) continue;
+		if(gr.out_degree(i) <= 1) continue;
+
+		vector<PI> p = hs.get_routes(i, gr, e2i);
+		router rt(i, gr, e2i, i2e, p);
+		rt.build();
+
+		if(rt.status != 1) continue;
+		if(balance_vertex(rt.ug, rt.u2e) == false) continue;
+
+		root = i;
+		ug = rt.ug;
+		u2e = rt.u2e;
+		break;
+	}
+
+	if(root == -1) return false;
+
+	printf("decompose hyper tree %d, degree = (%d, %d)\n", root, gr.in_degree(root), gr.out_degree(root));
+
+	decompose_tree(ug, u2e);
+	assert(gr.degree(root) == 0);
+	return true;
+}
+
 bool scallop3::resolve_hyper_vertex()
 {
 	int root = -1;
@@ -128,37 +160,6 @@ bool scallop3::resolve_hyper_vertex()
 	return true;
 }
 
-bool scallop3::resolve_hyper_tree()
-{
-	int root = -1;
-	undirected_graph ug;
-	vector<int> u2e;
-	for(int i = 1; i < gr.num_vertices() - 1; i++)
-	{
-		if(gr.in_degree(i) <= 1) continue;
-		if(gr.out_degree(i) <= 1) continue;
-
-		vector<PI> p = hs.get_routes(i, gr, e2i);
-		router rt(i, gr, e2i, i2e, p);
-		rt.build();
-
-		if(rt.status != 1) continue;
-		if(balance_vertex(rt.ug, rt.u2e) == false) continue;
-
-		root = i;
-		ug = rt.ug;
-		u2e = rt.u2e;
-		break;
-	}
-
-	if(root == -1) return false;
-
-	printf("decompose hyper tree %d, degree = (%d, %d)\n", root, gr.in_degree(root), gr.out_degree(root));
-
-	decompose_tree(ug, u2e);
-	assert(gr.degree(root) == 0);
-	return true;
-}
 
 bool scallop3::resolve_hyper_edge0()
 {
