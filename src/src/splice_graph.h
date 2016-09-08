@@ -85,6 +85,7 @@ public:
 	int draw(const string &file, const MIS &mis, const MES &mes, double len);
 	int draw(const string &file, const MIS &mis, const MES &mes, double len, const vector<int> &tp);
 	int print_nontrivial_vertices();
+	int print_weights();
 	int print();
 };
 

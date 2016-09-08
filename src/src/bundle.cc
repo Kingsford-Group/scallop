@@ -37,6 +37,7 @@ int bundle::build()
 	link_partial_exons();
 	build_splice_graph();
 	build_hyper_edges2();
+	assign_edge_info_weights();
 	return 0;
 }
 
@@ -572,7 +573,7 @@ int bundle::build_hyper_edges1()
 			for(int j = k1; j <= k2; j++) sp.insert(j);
 		}
 
-		if(sp.size() <= 2) continue;
+		if(sp.size() <= 1) continue;
 		hs.add_node_list(sp);
 	}
 
@@ -601,7 +602,7 @@ int bundle::build_hyper_edges2()
 		if(h.qname != qname)
 		{
 			set<int> s(sp.begin(), sp.end());
-			if(s.size() > 2) hs.add_node_list(s);
+			if(s.size() >= 2) hs.add_node_list(s);
 			sp.clear();
 		}
 
@@ -783,6 +784,46 @@ int bundle::build_splice_graph()
 	return 0;
 }
 
+int bundle::assign_edge_info_weights()
+{
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	{
+		edge_info ei = gr.get_edge_info(*it1);
+		ei.weight = 0;
+		gr.set_edge_info(*it1, ei);
+	}
+
+	MED med;
+	for(MVII::iterator it = hs.nodes.begin(); it != hs.nodes.end(); it++)
+	{
+		vector<int> v = it->first;
+		int c = it->second;
+		for(int k = 0; k < v.size() - 1; k++)
+		{
+			int s = v[k];
+			int t = v[k + 1];
+			PEB p = gr.edge(s, t);
+			if(p.second == false) continue;
+
+			//printf("add weight %d to (%d, %d)\n", c, s, t);
+
+			if(med.find(p.first) == med.end()) med.insert(PED(p.first, c));
+			else med[p.first] += c;
+		}
+	}
+
+	for(MED::iterator it = med.begin(); it != med.end(); it++)
+	{
+		edge_descriptor e = it->first;
+		double w = it->second;
+		edge_info ei = gr.get_edge_info(e);
+		ei.weight = w;
+		gr.set_edge_info(e, ei);
+	}
+	return 0;
+}
+
 int bundle::print(int index)
 {
 	printf("\nBundle %d: ", index);
@@ -829,10 +870,13 @@ int bundle::print(int index)
 	hs.print();
 
 	// print clips
+	/*
 	for(int i = 0; i < lsoft.size(); i++) printf("left  soft clips: pos = %s:%d, counts = %d\n", chrm.c_str(), lsoft[i].first, lsoft[i].second);
 	for(int i = 0; i < rsoft.size(); i++) printf("right soft clips: pos = %s:%d, counts = %d\n", chrm.c_str(), rsoft[i].first, rsoft[i].second);
 	for(int i = 0; i < lhard.size(); i++) printf("left  hard clips: pos = %s:%d, counts = %d\n", chrm.c_str(), lhard[i].first, lhard[i].second);
 	for(int i = 0; i < rhard.size(); i++) printf("right hard clips: pos = %s:%d, counts = %d\n", chrm.c_str(), rhard[i].first, rhard[i].second);
+	*/
+
 
 	return 0;
 }

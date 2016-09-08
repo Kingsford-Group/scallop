@@ -116,6 +116,8 @@ int assembler::process(const bundle_base &bb)
 	index++;
 
 	bd.print(index);
+	//bd.gr.print_weights();
+
 	super_graph sg(bd.gr, bd.hs);
 	sg.build();
 

@@ -142,8 +142,8 @@ int32_t region::identify_boundary(bool tag)
 		int32_t p = v[i].first;
 		int32_t len1 = p - lpos;
 		int32_t len2 = rpos - p;
-		if(len1 <= average_read_length) continue;
-		if(len2 <= average_read_length) continue;
+		if(len1 <= average_read_length * 0.5) continue;
+		if(len2 <= average_read_length * 0.5) continue;
 
 		int n1 = v[i].second / average_read_length + 5;
 		int n2 = (sum - v[i].second) / average_read_length + 5;

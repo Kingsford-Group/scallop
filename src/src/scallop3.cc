@@ -61,6 +61,10 @@ int scallop3::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
+		b = resolve_hyper_edge0();
+		if(b == true) print();
+		if(b == true) continue;
+
 		break;
 	}
 
@@ -88,7 +92,9 @@ bool scallop3::resolve_hyper_tree()
 		rt.build();
 
 		if(rt.status != 1) continue;
-		if(balance_vertex(rt.ug, rt.u2e) == false) continue;
+		balance_vertex(i);
+		bool b = balance_vertex(rt.ug, rt.u2e);
+		assert(b == true);
 
 		root = i;
 		ug = rt.ug;
@@ -188,6 +194,8 @@ bool scallop3::resolve_hyper_edge0()
 
 	if(root == -1) return false;
 
+	balance_vertex(root);
+
 	double ww1 = gr.get_edge_weight(i2e[ee1]);
 	double ww2 = gr.get_edge_weight(i2e[ee2]);
 	double ww = (ww1 <= ww2) ? ww1 : ww2;
@@ -216,7 +224,6 @@ bool scallop3::resolve_hyper_edge1()
 		set<int> s;
 
 		s = hs.get_successors(e);
-
 		if(s.size() >= 2 && hs.right_extend(s) == false)
 		{
 			v1.push_back(e);
@@ -699,8 +706,11 @@ int scallop3::decompose_trivial_vertex(int x)
 
 int scallop3::greedy_decompose(int num)
 {
-	printf("greedy decomposing %d\n", num);
+	for(int i = 1; i < gr.num_vertices() - 1; i++) balance_vertex(i);
+	for(int i = 1; i < gr.num_vertices() - 1; i++) balance_vertex(i);
+
 	int cnt = 0;
+	int n1 = paths.size();
 	while(true)
 	{
 		if(num != -1 && cnt >= num) break;
@@ -715,6 +725,8 @@ int scallop3::greedy_decompose(int num)
 		collect_path(e);
 		cnt++;
 	}
+	int n2 = paths.size();
+	printf("greedy decomposing produces %d / %d paths\n", n2 - n1, n2);
 	return 0;
 }
 
@@ -953,6 +965,8 @@ bool scallop3::balance_vertex(undirected_graph &ug, const vector<int> & u2e)
 
 int scallop3::balance_vertex(int v)
 {
+	if(gr.degree(v) <= 0) return 0;
+
 	edge_iterator it1, it2;
 	double w1 = 0, w2 = 0;
 	for(tie(it1, it2) = gr.in_edges(v); it1 != it2; it1++)
@@ -1161,7 +1175,7 @@ int scallop3::print()
 	int p2 = gr.compute_decomp_paths();
 	printf("statistics: %lu edges, %d vertices, total %d paths, %d required\n", gr.num_edges(), n, p1, p2);
 
-	//hs.print();
+	hs.print();
 
 	if(output_tex_files == true)
 	{
