@@ -9,6 +9,7 @@
 #include "splice_graph.h"
 #include "hyper_set.h"
 #include "path.h"
+#include "segment.h"
 
 using namespace std;
 
@@ -20,16 +21,13 @@ public:
 
 public:
 	vector<junction> junctions;		// splice junctions
-	vector<PPI> lsoft;				// left soft positions 
-	vector<PPI> rsoft;				// right soft positions
-	vector<PPI> lhard;				// left hard positions 
-	vector<PPI> rhard;				// right hard positions
 	splice_graph jr;				// junction graph
 	vector<region> regions;			// regions
 	vector<partial_exon> pexons;	// partial exons
 	split_interval_map pmap;		// partial exon map
 	splice_graph gr;				// splice graph
 	hyper_set hs;					// hyper edges
+	vector<segment> segments;		// segments
 
 public:
 	virtual int build();
@@ -47,7 +45,6 @@ private:
 
 	// junction graph, for paired-end reads
 	int build_junctions();
-	int build_clips();
 	int build_junction_graph();
 	int draw_junction_graph(const string &file);
 	int search_junction_graph(int32_t p);
@@ -73,6 +70,5 @@ private:
 	// store the corresponding pexons in each junction
 	int link_partial_exons();
 };
-
 
 #endif

@@ -23,7 +23,6 @@ int bundle::build()
 	compute_strand();
 	check_left_ascending();
 	build_junctions();
-	//build_clips();
 
 	if(junctions.size() <= 0 && ignore_single_exon_transcripts == true) return 0;
 
@@ -101,47 +100,6 @@ int bundle::build_junctions()
 		if(it->second < min_splice_boundary_hits) continue;
 		junctions.push_back(junction(it->first, it->second));
 	}
-	return 0;
-}
-
-int bundle::build_clips()
-{
-	MPI llsoft, rrsoft, llhard, rrhard;
-	for(int i = 0; i < hits.size(); i++)
-	{
-		PI soft, hard;
-		hits[i].get_clips(soft, hard);
-
-		if(soft.first != -1)
-		{
-			if(llsoft.find(soft.first) == llsoft.end()) llsoft.insert(PPI(soft.first, 1));
-			else llsoft[soft.first]++;
-		}
-
-		if(soft.second != -1)
-		{
-			if(rrsoft.find(soft.second) == rrsoft.end()) rrsoft.insert(PPI(soft.second, 1));
-			else rrsoft[soft.second]++;
-		}
-
-		if(hard.first != -1)
-		{
-			if(llhard.find(hard.first) == llhard.end()) llhard.insert(PPI(hard.first, 1));
-			else llhard[hard.first]++;
-		}
-
-		if(hard.second != -1)
-		{
-			if(rrhard.find(hard.second) == rrhard.end()) rrhard.insert(PPI(hard.second, 1));
-			else rrhard[hard.second]++;
-		}
-	}
-
-	for(MPI::iterator it = llsoft.begin(); it != llsoft.end(); it++) lsoft.push_back(PPI(it->first, it->second));
-	for(MPI::iterator it = rrsoft.begin(); it != rrsoft.end(); it++) rsoft.push_back(PPI(it->first, it->second));
-	for(MPI::iterator it = llhard.begin(); it != llhard.end(); it++) lhard.push_back(PPI(it->first, it->second));
-	for(MPI::iterator it = rrhard.begin(); it != rrhard.end(); it++) rhard.push_back(PPI(it->first, it->second));
-
 	return 0;
 }
 
