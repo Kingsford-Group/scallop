@@ -18,7 +18,7 @@ public:
 	split_interval_map imap;
 
 public:
-	int compare(const string &file);
+	int compare(const string &texfile = "");
 
 private:
 	int build_split_interval_map(splice_graph &gr);

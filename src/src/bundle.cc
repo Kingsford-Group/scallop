@@ -27,7 +27,6 @@ int bundle::build()
 	if(junctions.size() <= 0 && ignore_single_exon_transcripts == true) return 0;
 
 	build_junction_graph();
-
 	//draw_junction_graph("jr.tex");
 
 	build_regions();
@@ -36,7 +35,9 @@ int bundle::build()
 	link_partial_exons();
 	build_splice_graph();
 	build_hyper_edges2();
-	assign_edge_info_weights();
+	//assign_edge_info_weights();
+
+	build_segments();
 	return 0;
 }
 
@@ -782,6 +783,65 @@ int bundle::assign_edge_info_weights()
 	return 0;
 }
 
+int bundle::build_segments()
+{
+	int k = 1;
+	while(true)
+	{
+		segment s(&mmap);
+		build_segment(s, k);
+		assert(s.pexons.size() >= 1);
+		segments.push_back(s);
+		k += s.pexons.size();
+		if(k >= gr.num_vertices() - 1) break;
+	}
+	return 0;
+}
+
+int bundle::build_segment(segment &s, int k)
+{
+	if(k == 0) return 0;
+	if(k >= gr.num_vertices() - 1) return 0;
+
+	s.add_partial_exon(k - 1, pexons[k - 1], 0);
+	if(k >= gr.num_vertices() - 2) return 0;
+
+	if(gr.out_degree(k) >= 3) return 0;
+	if(gr.out_degree(k) <= 0) return 0;
+
+	if(gr.out_degree(k) == 2)
+	{
+		if(k + 2 >= gr.num_vertices() - 1) return 0;
+		int32_t p1 = pexons[k - 1].rpos;
+		int32_t p2 = pexons[k].lpos;
+		int32_t p3 = pexons[k].rpos;
+		int32_t p4 = pexons[k + 1].lpos;
+		//if(p1 != p2) return 0;
+		//if(p3 != p4) return 0;
+		PEB eb1 = gr.edge(k, k + 1);
+		PEB eb2 = gr.edge(k, k + 2);
+		PEB eb3 = gr.edge(k + 1, k + 2);
+		if(eb1.second == false) return 0;
+		if(eb2.second == false) return 0;
+		if(eb3.second == false) return 0;
+
+		double w = gr.get_edge_weight(eb2.first);
+		s.add_partial_exon(k, pexons[k], w);
+
+		return build_segment(s, k + 2);
+	}
+
+	if(gr.out_degree(k) == 1)
+	{
+		PEB eb1 = gr.edge(k, k + 1);
+		if(eb1.second == false) return 0;
+		if(gr.in_degree(k + 1) >= 2) return 0;
+		return build_segment(s, k + 1);
+	}
+
+	return 0;
+}
+
 int bundle::print(int index)
 {
 	printf("\nBundle %d: ", index);
@@ -826,6 +886,9 @@ int bundle::print(int index)
 
 	// print hyper-edges
 	hs.print();
+
+	// print segments
+	for(int i = 0; i < segments.size(); i++) segments[i].print(i);
 
 	// print clips
 	/*

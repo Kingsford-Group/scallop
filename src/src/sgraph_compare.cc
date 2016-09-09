@@ -18,7 +18,7 @@ int sgraph_compare::compare(const string &file)
 	add_existing_edges(gr1, gr3, 3);
 	add_existing_edges(gr2, gr3, 4);
 
-	draw(gr3, file);
+	if(file != "") draw(gr3, file);
 
 	compare_boundary_edges();
 	compare_splice_positions();

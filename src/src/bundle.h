@@ -67,6 +67,10 @@ private:
 	int build_splice_graph();			// weights from junctions
 	int assign_edge_info_weights();		// weights from hyper edges
 
+	// segments
+	int build_segments();
+	int build_segment(segment &s, int k);
+
 	// store the corresponding pexons in each junction
 	int link_partial_exons();
 };

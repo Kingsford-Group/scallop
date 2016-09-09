@@ -118,6 +118,10 @@ int assembler::process(const bundle_base &bb)
 	bd.print(index);
 	//bd.gr.print_weights();
 
+	if(ref_file1 != "" && bd.strand == '+') compare(bd.gr, ref_file1, "compare1.tex");
+	if(ref_file2 != "" && bd.strand == '-') compare(bd.gr, ref_file2, "compare2.tex");
+	return 0;
+
 	super_graph sg(bd.gr, bd.hs);
 	sg.build();
 
@@ -177,7 +181,6 @@ int assembler::compare(splice_graph &gr, const string &file, const string &texfi
 
 	sgraph_compare sgc(gt, gr);
 	sgc.compare(texfile);
-	//sgc.compare(string("compare.") + tostring(index) + string(".tex"));
 
 	return 0;
 }
