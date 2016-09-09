@@ -795,6 +795,11 @@ int bundle::build_segments()
 		k += s.pexons.size();
 		if(k >= gr.num_vertices() - 1) break;
 	}
+
+	for(int i = 0; i < segments.size(); i++)
+	{
+		segments[i].build();
+	}
 	return 0;
 }
 
