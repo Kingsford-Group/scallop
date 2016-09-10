@@ -6,11 +6,12 @@
 class slope
 {
 public:
-	slope(int t, int x, int s, double sg, int32_t l, int32_t r);
+	slope(int t, int lbin, int rbin, int s, double sg);
 
 public:
 	int type;			// 5end or 3end
-	int xbin;			// index in bsets
+	int lbin;			// index in bsets
+	int rbin;			// index in bsets
 	int score;			// the likelihood of being a slope
 	double sigma;		// variance sigma
 	int32_t lpos;		// left position
@@ -23,5 +24,6 @@ public:
 };
 
 bool compare_slope_score(const slope &x, const slope &y);
+bool compare_slope_pos(const slope &x, const slope &y);
 
 #endif

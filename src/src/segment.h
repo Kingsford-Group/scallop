@@ -18,11 +18,14 @@ public:
 public:
 	const split_interval_map *imap;	// pointer to a interval map
 	vector<int> plist;				// partial exon index
-	vector<partial_exon> pexons;	// exons in this segment
+	vector<partial_exon> pxs;		// exons in this segment
 	vector<double> offsets;			// weight offset
 	vector<int> nbins;				// #bins for each pexon
 	vector<int> bsets;				// set of bins
 	vector<slope> seeds;			// candidate slopes
+	vector<slope> slopes;			// chosen slopes
+
+	vector<partial_exon> pexons;	// generated partial exons
 
 public:
 	int clear();
@@ -31,7 +34,10 @@ public:
 	int build_bin_sets();
 	int build_bins(const partial_exon &pe, vector<int> &bins, int offset);
 	int build_seeds();
+	int select_slopes(int s, int t);
+	int build_partial_exons();
 	int print(int index) const;
+	int size() const;
 
 private:
 	int32_t get_left_position(int x);

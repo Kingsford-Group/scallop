@@ -34,10 +34,15 @@ int bundle::build()
 	build_partial_exon_map();
 	link_partial_exons();
 	build_splice_graph();
-	build_hyper_edges2();
-	//assign_edge_info_weights();
 
 	build_segments();
+	update_partial_exons();
+	build_partial_exon_map();
+
+	link_partial_exons();
+	build_splice_graph();
+	build_hyper_edges2();
+
 	return 0;
 }
 
@@ -602,6 +607,7 @@ int bundle::link_partial_exons()
 	{
 		int32_t l = pexons[i].lpos;
 		int32_t r = pexons[i].rpos;
+
 		assert(lm.find(l) == lm.end());
 		assert(rm.find(r) == rm.end());
 		lm.insert(PPI(l, i));
@@ -788,12 +794,12 @@ int bundle::build_segments()
 	int k = 1;
 	while(true)
 	{
+		if(k >= gr.num_vertices() - 1) break;
 		segment s(&mmap);
 		build_segment(s, k);
-		assert(s.pexons.size() >= 1);
+		assert(s.size() >= 1);
 		segments.push_back(s);
-		k += s.pexons.size();
-		if(k >= gr.num_vertices() - 1) break;
+		k += s.size();
 	}
 
 	for(int i = 0; i < segments.size(); i++)
@@ -847,6 +853,17 @@ int bundle::build_segment(segment &s, int k)
 	return 0;
 }
 
+int bundle::update_partial_exons()
+{
+	pexons.clear();
+	for(int i = 0; i < segments.size(); i++)
+	{
+		segment &s = segments[i];
+		pexons.insert(pexons.end(), s.pexons.begin(), s.pexons.end());
+	}
+	return 0;
+}
+
 int bundle::print(int index)
 {
 	printf("\nBundle %d: ", index);
@@ -890,10 +907,10 @@ int bundle::print(int index)
 	}
 
 	// print hyper-edges
-	hs.print();
+	//hs.print();
 
 	// print segments
-	for(int i = 0; i < segments.size(); i++) segments[i].print(i);
+	//for(int i = 0; i < segments.size(); i++) segments[i].print(i);
 
 	// print clips
 	/*

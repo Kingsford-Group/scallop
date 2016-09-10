@@ -19,8 +19,8 @@ using namespace std;
 #define TRIVIAL 0
 #define NORMAL 1
 
-#define SLOPE5END 0
-#define SLOPE3END 1
+#define SLOPE5END START_BOUNDARY
+#define SLOPE3END END_BOUNDARY
 
 #define SLOPE_MARGIN 0
 #define SLOPE_MIDDLE 1

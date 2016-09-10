@@ -70,6 +70,7 @@ private:
 	// segments
 	int build_segments();
 	int build_segment(segment &s, int k);
+	int update_partial_exons();
 
 	// store the corresponding pexons in each junction
 	int link_partial_exons();
