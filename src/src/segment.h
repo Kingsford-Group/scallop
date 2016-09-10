@@ -32,6 +32,10 @@ public:
 	int build_bins(const partial_exon &pe, vector<int> &bins, int offset);
 	int build_seeds();
 	int print(int index) const;
+
+private:
+	int32_t get_left_position(int x);
+	int32_t get_right_position(int x);
 };
 
 #endif

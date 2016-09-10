@@ -99,29 +99,59 @@ int segment::build_seeds()
 	int bin_num = slope_bin_num;
 	if(bsets.size() < bin_num) return 0;
 
-	assert(bin_num % 2 == 0);
-	int d = bin_num / 2;
+	assert(bin_num % 3 == 0);
+	int d = bin_num / 3;
 
 	for(int i = 0; i < bsets.size() - bin_num; i++)
 	{
-		double ave1, ave2, dev1, dev2;
-		compute_mean_dev(bsets, i, i + d, ave1, dev1);
-		compute_mean_dev(bsets, i + d, i + 2 * d, ave2, dev2);
+		double ave1, ave2, ave3, dev1, dev2, dev3;
+		compute_mean_dev(bsets, i + 0 * d, i + 1 * d, ave1, dev1);
+		compute_mean_dev(bsets, i + 1 * d, i + 2 * d, ave2, dev2);
+		compute_mean_dev(bsets, i + 2 * d, i + 3 * d, ave3, dev3);
+
 		int xx = ave1 * d * slope_bin_size / average_read_length;
 		int yy = ave2 * d * slope_bin_size / average_read_length;
-		int score5 = compute_binomial_score(xx + yy, 0.5, yy);
-		int score3 = compute_binomial_score(xx + yy, 0.5, xx);
+		int zz = ave3 * d * slope_bin_size / average_read_length;
 
-		if(score5 > slope_min_score)
+		int32_t p1 = get_left_position(i + 0 * d);
+		int32_t p2 = get_left_position(i + 1 * d);
+		int32_t p3 = get_left_position(i + 2 * d);
+		int32_t p4 = get_left_position(i + 3 * d);
+
+		int s1 = compute_binomial_score(xx + yy, 0.5, yy);
+		int s2 = compute_binomial_score(yy + zz, 0.5, zz);
+		int s3 = compute_binomial_score(xx + zz, 0.5, zz);
+
+		double t1 = (ave2 - ave1) / dev1;
+		double t2 = (ave3 - ave2) / dev2;
+		double t3 = (ave3 - ave1) / dev1;
+
+		if(s3 > slope_min_score && t3 >= slope_min_sigma)
 		{
-			slope s5(SLOPE5END, i + d, score5, (ave2 - ave1) / dev1);
-			seeds.push_back(s5);
+			slope sp(SLOPE5END, i + d, s3, t3, p2, p3);
+			sp.score1 = s1;
+			sp.score2 = s2;
+			sp.sigma1 = t1;
+			sp.sigma2 = t2;
+			seeds.push_back(sp);
 		}
 
-		if(score3 > slope_min_score)
+		s1 = compute_binomial_score(xx + yy, 0.5, xx);
+		s2 = compute_binomial_score(yy + zz, 0.5, yy);
+		s3 = compute_binomial_score(xx + zz, 0.5, xx);
+
+		t1 = (ave1 - ave2) / dev2;
+		t2 = (ave2 - ave3) / dev3;
+		t3 = (ave1 - ave3) / dev3;
+
+		if(s3 > slope_min_score && t3 >= slope_min_sigma)
 		{
-			slope s3(SLOPE3END, i + d, score3, (ave1 - ave2) / dev2);
-			seeds.push_back(s3);
+			slope sp(SLOPE3END, i + d, s3, t3, p2, p3);
+			sp.score1 = s1;
+			sp.score2 = s2;
+			sp.sigma1 = t1;
+			sp.sigma2 = t2;
+			seeds.push_back(sp);
 		}
 	}
 
@@ -129,6 +159,40 @@ int segment::build_seeds()
 
 	//for(int i = 0; i < seeds.size(); i++) seeds[i].print(i);
 
+	return 0;
+}
+
+int segment::get_left_position(int x)
+{
+	int s = 0;
+	for(int i = 0; i < nbins.size(); i++)
+	{
+		if(s + nbins[i] <= x) 
+		{
+			s += nbins[i];
+			continue;
+		}
+		return pexons[i].lpos + (x - s) * slope_bin_size;
+	}
+	assert(false);
+	return 0;
+}
+
+int segment::get_right_position(int x)
+{
+	int s = 0;
+	for(int i = 0; i < nbins.size(); i++)
+	{
+		if(s + nbins[i] <= x)
+		{
+			s += nbins[i];
+			continue;
+		}
+		partial_exon &pe = pexons[i];
+		if(x - s == nbins[i] - 1) return pe.rpos;
+		else return pe.lpos + (x - s + 1) * slope_bin_size;
+	}
+	assert(false);
 	return 0;
 }
 
