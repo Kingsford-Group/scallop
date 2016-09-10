@@ -60,7 +60,7 @@ int segment::build_bins(const partial_exon &pe, vector<int> &bins, int offset)
 
 	SIMI lit, rit;
 	tie(lit, rit) = locate_boundary_iterators(*imap, pe.lpos, pe.rpos);
-	for(SIMI it = lit; ; it++)
+	for(SIMI it = lit; lit != imap->end(); it++)
 	{
 		int o = it->second;
 		int32_t l = lower(it->first);

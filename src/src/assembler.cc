@@ -120,7 +120,6 @@ int assembler::process(const bundle_base &bb)
 
 	if(ref_file1 != "" && bd.strand == '+') compare(bd.gr, ref_file1, "compare1.tex");
 	if(ref_file2 != "" && bd.strand == '-') compare(bd.gr, ref_file2, "compare2.tex");
-	return 0;
 
 	super_graph sg(bd.gr, bd.hs);
 	sg.build();
