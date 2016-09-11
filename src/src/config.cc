@@ -39,8 +39,10 @@ int pseudo_length_count = 10;
 bool use_paired_end = false;
 int max_equations_each_iteration = 50;
 double max_ignorable_edge_weight = 5.5;
+int min_boundary_length = 50;
 int min_boundary_score = 1000;
 double min_boundary_sigma = 3.0;
+int32_t partial_exon_length = 100;
 
 // for algorithm
 double join_min_reliability = 0.6;
@@ -109,8 +111,10 @@ int print_parameters()
 	printf("strand_reverse = %c\n", strand_reverse ? 'T' : 'F');
 	printf("ignore_single_exon_transcripts = %c\n", ignore_single_exon_transcripts ? 'T' : 'F');
 	printf("max_ignorable_edge_weight = %.2lf\n", max_ignorable_edge_weight);
+	printf("min_boundary_length = %d\n", min_boundary_length);
 	printf("min_boundary_score = %d\n", min_boundary_score);
 	printf("min_boundary_signma = %.2lf\n", min_boundary_sigma);
+	printf("partial_exon_length = %.2lf\n", partial_exon_length);
 
 	// for algorithm
 	printf("join_min_reliability = %.2lf\n", join_min_reliability);
@@ -205,9 +209,19 @@ bool parse_arguments(int argc, const char ** argv)
 		{
 			ignore_single_exon_transcripts = true;
 		}
-		else if(string(argv[i]) == "-x")
+		else if(string(argv[i]) == "-x1")
 		{
-			transcript_min_expression = atof(argv[i + 1]);
+			min_boundary_length = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "-x2")
+		{
+			min_boundary_score = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "-x3")
+		{
+			min_boundary_sigma = atof(argv[i + 1]);
 			i++;
 		}
 	}
