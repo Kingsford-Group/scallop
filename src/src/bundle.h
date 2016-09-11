@@ -69,6 +69,7 @@ private:
 	int build_hyper_edges2();			// paired end
 	int build_splice_graph();			// weights from junctions
 	int assign_edge_info_weights();		// weights from hyper edges
+	int split_partial_exons();
 
 	// store the corresponding pexons in each junction
 	int link_partial_exons();
