@@ -46,6 +46,9 @@ private:
 	int add_pseudo_hyper_edges();
 	int extend_isolated_start_boundaries();
 	int extend_isolated_end_boundaries();
+	int identify_boundary_edges();
+	int identify_5end(int x, double &score, double &sigma);
+	int identify_3end(int x, double &score, double &sigma);
 
 	// resolve iteratively
 	bool resolve_ignorable_edges();

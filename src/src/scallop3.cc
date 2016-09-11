@@ -32,6 +32,7 @@ int scallop3::assemble()
 	classify();
 	extend_isolated_start_boundaries();
 	extend_isolated_end_boundaries();
+	identify_boundary_edges();
 
 	while(true)
 	{
@@ -564,6 +565,46 @@ int scallop3::extend_isolated_start_boundaries()
 
 		printf("extend isolated start boundary (%d, %d) -> %d\n", k1, k2, n);
 	}
+	return 0;
+}
+
+int scallop3::identify_boundary_edges()
+{
+	double score5 = -1, sigma5 = -1;
+	double score3 = -1, sigma3 = -1;
+	int k5 = -1, k3 = -1;
+	for(int i = 1; i < gr.num_vertices(); i++)
+	{
+		double score, sigma;
+		identify_5end(i, score, sigma);
+		if(score <= score5) continue;
+		score5 = score;
+		sigma5 = sigma;
+		k5 = i;
+	}
+	for(int i = 1; i < gr.num_vertices(); i++)
+	{
+		double score, sigma;
+		identify_3end(i, score, sigma);
+		if(score <= score3) continue;
+		score3 = score;
+		sigma3 = sigma;
+		k3 = i;
+	}
+
+	printf("maximum 5end vertex = %d, score = %.2lf, sigma = %.2lf, maximum 5end vertex = %d, score = %.2lf, sigma = %.2lf\n",
+			k5, score5, sigma5, k3, score3, sigma3);
+
+	return 0;
+}
+
+int scallop3::identify_3end(int x, double &score, double &sigma)
+{
+	return 0;
+}
+
+int scallop3::identify_5end(int x, double &score, double &sigma)
+{
 	return 0;
 }
 
