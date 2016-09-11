@@ -34,14 +34,16 @@ int bundle::build()
 	build_partial_exon_map();
 	link_partial_exons();
 	build_splice_graph();
+	build_hyper_edges2();
 
+	/*
 	build_segments();
 	update_partial_exons();
 	build_partial_exon_map();
-
 	link_partial_exons();
 	build_splice_graph();
 	build_hyper_edges2();
+	*/
 
 	return 0;
 }
@@ -747,6 +749,41 @@ int bundle::build_splice_graph()
 	}
 
 
+	return 0;
+}
+
+int bundle::split_partial_exons()
+{
+	vector<partial_exon> vv;
+	for(int i = 0; i < pexons.size(); i++)
+	{
+		partial_exon &pe = pexons[i];
+		int n = (pe.rpos - pe.lpos) / partial_exon_length;
+
+		if(n <= 1)
+		{
+			vv.push_back(pe);
+			continue;
+		}
+
+		int32_t len = (pe.rpos - pe.lpos) / n;
+		for(int k = 0; k < n; k++)
+		{
+			int lltype = (k == 0) ? pe.ltype : MIDDLE_CUT;
+			int rrtype = (k == n - 1) ? pe.rtype : MIDDLE_CUT;
+
+			int32_t p1 = pe.lpos + k * len;
+			int32_t p2 = pe.lpos + (k + 1) * len;
+			assert(p2 <= pe.rpos);
+			if(k == n - 1) p2 = pe.rpos;
+
+			partial_exon p(p1, p2, lltype, rrtype);
+			evaluate_rectangle(mmap, p.lpos, p.rpos, p.ave, p.dev);
+			vv.push_back(p);
+		}
+	}
+
+	pexons = vv;
 	return 0;
 }
 
