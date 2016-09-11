@@ -39,9 +39,9 @@ int pseudo_length_count = 10;
 bool use_paired_end = false;
 int max_equations_each_iteration = 50;
 double max_ignorable_edge_weight = 5.5;
-int min_boundary_length = 50;
+int min_boundary_length = 80;
 int min_boundary_score = 1000;
-double min_boundary_sigma = 3.0;
+double min_boundary_sigma = 4.0;
 int32_t partial_exon_length = 100;
 
 // for algorithm
@@ -114,7 +114,7 @@ int print_parameters()
 	printf("min_boundary_length = %d\n", min_boundary_length);
 	printf("min_boundary_score = %d\n", min_boundary_score);
 	printf("min_boundary_signma = %.2lf\n", min_boundary_sigma);
-	printf("partial_exon_length = %.2lf\n", partial_exon_length);
+	printf("partial_exon_length = %d\n", partial_exon_length);
 
 	// for algorithm
 	printf("join_min_reliability = %.2lf\n", join_min_reliability);
