@@ -688,32 +688,6 @@ int bundle::build_splice_graph()
 		gr.set_edge_weight(p, b.count);
 	}
 
-	// edges: connecting adjacent pexons => e2w
-	for(int i = 0; i < (int)(pexons.size()) - 1; i++)
-	{
-		const partial_exon &x = pexons[i];
-		const partial_exon &y = pexons[i + 1];
-
-		if(x.rpos != y.lpos) continue;
-
-		assert(x.rpos == y.lpos);
-		
-		// TODO
-		int xd = gr.out_degree(i + 1);
-		int yd = gr.in_degree(i + 2);
-		double wt = (xd < yd) ? x.ave : y.ave;
-		//int32_t xr = compute_overlap(mmap, x.rpos - 1);
-		//int32_t yl = compute_overlap(mmap, y.lpos);
-		//double wt = xr < yl ? xr : yl;
-
-		edge_descriptor p = gr.add_edge(i + 1, i + 2);
-		double w = (wt < 1.0) ? 1.0 : wt;
-		gr.set_edge_weight(p, w);
-		edge_info ei;
-		ei.weight = w;
-		gr.set_edge_info(p, ei);
-	}
-
 	// edges: connecting start/end and pexons
 	int ss = 0;
 	int tt = pexons.size() + 1;
@@ -745,6 +719,33 @@ int bundle::build_splice_graph()
 			gr.set_edge_info(p, ei);
 		}
 	}
+
+	// edges: connecting adjacent pexons => e2w
+	for(int i = 0; i < (int)(pexons.size()) - 1; i++)
+	{
+		const partial_exon &x = pexons[i];
+		const partial_exon &y = pexons[i + 1];
+
+		if(x.rpos != y.lpos) continue;
+
+		assert(x.rpos == y.lpos);
+		
+		// TODO
+		int xd = gr.out_degree(i + 1);
+		int yd = gr.in_degree(i + 2);
+		double wt = (xd < yd) ? x.ave : y.ave;
+		//int32_t xr = compute_overlap(mmap, x.rpos - 1);
+		//int32_t yl = compute_overlap(mmap, y.lpos);
+		//double wt = xr < yl ? xr : yl;
+
+		edge_descriptor p = gr.add_edge(i + 1, i + 2);
+		double w = (wt < 1.0) ? 1.0 : wt;
+		gr.set_edge_weight(p, w);
+		edge_info ei;
+		ei.weight = w;
+		gr.set_edge_info(p, ei);
+	}
+
 
 	return 0;
 }
@@ -910,7 +911,7 @@ int bundle::print(int index)
 	//hs.print();
 
 	// print segments
-	//for(int i = 0; i < segments.size(); i++) segments[i].print(i);
+	for(int i = 0; i < segments.size(); i++) segments[i].print(i);
 
 	// print clips
 	/*

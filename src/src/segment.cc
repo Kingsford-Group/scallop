@@ -127,11 +127,11 @@ int segment::build_seeds()
 		double t3 = (ave3 - ave1) / dev1;
 
 		bool b = (s3 >= slope_min_score);
-		b = (b && (s1 >= 0.3 * slope_min_score));
-		b = (b && (s2 >= 0.3 * slope_min_score));
+		b = (b && (s1 >= 0.25 * slope_min_score));
+		b = (b && (s2 >= 0.25 * slope_min_score));
 		b = (b && (t3 >= slope_min_sigma));
-		b = (b && (t1 >= slope_min_sigma * 0.5));
-		b = (b && (t2 >= slope_min_sigma * 0.5));
+		b = (b && (t1 >= slope_min_sigma * 0.4));
+		b = (b && (t2 >= slope_min_sigma * 0.4));
 	
 		if(b == true)
 		{
@@ -154,11 +154,11 @@ int segment::build_seeds()
 		t3 = (ave1 - ave3) / dev3;
 
 		b = (s3 >= slope_min_score);
-		b = (b && (s1 >= 0.3 * slope_min_score));
-		b = (b && (s2 >= 0.3 * slope_min_score));
+		b = (b && (s1 >= 0.25 * slope_min_score));
+		b = (b && (s2 >= 0.25 * slope_min_score));
 		b = (b && (t3 >= slope_min_sigma));
-		b = (b && (t1 >= slope_min_sigma * 0.5));
-		b = (b && (t2 >= slope_min_sigma * 0.5));
+		b = (b && (t1 >= slope_min_sigma * 0.4));
+		b = (b && (t2 >= slope_min_sigma * 0.4));
 
 		if(b == true)
 		{
@@ -298,6 +298,7 @@ int segment::size() const
 
 int segment::print(int index) const
 {
+	/*
 	printf("segment %d: \n", index);
 	for(int i = 0; i < pxs.size(); i++)
 	{
@@ -308,13 +309,16 @@ int segment::print(int index) const
 	{
 		seeds[i].print(i);
 	}
+	*/
 	for(int i = 0; i < slopes.size(); i++)
 	{
 		slopes[i].print(i);
 	}
+	/*
 	for(int i = 0; i < pexons.size(); i++)
 	{
 		pexons[i].print(i);
 	}
+	*/
 	return 0;
 }
