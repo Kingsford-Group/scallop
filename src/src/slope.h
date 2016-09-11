@@ -16,8 +16,8 @@ public:
 	double sigma;		// variance sigma
 	int32_t lpos;		// left position
 	int32_t rpos;		// right position
-	int score1, score2;
-	double sigma1, sigma2;
+	int score0, score1, score2;
+	double sigma0, sigma1, sigma2;
 
 public:
 	int print(int index) const;
