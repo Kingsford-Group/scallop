@@ -271,7 +271,7 @@ bool super_graph::cut_single_splice_graph(splice_graph &gr, int index)
 		tt.push_back(s);
 	}
 
-	double max_sum = 0;
+	double max_sum = 3;
 	int min_size = 5;
 
 	double ksum = max_sum + 1.0, kave = 0, kmin = 0;
