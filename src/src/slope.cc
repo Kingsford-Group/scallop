@@ -4,12 +4,14 @@
 slope::slope(int t, int lb, int rb, int s, double sg)
 	: type(t), lbin(lb), rbin(rb), score(s), sigma(sg)
 {
+	score0 = score1 = score2 = 0;
+	sigma0 = sigma1 = sigma2 = 0;
 }
 
 int slope::print(int index) const
 {
-	printf("slope %d: type = %s, bins = %d-%d, positions = %d-%d, score = %d (%d, %d), sigma = %.2lf (%.2lf, %.2lf)\n", 
-			index, type == 0 ? "5end" : "3end", lbin, rbin, lpos, rpos, score, score1, score2, sigma, sigma1, sigma2);
+	printf("slope %d: type = %d, bins = %d-%d, positions = %d-%d, score = %d (%d, %d, %d), sigma = %.2lf (%.2lf, %.2lf, %.2lf)\n", 
+			index, type, lbin, rbin, lpos, rpos, score, score0, score1, score2, sigma, sigma0, sigma1, sigma2);
 	return 0;
 }
 

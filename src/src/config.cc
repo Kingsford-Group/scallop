@@ -28,7 +28,7 @@ double min_region_coverage = 0.5;
 int max_num_bundles = -1;
 int tail_coverage = 8;
 int slope_bin_size = 10;
-int slope_bin_num = 39;
+int slope_bin_num = 20;
 int slope_min_score = 1000;
 double slope_min_sigma = 5.0;
 int pseudo_length_count = 10;
@@ -197,9 +197,19 @@ bool parse_arguments(int argc, const char ** argv)
 		{
 			ignore_single_exon_transcripts = true;
 		}
-		else if(string(argv[i]) == "-x")
+		else if(string(argv[i]) == "-x1")
 		{
-			transcript_min_expression = atof(argv[i + 1]);
+			slope_bin_num = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "-x2")
+		{
+			slope_min_score = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "-x3")
+		{
+			slope_min_sigma = atof(argv[i + 1]);
 			i++;
 		}
 	}

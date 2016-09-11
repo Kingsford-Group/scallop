@@ -1175,7 +1175,7 @@ int scallop3::print()
 	int p2 = gr.compute_decomp_paths();
 	printf("statistics: %lu edges, %d vertices, total %d paths, %d required\n", gr.num_edges(), n, p1, p2);
 
-	hs.print();
+	//hs.print();
 
 	if(output_tex_files == true)
 	{

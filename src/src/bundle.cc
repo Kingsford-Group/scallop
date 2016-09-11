@@ -828,8 +828,10 @@ int bundle::build_segment(segment &s, int k)
 		int32_t p2 = pexons[k].lpos;
 		int32_t p3 = pexons[k].rpos;
 		int32_t p4 = pexons[k + 1].lpos;
-		//if(p1 != p2) return 0;
-		//if(p3 != p4) return 0;
+
+		if(p1 != p2) return 0;
+		if(p3 != p4) return 0;
+
 		PEB eb1 = gr.edge(k, k + 1);
 		PEB eb2 = gr.edge(k, k + 2);
 		PEB eb3 = gr.edge(k + 1, k + 2);
@@ -848,6 +850,11 @@ int bundle::build_segment(segment &s, int k)
 		PEB eb1 = gr.edge(k, k + 1);
 		if(eb1.second == false) return 0;
 		if(gr.in_degree(k + 1) >= 2) return 0;
+
+		int32_t p1 = pexons[k - 1].rpos;
+		int32_t p2 = pexons[k].lpos;
+		if(p1 != p2) return 0;
+
 		return build_segment(s, k + 1);
 	}
 

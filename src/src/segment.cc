@@ -101,74 +101,57 @@ int segment::build_seeds()
 	int bin_num = slope_bin_num;
 	if(bsets.size() < bin_num) return 0;
 
-	assert(bin_num % 3 == 0);
-	int d = bin_num / 3;
+	int n = 2;
+	assert(bin_num % n == 0);
+	int d = bin_num / n;
 
 	for(int i = 0; i < bsets.size() - bin_num; i++)
 	{
-		double ave1, ave2, ave3, dev1, dev2, dev3;
-		compute_mean_dev(bsets, i + 0 * d, i + 1 * d, ave1, dev1);
-		compute_mean_dev(bsets, i + 1 * d, i + 2 * d, ave2, dev2);
-		compute_mean_dev(bsets, i + 2 * d, i + 3 * d, ave3, dev3);
+		vector<double> ave(n);
+		vector<double> dev(n);
+		vector<int> cnt(n);
+		vector<int> score(n);
+		vector<double> sigma(n);
 
-		int xx = ave1 * d * slope_bin_size / average_read_length;
-		int yy = ave2 * d * slope_bin_size / average_read_length;
-		int zz = ave3 * d * slope_bin_size / average_read_length;
-
-		int32_t p2 = get_left_position(i + 1 * d);
-		int32_t p3 = get_right_position(i + 2 * d - 1);
-
-		int s1 = compute_binomial_score(xx + yy, 0.5, yy);
-		int s2 = compute_binomial_score(yy + zz, 0.5, zz);
-		int s3 = compute_binomial_score(xx + zz, 0.5, zz);
-
-		double t1 = (ave2 - ave1) / dev1;
-		double t2 = (ave3 - ave2) / dev2;
-		double t3 = (ave3 - ave1) / dev1;
-
-		bool b = (s3 >= slope_min_score);
-		b = (b && (s1 >= 0.25 * slope_min_score));
-		b = (b && (s2 >= 0.25 * slope_min_score));
-		b = (b && (t3 >= slope_min_sigma));
-		b = (b && (t1 >= slope_min_sigma * 0.4));
-		b = (b && (t2 >= slope_min_sigma * 0.4));
-	
-		if(b == true)
+		for(int k = 0; k < n; k++) 
 		{
-			slope sp(SLOPE5END, i + d, i + 2 * d, s3, t3);
-			sp.lpos = p2;
-			sp.rpos = p3;
-			sp.score1 = s1;
-			sp.score2 = s2;
-			sp.sigma1 = t1;
-			sp.sigma2 = t2;
+			compute_mean_dev(bsets, i + k * d, i + (k + 1) * d, ave[k], dev[k]);
+			cnt[k] = ave[k] * d * slope_bin_size / average_read_length;
+		}
+
+		int32_t p1 = get_left_position(i + 1 * d);
+		int32_t p2 = get_right_position(i + (n - 1) * d - 1);
+		if(n <= 2) p2 = p1;
+
+		for(int k = 0; k < n - 1; k++)
+		{
+			score[k] = compute_binomial_score(cnt[k] + cnt[k + 1], 0.5, cnt[k + 1]);
+			sigma[k] = (ave[k + 1] - ave[k]) / dev[k];
+		}
+		score[n - 1] = compute_binomial_score(cnt[0] + cnt[n - 1], 0.5, cnt[n - 1]);
+		sigma[n - 1] = (ave[n - 1] - ave[0]) / dev[0];
+
+		if(score[n - 1] >= slope_min_score && sigma[n - 1] >= slope_min_sigma)
+		{
+			slope sp(SLOPE5END, i + d / 2, i + (n - 1) * d + d / 2, score[n - 1], sigma[n - 1]);
+			sp.lpos = p1;
+			sp.rpos = p2;
 			seeds.push_back(sp);
 		}
 
-		s1 = compute_binomial_score(xx + yy, 0.5, xx);
-		s2 = compute_binomial_score(yy + zz, 0.5, yy);
-		s3 = compute_binomial_score(xx + zz, 0.5, xx);
-
-		t1 = (ave1 - ave2) / dev2;
-		t2 = (ave2 - ave3) / dev3;
-		t3 = (ave1 - ave3) / dev3;
-
-		b = (s3 >= slope_min_score);
-		b = (b && (s1 >= 0.25 * slope_min_score));
-		b = (b && (s2 >= 0.25 * slope_min_score));
-		b = (b && (t3 >= slope_min_sigma));
-		b = (b && (t1 >= slope_min_sigma * 0.4));
-		b = (b && (t2 >= slope_min_sigma * 0.4));
-
-		if(b == true)
+		for(int k = 0; k < n - 1; k++)
 		{
-			slope sp(SLOPE3END, i + d, i + 2 * d, s3, t3);
-			sp.lpos = p2;
-			sp.rpos = p3;
-			sp.score1 = s1;
-			sp.score2 = s2;
-			sp.sigma1 = t1;
-			sp.sigma2 = t2;
+			score[k] = compute_binomial_score(cnt[k] + cnt[k + 1], 0.5, cnt[k]);
+			sigma[k] = (ave[k] - ave[k + 1]) / dev[k + 1];
+		}
+		score[n - 1] = compute_binomial_score(cnt[0] + cnt[n - 1], 0.5, cnt[0]);
+		sigma[n - 1] = (ave[0] - ave[n - 1]) / dev[n - 1];
+
+		if(score[n - 1] >= slope_min_score && sigma[n - 1] >= slope_min_sigma)
+		{
+			slope sp(SLOPE3END, i + d / 2, i + (n - 1) * d + d / 2, score[n - 1], sigma[n - 1]);
+			sp.lpos = p1;
+			sp.rpos = p2;
 			seeds.push_back(sp);
 		}
 	}
@@ -225,11 +208,29 @@ int segment::build_partial_exons()
 		int32_t p1 = pxs[i].lpos;
 		int32_t p2 = pxs[i].rpos;
 
-		if(p <= p1)
+		//printf("i = %d, j = %d, p = %d, p1 = %d, p2 = %d, type = %d (%d, %d)\n", i, j, p, p1, p2, x.type, SLOPE5END, SLOPE3END);
+
+		if(p == p1)
+		{
+			partial_exon pe = pxs[i];
+			pe.ltype = START_BOUNDARY;
+			pexons.push_back(pe);
+			i++;
+			j++;
+		}
+		else if(p == p2)
+		{
+			partial_exon pe = pxs[i];
+			pe.rtype = END_BOUNDARY;
+			pexons.push_back(pe);
+			i++;
+			j++;
+		}
+		else if(p < p1)
 		{
 			j++;
 		}
-		else if(p >= p2)
+		else if(p > p2)
 		{
 			pexons.push_back(pxs[i]);
 			i++;
@@ -298,7 +299,6 @@ int segment::size() const
 
 int segment::print(int index) const
 {
-	/*
 	printf("segment %d: \n", index);
 	for(int i = 0; i < pxs.size(); i++)
 	{
@@ -309,7 +309,6 @@ int segment::print(int index) const
 	{
 		seeds[i].print(i);
 	}
-	*/
 	for(int i = 0; i < slopes.size(); i++)
 	{
 		slopes[i].print(i);
