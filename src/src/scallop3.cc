@@ -204,18 +204,6 @@ bool scallop3::resolve_hyper_vertex()
 		hs.remove(se);
 	}
 
-	if(ratio > max_split_error_ratio) return false;
-
-	printf("split hyper vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
-
-	for(int i = 0; i < eqns.size(); i++) eqns[i].print(99);
-
-	equation &eqn = eqns[0];
-	assert(eqn.s.size() >= 1);
-	assert(eqn.t.size() >= 1);
-
-	split_vertex(root, eqn.s, eqn.t);
-
 	return true;
 }
 
