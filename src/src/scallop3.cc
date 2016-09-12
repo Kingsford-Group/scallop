@@ -95,6 +95,7 @@ int scallop3::refine_splice_graph()
 			if(gr.in_degree(s) >= 1 && gr.out_degree(t) >= 1) continue;
 
 			printf("refine graph by removing edge %d\n", e);
+			assert(false);
 
 			remove_edge(e);
 			hs.remove(e);
@@ -143,7 +144,7 @@ bool scallop3::resolve_hyper_tree()
 bool scallop3::resolve_hyper_vertex()
 {
 	int root = -1;
-	double ratio = -1;
+	double ratio1 = -1;
 	vector<equation> eqns;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
@@ -162,14 +163,47 @@ bool scallop3::resolve_hyper_vertex()
 		assert(rt.ratio >= 0);
 		assert(rt.eqns.size() == 2);
 
-		if(ratio >= 0 && ratio < rt.ratio) continue;
+		if(ratio1 >= 0 && ratio1 < rt.ratio) continue;
 
 		root = i;
-		ratio = rt.ratio;
+		ratio1 = rt.ratio;
 		eqns = rt.eqns;
 	}
 
 	if(root == -1) return false;
+
+	int se;
+	double ratio2 = compute_smallest_edge(root, se);
+	double sw = gr.get_edge_weight(i2e[se]);
+	double ratio = (ratio1 < ratio2) ? ratio1 : ratio2;
+	if(ratio > max_split_error_ratio) return false;
+
+	//if(ratio1 < ratio2 || sw > 2 * max_ignorable_edge_weight)
+	bool b = true;
+	if(hs.left_extend(se) || hs.right_extend(se)) b = false;
+	if(gr.in_degree(i2e[se]->target()) <= 1) b = false;
+	if(gr.out_degree(i2e[se]->source()) <= 1) b = false;
+	if(ratio1 < ratio2 || b == false)
+	{
+		printf("split hyper vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio1, gr.in_degree(root), gr.out_degree(root));
+
+		for(int i = 0; i < eqns.size(); i++) eqns[i].print(99);
+
+		equation &eqn = eqns[0];
+		assert(eqn.s.size() >= 1);
+		assert(eqn.t.size() >= 1);
+
+		split_vertex(root, eqn.s, eqn.t);
+	}
+	else
+	{
+		assert(se >= 0);
+		printf("remove small (hyper) edge %d of vertex %d, weight = %.2lf, ratio = %.2lf, degree = (%d, %d)\n", se, root, sw, ratio2, gr.in_degree(root), gr.out_degree(root));
+
+		remove_edge(se);
+		hs.remove(se);
+	}
+
 	if(ratio > max_split_error_ratio) return false;
 
 	printf("split hyper vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
@@ -421,18 +455,16 @@ bool scallop3::resolve_ignorable_edges()
 		int ei;
 		double ratio = compute_smallest_edge(i, ei);
 		edge_descriptor e = i2e[ei];
+		int s = e->source();
+		int t = e->target();
 
-		/*
-		if(ratio > max_split_error_ratio) continue;
-		if(gr.in_degree(e->target()) <= 1) continue;
-		if(gr.out_degree(e->source()) <= 1) continue;
-		*/
+		//if(ratio > max_split_error_ratio) continue;
 
 		double w = gr.get_edge_weight(e);
 		if(w > max_ignorable_edge_weight) continue;
 		if(hs.left_extend(ei) == true && hs.right_extend(ei) == true) continue;
-		if(e->source() == i && gr.in_degree(e->target()) <= 1) continue;
-		if(e->target() == i && gr.out_degree(e->source()) <= 1) continue;
+		if(s == i && gr.in_degree(t) <= 1) continue;
+		if(t == i && gr.out_degree(s) <= 1) continue;
 
 		printf("remove ignorable edge %d of vertex %d, weight = %.2lf, ratio = %.2lf, degree = (%d, %d)\n", 
 				ei, i, w, ratio, gr.in_degree(i), gr.out_degree(i));
