@@ -216,14 +216,17 @@ bool super_graph::remove_single_read(splice_graph &gr)
 		if(s == 0) continue;
 		if(t == gr.num_vertices() - 1) continue;
 		if(t == s + 1) continue;
-		if(gr.out_degree(s) <= 1) continue;
-		if(gr.in_degree(t) <= 1) continue;
+
+		//if(gr.out_degree(s) <= 1) continue;
+		//if(gr.in_degree(t) <= 1) continue;
+
 		int32_t s1 = gr.get_vertex_info(s).rpos;
 		int32_t s2 = gr.get_vertex_info(s + 1).lpos;
 		int32_t t1 = gr.get_vertex_info(t - 1).rpos;
 		int32_t t2 = gr.get_vertex_info(t).lpos;
-		if(s1 != s2) continue;
-		if(t1 != t2) continue;
+		if(s1 != s2 && t1 != t2) continue;
+		//if(s1 != s2) continue;
+		//if(t1 != t2) continue;
 		//printf("remove single read %d -> %d\n", s, t);
 
 		gr.remove_edge(e);

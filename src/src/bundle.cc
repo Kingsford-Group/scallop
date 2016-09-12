@@ -34,10 +34,12 @@ int bundle::build()
 	build_partial_exon_map();
 	link_partial_exons();
 	build_splice_graph();
-	build_hyper_edges2();
+
 	extend_isolated_start_boundaries();
 	extend_isolated_end_boundaries();
-	identify_boundary_edges();
+	//identify_boundary_edges();
+
+	build_hyper_edges2();
 
 	/*
 	build_segments();
@@ -1168,7 +1170,7 @@ int bundle::print(int index)
 	//hs.print();
 
 	// print segments
-	for(int i = 0; i < segments.size(); i++) segments[i].print(i);
+	//for(int i = 0; i < segments.size(); i++) segments[i].print(i);
 
 	// print clips
 	/*
