@@ -162,6 +162,8 @@ bool scallop3::resolve_nontrivial_vertex(bool split, bool hyper)
 		assert(eqn.t.size() >= 1);
 
 		split_vertex(root, eqn.s, eqn.t);
+
+		return true;
 	}
 
 	bool b = true;
@@ -176,9 +178,11 @@ bool scallop3::resolve_nontrivial_vertex(bool split, bool hyper)
 
 		remove_edge(se);
 		hs.remove(se);
+
+		return true;
 	}
 
-	return true;
+	return false;
 }
 
 bool scallop3::resolve_hyper_tree()
