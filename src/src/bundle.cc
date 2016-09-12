@@ -740,7 +740,6 @@ int bundle::build_splice_graph()
 
 		assert(x.rpos == y.lpos);
 		
-		// TODO
 		int xd = gr.out_degree(i + 1);
 		int yd = gr.in_degree(i + 2);
 		double wt = (xd < yd) ? x.ave : y.ave;

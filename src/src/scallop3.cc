@@ -21,6 +21,7 @@ scallop3::scallop3(const string &s, const splice_graph &g, const hyper_set &h)
 	hs.build(gr, e2i);
 	init_super_edges();
 	init_vertex_map();
+	init_inner_weights();
 	print();
 }
 
@@ -355,7 +356,8 @@ bool scallop3::resolve_normal_vertex()
 	if(ratio > max_split_error_ratio) return false;
 
 	// TODO
-	if(ratio1 < ratio2 || sw > 2 * max_ignorable_edge_weight)
+	//if(ratio1 < ratio2 || sw > 2 * max_ignorable_edge_weight)
+	if(ratio1 < ratio2)
 	{
 		printf("split normal vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
 
@@ -390,8 +392,12 @@ bool scallop3::resolve_ignorable_edges()
 		int ei;
 		double ratio = compute_smallest_edge(i, ei);
 		edge_descriptor e = i2e[ei];
-		double w = gr.get_edge_weight(e);
 
+		if(ratio > max_split_error_ratio) continue;
+		if(gr.in_degree(e->target()) <= 1) continue;
+		if(gr.out_degree(e->source()) <= 1) continue;
+
+		double w = gr.get_edge_weight(e);
 		if(w > max_ignorable_edge_weight) continue;
 		if(hs.left_extend(ei) == true && hs.right_extend(ei) == true) continue;
 		if(e->source() == i && gr.in_degree(e->target()) <= 1) continue;
@@ -512,6 +518,20 @@ int scallop3::init_super_edges()
 		int s = (*it1)->source();
 		v.push_back(s);
 		mev.insert(PEV(*it1, v));
+	}
+	return 0;
+}
+
+int scallop3::init_inner_weights()
+{
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	{
+		edge_descriptor e = (*it1);
+		double w = gr.get_edge_weight(e);
+		edge_info ei = gr.get_edge_info(e);
+		ei.weight = w;
+		gr.set_edge_info(e, ei);
 	}
 	return 0;
 }
