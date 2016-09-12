@@ -152,8 +152,8 @@ bool scallop3::resolve_hyper_vertex()
 	//if(ratio1 < ratio2 || sw > 2 * max_ignorable_edge_weight)
 	bool b = true;
 	if(hs.left_extend(se) && hs.right_extend(se)) b = false;
-	if(gr.in_degree(i2e[se]->target()) <= 1) b = false;
-	if(gr.out_degree(i2e[se]->source()) <= 1) b = false;
+	//if(gr.in_degree(i2e[se]->target()) <= 1) b = false;
+	//if(gr.out_degree(i2e[se]->source()) <= 1) b = false;
 	if(ratio1 < ratio2 || (b == false))
 	{
 		printf("split hyper vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio1, gr.in_degree(root), gr.out_degree(root));
@@ -229,7 +229,7 @@ bool scallop3::resolve_hyper_edge0()
 	int k2 = split_edge(ee2, ww);
 	int x = merge_adjacent_equal_edges(k1, k2);
 
-	printf(" resolve hyper edge (%d, %d) of vertex %d, weight = (%.2lf, %.2lf) -> (%d, %d) -> %d\n", ee1, ee2, root, ww1, ww2, k1, k2, x);
+	printf("resolve hyper edge0 (%d, %d) of vertex %d, weight = (%.2lf, %.2lf) -> (%d, %d) -> %d\n", ee1, ee2, root, ww1, ww2, k1, k2, x);
 
 	hs.replace(ee1, ee2, x);
 	if(k1 == ee1) hs.remove(ee1);
@@ -269,7 +269,7 @@ bool scallop3::resolve_hyper_edge1()
 
 	if(v1.size() == 0 || v2.size() == 0) return false;
 
-	printf("resolve hyper edge ( ");
+	printf("resolve hyper edge1 ( ");
 	printv(v1);
 	printf("), ( ");
 	printv(v2);
@@ -378,10 +378,12 @@ bool scallop3::resolve_normal_vertex()
 	if(ratio > max_split_error_ratio) return false;
 
 	//if(ratio1 < ratio2 || sw > 2 * max_ignorable_edge_weight)
+	/*
 	bool b = true;
 	if(gr.in_degree(i2e[se]->target()) <= 1) b = false;
 	if(gr.out_degree(i2e[se]->source()) <= 1) b = false;
-	if(ratio1 < ratio2 || (b == false))
+	*/
+	if(ratio1 < ratio2)
 	{
 		printf("split normal vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio1, gr.in_degree(root), gr.out_degree(root));
 
@@ -446,8 +448,9 @@ bool scallop3::resolve_trivial_vertex()
 	equation eqn;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
-		if(gr.degree(i) == 0) continue;
 		if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) continue;
+		if(gr.in_degree(i) <= 1) continue;
+		if(gr.out_degree(i) <= 1) continue;
 
 		router rt(i, gr, e2i, i2e);
 		rt.build();
