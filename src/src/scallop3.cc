@@ -357,7 +357,7 @@ bool scallop3::resolve_normal_vertex()
 
 		vector<PI> p = hs.get_routes(i, gr, e2i);
 
-		if(p.size() >= 1) continue;
+		//if(p.size() >= 1) continue;
 
 		router rt(i, gr, e2i, i2e, p);
 		rt.build();
@@ -386,7 +386,11 @@ bool scallop3::resolve_normal_vertex()
 
 	// TODO
 	//if(ratio1 < ratio2 || sw > 2 * max_ignorable_edge_weight)
-	if(ratio1 < ratio2)
+	bool b = true;
+	if(hs.left_extend(se) || hs.right_extend(se)) b = false;
+	if(gr.in_degree(i2e[se]->target()) <= 1) b = false;
+	if(gr.out_degree(i2e[se]->source()) <= 1) b = false;
+	if(ratio1 < ratio2 || b == false)
 	{
 		printf("split normal vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
 
