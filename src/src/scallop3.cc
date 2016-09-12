@@ -150,7 +150,11 @@ bool scallop3::resolve_hyper_vertex()
 	if(ratio > max_split_error_ratio) return false;
 
 	//if(ratio1 < ratio2 || sw > 2 * max_ignorable_edge_weight)
-	if(ratio1 < ratio2 || hs.extend(se))
+	bool b = true;
+	if(hs.left_extend(se) && hs.right_extend(se)) b = false;
+	if(gr.in_degree(i2e[se]->target()) <= 1) b = false;
+	if(gr.out_degree(i2e[se]->source()) <= 1) b = false;
+	if(ratio1 < ratio2 || (b == false))
 	{
 		printf("split hyper vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio1, gr.in_degree(root), gr.out_degree(root));
 
@@ -165,7 +169,7 @@ bool scallop3::resolve_hyper_vertex()
 	else
 	{
 		assert(se >= 0);
-		printf("remove small edge %d of vertex %d, weight = %.2lf, ratio = %.2lf, degree = (%d, %d)\n", se, root, sw, ratio2, gr.in_degree(root), gr.out_degree(root));
+		printf("remove small (hyper) edge %d of vertex %d, weight = %.2lf, ratio = %.2lf, degree = (%d, %d)\n", se, root, sw, ratio2, gr.in_degree(root), gr.out_degree(root));
 
 		remove_edge(se);
 		hs.remove(se);
@@ -374,7 +378,10 @@ bool scallop3::resolve_normal_vertex()
 	if(ratio > max_split_error_ratio) return false;
 
 	//if(ratio1 < ratio2 || sw > 2 * max_ignorable_edge_weight)
-	if(ratio1 < ratio2)
+	bool b = true;
+	if(gr.in_degree(i2e[se]->target()) <= 1) b = false;
+	if(gr.out_degree(i2e[se]->source()) <= 1) b = false;
+	if(ratio1 < ratio2 || (b == false))
 	{
 		printf("split normal vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio1, gr.in_degree(root), gr.out_degree(root));
 
