@@ -115,12 +115,12 @@ int assembler::process(const bundle_base &bb)
 
 	index++;
 
+	/*
 	bd.print(index);
-	//bd.gr.print_weights();
-
 	if(ref_file != "") compare(bd.gr, ref_file, "compare.tex");
 	if(ref_file1 != "" && bd.strand == '+') compare(bd.gr, ref_file1, "compare1.tex");
 	if(ref_file2 != "" && bd.strand == '-') compare(bd.gr, ref_file2, "compare2.tex");
+	*/
 
 	super_graph sg(bd.gr, bd.hs);
 	sg.build();
@@ -130,19 +130,15 @@ int assembler::process(const bundle_base &bb)
 		string gid = "bundle." + tostring(index) + "." + tostring(k);
 		if(fixed_gene_name != "" && gid != fixed_gene_name) continue;
 
-		/*
 		if(k == 0 || fixed_gene_name != "") bd.print(index);
 		if(k == 0 || fixed_gene_name != "") sg.print();
-		*/
 
 		splice_graph &gr = sg.subs[k];
 		hyper_set &hs = sg.hss[k];
 
-		/*
 		if(ref_file != "") compare(gr, ref_file, "compare.tex");
 		if(ref_file1 != "" && bd.strand == '+') compare(gr, ref_file1, "compare1.tex");
 		if(ref_file2 != "" && bd.strand == '-') compare(gr, ref_file2, "compare2.tex");
-		*/
 
 		if(algo != "shao")
 		{

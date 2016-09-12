@@ -99,9 +99,12 @@ int bundle::build_junctions()
 	{
 		hits[i].get_splice_positions(v);
 		if(v.size() == 0) continue;
+
+		//hits[i].print();
 		for(int k = 0; k < v.size(); k++)
 		{
 			int64_t p = v[k];
+			//printf(" %d-%d\n", low32(p), high32(p));
 			if(m.find(p) == m.end()) m.insert(pair<int64_t, int>(p, 1));
 			else m[p]++;
 		}
@@ -1141,12 +1144,7 @@ int bundle::print(int index)
 			tid, hits.size(), pexons.size(), chrm.c_str(), lpos, rpos, strand, n0, np, nq);
 
 	// print hits
-	/*
-	for(int i = 0; i < hits.size(); i++)
-	{
-		hits[i].print();
-	}
-	*/
+	//for(int i = 0; i < hits.size(); i++) hits[i].print();
 
 	// print regions
 	for(int i = 0; i < regions.size(); i++)

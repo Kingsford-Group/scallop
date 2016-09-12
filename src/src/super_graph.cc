@@ -209,7 +209,7 @@ bool super_graph::remove_single_read(splice_graph &gr)
 	{
 		edge_descriptor e = (*it1);
 		double w = gr.get_edge_weight(e);
-		if(w >= 1.5) continue;
+		if(w >= 2.5) continue;
 
 		int s = e->source();
 		int t = e->target();
@@ -220,11 +220,21 @@ bool super_graph::remove_single_read(splice_graph &gr)
 		//if(gr.out_degree(s) <= 1) continue;
 		//if(gr.in_degree(t) <= 1) continue;
 
+		bool b1 = true, b2 = true;
 		int32_t s1 = gr.get_vertex_info(s).rpos;
 		int32_t s2 = gr.get_vertex_info(s + 1).lpos;
+		if(s1 != s2) b1 = false;
+		if(gr.get_vertex_weight(s) < 10.0 * w) b1 = false;
+		if(gr.get_vertex_weight(s + 1) < 10.0 * w) b1 = false;
+
 		int32_t t1 = gr.get_vertex_info(t - 1).rpos;
 		int32_t t2 = gr.get_vertex_info(t).lpos;
-		if(s1 != s2 && t1 != t2) continue;
+		if(t1 != t2) b2 = false;
+		if(gr.get_vertex_weight(t - 1) < 10.0 * w) b2 = false;
+		if(gr.get_vertex_weight(t) < 10.0 * w) b2 = false;
+
+		if(b1 == false && b2 == false) continue;
+		//if(s1 != s2 && t1 != t2) continue;
 		//if(s1 != s2) continue;
 		//if(t1 != t2) continue;
 		//printf("remove single read %d -> %d\n", s, t);
