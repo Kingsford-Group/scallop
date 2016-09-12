@@ -183,7 +183,7 @@ bool scallop3::resolve_hyper_vertex()
 	if(hs.left_extend(se) || hs.right_extend(se)) b = false;
 	//if(gr.in_degree(i2e[se]->target()) <= 1) b = false;
 	//if(gr.out_degree(i2e[se]->source()) <= 1) b = false;
-	if(ratio1 < ratio2 || (b == false) || true)
+	if(ratio1 < ratio2 || (b == false))
 	{
 		printf("split hyper vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio1, gr.in_degree(root), gr.out_degree(root));
 

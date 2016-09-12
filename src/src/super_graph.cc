@@ -209,7 +209,7 @@ bool super_graph::remove_single_read(splice_graph &gr)
 	{
 		edge_descriptor e = (*it1);
 		double w = gr.get_edge_weight(e);
-		if(w >= 1.5) continue;
+		if(w >= 2.5) continue;
 
 		int s = e->source();
 		int t = e->target();
