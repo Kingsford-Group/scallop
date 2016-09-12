@@ -259,6 +259,11 @@ int hyper_set::remove(int e)
 	return 0;
 }
 
+bool hyper_set::extend(int e)
+{
+	return (left_extend(e) || right_extend(e));
+}
+
 bool hyper_set::left_extend(int e)
 {
 	if(e2s.find(e) == e2s.end()) return false;

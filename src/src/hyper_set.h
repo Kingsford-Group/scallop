@@ -45,6 +45,7 @@ public:
 	int remove(int e);
 	int remove(const vector<int> &x);
 	int remove(const set<int> &x);
+	bool extend(int e);
 	bool left_extend(int e);
 	bool left_extend(const set<int> &s);
 	bool right_extend(int e);
