@@ -51,11 +51,11 @@ int scallop3::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_nontrivial_vertex(true, false);
+		b = resolve_trivial_vertex();
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_trivial_vertex();
+		b = resolve_nontrivial_vertex(true, false);
 		if(b == true) print();
 		if(b == true) continue;
 
