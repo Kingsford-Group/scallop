@@ -448,11 +448,9 @@ bool scallop3::resolve_ignorable_edges()
 		double ratio = compute_smallest_edge(i, ei);
 		edge_descriptor e = i2e[ei];
 
-		/*
 		if(ratio > max_split_error_ratio) continue;
 		if(gr.in_degree(e->target()) <= 1) continue;
 		if(gr.out_degree(e->source()) <= 1) continue;
-		*/
 
 		double w = gr.get_edge_weight(e);
 		if(w > max_ignorable_edge_weight) continue;
