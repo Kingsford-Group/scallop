@@ -45,6 +45,7 @@ private:
 	int init_super_edges();
 	int init_inner_weights();
 	int add_pseudo_hyper_edges();
+	int refine_splice_graph();
 
 	// resolve iteratively
 	bool resolve_ignorable_edges();

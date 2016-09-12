@@ -37,6 +37,8 @@ int scallop3::assemble()
 	{
 		bool b	= false;
 
+		refine_splice_graph();
+
 		b = resolve_ignorable_edges();
 		if(b == true) print();
 		if(b == true) continue;
@@ -74,6 +76,33 @@ int scallop3::assemble()
 
 	greedy_decompose(-1);
 
+	return 0;
+}
+
+int scallop3::refine_splice_graph()
+{
+	while(true)
+	{
+		bool b = false;
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+		{
+			int s = (*it1)->source();
+			int t = (*it1)->target();
+			int e = e2i[*it1];
+			if(s == 0) continue;
+			if(t == gr.num_vertices() - 1) continue;
+			if(gr.in_degree(s) >= 1 && gr.out_degree(t) >= 1) continue;
+
+			printf("refine graph by removing edge %d\n", e);
+
+			remove_edge(e);
+			hs.remove(e);
+			b = true;
+			break;
+		}
+		if(b == false) break;
+	}
 	return 0;
 }
 
@@ -151,10 +180,10 @@ bool scallop3::resolve_hyper_vertex()
 
 	//if(ratio1 < ratio2 || sw > 2 * max_ignorable_edge_weight)
 	bool b = true;
-	if(hs.left_extend(se) && hs.right_extend(se)) b = false;
+	if(hs.left_extend(se) || hs.right_extend(se)) b = false;
 	//if(gr.in_degree(i2e[se]->target()) <= 1) b = false;
 	//if(gr.out_degree(i2e[se]->source()) <= 1) b = false;
-	if(ratio1 < ratio2 || (b == false))
+	if(ratio1 < ratio2 || (b == false) || true)
 	{
 		printf("split hyper vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio1, gr.in_degree(root), gr.out_degree(root));
 
@@ -449,8 +478,8 @@ bool scallop3::resolve_trivial_vertex()
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) continue;
-		if(gr.in_degree(i) <= 1) continue;
-		if(gr.out_degree(i) <= 1) continue;
+		if(gr.in_degree(i) <= 0) continue;
+		if(gr.out_degree(i) <= 0) continue;
 
 		router rt(i, gr, e2i, i2e);
 		rt.build();
@@ -912,7 +941,8 @@ bool scallop3::balance_vertex(undirected_graph &ug, const vector<int> & u2e)
 
 int scallop3::balance_vertex(int v)
 {
-	if(gr.degree(v) <= 0) return 0;
+	if(gr.in_degree(v) <= 0) return 0;
+	if(gr.out_degree(v) <= 0) return 0;
 
 	edge_iterator it1, it2;
 	double w1 = 0, w2 = 0;
