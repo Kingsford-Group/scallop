@@ -174,8 +174,8 @@ bool scallop3::resolve_hyper_edge0()
 			for(set<int>::iterator it = s.begin(); it != s.end(); it++)
 			{
 				double w = gr.get_edge_weight(i2e[*it]);
-				if(w >= w1 && hs.left_extend(e1)) continue;
-				if(w <= w1 && hs.right_extend(*it)) continue;
+				if(hs.left_extend(e1)) continue;
+				if(hs.right_extend(*it)) continue;
 				if(w <= w2) continue;
 				w2 = w;
 				e2 = (*it);
@@ -198,6 +198,9 @@ bool scallop3::resolve_hyper_edge0()
 	double ww1 = gr.get_edge_weight(i2e[ee1]);
 	double ww2 = gr.get_edge_weight(i2e[ee2]);
 	double ww = (ww1 <= ww2) ? ww1 : ww2;
+
+	if(ww1 <= ww2) assert(hs.left_extend(ee1) == false);
+	if(ww2 <= ww1) assert(hs.right_extend(ee2) == false);
 
 	int k1 = split_edge(ee1, ww);
 	int k2 = split_edge(ee2, ww);
