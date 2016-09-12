@@ -37,7 +37,7 @@ int scallop3::assemble()
 	{
 		bool b	= false;
 
-		refine_splice_graph();
+		//refine_splice_graph();
 
 		b = resolve_ignorable_edges();
 		if(b == true) print();
@@ -143,7 +143,7 @@ bool scallop3::resolve_hyper_tree()
 bool scallop3::resolve_hyper_vertex()
 {
 	int root = -1;
-	double ratio = -1;
+	double ratio1 = -1;
 	vector<equation> eqns;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
@@ -162,25 +162,47 @@ bool scallop3::resolve_hyper_vertex()
 		assert(rt.ratio >= 0);
 		assert(rt.eqns.size() == 2);
 
-		if(ratio >= 0 && ratio < rt.ratio) continue;
+		if(ratio1 >= 0 && ratio1 < rt.ratio) continue;
 
 		root = i;
-		ratio = rt.ratio;
+		ratio1 = rt.ratio;
 		eqns = rt.eqns;
 	}
 
 	if(root == -1) return false;
+
+	int se;
+	double ratio2 = compute_smallest_edge(root, se);
+	double sw = gr.get_edge_weight(i2e[se]);
+
+	double ratio = (ratio1 < ratio2) ? ratio1 : ratio2;
 	if(ratio > max_split_error_ratio) return false;
 
-	printf("split hyper vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
+	//if(ratio1 < ratio2 || sw > 2 * max_ignorable_edge_weight)
+	bool b = true;
+	if(hs.left_extend(se) || hs.right_extend(se)) b = false;
+	//if(gr.in_degree(i2e[se]->target()) <= 1) b = false;
+	//if(gr.out_degree(i2e[se]->source()) <= 1) b = false;
+	if(ratio1 < ratio2 || (b == false) || true)
+	{
+		printf("split hyper vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio1, gr.in_degree(root), gr.out_degree(root));
 
-	for(int i = 0; i < eqns.size(); i++) eqns[i].print(99);
+		for(int i = 0; i < eqns.size(); i++) eqns[i].print(99);
 
-	equation &eqn = eqns[0];
-	assert(eqn.s.size() >= 1);
-	assert(eqn.t.size() >= 1);
+		equation &eqn = eqns[0];
+		assert(eqn.s.size() >= 1);
+		assert(eqn.t.size() >= 1);
 
-	split_vertex(root, eqn.s, eqn.t);
+		split_vertex(root, eqn.s, eqn.t);
+	}
+	else
+	{
+		assert(se >= 0);
+		printf("remove small (hyper) edge %d of vertex %d, weight = %.2lf, ratio = %.2lf, degree = (%d, %d)\n", se, root, sw, ratio2, gr.in_degree(root), gr.out_degree(root));
+
+		remove_edge(se);
+		hs.remove(se);
+	}
 
 	return true;
 }
@@ -236,7 +258,7 @@ bool scallop3::resolve_hyper_edge0()
 	int k2 = split_edge(ee2, ww);
 	int x = merge_adjacent_equal_edges(k1, k2);
 
-	printf(" resolve hyper edge (%d, %d) of vertex %d, weight = (%.2lf, %.2lf) -> (%d, %d) -> %d\n", ee1, ee2, root, ww1, ww2, k1, k2, x);
+	printf("resolve hyper edge0 (%d, %d) of vertex %d, weight = (%.2lf, %.2lf) -> (%d, %d) -> %d\n", ee1, ee2, root, ww1, ww2, k1, k2, x);
 
 	hs.replace(ee1, ee2, x);
 	if(k1 == ee1) hs.remove(ee1);
@@ -276,7 +298,7 @@ bool scallop3::resolve_hyper_edge1()
 
 	if(v1.size() == 0 || v2.size() == 0) return false;
 
-	printf("resolve hyper edge ( ");
+	printf("resolve hyper edge1 ( ");
 	printv(v1);
 	printf("), ( ");
 	printv(v2);
@@ -384,11 +406,15 @@ bool scallop3::resolve_normal_vertex()
 
 	if(ratio > max_split_error_ratio) return false;
 
-	// TODO
 	//if(ratio1 < ratio2 || sw > 2 * max_ignorable_edge_weight)
+	/*
+	bool b = true;
+	if(gr.in_degree(i2e[se]->target()) <= 1) b = false;
+	if(gr.out_degree(i2e[se]->source()) <= 1) b = false;
+	*/
 	if(ratio1 < ratio2)
 	{
-		printf("split normal vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
+		printf("split normal vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio1, gr.in_degree(root), gr.out_degree(root));
 
 		for(int i = 0; i < eqns.size(); i++) eqns[i].print(99);
 
@@ -401,7 +427,7 @@ bool scallop3::resolve_normal_vertex()
 	else
 	{
 		assert(se >= 0);
-		printf("remove small edge %d of vertex %d, weight = %.2lf, ratio = %.2lf, degree = (%d, %d)\n", se, root, sw, ratio, gr.in_degree(root), gr.out_degree(root));
+		printf("remove small edge %d of vertex %d, weight = %.2lf, ratio = %.2lf, degree = (%d, %d)\n", se, root, sw, ratio2, gr.in_degree(root), gr.out_degree(root));
 
 		remove_edge(se);
 		hs.remove(se);
@@ -451,8 +477,9 @@ bool scallop3::resolve_trivial_vertex()
 	equation eqn;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
-		if(gr.degree(i) == 0) continue;
 		if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) continue;
+		if(gr.in_degree(i) <= 0) continue;
+		if(gr.out_degree(i) <= 0) continue;
 
 		router rt(i, gr, e2i, i2e);
 		rt.build();
@@ -914,7 +941,8 @@ bool scallop3::balance_vertex(undirected_graph &ug, const vector<int> & u2e)
 
 int scallop3::balance_vertex(int v)
 {
-	if(gr.degree(v) <= 0) return 0;
+	if(gr.in_degree(v) <= 0) return 0;
+	if(gr.out_degree(v) <= 0) return 0;
 
 	edge_iterator it1, it2;
 	double w1 = 0, w2 = 0;
