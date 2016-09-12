@@ -101,7 +101,7 @@ int segment::build_seeds()
 	int bin_num = slope_bin_num;
 	if(bsets.size() < bin_num) return 0;
 
-	int n = 2;
+	int n = 3;
 	assert(bin_num % n == 0);
 	int d = bin_num / n;
 
@@ -131,9 +131,19 @@ int segment::build_seeds()
 		score[n - 1] = compute_binomial_score(cnt[0] + cnt[n - 1], 0.5, cnt[n - 1]);
 		sigma[n - 1] = (ave[n - 1] - ave[0]) / dev[0];
 
-		if(score[n - 1] >= slope_min_score && sigma[n - 1] >= slope_min_sigma)
+		bool b = true;
+		for(int k = 0; k < n - 1; k++)
 		{
-			slope sp(SLOPE5END, i + d / 2, i + (n - 1) * d + d / 2, score[n - 1], sigma[n - 1]);
+			if(score[i] < 0.1 * slope_min_score) b = false;
+			if(sigma[i] < 0.1 * slope_min_sigma) b = false;
+		}
+		if(score[n - 1] < slope_min_score) b = false;
+		if(sigma[n - 1] < slope_min_sigma) b = false;
+
+		if(b == true)
+		{
+			//slope sp(SLOPE5END, i + d / 2, i + (n - 1) * d + d / 2, score[n - 1], sigma[n - 1]);
+			slope sp(SLOPE5END, i + d, i + (n - 1) * d, score[n - 1], sigma[n - 1]);
 			sp.lpos = p1;
 			sp.rpos = p2;
 			seeds.push_back(sp);
@@ -147,9 +157,19 @@ int segment::build_seeds()
 		score[n - 1] = compute_binomial_score(cnt[0] + cnt[n - 1], 0.5, cnt[0]);
 		sigma[n - 1] = (ave[0] - ave[n - 1]) / dev[n - 1];
 
-		if(score[n - 1] >= slope_min_score && sigma[n - 1] >= slope_min_sigma)
+		b = true;
+		for(int k = 0; k < n - 1; k++)
 		{
-			slope sp(SLOPE3END, i + d / 2, i + (n - 1) * d + d / 2, score[n - 1], sigma[n - 1]);
+			if(score[i] < 0.1 * slope_min_score) b = false;
+			if(sigma[i] < 0.1 * slope_min_sigma) b = false;
+		}
+		if(score[n - 1] < slope_min_score) b = false;
+		if(sigma[n - 1] < slope_min_sigma) b = false;
+
+		if(b == true)
+		{
+			//slope sp(SLOPE3END, i + d / 2, i + (n - 1) * d + d / 2, score[n - 1], sigma[n - 1]);
+			slope sp(SLOPE3END, i + d, i + (n - 1) * d, score[n - 1], sigma[n - 1]);
 			sp.lpos = p1;
 			sp.rpos = p2;
 			seeds.push_back(sp);
@@ -215,6 +235,10 @@ int segment::build_partial_exons()
 			partial_exon pe = pxs[i];
 			pe.ltype = START_BOUNDARY;
 			pexons.push_back(pe);
+
+			printf("apply1 ");
+			x.print(j);
+
 			i++;
 			j++;
 		}
@@ -223,6 +247,10 @@ int segment::build_partial_exons()
 			partial_exon pe = pxs[i];
 			pe.rtype = END_BOUNDARY;
 			pexons.push_back(pe);
+
+			printf("apply2 ");
+			x.print(j);
+
 			i++;
 			j++;
 		}
@@ -251,6 +279,10 @@ int segment::build_partial_exons()
 			evaluate_rectangle(*imap, pe2.lpos, pe2.rpos, pe2.ave, pe2.dev);
 			pexons.push_back(pe1);
 			pexons.push_back(pe2);
+
+			printf("apply ");
+			x.print(j);
+
 			i++;
 			j++;
 		}

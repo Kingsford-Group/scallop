@@ -35,6 +35,9 @@ int bundle::build()
 	link_partial_exons();
 	build_splice_graph();
 	build_hyper_edges2();
+	extend_isolated_start_boundaries();
+	extend_isolated_end_boundaries();
+	identify_boundary_edges();
 
 	/*
 	build_segments();
@@ -853,19 +856,21 @@ int bundle::build_segment(segment &s, int k)
 	if(k >= gr.num_vertices() - 1) return 0;
 
 	s.add_partial_exon(k - 1, pexons[k - 1], 0);
+	if(pexons[k - 1].ltype == START_BOUNDARY) return 0;
+	if(pexons[k - 1].rtype == END_BOUNDARY) return 0;
 	if(k >= gr.num_vertices() - 2) return 0;
-
 	if(gr.out_degree(k) >= 3) return 0;
 	if(gr.out_degree(k) <= 0) return 0;
 
 	if(gr.out_degree(k) == 2)
 	{
 		if(k + 2 >= gr.num_vertices() - 1) return 0;
+		if(pexons[k + 1].rtype == END_BOUNDARY) return 0;
+
 		int32_t p1 = pexons[k - 1].rpos;
 		int32_t p2 = pexons[k].lpos;
 		int32_t p3 = pexons[k].rpos;
 		int32_t p4 = pexons[k + 1].lpos;
-
 		if(p1 != p2) return 0;
 		if(p3 != p4) return 0;
 
@@ -875,11 +880,14 @@ int bundle::build_segment(segment &s, int k)
 		if(eb1.second == false) return 0;
 		if(eb2.second == false) return 0;
 		if(eb3.second == false) return 0;
+		if(gr.in_degree(k + 2) > 2) return 0;
 
 		double w = gr.get_edge_weight(eb2.first);
 		s.add_partial_exon(k, pexons[k], w);
+		s.add_partial_exon(k + 1, pexons[k + 1], 0);
 
-		return build_segment(s, k + 2);
+		return 0;
+		//return build_segment(s, k + 2);
 	}
 
 	if(gr.out_degree(k) == 1)
@@ -887,12 +895,17 @@ int bundle::build_segment(segment &s, int k)
 		PEB eb1 = gr.edge(k, k + 1);
 		if(eb1.second == false) return 0;
 		if(gr.in_degree(k + 1) >= 2) return 0;
+		if(pexons[k].rtype == END_BOUNDARY) return 0;
 
+		/*
 		int32_t p1 = pexons[k - 1].rpos;
 		int32_t p2 = pexons[k].lpos;
 		if(p1 != p2) return 0;
+		*/
 
-		return build_segment(s, k + 1);
+		s.add_partial_exon(k, pexons[k], 0);
+		return 0;
+		//return build_segment(s, k + 1);
 	}
 
 	return 0;
@@ -908,6 +921,206 @@ int bundle::update_partial_exons()
 	}
 	return 0;
 }
+
+int bundle::identify_boundary_edges()
+{
+	while(true)
+	{
+		bool b1 = identify_5end();
+		bool b2 = identify_5end();
+		if(b1 == false && b2 == false) break;
+	}
+	return 0;
+}
+
+bool bundle::identify_5end()
+{
+	double score5 = -1, sigma5 = -1;
+	int k5 = -1; 
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		double score, sigma;
+		identify_5end(i, score, sigma);
+		if(score <= score5) continue;
+		if(score < 600) continue;
+		if(sigma < 10) continue;
+		score5 = score;
+		sigma5 = sigma;
+		k5 = i;
+	}
+	if(k5 == -1) return false;
+
+	printf("maximum 5end vertex = %d, score = %.2lf, sigma = %.2lf, pos = %d-%d\n", 
+			k5, score5, sigma5, gr.get_vertex_info(k5).lpos, gr.get_vertex_info(k5).rpos);
+
+	edge_descriptor e = gr.add_edge(0, k5);
+	double w = gr.get_vertex_weight(k5) - gr.get_vertex_weight(k5 - 1);
+	if(w <= 1.0) w = 1.0;
+	gr.set_edge_weight(e, w);
+	gr.set_edge_info(e, edge_info());
+
+	return true;
+}
+
+bool bundle::identify_3end()
+{
+	double score3 = -1, sigma3 = -1;
+	int k3 = -1;
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		double score, sigma;
+		identify_3end(i, score, sigma);
+		if(score <= score3) continue;
+		if(score < 600) continue;
+		if(sigma < 10) continue;
+		score3 = score;
+		sigma3 = sigma;
+		k3 = i;
+	}
+
+	if(k3 == -1) return false;
+
+	printf("maximum 3end vertex = %d, score = %.2lf, sigma = %.2lf, pos = %d-%d\n", 
+			k3, score3, sigma3, gr.get_vertex_info(k3).lpos, gr.get_vertex_info(k3).rpos);
+
+	edge_descriptor e = gr.add_edge(k3, gr.num_vertices() - 1);
+	double w = gr.get_vertex_weight(k3) - gr.get_vertex_weight(k3 + 1);
+	if(w <= 1.0) w = 1.0;
+	gr.set_edge_weight(e, w);
+	gr.set_edge_info(e, edge_info());
+
+	return true;
+}
+
+int bundle::extend_isolated_end_boundaries()
+{
+	for(int i = 1; i < gr.num_vertices(); i++)
+	{
+		if(gr.in_degree(i) != 1) continue;
+		if(gr.out_degree(i) != 1) continue;
+
+		edge_iterator it1, it2;
+		tie(it1, it2) = gr.in_edges(i);
+		edge_descriptor e1 = (*it1);
+		tie(it1, it2) = gr.out_edges(i);
+		edge_descriptor e2 = (*it1);
+		int s = e1->source();
+		int t = e2->target();
+
+		if(gr.out_degree(s) != 1) continue;
+		if(t != gr.num_vertices() - 1) continue;
+		if(gr.get_edge_weight(e1) >= 1.5) continue;
+		//if(gr.get_edge_weight(e2) >= 1.5) continue;
+		if(gr.get_vertex_weight(s) <= 5.0) continue;
+		if(gr.get_vertex_info(s).rpos == gr.get_vertex_info(i).lpos) continue;
+
+		double w = gr.get_vertex_weight(s) - gr.get_edge_weight(e1);
+		edge_descriptor e = gr.add_edge(s, t);
+		gr.set_edge_weight(e, w);
+		gr.set_edge_info(e, edge_info());
+		
+		//printf("extend isolated end boundary (%d, %d) -> %d\n", k1, k2, n);
+	}
+	return 0;
+}
+
+int bundle::extend_isolated_start_boundaries()
+{
+	for(int i = 1; i < gr.num_vertices(); i++)
+	{
+		if(gr.in_degree(i) != 1) continue;
+		if(gr.out_degree(i) != 1) continue;
+
+		edge_iterator it1, it2;
+		tie(it1, it2) = gr.in_edges(i);
+		edge_descriptor e1 = (*it1);
+		tie(it1, it2) = gr.out_edges(i);
+		edge_descriptor e2 = (*it1);
+		int s = e1->source();
+		int t = e2->target();
+
+		if(s != 0) continue;
+		if(gr.in_degree(t) != 1) continue;
+		//if(gr.get_edge_weight(e1) >= 1.5) continue;
+		if(gr.get_edge_weight(e2) >= 1.5) continue;
+		if(gr.get_vertex_weight(t) <= 5.0) continue;
+		if(gr.get_vertex_info(i).rpos == gr.get_vertex_info(t).lpos) continue;
+
+		double w = gr.get_vertex_weight(t) - gr.get_edge_weight(e2);
+		edge_descriptor e = gr.add_edge(s, t);
+		gr.set_edge_weight(e, w);
+		gr.set_edge_info(e, edge_info());
+		
+		//printf("extend isolated start boundary (%d, %d) -> %d\n", k1, k2, n);
+	}
+	return 0;
+}
+
+int bundle::identify_5end(int x, double &score, double &sigma)
+{
+	score = sigma = -1;
+	if(x <= 1) return 0;
+	if(gr.edge(0, x - 1).second == true) return 0;
+	if(gr.edge(0, x).second == true) return 0;
+	if(gr.edge(x - 1, x).second == false) return 0;
+	if(gr.in_degree(x) >= 2) return 0;
+	if(gr.out_degree(x - 1) >= 2) return 0;
+
+	vertex_info v1 = gr.get_vertex_info(x - 1);
+	vertex_info v2 = gr.get_vertex_info(x);
+	int l1 = v1.rpos - v1.lpos;
+	int l2 = v2.rpos - v2.lpos;
+
+	if(l1 <= 50) return 0;
+	if(l2 <= 50) return 0;
+
+	double w1 = gr.get_vertex_weight(x - 1);
+	double w2 = gr.get_vertex_weight(x);
+	int x1 = w1 * l1 / average_read_length;
+	int x2 = w2 * l2 / average_read_length;
+	
+	if(x1 + x2 <= 10) return 0;
+
+	double r = l2 * 1.0 / (l1 + l2);
+	score = compute_binomial_score(x1 + x2, r, x2);
+	sigma = (w2 - w1) / v1.stddev;
+
+	return 0;
+}
+
+int bundle::identify_3end(int x, double &score, double &sigma)
+{
+	score = sigma = -1;
+	int n = gr.num_vertices() - 1;
+	if(x >= n - 1) return 0;
+	if(gr.edge(x, n).second == true) return 0;
+	if(gr.edge(x + 1, n).second == true) return 0;
+	if(gr.edge(x, x + 1).second == false) return 0;
+	if(gr.out_degree(x) >= 2) return 0;
+	if(gr.in_degree(x + 1) >= 2) return 0;
+
+	vertex_info v1 = gr.get_vertex_info(x);
+	vertex_info v2 = gr.get_vertex_info(x + 1);
+	int l1 = v1.rpos - v1.lpos;
+	int l2 = v2.rpos - v2.lpos;
+
+	if(l1 <= 50) return 0;
+	if(l2 <= 50) return 0;
+
+	double w1 = gr.get_vertex_weight(x);
+	double w2 = gr.get_vertex_weight(x + 1);
+	int x1 = w1 * l1 / average_read_length;
+	int x2 = w2 * l2 / average_read_length;
+	
+	if(x1 + x2 <= 10) return 0;
+
+	double r = l1 * 1.0 / (l1 + l2);
+	score = compute_binomial_score(x1 + x2, r, x1);
+	sigma = (w1 - w2) / v2.stddev;
+
+	return 0;
+}
+
 
 int bundle::print(int index)
 {

@@ -1,6 +1,7 @@
 #include "scallop3.h"
 #include "config.h"
 #include "gurobi_c++.h"
+#include "binomial.h"
 
 #include <cstdio>
 #include <iostream>
@@ -30,9 +31,6 @@ scallop3::~scallop3()
 int scallop3::assemble()
 {
 	classify();
-	extend_isolated_start_boundaries();
-	extend_isolated_end_boundaries();
-	identify_boundary_edges();
 
 	while(true)
 	{
@@ -465,149 +463,6 @@ int scallop3::classify()
 	else return NORMAL;
 }
 
-int scallop3::extend_isolated_end_boundaries()
-{
-	for(int i = 1; i < gr.num_vertices(); i++)
-	{
-		if(gr.in_degree(i) != 1) continue;
-		if(gr.out_degree(i) != 1) continue;
-
-		edge_iterator it1, it2;
-		tie(it1, it2) = gr.in_edges(i);
-		edge_descriptor e1 = (*it1);
-		tie(it1, it2) = gr.out_edges(i);
-		edge_descriptor e2 = (*it1);
-		int k1 = e2i[e1];
-		int k2 = e2i[e2];
-		int s = e1->source();
-		int t = e2->target();
-
-		if(gr.out_degree(s) != 1) continue;
-		if(t != gr.num_vertices() - 1) continue;
-		if(gr.get_edge_weight(e1) >= 1.5) continue;
-		//if(gr.get_edge_weight(e2) >= 1.5) continue;
-		if(gr.get_vertex_weight(s) <= 5.0) continue;
-		if(gr.get_vertex_info(s).rpos == gr.get_vertex_info(i).lpos) continue;
-
-		/*
-		if(hs.left_extend(k1) == true) continue;
-		hs.remove(k1);
-		hs.remove(k2);
-		remove_edge(k1);
-		remove_edge(k2);
-		*/
-
-		double w = gr.get_vertex_weight(s) - gr.get_edge_weight(e1);
-		edge_descriptor e = gr.add_edge(s, t);
-		gr.set_edge_weight(e, w);
-		gr.set_edge_info(e, edge_info());
-		
-		vector<int> v;
-		v.push_back(s);
-
-		if(mev.find(e) != mev.end()) mev[e] = v;
-		else mev.insert(PEV(e, v));
-
-		int n = i2e.size();
-		i2e.push_back(e);
-		e2i.insert(PEI(e, n));
-
-		printf("extend isolated end boundary (%d, %d) -> %d\n", k1, k2, n);
-	}
-	return 0;
-}
-
-int scallop3::extend_isolated_start_boundaries()
-{
-	for(int i = 1; i < gr.num_vertices(); i++)
-	{
-		if(gr.in_degree(i) != 1) continue;
-		if(gr.out_degree(i) != 1) continue;
-
-		edge_iterator it1, it2;
-		tie(it1, it2) = gr.in_edges(i);
-		edge_descriptor e1 = (*it1);
-		tie(it1, it2) = gr.out_edges(i);
-		edge_descriptor e2 = (*it1);
-		int k1 = e2i[e1];
-		int k2 = e2i[e2];
-		int s = e1->source();
-		int t = e2->target();
-
-		if(s != 0) continue;
-		if(gr.in_degree(t) != 1) continue;
-		//if(gr.get_edge_weight(e1) >= 1.5) continue;
-		if(gr.get_edge_weight(e2) >= 1.5) continue;
-		if(gr.get_vertex_weight(t) <= 5.0) continue;
-		if(gr.get_vertex_info(i).rpos == gr.get_vertex_info(t).lpos) continue;
-
-		/*
-		if(hs.left_extend(k1) == true) continue;
-		hs.remove(k1);
-		hs.remove(k2);
-		remove_edge(k1);
-		remove_edge(k2);
-		*/
-
-		double w = gr.get_vertex_weight(t) - gr.get_edge_weight(e2);
-		edge_descriptor e = gr.add_edge(s, t);
-		gr.set_edge_weight(e, w);
-		gr.set_edge_info(e, edge_info());
-		
-		vector<int> v;
-		v.push_back(s);
-		if(mev.find(e) != mev.end()) mev[e] = v;
-		else mev.insert(PEV(e, v));
-
-		int n = i2e.size();
-		i2e.push_back(e);
-		e2i.insert(PEI(e, n));
-
-		printf("extend isolated start boundary (%d, %d) -> %d\n", k1, k2, n);
-	}
-	return 0;
-}
-
-int scallop3::identify_boundary_edges()
-{
-	double score5 = -1, sigma5 = -1;
-	double score3 = -1, sigma3 = -1;
-	int k5 = -1, k3 = -1;
-	for(int i = 1; i < gr.num_vertices(); i++)
-	{
-		double score, sigma;
-		identify_5end(i, score, sigma);
-		if(score <= score5) continue;
-		score5 = score;
-		sigma5 = sigma;
-		k5 = i;
-	}
-	for(int i = 1; i < gr.num_vertices(); i++)
-	{
-		double score, sigma;
-		identify_3end(i, score, sigma);
-		if(score <= score3) continue;
-		score3 = score;
-		sigma3 = sigma;
-		k3 = i;
-	}
-
-	printf("maximum 5end vertex = %d, score = %.2lf, sigma = %.2lf, maximum 5end vertex = %d, score = %.2lf, sigma = %.2lf\n",
-			k5, score5, sigma5, k3, score3, sigma3);
-
-	return 0;
-}
-
-int scallop3::identify_3end(int x, double &score, double &sigma)
-{
-	return 0;
-}
-
-int scallop3::identify_5end(int x, double &score, double &sigma)
-{
-	return 0;
-}
-
 int scallop3::add_pseudo_hyper_edges()
 {
 	for(int k = 1; k < gr.num_vertices() - 1; k++)
@@ -643,7 +498,6 @@ int scallop3::add_pseudo_hyper_edges()
 	}
 	return 0;
 }
-
 
 int scallop3::init_super_edges()
 {
