@@ -26,7 +26,7 @@ int bundle::build()
 	build_junctions();
 	if(junctions.size() <= 0 && ignore_single_exon_transcripts == true) return 0;
 
-	build_regions(10);
+	build_regions(5);
 	build_partial_exons();
 	build_regions(0);
 	build_partial_exons();
@@ -115,10 +115,14 @@ int bundle::build_regions(int count)
 	s.insert(PI(rpos, END_BOUNDARY));
 	for(int i = 0; i < junctions.size(); i++)
 	{
-		if(junctions[i].count < count) continue;
+		junction &jc = junctions[i];
 
-		int32_t l = junctions[i].lpos;
-		int32_t r = junctions[i].rpos;
+		double ave, dev;
+		evaluate_rectangle(mmap, jc.lpos, jc.rpos, ave, dev);
+		if(jc.count < count && ave >= count) continue;
+
+		int32_t l = jc.lpos;
+		int32_t r = jc.rpos;
 
 		if(s.find(l) == s.end()) s.insert(PI(l, LEFT_SPLICE));
 		else if(s[l] == RIGHT_SPLICE) s[l] = LEFT_RIGHT_SPLICE;
