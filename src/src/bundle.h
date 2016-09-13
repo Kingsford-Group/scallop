@@ -21,13 +21,11 @@ public:
 
 public:
 	vector<junction> junctions;		// splice junctions
-	splice_graph jr;				// junction graph
 	vector<region> regions;			// regions
 	vector<partial_exon> pexons;	// partial exons
 	split_interval_map pmap;		// partial exon map
 	splice_graph gr;				// splice graph
 	hyper_set hs;					// hyper edges
-	vector<segment> segments;		// segments
 
 public:
 	virtual int build();
@@ -36,53 +34,28 @@ public:
 	int print(int index);
 
 private:
-	// check whether hits are sorted
+	// check and init
 	int check_left_ascending();
 	int check_right_ascending();
-
-	// compute strand
 	int compute_strand();
 
-	// junction graph, for paired-end reads
+	// splice graph
 	int build_junctions();
-	int build_junction_graph();
-	int draw_junction_graph(const string &file);
-	int search_junction_graph(int32_t p);
-	int traverse_junction_graph(int s, int t, VE &ve);
-	int traverse_junction_graph1(int s, int t, VE &ve);
-	int traverse_junction_graph1(int s, int t);
-	int test_junction_graph();
-
-	// build partial exons
-	int align_hits();
-	int build_regions();
+	int build_regions(int count);
 	int build_partial_exons();
+	int link_partial_exons();
+	int build_splice_graph();
 	int build_partial_exon_map();
 	int locate_left_partial_exon(int32_t x);
 	int locate_right_partial_exon(int32_t x);
 
-	// super junctions and super partial_exons;
+	// super edges
 	int build_hyper_edges1();			// single end
 	int build_hyper_edges2();			// paired end
-	int build_splice_graph();			// weights from junctions
-	int assign_edge_info_weights();		// weights from hyper edges
-	int split_partial_exons();
 
-	// segments
-	int build_segments();
-	int build_segment(segment &s, int k);
-	int update_partial_exons();
-
+	// update splice graph
 	int extend_isolated_start_boundaries();
 	int extend_isolated_end_boundaries();
-	int identify_boundary_edges();
-	int identify_5end(int x, double &score, double &sigma);
-	int identify_3end(int x, double &score, double &sigma);
-	bool identify_5end();
-	bool identify_3end();
-
-	// store the corresponding pexons in each junction
-	int link_partial_exons();
 };
 
 #endif

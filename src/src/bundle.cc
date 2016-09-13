@@ -22,33 +22,22 @@ int bundle::build()
 {
 	compute_strand();
 	check_left_ascending();
-	build_junctions();
 
+	build_junctions();
 	if(junctions.size() <= 0 && ignore_single_exon_transcripts == true) return 0;
 
-	build_junction_graph();
-	//draw_junction_graph("jr.tex");
-
-	build_regions();
+	build_regions(10);
 	build_partial_exons();
+	build_regions(0);
+	build_partial_exons();
+
 	build_partial_exon_map();
 	link_partial_exons();
 	build_splice_graph();
 
 	extend_isolated_start_boundaries();
 	extend_isolated_end_boundaries();
-	//identify_boundary_edges();
-
 	build_hyper_edges2();
-
-	/*
-	build_segments();
-	update_partial_exons();
-	build_partial_exon_map();
-	link_partial_exons();
-	build_splice_graph();
-	build_hyper_edges2();
-	*/
 
 	return 0;
 }
@@ -119,15 +108,15 @@ int bundle::build_junctions()
 	return 0;
 }
 
-int bundle::build_junction_graph()
+int bundle::build_regions(int count)
 {
-	jr.clear();
-
 	MPI s;
 	s.insert(PI(lpos, START_BOUNDARY));
 	s.insert(PI(rpos, END_BOUNDARY));
 	for(int i = 0; i < junctions.size(); i++)
 	{
+		if(junctions[i].count < count) continue;
+
 		int32_t l = junctions[i].lpos;
 		int32_t r = junctions[i].rpos;
 
@@ -138,328 +127,28 @@ int bundle::build_junction_graph()
 		else if(s[r] == LEFT_SPLICE) s[r] = LEFT_RIGHT_SPLICE;
 	}
 
+	for(int i = 0; i < pexons.size(); i++)
+	{
+		partial_exon &p = pexons[i];
+		if(s.find(p.lpos) != s.end()) s.insert(PI(p.lpos, p.ltype));
+		if(s.find(p.rpos) != s.end()) s.insert(PI(p.rpos, p.rtype));
+	}
+
 	vector<PPI> v(s.begin(), s.end());
 	sort(v.begin(), v.end());
 
-	// position to vertex
-	MPI p2v;
-	for(int i = 0; i < v.size(); i++)
-	{
-		p2v.insert(PI(v[i].first, i));
-	}
-
-	// vertices
-	jr.clear();
-	for(int i = 0; i < v.size(); i++)
-	{
-		jr.add_vertex();
-		vertex_info vi;
-		vi.pos = v[i].first;
-		vi.type = v[i].second;
-		jr.set_vertex_info(i, vi);
-	}
-
-	// edges: connecting adjacent regions
-	for(int i = 0; i < v.size() - 1; i++)
-	{
-		edge_descriptor p = jr.add_edge(i, i + 1);
-		edge_info ei;
-		ei.jid = -1;
-		jr.set_edge_info(p, ei);
-	}
-
-	// edges: each junction
-	for(int i = 0; i < junctions.size(); i++)
-	{
-		int32_t l = junctions[i].lpos;
-		int32_t r = junctions[i].rpos;
-		assert(p2v.find(l) != p2v.end());
-		assert(p2v.find(r) != p2v.end());
-		edge_descriptor p = jr.add_edge(p2v[l], p2v[r]);
-		edge_info ei;
-		ei.jid = i;
-		jr.set_edge_info(p, ei);
-	}
-
-	return 0;
-}
-
-int bundle::draw_junction_graph(const string &file)
-{
-	char buf[10240];
-
-	MIS mis;
-	for(int i = 0; i < jr.num_vertices(); i++)
-	{
-		int32_t p = jr.get_vertex_info(i).pos;
-		sprintf(buf, "%d", p);
-		mis.insert(PIS(i, buf));
-	}
-
-	MES mes;
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = jr.edges(); it1 != it2; it1++)
-	{
-		int jid = jr.get_edge_info(*it1).jid;
-		sprintf(buf, "%d", jid);
-		mes.insert(PES(*it1, buf));
-	}
-
-	jr.draw(file, mis, mes, 3.0);
-	return 0;
-}
-
-int bundle::test_junction_graph()
-{
-	for(int i = 0; i < jr.num_vertices(); i++)
-	{
-		for(int j = i + 1; j < jr.num_vertices(); j++)
-		{
-			VE ve;
-			int p = traverse_junction_graph1(i, j, ve);
-			printf("path1 from %d to %d, length = %d :", i, j, p);
-			for(int k = 0; k < ve.size(); k++)
-			{
-				int s = ve[k]->source();
-				int t = ve[k]->target();
-				int id = jr.get_edge_info(ve[k]).jid;
-				printf("(%d, %d, %d) <- ", s, t, id);
-			}
-			printf(" START\n");
-		}
-	}
-	return 0;
-}
-
-int bundle::search_junction_graph(int32_t p)
-{
-	assert(jr.num_vertices() >= 2);
-	int l = 0;
-	int r = jr.num_vertices() - 1;
-	while(l < r)
-	{
-		int m = (l + r) / 2;
-		int32_t p1 = jr.get_vertex_info(m).pos;
-		int32_t p2 = jr.get_vertex_info(m + 1).pos;
-		assert(p1 < p2);
-		if(p >= p1 && p < p2) return m;
-		if(p < p1) r = m;
-		if(p >= p2) l = m + 1;
-	}
-	return -1;
-}
-
-int bundle::traverse_junction_graph1(int s, int t)
-{
-	VE ve;
-	return traverse_junction_graph1(s, t, ve);
-}
-
-int bundle::traverse_junction_graph1(int s, int t, VE &ve)
-{
-	ve.clear();
-	if(s > t) return -1;
-
-	vector<double> v1, v2;		// shortest path/with one edge
-	VE ve1, ve2;				// tracing back pointers
-	v1.push_back(0);
-	v2.push_back(-1);
-	ve1.push_back(null_edge);
-	ve2.push_back(null_edge);
-
-	for(int k = s + 1; k <= t; k++)
-	{
-		edge_descriptor ee1 = null_edge;
-		edge_descriptor ee2 = null_edge;
-		double ww1 = DBL_MAX;
-		double ww2 = DBL_MAX;
-		edge_iterator it1, it2;
-		for(tie(it1, it2) = jr.in_edges(k); it1 != it2; it1++)
-		{
-			int ss = (*it1)->source();
-			if(ss < s) continue;
-
-			double w = 0;
-			int id = jr.get_edge_info(*it1).jid;
-			if(id < 0) 
-			{
-				assert(ss == k - 1);
-				w = jr.get_vertex_info(k).pos - jr.get_vertex_info(ss).pos;
-
-				if(v1[ss - s] + w < ww1)
-				{
-					ww1 = v1[ss - s] + w;
-					ee1 = *it1;
-				}
-
-				if(v1[ss - s] + w < ww2)
-				{
-					ww2 = v1[ss - s] + w;
-					ee2 = *it1;
-				}
-			}
-			else
-			{
-				if(v1[ss - s] < ww1)
-				{
-					ww1 = v1[ss - s];
-					ee1 = *it1;
-				}
-
-				if(v2[ss - s] >= 0 && v2[ss - s] < ww2)
-				{
-					ww2 = v2[ss - s];
-					ee2 = *it1;
-				}
-			}
-		}
-
-		assert(ee1 != null_edge);
-		v1.push_back(ww1);
-		ve1.push_back(ee1);
-
-		if(ee2 == null_edge)
-		{
-			v2.push_back(-1);
-			ve2.push_back(null_edge);
-		}
-		else
-		{
-			v2.push_back(ww2);
-			ve2.push_back(ee2);
-		}
-	}
-
-	if(v2[t - s] <= 0) return -1;
-
-	int k = t - s;
-	while(ve2[k] != null_edge)
-	{
-		ve.push_back(ve2[k]);
-		int id = jr.get_edge_info(ve2[k]).jid;
-		k = ve2[k]->source() - s;
-		if(id < 0) break;
-	}
-
-	while(ve1[k] != null_edge)
-	{
-		ve.push_back(ve1[k]);
-		k = ve1[k]->source() - s;
-	}
-
-	return (int)(v2[t - s]);
-}
-
-int bundle::traverse_junction_graph(int s, int t, VE &ve)
-{
-	ve.clear();
-	if(s > t) return -1;
-	vector<double> v1;
-	VE v2;
-	v1.push_back(0);
-	v2.push_back(null_edge);
-
-	for(int k = s + 1; k <= t; k++)
-	{
-		edge_descriptor ee = null_edge;
-		double ww = DBL_MAX;
-		edge_iterator it1, it2;
-		for(tie(it1, it2) = jr.in_edges(k); it1 != it2; it1++)
-		{
-			int ss = (*it1)->source();
-			if(ss < s) continue;
-
-			double w = 0;
-			int id = jr.get_edge_info(*it1).jid;
-			if(id < 0) 
-			{
-				assert(ss == k - 1);
-				w = jr.get_vertex_info(k).pos - jr.get_vertex_info(ss).pos;
-			}
-
-			if(v1[ss - s] + w < ww)
-			{
-				ww = v1[ss - s] + w;
-				ee =  *it1;
-			}
-		}
-
-		assert(ee != null_edge);
-		v1.push_back(ww);
-		v2.push_back(ee);
-	}
-
-	int k = t - s;
-	while(v2[k] != null_edge)
-	{
-		ve.push_back(v2[k]);
-		k = v2[k]->source() - s;
-	}
-	return (int)(v1[t - s]);
-}
-
-int bundle::align_hits()
-{
-	mmap.clear();
-	imap.clear();
-	for(int i = 0; i < hits.size(); i++)
-	{
-		hit &h = hits[i];
-		vector<int64_t> vm;
-		vector<int64_t> vi;
-		vector<int64_t> vd;
-
-		h.get_mid_intervals(vm, vi, vd);
-
-		for(int k = 0; k < vm.size(); k++)
-		{
-			int32_t s = high32(vm[k]);
-			int32_t t = low32(vm[k]);
-			mmap += make_pair(ROI(s, t), 1);
-		}
-
-		for(int k = 0; k < vi.size(); k++)
-		{
-			int32_t s = high32(vi[k]);
-			int32_t t = low32(vi[k]);
-			imap += make_pair(ROI(s, t), 1);
-		}
-
-		for(int k = 0; k < vd.size(); k++)
-		{
-			int32_t s = high32(vd[k]);
-			int32_t t = low32(vd[k]);
-			imap += make_pair(ROI(s, t), 1);
-		}
-	}
-
-	// Test imap
-	/*
-	SIMI::iterator jit;
-	for(jit = imap.begin(); jit != imap.end(); jit++)
-	{
-		printf("imap (%d, %d) -> %d\n", lower(jit->first), upper(jit->first), jit->second);
-	}
-	*/
-
-	return 0;
-}
-
-int bundle::build_regions()
-{
 	regions.clear();
-	for(int k = 0; k < jr.num_vertices() - 1; k++)
+	for(int k = 0; k < v.size() - 1; k++)
 	{
-		int32_t lpos = jr.get_vertex_info(k).pos;
-		int32_t rpos = jr.get_vertex_info(k + 1).pos;
-
-		int ltype = jr.get_vertex_info(k).type; 
-		int rtype = jr.get_vertex_info(k + 1).type; 
+		int32_t l = v[k].first;
+		int32_t r = v[k + 1].first;
+		int ltype = v[k].second; 
+		int rtype = v[k + 1].second; 
 
 		if(ltype == LEFT_RIGHT_SPLICE) ltype = RIGHT_SPLICE;
 		if(rtype == LEFT_RIGHT_SPLICE) rtype = LEFT_SPLICE;
 
-		regions.push_back(region(lpos, rpos, ltype, rtype, &mmap, &imap));
+		regions.push_back(region(l, r, ltype, rtype, &mmap, &imap));
 	}
 
 	return 0;
@@ -759,243 +448,6 @@ int bundle::build_splice_graph()
 	return 0;
 }
 
-int bundle::split_partial_exons()
-{
-	vector<partial_exon> vv;
-	for(int i = 0; i < pexons.size(); i++)
-	{
-		partial_exon &pe = pexons[i];
-		int n = (pe.rpos - pe.lpos) / partial_exon_length;
-
-		if(n <= 1)
-		{
-			vv.push_back(pe);
-			continue;
-		}
-
-		int32_t len = (pe.rpos - pe.lpos) / n;
-		for(int k = 0; k < n; k++)
-		{
-			int lltype = (k == 0) ? pe.ltype : MIDDLE_CUT;
-			int rrtype = (k == n - 1) ? pe.rtype : MIDDLE_CUT;
-
-			int32_t p1 = pe.lpos + k * len;
-			int32_t p2 = pe.lpos + (k + 1) * len;
-			assert(p2 <= pe.rpos);
-			if(k == n - 1) p2 = pe.rpos;
-
-			partial_exon p(p1, p2, lltype, rrtype);
-			evaluate_rectangle(mmap, p.lpos, p.rpos, p.ave, p.dev);
-			vv.push_back(p);
-		}
-	}
-
-	pexons = vv;
-	return 0;
-}
-
-int bundle::assign_edge_info_weights()
-{
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
-	{
-		edge_info ei = gr.get_edge_info(*it1);
-		ei.weight = 0;
-		gr.set_edge_info(*it1, ei);
-	}
-
-	MED med;
-	for(MVII::iterator it = hs.nodes.begin(); it != hs.nodes.end(); it++)
-	{
-		vector<int> v = it->first;
-		int c = it->second;
-		for(int k = 0; k < v.size() - 1; k++)
-		{
-			int s = v[k];
-			int t = v[k + 1];
-			PEB p = gr.edge(s, t);
-			if(p.second == false) continue;
-
-			//printf("add weight %d to (%d, %d)\n", c, s, t);
-
-			if(med.find(p.first) == med.end()) med.insert(PED(p.first, c));
-			else med[p.first] += c;
-		}
-	}
-
-	for(MED::iterator it = med.begin(); it != med.end(); it++)
-	{
-		edge_descriptor e = it->first;
-		double w = it->second;
-		edge_info ei = gr.get_edge_info(e);
-		ei.weight = w;
-		gr.set_edge_info(e, ei);
-	}
-	return 0;
-}
-
-int bundle::build_segments()
-{
-	int k = 1;
-	while(true)
-	{
-		if(k >= gr.num_vertices() - 1) break;
-		segment s(&mmap);
-		build_segment(s, k);
-		assert(s.size() >= 1);
-		segments.push_back(s);
-		k += s.size();
-	}
-
-	for(int i = 0; i < segments.size(); i++)
-	{
-		segments[i].build();
-	}
-	return 0;
-}
-
-int bundle::build_segment(segment &s, int k)
-{
-	if(k == 0) return 0;
-	if(k >= gr.num_vertices() - 1) return 0;
-
-	s.add_partial_exon(k - 1, pexons[k - 1], 0);
-	if(pexons[k - 1].ltype == START_BOUNDARY) return 0;
-	if(pexons[k - 1].rtype == END_BOUNDARY) return 0;
-	if(k >= gr.num_vertices() - 2) return 0;
-	if(gr.out_degree(k) >= 3) return 0;
-	if(gr.out_degree(k) <= 0) return 0;
-
-	if(gr.out_degree(k) == 2)
-	{
-		if(k + 2 >= gr.num_vertices() - 1) return 0;
-		if(pexons[k + 1].rtype == END_BOUNDARY) return 0;
-
-		int32_t p1 = pexons[k - 1].rpos;
-		int32_t p2 = pexons[k].lpos;
-		int32_t p3 = pexons[k].rpos;
-		int32_t p4 = pexons[k + 1].lpos;
-		if(p1 != p2) return 0;
-		if(p3 != p4) return 0;
-
-		PEB eb1 = gr.edge(k, k + 1);
-		PEB eb2 = gr.edge(k, k + 2);
-		PEB eb3 = gr.edge(k + 1, k + 2);
-		if(eb1.second == false) return 0;
-		if(eb2.second == false) return 0;
-		if(eb3.second == false) return 0;
-		if(gr.in_degree(k + 2) > 2) return 0;
-
-		double w = gr.get_edge_weight(eb2.first);
-		s.add_partial_exon(k, pexons[k], w);
-		s.add_partial_exon(k + 1, pexons[k + 1], 0);
-
-		return 0;
-		//return build_segment(s, k + 2);
-	}
-
-	if(gr.out_degree(k) == 1)
-	{
-		PEB eb1 = gr.edge(k, k + 1);
-		if(eb1.second == false) return 0;
-		if(gr.in_degree(k + 1) >= 2) return 0;
-		if(pexons[k].rtype == END_BOUNDARY) return 0;
-
-		/*
-		int32_t p1 = pexons[k - 1].rpos;
-		int32_t p2 = pexons[k].lpos;
-		if(p1 != p2) return 0;
-		*/
-
-		s.add_partial_exon(k, pexons[k], 0);
-		return 0;
-		//return build_segment(s, k + 1);
-	}
-
-	return 0;
-}
-
-int bundle::update_partial_exons()
-{
-	pexons.clear();
-	for(int i = 0; i < segments.size(); i++)
-	{
-		segment &s = segments[i];
-		pexons.insert(pexons.end(), s.pexons.begin(), s.pexons.end());
-	}
-	return 0;
-}
-
-int bundle::identify_boundary_edges()
-{
-	while(true)
-	{
-		bool b1 = identify_5end();
-		bool b2 = identify_5end();
-		if(b1 == false && b2 == false) break;
-	}
-	return 0;
-}
-
-bool bundle::identify_5end()
-{
-	double score5 = -1, sigma5 = -1;
-	int k5 = -1; 
-	for(int i = 1; i < gr.num_vertices() - 1; i++)
-	{
-		double score, sigma;
-		identify_5end(i, score, sigma);
-		if(score <= score5) continue;
-		if(score < 600) continue;
-		if(sigma < 10) continue;
-		score5 = score;
-		sigma5 = sigma;
-		k5 = i;
-	}
-	if(k5 == -1) return false;
-
-	printf("maximum 5end vertex = %d, score = %.2lf, sigma = %.2lf, pos = %d-%d\n", 
-			k5, score5, sigma5, gr.get_vertex_info(k5).lpos, gr.get_vertex_info(k5).rpos);
-
-	edge_descriptor e = gr.add_edge(0, k5);
-	double w = gr.get_vertex_weight(k5) - gr.get_vertex_weight(k5 - 1);
-	if(w <= 1.0) w = 1.0;
-	gr.set_edge_weight(e, w);
-	gr.set_edge_info(e, edge_info());
-
-	return true;
-}
-
-bool bundle::identify_3end()
-{
-	double score3 = -1, sigma3 = -1;
-	int k3 = -1;
-	for(int i = 1; i < gr.num_vertices() - 1; i++)
-	{
-		double score, sigma;
-		identify_3end(i, score, sigma);
-		if(score <= score3) continue;
-		if(score < 600) continue;
-		if(sigma < 10) continue;
-		score3 = score;
-		sigma3 = sigma;
-		k3 = i;
-	}
-
-	if(k3 == -1) return false;
-
-	printf("maximum 3end vertex = %d, score = %.2lf, sigma = %.2lf, pos = %d-%d\n", 
-			k3, score3, sigma3, gr.get_vertex_info(k3).lpos, gr.get_vertex_info(k3).rpos);
-
-	edge_descriptor e = gr.add_edge(k3, gr.num_vertices() - 1);
-	double w = gr.get_vertex_weight(k3) - gr.get_vertex_weight(k3 + 1);
-	if(w <= 1.0) w = 1.0;
-	gr.set_edge_weight(e, w);
-	gr.set_edge_info(e, edge_info());
-
-	return true;
-}
-
 int bundle::extend_isolated_end_boundaries()
 {
 	for(int i = 1; i < gr.num_vertices(); i++)
@@ -1060,72 +512,6 @@ int bundle::extend_isolated_start_boundaries()
 	return 0;
 }
 
-int bundle::identify_5end(int x, double &score, double &sigma)
-{
-	score = sigma = -1;
-	if(x <= 1) return 0;
-	if(gr.edge(0, x - 1).second == true) return 0;
-	if(gr.edge(0, x).second == true) return 0;
-	if(gr.edge(x - 1, x).second == false) return 0;
-	if(gr.in_degree(x) >= 2) return 0;
-	if(gr.out_degree(x - 1) >= 2) return 0;
-
-	vertex_info v1 = gr.get_vertex_info(x - 1);
-	vertex_info v2 = gr.get_vertex_info(x);
-	int l1 = v1.rpos - v1.lpos;
-	int l2 = v2.rpos - v2.lpos;
-
-	if(l1 <= 50) return 0;
-	if(l2 <= 50) return 0;
-
-	double w1 = gr.get_vertex_weight(x - 1);
-	double w2 = gr.get_vertex_weight(x);
-	int x1 = w1 * l1 / average_read_length;
-	int x2 = w2 * l2 / average_read_length;
-	
-	if(x1 + x2 <= 10) return 0;
-
-	double r = l2 * 1.0 / (l1 + l2);
-	score = compute_binomial_score(x1 + x2, r, x2);
-	sigma = (w2 - w1) / v1.stddev;
-
-	return 0;
-}
-
-int bundle::identify_3end(int x, double &score, double &sigma)
-{
-	score = sigma = -1;
-	int n = gr.num_vertices() - 1;
-	if(x >= n - 1) return 0;
-	if(gr.edge(x, n).second == true) return 0;
-	if(gr.edge(x + 1, n).second == true) return 0;
-	if(gr.edge(x, x + 1).second == false) return 0;
-	if(gr.out_degree(x) >= 2) return 0;
-	if(gr.in_degree(x + 1) >= 2) return 0;
-
-	vertex_info v1 = gr.get_vertex_info(x);
-	vertex_info v2 = gr.get_vertex_info(x + 1);
-	int l1 = v1.rpos - v1.lpos;
-	int l2 = v2.rpos - v2.lpos;
-
-	if(l1 <= 50) return 0;
-	if(l2 <= 50) return 0;
-
-	double w1 = gr.get_vertex_weight(x);
-	double w2 = gr.get_vertex_weight(x + 1);
-	int x1 = w1 * l1 / average_read_length;
-	int x2 = w2 * l2 / average_read_length;
-	
-	if(x1 + x2 <= 10) return 0;
-
-	double r = l1 * 1.0 / (l1 + l2);
-	score = compute_binomial_score(x1 + x2, r, x1);
-	sigma = (w1 - w2) / v2.stddev;
-
-	return 0;
-}
-
-
 int bundle::print(int index)
 {
 	printf("\nBundle %d: ", index);
@@ -1165,18 +551,6 @@ int bundle::print(int index)
 
 	// print hyper-edges
 	//hs.print();
-
-	// print segments
-	//for(int i = 0; i < segments.size(); i++) segments[i].print(i);
-
-	// print clips
-	/*
-	for(int i = 0; i < lsoft.size(); i++) printf("left  soft clips: pos = %s:%d, counts = %d\n", chrm.c_str(), lsoft[i].first, lsoft[i].second);
-	for(int i = 0; i < rsoft.size(); i++) printf("right soft clips: pos = %s:%d, counts = %d\n", chrm.c_str(), rsoft[i].first, rsoft[i].second);
-	for(int i = 0; i < lhard.size(); i++) printf("left  hard clips: pos = %s:%d, counts = %d\n", chrm.c_str(), lhard[i].first, lhard[i].second);
-	for(int i = 0; i < rhard.size(); i++) printf("right hard clips: pos = %s:%d, counts = %d\n", chrm.c_str(), rhard[i].first, rhard[i].second);
-	*/
-
 
 	return 0;
 }
@@ -1245,5 +619,3 @@ int bundle::output_transcript(ofstream &fout, const path &p, const string &gid, 
 	}
 	return 0;
 }
-
-
