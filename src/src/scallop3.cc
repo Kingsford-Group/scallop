@@ -39,11 +39,9 @@ int scallop3::assemble()
 
 		refine_splice_graph();
 
-		/*
 		b = resolve_ignorable_edges();
 		if(b == true) print();
 		if(b == true) continue;
-		*/
 
 		b = resolve_nontrivial_vertex(true, true);
 		if(b == true) print();
