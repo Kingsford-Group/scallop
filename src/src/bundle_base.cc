@@ -39,10 +39,12 @@ int bundle_base::add_hit(const hit &ht)
 	vector<int64_t> vd;
 	ht.get_mid_intervals(vm, vi, vd);
 
+	//ht.print();
 	for(int k = 0; k < vm.size(); k++)
 	{
 		int32_t s = high32(vm[k]);
 		int32_t t = low32(vm[k]);
+		//printf(" add interval %d-%d\n", s, t);
 		mmap += make_pair(ROI(s, t), 1);
 	}
 

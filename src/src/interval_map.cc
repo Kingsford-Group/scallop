@@ -54,7 +54,7 @@ PSIMI locate_boundary_iterators(const split_interval_map &imap, int32_t x, int32
 	if(lit == imap.end()) assert(rit == imap.end());
 	if(rit == imap.end() && lit != imap.end()) 
 	{
-		printf("x = %d, y = %d, lit = [%d, %d)\n", x, y, lower(lit->first), upper(lit->first));
+		//printf("x = %d, y = %d, lit = [%d, %d)\n", x, y, lower(lit->first), upper(lit->first));
 		assert(lit == imap.end());
 	}
 
@@ -92,14 +92,14 @@ int32_t compute_sum_overlap(const split_interval_map &imap, SIMI &p, SIMI &q)
 		int u = upper(it->first);
 		assert(u > l);
 
-		printf(" AA add [%d, %d) : %d\n", lower(it->first), upper(it->first), it->second);
+		//printf(" AA add [%d, %d) : %d\n", lower(it->first), upper(it->first), it->second);
 
 		s += (u - l) * it->second;
 	}
 	if(q != imap.end())
 	{
-		printf(" BB add [%d, %d) : %d\n", lower(q->first), upper(q->first), q->second);
-		s += q->second;
+		//printf(" BB add [%d, %d) : %d\n", lower(q->first), upper(q->first), q->second);
+		s += (upper(q->first) - lower(q->first)) * q->second;
 	}
 	return s;
 }
@@ -130,9 +130,8 @@ int evaluate_rectangle(const split_interval_map &imap, int ll, int rr, double &a
 	if(lit == imap.end()) return 0;
 	if(rit == imap.end()) return 0;
 
-	printf("----\n");
 	ave = 1.0 * compute_sum_overlap(imap, lit, rit) / (rr - ll);
-	printf("compute average %d-%d = %.2lf\n", ll, rr, ave);
+	//printf("compute average %d-%d = %.2lf\n", ll, rr, ave);
 
 	double var = 0;
 	for(SIMI it = lit; ; it++)
