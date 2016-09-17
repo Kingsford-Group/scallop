@@ -58,6 +58,7 @@ extern double slope_min_sigma;
 extern bool use_paired_end;
 extern bool ignore_single_exon_transcripts;
 extern double max_ignorable_edge_weight;
+extern double max_removable_edge_weight;
 extern int min_boundary_score;
 extern int min_boundary_length;
 extern double min_boundary_sigma;
