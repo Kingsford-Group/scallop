@@ -51,13 +51,19 @@ int scallop3::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
+		b = resolve_trivial_vertex(true);
+		if(b == true) print();
+		if(b == true) continue;
+
 		b = resolve_nontrivial_vertex(true, false);
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_trivial_vertex();
+		/*
+		b = resolve_trivial_vertex(false);
 		if(b == true) print();
 		if(b == true) continue;
+		*/
 
 		b = resolve_nontrivial_vertex(false, false);
 		if(b == true) print();
@@ -534,7 +540,7 @@ bool scallop3::resolve_ignorable_edges()
 	return flag;
 }
 
-bool scallop3::resolve_trivial_vertex()
+bool scallop3::resolve_trivial_vertex(bool split)
 {
 	int root = -1;
 	double ratio = -1;
@@ -555,32 +561,34 @@ bool scallop3::resolve_trivial_vertex()
 
 	if(root == -1) return false;
 
-	double ww = gr.get_edge_weight(i2e[se]);
+	if(split == true)
+	{
+		printf("resolve trivial vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
+
+		decompose_trivial_vertex(root);
+		assert(gr.degree(root) == 0);
+		return true;
+	}
 
 	bool b = true;
+	double ww = gr.get_edge_weight(i2e[se]);
 	if(hs.left_extend(se) && hs.right_extend(se)) b = false;
 	if(gr.in_degree(i2e[se]->target()) <= 1) b = false;
 	if(gr.out_degree(i2e[se]->source()) <= 1) b = false;
 	if(ww > max_removable_edge_weight) b = false;
 	if(ratio > max_split_error_ratio) b = false;
 
-	if(b == false)
-	{
-		printf("resolve trivial vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
-
-		decompose_trivial_vertex(root);
-		assert(gr.degree(root) == 0);
-	}
-	else
+	if(b == true && split == false)
 	{
 		printf("remove trivial small edge %d of vertex %d, weight = %.2lf, ratio = %.2lf, degree = (%d, %d)\n", 
 				se, root, ww, ratio, gr.in_degree(root), gr.out_degree(root));
 
 		remove_edge(se);
 		hs.remove(se);
+		return true;
 	}
 
-	return true;
+	return false;
 }
 
 int scallop3::classify()
