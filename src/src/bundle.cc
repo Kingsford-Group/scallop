@@ -469,9 +469,9 @@ int bundle::extend_isolated_end_boundaries()
 
 		if(gr.out_degree(s) != 1) continue;
 		if(t != gr.num_vertices() - 1) continue;
-		if(gr.get_edge_weight(e1) >= 1.5) continue;
+		if(gr.get_edge_weight(e1) >= 3.5) continue;
 		//if(gr.get_edge_weight(e2) >= 1.5) continue;
-		if(gr.get_vertex_weight(s) <= 5.0) continue;
+		if(gr.get_vertex_weight(s) <= 10.0) continue;
 		if(gr.get_vertex_info(s).rpos == gr.get_vertex_info(i).lpos) continue;
 
 		double w = gr.get_vertex_weight(s) - gr.get_edge_weight(e1);
@@ -479,7 +479,9 @@ int bundle::extend_isolated_end_boundaries()
 		gr.set_edge_weight(e, w);
 		gr.set_edge_info(e, edge_info());
 		
-		//printf("extend isolated end boundary (%d, %d) -> %d\n", k1, k2, n);
+		printf("extend isolated end boundary: (%d, %.2lf) -- (%.2lf) -- (%d, %.2lf)\n", s, gr.get_vertex_weight(s),
+				gr.get_edge_weight(e1), i, gr.get_vertex_weight(i));
+
 	}
 	return 0;
 }
@@ -502,8 +504,8 @@ int bundle::extend_isolated_start_boundaries()
 		if(s != 0) continue;
 		if(gr.in_degree(t) != 1) continue;
 		//if(gr.get_edge_weight(e1) >= 1.5) continue;
-		if(gr.get_edge_weight(e2) >= 1.5) continue;
-		if(gr.get_vertex_weight(t) <= 5.0) continue;
+		if(gr.get_edge_weight(e2) >= 3.5) continue;
+		if(gr.get_vertex_weight(t) <= 10.0) continue;
 		if(gr.get_vertex_info(i).rpos == gr.get_vertex_info(t).lpos) continue;
 
 		double w = gr.get_vertex_weight(t) - gr.get_edge_weight(e2);
@@ -511,7 +513,8 @@ int bundle::extend_isolated_start_boundaries()
 		gr.set_edge_weight(e, w);
 		gr.set_edge_info(e, edge_info());
 		
-		//printf("extend isolated start boundary (%d, %d) -> %d\n", k1, k2, n);
+		printf("extend isolated start boundary: (%d, %.2lf) -- (%.2lf) -- (%d, %.2lf)\n", i, gr.get_vertex_weight(i),
+				gr.get_edge_weight(e2), t, gr.get_vertex_weight(t));
 	}
 	return 0;
 }

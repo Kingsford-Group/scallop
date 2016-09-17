@@ -226,8 +226,7 @@ int region::build_partial_exons()
 			evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev);
 			pexons.push_back(pe);
 
-			printf("whole region: ");
-			pe.print(9);
+			//printf("whole region 1: "); pe.print(9);
 
 			return 0;
 		}
@@ -240,6 +239,9 @@ int region::build_partial_exons()
 			partial_exon pe(lpos, rpos, ltype, rtype);
 			evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev);
 			pexons.push_back(pe);
+
+			//printf("whole region 2: "); pe.print(9);
+
 			return 0;
 		}
 		else if(p1 > 0)
