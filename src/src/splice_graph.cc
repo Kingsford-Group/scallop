@@ -782,6 +782,36 @@ int splice_graph::round_weights()
 	return 0;
 }
 
+double splice_graph::compute_average_edge_weight()
+{
+	edge_iterator it1, it2;
+	int cnt = 0;
+	double sum = 0;
+	for(tie(it1, it2) = edges(); it1 != it2; it1++)
+	{
+		int s = (*it1)->source();
+		int t = (*it1)->target();
+		if(s == 0) continue;
+		if(t == num_vertices() - 1) continue;
+		cnt++;
+		sum += get_edge_weight(*it1);
+	}
+	if(cnt >= 1) sum = sum / cnt;
+	return sum;
+}
+
+double splice_graph::compute_average_vertex_weight()
+{
+	double sum = 0;
+	int cnt = num_vertices() - 2;
+	for(int i = 1; i < num_vertices() - 1; i++)
+	{
+		sum += get_vertex_weight(i);
+	}
+	if(cnt >= 1) sum = sum / cnt;
+	return sum;
+}
+
 int splice_graph::draw(const string &file, const MIS &mis, const MES &mes, double len, const vector<int> &tp)
 {
 	return directed_graph::draw(file, mis, mes, len, tp);

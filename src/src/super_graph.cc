@@ -528,8 +528,11 @@ int super_graph::print()
 		int32_t lpos = gr.get_vertex_info(0).lpos;
 		int32_t rpos = gr.get_vertex_info(gr.num_vertices() - 1).rpos;
 
-		printf("subgraph %d, #vertices = %lu / %lu, #starting = %d, #ending = %d, range = [%d, %d)\n", 
-				i, gr.num_vertices() - 2, root.num_vertices() - 2, d0, dn, lpos, rpos);
+		double vv = gr.compute_average_vertex_weight();
+		double ee = gr.compute_average_edge_weight();
+
+		printf("subgraph %d, #edges = %lu, #vertices = %lu / %lu, #starting = %d, #ending = %d, range = [%d, %d), vertex-weight = %.2lf, edge-weight= %.2lf\n", 
+				i, gr.num_edges(), gr.num_vertices() - 2, root.num_vertices() - 2, d0, dn, lpos, rpos, vv, ee);
 	}
 	return 0;
 }
