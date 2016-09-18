@@ -136,7 +136,7 @@ int assembler::process(const bundle_base &bb)
 
 	for(int k = 0; k < sg.subs.size(); k++)
 	{
-		if(k != maxk) continue;
+		//if(k != maxk) continue;
 
 		string gid = "bundle." + tostring(index) + "." + tostring(k);
 		if(fixed_gene_name != "" && gid != fixed_gene_name) continue;
