@@ -140,6 +140,36 @@ int splice_graph::set_vertex_weights(const vector<double> &v)
 	return 0;
 }
 
+edge_descriptor splice_graph::max_out_edge(int v)
+{
+	edge_iterator it1, it2;
+	edge_descriptor ee = null_edge;
+	double ww = 0;
+	for(tie(it1, it2) = out_edges(v); it1 != it2; it1++)
+	{
+		double w = get_edge_weight(*it1);
+		if(w < ww) continue;
+		ee = (*it1);
+		ww = w;
+	}
+	return ee;
+}
+
+edge_descriptor splice_graph::max_in_edge(int v)
+{
+	edge_iterator it1, it2;
+	edge_descriptor ee = null_edge;
+	double ww = 0;
+	for(tie(it1, it2) = in_edges(v); it1 != it2; it1++)
+	{
+		double w = get_edge_weight(*it1);
+		if(w < ww) continue;
+		ee = (*it1);
+		ww = w;
+	}
+	return ee;
+}
+
 edge_descriptor splice_graph::compute_maximum_edge_w()
 {
 	edge_iterator it1, it2;

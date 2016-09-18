@@ -45,6 +45,9 @@ public:
 	int set_edge_weights(const MED & med);
 	int set_vertex_weights(const vector<double> &v);
 
+	edge_descriptor max_out_edge(int v);
+	edge_descriptor max_in_edge(int v);
+
 	// modify the splice_graph
 	int clear();
 	int copy(const splice_graph &gr, MEE &x2y, MEE &y2x);

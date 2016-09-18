@@ -1,4 +1,5 @@
 #include "super_graph.h"
+#include "config.h"
 #include <algorithm>
 #include <cfloat>
 
@@ -15,6 +16,10 @@ int super_graph::build()
 	{
 		subs.clear();
 		hss.clear();
+
+		remove_edges(root);
+		refine_splice_graph(root);
+
 		while(remove_single_read(root));
 		refine_splice_graph(root);
 
@@ -243,6 +248,60 @@ bool super_graph::remove_single_read(splice_graph &gr)
 		return true;
 	}
 	return false;
+}
+
+int super_graph::remove_edges(splice_graph &gr)
+{
+	set<int> sv;
+	SE se;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	{
+		double w = gr.get_edge_weight(*it1);
+		if(w < min_edge_weight) continue;
+		se.insert(*it1);
+		sv.insert((*it1)->source());
+		sv.insert((*it1)->target());
+	}
+
+	while(true)
+	{
+		bool b = false;
+		for(set<int>::iterator it = sv.begin(); it != sv.end(); it++)
+		{
+			int v = (*it);
+			edge_descriptor e1 = gr.max_out_edge(v);
+			edge_descriptor e2 = gr.max_in_edge(v);
+			if(e1 != null_edge && se.find(e1) == se.end())
+			{
+				se.insert(e1);
+				sv.insert(e1->target());
+				b = true;
+			}
+			if(e2 != null_edge && se.find(e2) == se.end())
+			{
+				se.insert(e2);
+				sv.insert(e2->source());
+				b = true;
+			}
+			if(b == true) break;
+		}
+		if(b == false) break;
+	}
+
+	VE ve;
+	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	{
+		if(se.find(*it1) != se.end()) continue;
+		ve.push_back(*it1);
+	}
+
+	for(int i = 0; i < ve.size(); i++)
+	{
+		gr.remove_edge(ve[i]);
+	}
+
+	return 0;
 }
 
 bool super_graph::cut_splice_graph()
