@@ -207,12 +207,10 @@ bool parse_arguments(int argc, const char ** argv)
 		}
 		else if(string(argv[i]) == "-x")
 		{
-			max_removable_edge_weight = atof(argv[i + 1]);
+			min_edge_weight = atof(argv[i + 1]);
 			i++;
 		}
-
 	}
 
 	return b;
 }
-
