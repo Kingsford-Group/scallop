@@ -125,8 +125,19 @@ int assembler::process(const bundle_base &bb)
 	super_graph sg(bd.gr, bd.hs);
 	sg.build();
 
+	int maxk = -1;
+	int maxv = 0;
 	for(int k = 0; k < sg.subs.size(); k++)
 	{
+		if(sg.subs[k].num_vertices() < maxv) continue;
+		maxk = k;
+		maxv = sg.subs[k].num_vertices();
+	}
+
+	for(int k = 0; k < sg.subs.size(); k++)
+	{
+		if(k != maxk) continue;
+
 		string gid = "bundle." + tostring(index) + "." + tostring(k);
 		if(fixed_gene_name != "" && gid != fixed_gene_name) continue;
 
