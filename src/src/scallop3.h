@@ -51,7 +51,7 @@ private:
 	bool resolve_ignorable_edges();
 	bool resolve_hyper_tree();
 	bool resolve_nontrivial_vertex(bool split, bool hyper);
-	bool resolve_trivial_vertex();
+	bool resolve_trivial_vertex(bool split);
 	bool resolve_hyper_edge1();
 	bool resolve_hyper_edge0();
 	//bool resolve_hyper_vertex();

@@ -51,13 +51,19 @@ int scallop3::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_trivial_vertex();
+		b = resolve_trivial_vertex(true);
 		if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_nontrivial_vertex(true, false);
 		if(b == true) print();
 		if(b == true) continue;
+
+		/*
+		b = resolve_trivial_vertex(false);
+		if(b == true) print();
+		if(b == true) continue;
+		*/
 
 		b = resolve_nontrivial_vertex(false, false);
 		if(b == true) print();
@@ -534,37 +540,55 @@ bool scallop3::resolve_ignorable_edges()
 	return flag;
 }
 
-bool scallop3::resolve_trivial_vertex()
+bool scallop3::resolve_trivial_vertex(bool split)
 {
 	int root = -1;
 	double ratio = -1;
-	equation eqn;
+	int se = -1;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.degree(i) == 0) continue;
 		if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) continue;
 
-		router rt(i, gr, e2i, i2e);
-		rt.build();
-		if(rt.status != 0) continue;
-		assert(rt.ratio >= 0);
-		assert(rt.eqns.size() == 1);
+		int e;
+		double r = compute_smallest_edge(i, e);
+		if(ratio >= 0 && ratio < r) continue;
 
-		if(ratio >= 0 && ratio < rt.ratio) continue;
 		root = i;
-		ratio = rt.ratio;
-		eqn = rt.eqns[0];
+		ratio = r;
+		se = e;
 	}
 
 	if(root == -1) return false;
 
-	printf("resolve trivial vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
-	eqn.print(77);
+	if(split == true)
+	{
+		printf("resolve trivial vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
 
-	decompose_trivial_vertex(root);
-	assert(gr.degree(root) == 0);
+		decompose_trivial_vertex(root);
+		assert(gr.degree(root) == 0);
+		return true;
+	}
 
-	return true;
+	bool b = true;
+	double ww = gr.get_edge_weight(i2e[se]);
+	if(hs.left_extend(se) && hs.right_extend(se)) b = false;
+	if(gr.in_degree(i2e[se]->target()) <= 1) b = false;
+	if(gr.out_degree(i2e[se]->source()) <= 1) b = false;
+	if(ww > max_removable_edge_weight) b = false;
+	if(ratio > max_split_error_ratio) b = false;
+
+	if(b == true && split == false)
+	{
+		printf("remove trivial small edge %d of vertex %d, weight = %.2lf, ratio = %.2lf, degree = (%d, %d)\n", 
+				se, root, ww, ratio, gr.in_degree(root), gr.out_degree(root));
+
+		remove_edge(se);
+		hs.remove(se);
+		return true;
+	}
+
+	return false;
 }
 
 int scallop3::classify()
