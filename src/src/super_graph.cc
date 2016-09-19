@@ -259,11 +259,13 @@ int super_graph::remove_edges(splice_graph &gr)
 	edge_iterator it1, it2;
 	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
 	{
-		double w = gr.get_edge_weight(*it1);
-		if(w < min_edge_weight) continue;
-		se.insert(*it1);
 		int s = (*it1)->source();
 		int t = (*it1)->target();
+		double w = gr.get_edge_weight(*it1);
+		if(s == 0) continue;
+		if(t == gr.num_vertices() - 1) continue;
+		if(w < min_edge_weight) continue;
+		se.insert(*it1);
 		sv1.insert(t);
 		sv2.insert(s);
 	}
