@@ -37,8 +37,6 @@ int scallop3::assemble()
 	{
 		bool b	= false;
 
-		refine_splice_graph();
-
 		b = resolve_ignorable_edges();
 		if(b == true) print();
 		if(b == true) continue;
@@ -86,6 +84,17 @@ int scallop3::assemble()
 
 	greedy_decompose(-1);
 
+	return 0;
+}
+
+int scallop3::assert_weights()
+{
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	{
+		double w = gr.get_edge_weight(*it1);
+		assert(w >= 0.99);
+	}
 	return 0;
 }
 
