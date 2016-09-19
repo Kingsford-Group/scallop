@@ -26,7 +26,7 @@ int super_graph::build()
 		build_undirected_graph();
 		split_splice_graph();
 
-		print();
+		//print();
 
 		bool b = cut_splice_graph();
 		if(b == false) break;
@@ -242,6 +242,7 @@ bool super_graph::remove_single_read(splice_graph &gr)
 		//if(s1 != s2 && t1 != t2) continue;
 		//if(s1 != s2) continue;
 		//if(t1 != t2) continue;
+
 		//printf("remove single read %d -> %d\n", s, t);
 
 		gr.remove_edge(e);
@@ -252,7 +253,8 @@ bool super_graph::remove_single_read(splice_graph &gr)
 
 int super_graph::remove_edges(splice_graph &gr)
 {
-	set<int> sv;
+	set<int> sv1;
+	set<int> sv2;
 	SE se;
 	edge_iterator it1, it2;
 	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
@@ -260,28 +262,48 @@ int super_graph::remove_edges(splice_graph &gr)
 		double w = gr.get_edge_weight(*it1);
 		if(w < min_edge_weight) continue;
 		se.insert(*it1);
-		sv.insert((*it1)->source());
-		sv.insert((*it1)->target());
+		int s = (*it1)->source();
+		int t = (*it1)->target();
+		sv1.insert(t);
+		sv2.insert(s);
 	}
+
+	/*
+	for(SE::iterator it = se.begin(); it != se.end(); it++)
+	{
+		printf("remaining edge (%d, %d), weight = %.2lf\n", (*it)->source(), (*it)->target(), gr.get_edge_weight(*it));
+	}
+
+	printf("sv1: "); printv(vector<int>(sv1.begin(), sv1.end())); printf("\n");
+	printf("sv2: "); printv(vector<int>(sv2.begin(), sv2.end())); printf("\n");
+	*/
 
 	while(true)
 	{
 		bool b = false;
-		for(set<int>::iterator it = sv.begin(); it != sv.end(); it++)
+		for(SE::iterator it = se.begin(); it != se.end(); it++)
 		{
-			int v = (*it);
-			edge_descriptor e1 = gr.max_out_edge(v);
-			edge_descriptor e2 = gr.max_in_edge(v);
-			if(e1 != null_edge && se.find(e1) == se.end())
+			edge_descriptor e = (*it);
+			int s = e->source(); 
+			int t = e->target();
+			if(sv1.find(s) == sv1.end() && s != 0)
 			{
-				se.insert(e1);
-				sv.insert(e1->target());
+				edge_descriptor ee = gr.max_in_edge(s);
+				assert(ee != null_edge);
+				assert(se.find(ee) == se.end());
+				se.insert(ee);
+				sv1.insert(s);
+				sv2.insert(ee->source());
 				b = true;
 			}
-			if(e2 != null_edge && se.find(e2) == se.end())
+			if(sv2.find(t) == sv2.end() && t != gr.num_vertices() - 1)
 			{
-				se.insert(e2);
-				sv.insert(e2->source());
+				edge_descriptor ee = gr.max_out_edge(t);
+				assert(ee != null_edge);
+				assert(se.find(ee) == se.end());
+				se.insert(ee);
+				sv1.insert(ee->target());
+				sv2.insert(t);
 				b = true;
 			}
 			if(b == true) break;
@@ -298,6 +320,7 @@ int super_graph::remove_edges(splice_graph &gr)
 
 	for(int i = 0; i < ve.size(); i++)
 	{
+		//printf("remove edge (%d, %d), weight = %.2lf\n", ve[i]->source(), ve[i]->target(), gr.get_edge_weight(ve[i]));
 		gr.remove_edge(ve[i]);
 	}
 
