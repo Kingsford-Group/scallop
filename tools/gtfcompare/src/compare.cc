@@ -84,8 +84,9 @@ int compare_transcripts(const vector<transcript> &y, const vector<transcript> &x
 
 				if(b == true)
 				{
-					printf("TRUE %s %s %s %c %s %s %s %c\n", t1.gene_id.c_str(), t1.transcript_id.c_str(), t1.label().c_str(), t1.strand, 
-							t2.gene_id.c_str(), t2.transcript_id.c_str(), t2.label().c_str(), t2.strand);
+					printf("TRUE %s %s %s %c %d %lu %d %s %s %s %c %d %lu %d\n", 
+							t1.gene_id.c_str(), t1.transcript_id.c_str(), t1.label().c_str(), t1.strand, t1.expression, t1.exons.size(), t1.length(),
+							t2.gene_id.c_str(), t2.transcript_id.c_str(), t2.label().c_str(), t2.strand, t2.expression, t2.exons.size(), t2.length());
 				}
 
 				if(t1.strand != t2.strand) b = false;
@@ -99,7 +100,8 @@ int compare_transcripts(const vector<transcript> &y, const vector<transcript> &x
 			break;
 		}
 
-		if(flag == false) printf("FALSE %s %s %s %c\n", t1.gene_id.c_str(), t1.transcript_id.c_str(), t1.label().c_str(), t1.strand);
+		if(flag == false) printf("FALSE %s %s %s %c %d %lu %d\n", 
+				t1.gene_id.c_str(), t1.transcript_id.c_str(), t1.label().c_str(), t1.strand, t1.expression, t1.exons.size(), t1.length());
 	}
 	return cnt;
 }
