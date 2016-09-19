@@ -28,9 +28,13 @@ int super_graph::build()
 
 		//print();
 
+		/*
 		bool b = cut_splice_graph();
 		if(b == false) break;
 		refine_splice_graph(root);
+		*/
+
+		break;
 	}
 	return 0;
 }
