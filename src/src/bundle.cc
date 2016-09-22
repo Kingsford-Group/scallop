@@ -38,6 +38,7 @@ int bundle::build()
 	extend_isolated_start_boundaries();
 	extend_isolated_end_boundaries();
 
+	//printf("-----------------------------\n");
 	build_hyper_edges2();
 	//printf("+++++++++++++++++++++++++++++\n");
 	//gr.draw("gr.tex");
@@ -264,7 +265,7 @@ int bundle::build_hyper_edges2()
 		
 		/*
 		printf("sp1 = ( ");
-		printv(sp);
+		printv(sp1);
 		printf(")\n");
 		h.print();
 		*/
@@ -302,6 +303,13 @@ int bundle::build_hyper_edges2()
 			continue;
 		}
 
+		/*
+		printf("sp2 = ( ");
+		printv(sp2);
+		printf(")\n");
+		printf("=========\n");
+		*/
+
 		int x1 = -1, x2 = -1;
 		if(h.isize < 0) 
 		{
@@ -314,7 +322,8 @@ int bundle::build_hyper_edges2()
 			x2 = sp1[min_element(sp1)];
 		}
 
-		bool c = bridge_read(x1, x2);
+		vector<int> sp3;
+		bool c = bridge_read(x1, x2, sp3);
 
 		if(c == false)
 		{
@@ -325,19 +334,33 @@ int bundle::build_hyper_edges2()
 		else
 		{
 			sp1.insert(sp1.end(), sp2.begin(), sp2.end());
+			sp1.insert(sp1.end(), sp3.begin(), sp3.end());
 		}
 	}
 
 	return 0;
 }
 
-bool bundle::bridge_read(int x, int y)
+bool bundle::bridge_read(int x, int y, vector<int> &s)
 {
+	s.clear();
 	if(x >= y) return true;
-	PEB p = gr.edge(x + 1, y + 1);
-	if(p.second == true) return true;
-	else return false;
-	// TODO
+	PEB e = gr.edge(x + 1, y + 1);
+	if(e.second == true) return true;
+
+	int p = x;
+	edge_iterator it1, it2;
+	while(true)
+	{
+		if(p == gr.num_vertices() - 1) return false;
+		if(gr.out_degree(p) >= 2) return false;
+		if(gr.out_degree(p) <= 0) return false;
+		tie(it1, it2) = gr.out_edges(p);
+		p = (*it1)->target();
+		if(p == y) return true;
+		s.push_back(p);
+	}
+	assert(false);
 }
 
 int bundle::link_partial_exons()
