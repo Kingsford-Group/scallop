@@ -257,7 +257,7 @@ int bundle::build_hyper_edges2()
 	hs.clear();
 
 	string qname;
-	vector<int> sp;
+	vector<int> sp1;
 	for(int i = 0; i < hits.size(); i++)
 	{
 		hit &h = hits[i];
@@ -271,9 +271,9 @@ int bundle::build_hyper_edges2()
 
 		if(h.qname != qname)
 		{
-			set<int> s(sp.begin(), sp.end());
+			set<int> s(sp1.begin(), sp1.end());
 			if(s.size() >= 2) hs.add_node_list(s);
-			sp.clear();
+			sp1.clear();
 		}
 
 		qname = h.qname;
@@ -296,20 +296,48 @@ int bundle::build_hyper_edges2()
 			for(int j = k1; j <= k2; j++) sp2.push_back(j);
 		}
 
-		// TODO TODO TODO TODO
-		//if(sp.size() >= 1 && sp2.size() >= 1 && sp.back() + 1 < sp2[0]) sp.clear();
+		if(sp1.size() <= 0 || sp2.size() <= 0)
+		{
+			sp1.insert(sp1.end(), sp2.begin(), sp2.end());
+			continue;
+		}
 
-		sp.insert(sp.end(), sp2.begin(), sp2.end());
+		int x1 = -1, x2 = -1;
+		if(h.isize < 0) 
+		{
+			x1 = sp1[max_element(sp1)];
+			x2 = sp2[min_element(sp2)];
+		}
+		else
+		{
+			x1 = sp2[max_element(sp2)];
+			x2 = sp1[min_element(sp1)];
+		}
 
-		/*
-		printf("sp2 = ( ");
-		printv(sp);
-		printf(")\n");
-		printf("===\n");
-		*/
+		bool c = bridge_read(x1, x2);
+
+		if(c == false)
+		{
+			set<int> s(sp1.begin(), sp1.end());
+			if(s.size() >= 2) hs.add_node_list(s);
+			sp1 = sp2;
+		}
+		else
+		{
+			sp1.insert(sp1.end(), sp2.begin(), sp2.end());
+		}
 	}
 
 	return 0;
+}
+
+bool bundle::bridge_read(int x, int y)
+{
+	if(x >= y) return true;
+	PEB p = gr.edge(x + 1, y + 1);
+	if(p.second == true) return true;
+	else return false;
+	// TODO
 }
 
 int bundle::link_partial_exons()
