@@ -164,6 +164,7 @@ int assembler::process(const bundle_base &bb)
 					path p;
 					p.v = sg.get_root_vertices(k, sc.paths[i].v);
 					p.abd = sc.paths[i].abd;
+					p.reads = sc.paths[i].reads;
 					bd.output_transcript(fout, p, gid, tid);
 				}
 			}

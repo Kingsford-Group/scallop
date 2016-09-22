@@ -7,6 +7,7 @@ path::path()
 {
 	v.clear();
 	abd = 0;
+	reads = 0;
 }
 
 path::~path()
@@ -16,13 +17,14 @@ int path::clear()
 {
 	v.clear();
 	abd = 0;
+	reads = 0;
 	return 0;
 }
 
 int path::print(int index) const
 {
 	if(v.size() == 0) return 0;
-	printf("path %d: abundance = %.2lf, vertices = ", index, abd);
+	printf("path %d: abundance = %.2lf, reads = %.2lf, vertices = ", index, abd, reads);
 	for(int i = 0; i < v.size() - 1; i++)
 	{
 		printf("%d, ", v[i]);

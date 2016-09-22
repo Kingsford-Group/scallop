@@ -579,6 +579,7 @@ int bundle::output_transcript(ofstream &fout, const path &p, const string &gid, 
 
 	const vector<int> &v = p.v;
 	double abd = p.abd;
+	double cov = p.reads / average_read_length;
 
 	assert(v[0] == 0);
 	assert(v[v.size() - 1] == pexons.size() + 1);
@@ -599,6 +600,7 @@ int bundle::output_transcript(ofstream &fout, const path &p, const string &gid, 
 	fout<<".\t";					// frame
 	fout<<"gene_id \""<<gid.c_str()<<"\"; ";
 	fout<<"transcript_id \""<<tid.c_str()<<"\"; ";
+	fout<<"coverage \""<<cov<<"\"; ";
 	fout<<"expression \""<<abd<<"\";"<<endl;
 
 	join_interval_map jmap;
@@ -622,6 +624,7 @@ int bundle::output_transcript(ofstream &fout, const path &p, const string &gid, 
 		fout<<"gene_id \""<<gid.c_str()<<"\"; ";
 		fout<<"transcript_id \""<<tid.c_str()<<"\"; ";
 		fout<<"exon_number \""<<++cnt<<"\"; ";
+		fout<<"coverage \""<<cov<<"\"; ";
 		fout<<"expression \""<<abd<<"\";"<<endl;
 	}
 	return 0;

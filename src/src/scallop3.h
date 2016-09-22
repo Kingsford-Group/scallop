@@ -32,6 +32,7 @@ public:
 	MEI e2i;							// edge map, from edge to index
 	VE i2e;								// edge map, from index to edge
 	MEV mev;							// super edges
+	MED med;							// reads for this super edge
 	vector<int> v2v;					// vertex map
 	hyper_set hs;						// hyper edges
 	int round;							// round in iteration

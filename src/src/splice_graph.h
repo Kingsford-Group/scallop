@@ -47,6 +47,8 @@ public:
 
 	edge_descriptor max_out_edge(int v);
 	edge_descriptor max_in_edge(int v);
+	double get_in_weights(int v);
+	double get_out_weights(int v);
 
 	// modify the splice_graph
 	int clear();

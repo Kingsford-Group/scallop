@@ -14,6 +14,7 @@ public:
 public:
 	vector<int> v;
 	double abd;
+	double reads;
 
 public:
 	int clear();
