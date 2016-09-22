@@ -38,9 +38,11 @@ int scallop3::assemble()
 	{
 		bool b	= false;
 
+		/*
 		b = resolve_ignorable_edges();
 		if(b == true) print();
 		if(b == true) continue;
+		*/
 
 		b = resolve_nontrivial_vertex(true, true);
 		if(b == true) print();
