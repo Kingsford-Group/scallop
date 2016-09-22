@@ -1109,7 +1109,7 @@ int scallop3::collect_path(int e)
 	p.abd = gr.get_edge_weight(i2e[e]);
 	p.v = v;
 
-	if(p.reads >= min_coverage) 
+	if(p.reads / 100.0 >= min_coverage) 
 	{
 		paths.push_back(p);
 	}
