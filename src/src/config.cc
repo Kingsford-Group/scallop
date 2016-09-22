@@ -37,6 +37,7 @@ int max_equations_each_iteration = 50;
 double max_ignorable_edge_weight = 10.0;
 double max_removable_edge_weight = 5.5;
 double min_edge_weight = 1.9;
+double min_coverage = 10.0;
 int min_boundary_length = 80;
 int min_boundary_score = 1000;
 double min_boundary_sigma = 4.0;
@@ -107,6 +108,7 @@ int print_parameters()
 	printf("max_ignorable_edge_weight = %.2lf\n", max_ignorable_edge_weight);
 	printf("max_removable_edge_weight = %.2lf\n", max_removable_edge_weight);
 	printf("min_edge_weight = %.2lf\n", min_edge_weight);
+	printf("min_coverage = %.2lf\n", min_coverage);
 	printf("min_boundary_length = %d\n", min_boundary_length);
 	printf("min_boundary_score = %d\n", min_boundary_score);
 	printf("min_boundary_signma = %.2lf\n", min_boundary_sigma);

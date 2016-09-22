@@ -1128,7 +1128,11 @@ int scallop3::collect_path(int e)
 	p.reads = med[i2e[e]];
 	p.abd = gr.get_edge_weight(i2e[e]);
 	p.v = v;
-	paths.push_back(p);
+
+	if(p.reads >= min_coverage) 
+	{
+		paths.push_back(p);
+	}
 
 	gr.remove_edge(i2e[e]);
 	e2i.erase(i2e[e]);
