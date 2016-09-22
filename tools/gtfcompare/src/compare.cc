@@ -86,9 +86,9 @@ int compare_transcripts(const vector<transcript> &y, const vector<transcript> &x
 				{
 					printf("TRUE %s %s %s %c %d %lu %d %.2lf %.2lf %s %s %s %c %d %lu %d %.2lf %.2lf\n", 
 							t1.gene_id.c_str(), t1.transcript_id.c_str(), t1.label().c_str(), t1.strand, 
-							t1.expression, t1.exons.size(), t1.length(), t1.coverage, t1.coverage / t1.length(),
+							t1.expression, t1.exons.size(), t1.length(), t1.coverage, t1.coverage / t1.length() * 100.0,
 							t2.gene_id.c_str(), t2.transcript_id.c_str(), t2.label().c_str(), t2.strand, 
-							t2.expression, t2.exons.size(), t2.length(), t2.coverage, t2.coverage / t2.length());
+							t2.expression, t2.exons.size(), t2.length(), t2.coverage, t2.coverage / t2.length() * 100.0);
 				}
 
 				if(t1.strand != t2.strand) b = false;
@@ -104,7 +104,7 @@ int compare_transcripts(const vector<transcript> &y, const vector<transcript> &x
 
 		if(flag == false) printf("FALSE %s %s %s %c %d %lu %d %.2lf %.2lf\n", 
 				t1.gene_id.c_str(), t1.transcript_id.c_str(), t1.label().c_str(), t1.strand, 
-				t1.expression, t1.exons.size(), t1.length(), t1.coverage, t1.coverage / t1.length());
+				t1.expression, t1.exons.size(), t1.length(), t1.coverage, t1.coverage / t1.length() * 100.0);
 	}
 	return cnt;
 }
