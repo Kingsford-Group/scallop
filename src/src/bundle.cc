@@ -37,7 +37,10 @@ int bundle::build()
 
 	extend_isolated_start_boundaries();
 	extend_isolated_end_boundaries();
+
 	build_hyper_edges2();
+	//printf("+++++++++++++++++++++++++++++\n");
+	//gr.draw("gr.tex");
 
 	return 0;
 }
@@ -260,7 +263,7 @@ int bundle::build_hyper_edges2()
 		hit &h = hits[i];
 		
 		/*
-		printf("sp = ( ");
+		printf("sp1 = ( ");
 		printv(sp);
 		printf(")\n");
 		h.print();
@@ -293,8 +296,17 @@ int bundle::build_hyper_edges2()
 			for(int j = k1; j <= k2; j++) sp2.push_back(j);
 		}
 
-		if(sp.size() >= 1 && sp2.size() >= 1 && sp.back() + 1 < sp2[0]) sp.clear();
+		// TODO TODO TODO TODO
+		//if(sp.size() >= 1 && sp2.size() >= 1 && sp.back() + 1 < sp2[0]) sp.clear();
+
 		sp.insert(sp.end(), sp2.begin(), sp2.end());
+
+		/*
+		printf("sp2 = ( ");
+		printv(sp);
+		printf(")\n");
+		printf("===\n");
+		*/
 	}
 
 	return 0;
