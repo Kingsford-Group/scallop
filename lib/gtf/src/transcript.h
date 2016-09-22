@@ -27,6 +27,7 @@ public:
 
 	string transcript_id;
 	int32_t expression;
+	double coverage;
 	vector<PI32> exons;
 	char strand;
 

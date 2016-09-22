@@ -10,7 +10,7 @@ class exon
 {
 public:
 	exon(const string &s);
-	exon(const string &_transcript_id, const string &_gene_id, int32_t _start, int32_t _end, int32_t _expression);
+	exon(const string &_transcript_id, const string &_gene_id, int32_t _start, int32_t _end, int32_t _expression, double _coverage);
 
 public:
 	int parse(const string &s);
@@ -30,6 +30,7 @@ public:
 	string transcript_id;
 	string gene_id;
 	int32_t expression;
+	double coverage;
 };
 
 #endif

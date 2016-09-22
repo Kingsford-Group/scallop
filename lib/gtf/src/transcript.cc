@@ -39,6 +39,7 @@ int transcript::add_exon(const exon &e)
 	transcript_id = e.transcript_id;
 	gene_id = e.gene_id;
 	expression = e.expression;
+	coverage = e.coverage;
 	strand = e.strand;
 	exons.push_back(PI32(e.start, e.end));
 	return 0;
@@ -97,6 +98,7 @@ int transcript::write(ofstream &fout) const
 	fout<<".\t";								// frame
 	fout<<"gene_id \""<<gene_id.c_str()<<"\"; ";
 	fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
+	fout<<"coverage \""<<coverage<<"\"; ";
 	fout<<"expression \""<<expression<<"\";"<<endl;
 
 	for(int k = 0; k < exons.size(); k++)
@@ -112,6 +114,7 @@ int transcript::write(ofstream &fout) const
 		fout<<"gene_id \""<<gene_id.c_str()<<"\"; ";
 		fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
 		fout<<"exon \""<<k + 1<<"\"; ";
+		fout<<"coverage \""<<coverage<<"\"; ";
 		fout<<"expression \""<<expression<<"\";"<<endl;
 	}
 	return 0;
