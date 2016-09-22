@@ -38,11 +38,9 @@ int scallop3::assemble()
 	{
 		bool b	= false;
 
-		/*
 		b = resolve_ignorable_edges();
 		if(b == true) print();
 		if(b == true) continue;
-		*/
 
 		b = resolve_nontrivial_vertex(true, true);
 		if(b == true) print();
@@ -965,8 +963,17 @@ int scallop3::balance_vertex(int v)
 	assert(w1 >= SMIN);
 	assert(w2 >= SMIN);
 
+	double wv = gr.get_vertex_weight(v);
+	double ww = (wv >= w1 && wv >= w2) ? wv : (w1 >= w2 ? w1 : w2);
+	assert(ww >= w1 && ww >= w2);
+
+	double r1 = ww / w1;
+	double r2 = ww / w2;
+
+	/*
 	double r1 = (w1 > w2) ? 1.0 : w2 / w1;
 	double r2 = (w1 < w2) ? 1.0 : w1 / w2;
+	*/
 
 	for(tie(it1, it2) = gr.in_edges(v); it1 != it2; it1++)
 	{
