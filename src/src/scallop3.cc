@@ -650,6 +650,8 @@ int scallop3::decompose_trivial_vertex(int x)
 
 int scallop3::greedy_decompose(int num)
 {
+	if(gr.num_edges() == 0) return 0;
+
 	for(int i = 1; i < gr.num_vertices() - 1; i++) balance_vertex(i);
 	for(int i = 1; i < gr.num_vertices() - 1; i++) balance_vertex(i);
 
@@ -963,7 +965,8 @@ int scallop3::balance_vertex(int v)
 	assert(w1 >= SMIN);
 	assert(w2 >= SMIN);
 
-	double wv = gr.get_vertex_weight(v);
+	//double wv = gr.get_vertex_weight(v);
+	double wv = -1;		// do not use it
 	double ww = (wv >= w1 && wv >= w2) ? wv : (w1 >= w2 ? w1 : w2);
 	assert(ww >= w1 && ww >= w2);
 
