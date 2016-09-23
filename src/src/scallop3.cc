@@ -401,7 +401,7 @@ bool scallop3::resolve_ignorable_edges()
 		int s = e->source();
 		int t = e->target();
 
-		if(ratio > 2 * max_split_error_ratio) continue;
+		if(ratio > max_split_error_ratio) continue;
 
 		double w = gr.get_edge_weight(e);
 		if(w > max_ignorable_edge_weight) continue;
