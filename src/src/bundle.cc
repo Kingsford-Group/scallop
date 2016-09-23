@@ -346,12 +346,10 @@ bool bundle::bridge_read(int x, int y, vector<int> &v)
 {
 	v.clear();
 	if(x >= y) return true;
-	
-	/*
+
 	PEB e = gr.edge(x + 1, y + 1);
 	if(e.second == true) return true;
 	else return false;
-	*/
 
 	if(y - x >= 10) return false;
 
