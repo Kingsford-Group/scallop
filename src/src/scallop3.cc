@@ -42,6 +42,10 @@ int scallop3::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
+		b = resolve_nontrivial_vertex(false, false);
+		if(b == true) print();
+		if(b == true) continue;
+
 		b = resolve_nontrivial_vertex(true, true);
 		if(b == true) print();
 		if(b == true) continue;
@@ -63,10 +67,6 @@ int scallop3::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 		*/
-
-		b = resolve_nontrivial_vertex(false, false);
-		if(b == true) print();
-		if(b == true) continue;
 
 		b = resolve_hyper_edge1();
 		if(b == true) print();
