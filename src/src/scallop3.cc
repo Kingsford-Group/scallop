@@ -46,15 +46,15 @@ int scallop3::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
+		b = resolve_hyper_tree();
+		if(b == true) print();
+		if(b == true) continue;
+
 		b = resolve_trivial_vertex(true);
 		if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_nontrivial_vertex(true, false);
-		if(b == true) print();
-		if(b == true) continue;
-
-		b = resolve_hyper_tree();
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -1185,7 +1185,7 @@ int scallop3::print()
 	int p2 = gr.compute_decomp_paths();
 	printf("statistics: %lu edges, %d vertices, total %d paths, %d required\n", gr.num_edges(), n, p1, p2);
 
-	hs.print();
+	//hs.print();
 
 	if(output_tex_files == true)
 	{
