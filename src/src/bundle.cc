@@ -348,20 +348,23 @@ bool bundle::bridge_read(int x, int y, vector<int> &v)
 	PEB e = gr.edge(x + 1, y + 1);
 	if(e.second == true) return true;
 
+	if(y - x >= 10) return false;
+
 	long max = 9999999999;
 	vector<long> table;
 	vector<int> trace;
 	int n = y - x + 1;
 	table.resize(n, 0);
+	trace.resize(n, -1);
 	table[0] = 1;
 	trace[0] = -1;
 	for(int i = x + 1; i <= y; i++)
 	{
 		edge_iterator it1, it2;
-		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
+		for(tie(it1, it2) = gr.in_edges(i + 1); it1 != it2; it1++)
 		{
-			int s = (*it1)->source();
-			int t = (*it1)->target();
+			int s = (*it1)->source() - 1;
+			int t = (*it1)->target() - 1;
 			assert(t == i);
 			if(s < x) continue;
 			if(table[s - x] <= 0) continue;
@@ -370,6 +373,8 @@ bool bundle::bridge_read(int x, int y, vector<int> &v)
 			if(table[t - x] >= max) return false;
 		}
 	}
+
+	//printf("x = %d, y = %d, num-paths = %ld\n", x, y, table[n - 1]);
 	if(table[n - 1] != 1) return false;
 
 	v.clear();
@@ -380,6 +385,7 @@ bool bundle::bridge_read(int x, int y, vector<int> &v)
 		if(p <= 0) break;
 		v.push_back(p + x);
 	}
+	assert(v.size() >= 1);
 
 	return true;
 }
