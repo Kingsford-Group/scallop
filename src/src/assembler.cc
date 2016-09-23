@@ -151,6 +151,9 @@ int assembler::process(const bundle_base &bb)
 		if(ref_file1 != "" && bd.strand == '+') compare(gr, ref_file1, "compare1.tex");
 		if(ref_file2 != "" && bd.strand == '-') compare(gr, ref_file2, "compare2.tex");
 
+		double reads = gr.compute_coverage() / average_read_length;
+		if(reads < min_splice_graph_coverage) continue;
+
 		if(algo != "shao")
 		{
 			scallop3 sc(gid, gr, hs);
