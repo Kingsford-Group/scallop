@@ -307,7 +307,6 @@ int bundle::build_hyper_edges2()
 		printf("sp2 = ( ");
 		printv(sp2);
 		printf(")\n");
-		printf("=========\n");
 		*/
 
 		int x1 = -1, x2 = -1;
@@ -324,6 +323,8 @@ int bundle::build_hyper_edges2()
 
 		vector<int> sp3;
 		bool c = bridge_read(x1, x2, sp3);
+
+		//printf("=========\n");
 
 		if(c == false)
 		{
@@ -345,8 +346,12 @@ bool bundle::bridge_read(int x, int y, vector<int> &v)
 {
 	v.clear();
 	if(x >= y) return true;
+	
+	/*
 	PEB e = gr.edge(x + 1, y + 1);
 	if(e.second == true) return true;
+	else return false;
+	*/
 
 	if(y - x >= 10) return false;
 
@@ -377,6 +382,8 @@ bool bundle::bridge_read(int x, int y, vector<int> &v)
 	//printf("x = %d, y = %d, num-paths = %ld\n", x, y, table[n - 1]);
 	if(table[n - 1] != 1) return false;
 
+	//printf("path = ");
+
 	v.clear();
 	int p = n - 1;
 	while(p >= 0)
@@ -384,8 +391,10 @@ bool bundle::bridge_read(int x, int y, vector<int> &v)
 		p = trace[p];
 		if(p <= 0) break;
 		v.push_back(p + x);
+		//printf("%d ", p + x);
 	}
-	assert(v.size() >= 1);
+	//printf("\n");
+	//assert(v.size() >= 1);
 
 	return true;
 }
