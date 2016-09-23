@@ -346,11 +346,6 @@ bool bundle::bridge_read(int x, int y, vector<int> &v)
 {
 	v.clear();
 	if(x >= y) return true;
-
-	PEB e = gr.edge(x + 1, y + 1);
-	if(e.second == true) return true;
-	else return false;
-
 	if(y - x >= 10) return false;
 
 	long max = 9999999999;
@@ -377,9 +372,14 @@ bool bundle::bridge_read(int x, int y, vector<int> &v)
 		}
 	}
 
-	//printf("x = %d, y = %d, num-paths = %ld\n", x, y, table[n - 1]);
-	if(table[n - 1] != 1) return false;
+	if(table[n - 1] != 1)
+	{
+		PEB e = gr.edge(x + 1, y + 1);
+		if(e.second == true) return true;
+		else return false;
+	}
 
+	//printf("x = %d, y = %d, num-paths = %ld\n", x, y, table[n - 1]);
 	//printf("path = ");
 
 	v.clear();
