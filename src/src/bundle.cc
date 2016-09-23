@@ -341,26 +341,47 @@ int bundle::build_hyper_edges2()
 	return 0;
 }
 
-bool bundle::bridge_read(int x, int y, vector<int> &s)
+bool bundle::bridge_read(int x, int y, vector<int> &v)
 {
-	s.clear();
+	v.clear();
 	if(x >= y) return true;
 	PEB e = gr.edge(x + 1, y + 1);
 	if(e.second == true) return true;
 
-	int p = x;
-	edge_iterator it1, it2;
-	while(true)
+	long max = 9999999999;
+	vector<long> table;
+	vector<int> trace;
+	int n = y - x + 1;
+	table.resize(n, 0);
+	table[0] = 1;
+	trace[0] = -1;
+	for(int i = x + 1; i <= y; i++)
 	{
-		if(p == gr.num_vertices() - 1) return false;
-		if(gr.out_degree(p) >= 2) return false;
-		if(gr.out_degree(p) <= 0) return false;
-		tie(it1, it2) = gr.out_edges(p);
-		p = (*it1)->target();
-		if(p == y) return true;
-		s.push_back(p);
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
+		{
+			int s = (*it1)->source();
+			int t = (*it1)->target();
+			assert(t == i);
+			if(s < x) continue;
+			if(table[s - x] <= 0) continue;
+			table[t - x] += table[s - x];
+			trace[t - x] = s - x;
+			if(table[t - x] >= max) return false;
+		}
 	}
-	assert(false);
+	if(table[n - 1] != 1) return false;
+
+	v.clear();
+	int p = n - 1;
+	while(p >= 0)
+	{
+		p = trace[p];
+		if(p <= 0) break;
+		v.push_back(p + x);
+	}
+
+	return true;
 }
 
 int bundle::link_partial_exons()

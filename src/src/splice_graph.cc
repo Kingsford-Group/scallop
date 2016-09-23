@@ -423,6 +423,29 @@ long splice_graph::compute_num_paths()
 	return table[n - 1];
 }
 
+long splice_graph::compute_num_paths(int a, int b)
+{
+	long max = 9999999999;
+	vector<long> table;
+	int n = (b - a + 1);
+	table.resize(n, 0);
+	table[0] = 1;
+	for(int i = a + 1; i <= b; i++)
+	{
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = in_edges(i); it1 != it2; it1++)
+		{
+			int s = (*it1)->source();
+			int t = (*it1)->target();
+			assert(t == i);
+			if(s < a) continue;
+			table[t] += table[s - a];
+			if(table[t] >= max) return max;
+		}
+	}
+	return table[n - 1];
+}
+
 bool splice_graph::check_fully_connected()
 {
 	assert(num_vertices() >= 2);

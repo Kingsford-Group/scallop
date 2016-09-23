@@ -61,6 +61,7 @@ public:
 
 	// analysis the structure of splice graph
 	long compute_num_paths();
+	long compute_num_paths(int a, int b);
 	int compute_decomp_paths();
 	bool check_fully_connected();
 	int compute_independent_subgraphs();
