@@ -160,7 +160,7 @@ bool scallop3::resolve_nontrivial_vertex(bool split, bool hyper)
 	if(root == -1) return false;
 
 	int se;
-	double ratio2 = compute_smallest_edge(root, se) * 0.5;
+	double ratio2 = compute_smallest_edge(root, se);
 	double sw = gr.get_edge_weight(i2e[se]);
 
 	double ratio = (ratio1 < ratio2) ? ratio1 : ratio2;
@@ -401,7 +401,7 @@ bool scallop3::resolve_ignorable_edges()
 		int s = e->source();
 		int t = e->target();
 
-		if(ratio > 2 * max_split_error_ratio) continue;
+		if(ratio > max_split_error_ratio) continue;
 
 		double w = gr.get_edge_weight(e);
 		if(w > max_ignorable_edge_weight) continue;
@@ -1158,7 +1158,7 @@ double scallop3::compute_smallest_edge(int x, int &e)
 		e = e2i[*it1];
 	}
 	assert(e >= 0);
-	return ratio;
+	return ratio * 0.4;
 }
 
 int scallop3::stats()
