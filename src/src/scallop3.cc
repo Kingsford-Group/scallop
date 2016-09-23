@@ -160,7 +160,7 @@ bool scallop3::resolve_nontrivial_vertex(bool split, bool hyper)
 	if(root == -1) return false;
 
 	int se;
-	double ratio2 = compute_smallest_edge(root, se);
+	double ratio2 = compute_smallest_edge(root, se) * 0.5;
 	double sw = gr.get_edge_weight(i2e[se]);
 
 	double ratio = (ratio1 < ratio2) ? ratio1 : ratio2;
