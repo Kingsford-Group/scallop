@@ -154,8 +154,7 @@ bool scallop3::resolve_nontrivial_vertex(bool split, bool hyper)
 	if(root == -1) return false;
 
 	int se;
-	double ratio2 = compute_smallest_removable_edge(hyper, se);
-	double sw = gr.get_edge_weight(i2e[se]);
+	double ratio2 = compute_smallest_edge(root, se);
 
 	double ratio = (ratio1 < ratio2) ? ratio1 : ratio2;
 	if(ratio > max_split_error_ratio) return false;
@@ -176,11 +175,10 @@ bool scallop3::resolve_nontrivial_vertex(bool split, bool hyper)
 		return true;
 	}
 
-	bool b = true;
-	if(hs.left_extend(se) && hs.right_extend(se)) b = false;
-	if(gr.in_degree(i2e[se]->target()) <= 1) b = false;
-	if(gr.out_degree(i2e[se]->source()) <= 1) b = false;
-	if(split == false && ratio2 <= ratio1 && b == true)
+	se = -1;
+	ratio2 = compute_smallest_removable_edge(se);
+	double sw = gr.get_edge_weight(i2e[se]);
+	if(split == false && ratio2 <= ratio1)
 	{
 		assert(se >= 0);
 		printf("remove %s small edge %d, weight = %.2lf, ratio = %.2lf / %.2lf\n", 
@@ -1115,15 +1113,15 @@ int scallop3::collect_path(int e)
 	return 0;
 }
 
-double scallop3::compute_smallest_removable_edge(bool hyper, int &ee)
+double scallop3::compute_smallest_removable_edge(int &ee)
 {
 	ee = -1;
 	double ratio = 999;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
-		vector<PI> p = hs.get_routes(i, gr, e2i);
-		if(hyper == true && p.size() <= 0) continue;
-		if(hyper == false&& p.size() >= 1) continue;
+		//vector<PI> p = hs.get_routes(i, gr, e2i);
+		//if(hyper == true && p.size() <= 0) continue;
+		//if(hyper == false&& p.size() >= 1) continue;
 
 		if(gr.in_degree(i) <= 1) continue;
 		if(gr.out_degree(i) <= 1) continue;
