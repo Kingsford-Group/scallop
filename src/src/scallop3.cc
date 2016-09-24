@@ -39,11 +39,11 @@ int scallop3::assemble()
 		bool b	= false;
 
 		int ee = -1, v1 = -1, v2 = -1;
-		double r0 = compute_smallest_removable_edge(ee);
+		double r0 = compute_smallest_removable_edge(ee) * 0.4;
 		double r1 = compute_smallest_splitable_vertex(v1, true);
 		double r2 = compute_smallest_splitable_vertex(v2, false);
 
-		if(ee != -1 && r0 <= 2.0 * max_split_error_ratio && gr.get_edge_weight(i2e[ee]) <= max_ignorable_edge_weight)
+		if(ee != -1 && r0 <= max_split_error_ratio && gr.get_edge_weight(i2e[ee]) <= max_ignorable_edge_weight)
 		{
 			remove_edge(ee);
 			hs.remove(ee);
@@ -52,7 +52,7 @@ int scallop3::assemble()
 			continue;
 		}
 
-		if(ee != -1 && r0 <= r1 && r0 * 0.4 <= r2 && r0 <= 2.0 * max_split_error_ratio)
+		if(ee != -1 && r0 <= r1 && r0 <= r2 && r0 <= max_split_error_ratio)
 		{
 			remove_edge(ee);
 			hs.remove(ee);
@@ -98,12 +98,6 @@ int scallop3::assemble()
 			print();
 			continue;
 		}
-
-		/*
-		b = resolve_nontrivial_vertex(true, false);
-		if(b == true) print();
-		if(b == true) continue;
-		*/
 
 		b = resolve_hyper_edge1();
 		if(b == true) print();
@@ -185,7 +179,7 @@ double scallop3::compute_smallest_splitable_vertex(int &root, bool hyper)
 		assert(rt.ratio >= 0);
 		assert(rt.eqns.size() == 2);
 
-		if(mratio >= 0 && mratio < rt.ratio) continue;
+		if(mratio < rt.ratio) continue;
 
 		root = i;
 		mratio = rt.ratio;
