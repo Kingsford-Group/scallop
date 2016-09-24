@@ -43,7 +43,7 @@ int scallop3::assemble()
 		double r1 = compute_smallest_splitable_vertex(v1, true);
 		double r2 = compute_smallest_splitable_vertex(v2, false);
 
-		if(ee != -1 && (r0 <= r1 && r0 * 0.4 <= r2) || gr.get_edge_weight(i2e[ee]) <= max_ignorable_edge_weight)
+		if(ee != -1 && ((r0 <= r1 && r0 * 0.4 <= r2) || gr.get_edge_weight(i2e[ee]) <= max_ignorable_edge_weight))
 		{
 			remove_edge(ee);
 			hs.remove(ee);
