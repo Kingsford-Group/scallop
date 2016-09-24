@@ -43,7 +43,7 @@ int scallop3::assemble()
 		double r1 = compute_smallest_splitable_vertex(v1, true);
 		double r2 = compute_smallest_splitable_vertex(v2, false);
 
-		if(ee != -1 && ((r0 <= r1 && r0 * 0.4 <= r2) || gr.get_edge_weight(i2e[ee]) <= max_ignorable_edge_weight))
+		if(ee != -1 && r0 <= r1 && r0 * 0.4 <= r2 && r0 <= 2.0 * max_split_error_ratio)
 		{
 			remove_edge(ee);
 			hs.remove(ee);
@@ -51,7 +51,7 @@ int scallop3::assemble()
 			print();
 			continue;
 		}
-		else if(v1 != -1)
+		else if(v1 != -1 && r1 <= max_split_error_ratio)
 		{
 			split_vertex(v1);
 			b = true;
@@ -81,7 +81,7 @@ int scallop3::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
-		if(v2 != -1)
+		if(v2 != -1 && r2 <= max_split_error_ratio)
 		{
 			split_vertex(v2);
 			b = true;
@@ -157,7 +157,7 @@ int scallop3::refine_splice_graph()
 double scallop3::compute_smallest_splitable_vertex(int &root, bool hyper)
 {
 	root = -1;
-	double mratio = -1;
+	double mratio = 999.0;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.in_degree(i) <= 1) continue;
@@ -467,7 +467,7 @@ bool scallop3::resolve_hyper_edge1()
 double scallop3::compute_smallest_removable_edge(int &ee)
 {
 	ee = -1;
-	double mratio = -1;
+	double mratio = 999;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		// TODO TODO
@@ -476,7 +476,7 @@ double scallop3::compute_smallest_removable_edge(int &ee)
 
 		int ei;
 		double ratio = compute_smallest_edge(i, ei);
-		if(mratio >= 0 && ratio > mratio) continue;
+		if(ratio > mratio) continue;
 
 		edge_descriptor e = i2e[ei];
 		int s = e->source();
