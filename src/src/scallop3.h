@@ -53,21 +53,19 @@ private:
 	bool resolve_ignorable_edges();
 	bool resolve_hyper_tree();
 	bool resolve_nontrivial_vertex(bool split, bool hyper);
-	bool resolve_trivial_vertex();
+	bool resolve_trivial_vertex(bool split);
 	bool resolve_hyper_edge1();
 	bool resolve_hyper_edge0();
-	double compute_smallest_removable_edge(int &e);
-	double compute_smallest_splitable_vertex(int &v, bool hyper);
+	//bool resolve_hyper_vertex();
+	//bool resolve_normal_vertex();
 
 	// smooth vertex
 	bool balance_vertex(undirected_graph &ug, const vector<int> &u2e);
 	int balance_vertex(int x);
-	double compute_balance_ratio(int v);
 
 	// decomposing subroutines
 	int decompose_tree(undirected_graph &ug, const vector<int> &u2e);
 	int decompose_trivial_vertex(int v);
-	int split_vertex(int x);
 	int split_vertex(int x, const vector<int> &xe, const vector<int> &ye);
 	int split_edge(int exi, double w);
 	int merge_adjacent_edges(int x, int y);
@@ -79,6 +77,7 @@ private:
 	int collect_existing_st_paths();
 	int greedy_decompose(int num);
 	double compute_smallest_edge(int x, int &e);
+	double compute_smallest_edge(int &e);
 
 	// print and draw
 	int print();
