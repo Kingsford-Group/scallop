@@ -77,7 +77,7 @@ private:
 	int collect_existing_st_paths();
 	int greedy_decompose(int num);
 	double compute_smallest_edge(int x, int &e);
-	double compute_smallest_edge(int &e);
+	double compute_smallest_removable_edge(bool hyper, int &e);
 
 	// print and draw
 	int print();
