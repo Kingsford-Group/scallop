@@ -177,10 +177,10 @@ bool scallop3::resolve_nontrivial_vertex(bool split, bool hyper)
 
 	se = -1;
 	ratio2 = compute_smallest_removable_edge(se);
-	double sw = gr.get_edge_weight(i2e[se]);
-	if(split == false && ratio2 <= ratio1)
+	if(split == false && ratio2 <= ratio1 && se != -1)
 	{
 		assert(se >= 0);
+		double sw = gr.get_edge_weight(i2e[se]);
 		printf("remove %s small edge %d, weight = %.2lf, ratio = %.2lf / %.2lf\n", 
 				hyper ? "hyper" : "normal", se, sw, ratio1, ratio2);
 
