@@ -213,6 +213,7 @@ bool scallop3::resolve_smallest_edge()
 	if(rt.status == 4) ratio2 = rt.ratio;
 
 	if(ratio1 > ratio2) return false;
+	if(ratio1 > max_split_error_ratio) return false;
 
 	double sw = gr.get_edge_weight(i2e[se]);
 	printf("remove small edge %d, weight = %.2lf, ratio = %.2lf\n", se, sw, ratio1);
