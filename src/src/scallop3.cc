@@ -155,7 +155,8 @@ bool scallop3::resolve_nontrivial_vertex(bool split, bool hyper)
 
 	int se;
 	//double ratio2 = compute_smallest_edge(root, se);
-	double ratio2 = compute_smallest_removable_edge(se);
+	//double ratio2 = compute_smallest_removable_edge(se);
+	double ratio2 = 999;
 
 	double ratio = (ratio1 < ratio2) ? ratio1 : ratio2;
 	if(ratio > max_split_error_ratio) return false;
