@@ -190,7 +190,7 @@ bool scallop3::resolve_smallest_edge()
 		if(gr.out_degree(i) <= 1) continue;
 
 		int e;
-		double r = compute_smallest_edge(i, e);
+		double r = compute_smallest_edge(i, e) * 1.5;
 
 		if(ratio1 < r) continue;
 
