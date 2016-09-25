@@ -178,7 +178,31 @@ bool scallop3::resolve_smallest_edge()
 {
 	int root = -1;
 	int se = -1;
-	double ratio1 = compute_smallest_removable_edge(root, se);
+	double ratio1 = 999;
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		/*
+		vector<PI> p = hs.get_routes(i, gr, e2i);
+		if(hyper == true && p.size() <= 0) continue;
+		if(hyper == false&& p.size() >= 1) continue;
+		*/
+
+		if(gr.in_degree(i) <= 1) continue;
+		if(gr.out_degree(i) <= 1) continue;
+
+		int e;
+		double r = compute_smallest_edge(i, e);
+
+		if(ratio1 < r) continue;
+
+		if(hs.left_extend(e) && hs.right_extend(e)) continue;
+		if(gr.in_degree(i2e[e]->target()) <= 1) continue;
+		if(gr.out_degree(i2e[e]->source()) <= 1) continue;
+
+		ratio1 = r;
+		se = e;
+		root = i;
+	}
 
 	if(se == -1) return false;
 	assert(root != -1);
@@ -427,7 +451,9 @@ bool scallop3::resolve_trivial_vertex()
 		if(gr.degree(i) == 0) continue;
 		if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) continue;
 
-		double r = compute_balance_ratio(i);
+		//double r = compute_balance_ratio(i);
+		int e;
+		double r = compute_smallest_edge(i, e);
 		if(r > ratio) continue;
 
 		root = i;
@@ -836,36 +862,6 @@ int scallop3::split_edge(int ei, double w)
 	e2i.insert(PEI(p2, n));
 
 	return n;
-}
-
-double scallop3::compute_smallest_removable_edge(int &root, int &ee)
-{
-	ee = -1;
-	root = -1;
-	double ratio = 999;
-	for(int i = 1; i < gr.num_vertices() - 1; i++)
-	{
-		//vector<PI> p = hs.get_routes(i, gr, e2i);
-		//if(hyper == true && p.size() <= 0) continue;
-		//if(hyper == false&& p.size() >= 1) continue;
-
-		if(gr.in_degree(i) <= 1) continue;
-		if(gr.out_degree(i) <= 1) continue;
-
-		int e;
-		double r = compute_smallest_edge(i, e);
-
-		if(ratio < r) continue;
-
-		if(hs.left_extend(e) && hs.right_extend(e)) continue;
-		if(gr.in_degree(i2e[e]->target()) <= 1) continue;
-		if(gr.out_degree(i2e[e]->source()) <= 1) continue;
-
-		ratio = r;
-		ee = e;
-		root = i;
-	}
-	return ratio;
 }
 
 double scallop3::compute_smallest_edge(int x, int &e)
