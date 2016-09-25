@@ -6,7 +6,6 @@
 #include "gtf.h"
 #include "config.h"
 #include "assembler.h"
-#include "scallop2.h"
 #include "scallop3.h"
 #include "sgraph_compare.h"
 #include "super_graph.h"

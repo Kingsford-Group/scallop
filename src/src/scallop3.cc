@@ -620,8 +620,7 @@ int scallop3::greedy_decompose(int num)
 		VE v;
 		double w = gr.compute_maximum_path_w(v);
 
-		if(w <= 0.0) break;
-		if(w <= transcript_min_expression) break;
+		if(w <= 0.5) break;
 
 		int e = split_merge_path(v, w);
 		collect_path(e);

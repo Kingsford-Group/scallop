@@ -98,41 +98,6 @@ int hit::print() const
 	return 0;
 }
 
-int hit::get_clips(PI32 &soft, PI32 &hard) const
-{
-	soft.first = soft.second = -1;
-	hard.first = hard.second = -1;
-	if(n_cigar <= 1) return 0;
-
-	if(bam_cigar_op(cigar[0]) == BAM_CSOFT_CLIP && bam_cigar_op(cigar[1]) == BAM_CMATCH && bam_cigar_oplen(cigar[0]) >= min_clip_length)
-	{
-		soft.first = pos;
-	}
-	if(bam_cigar_op(cigar[0]) == BAM_CHARD_CLIP && bam_cigar_op(cigar[1]) == BAM_CMATCH && bam_cigar_oplen(cigar[0]) >= min_clip_length)
-	{
-		hard.first = pos;
-	}
-
-	int32_t p = pos;
-    for(int k = 0; k < n_cigar - 1; k++)
-	{
-		if (bam_cigar_type(bam_cigar_op(cigar[k]))&2)
-			p += bam_cigar_oplen(cigar[k]);
-	}
-
-	int n = n_cigar - 1;
-
-	if(bam_cigar_op(cigar[n]) == BAM_CSOFT_CLIP && bam_cigar_op(cigar[n - 1]) == BAM_CMATCH && bam_cigar_oplen(cigar[n]) >= min_clip_length)
-	{
-		soft.second = p;
-	}
-	if(bam_cigar_op(cigar[n]) == BAM_CHARD_CLIP && bam_cigar_op(cigar[n - 1]) == BAM_CMATCH && bam_cigar_oplen(cigar[n]) >= min_clip_length)
-	{
-		hard.second = p;
-	}
-    return 0;
-}
-
 int hit::get_splice_positions(vector<int64_t> &v) const
 {
 	v.clear();

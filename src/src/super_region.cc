@@ -116,6 +116,8 @@ int super_region::extend_slope(slope &s)
 	assert(m % 4 == 0);
 	m = m / 4;
 
+	int tail_coverage = 8;
+
 	// extend to the left 
 	int p = 0;
 	for(int i = s.lbin; i < s.lbin + m; i++) p += bins[i];

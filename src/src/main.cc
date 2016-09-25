@@ -10,10 +10,10 @@
 #include "assembler.h"
 #include "config.h"
 #include "bundle.h"
-#include "scallop1.h"
 #include "gtf.h"
 #include "genome.h"
 #include "subsetsum4.h"
+#include "scallop1.h"
 
 using namespace std;
 
