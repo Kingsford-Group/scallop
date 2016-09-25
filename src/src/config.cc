@@ -24,11 +24,11 @@ double min_subregion_overlap = 2;
 
 // for splice graph
 double min_edge_weight = 2.9;
-double max_ignorable_edge_weight = 20.0;
+double max_split_error_ratio = 0.15;
+double max_ignorable_edge_weight = 25.0;
+double smallest_edge_ratio_scalor = 0.25;
 double min_transcript_coverage = 10.0;
 double min_splice_graph_coverage = 20.0;
-double max_split_error_ratio = 0.15;
-double smallest_edge_ratio_scalor = 0.3;
 
 // for identifying new boundaries
 int min_boundary_length = 80;
