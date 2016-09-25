@@ -44,7 +44,7 @@ int simulation_num_edges = 0;
 int simulation_max_edge_weight = 0;
 
 // input and output
-string algo = "shao";
+string algo = "scallop";
 string input_file;
 string ref_file;
 string ref_file1;
@@ -55,7 +55,6 @@ string output_file;
 int max_num_bundles = -1;
 int32_t average_read_length = 100;
 bool strand_reverse = false;
-bool ignore_single_exon_transcripts = false;
 bool output_tex_files = false;
 string fixed_gene_name = "";
 int min_gtf_transcripts_num = 0;
@@ -111,7 +110,6 @@ int print_parameters()
 	printf("max_num_bundles = %d\n", max_num_bundles);
 	printf("average_read_length = %d\n", average_read_length);
 	printf("strand_reverse = %c\n", strand_reverse ? 'T' : 'F');
-	printf("ignore_single_exon_transcripts = %c\n", ignore_single_exon_transcripts ? 'T' : 'F');
 	printf("output_tex_files = %c\n", output_tex_files ? 'T' : 'F');
 	printf("fixed_gene_name = %s\n", fixed_gene_name.c_str());
 	printf("min_gtf_transcripts_num = %d\n", min_gtf_transcripts_num);
@@ -122,18 +120,12 @@ int print_parameters()
 	return 0;
 }
 
-bool parse_arguments(int argc, const char ** argv)
+int parse_arguments(int argc, const char ** argv)
 {
-	output_tex_files = false;
-	bool b = false;
 	for(int i = 1; i < argc; i++)
 	{
-		if(string(argv[i]) == "-a")
-		{
-			algo = string(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "-i")
+		// necessary ones
+		if(string(argv[i]) == "-i")
 		{
 			input_file = string(argv[i + 1]);
 			i++;
@@ -141,6 +133,13 @@ bool parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "-o")
 		{
 			output_file = string(argv[i + 1]);
+			i++;
+		}
+
+		// internal use
+		else if(string(argv[i]) == "-a")
+		{
+			algo = string(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "-r")
@@ -167,20 +166,106 @@ bool parse_arguments(int argc, const char ** argv)
 		{
 			output_tex_files = true;
 		}
-		else if(string(argv[i]) == "-RF")
+
+		// user specified
+		else if(string(argv[i]) == "--min_flank_length")
 		{
-			strand_reverse = true;
+			min_flank_length = atoi(argv[i + 1]);
+			i++;
 		}
-		else if(string(argv[i]) == "-m")
+		else if(string(argv[i]) == "--min_bundle_gap")
 		{
-			ignore_single_exon_transcripts = true;
+			min_bundle_gap = atoi(argv[i + 1]);
+			i++;
 		}
-		else if(string(argv[i]) == "-x")
+		else if(string(argv[i]) == "--min_num_hits_in_bundle")
+		{
+			min_num_hits_in_bundle = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_mapping_quality")
+		{
+			min_mapping_quality = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_splice_boundary_hits")
+		{
+			min_splice_boundary_hits = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--max_indel_ratio")
+		{
+			max_indel_ratio = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_subregion_gap")
+		{
+			min_subregion_gap = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_subregion_length")
+		{
+			min_subregion_length = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_subregion_overlap")
+		{
+			min_subregion_overlap = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_edge_weight")
 		{
 			min_edge_weight = atof(argv[i + 1]);
 			i++;
 		}
+		else if(string(argv[i]) == "--max_ignorable_edge_weight")
+		{
+			max_ignorable_edge_weight = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_transcript_coverage")
+		{
+			min_transcript_coverage = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_splice_graph_coverage")
+		{
+			min_splice_graph_coverage = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_boundary_length")
+		{
+			min_boundary_length = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_boundary_score")
+		{
+			min_boundary_score = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_boundary_sigma")
+		{
+			min_boundary_sigma = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--max_dp_table_size")
+		{
+			max_dp_table_size = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_router_count")
+		{
+			min_router_count = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--strand_reverse")
+		{
+			string s(argv[i + 1]);
+			if(s == "true") strand_reverse = true;
+			else strand_reverse = false;
+			i++;
+		}
 	}
 
-	return b;
+	return 0;
 }

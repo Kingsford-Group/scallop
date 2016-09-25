@@ -70,16 +70,12 @@ extern int32_t average_read_length;
 extern bool output_tex_files;
 extern string fixed_gene_name;
 extern int max_num_bundles;
-extern bool ignore_single_exon_transcripts;
 extern bool strand_reverse;
 extern int min_gtf_transcripts_num;
 extern bool fast_mode;
 
 // parse arguments
-bool parse_arguments(int argc, const char ** argv);
+int parse_arguments(int argc, const char ** argv);
 int print_parameters();
-
-// load parameters
-int load_config(const char * conf_file);
 
 #endif

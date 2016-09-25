@@ -24,7 +24,6 @@ int bundle::build()
 	check_left_ascending();
 
 	build_junctions();
-	if(junctions.size() <= 0 && ignore_single_exon_transcripts == true) return 0;
 
 	build_regions(5);
 	build_partial_exons();

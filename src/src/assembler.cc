@@ -110,8 +110,6 @@ int assembler::process(const bundle_base &bb)
 	bd.chrm = string(buf);
 	bd.build();
 
-	if(bd.junctions.size() <= 0 && ignore_single_exon_transcripts) return 0;
-
 	index++;
 
 	/*
@@ -153,22 +151,19 @@ int assembler::process(const bundle_base &bb)
 		double reads = gr.compute_coverage() / average_read_length;
 		if(reads < min_splice_graph_coverage) continue;
 
-		if(algo != "shao")
-		{
-			scallop3 sc(gid, gr, hs);
-			sc.assemble();
+		scallop3 sc(gid, gr, hs);
+		sc.assemble();
 
-			if(output_file != "")
+		if(output_file != "")
+		{
+			for(int i = 0; i < sc.paths.size(); i++)
 			{
-				for(int i = 0; i < sc.paths.size(); i++)
-				{
-					string tid = gid + "." + tostring(i);
-					path p;
-					p.v = sg.get_root_vertices(k, sc.paths[i].v);
-					p.abd = sc.paths[i].abd;
-					p.reads = sc.paths[i].reads;
-					bd.output_transcript(fout, p, gid, tid);
-				}
+				string tid = gid + "." + tostring(i);
+				path p;
+				p.v = sg.get_root_vertices(k, sc.paths[i].v);
+				p.abd = sc.paths[i].abd;
+				p.reads = sc.paths[i].reads;
+				bd.output_transcript(fout, p, gid, tid);
 			}
 		}
 
