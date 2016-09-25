@@ -127,7 +127,7 @@ bool scallop3::resolve_nontrivial_vertex(bool split, bool hyper)
 	double ratio1 = compute_smallest_splitable_vertex(root, hyper);
 	double ratio2 = compute_smallest_removable_edge(se);
 
-	if(root == -1) return false; // TODO
+	//if(root == -1) return false; // TODO
 
 	if(split == true)
 	{
