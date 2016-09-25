@@ -436,7 +436,7 @@ bool scallop3::resolve_ignorable_edges()
 bool scallop3::resolve_trivial_vertex()
 {
 	int root = -1;
-	double ratio = -1;
+	double ratio = 999;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.degree(i) == 0) continue;
