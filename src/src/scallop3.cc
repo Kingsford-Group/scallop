@@ -381,34 +381,20 @@ bool scallop3::resolve_hyper_edge1()
 
 bool scallop3::resolve_ignorable_edges()
 {
-	bool flag = false;
-	for(int i = 1; i < gr.num_vertices() - 1; i++)
-	{
-		if(gr.in_degree(i) <= 1) continue;
-		if(gr.out_degree(i) <= 1) continue;
+	int e = -1;
+	double ratio = compute_smallest_removable_edge(e);
+	if(e == -1) return false;
 
-		int ei;
-		double ratio = compute_smallest_edge(i, ei);
-		edge_descriptor e = i2e[ei];
-		int s = e->source();
-		int t = e->target();
+	double w = gr.get_edge_weight(i2e[e]);
 
-		if(ratio > max_split_error_ratio) continue;
+	if(ratio > max_split_error_ratio) return false;
+	if(w > max_ignorable_edge_weight) return false;
 
-		double w = gr.get_edge_weight(e);
-		if(w > max_ignorable_edge_weight) continue;
-		if(hs.left_extend(ei) == true && hs.right_extend(ei) == true) continue;
-		if(s == i && gr.in_degree(t) <= 1) continue;
-		if(t == i && gr.out_degree(s) <= 1) continue;
+	printf("remove ignorable edge %d, weight = %.2lf, ratio = %.2lf\n", e, w, ratio);
 
-		printf("remove ignorable edge %d of vertex %d, weight = %.2lf, ratio = %.2lf, degree = (%d, %d)\n", 
-				ei, i, w, ratio, gr.in_degree(i), gr.out_degree(i));
-
-		remove_edge(ei);
-		hs.remove(ei);
-		flag = true;
-	}
-	return flag;
+	remove_edge(e);
+	hs.remove(e);
+	return true;
 }
 
 bool scallop3::resolve_trivial_vertex(bool split)
