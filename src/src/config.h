@@ -75,6 +75,7 @@ extern int min_gtf_transcripts_num;
 extern bool fast_mode;
 
 // parse arguments
+int print_command_line(int argc, const char ** argv);
 int parse_arguments(int argc, const char ** argv);
 int print_parameters();
 

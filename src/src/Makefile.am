@@ -15,7 +15,6 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  edge_info.h edge_info.cc \
 				  interval_map.h interval_map.cc \
 				  subsetsum1.h subsetsum1.cc \
-				  subsetsum3.h subsetsum3.cc \
 				  subsetsum4.h subsetsum4.cc \
 				  config.h config.cc \
 				  hit.h hit.cc \
@@ -24,11 +23,9 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  router.h router.cc \
 				  binomial.h binomial.cc \
 				  region.h region.cc \
-				  slope.h slope.cc \
 				  junction.h junction.cc \
 				  bundle_base.h bundle_base.cc \
 				  bundle.h bundle.cc \
-				  segment.h segment.cc \
 				  path.h path.cc \
 				  smoother.h smoother.cc \
 				  equation.h equation.cc \

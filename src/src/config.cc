@@ -120,6 +120,17 @@ int print_parameters()
 	return 0;
 }
 
+int print_command_line(int argc, const char ** argv)
+{
+	printf("command line: ");
+	for(int i = 0; i < argc; i++)
+	{
+		printf("%d ", argv[i]);
+	}
+	printf("\n");
+	return 0;
+}
+
 int parse_arguments(int argc, const char ** argv)
 {
 	for(int i = 1; i < argc; i++)

@@ -25,6 +25,8 @@ int process_sgr();
 int main(int argc, const char **argv)
 {
 	srand(time(0));
+
+	print_command_line(argc, argv);
 	parse_arguments(argc, argv);
 	print_parameters();
 
