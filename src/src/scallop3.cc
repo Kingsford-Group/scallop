@@ -42,11 +42,11 @@ int scallop3::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_nontrivial_vertex(false, false);
+		b = resolve_smallest_edge();
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_nontrivial_vertex(true, true);
+		b = resolve_nontrivial_vertex(true);
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -54,11 +54,11 @@ int scallop3::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_trivial_vertex(true);
+		b = resolve_trivial_vertex();
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_nontrivial_vertex(true, false);
+		b = resolve_nontrivial_vertex(false);
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -121,64 +121,59 @@ int scallop3::refine_splice_graph()
 	return 0;
 }
 
-bool scallop3::resolve_nontrivial_vertex(bool split, bool hyper)
+bool scallop3::resolve_nontrivial_vertex(bool hyper)
 {
-	if(split == true)
-	{
-		int root = -1, se = -1;
-		double ratio1 = compute_smallest_splitable_vertex(root, hyper);
-		if(root == -1) return false;
+	int root = -1, se = -1;
+	double ratio1 = compute_smallest_splitable_vertex(root, hyper);
+	if(root == -1) return false;
 
-		double ratio2 = compute_smallest_edge(root, se);
-		//double ratio2 = compute_smallest_removable_edge(se);
-		if(ratio1 > ratio2) return false;
-		if(ratio1 > max_split_error_ratio) return false;
+	double ratio2 = compute_smallest_edge(root, se);
+	//double ratio2 = compute_smallest_removable_edge(se);
+	if(ratio1 > ratio2) return false;
+	if(ratio1 > max_split_error_ratio) return false;
 
-		vector<PI> p = hs.get_routes(root, gr, e2i);
-		router rt(root, gr, e2i, i2e, p);
-		rt.build();
+	vector<PI> p = hs.get_routes(root, gr, e2i);
+	router rt(root, gr, e2i, i2e, p);
+	rt.build();
 
-		assert(rt.ratio >= 0);
-		assert(rt.eqns.size() == 2);
-		assert(rt.status == 4);
+	assert(rt.ratio >= 0);
+	assert(rt.eqns.size() == 2);
+	assert(rt.status == 4);
 
-		printf("split %s vertex %d, ratio = %.2lf / %.2lf, degree = (%d, %d)\n", 
-				hyper ? "hyper" : "normal", root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
+	printf("split %s vertex %d, ratio = %.2lf / %.2lf, degree = (%d, %d)\n", 
+			hyper ? "hyper" : "normal", root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
 
-		for(int i = 0; i < rt.eqns.size(); i++) rt.eqns[i].print(99);
+	for(int i = 0; i < rt.eqns.size(); i++) rt.eqns[i].print(99);
 
-		equation &eqn = rt.eqns[0];
-		assert(eqn.s.size() >= 1);
-		assert(eqn.t.size() >= 1);
+	equation &eqn = rt.eqns[0];
+	assert(eqn.s.size() >= 1);
+	assert(eqn.t.size() >= 1);
 
-		split_vertex(root, eqn.s, eqn.t);
+	split_vertex(root, eqn.s, eqn.t);
 
-		return true;
-	}
+	return true;
+}
 
-	if(split == false)
-	{
-		int se = -1, root1 = -1, root2 = -1;
-		double ratio0 = compute_smallest_removable_edge(se);
-		double ratio1 = compute_smallest_splitable_vertex(root1, false);
-		double ratio2 = compute_smallest_splitable_vertex(root2, true);
+bool scallop3::resolve_smallest_edge()
+{
+	int se = -1, root1 = -1, root2 = -1;
+	double ratio0 = compute_smallest_removable_edge(se);
+	double ratio1 = compute_smallest_splitable_vertex(root1, false);
+	double ratio2 = compute_smallest_splitable_vertex(root2, true);
 
-		if(se == -1) return false;
-		if(root1 == -1 && root2 == -1) return false;
-		if(ratio0 > ratio1) return false;
-		if(ratio0 > ratio2) return false;
-		if(ratio0 > max_split_error_ratio) return false;
+	if(se == -1) return false;
+	if(root1 == -1 && root2 == -1) return false;
+	if(ratio0 > ratio1) return false;
+	if(ratio0 > ratio2) return false;
+	if(ratio0 > max_split_error_ratio) return false;
 
-		double sw = gr.get_edge_weight(i2e[se]);
-		printf("remove %s small edge %d, weight = %.2lf, ratio = %.2lf\n", hyper ? "hyper" : "normal", se, sw, ratio0);
+	double sw = gr.get_edge_weight(i2e[se]);
+	printf("remove small edge %d, weight = %.2lf, ratio = %.2lf\n", se, sw, ratio0);
 
-		remove_edge(se);
-		hs.remove(se);
+	remove_edge(se);
+	hs.remove(se);
 
-		return true;
-	}
-
-	return false;
+	return true;
 }
 
 bool scallop3::resolve_hyper_tree()
@@ -399,7 +394,7 @@ bool scallop3::resolve_ignorable_edges()
 	return flag;
 }
 
-bool scallop3::resolve_trivial_vertex(bool split)
+bool scallop3::resolve_trivial_vertex()
 {
 	int root = -1;
 	double ratio = -1;
@@ -410,7 +405,8 @@ bool scallop3::resolve_trivial_vertex(bool split)
 		if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) continue;
 
 		int e;
-		double r = compute_smallest_edge(i, e);
+		//double r = compute_smallest_edge(i, e);
+		double r = compute_balance_ratio(i);
 		if(ratio >= 0 && ratio < r) continue;
 
 		root = i;
@@ -420,34 +416,11 @@ bool scallop3::resolve_trivial_vertex(bool split)
 
 	if(root == -1) return false;
 
-	if(split == true)
-	{
-		printf("resolve trivial vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
+	printf("resolve trivial vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
 
-		decompose_trivial_vertex(root);
-		assert(gr.degree(root) == 0);
-		return true;
-	}
-
-	bool b = true;
-	double ww = gr.get_edge_weight(i2e[se]);
-	if(hs.left_extend(se) && hs.right_extend(se)) b = false;
-	if(gr.in_degree(i2e[se]->target()) <= 1) b = false;
-	if(gr.out_degree(i2e[se]->source()) <= 1) b = false;
-	if(ww > max_removable_edge_weight) b = false;
-	if(ratio > max_split_error_ratio) b = false;
-
-	if(b == true && split == false)
-	{
-		printf("remove trivial small edge %d of vertex %d, weight = %.2lf, ratio = %.2lf, degree = (%d, %d)\n", 
-				se, root, ww, ratio, gr.in_degree(root), gr.out_degree(root));
-
-		remove_edge(se);
-		hs.remove(se);
-		return true;
-	}
-
-	return false;
+	decompose_trivial_vertex(root);
+	assert(gr.degree(root) == 0);
+	return true;
 }
 
 int scallop3::classify()
@@ -970,6 +943,28 @@ int scallop3::balance_vertex(int v)
 	}
 
 	return 0;
+}
+
+double scallop3::compute_balance_ratio(int v)
+{
+	edge_iterator it1, it2;
+	double w1 = 0, w2 = 0;
+	for(tie(it1, it2) = gr.in_edges(v); it1 != it2; it1++)
+	{
+		double w = gr.get_edge_weight(*it1);
+		w1 += w;
+	}
+	for(tie(it1, it2) = gr.out_edges(v); it1 != it2; it1++)
+	{
+		double w = gr.get_edge_weight(*it1);
+		w2 += w;
+	}
+
+	assert(w1 >= SMIN);
+	assert(w2 >= SMIN);
+
+	if(w1 >= w2) return w1 / w2;
+	else return w2 / w1;
 }
 
 int scallop3::split_vertex(int x, const vector<int> &xe, const vector<int> &ye)
