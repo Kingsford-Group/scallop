@@ -1191,7 +1191,7 @@ double scallop3::compute_smallest_edge(int x, int &e)
 		e = e2i[*it1];
 	}
 	assert(e >= 0);
-	return ratio * 0.3;
+	return ratio * smallest_edge_ratio_scalor;
 }
 
 int scallop3::stats()

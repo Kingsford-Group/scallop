@@ -46,6 +46,7 @@ extern double max_ignorable_edge_weight;
 extern double min_transcript_coverage;
 extern double min_splice_graph_coverage;
 extern double max_split_error_ratio;
+extern double smallest_edge_ratio_scalor;
 
 // for identifying new boundaries
 extern int min_boundary_score;

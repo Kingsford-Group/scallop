@@ -28,6 +28,7 @@ double max_ignorable_edge_weight = 20.0;
 double min_transcript_coverage = 10.0;
 double min_splice_graph_coverage = 20.0;
 double max_split_error_ratio = 0.15;
+double smallest_edge_ratio_scalor = 0.3;
 
 // for identifying new boundaries
 int min_boundary_length = 80;
@@ -83,6 +84,7 @@ int print_parameters()
 	printf("min_transcript_coverage = %.2lf\n", min_transcript_coverage);
 	printf("min_splice_graph_coverage = %.2lf\n", min_splice_graph_coverage);
 	printf("max_split_error_ratio = %.2lf\n", max_split_error_ratio);
+	printf("smallest_edge_ratio_scalor = %.2lf\n", smallest_edge_ratio_scalor);
 
 	// for identifying new boundaries
 	printf("min_boundary_length = %d\n", min_boundary_length);
@@ -242,6 +244,16 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--min_splice_graph_coverage")
 		{
 			min_splice_graph_coverage = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--max_split_error_ratio")
+		{
+			max_split_error_ratio = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--smallest_edge_ratio_scalor")
+		{
+			smallest_edge_ratio_scalor = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_boundary_length")
