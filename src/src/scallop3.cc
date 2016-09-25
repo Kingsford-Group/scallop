@@ -179,12 +179,16 @@ bool scallop3::resolve_nontrivial_vertex(bool split, bool hyper)
 	se = -1;
 	ratio2 = compute_smallest_removable_edge(root1, se);
 
-	vector<PI> p = hs.get_routes(root1, gr, e2i);
-	router rt(root1, gr, e2i, i2e, p);
-	rt.build();
-
 	ratio1 = 999;
-	if(rt.status != 4) ratio1 = rt.ratio;
+
+	if(se != -1)
+	{
+		assert(root1 != -1);
+		vector<PI> p = hs.get_routes(root1, gr, e2i);
+		router rt(root1, gr, e2i, i2e, p);
+		rt.build();
+		if(rt.status == 4) ratio1 = rt.ratio;
+	}
 
 	if(split == false && ratio2 <= ratio1 && se != -1)
 	{
