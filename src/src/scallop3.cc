@@ -405,8 +405,8 @@ bool scallop3::resolve_trivial_vertex()
 		if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) continue;
 
 		int e;
-		double r = compute_smallest_edge(i, e);
-		//double r = compute_balance_ratio(i);
+		//double r = compute_smallest_edge(i, e);
+		double r = compute_balance_ratio(i);
 		if(ratio >= 0 && ratio < r) continue;
 
 		root = i;
