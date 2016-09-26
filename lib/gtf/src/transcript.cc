@@ -8,6 +8,7 @@
 
 transcript::transcript()
 {
+	RPKM = 0;
 }
 
 transcript::~transcript()
@@ -49,6 +50,11 @@ int transcript::sort()
 {
 	std::sort(exons.begin(), exons.end());
 	return 0;
+}
+
+int transcript::assign_RPKM(int reads)
+{
+	RPKM = coverage * 1e3 / length() * 1e9 / reads;
 }
 
 int transcript::length() const
@@ -98,6 +104,7 @@ int transcript::write(ofstream &fout) const
 	fout<<".\t";								// frame
 	fout<<"gene_id \""<<gene_id.c_str()<<"\"; ";
 	fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
+	fout<<"RPKM \""<<RPKM<<"\"; ";
 	fout<<"coverage \""<<coverage<<"\"; ";
 	fout<<"expression \""<<expression<<"\";"<<endl;
 
@@ -114,6 +121,7 @@ int transcript::write(ofstream &fout) const
 		fout<<"gene_id \""<<gene_id.c_str()<<"\"; ";
 		fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
 		fout<<"exon \""<<k + 1<<"\"; ";
+		fout<<"RPKM \""<<RPKM<<"\"; ";
 		fout<<"coverage \""<<coverage<<"\"; ";
 		fout<<"expression \""<<expression<<"\";"<<endl;
 	}

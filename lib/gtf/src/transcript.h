@@ -28,12 +28,14 @@ public:
 	string transcript_id;
 	int32_t expression;
 	double coverage;
+	double RPKM;
 	vector<PI32> exons;
 	char strand;
 
 public:
 	int add_exon(int s, int t);
 	int add_exon(const exon &e);
+	int assign_RPKM(int reads);
 	int sort();
 	int write(ofstream &fout) const;
 	int length() const;

@@ -27,6 +27,7 @@ public:
 	int add_gene(const gene &g);
 	int sort();
 	int build_index();
+	int assign_RPKM(int reads);
 
 	// fetch information
 	const gene* get_gene(string name) const;

@@ -153,3 +153,12 @@ const gene* genome::locate_gene(const string &chrm, const PI32 &p) const
 	}
 	return x;
 }
+
+int genome::assign_RPKM(int reads)
+{
+	for(int i = 0; i < genes.size(); i++)
+	{
+		genes[i].assign_RPKM(reads);
+	}
+	return 0;
+}

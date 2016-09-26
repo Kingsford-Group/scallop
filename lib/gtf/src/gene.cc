@@ -102,6 +102,15 @@ int gene::sort()
 	return 0;
 }
 
+int gene::assign_RPKM(int reads)
+{
+	for(int i = 0; i < transcripts.size(); i++)
+	{
+		transcripts[i].assign_RPKM(reads);
+	}
+	return 0;
+}
+
 set<int32_t> gene::get_exon_boundaries() const
 {
 	set<int32_t> s;
