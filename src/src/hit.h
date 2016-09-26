@@ -46,6 +46,7 @@ public:
 
 public:
 	int32_t rpos;							// right position mapped to reference [pos, rpos)
+	int32_t qlen;							// read length
 	string qname;							// query name
 	char strand;							// strandness
 	char xs;								// xs aux in sam

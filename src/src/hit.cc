@@ -11,12 +11,14 @@ hit::hit(int32_t p)
 	bam1_core_t::pos = p;
 	strand = '.';
 	xs = '.';
+	qlen = 0;
 }
 
 hit::hit(const hit &h)
 	:bam1_core_t(h)
 {
 	rpos = h.rpos;
+	qlen = h.qlen;
 	qname = h.qname;
 	strand = h.strand;
 	xs = h.xs;
@@ -37,6 +39,7 @@ hit::hit(bam1_t *b)
 
 	// compute rpos
 	rpos = pos + (int32_t)bam_cigar2rlen(n_cigar, bam_get_cigar(b));
+	qlen = (int32_t)bam_cigar2qlen(n_cigar, bam_get_cigar(b));
 
 	// copy cigar
 	assert(n_cigar <= MAX_NUM_CIGAR);
@@ -92,8 +95,8 @@ int hit::print() const
 	}
 
 	// print basic information
-	printf("Hit %s: [%d-%d), mpos = %d, cigar = %s, flag = %d, quality = %d, strand = %c, isize = %d\n", 
-			qname.c_str(), pos, rpos, mpos, sstr.str().c_str(), flag, qual, strand, isize);
+	printf("Hit %s: [%d-%d), mpos = %d, cigar = %s, flag = %d, quality = %d, strand = %c, isize = %d, qlen = %d\n", 
+			qname.c_str(), pos, rpos, mpos, sstr.str().c_str(), flag, qual, strand, isize, qlen);
 
 	return 0;
 }

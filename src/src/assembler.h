@@ -25,7 +25,7 @@ private:
 	bool terminate;
 
 	genome gm;
-	int reads;
+	double qlen;
 
 public:
 	int assemble();

@@ -17,7 +17,7 @@ assembler::assembler()
     b1t = bam_init1();
 	terminate = false;
 	index = -1;
-	reads = 0;
+	qlen = 0;
 }
 
 assembler::~assembler()
@@ -42,7 +42,7 @@ int assembler::assemble()
 		if(p.qual < min_mapping_quality) continue;	// ignore hits with small quality
 
 		hit ht(b1t);
-		reads++;
+		qlen += ht.qlen;
 		if(ht.strand == '.') continue;	// TODO
 
 		truncate(ht);
@@ -52,7 +52,9 @@ int assembler::assemble()
 	for(int i = 0; i < vbb.size(); i++) process(vbb[i]);
 
 	if(output_file == "") return 0;
-	gm.assign_RPKM(reads);
+
+	double factor = 1e9 * average_read_length / qlen;
+	gm.assign_RPKM(factor);
 	gm.write(output_file);
 
 	return 0;
@@ -152,8 +154,8 @@ int assembler::process(const bundle_base &bb)
 		if(ref_file1 != "" && bd.strand == '+') compare(gr, ref_file1, "compare1.tex");
 		if(ref_file2 != "" && bd.strand == '-') compare(gr, ref_file2, "compare2.tex");
 
-		double reads = gr.compute_coverage() / average_read_length;
-		if(reads < min_splice_graph_coverage) continue;
+		double ss = gr.compute_coverage() / average_read_length;
+		if(ss < min_splice_graph_coverage) continue;
 
 		scallop3 sc(gid, gr, hs);
 		sc.assemble();
