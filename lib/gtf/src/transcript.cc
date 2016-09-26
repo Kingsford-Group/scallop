@@ -87,7 +87,7 @@ string transcript::label() const
 
 int transcript::write(ofstream &fout) const
 {
-	fout.precision(2);
+	fout.precision(4);
 	fout<<fixed;
 
 	if(exons.size() == 0) return 0;
