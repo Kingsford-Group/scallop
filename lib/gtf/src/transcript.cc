@@ -54,7 +54,7 @@ int transcript::sort()
 
 int transcript::assign_RPKM(int reads)
 {
-	RPKM = coverage * 1e3 / length() * 1e9 / reads;
+	RPKM = coverage * 1e3 / length() * 1e6 / reads;
 }
 
 int transcript::length() const
