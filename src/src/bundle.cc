@@ -743,6 +743,7 @@ int bundle::output_transcript(transcript &trst, const path &p, const string &gid
 	trst.seqname = chrm;
 	trst.source = algo;
 	trst.gene_id = gid;
+	trst.transcript_id = tid;
 	trst.expression = p.abd;
 	trst.coverage = p.reads / average_read_length;
 	trst.strand = strand;

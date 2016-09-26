@@ -52,6 +52,7 @@ int assembler::assemble()
 	for(int i = 0; i < vbb.size(); i++) process(vbb[i]);
 
 	if(output_file == "") return 0;
+	gm.assign_RPKM(reads);
 	gm.write(output_file);
 
 	return 0;
