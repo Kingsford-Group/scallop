@@ -63,6 +63,32 @@ int reverse(vector<T> &x)
 }
 
 template<typename T>
+int max_element(const vector<T> &x)
+{
+	if(x.size() == 0) return -1;
+	int k = 0;
+	for(int i = 1; i < x.size(); i++)
+	{
+		if(x[i] <= x[k]) continue;
+		k = i;
+	}
+	return k;
+}
+
+template<typename T>
+int min_element(const vector<T> &x)
+{
+	if(x.size() == 0) return -1;
+	int k = 0;
+	for(int i = 1; i < x.size(); i++)
+	{
+		if(x[i] >= x[k]) continue;
+		k = i;
+	}
+	return k;
+}
+
+template<typename T>
 int printv(const vector<T> &x)
 {
 	for(int i = 0; i < x.size(); i++)
