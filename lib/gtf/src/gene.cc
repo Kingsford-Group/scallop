@@ -102,11 +102,11 @@ int gene::sort()
 	return 0;
 }
 
-int gene::assign_RPKM(int reads)
+int gene::assign_RPKM(double factor)
 {
 	for(int i = 0; i < transcripts.size(); i++)
 	{
-		transcripts[i].assign_RPKM(reads);
+		transcripts[i].assign_RPKM(factor);
 	}
 	return 0;
 }

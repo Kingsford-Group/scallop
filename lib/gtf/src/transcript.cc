@@ -52,9 +52,10 @@ int transcript::sort()
 	return 0;
 }
 
-int transcript::assign_RPKM(int reads)
+int transcript::assign_RPKM(double factor)
 {
-	RPKM = coverage * 1e3 / length() * 1e6 / reads;
+	RPKM = coverage * factor / length();
+	return 0;
 }
 
 int transcript::length() const
