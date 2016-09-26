@@ -10,6 +10,8 @@
 #include "hyper_set.h"
 #include "path.h"
 #include "segment.h"
+#include "gene.h"
+#include "transcript.h"
 
 using namespace std;
 
@@ -29,8 +31,10 @@ public:
 
 public:
 	virtual int build();
-	int output_transcript(ofstream &fout, const path &p, const string &gid, const string &tid) const;	
 	int output_transcripts(ofstream &fout, const vector<path> &p, const string &gid) const;	
+	int output_transcript(ofstream &fout, const path &p, const string &gid, const string &tid) const;	
+	int output_transcripts(gene &gn, const vector<path> &p, const string &gid) const;	
+	int output_transcript(transcript &trst, const path &p, const string &gid, const string &tid) const;	
 	int print(int index);
 
 private:

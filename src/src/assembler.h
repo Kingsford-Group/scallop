@@ -5,6 +5,7 @@
 #include <string>
 #include "bundle_base.h"
 #include "bundle.h"
+#include "genome.h"
 
 using namespace std;
 
@@ -18,13 +19,13 @@ private:
 	samFile *sfn;
 	bam_hdr_t *hdr;
 	bam1_t *b1t;
-	
-	ofstream fout;
-	int index;
-
 	vector<bundle_base> vbb;
 
+	int index;
 	bool terminate;
+
+	genome gm;
+	int reads;
 
 public:
 	int assemble();

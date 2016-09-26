@@ -725,3 +725,38 @@ int bundle::output_transcript(ofstream &fout, const path &p, const string &gid, 
 	}
 	return 0;
 }
+
+int bundle::output_transcripts(gene &gn, const vector<path> &p, const string &gid) const
+{
+	for(int i = 0; i < p.size(); i++)
+	{
+		string tid = gid + "." + tostring(i);
+		transcript trst;
+		output_transcript(trst, p[i], gid, tid);
+		gn.add_transcript(trst);
+	}
+	return 0;
+}
+
+int bundle::output_transcript(transcript &trst, const path &p, const string &gid, const string &tid) const
+{
+	trst.seqname = chrm;
+	trst.source = algo;
+	trst.gene_id = gid;
+	trst.expression = p.abd;
+	trst.coverage = p.reads / average_read_length;
+	trst.strand = strand;
+
+	const vector<int> &v = p.v;
+	join_interval_map jmap;
+	for(int k = 1; k < v.size() - 1; k++)
+	{
+		const partial_exon &r = pexons[v[k] - 1];
+		jmap += make_pair(ROI(r.lpos, r.rpos), 1);
+	}
+	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
+	{
+		trst.add_exon(lower(it->first), upper(it->first));
+	}
+	return 0;
+}

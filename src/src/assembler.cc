@@ -17,7 +17,7 @@ assembler::assembler()
     b1t = bam_init1();
 	terminate = false;
 	index = -1;
-	if(output_file != "") fout.open(output_file);
+	reads = 0;
 }
 
 assembler::~assembler()
@@ -25,7 +25,6 @@ assembler::~assembler()
     bam_destroy1(b1t);
     bam_hdr_destroy(hdr);
     sam_close(sfn);
-	if(output_file != "") fout.close();
 }
 
 int assembler::assemble()
@@ -43,6 +42,7 @@ int assembler::assemble()
 		if(p.qual < min_mapping_quality) continue;	// ignore hits with small quality
 
 		hit ht(b1t);
+		reads++;
 		if(ht.strand == '.') continue;	// TODO
 
 		truncate(ht);
@@ -50,6 +50,9 @@ int assembler::assemble()
     }
 
 	for(int i = 0; i < vbb.size(); i++) process(vbb[i]);
+
+	if(output_file == "") return 0;
+	gm.write(output_file);
 
 	return 0;
 }
@@ -154,18 +157,19 @@ int assembler::process(const bundle_base &bb)
 		scallop3 sc(gid, gr, hs);
 		sc.assemble();
 
-		if(output_file != "")
+		vector<path> pp;
+		for(int i = 0; i < sc.paths.size(); i++)
 		{
-			for(int i = 0; i < sc.paths.size(); i++)
-			{
-				string tid = gid + "." + tostring(i);
-				path p;
-				p.v = sg.get_root_vertices(k, sc.paths[i].v);
-				p.abd = sc.paths[i].abd;
-				p.reads = sc.paths[i].reads;
-				bd.output_transcript(fout, p, gid, tid);
-			}
+			path p;
+			p.v = sg.get_root_vertices(k, sc.paths[i].v);
+			p.abd = sc.paths[i].abd;
+			p.reads = sc.paths[i].reads;
+			pp.push_back(p);
 		}
+
+		gene gn;
+		bd.output_transcripts(gn, pp, gid);
+		gm.add_gene(gn);
 
 		if(fixed_gene_name != "" && gid == fixed_gene_name) terminate = true;
 		if(terminate == true) return 0;
