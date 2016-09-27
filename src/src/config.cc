@@ -23,8 +23,8 @@ int32_t min_subregion_length = 15;
 double min_subregion_overlap = 2;
 
 // for splice graph
-double min_consecutive_edge_weight = 5.0;
-double min_splice_edge_weight = 2.5;
+double min_consecutive_edge_weight = 3.9;
+double min_splice_edge_weight = 3.9;
 double max_split_error_ratio = 0.15;
 double max_ignorable_edge_weight = 25.0;
 double smallest_edge_ratio_scalor = 0.25;
