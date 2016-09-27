@@ -380,7 +380,7 @@ bool scallop3::resolve_ignorable_edges()
 
 		double w = gr.get_edge_weight(e);
 		if(w > max_ignorable_edge_weight) continue;
-		if(hs.left_extend(ei) == true && hs.right_extend(ei) == true) continue;
+		if(hs.left_extend(ei) == true || hs.right_extend(ei) == true) continue;
 		if(s == i && gr.in_degree(t) <= 1) continue;
 		if(t == i && gr.out_degree(s) <= 1) continue;
 
