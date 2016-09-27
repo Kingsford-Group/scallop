@@ -1143,7 +1143,7 @@ double scallop3::compute_smallest_removable_edge(int &se)
 
 		if(ratio < r) continue;
 
-		if(hs.left_extend(e) && hs.right_extend(e)) continue;
+		if(hs.left_extend(e) || hs.right_extend(e)) continue;
 		if(gr.in_degree(i2e[e]->target()) <= 1) continue;
 		if(gr.out_degree(i2e[e]->source()) <= 1) continue;
 
