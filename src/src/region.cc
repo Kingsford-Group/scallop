@@ -114,6 +114,7 @@ bool region::empty_subregion(int32_t p1, int32_t p2)
 
 int32_t region::identify_boundary(bool tag)
 {
+	if(identify_extra_boundary == false) return -1;
 	if(lower(jmap.begin()->first) != lpos || upper(jmap.begin()->first) != rpos) return -1;
 
 	typedef pair<int32_t, int64_t> PI64;

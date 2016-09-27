@@ -35,6 +35,7 @@ extern double max_indel_ratio;
 extern int32_t min_subregion_gap;
 extern double min_subregion_overlap;
 extern int32_t min_subregion_length;
+extern bool identify_extra_boundary;
 
 // for subsetsum and router
 extern int max_dp_table_size;
