@@ -264,10 +264,13 @@ int super_graph::remove_edges(splice_graph &gr)
 	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
 	{
 		double w = gr.get_edge_weight(*it1);
-		if(w < min_edge_weight) continue;
-		se.insert(*it1);
 		int s = (*it1)->source();
 		int t = (*it1)->target();
+		int32_t p1 = gr.get_vertex_info(s).rpos;
+		int32_t p2 = gr.get_vertex_info(t).lpos;
+		if(p1 == p2 && w < min_consecutive_edge_weight) continue;
+		if(p1 != p2 && w < min_splice_edge_weight) continue;
+		se.insert(*it1);
 		sv1.insert(t);
 		sv2.insert(s);
 	}
