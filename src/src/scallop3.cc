@@ -380,7 +380,9 @@ bool scallop3::resolve_ignorable_edges()
 
 		double w = gr.get_edge_weight(e);
 		if(w > max_ignorable_edge_weight) continue;
-		if(hs.left_extend(ei) == true || hs.right_extend(ei) == true) continue;
+		if(e->target() == i && hs.right_extend(ei)) continue;
+		if(e->source() == i && hs.left_extend(ei)) continue;
+		//if(hs.left_extend(ei) == true || hs.right_extend(ei) == true) continue;
 		if(s == i && gr.in_degree(t) <= 1) continue;
 		if(t == i && gr.out_degree(s) <= 1) continue;
 
@@ -1143,7 +1145,9 @@ double scallop3::compute_smallest_removable_edge(int &se)
 
 		if(ratio < r) continue;
 
-		if(hs.left_extend(e) || hs.right_extend(e)) continue;
+		if(i2e[e]->target() == i && hs.right_extend(e)) continue;
+		if(i2e[e]->source() == i && hs.left_extend(e)) continue;
+		//if(hs.left_extend(e) || hs.right_extend(e)) continue;
 		if(gr.in_degree(i2e[e]->target()) <= 1) continue;
 		if(gr.out_degree(i2e[e]->source()) <= 1) continue;
 
