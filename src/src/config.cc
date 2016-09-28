@@ -21,7 +21,6 @@ double max_indel_ratio = 0.2;
 int32_t min_subregion_gap = 3;
 int32_t min_subregion_length = 15;
 double min_subregion_overlap = 2;
-bool identify_extra_boundary = false;
 int min_subregion_ladders = 0;
 
 // for splice graph
@@ -34,8 +33,10 @@ double min_transcript_coverage = 10.0;
 double min_splice_graph_coverage = 20.0;
 
 // for identifying new boundaries
+bool identify_extra_boundary = true;
 int min_boundary_length = 80;
 int min_boundary_score = 1000;
+double min_boundary_ave_ratio = 2.0;
 double min_boundary_sigma = 4.0;
 
 // for subsetsum and router
@@ -80,7 +81,6 @@ int print_parameters()
 	printf("min_subregion_gap = %d\n", min_subregion_gap);
 	printf("min_subregion_length = %d\n", min_subregion_length);
 	printf("min_subregion_overlap = %.2lf\n", min_subregion_overlap);
-	printf("identify_extra_boundary = %c\n", identify_extra_boundary ? 'T' : 'F');
 	printf("min_subregion_ladders = %d\n", min_subregion_ladders);
 
 	// for splice graph
@@ -93,8 +93,10 @@ int print_parameters()
 	printf("smallest_edge_ratio_scalor = %.2lf\n", smallest_edge_ratio_scalor);
 
 	// for identifying new boundaries
+	printf("identify_extra_boundary = %c\n", identify_extra_boundary ? 'T' : 'F');
 	printf("min_boundary_length = %d\n", min_boundary_length);
 	printf("min_boundary_score = %d\n", min_boundary_score);
+	printf("min_boundary_ave_ratio = %.2lf\n", min_boundary_ave_ratio);
 	printf("min_boundary_signma = %.2lf\n", min_boundary_sigma);
 
 	// for subsetsum and router
@@ -287,6 +289,11 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--min_boundary_score")
 		{
 			min_boundary_score = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_boundary_ave_ratio")
+		{
+			min_boundary_ave_ratio = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_boundary_sigma")

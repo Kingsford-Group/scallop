@@ -35,7 +35,6 @@ extern double max_indel_ratio;
 extern int32_t min_subregion_gap;
 extern double min_subregion_overlap;
 extern int32_t min_subregion_length;
-extern bool identify_extra_boundary;
 extern int min_subregion_ladders;
 
 // for subsetsum and router
@@ -52,8 +51,10 @@ extern double max_split_error_ratio;
 extern double smallest_edge_ratio_scalor;
 
 // for identifying new boundaries
+extern bool identify_extra_boundary;
 extern int min_boundary_score;
 extern int min_boundary_length;
+extern double min_boundary_ave_ratio;
 extern double min_boundary_sigma;
 
 // for simulation

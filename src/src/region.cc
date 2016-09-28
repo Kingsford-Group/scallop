@@ -143,7 +143,8 @@ int32_t region::identify_boundary(bool tag)
 
 	int32_t pos = -1;
 	uint32_t score = 0;
-	double ave1 = 0, ave2 = 0;
+	double ratio = 0;
+	double mave1 = 0, mave2 = 0;
 	for(int i = 0; i < v.size(); i++)
 	{
 		int32_t p = v[i].first;
@@ -156,24 +157,34 @@ int32_t region::identify_boundary(bool tag)
 		int n1 = v[i].second / average_read_length + 5;
 		int n2 = (sum - v[i].second) / average_read_length + 5;
 
-		uint32_t s = 0;
+		double ave1 = v[i].second * 1.0 / len1 + 2.0;
+		double ave2 = (sum - v[i].second) * 1.0 / len2 + 2.0;
+
+		double r = 0;
+		int32_t s = 0;
 		if(tag == true)
 		{
 			double pr = len1 * 1.0 / (len1 + len2);
 			s = compute_binomial_score(n1 + n2, pr, n1);
+			r = ave1 / ave2;
 		}
 		else
 		{
 			double pr = len2 * 1.0 / (len1 + len2);
 			s = compute_binomial_score(n1 + n2, pr, n2);
+			r = ave2 / ave1;
 		}
 
-		if(score > s) continue;
+		if(s < min_boundary_score) continue;
+		if(r < min_boundary_ave_ratio) continue;
+		if(ratio > r) continue;
+		//if(score > s) continue;
 
 		score = s;
+		ratio = r;
 		pos = p;
-		ave1 = v[i].second * 1.0 / len1;
-		ave2 = (sum - v[i].second) * 1.0 / len2;
+		mave1 = ave1;
+		mave2 = ave2;
 	}
 
 	if(pos == -1) return -1;
@@ -188,29 +199,30 @@ int32_t region::identify_boundary(bool tag)
 
 		if(t <= pos)
 		{
-			var1 += (s - p) * ave1 * ave1;
-			var1 += (t - s) * (it->second - ave1) * (it->second - ave1);
+			var1 += (s - p) * mave1 * mave1;
+			var1 += (t - s) * (it->second - mave1) * (it->second - mave1);
 		}
 		else
 		{
-			var2 += (s - p) * ave2 * ave2;
-			var2 += (t - s) * (it->second - ave2) * (it->second - ave2);
+			var2 += (s - p) * mave2 * mave2;
+			var2 += (t - s) * (it->second - mave2) * (it->second - mave2);
 		}
 		p = t;
 	}
-	var2 += (rpos - p) * ave2 * ave2;
+	var2 += (rpos - p) * mave2 * mave2;
 
 	int len1 = pos - lpos;
 	int len2 = rpos - pos;
 	double dev1 = sqrt(var1 / len1);
 	double dev2 = sqrt(var2 / len2);
 
-	if(score < min_boundary_score) return -1;
-	if(tag == true && ave1 < ave2 + min_boundary_sigma * dev2) return -1;
-	if(tag == false && ave2 < ave1 + min_boundary_sigma * dev1) return -1;
+	if(tag == true && mave1 < mave2 + min_boundary_sigma * dev2) return -1;
+	if(tag == true && mave2 > mave1 - min_boundary_sigma * dev2) return -1;
+	if(tag == false && mave2 < mave1 + min_boundary_sigma * dev1) return -1;
+	if(tag == false && mave1 > mave2 - min_boundary_sigma * dev1) return -1;
 
-	printf("new boundary: %s-position: region = %d-%d, score = %d, pos = %d, len = (%d, %d) ave = (%.1lf, %.1lf), dev = (%.1lf, %.1lf)\n", 
-			tag ? "end" : "start", lpos, rpos, score, pos, len1, len2, ave1, ave2, dev1, dev2);
+	printf("new boundary: %s-position: region = %d-%d, score = %d, pos = %d, len = (%d, %d) mave = (%.1lf, %.1lf), dev = (%.1lf, %.1lf)\n", 
+			tag ? "end" : "start", lpos, rpos, score, pos, len1, len2, mave1, mave2, dev1, dev2);
 
 	return pos;
 }
