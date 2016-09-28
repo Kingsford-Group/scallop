@@ -27,7 +27,7 @@ int bundle::build()
 
 	bool bb = identify_extra_boundary;
 
-	if(identify_extra_boundary = true)
+	if(identify_extra_boundary == true)
 	{
 		build_regions(5);
 		build_partial_exons();
