@@ -22,7 +22,7 @@ int32_t min_subregion_gap = 3;
 int32_t min_subregion_length = 15;
 double min_subregion_overlap = 2;
 bool identify_extra_boundary = false;
-int min_subregion_ladders = 10;
+int min_subregion_ladders = 0;
 
 // for splice graph
 double min_consecutive_edge_weight = 3.9;
