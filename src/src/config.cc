@@ -35,9 +35,9 @@ double min_splice_graph_coverage = 20.0;
 // for identifying new boundaries
 bool identify_extra_boundary = false;
 int min_boundary_length = 80;
-int min_boundary_score = 1000;
-double min_boundary_ave_ratio = 2.0;
-double min_boundary_sigma = 4.0;
+int min_boundary_score = 100;
+double min_boundary_ave_ratio = 3.0;
+double min_boundary_sigma = 5.0;
 
 // for subsetsum and router
 int max_dp_table_size = 10000;

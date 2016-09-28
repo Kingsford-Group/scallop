@@ -217,9 +217,9 @@ int32_t region::identify_boundary(bool tag)
 	double dev2 = sqrt(var2 / len2);
 
 	if(tag == true && mave1 < mave2 + min_boundary_sigma * dev2) return -1;
-	if(tag == true && mave2 > mave1 - min_boundary_sigma * dev1) return -1;
 	if(tag == false && mave2 < mave1 + min_boundary_sigma * dev1) return -1;
-	if(tag == false && mave1 > mave2 - min_boundary_sigma * dev2) return -1;
+	//if(tag == false && mave1 > mave2 - min_boundary_sigma * dev2) return -1;
+	//if(tag == true && mave2 > mave1 - min_boundary_sigma * dev1) return -1;
 
 	printf("new boundary: %s-position: region = %d-%d, score = %d, pos = %d, len = (%d, %d) mave = (%.1lf, %.1lf), dev = (%.1lf, %.1lf)\n", 
 			tag ? "end" : "start", lpos, rpos, score, pos, len1, len2, mave1, mave2, dev1, dev2);
