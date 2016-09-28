@@ -12,6 +12,7 @@ super_graph::~super_graph()
 
 int super_graph::build()
 {
+	root.draw("root1.tex");
 	while(true)
 	{
 		subs.clear();
@@ -36,6 +37,7 @@ int super_graph::build()
 
 		break;
 	}
+	root.draw("root2.tex");
 	return 0;
 }
 

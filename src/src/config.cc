@@ -22,6 +22,7 @@ int32_t min_subregion_gap = 3;
 int32_t min_subregion_length = 15;
 double min_subregion_overlap = 2;
 bool identify_extra_boundary = false;
+int min_subregion_ladders = 10;
 
 // for splice graph
 double min_consecutive_edge_weight = 3.9;
@@ -80,6 +81,7 @@ int print_parameters()
 	printf("min_subregion_length = %d\n", min_subregion_length);
 	printf("min_subregion_overlap = %.2lf\n", min_subregion_overlap);
 	printf("identify_extra_boundary = %c\n", identify_extra_boundary ? 'T' : 'F');
+	printf("min_subregion_ladders = %d\n", min_subregion_ladders);
 
 	// for splice graph
 	printf("min_consecutive_edge_weight = %.2lf\n", min_consecutive_edge_weight);
@@ -235,6 +237,11 @@ int parse_arguments(int argc, const char ** argv)
 			string s(argv[i + 1]);
 			if(s == "true") identify_extra_boundary = true;
 			else identify_extra_boundary = false;
+			i++;
+		}
+		else if(string(argv[i]) == "--min_subregion_ladders")
+		{
+			min_subregion_ladders = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_consecutive_edge_weight")

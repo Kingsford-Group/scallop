@@ -96,6 +96,9 @@ bool region::empty_subregion(int32_t p1, int32_t p2)
 	tie(it1, it2) = locate_boundary_iterators(*mmap, p1, p2);
 	if(it1 == mmap->end() || it2 == mmap->end()) return true;
 
+	int ladders = distance(it1, it2);
+	if(ladders < min_subregion_ladders) return false;
+
 	int32_t sum = compute_sum_overlap(*mmap, it1, it2);
 	double ratio = sum * 1.0 / (p2 - p1);
 	//printf(" region = [%d, %d), subregion [%d, %d), overlap = %.2lf\n", lpos, rpos, p1, p2, ratio);
