@@ -97,7 +97,7 @@ bool region::empty_subregion(int32_t p1, int32_t p2)
 	if(it1 == mmap->end() || it2 == mmap->end()) return true;
 
 	int ladders = distance(it1, it2);
-	if(ladders < min_subregion_ladders) return false;
+	if(ladders < min_subregion_ladders) return true;
 
 	int32_t sum = compute_sum_overlap(*mmap, it1, it2);
 	double ratio = sum * 1.0 / (p2 - p1);
