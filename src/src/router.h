@@ -43,7 +43,7 @@ public:
 	int build_bipartite_graph();			// build bipartite graph
 	int add_single_equation();				// cannot be divided
 	int split();							// use subsetsum4
-	bool balance();							// balance weight with tree
+	//bool balance();							// balance weight with tree
 	vector<PI> build_tree_order();			// compute tree order
 
 	// print and stats

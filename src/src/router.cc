@@ -283,6 +283,7 @@ int router::split()
 	return 0;
 }
 
+/*
 bool router::balance()
 {
 	assert(status == 1);
@@ -356,6 +357,7 @@ bool router::balance()
 	delete env;
 	return true;
 }
+*/
 
 vector<PI> router::build_tree_order()
 {

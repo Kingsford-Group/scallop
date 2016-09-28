@@ -919,28 +919,49 @@ int scallop3::balance_vertex(int v)
 	assert(w1 >= SMIN);
 	assert(w2 >= SMIN);
 
-	//double wv = gr.get_vertex_weight(v);
-	double wv = -1;		// do not use it
-	double ww = (wv >= w1 && wv >= w2) ? wv : (w1 >= w2 ? w1 : w2);
-	assert(ww >= w1 && ww >= w2);
-
+	// use max-meature
+	//double ww = (wv >= w1 && wv >= w2) ? wv : (w1 >= w2 ? w1 : w2);
+	//assert(ww >= w1 && ww >= w2);
+	// use sqrt-meature
+	double ww = sqrt(w1 * w2);
 	double r1 = ww / w1;
 	double r2 = ww / w2;
 
-	/*
-	double r1 = (w1 > w2) ? 1.0 : w2 / w1;
-	double r2 = (w1 < w2) ? 1.0 : w1 / w2;
-	*/
-
+	double m1 = 0, m2 = 0;
 	for(tie(it1, it2) = gr.in_edges(v); it1 != it2; it1++)
 	{
-		double w = gr.get_edge_weight(*it1);
-		gr.set_edge_weight(*it1, w * r1);
+		double wx = gr.get_edge_weight(*it1);
+		double wy = wx * r1;
+		if(wy < 1.0)
+		{
+			m1 += (1.0 - wy);
+			wy = 1.0;
+		}
+		gr.set_edge_weight(*it1, wy);
 	}
 	for(tie(it1, it2) = gr.out_edges(v); it1 != it2; it1++)
 	{
-		double w = gr.get_edge_weight(*it1);
-		gr.set_edge_weight(*it1, w * r2);
+		double wx = gr.get_edge_weight(*it1);
+		double wy = wx * r2;
+		if(wy < 1.0)
+		{
+			m2 += 1.0 - wy;
+			wy = 1.0;
+		}
+		gr.set_edge_weight(*it1, wy);
+	}
+
+	if(m1 > m2)
+	{
+		edge_descriptor e = gr.max_out_edge(v);
+		double w = gr.get_edge_weight(e);
+		gr.set_edge_weight(e, w + m1 - m2);
+	}
+	else if(m1 < m2)
+	{
+		edge_descriptor e = gr.max_in_edge(v);
+		double w = gr.get_edge_weight(e);
+		gr.set_edge_weight(e, w + m2 - m1);
 	}
 
 	return 0;
