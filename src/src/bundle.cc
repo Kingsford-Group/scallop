@@ -34,8 +34,8 @@ int bundle::build()
 	link_partial_exons();
 	build_splice_graph();
 
-	extend_isolated_start_boundaries();
-	extend_isolated_end_boundaries();
+	//extend_isolated_start_boundaries();
+	//extend_isolated_end_boundaries();
 
 	//printf("-----------------------------\n");
 	build_hyper_edges2();
