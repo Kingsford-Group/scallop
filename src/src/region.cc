@@ -157,8 +157,8 @@ int32_t region::identify_boundary(bool tag)
 		int n1 = v[i].second / average_read_length + 5;
 		int n2 = (sum - v[i].second) / average_read_length + 5;
 
-		double ave1 = v[i].second * 1.0 / len1 + 2.0;
-		double ave2 = (sum - v[i].second) * 1.0 / len2 + 2.0;
+		double ave1 = v[i].second * 1.0 / len1 + 1.0;
+		double ave2 = (sum - v[i].second) * 1.0 / len2 + 1.0;
 
 		double r = 0;
 		int32_t s = 0;

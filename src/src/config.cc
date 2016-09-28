@@ -33,7 +33,7 @@ double min_transcript_coverage = 10.0;
 double min_splice_graph_coverage = 20.0;
 
 // for identifying new boundaries
-bool identify_extra_boundary = true;
+bool identify_extra_boundary = false;
 int min_boundary_length = 80;
 int min_boundary_score = 1000;
 double min_boundary_ave_ratio = 2.0;
