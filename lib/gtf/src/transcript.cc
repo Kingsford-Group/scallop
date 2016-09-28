@@ -42,6 +42,7 @@ int transcript::add_exon(const exon &e)
 	expression = e.expression;
 	coverage = e.coverage;
 	strand = e.strand;
+	RPKM = e.RPKM;
 	exons.push_back(PI32(e.start, e.end));
 	return 0;
 }
