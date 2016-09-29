@@ -380,12 +380,9 @@ bool scallop3::resolve_small_edges1()
 		int t = e->target();
 		double w = gr.get_edge_weight(e);
 
-		int32_t p1 = gr.get_vertex_info(s).rpos;
-		int32_t p2 = gr.get_vertex_info(t).lpos;
-		if(p1 == p2 && w >= min_consecutive_edge_weight) continue;
-		if(p1 != p2 && w >= min_splice_edge_weight) continue;
-
-		if(hs.left_extend(ei) == true && hs.right_extend(ei) == true) continue;
+		if(s == 0 && t == gr.num_vertices() - 1) continue;
+		if(w >= min_flying_edge_weight) continue;
+		if(hs.left_extend(ei) == true || hs.right_extend(ei) == true) continue;
 		if(gr.out_degree(s) <= 1) continue;
 		if(gr.in_degree(t) <= 1) continue;
 

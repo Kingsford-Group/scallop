@@ -44,6 +44,7 @@ extern int min_router_count;
 // for splice graph
 extern double min_consecutive_edge_weight;
 extern double min_splice_edge_weight;
+extern double min_flying_edge_weight;
 extern double max_ignorable_edge_weight;
 extern double min_transcript_coverage;
 extern double min_splice_graph_coverage;
