@@ -50,6 +50,7 @@ private:
 	int refine_splice_graph();
 
 	// resolve iteratively
+	bool resolve_small_edges();
 	bool resolve_small_edges1();
 	bool resolve_small_edges2();
 	bool resolve_small_edges3();

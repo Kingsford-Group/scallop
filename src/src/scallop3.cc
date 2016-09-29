@@ -38,15 +38,7 @@ int scallop3::assemble()
 	{
 		bool b	= false;
 
-		b = resolve_small_edges1();
-		if(b == true) print();
-		if(b == true) continue;
-
-		b = resolve_small_edges2();
-		if(b == true) print();
-		if(b == true) continue;
-
-		b = resolve_small_edges3();
+		b = resolve_small_edges();
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -154,28 +146,6 @@ bool scallop3::resolve_nontrivial_vertex(bool hyper)
 	assert(eqn.t.size() >= 1);
 
 	split_vertex(root, eqn.s, eqn.t);
-
-	return true;
-}
-
-bool scallop3::resolve_small_edges3()
-{
-	int se = -1, root1 = -1, root2 = -1;
-	double ratio0 = compute_smallest_removable_edge(se);
-	double ratio1 = compute_smallest_splitable_vertex(root1, false);
-	double ratio2 = compute_smallest_splitable_vertex(root2, true);
-
-	if(se == -1) return false;
-	if(root1 == -1 && root2 == -1) return false;
-	if(ratio0 > ratio1) return false;
-	if(ratio0 > ratio2) return false;
-	if(ratio0 > max_split_error_ratio) return false;
-
-	double sw = gr.get_edge_weight(i2e[se]);
-	printf("remove small edge %d, weight = %.2lf, ratio = %.2lf\n", se, sw, ratio0);
-
-	remove_edge(se);
-	hs.remove(se);
 
 	return true;
 }
@@ -430,6 +400,44 @@ bool scallop3::resolve_small_edges2()
 		flag = true;
 	}
 	return flag;
+}
+
+bool scallop3::resolve_small_edges3()
+{
+	int se = -1, root1 = -1, root2 = -1;
+	double ratio0 = compute_smallest_removable_edge(se);
+	double ratio1 = compute_smallest_splitable_vertex(root1, false);
+	double ratio2 = compute_smallest_splitable_vertex(root2, true);
+
+	if(se == -1) return false;
+	if(root1 == -1 && root2 == -1) return false;
+	if(ratio0 > ratio1) return false;
+	if(ratio0 > ratio2) return false;
+	if(ratio0 > max_split_error_ratio) return false;
+
+	double sw = gr.get_edge_weight(i2e[se]);
+	printf("remove small edge %d, weight = %.2lf, ratio = %.2lf\n", se, sw, ratio0);
+
+	remove_edge(se);
+	hs.remove(se);
+
+	return true;
+}
+
+bool scallop3::resolve_small_edges()
+{
+	int se = -1;
+	double ratio = compute_smallest_removable_edge(se);
+
+	if(se == -1) return false;
+
+	double sw = gr.get_edge_weight(i2e[se]);
+	printf("remove small edge %d, weight = %.2lf, ratio = %.2lf\n", se, sw, ratio);
+
+	remove_edge(se);
+	hs.remove(se);
+
+	return true;
 }
 
 bool scallop3::resolve_trivial_vertex()
