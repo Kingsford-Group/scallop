@@ -10,13 +10,22 @@ using namespace std;
 
 int main(int argc, const char **argv)
 {
-	if(argc != 3)
+ 	if(argc != 3 && argc != 4)
 	{
-		cout<<"usage: "<<argv[0]<< " <in-gtf-file> <out-gtf-file>"<<endl;
+		cout<<"usage: "<<argv[0]<< " <in-gtf-file> <out-gtf-file> <min-expression>"<<endl;
 		return 0;
 	}
 
 	genome g(argv[1]);
+
+	if(argc == 4)
+	{
+		for(int i = 0; i < g.genes.size(); i++) 
+		{
+			g.genes[i].remove_transcripts(atof(argv[3]));
+		}
+	}
+
 	g.write(argv[2]);
 
     return 0;
