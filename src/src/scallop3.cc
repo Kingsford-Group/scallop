@@ -39,6 +39,7 @@ int scallop3::assemble()
 		bool b	= false;
 
 		b = resolve_small_edges();
+		if(b == true) refine_splice_graph();
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -100,12 +101,16 @@ int scallop3::refine_splice_graph()
 			int s = (*it1)->source();
 			int t = (*it1)->target();
 			int e = e2i[*it1];
-			if(s == 0) continue;
-			if(t == gr.num_vertices() - 1) continue;
-			if(gr.in_degree(s) >= 1 && gr.out_degree(t) >= 1) continue;
+			//if(s == 0) continue;
+			//if(t == gr.num_vertices() - 1) continue;
 
-			printf("refine graph by removing edge %d\n", e);
-			assert(false);
+			//printf(" refine (%d, %d), degree = (%d, %d)\n", s, t, gr.in_degree(s), gr.out_degree(t));
+
+			if(gr.in_degree(s) >= 1 && gr.out_degree(t) >= 1) continue;
+			if(s == 0 && gr.out_degree(t) >= 1) continue;
+			if(t == gr.num_vertices() - 1 && gr.in_degree(s) >= 1) continue;
+
+			printf("refine graph by removing edge %d = (%d, %d), weight = %.2lf\n", e, s, t, gr.get_edge_weight(i2e[e]));
 
 			remove_edge(e);
 			hs.remove(e);
@@ -322,8 +327,7 @@ bool scallop3::resolve_hyper_edge1()
 			int k2 = split_edge(v2[j], w);
 			int x = merge_adjacent_equal_edges(k1, k2);
 
-			printf(" split (%d, %d), w = %.2lf, weight = (%.2lf, %.2lf), (%.2lf, %.2lf) -> (%d, %d) -> %d\n", v1[i], v2[j], 
-					w, w1[i], w2[j], t1, t2, k1, k2, x);
+			//printf(" split (%d, %d), w = %.2lf, weight = (%.2lf, %.2lf), (%.2lf, %.2lf) -> (%d, %d) -> %d\n", v1[i], v2[j], w, w1[i], w2[j], t1, t2, k1, k2, x);
 
 			hs.replace(v1[i], v2[j], x);
 			if(k1 == v1[i]) hs.remove(v1[i]);
@@ -336,94 +340,6 @@ bool scallop3::resolve_hyper_edge1()
 	return true;
 }
 
-bool scallop3::resolve_small_edges1()
-{
-	bool flag = false;
-	for(int i = 1; i < gr.num_vertices() - 1; i++)
-	{
-		if(gr.degree(i) == 0) continue;
-		if(gr.degree(i) <= max_flying_vertex_degree) continue;
-
-		int ei;
-		double ratio = compute_smallest_edge(i, ei);
-		edge_descriptor e = i2e[ei];
-		int s = e->source();
-		int t = e->target();
-		double w = gr.get_edge_weight(e);
-
-		if(s == 0 && t == gr.num_vertices() - 1) continue;
-		if(w >= min_flying_edge_weight) continue;
-		if(s == i && hs.left_extend(ei)) continue;
-		if(t == i && hs.right_extend(ei)) continue;
-		if(gr.out_degree(s) <= 1) continue;
-		if(gr.in_degree(t) <= 1) continue;
-
-		printf("remove minimum edge %d of vertex %d, weight = %.2lf, ratio = %.2lf, degree = (%d, %d)\n", 
-				ei, i, w, ratio, gr.in_degree(i), gr.out_degree(i));
-
-		remove_edge(ei);
-		hs.remove(ei);
-		flag = true;
-	}
-	return flag;
-}
-
-bool scallop3::resolve_small_edges2()
-{
-	bool flag = false;
-	for(int i = 1; i < gr.num_vertices() - 1; i++)
-	{
-		if(gr.in_degree(i) <= 1) continue;
-		if(gr.out_degree(i) <= 1) continue;
-
-		int ei;
-		double ratio = compute_smallest_edge(i, ei);
-		edge_descriptor e = i2e[ei];
-		int s = e->source();
-		int t = e->target();
-		double w = gr.get_edge_weight(e);
-
-		if(ratio > max_split_error_ratio) continue;
-
-		if(w > max_ignorable_edge_weight) continue;
-		if(s == i && hs.left_extend(ei)) continue;
-		if(t == i && hs.right_extend(ei)) continue;
-		//if(hs.left_extend(ei) == true || hs.right_extend(ei) == true) continue;
-		if(s == i && gr.in_degree(t) <= 1) continue;
-		if(t == i && gr.out_degree(s) <= 1) continue;
-
-		printf("remove ignorable edge %d of vertex %d, weight = %.2lf, ratio = %.2lf, degree = (%d, %d)\n", 
-				ei, i, w, ratio, gr.in_degree(i), gr.out_degree(i));
-
-		remove_edge(ei);
-		hs.remove(ei);
-		flag = true;
-	}
-	return flag;
-}
-
-bool scallop3::resolve_small_edges3()
-{
-	int se = -1, root1 = -1, root2 = -1;
-	double ratio0 = compute_smallest_removable_edge(se);
-	double ratio1 = compute_smallest_splitable_vertex(root1, false);
-	double ratio2 = compute_smallest_splitable_vertex(root2, true);
-
-	if(se == -1) return false;
-	if(root1 == -1 && root2 == -1) return false;
-	if(ratio0 > ratio1) return false;
-	if(ratio0 > ratio2) return false;
-	if(ratio0 > max_split_error_ratio) return false;
-
-	double sw = gr.get_edge_weight(i2e[se]);
-	printf("remove small edge %d, weight = %.2lf, ratio = %.2lf\n", se, sw, ratio0);
-
-	remove_edge(se);
-	hs.remove(se);
-
-	return true;
-}
-
 bool scallop3::resolve_small_edges()
 {
 	int se = -1;
@@ -432,7 +348,10 @@ bool scallop3::resolve_small_edges()
 	if(se == -1) return false;
 
 	double sw = gr.get_edge_weight(i2e[se]);
-	printf("remove small edge %d, weight = %.2lf, ratio = %.2lf\n", se, sw, ratio);
+	int s = i2e[se]->source();
+	int t = i2e[se]->target();
+	printf("remove small edge %d, weight = %.2lf, ratio = %.2lf, vertex = (%d, %d), degree = (%d, %d)\n", 
+			se, sw, ratio, s, t, gr.out_degree(s), gr.in_degree(t));
 
 	remove_edge(se);
 	hs.remove(se);
@@ -1213,8 +1132,10 @@ double scallop3::compute_smallest_removable_edge(int &se)
 		if(i2e[e]->target() == i && hs.right_extend(e)) continue;
 		if(i2e[e]->source() == i && hs.left_extend(e)) continue;
 		//if(hs.left_extend(e) || hs.right_extend(e)) continue;
-		if(gr.in_degree(i2e[e]->target()) <= 1) continue;
-		if(gr.out_degree(i2e[e]->source()) <= 1) continue;
+
+		// TODO
+		//if(gr.in_degree(i2e[e]->target()) <= 1) continue;
+		//if(gr.out_degree(i2e[e]->source()) <= 1) continue;
 
 		ratio = r;
 		se = e;

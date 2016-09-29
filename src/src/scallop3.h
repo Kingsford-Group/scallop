@@ -51,16 +51,11 @@ private:
 
 	// resolve iteratively
 	bool resolve_small_edges();
-	bool resolve_small_edges1();
-	bool resolve_small_edges2();
-	bool resolve_small_edges3();
 	bool resolve_hyper_tree();
 	bool resolve_nontrivial_vertex(bool hyper);
 	bool resolve_trivial_vertex();
 	bool resolve_hyper_edge1();
 	bool resolve_hyper_edge0();
-	//bool resolve_hyper_vertex();
-	//bool resolve_normal_vertex();
 
 	// smooth vertex
 	bool balance_vertex(undirected_graph &ug, const vector<int> &u2e);
