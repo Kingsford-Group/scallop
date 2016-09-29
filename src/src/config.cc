@@ -26,7 +26,8 @@ int min_subregion_ladders = 0;
 // for splice graph
 double min_consecutive_edge_weight = 3.9;
 double min_splice_edge_weight = 3.9;
-double min_flying_edge_weight = 1.5;
+double min_flying_edge_weight = 2.5;
+int max_flying_vertex_degree = 4;
 double max_split_error_ratio = 0.15;
 double max_ignorable_edge_weight = 25.0;
 double smallest_edge_ratio_scalor = 0.25;
@@ -88,6 +89,7 @@ int print_parameters()
 	printf("min_consecutive_edge_weight = %.2lf\n", min_consecutive_edge_weight);
 	printf("min_splice_edge_weight = %.2lf\n", min_splice_edge_weight);
 	printf("min_flying_edge_weight = %.2lf\n", min_flying_edge_weight);
+	printf("max_flying_vertex_degree = %d\n", max_flying_vertex_degree);
 	printf("max_ignorable_edge_weight = %.2lf\n", max_ignorable_edge_weight);
 	printf("min_transcript_coverage = %.2lf\n", min_transcript_coverage);
 	printf("min_splice_graph_coverage = %.2lf\n", min_splice_graph_coverage);
@@ -261,6 +263,11 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--min_flying_edge_weight")
 		{
 			min_flying_edge_weight = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--max_flying_vertex_degree")
+		{
+			max_flying_vertex_degree = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--max_ignorable_edge_weight")

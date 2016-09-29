@@ -372,6 +372,7 @@ bool scallop3::resolve_small_edges1()
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.degree(i) == 0) continue;
+		if(gr.degree(i) <= max_flying_vertex_degree) continue;
 
 		int ei;
 		double ratio = compute_smallest_edge(i, ei);
@@ -382,7 +383,8 @@ bool scallop3::resolve_small_edges1()
 
 		if(s == 0 && t == gr.num_vertices() - 1) continue;
 		if(w >= min_flying_edge_weight) continue;
-		if(hs.left_extend(ei) == true || hs.right_extend(ei) == true) continue;
+		if(s == i && hs.left_extend(ei)) continue;
+		if(t == i && hs.right_extend(ei)) continue;
 		if(gr.out_degree(s) <= 1) continue;
 		if(gr.in_degree(t) <= 1) continue;
 
@@ -414,8 +416,8 @@ bool scallop3::resolve_small_edges2()
 		if(ratio > max_split_error_ratio) continue;
 
 		if(w > max_ignorable_edge_weight) continue;
-		if(e->target() == i && hs.right_extend(ei)) continue;
-		if(e->source() == i && hs.left_extend(ei)) continue;
+		if(s == i && hs.left_extend(ei)) continue;
+		if(t == i && hs.right_extend(ei)) continue;
 		//if(hs.left_extend(ei) == true || hs.right_extend(ei) == true) continue;
 		if(s == i && gr.in_degree(t) <= 1) continue;
 		if(t == i && gr.out_degree(s) <= 1) continue;
