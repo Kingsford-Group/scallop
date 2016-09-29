@@ -38,11 +38,15 @@ int scallop3::assemble()
 	{
 		bool b	= false;
 
-		b = resolve_ignorable_edges();
+		b = resolve_small_edges1();
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_smallest_edge();
+		b = resolve_small_edges2();
+		if(b == true) print();
+		if(b == true) continue;
+
+		b = resolve_small_edges3();
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -154,7 +158,7 @@ bool scallop3::resolve_nontrivial_vertex(bool hyper)
 	return true;
 }
 
-bool scallop3::resolve_smallest_edge()
+bool scallop3::resolve_small_edges3()
 {
 	int se = -1, root1 = -1, root2 = -1;
 	double ratio0 = compute_smallest_removable_edge(se);
@@ -362,7 +366,40 @@ bool scallop3::resolve_hyper_edge1()
 	return true;
 }
 
-bool scallop3::resolve_ignorable_edges()
+bool scallop3::resolve_small_edges1()
+{
+	bool flag = false;
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		if(gr.degree(i) == 0) continue;
+
+		int ei;
+		double ratio = compute_smallest_edge(i, ei);
+		edge_descriptor e = i2e[ei];
+		int s = e->source();
+		int t = e->target();
+		double w = gr.get_edge_weight(e);
+
+		int32_t p1 = gr.get_vertex_info(s).rpos;
+		int32_t p2 = gr.get_vertex_info(t).lpos;
+		if(p1 == p2 && w >= min_consecutive_edge_weight) continue;
+		if(p1 != p2 && w >= min_splice_edge_weight) continue;
+
+		if(hs.left_extend(ei) == true && hs.right_extend(ei) == true) continue;
+		if(gr.out_degree(s) <= 1) continue;
+		if(gr.in_degree(t) <= 1) continue;
+
+		printf("remove minimum edge %d of vertex %d, weight = %.2lf, ratio = %.2lf, degree = (%d, %d)\n", 
+				ei, i, w, ratio, gr.in_degree(i), gr.out_degree(i));
+
+		remove_edge(ei);
+		hs.remove(ei);
+		flag = true;
+	}
+	return flag;
+}
+
+bool scallop3::resolve_small_edges2()
 {
 	bool flag = false;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
@@ -375,10 +412,10 @@ bool scallop3::resolve_ignorable_edges()
 		edge_descriptor e = i2e[ei];
 		int s = e->source();
 		int t = e->target();
+		double w = gr.get_edge_weight(e);
 
 		if(ratio > max_split_error_ratio) continue;
 
-		double w = gr.get_edge_weight(e);
 		if(w > max_ignorable_edge_weight) continue;
 		if(e->target() == i && hs.right_extend(ei)) continue;
 		if(e->source() == i && hs.left_extend(ei)) continue;

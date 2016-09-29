@@ -50,8 +50,9 @@ private:
 	int refine_splice_graph();
 
 	// resolve iteratively
-	bool resolve_ignorable_edges();
-	bool resolve_smallest_edge();
+	bool resolve_small_edges1();
+	bool resolve_small_edges2();
+	bool resolve_small_edges3();
 	bool resolve_hyper_tree();
 	bool resolve_nontrivial_vertex(bool hyper);
 	bool resolve_trivial_vertex();
