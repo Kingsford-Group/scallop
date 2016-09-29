@@ -37,7 +37,7 @@ int simulator::simulate_transcript(const string &tid, const string &gid, gene &g
 	{
 		int ss = s[i] * 3 + 1;
 		int tt = s[i] * 3 + 3;
-		exon e(tid, gid, ss, tt, x);
+		exon e(tid, gid, ss, tt, x, 1, 1);
 		g.add_exon(e);
 	}
 
