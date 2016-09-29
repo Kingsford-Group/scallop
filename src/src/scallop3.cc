@@ -39,7 +39,6 @@ int scallop3::assemble()
 		bool b	= false;
 
 		b = resolve_small_edges();
-		if(b == true) refine_splice_graph();
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -1133,9 +1132,8 @@ double scallop3::compute_smallest_removable_edge(int &se)
 		if(i2e[e]->source() == i && hs.left_extend(e)) continue;
 		//if(hs.left_extend(e) || hs.right_extend(e)) continue;
 
-		// TODO
-		//if(gr.in_degree(i2e[e]->target()) <= 1) continue;
-		//if(gr.out_degree(i2e[e]->source()) <= 1) continue;
+		if(gr.in_degree(i2e[e]->target()) <= 1) continue;
+		if(gr.out_degree(i2e[e]->source()) <= 1) continue;
 
 		ratio = r;
 		se = e;
