@@ -140,7 +140,7 @@ bool scallop3::resolve_hyper_vertex(int status)
 
 		assert(rt.ratio >= 0);
 		assert(rt.eqns.size() == 2);
-		assert(rt.status == 4);
+		assert(rt.status == status);
 
 		printf("split hyper-%d vertex %d, ratio = %.2lf / %.2lf, degree = (%d, %d)\n", 
 				status, root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
