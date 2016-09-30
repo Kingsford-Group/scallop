@@ -49,6 +49,14 @@ int bundle::build()
 	link_partial_exons();
 	build_splice_graph();
 
+
+	// remove/add necessary edges
+	while(remove_single_read());
+	refine_splice_graph();
+
+	remove_edges();
+	refine_splice_graph();
+
 	identify_start_suspend_boundaries();
 	identify_end_suspend_boundaries();
 
@@ -705,6 +713,129 @@ int bundle::identify_end_suspend_boundaries()
 
 		printf("end suspend boundary: vertex = %d weight = %.2lf stddev = %.2lf length = %d\n", i, wv, vi.stddev, vi.length);
 	}
+	return 0;
+}
+
+int bundle::refine_splice_graph()
+{
+	while(true)
+	{
+		bool b = false;
+		for(int i = 1; i < gr.num_vertices() - 1; i++)
+		{
+			if(gr.degree(i) == 0) continue;
+			if(gr.in_degree(i) >= 1 && gr.out_degree(i) >= 1) continue;
+			gr.clear_vertex(i);
+			b = true;
+		}
+		if(b == false) break;
+	}
+	return 0;
+}
+
+bool bundle::remove_single_read()
+{
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	{
+		edge_descriptor e = (*it1);
+		double w = gr.get_edge_weight(e);
+		if(w >= 1.1) continue;
+
+		int s = e->source();
+		int t = e->target();
+		int n = gr.num_vertices() - 1;
+		if(s == 0 && gr.out_degree(0) <= 1) continue;
+		if(t == n && gr.in_degree(n) <= 1) continue;
+
+		int32_t p1 = gr.get_vertex_info(s).rpos;
+		int32_t p2 = gr.get_vertex_info(t).lpos;
+		if(p1 == p2) continue;
+
+		printf("remove single read %d -> %d\n", s, t);
+		gr.remove_edge(e);
+
+		return true;
+	}
+	return false;
+}
+
+int bundle::remove_edges()
+{
+	set<int> sv1;
+	set<int> sv2;
+	SE se;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	{
+		double w = gr.get_edge_weight(*it1);
+		int s = (*it1)->source();
+		int t = (*it1)->target();
+		int32_t p1 = gr.get_vertex_info(s).rpos;
+		int32_t p2 = gr.get_vertex_info(t).lpos;
+		if(p1 == p2 && w < min_consecutive_edge_weight) continue;
+		if(p1 != p2 && w < min_splice_edge_weight) continue;
+		se.insert(*it1);
+		sv1.insert(t);
+		sv2.insert(s);
+	}
+
+	/*
+	for(SE::iterator it = se.begin(); it != se.end(); it++)
+	{
+		printf("remaining edge (%d, %d), weight = %.2lf\n", (*it)->source(), (*it)->target(), gr.get_edge_weight(*it));
+	}
+
+	printf("sv1: "); printv(vector<int>(sv1.begin(), sv1.end())); printf("\n");
+	printf("sv2: "); printv(vector<int>(sv2.begin(), sv2.end())); printf("\n");
+	*/
+
+	while(true)
+	{
+		bool b = false;
+		for(SE::iterator it = se.begin(); it != se.end(); it++)
+		{
+			edge_descriptor e = (*it);
+			int s = e->source(); 
+			int t = e->target();
+			if(sv1.find(s) == sv1.end() && s != 0)
+			{
+				edge_descriptor ee = gr.max_in_edge(s);
+				assert(ee != null_edge);
+				assert(se.find(ee) == se.end());
+				se.insert(ee);
+				sv1.insert(s);
+				sv2.insert(ee->source());
+				b = true;
+			}
+			if(sv2.find(t) == sv2.end() && t != gr.num_vertices() - 1)
+			{
+				edge_descriptor ee = gr.max_out_edge(t);
+				assert(ee != null_edge);
+				assert(se.find(ee) == se.end());
+				se.insert(ee);
+				sv1.insert(ee->target());
+				sv2.insert(t);
+				b = true;
+			}
+			if(b == true) break;
+		}
+		if(b == false) break;
+	}
+
+	VE ve;
+	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	{
+		if(se.find(*it1) != se.end()) continue;
+		ve.push_back(*it1);
+	}
+
+	for(int i = 0; i < ve.size(); i++)
+	{
+		//printf("remove edge (%d, %d), weight = %.2lf\n", ve[i]->source(), ve[i]->target(), gr.get_edge_weight(ve[i]));
+		gr.remove_edge(ve[i]);
+	}
+
 	return 0;
 }
 

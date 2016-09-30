@@ -40,9 +40,6 @@ private:
 	int split_single_splice_graph(splice_graph &gr, hyper_set &hs, const set<int> &v, int index);
 	bool cut_splice_graph();
 	bool cut_single_splice_graph(splice_graph &gr, int index);
-	bool remove_single_read(splice_graph &gr);
-	int refine_splice_graph(splice_graph &gr);
-	int remove_edges(splice_graph &gr);
 
 	// analysis the structure
 	int build_maximum_path_graph(splice_graph &gr, undirected_graph &mg);
