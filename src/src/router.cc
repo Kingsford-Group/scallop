@@ -69,9 +69,16 @@ int router::build()
 
 	split();
 
-	if(eqns.size() == 2)
+	if(vv.size() == 2 && eqns.size() == 2)
+	{
+		status = 3;
+		return 0;
+	}
+
+	if(vv.size() >= 3 && eqns.size() == 2)
 	{
 		status = 4;
+		return 0;
 	}
 
 	return 0;

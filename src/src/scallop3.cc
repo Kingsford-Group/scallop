@@ -42,7 +42,7 @@ int scallop3::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_nontrivial_vertex(true);
+		b = resolve_hyper_vertex(3);
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -50,11 +50,11 @@ int scallop3::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_trivial_vertex();
+		b = resolve_hyper_vertex(4);
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_nontrivial_vertex(false);
+		b = resolve_trivial_vertex();
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -121,37 +121,61 @@ int scallop3::refine_splice_graph()
 	return 0;
 }
 
-bool scallop3::resolve_nontrivial_vertex(bool hyper)
+bool scallop3::resolve_hyper_vertex(int status)
 {
 	int root = -1, se = -1;
-	double ratio1 = compute_smallest_splitable_vertex(root, hyper);
+	double ratio1 = compute_smallest_splitable_vertex(root, status);
 	if(root == -1) return false;
 
-	double ratio2 = compute_smallest_edge(root, se);
-	//double ratio2 = compute_smallest_removable_edge(se);
-	if(ratio1 > ratio2) return false;
-	if(ratio1 > max_split_error_ratio) return false;
+	double ratio2 = compute_smallest_edge(root, se) * smallest_edge_ratio_scalor;
+	if(status == 3) ratio2 = 999;
 
-	vector<PI> p = hs.get_routes(root, gr, e2i);
-	router rt(root, gr, e2i, i2e, p);
-	rt.build();
+	if(ratio1 <= ratio2)
+	{
+		if(ratio1 > max_split_error_ratio) return false;
 
-	assert(rt.ratio >= 0);
-	assert(rt.eqns.size() == 2);
-	assert(rt.status == 4);
+		vector<PI> p = hs.get_routes(root, gr, e2i);
+		router rt(root, gr, e2i, i2e, p);
+		rt.build();
 
-	printf("split %s vertex %d, ratio = %.2lf / %.2lf, degree = (%d, %d)\n", 
-			hyper ? "hyper" : "normal", root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
+		assert(rt.ratio >= 0);
+		assert(rt.eqns.size() == 2);
+		assert(rt.status == 4);
 
-	for(int i = 0; i < rt.eqns.size(); i++) rt.eqns[i].print(99);
+		printf("split hyper-%d vertex %d, ratio = %.2lf / %.2lf, degree = (%d, %d)\n", 
+				status, root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
 
-	equation &eqn = rt.eqns[0];
-	assert(eqn.s.size() >= 1);
-	assert(eqn.t.size() >= 1);
+		for(int i = 0; i < rt.eqns.size(); i++) rt.eqns[i].print(99);
 
-	split_vertex(root, eqn.s, eqn.t);
+		equation &eqn = rt.eqns[0];
+		assert(eqn.s.size() >= 1);
+		assert(eqn.t.size() >= 1);
 
-	return true;
+		split_vertex(root, eqn.s, eqn.t);
+		return true;
+	}
+
+	if(ratio2 < ratio1)
+	{
+		if(ratio2 > max_split_error_ratio) return false;
+
+		double sw = gr.get_edge_weight(i2e[se]);
+		int s = i2e[se]->source();
+		int t = i2e[se]->target();
+
+		if(hs.left_extend(se) && hs.right_extend(se)) return false;
+		if(gr.in_degree(t) <= 1) return false;
+		if(gr.out_degree(s) <= 1) return false;
+
+
+		printf("remove hyper-%d edge %d, weight = %.2lf, ratio = %.2lf / %.2lf, vertex = (%d, %d), degree = (%d, %d)\n", 
+				status, se, sw, ratio1, ratio2, s, t, gr.out_degree(s), gr.in_degree(t));
+
+		remove_edge(se);
+		hs.remove(se);
+		return true;
+	}
+	return false;
 }
 
 bool scallop3::resolve_hyper_tree()
@@ -1079,7 +1103,7 @@ int scallop3::collect_path(int e)
 	return 0;
 }
 
-double scallop3::compute_smallest_splitable_vertex(int &root, bool hyper)
+double scallop3::compute_smallest_splitable_vertex(int &root, int status)
 {
 	root = -1;
 	double ratio = 999;
@@ -1089,14 +1113,12 @@ double scallop3::compute_smallest_splitable_vertex(int &root, bool hyper)
 		if(gr.out_degree(i) <= 1) continue;
 
 		vector<PI> p = hs.get_routes(i, gr, e2i);
-
-		if(hyper == true && p.size() <= 0) continue;
-		if(hyper == false&& p.size() >= 1) continue;
+		if(p.size() == 0) continue;
 
 		router rt(i, gr, e2i, i2e, p);
 		rt.build();
 
-		if(rt.status != 4) continue;
+		if(rt.status != status) continue;
 		assert(rt.ratio >= 0);
 		assert(rt.eqns.size() == 2);
 
@@ -1115,10 +1137,6 @@ double scallop3::compute_smallest_removable_edge(int &se)
 	double ratio = 999;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
-		//vector<PI> p = hs.get_routes(i, gr, e2i);
-		//if(hyper == true && p.size() <= 0) continue;
-		//if(hyper == false&& p.size() >= 1) continue;
-
 		if(gr.in_degree(i) <= 1) continue;
 		if(gr.out_degree(i) <= 1) continue;
 
@@ -1129,7 +1147,6 @@ double scallop3::compute_smallest_removable_edge(int &se)
 
 		if(i2e[e]->target() == i && hs.right_extend(e)) continue;
 		if(i2e[e]->source() == i && hs.left_extend(e)) continue;
-		//if(hs.left_extend(e) || hs.right_extend(e)) continue;
 
 		if(gr.in_degree(i2e[e]->target()) <= 1) continue;
 		if(gr.out_degree(i2e[e]->source()) <= 1) continue;

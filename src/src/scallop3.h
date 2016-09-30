@@ -52,7 +52,7 @@ private:
 	// resolve iteratively
 	bool resolve_small_edges();
 	bool resolve_hyper_tree();
-	bool resolve_nontrivial_vertex(bool hyper);
+	bool resolve_hyper_vertex(int status);
 	bool resolve_trivial_vertex();
 	bool resolve_hyper_edge1();
 	bool resolve_hyper_edge0();
@@ -77,7 +77,7 @@ private:
 	int greedy_decompose(int num);
 	double compute_smallest_edge(int x, int &e);
 	double compute_smallest_removable_edge(int &se);
-	double compute_smallest_splitable_vertex(int &root, bool hyper);
+	double compute_smallest_splitable_vertex(int &root, int status);
 
 	// print and draw
 	int print();
