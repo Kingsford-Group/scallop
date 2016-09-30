@@ -143,7 +143,7 @@ int evaluate_rectangle(const split_interval_map &imap, int ll, int rr, double &a
 	}
 
 	dev = sqrt(var / (rr - ll));
-	if(dev < 1.0) dev = 1.0;
+	//if(dev < 1.0) dev = 1.0;
 
 	return 0;
 }
