@@ -61,6 +61,8 @@ private:
 	// update splice graph
 	int extend_isolated_start_boundaries();
 	int extend_isolated_end_boundaries();
+	int identify_start_suspend_boundaries();
+	int identify_end_suspend_boundaries();
 };
 
 #endif

@@ -49,12 +49,13 @@ int bundle::build()
 	link_partial_exons();
 	build_splice_graph();
 
+	identify_start_suspend_boundaries();
+	identify_end_suspend_boundaries();
+
 	extend_isolated_start_boundaries();
 	extend_isolated_end_boundaries();
 
-	//printf("-----------------------------\n");
 	build_hyper_edges2();
-	//printf("+++++++++++++++++++++++++++++\n");
 	//gr.draw("gr.tex");
 
 	return 0;
@@ -633,6 +634,76 @@ int bundle::extend_isolated_start_boundaries()
 		
 		printf("extend isolated start boundary: (%d, %.2lf) -- (%.2lf) -- (%d, %.2lf)\n", i, gr.get_vertex_weight(i),
 				gr.get_edge_weight(e2), t, gr.get_vertex_weight(t));
+
+		gr.remove_edge(e1);
+		gr.remove_edge(e2);
+	}
+	return 0;
+}
+
+int bundle::identify_start_suspend_boundaries()
+{
+	for(int i = 1; i < gr.num_vertices(); i++)
+	{
+		if(gr.in_degree(i) != 1) continue;
+		if(gr.out_degree(i) != 1) continue;
+
+		edge_iterator it1, it2;
+		tie(it1, it2) = gr.in_edges(i);
+		edge_descriptor e1 = (*it1);
+		tie(it1, it2) = gr.out_edges(i);
+		edge_descriptor e2 = (*it1);
+		int s = e1->source();
+		int t = e2->target();
+		vertex_info vi = gr.get_vertex_info(i);
+		double wv = gr.get_vertex_weight(i);
+		double ww = gr.get_vertex_weight(t);
+
+		if(s != 0) continue;
+		if(t != i + 1) continue;
+		if(gr.in_degree(t) == 1) continue;
+		if(vi.stddev >= 0.5) continue;
+		if(wv > 5.0) continue;
+		if(ww < wv * 5) continue;
+		if(vi.length > 100) continue;
+		if(vi.rpos == gr.get_vertex_info(t).lpos) continue;
+
+		printf("start suspend boundary: vertex = %d weight = %.2lf stddev = %.2lf length = %d\n", i, wv, vi.stddev, vi.length);
+
+		gr.remove_edge(e1);
+		gr.remove_edge(e2);
+	}
+	return 0;
+}
+
+int bundle::identify_end_suspend_boundaries()
+{
+	for(int i = 1; i < gr.num_vertices(); i++)
+	{
+		if(gr.in_degree(i) != 1) continue;
+		if(gr.out_degree(i) != 1) continue;
+
+		edge_iterator it1, it2;
+		tie(it1, it2) = gr.in_edges(i);
+		edge_descriptor e1 = (*it1);
+		tie(it1, it2) = gr.out_edges(i);
+		edge_descriptor e2 = (*it1);
+		int s = e1->source();
+		int t = e2->target();
+		vertex_info vi = gr.get_vertex_info(i);
+		double wv = gr.get_vertex_weight(i);
+		double ww = gr.get_vertex_weight(s);
+
+		if(s != i - 1) continue;
+		if(t != gr.num_vertices() - 1) continue;
+		if(gr.out_degree(s) == 1) continue;
+		if(vi.stddev >= 0.5) continue;
+		if(vi.length > 100) continue;
+		if(wv > 5.0) continue;
+		if(ww < wv * 2.0) continue;
+		if(vi.lpos == gr.get_vertex_info(s).rpos) continue;
+
+		printf("end suspend boundary: vertex = %d weight = %.2lf stddev = %.2lf length = %d\n", i, wv, vi.stddev, vi.length);
 	}
 	return 0;
 }
