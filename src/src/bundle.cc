@@ -663,8 +663,8 @@ int bundle::identify_start_suspend_boundaries()
 		if(t != i + 1) continue;
 		if(gr.in_degree(t) == 1) continue;
 		if(vi.stddev >= 0.5) continue;
-		if(wv > 5.0) continue;
-		if(ww < wv * 5) continue;
+		if(wv > 10.0) continue;
+		if(ww < wv * 2) continue;
 		if(vi.length > 100) continue;
 		if(vi.rpos == gr.get_vertex_info(t).lpos) continue;
 
@@ -699,7 +699,7 @@ int bundle::identify_end_suspend_boundaries()
 		if(gr.out_degree(s) == 1) continue;
 		if(vi.stddev >= 0.5) continue;
 		if(vi.length > 100) continue;
-		if(wv > 5.0) continue;
+		if(wv > 10.0) continue;
 		if(ww < wv * 2.0) continue;
 		if(vi.lpos == gr.get_vertex_info(s).rpos) continue;
 
