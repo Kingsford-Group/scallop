@@ -51,8 +51,8 @@ int bundle::build()
 
 
 	// remove/add necessary edges
-	while(remove_single_read());
-	refine_splice_graph();
+	//while(remove_single_read());
+	//refine_splice_graph();
 
 	remove_edges();
 	refine_splice_graph();
