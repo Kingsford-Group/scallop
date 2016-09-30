@@ -369,7 +369,6 @@ bool scallop3::resolve_trivial_vertex()
 		if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) continue;
 
 		int e;
-		//double r = compute_smallest_edge(i, e);
 		double r = compute_balance_ratio(i);
 		if(ratio >= 0 && ratio < r) continue;
 
@@ -1179,7 +1178,7 @@ double scallop3::compute_smallest_edge(int x, int &e)
 		e = e2i[*it1];
 	}
 	assert(e >= 0);
-	return ratio * smallest_edge_ratio_scalor;
+	return ratio;
 }
 
 int scallop3::stats()
