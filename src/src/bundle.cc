@@ -712,6 +712,9 @@ int bundle::identify_end_suspend_boundaries()
 		//if(vi.lpos == gr.get_vertex_info(s).rpos) continue;
 
 		printf("end suspend boundary: vertex = %d weight = %.2lf stddev = %.2lf length = %d\n", i, wv, vi.stddev, vi.length);
+
+		gr.remove_edge(e1);
+		gr.remove_edge(e2);
 	}
 	return 0;
 }
