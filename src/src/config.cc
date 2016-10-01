@@ -30,7 +30,7 @@ double max_split_error_ratio = 0.15;
 double min_transcript_coverage = 10.0;
 double min_splice_graph_coverage = 20.0;
 double smallest_edge_ratio_scalor1 = 0.2;
-double smallest_edge_ratio_scalor2 = 0.5;
+double smallest_edge_ratio_scalor2 = 1.0;
 
 // for identifying new boundaries
 bool identify_extra_boundary = false;

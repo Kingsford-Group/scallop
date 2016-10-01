@@ -14,6 +14,8 @@ typedef pair<PEE, int> PPEEI;
 typedef map<PEE, int> MPEEI;
 typedef pair<int, int> PI;
 typedef map<int, int> MI;
+typedef pair<int, double> PID;
+typedef map<int, double> MID;
 
 // for noisy splice graph
 class scallop3
@@ -58,9 +60,12 @@ private:
 	bool resolve_hyper_edge0();
 
 	// smooth vertex
-	bool balance_vertex(undirected_graph &ug, const vector<int> &u2e);
 	int balance_vertex(int x);
 	double compute_balance_ratio(int x);
+	double balance_vertex(undirected_graph &ug, const vector<int> &u2e);
+
+	int get_weights(int v, MID &m);
+	int set_weights(MID &m);
 
 	// decomposing subroutines
 	int decompose_tree(undirected_graph &ug, const vector<int> &u2e);

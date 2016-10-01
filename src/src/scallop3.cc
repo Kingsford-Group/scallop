@@ -195,7 +195,14 @@ bool scallop3::resolve_hyper_tree()
 
 		if(rt.status != 1) continue;
 
-		double r = compute_balance_ratio(i);
+		MID m;
+		get_weights(i, m);
+
+		balance_vertex(i);
+		double r = balance_vertex(rt.ug, rt.u2e);
+
+		set_weights(m);
+
 		if(ratio1 < r) continue;
 
 		root = i;
@@ -207,7 +214,8 @@ bool scallop3::resolve_hyper_tree()
 	int se = -1;
 	double ratio2 = compute_smallest_edge(root, se) * smallest_edge_ratio_scalor2;
 
-	if(ratio1 <= ratio2)
+	//if(ratio1 <= ratio2)
+	if(true)
 	{
 		vector<PI> p = hs.get_routes(root, gr, e2i);
 		router rt(root, gr, e2i, i2e, p);
@@ -217,7 +225,7 @@ bool scallop3::resolve_hyper_tree()
 		balance_vertex(root);
 		balance_vertex(rt.ug, rt.u2e);
 
-		printf("resolve hyper tree %d, degree = (%d, %d)\n", root, gr.in_degree(root), gr.out_degree(root));
+		printf("resolve hyper tree %d, ratio = (%.3lf, %.3lf), degree = (%d, %d)\n", root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
 
 		decompose_tree(rt.ug, rt.u2e);
 		assert(gr.degree(root) == 0);
@@ -225,7 +233,8 @@ bool scallop3::resolve_hyper_tree()
 		return true;
 	}
 
-	if(ratio2 < ratio1)
+	//if(ratio2 < ratio1)
+	if(false)
 	{
 		if(ratio2 > max_split_error_ratio) return false;
 
@@ -548,6 +557,35 @@ int scallop3::init_vertex_map()
 	return 0;
 }
 
+int scallop3::get_weights(int x, MID &m)
+{
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
+	{
+		int e = e2i[*it1];
+		double w = gr.get_edge_weight(*it1);
+		m.insert(PID(e, w));
+	}
+	for(tie(it1, it2) = gr.out_edges(x); it1 != it2; it1++)
+	{
+		int e = e2i[*it1];
+		double w = gr.get_edge_weight(*it1);
+		m.insert(PID(e, w));
+	}
+	return 0;
+}
+
+int scallop3::set_weights(MID &m)
+{
+	for(MID::iterator it = m.begin(); it != m.end(); it++)
+	{
+		edge_descriptor e = i2e[it->first];
+		double w = it->second;
+		gr.set_edge_weight(e, w);
+	}
+	return 0;
+}
+
 int scallop3::decompose_tree(undirected_graph &ug, const vector<int> &u2e)
 {
 	undirected_graph ug2(ug);
@@ -840,7 +878,7 @@ int scallop3::split_edge(int ei, double w)
 	return n;
 }
 
-bool scallop3::balance_vertex(undirected_graph &ug, const vector<int> & u2e)
+double scallop3::balance_vertex(undirected_graph &ug, const vector<int> & u2e)
 {
 	GRBEnv *env = new GRBEnv();
 	GRBModel *model = new GRBModel(*env);
@@ -906,18 +944,23 @@ bool scallop3::balance_vertex(undirected_graph &ug, const vector<int> & u2e)
 	{
 		delete model;
 		delete env;
-		return false;
+		return -1;
 	}
 
+	double ww1 = 0;
+	double ww2 = 0;
 	for(int i = 0; i < wvars.size(); i++)
 	{
-		double w = wvars[i].get(GRB_DoubleAttr_X);
-		gr.set_edge_weight(i2e[u2e[i]], w);
+		double w1 = gr.get_edge_weight(i2e[u2e[i]]);
+		double w2 = wvars[i].get(GRB_DoubleAttr_X);
+		gr.set_edge_weight(i2e[u2e[i]], w2);
+		ww1 += w1;
+		ww2 += fabs(w1 - w2);
 	}
 
 	delete model;
 	delete env;
-	return true;
+	return ww2 / ww1;
 }
 
 int scallop3::balance_vertex(int v)
