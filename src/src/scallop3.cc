@@ -214,8 +214,7 @@ bool scallop3::resolve_hyper_tree()
 	int se = -1;
 	double ratio2 = compute_smallest_edge(root, se) * smallest_edge_ratio_scalor2;
 
-	//if(ratio1 <= ratio2)
-	if(true)
+	if(ratio1 <= ratio2)
 	{
 		vector<PI> p = hs.get_routes(root, gr, e2i);
 		router rt(root, gr, e2i, i2e, p);
@@ -233,8 +232,7 @@ bool scallop3::resolve_hyper_tree()
 		return true;
 	}
 
-	//if(ratio2 < ratio1)
-	if(false)
+	if(ratio2 < ratio1)
 	{
 		if(ratio2 > max_split_error_ratio) return false;
 
