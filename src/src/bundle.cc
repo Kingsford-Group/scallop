@@ -670,13 +670,13 @@ int bundle::identify_start_suspend_boundaries()
 		if(s != 0) continue;
 		if(t != i + 1) continue;
 		if(gr.in_degree(t) == 1) continue;
-		if(vi.stddev >= 0.1 && (ww < wv * 2.0 || wv > 10.0)) continue;
+		if(vi.stddev >= 0.1 && (ww < wv * 5.0 || wv > 10.0)) continue;
 		//if(vi.length > 100) continue;
 		//if(wv > 10.0) continue;
 		//if(ww < wv * 2) continue;
 		//if(vi.rpos == gr.get_vertex_info(t).lpos) continue;
 
-		printf("start suspend boundary: vertex = %d weight = %.2lf stddev = %.2lf length = %d\n", i, wv, vi.stddev, vi.length);
+		printf("start suspend boundary: vertex = %d weight = %.2lf / %.2lf stddev = %.2lf length = %d\n", i, wv, ww, vi.stddev, vi.length);
 
 		gr.remove_edge(e1);
 		gr.remove_edge(e2);
@@ -706,12 +706,12 @@ int bundle::identify_end_suspend_boundaries()
 		if(t != gr.num_vertices() - 1) continue;
 		if(gr.out_degree(s) == 1) continue;
 		if(vi.length > 100) continue;
-		if(vi.stddev >= 0.1 && (ww < wv * 2.0 || wv > 10.0)) continue;
+		if(vi.stddev >= 0.1 && (ww < wv * 5.0 || wv > 10.0)) continue;
 		//if(wv > 10.0) continue;
 		//if(ww < wv * 2.0) continue;
 		//if(vi.lpos == gr.get_vertex_info(s).rpos) continue;
 
-		printf("end suspend boundary: vertex = %d weight = %.2lf stddev = %.2lf length = %d\n", i, wv, vi.stddev, vi.length);
+		printf("end suspend boundary: vertex = %d weight = %.2lf / %.2lf stddev = %.2lf length = %d\n", i, wv, ww, vi.stddev, vi.length);
 
 		gr.remove_edge(e1);
 		gr.remove_edge(e2);
