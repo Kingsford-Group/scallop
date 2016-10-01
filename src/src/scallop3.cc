@@ -127,7 +127,7 @@ bool scallop3::resolve_hyper_vertex(int status)
 	double ratio1 = compute_smallest_splitable_vertex(root, status);
 	if(root == -1) return false;
 
-	double ratio2 = compute_smallest_edge(root, se) * smallest_edge_ratio_scalor;
+	double ratio2 = compute_smallest_edge(root, se) * smallest_edge_ratio_scalor1;
 	if(status == 3) ratio2 = 999;
 
 	if(ratio1 <= ratio2)
@@ -183,6 +183,7 @@ bool scallop3::resolve_hyper_tree()
 	int root = -1;
 	undirected_graph ug;
 	vector<int> u2e;
+	double ratio1 = 999;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.in_degree(i) <= 1) continue;
@@ -193,23 +194,58 @@ bool scallop3::resolve_hyper_tree()
 		rt.build();
 
 		if(rt.status != 1) continue;
-		balance_vertex(i);
-		bool b = balance_vertex(rt.ug, rt.u2e);
-		assert(b == true);
+
+		double r = compute_balance_ratio(i);
+		if(ratio1 < r) continue;
 
 		root = i;
-		ug = rt.ug;
-		u2e = rt.u2e;
-		break;
+		ratio1 = r;
 	}
 
 	if(root == -1) return false;
 
-	printf("resolve hyper tree %d, degree = (%d, %d)\n", root, gr.in_degree(root), gr.out_degree(root));
+	int se = -1;
+	double ratio2 = compute_smallest_edge(root, se) * smallest_edge_ratio_scalor2;
 
-	decompose_tree(ug, u2e);
-	assert(gr.degree(root) == 0);
-	return true;
+	if(ratio1 <= ratio2)
+	{
+		vector<PI> p = hs.get_routes(root, gr, e2i);
+		router rt(root, gr, e2i, i2e, p);
+		rt.build();
+		assert(rt.status == 1);
+
+		balance_vertex(root);
+		balance_vertex(rt.ug, rt.u2e);
+
+		printf("resolve hyper tree %d, degree = (%d, %d)\n", root, gr.in_degree(root), gr.out_degree(root));
+
+		decompose_tree(rt.ug, rt.u2e);
+		assert(gr.degree(root) == 0);
+
+		return true;
+	}
+
+	if(ratio2 < ratio1)
+	{
+		if(ratio2 > max_split_error_ratio) return false;
+
+		double sw = gr.get_edge_weight(i2e[se]);
+		int s = i2e[se]->source();
+		int t = i2e[se]->target();
+
+		if(hs.left_extend(se) && hs.right_extend(se)) return false;
+		if(gr.in_degree(t) <= 1) return false;
+		if(gr.out_degree(s) <= 1) return false;
+
+		printf("remove hyper-tree edge %d, weight = %.2lf, ratio = %.2lf / %.2lf, vertex = (%d, %d), degree = (%d, %d)\n", 
+				se, sw, ratio1, ratio2, s, t, gr.out_degree(s), gr.in_degree(t));
+
+		remove_edge(se);
+		hs.remove(se);
+		return true;
+	}
+
+	return false;
 }
 
 bool scallop3::resolve_hyper_edge0()
