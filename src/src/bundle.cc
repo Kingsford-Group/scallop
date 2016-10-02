@@ -672,12 +672,11 @@ int bundle::identify_start_suspend_boundaries()
 		if(vi.length > 100) continue;
 
 		bool b1 = true, b2 = true;
-		if(t != i + 1) b1 = false;
 		if(vi.stddev >= 0.01) b1 = false;
 
-		if(t == i + 1) b2 = false;
-		if(wv > 10.0) b2 = false;
+		//if(wv > 10.0) b2 = false;
 		if(ww < wv * 2) b2 = false;
+		if(t - 1 == i) b2 = false;
 		if(gr.get_vertex_info(t - 1).rpos != gr.get_vertex_info(t).lpos) b2 = false;
 
 		if(b1 == false && b2 == false) continue;
@@ -713,12 +712,11 @@ int bundle::identify_end_suspend_boundaries()
 		if(vi.length > 100) continue;
 
 		bool b1 = true, b2 = true;
-		if(i != s + 1) b1 = false;
 		if(vi.stddev >= 0.01) b1 = false;
 
-		if(i == s + 1) b2 = false;
+		//if(ww < wv * 2.0) b2 = false;
 		if(wv > 10.0) b2 = false;
-		if(ww < wv * 2.0) b2 = false;
+		if(i == s + 1) b2 = false;
 		if(gr.get_vertex_info(s).rpos != gr.get_vertex_info(s + 1).lpos) b2 = false;
 
 		if(b1 == false && b2 == false) continue;
