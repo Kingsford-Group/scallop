@@ -797,9 +797,10 @@ int bundle::remove_edges()
 		int32_t p2 = gr.get_vertex_info(t).lpos;
 		if(gr.get_vertex_weight(s) < min_vertex_weight) continue;
 		if(gr.get_vertex_weight(t) < min_vertex_weight) continue;
-		if(p1 != p2 && w < min_splice_edge_weight) continue;
 		if(s == 0 && w < min_boundary_edge_weight) continue;
 		if(t == gr.num_vertices() - 1 && w < min_boundary_edge_weight) continue;
+		if(w < min_splice_edge_weight) continue;
+		//if(p1 == p2 && w < min_consecutive_edge_weight) continue;
 		se.insert(*it1);
 		sv1.insert(t);
 		sv2.insert(s);
