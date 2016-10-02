@@ -810,14 +810,12 @@ int bundle::remove_edges()
 		sv2.insert(s);
 	}
 
-	/*
-	if(ww >= 1.5)
+	if(ww >= 2.5)
 	{
 		se.insert(ee);
 		sv1.insert(ee->target());
 		sv2.insert(ee->source());
 	}
-	*/
 
 	while(true)
 	{
