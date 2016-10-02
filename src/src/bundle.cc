@@ -57,11 +57,11 @@ int bundle::build()
 	remove_edges();
 	refine_splice_graph();
 
-	extend_isolated_start_boundaries();
-	extend_isolated_end_boundaries();
-
 	identify_start_suspend_boundaries();
 	identify_end_suspend_boundaries();
+
+	extend_isolated_start_boundaries();
+	extend_isolated_end_boundaries();
 
 	build_hyper_edges2();
 	//gr.draw("gr.tex");
@@ -669,11 +669,10 @@ int bundle::identify_start_suspend_boundaries()
 
 		if(s != 0) continue;
 		if(gr.in_degree(t) == 1) continue;
+		if(vi.length > 100) continue;
 
 		bool b1 = true, b2 = true;
 		if(vi.stddev >= 0.01) b1 = false;
-		//if(vi.length > 100) continue;
-		//if(wv > 10.0) b1 = false;
 
 		if(wv > 10.0) b2 = false;
 		if(ww < wv * 2) b2 = false;
@@ -712,11 +711,10 @@ int bundle::identify_end_suspend_boundaries()
 
 		if(t != gr.num_vertices() - 1) continue;
 		if(gr.out_degree(s) == 1) continue;
+		if(vi.length > 100) continue;
 
 		bool b1 = true, b2 = true;
 		if(vi.stddev >= 0.01) b1 = false;
-		//if(wv > 10.0) b1 = false;
-		//if(vi.length > 100) continue;
 
 		if(ww < wv * 2.0) b2 = false;
 		if(wv > 10.0) b2 = false;
@@ -812,12 +810,14 @@ int bundle::remove_edges()
 		sv2.insert(s);
 	}
 
+	/*
 	if(ww >= 1.5)
 	{
 		se.insert(ee);
 		sv1.insert(ee->target());
 		sv2.insert(ee->source());
 	}
+	*/
 
 	while(true)
 	{
