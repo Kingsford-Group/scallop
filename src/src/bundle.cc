@@ -679,6 +679,8 @@ int bundle::identify_start_suspend_boundaries()
 		if(t - 1 == i) b2 = false;
 		if(gr.get_vertex_info(t - 1).rpos != gr.get_vertex_info(t).lpos) b2 = false;
 
+		b2 = false;
+
 		if(b1 == false && b2 == false) continue;
 		printf("start suspend boundary: vertex = %d weight = %.2lf stddev = %.2lf length = %d, type = (%c, %c)\n", 
 				i, wv, vi.stddev, vi.length, b1 ? 'T' : 'F', b2 ? 'T' : 'F');
@@ -718,6 +720,8 @@ int bundle::identify_end_suspend_boundaries()
 		if(wv > 10.0) b2 = false;
 		if(i == s + 1) b2 = false;
 		if(gr.get_vertex_info(s).rpos != gr.get_vertex_info(s + 1).lpos) b2 = false;
+
+		b2 = false;
 
 		if(b1 == false && b2 == false) continue;
 		printf("end suspend boundary: vertex = %d weight = %.2lf stddev = %.2lf length = %d, type = (%c, %c)\n", 
