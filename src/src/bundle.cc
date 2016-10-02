@@ -668,15 +668,20 @@ int bundle::identify_start_suspend_boundaries()
 		double ww = gr.get_vertex_weight(t);
 
 		if(s != 0) continue;
-		if(t != i + 1) continue;
 		if(gr.in_degree(t) == 1) continue;
-		if(vi.stddev >= 0.1) continue;
 		if(vi.length > 100) continue;
-		//if(wv > 10.0) continue;
-		//if(ww < wv * 2) continue;
-		//if(vi.rpos == gr.get_vertex_info(t).lpos) continue;
 
-		printf("start suspend boundary: vertex = %d weight = %.2lf stddev = %.2lf length = %d\n", i, wv, vi.stddev, vi.length);
+		bool b1 = true, b2 = true;
+		if(vi.stddev >= 0.01) b1 = false;
+
+		if(wv > 10.0) b2 = false;
+		if(ww < wv * 2) b2 = false;
+		if(t - 1 == i) b2 = false;
+		if(gr.get_vertex_info(t - 1).rpos != gr.get_vertex_info(t).lpos) b2 = false;
+
+		if(b1 == false && b2 == false) continue;
+		printf("start suspend boundary: vertex = %d weight = %.2lf stddev = %.2lf length = %d, type = (%c, %c)\n", 
+				i, wv, vi.stddev, vi.length, b1 ? 'T' : 'F', b2 ? 'T' : 'F');
 
 		gr.remove_edge(e1);
 		gr.remove_edge(e2);
@@ -702,16 +707,21 @@ int bundle::identify_end_suspend_boundaries()
 		double wv = gr.get_vertex_weight(i);
 		double ww = gr.get_vertex_weight(s);
 
-		if(s != i - 1) continue;
 		if(t != gr.num_vertices() - 1) continue;
 		if(gr.out_degree(s) == 1) continue;
-		if(vi.stddev >= 0.1) continue;
 		if(vi.length > 100) continue;
-		//if(wv > 10.0) continue;
-		//if(ww < wv * 2.0) continue;
-		//if(vi.lpos == gr.get_vertex_info(s).rpos) continue;
 
-		printf("end suspend boundary: vertex = %d weight = %.2lf stddev = %.2lf length = %d\n", i, wv, vi.stddev, vi.length);
+		bool b1 = true, b2 = true;
+		if(vi.stddev >= 0.01) b1 = false;
+
+		if(ww < wv * 2.0) b2 = false;
+		if(wv > 10.0) b2 = false;
+		if(i == s + 1) b2 = false;
+		if(gr.get_vertex_info(s).rpos != gr.get_vertex_info(s + 1).lpos) b2 = false;
+
+		if(b1 == false && b2 == false) continue;
+		printf("end suspend boundary: vertex = %d weight = %.2lf stddev = %.2lf length = %d, type = (%c, %c)\n", 
+				i, wv, vi.stddev, vi.length, b1 ? 'T' : 'F', b2 ? 'T' : 'F');
 
 		gr.remove_edge(e1);
 		gr.remove_edge(e2);
