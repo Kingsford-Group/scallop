@@ -57,8 +57,8 @@ int bundle::build()
 	remove_edges();
 	refine_splice_graph();
 
-	//identify_start_suspend_boundaries();
-	//identify_end_suspend_boundaries();
+	identify_start_suspend_boundaries();
+	identify_end_suspend_boundaries();
 
 	extend_isolated_start_boundaries();
 	extend_isolated_end_boundaries();
@@ -673,6 +673,7 @@ int bundle::identify_start_suspend_boundaries()
 
 		bool b1 = true, b2 = true;
 		if(vi.stddev >= 0.01) b1 = false;
+		if(wv > 10.0) b1 = false;
 
 		if(wv > 10.0) b2 = false;
 		if(ww < wv * 2) b2 = false;
@@ -715,6 +716,7 @@ int bundle::identify_end_suspend_boundaries()
 
 		bool b1 = true, b2 = true;
 		if(vi.stddev >= 0.01) b1 = false;
+		if(wv > 10.0) b1 = false;
 
 		if(ww < wv * 2.0) b2 = false;
 		if(wv > 10.0) b2 = false;
