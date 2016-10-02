@@ -24,8 +24,8 @@ double min_subregion_overlap = 2;
 int min_subregion_ladders = 0;
 
 // for splice graph
-double min_consecutive_edge_weight = 3.9;
-double min_splice_edge_weight = 3.9;
+double min_boundary_edge_weight = 3.5;
+double min_splice_edge_weight = 5.0;
 double max_split_error_ratio = 0.15;
 double min_transcript_coverage = 10.0;
 double min_splice_graph_coverage = 20.0;
@@ -84,7 +84,7 @@ int print_parameters()
 	printf("min_subregion_ladders = %d\n", min_subregion_ladders);
 
 	// for splice graph
-	printf("min_consecutive_edge_weight = %.2lf\n", min_consecutive_edge_weight);
+	printf("min_boundary_edge_weight = %.2lf\n", min_boundary_edge_weight);
 	printf("min_splice_edge_weight = %.2lf\n", min_splice_edge_weight);
 	printf("min_transcript_coverage = %.2lf\n", min_transcript_coverage);
 	printf("min_splice_graph_coverage = %.2lf\n", min_splice_graph_coverage);
@@ -246,9 +246,9 @@ int parse_arguments(int argc, const char ** argv)
 			min_subregion_ladders = atoi(argv[i + 1]);
 			i++;
 		}
-		else if(string(argv[i]) == "--min_consecutive_edge_weight")
+		else if(string(argv[i]) == "--min_boundary_edge_weight")
 		{
-			min_consecutive_edge_weight = atof(argv[i + 1]);
+			min_boundary_edge_weight = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_splice_edge_weight")
