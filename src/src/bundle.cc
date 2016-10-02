@@ -779,9 +779,18 @@ int bundle::remove_edges()
 	set<int> sv2;
 	SE se;
 	edge_iterator it1, it2;
+	double ww = 0;
+	edge_descriptor ee = null_edge;
 	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
 	{
 		double w = gr.get_edge_weight(*it1);
+
+		if(w > ww)
+		{
+			ww = w;
+			ee = (*it1);
+		}
+
 		int s = (*it1)->source();
 		int t = (*it1)->target();
 		int32_t p1 = gr.get_vertex_info(s).rpos;
@@ -793,15 +802,12 @@ int bundle::remove_edges()
 		sv2.insert(s);
 	}
 
-	/*
-	for(SE::iterator it = se.begin(); it != se.end(); it++)
+	if(ww >= 1.5)
 	{
-		printf("remaining edge (%d, %d), weight = %.2lf\n", (*it)->source(), (*it)->target(), gr.get_edge_weight(*it));
+		se.insert(ee);
+		sv1.insert(ee->target());
+		sv2.insert(ee->source());
 	}
-
-	printf("sv1: "); printv(vector<int>(sv1.begin(), sv1.end())); printf("\n");
-	printf("sv2: "); printv(vector<int>(sv2.begin(), sv2.end())); printf("\n");
-	*/
 
 	while(true)
 	{
