@@ -57,8 +57,8 @@ int bundle::build()
 	remove_edges();
 	refine_splice_graph();
 
-	identify_start_suspend_boundaries();
-	identify_end_suspend_boundaries();
+	//identify_start_suspend_boundaries();
+	//identify_end_suspend_boundaries();
 
 	extend_isolated_start_boundaries();
 	extend_isolated_end_boundaries();
