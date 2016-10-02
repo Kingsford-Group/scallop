@@ -18,7 +18,7 @@ scallop3::scallop3(const string &s, const splice_graph &g, const hyper_set &h)
 	round = 0;
 	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 	gr.get_edge_indices(i2e, e2i);
-	add_pseudo_hyper_edges();
+	//add_pseudo_hyper_edges();
 	hs.build(gr, e2i);
 	init_super_edges();
 	init_vertex_map();

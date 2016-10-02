@@ -25,7 +25,7 @@ int min_subregion_ladders = 0;
 
 // for splice graph
 double min_vertex_weight = 3.0;
-double min_splice_edge_weight = 3.5;
+double min_splice_edge_weight = 4.5;
 double min_boundary_edge_weight = 5.0;
 double max_split_error_ratio = 0.15;
 double min_transcript_coverage = 10.0;
