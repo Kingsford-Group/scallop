@@ -54,14 +54,14 @@ int bundle::build()
 	//while(remove_single_read());
 	//refine_splice_graph();
 
-	remove_edges();
-	refine_splice_graph();
+	extend_isolated_start_boundaries();
+	extend_isolated_end_boundaries();
 
 	identify_start_suspend_boundaries();
 	identify_end_suspend_boundaries();
 
-	extend_isolated_start_boundaries();
-	extend_isolated_end_boundaries();
+	remove_edges();
+	refine_splice_graph();
 
 	build_hyper_edges2();
 	//gr.draw("gr.tex");
