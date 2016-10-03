@@ -26,12 +26,15 @@ int region::build_join_interval_map()
 	tie(lit, rit) = locate_boundary_iterators(*mmap, lpos, rpos);
 	if(lit == mmap->end() || rit == mmap->end()) return 0;
 
+	int w = 1;
+	if(ltype == START_BOUNDARY) w = 2;
+	if(rtype == END_BOUNDARY) w = 2;
+
 	SIMI it = lit;
 	while(true)
 	{
 		// TODO
-		//if(it->second >= 2) 
-		jmap += make_pair(it->first, 1);
+		if(it->second >= w) jmap += make_pair(it->first, 1);
 		if(it == rit) break;
 		it++;
 	}
@@ -47,6 +50,8 @@ int region::build_join_interval_map()
 int region::smooth_join_interval_map()
 {
 	int32_t gap = min_subregion_gap;
+	if(ltype == START_BOUNDARY) gap = 0;
+	if(rtype == END_BOUNDARY) gap = 0;
 
 	/*
 	bool b1 = false, b2 = false;
