@@ -48,7 +48,7 @@ bool hyper_set::rebuild(int k)
 	bool b = false;
 	for(int i = 0; i < edges.size(); i++)
 	{
-		if(edges[i].size() <= 2) continue;
+		if(edges[i].size() <= 1) continue;
 
 		if(ecnts[i] <= k)
 		{
