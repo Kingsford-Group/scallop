@@ -228,6 +228,7 @@ int hyper_set::replace(const vector<int> &v, int e)
 {
 	if(v.size() == 0) return 0;
 	set<int> s = get_intersection(v);
+	
 	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
 	{
 		int k = (*it);

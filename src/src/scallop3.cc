@@ -176,7 +176,6 @@ bool scallop3::resolve_hyper_vertex(int status)
 		if(gr.in_degree(t) <= 1) return false;
 		if(gr.out_degree(s) <= 1) return false;
 
-
 		printf("remove hyper-%d edge %d, weight = %.2lf, ratio = %.2lf / %.2lf, vertex = (%d, %d), degree = (%d, %d)\n", 
 				status, se, sw, ratio1, ratio2, s, t, gr.out_degree(s), gr.in_degree(t));
 
@@ -192,6 +191,7 @@ bool scallop3::resolve_hyper_tree(int status)
 	int root = -1;
 	undirected_graph ug;
 	vector<int> u2e;
+	vector<PPID> vpi;
 	double ratio1 = 999;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
@@ -208,7 +208,7 @@ bool scallop3::resolve_hyper_tree(int status)
 		get_weights(i, m);
 
 		balance_vertex(i);
-		double r = balance_vertex(rt.ug, rt.u2e);
+		double r = balance_vertex(rt.ug, rt.u2e, vpi);
 
 		set_weights(m);
 
@@ -231,14 +231,13 @@ bool scallop3::resolve_hyper_tree(int status)
 		assert(rt.status == status);
 
 		balance_vertex(root);
-		balance_vertex(rt.ug, rt.u2e);
-
-		// print hyper tree
-		for(int k = 0; k < p.size(); k++)
+		balance_vertex(rt.ug, rt.u2e, vpi);
 
 		printf("resolve hyper tree-%d %d, ratio = (%.3lf, %.3lf), degree = (%d, %d)\n", status, root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
 
-		decompose_tree(rt.ug, rt.u2e);
+		//for(int i = 0; i < vpi.size(); i++) printf("(%d, %d) -> %.4lf\n", vpi[i].first.first, vpi[i].first.second, vpi[i].second);
+
+		decompose_tree(vpi);
 		assert(gr.degree(root) == 0);
 
 		return true;
@@ -318,7 +317,7 @@ bool scallop3::resolve_hyper_edge0()
 	int k2 = split_edge(ee2, ww);
 	int x = merge_adjacent_equal_edges(k1, k2);
 
-	printf(" resolve hyper edge (%d, %d) of vertex %d, weight = (%.2lf, %.2lf) -> (%d, %d) -> %d\n", ee1, ee2, root, ww1, ww2, k1, k2, x);
+	printf("resolve hyper edge (%d, %d) of vertex %d, weight = (%.2lf, %.2lf) -> (%d, %d) -> %d\n", ee1, ee2, root, ww1, ww2, k1, k2, x);
 
 	hs.replace(ee1, ee2, x);
 	if(k1 == ee1) hs.remove(ee1);
@@ -596,79 +595,67 @@ int scallop3::set_weights(MID &m)
 	return 0;
 }
 
-int scallop3::decompose_tree(undirected_graph &ug, const vector<int> &u2e)
+int scallop3::decompose_tree(const vector<PPID> &vpi)
 {
-	undirected_graph ug2(ug);
-	while(true)
+	map<int, int> m;
+	for(int i = 0; i < vpi.size(); i++)
 	{
-		int x = -1, y = -1;
-		edge_iterator it1, it2;
-		for(tie(it1, it2) = ug2.edges(); it1 != it2; it1++)
-		{
-			int s = (*it1)->source();
-			int t = (*it1)->target();
-			assert(s != t);
-			if(s > t) 
-			{
-				s = (*it1)->target();
-				t = (*it1)->source();
-			}
-			if(ug2.degree(s) != 1 && ug2.degree(t) != 1) continue;
-
-			x = s;
-			y = t;
-			ug2.remove_edge(*it1);
-			break;
-		}
-
-		if(x == -1 || y == -1) break;
-
-		int xx = u2e[x];
-		int yy = u2e[y];
-		int e = merge_adjacent_edges(xx, yy);
-		hs.replace(xx, yy, e);
-		if(ug.degree(x) == 1) hs.replace(xx, e);
-		if(ug.degree(y) == 1) hs.replace(yy, e);
+		int e1 = vpi[i].first.first;
+		int e2 = vpi[i].first.second;
+		if(m.find(e1) == m.end()) m.insert(PI(e1, 1));
+		else m[e1]++;
+		if(m.find(e2) == m.end()) m.insert(PI(e2, 1));
+		else m[e2]++;
 	}
 
-	assert(ug2.num_edges() == 0);
-
-	for(int i = 0; i < u2e.size(); i++)
+	for(int i = 0; i < vpi.size(); i++)
 	{
-		int e = u2e[i];
-		hs.remove(e);
+		int e1 = vpi[i].first.first;
+		int e2 = vpi[i].first.second;
+		double w = vpi[i].second;
+
+		//printf("merge adjacent edges (%d, %d) -> %.4lf\n", e1, e2, w);
+		int e = merge_adjacent_edges(e1, e2, w);
+
+		hs.replace(e1, e2, e);
+		if(m[e1] == 1) hs.replace(e1, e);
+		if(m[e2] == 1) hs.replace(e2, e);
+	}
+
+	for(int i = 0; i < vpi.size(); i++)
+	{
+		int e1 = vpi[i].first.first;
+		int e2 = vpi[i].first.second;
+		assert(hs.left_extend(e1) == false || hs.right_extend(e1) == false);
+		assert(hs.left_extend(e2) == false || hs.right_extend(e2) == false);
+		hs.remove(e1);
+		hs.remove(e2);
 	}
 	return 0;
 }
 
 int scallop3::decompose_trivial_vertex(int x)
 {
-	vector<int> u2e;
-	undirected_graph ug;
+	balance_vertex(x);
+
+	vector<PPID> vpi;
 	edge_iterator it1, it2;
+	edge_iterator ot1, ot2;
 	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
 	{
-		int e = e2i[*it1];
-		u2e.push_back(e);
-		ug.add_vertex();
-	}
-	for(tie(it1, it2) = gr.out_edges(x); it1 != it2; it1++)
-	{
-		int e = e2i[*it1];
-		u2e.push_back(e);
-		ug.add_vertex();
-	}
-
-	for(int i = 0; i < gr.in_degree(x); i++)
-	{
-		for(int j = 0; j < gr.out_degree(x); j++)
+		int e1 = e2i[*it1];
+		double w1 = gr.get_edge_weight(*it1);
+		for(tie(ot1, ot2) = gr.out_edges(x); ot1 != ot2; ot1++)
 		{
-			ug.add_edge(i, j + gr.in_degree(x));
+			int e2 = e2i[*ot1];
+			double w2 = gr.get_edge_weight(*ot1);
+			double w = w1 <= w2 ? w1 : w2;
+
+			vpi.push_back(PPID(PI(e1, e2), w));
 		}
 	}
 
-	balance_vertex(x);
-	decompose_tree(ug, u2e);
+	decompose_tree(vpi);
 	return 0;
 }
 
@@ -814,7 +801,7 @@ int scallop3::remove_edge(int e)
 	return 0;
 }
 
-int scallop3::merge_adjacent_edges(int x, int y)
+int scallop3::merge_adjacent_edges(int x, int y, double ww)
 {
 	if(i2e[x] == null_edge) return -1;
 	if(i2e[y] == null_edge) return -1;
@@ -827,18 +814,30 @@ int scallop3::merge_adjacent_edges(int x, int y)
 	int ys = yy->source();
 	int yt = yy->target();
 
-	if(xt != ys) return merge_adjacent_edges(y, x);
+	if(xt != ys) return merge_adjacent_edges(y, x, ww);
 	assert(xt == ys);
-
-	double wx = gr.get_edge_weight(xx);
-	double wy = gr.get_edge_weight(yy);
-	double ww = (wx <= wy) ? wx : wy;
 
 	int x1 = split_edge(x, ww);
 	int y1 = split_edge(y, ww);
 	int xy = merge_adjacent_equal_edges(x1, y1);
 
 	return xy;
+}
+
+int scallop3::merge_adjacent_edges(int x, int y)
+{
+
+	if(i2e[x] == null_edge) return -1;
+	if(i2e[y] == null_edge) return -1;
+
+	edge_descriptor xx = i2e[x];
+	edge_descriptor yy = i2e[y];
+
+	double wx = gr.get_edge_weight(xx);
+	double wy = gr.get_edge_weight(yy);
+	double ww = (wx <= wy) ? wx : wy;
+
+	return merge_adjacent_edges(x, y, ww);
 }
 
 int scallop3::split_edge(int ei, double w)
@@ -888,7 +887,7 @@ int scallop3::split_edge(int ei, double w)
 	return n;
 }
 
-double scallop3::balance_vertex(undirected_graph &ug, const vector<int> & u2e)
+double scallop3::balance_vertex(undirected_graph &ug, const vector<int> & u2e, vector<PPID> &vpi)
 {
 	GRBEnv *env = new GRBEnv();
 	GRBModel *model = new GRBModel(*env);
@@ -966,6 +965,20 @@ double scallop3::balance_vertex(undirected_graph &ug, const vector<int> & u2e)
 		gr.set_edge_weight(i2e[u2e[i]], w2);
 		ww1 += w1;
 		ww2 += fabs(w1 - w2);
+	}
+
+	vpi.clear();
+	for(int i = 0; i < ve.size(); i++)
+	{
+		edge_descriptor e = ve[i];
+		int s = e->source();
+		int t = e->target();
+		int es = u2e[s];
+		int et = u2e[t];
+		PI p(es, et);
+		if(s > t) p = PI(et, es);
+		double w = rvars[i].get(GRB_DoubleAttr_X);
+		vpi.push_back(PPID(p, w));
 	}
 
 	delete model;
