@@ -38,6 +38,10 @@ int scallop3::assemble()
 	{
 		bool b	= false;
 
+		b = resolve_small_edges();
+		if(b == true) print();
+		if(b == true) continue;
+
 		b = resolve_hyper_vertex(3);
 		if(b == true) print();
 		if(b == true) continue;
@@ -46,19 +50,15 @@ int scallop3::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_hyper_tree(2);
-		if(b == true) print();
-		if(b == true) continue;
-
 		b = resolve_hyper_vertex(4);
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_small_edges();
+		b = resolve_trivial_vertex();
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_trivial_vertex();
+		b = resolve_hyper_tree(2);
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -269,11 +269,11 @@ bool scallop3::resolve_hyper_tree(int status)
 bool scallop3::resolve_hyper_edge0()
 {
 	int ee1 = -1, ee2 = -1, root = -1;
+	edge_iterator it1, it2;
 	for(int i = 1; i < gr.num_vertices(); i++)
 	{
 		ee1 = ee2 = root = -1;
 		double ww = 0;
-		edge_iterator it1, it2;
 		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
 		{
 			int e1 = e2i[*it1];
@@ -317,7 +317,33 @@ bool scallop3::resolve_hyper_edge0()
 	int k2 = split_edge(ee2, ww);
 	int x = merge_adjacent_equal_edges(k1, k2);
 
-	printf("resolve hyper edge (%d, %d) of vertex %d, weight = (%.2lf, %.2lf) -> (%d, %d) -> %d\n", ee1, ee2, root, ww1, ww2, k1, k2, x);
+	vector<PI> p = hs.get_routes(root, gr, e2i);
+	printf("resolve hyper edge0 of vertex %d, degree = (%d, %d), routes = %lu\n", root, gr.in_degree(root), gr.out_degree(root), p.size());
+	for(tie(it1, it2) = gr.in_edges(root); it1 != it2; it1++)
+	{
+		int s = (*it1)->source();
+		int t = (*it1)->target();
+		int e = e2i[*it1];
+		double w = gr.get_edge_weight(*it1);
+		printf(" in-edge %d: (%d, %d), weight = %.2lf\n", e, s, t, w);
+	}
+	for(tie(it1, it2) = gr.out_edges(root); it1 != it2; it1++)
+	{
+		int s = (*it1)->source();
+		int t = (*it1)->target();
+		int e = e2i[*it1];
+		double w = gr.get_edge_weight(*it1);
+		printf(" out-edge %d: (%d, %d), weight = %.2lf\n", e, s, t, w);
+	}
+	for(int i = 0; i < p.size(); i++)
+	{
+		printf("hyper-edge: (%d, %d)\n", p[i].first, p[i].second);
+	}
+	printf("\n");
+
+
+	//printf("resolve hyper edge0 (%d, %d) of vertex %d, weight = (%.2lf, %.2lf) -> (%d, %d) -> %d, degree = (%d, %d)\n", ee1, ee2, root, ww1, ww2, k1, k2, x,
+	//		gr.in_degree(root), gr.out_degree(root));
 
 	hs.replace(ee1, ee2, x);
 	if(k1 == ee1) hs.remove(ee1);
@@ -357,11 +383,37 @@ bool scallop3::resolve_hyper_edge1()
 
 	if(v1.size() == 0 || v2.size() == 0) return false;
 
+	/*
 	printf("resolve hyper edge ( ");
 	printv(v1);
 	printf("), ( ");
 	printv(v2);
 	printf(")\n");
+	*/
+
+	vector<PI> p = hs.get_routes(root, gr, e2i);
+	printf("resolve hyper edge1 of vertex %d, degree = (%d, %d), routes = %lu\n", root, gr.in_degree(root), gr.out_degree(root), p.size());
+	for(tie(it1, it2) = gr.in_edges(root); it1 != it2; it1++)
+	{
+		int s = (*it1)->source();
+		int t = (*it1)->target();
+		int e = e2i[*it1];
+		double w = gr.get_edge_weight(*it1);
+		printf(" in-edge %d: (%d, %d), weight = %.2lf\n", e, s, t, w);
+	}
+	for(tie(it1, it2) = gr.out_edges(root); it1 != it2; it1++)
+	{
+		int s = (*it1)->source();
+		int t = (*it1)->target();
+		int e = e2i[*it1];
+		double w = gr.get_edge_weight(*it1);
+		printf(" out-edge %d: (%d, %d), weight = %.2lf\n", e, s, t, w);
+	}
+	for(int i = 0; i < p.size(); i++)
+	{
+		printf("hyper-edge: (%d, %d)\n", p[i].first, p[i].second);
+	}
+	printf("\n");
 
 	assert(v1.size() == 1 || v2.size() == 1);
 
