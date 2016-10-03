@@ -38,6 +38,8 @@ public:
 	MED med;							// reads for this super edge
 	vector<int> v2v;					// vertex map
 	hyper_set hs;						// hyper edges
+
+	int stage;							// switch for second stage
 	int round;							// round in iteration
 	vector<path> paths;					// predicted transcripts
 	vector<router> routers;
@@ -67,6 +69,8 @@ private:
 
 	int get_weights(int v, MID &m);
 	int set_weights(MID &m);
+	bool check_removable(int v, int e);
+	double compute_smallest_edge(int x, int &e);
 
 	// decomposing subroutines
 	int decompose_tree(const vector<PPID> &vpi);
@@ -82,9 +86,6 @@ private:
 	int collect_path(int e);
 	int collect_existing_st_paths();
 	int greedy_decompose(int num);
-	double compute_smallest_edge(int x, int &e);
-	double compute_smallest_removable_edge(int &se);
-	double compute_smallest_splitable_vertex(int &root, int status);
 
 	// print and draw
 	int print();
