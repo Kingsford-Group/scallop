@@ -472,7 +472,32 @@ bool scallop3::resolve_hyper_edge1()
 bool scallop3::resolve_small_edges()
 {
 	int se = -1;
-	double ratio = compute_smallest_removable_edge(se);
+	int root = -1;
+	double ratio = 999;
+	double ww = DBL_MAX;
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		if(gr.in_degree(i) <= 1) continue;
+		if(gr.out_degree(i) <= 1) continue;
+
+		int e;
+		double r = compute_smallest_edge(i, e);
+		double w = gr.get_edge_weight(i2e[e]);
+
+		if(ww < w) continue;
+		//if(ratio < r) continue;
+
+		if(i2e[e]->target() == i && hs.right_extend(e)) continue;
+		if(i2e[e]->source() == i && hs.left_extend(e)) continue;
+
+		if(gr.in_degree(i2e[e]->target()) <= 1) continue;
+		if(gr.out_degree(i2e[e]->source()) <= 1) continue;
+
+		ratio = r;
+		se = e;
+		root = i;
+		ww = w;
+	}
 
 	if(se == -1) return false;
 
@@ -1289,6 +1314,7 @@ double scallop3::compute_smallest_removable_edge(int &se)
 	se = -1;
 	int root = -1;
 	double ratio = 999;
+	double ww = DBL_MAX;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.in_degree(i) <= 1) continue;
@@ -1296,8 +1322,10 @@ double scallop3::compute_smallest_removable_edge(int &se)
 
 		int e;
 		double r = compute_smallest_edge(i, e);
+		double w = gr.get_edge_weight(i2e[e]);
 
-		if(ratio < r) continue;
+		if(ww < w) continue;
+		//if(ratio < r) continue;
 
 		if(i2e[e]->target() == i && hs.right_extend(e)) continue;
 		if(i2e[e]->source() == i && hs.left_extend(e)) continue;
@@ -1308,6 +1336,7 @@ double scallop3::compute_smallest_removable_edge(int &se)
 		ratio = r;
 		se = e;
 		root = i;
+		ww = w;
 	}
 	return ratio;
 }
