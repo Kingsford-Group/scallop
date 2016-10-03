@@ -533,7 +533,7 @@ bool scallop3::resolve_small_edges()
 	}
 
 	if(se == -1) return false;
-	if(ratio > max_split_error_ratio) return false;
+	//if(ratio > max_split_error_ratio) return false;
 
 	double sw = gr.get_edge_weight(i2e[se]);
 	int s = i2e[se]->source();
