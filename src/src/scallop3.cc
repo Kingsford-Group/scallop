@@ -38,10 +38,6 @@ int scallop3::assemble()
 	{
 		bool b	= false;
 
-		b = resolve_small_edges();
-		if(b == true) print();
-		if(b == true) continue;
-
 		b = resolve_hyper_vertex(3);
 		if(b == true) print();
 		if(b == true) continue;
@@ -50,15 +46,19 @@ int scallop3::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
+		b = resolve_hyper_tree(2);
+		if(b == true) print();
+		if(b == true) continue;
+
 		b = resolve_hyper_vertex(4);
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_trivial_vertex();
+		b = resolve_small_edges();
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_hyper_tree(2);
+		b = resolve_trivial_vertex();
 		if(b == true) print();
 		if(b == true) continue;
 
