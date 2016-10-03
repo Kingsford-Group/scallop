@@ -7,6 +7,7 @@ int hyper_set::clear()
 	nodes.clear();
 	edges.clear();
 	e2s.clear();
+	ecnts.clear();
 	return 0;
 }
 
@@ -40,6 +41,30 @@ int hyper_set::build(directed_graph &gr, MEI& e2i)
 	return 0;
 }
 
+bool hyper_set::rebuild(int k)
+{
+	VVI vvi;
+	vector<int> vv;
+	bool b = false;
+	for(int i = 0; i < edges.size(); i++)
+	{
+		if(ecnts[i] <= k)
+		{
+			b = true;
+			continue;
+		}
+		vvi.push_back(edges[i]);
+		vv.push_back(ecnts[i]);
+	}
+	edges = vvi;
+	ecnts = vv;
+
+	build_index();
+	purify();
+	build_index();
+	return b;
+}
+
 int hyper_set::build_edges(directed_graph &gr, MEI& e2i)
 {
 	edges.clear();
@@ -60,6 +85,7 @@ int hyper_set::build_edges(directed_graph &gr, MEI& e2i)
 		}
 		if(b == false) continue;
 		edges.push_back(ve);
+		ecnts.push_back(c);
 	}
 
 	return 0;

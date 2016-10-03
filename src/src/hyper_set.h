@@ -21,6 +21,7 @@ class hyper_set
 public:
 	MVII nodes;			// hyper-edges using list-of-nodes
 	VVI edges;			// hyper-edges using list-of-edges
+	vector<int> ecnts;	// counts for edges
 	MISI e2s;			// index: from edge to hyper-edges
 
 public:
@@ -31,6 +32,7 @@ public:
 	int build(directed_graph &gr, MEI &e2i);
 	int build_edges(directed_graph &gr, MEI &e2i);
 	int build_index();
+	bool rebuild(int k);
 	set<int> get_intersection(const vector<int> &v);
 	set<int> get_successors(int e);
 	set<int> get_predecessors(int e);
