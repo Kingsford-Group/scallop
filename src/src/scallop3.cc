@@ -224,6 +224,10 @@ bool scallop3::resolve_hyper_tree()
 		balance_vertex(root);
 		balance_vertex(rt.ug, rt.u2e);
 
+		// print hyper tree
+		for(int k = 0; k < p.size(); k++)
+
+
 		printf("resolve hyper tree %d, ratio = (%.3lf, %.3lf), degree = (%d, %d)\n", root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
 
 		decompose_tree(rt.ug, rt.u2e);

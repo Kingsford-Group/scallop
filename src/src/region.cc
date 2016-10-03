@@ -29,6 +29,8 @@ int region::build_join_interval_map()
 	int w = 1;
 	if(ltype == START_BOUNDARY) w = 2;
 	if(rtype == END_BOUNDARY) w = 2;
+	if(ltype == START_BOUNDARY) jmap += make_pair(ROI(lpos, lpos + 1), 1);
+	if(rtype == END_BOUNDARY) jmap += make_pair(ROI(rpos - 1, rpos), 1);
 
 	SIMI it = lit;
 	while(true)
@@ -39,10 +41,7 @@ int region::build_join_interval_map()
 		it++;
 	}
 
-	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
-	{
-		assert(it->second == 1);
-	}
+	//for(JIMI it = jmap.begin(); it != jmap.end(); it++) assert(it->second == 1);
 
 	return 0;
 }
@@ -81,10 +80,7 @@ int region::smooth_join_interval_map()
 		jmap += make_pair(ROI(v[i].first, v[i].second), 1);
 	}
 
-	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
-	{
-		assert(it->second == 1);
-	}
+	//for(JIMI it = jmap.begin(); it != jmap.end(); it++) assert(it->second == 1);
 
 	return 0;
 }
