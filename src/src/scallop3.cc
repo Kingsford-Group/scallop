@@ -69,11 +69,13 @@ int scallop3::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
+		/*
 		if(stage == 1)
 		{
 			stage = 2;
 			continue;
 		}
+		*/
 
 		b = resolve_hyper_edge1();
 		if(b == true) print();
