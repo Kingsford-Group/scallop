@@ -6,6 +6,7 @@ int hyper_set::clear()
 {
 	nodes.clear();
 	edges.clear();
+	e2s.clear();
 	return 0;
 }
 

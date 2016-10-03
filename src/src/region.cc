@@ -26,22 +26,20 @@ int region::build_join_interval_map()
 	tie(lit, rit) = locate_boundary_iterators(*mmap, lpos, rpos);
 	if(lit == mmap->end() || rit == mmap->end()) return 0;
 
-	int w = 1;
-	if(ltype == START_BOUNDARY) w = 2;
-	if(rtype == END_BOUNDARY) w = 2;
-	if(ltype == START_BOUNDARY) jmap += make_pair(ROI(lpos, lpos + 1), 1);
-	if(rtype == END_BOUNDARY) jmap += make_pair(ROI(rpos - 1, rpos), 1);
-
 	SIMI it = lit;
 	while(true)
 	{
 		// TODO
-		if(it->second >= w) jmap += make_pair(it->first, 1);
+		//if(it->second >= 2) 
+		jmap += make_pair(it->first, 1);
 		if(it == rit) break;
 		it++;
 	}
 
-	//for(JIMI it = jmap.begin(); it != jmap.end(); it++) assert(it->second == 1);
+	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
+	{
+		assert(it->second == 1);
+	}
 
 	return 0;
 }
@@ -49,8 +47,6 @@ int region::build_join_interval_map()
 int region::smooth_join_interval_map()
 {
 	int32_t gap = min_subregion_gap;
-	if(ltype == START_BOUNDARY) gap = 0;
-	if(rtype == END_BOUNDARY) gap = 0;
 
 	/*
 	bool b1 = false, b2 = false;
@@ -80,7 +76,10 @@ int region::smooth_join_interval_map()
 		jmap += make_pair(ROI(v[i].first, v[i].second), 1);
 	}
 
-	//for(JIMI it = jmap.begin(); it != jmap.end(); it++) assert(it->second == 1);
+	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
+	{
+		assert(it->second == 1);
+	}
 
 	return 0;
 }
