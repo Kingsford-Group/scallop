@@ -48,11 +48,14 @@ bool hyper_set::rebuild(int k)
 	bool b = false;
 	for(int i = 0; i < edges.size(); i++)
 	{
+		if(edges[i].size() <= 2) continue;
+
 		if(ecnts[i] <= k)
 		{
 			b = true;
 			continue;
 		}
+
 		vvi.push_back(edges[i]);
 		vv.push_back(ecnts[i]);
 	}
@@ -340,6 +343,7 @@ bool hyper_set::right_extend(const set<int> &s)
 int hyper_set::print()
 {
 	//printf("PRINT HYPER_SET\n");
+	/*
 	for(MVII::iterator it = nodes.begin(); it != nodes.end(); it++)
 	{
 		const vector<int> &v = it->first;
@@ -348,6 +352,7 @@ int hyper_set::print()
 		printv(v);
 		printf(")\n");
 	}
+	*/
 
 	for(int i = 0; i < edges.size(); i++)
 	{
