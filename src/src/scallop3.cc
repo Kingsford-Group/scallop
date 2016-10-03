@@ -275,6 +275,7 @@ bool scallop3::resolve_hyper_tree(int status)
 
 	if(ratio2 < ratio1)
 	{
+		if(se == -1) return false;
 		if(ratio2 > max_split_error_ratio) return false;
 
 		double sw = gr.get_edge_weight(i2e[se]);
@@ -512,6 +513,8 @@ bool scallop3::resolve_small_edges()
 
 		int e;
 		double r = compute_smallest_edge(i, e);
+		if(e == -1) continue;
+
 		double w = gr.get_edge_weight(i2e[e]);
 
 		if(ratio < r) continue;
