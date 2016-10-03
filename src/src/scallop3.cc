@@ -46,7 +46,11 @@ int scallop3::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_hyper_tree();
+		b = resolve_hyper_tree(1);
+		if(b == true) print();
+		if(b == true) continue;
+
+		b = resolve_hyper_tree(2);
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -58,8 +62,10 @@ int scallop3::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
+		/*
 		b = hs.rebuild(1);
 		if(b == true) continue;
+		*/
 
 		b = resolve_hyper_edge1();
 		if(b == true) print();
@@ -181,7 +187,7 @@ bool scallop3::resolve_hyper_vertex(int status)
 	return false;
 }
 
-bool scallop3::resolve_hyper_tree()
+bool scallop3::resolve_hyper_tree(int status)
 {
 	int root = -1;
 	undirected_graph ug;
@@ -196,7 +202,7 @@ bool scallop3::resolve_hyper_tree()
 		router rt(i, gr, e2i, i2e, p);
 		rt.build();
 
-		if(rt.status != 1) continue;
+		if(rt.status != status) continue;
 
 		MID m;
 		get_weights(i, m);
@@ -222,7 +228,7 @@ bool scallop3::resolve_hyper_tree()
 		vector<PI> p = hs.get_routes(root, gr, e2i);
 		router rt(root, gr, e2i, i2e, p);
 		rt.build();
-		assert(rt.status == 1);
+		assert(rt.status == status);
 
 		balance_vertex(root);
 		balance_vertex(rt.ug, rt.u2e);
@@ -230,8 +236,7 @@ bool scallop3::resolve_hyper_tree()
 		// print hyper tree
 		for(int k = 0; k < p.size(); k++)
 
-
-		printf("resolve hyper tree %d, ratio = (%.3lf, %.3lf), degree = (%d, %d)\n", root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
+		printf("resolve hyper tree-%d %d, ratio = (%.3lf, %.3lf), degree = (%d, %d)\n", status, root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
 
 		decompose_tree(rt.ug, rt.u2e);
 		assert(gr.degree(root) == 0);
@@ -251,8 +256,8 @@ bool scallop3::resolve_hyper_tree()
 		if(gr.in_degree(t) <= 1) return false;
 		if(gr.out_degree(s) <= 1) return false;
 
-		printf("remove hyper-tree edge %d, weight = %.2lf, ratio = %.2lf / %.2lf, vertex = (%d, %d), degree = (%d, %d)\n", 
-				se, sw, ratio1, ratio2, s, t, gr.out_degree(s), gr.in_degree(t));
+		printf("remove hyper tree-%d edge %d, weight = %.2lf, ratio = %.2lf / %.2lf, vertex = (%d, %d), degree = (%d, %d)\n", 
+				status, se, sw, ratio1, ratio2, s, t, gr.out_degree(s), gr.in_degree(t));
 
 		remove_edge(se);
 		hs.remove(se);
