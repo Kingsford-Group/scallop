@@ -67,6 +67,24 @@ int router::build()
 		return 0;
 	}
 
+	bool b1 = true, b2 = true;
+	for(int i = 0; i < gr.in_degree(root); i++)
+	{
+		if(ug.degree(i) == 0) b1 = false;
+	}
+	for(int i = 0; i < gr.out_degree(root); i++)
+	{
+		if(ug.degree(i + gr.in_degree(root)) == 0) b2 = false;
+	}
+
+	assert(b1 == false || b2 == false);
+
+	if(b1 == true || b2 == true)
+	{
+		status = 5;
+		return 0;
+	}
+
 	split();
 
 	if(vv.size() == 2 && eqns.size() == 2)
