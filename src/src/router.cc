@@ -94,9 +94,10 @@ int router::build()
 	assert(b1 == true || b2 == true);
 	assert(b1 == false || b2 == false);
 
-	if(vv.size() == 2 && ug.num_edges() + 2 == ug.num_vertices()) status = 5;
-	else status = 6;
+	//if(vv.size() == 2 && ug.num_edges() + 2 == ug.num_vertices()) status = 5;
+	//else status = 6;
 
+	status = 5;
 	return 0;
 }
 
