@@ -62,11 +62,11 @@ int scallop3::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
+		/*
 		b = resolve_hyper_tree(5);
 		if(b == true) print();
 		if(b == true) continue;
 
-		/*
 		b = hs.rebuild(1);
 		if(b == true) continue;
 		*/
