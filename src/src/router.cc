@@ -67,23 +67,6 @@ int router::build()
 		return 0;
 	}
 
-	bool b1 = true, b2 = true;
-	for(int i = 0; i < gr.in_degree(root); i++)
-	{
-		if(ug.degree(i) == 0) b1 = false;
-	}
-	for(int i = 0; i < gr.out_degree(root); i++)
-	{
-		if(ug.degree(i + gr.in_degree(root)) == 0) b2 = false;
-	}
-
-	if(b1 == true || b2 == true)
-	{
-		if(vv.size() == 2 && ug.num_edges() + 2 == ug.num_vertices()) status = 5;
-		else status = 6;
-		return 0;
-	}
-
 	split();
 
 	if(vv.size() == 2 && eqns.size() == 2)
@@ -97,6 +80,22 @@ int router::build()
 		status = 4;
 		return 0;
 	}
+
+	bool b1 = true, b2 = true;
+	for(int i = 0; i < gr.in_degree(root); i++)
+	{
+		if(ug.degree(i) == 0) b1 = false;
+	}
+	for(int i = 0; i < gr.out_degree(root); i++)
+	{
+		if(ug.degree(i + gr.in_degree(root)) == 0) b2 = false;
+	}
+
+	assert(b1 == true || b2 == true);
+	assert(b1 == false || b2 == false);
+
+	if(vv.size() == 2 && ug.num_edges() + 2 == ug.num_vertices()) status = 5;
+	else status = 6;
 
 	return 0;
 }

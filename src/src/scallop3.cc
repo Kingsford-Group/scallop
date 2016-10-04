@@ -62,6 +62,10 @@ int scallop3::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
+		b = resolve_hyper_tree(5);
+		if(b == true) print();
+		if(b == true) continue;
+
 		/*
 		b = hs.rebuild(1);
 		if(b == true) continue;
@@ -203,11 +207,13 @@ bool scallop3::resolve_hyper_tree(int status)
 		rt.build();
 
 		if(rt.status != status) continue;
-
+		
 		MID m;
 		get_weights(i, m);
 
 		balance_vertex(i);
+		if(status == 5) complete_graph(rt.ug, rt.u2e, i);
+
 		double r = balance_vertex(rt.ug, rt.u2e, vpi);
 
 		set_weights(m);
@@ -222,6 +228,8 @@ bool scallop3::resolve_hyper_tree(int status)
 
 	int se = -1;
 	double ratio2 = compute_smallest_edge(root, se) * smallest_edge_ratio_scalor2;
+	if(status == 5 && ratio1 > 0.01) return false;
+	if(status == 5) ratio2 = 999;
 
 	if(ratio1 <= ratio2)
 	{
@@ -231,11 +239,11 @@ bool scallop3::resolve_hyper_tree(int status)
 		assert(rt.status == status);
 
 		balance_vertex(root);
+		if(status == 5) complete_graph(rt.ug, rt.u2e, root);
+
 		balance_vertex(rt.ug, rt.u2e, vpi);
 
 		printf("resolve hyper tree-%d %d, ratio = (%.3lf, %.3lf), degree = (%d, %d)\n", status, root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
-
-		//for(int i = 0; i < vpi.size(); i++) printf("(%d, %d) -> %.4lf\n", vpi[i].first.first, vpi[i].first.second, vpi[i].second);
 
 		decompose_tree(vpi);
 		assert(gr.degree(root) == 0);
@@ -887,7 +895,34 @@ int scallop3::split_edge(int ei, double w)
 	return n;
 }
 
-double scallop3::balance_vertex(undirected_graph &ug, const vector<int> & u2e, vector<PPID> &vpi)
+int scallop3::complete_graph(undirected_graph &ug, const vector<int> &u2e, int root)
+{
+	edge_descriptor e1 = gr.max_in_edge(root);
+	edge_descriptor e2 = gr.max_out_edge(root);
+	
+	int k1 = -1, k2 = -1;
+	for(int i = 0; i < u2e.size(); i++)
+	{
+		if(u2e[i] == e2i[e1]) k1 = i;
+		if(u2e[i] == e2i[e2]) k2 = i;
+	}
+	assert(k1 != -1 && k2 != -1);
+
+	for(int i = 0; i < gr.in_degree(root); i++)
+	{
+		if(ug.degree(i) >= 1) continue;
+		ug.add_edge(i, k2);
+	}
+	for(int i = 0; i < gr.out_degree(root); i++)
+	{
+		int j = i + gr.in_degree(root);
+		if(ug.degree(j) >= 1) continue;
+		ug.add_edge(k1, j);
+	}
+	return 0;
+}
+
+double scallop3::balance_vertex(undirected_graph &ug, const vector<int> &u2e, vector<PPID> &vpi)
 {
 	GRBEnv *env = new GRBEnv();
 	GRBModel *model = new GRBModel(*env);
