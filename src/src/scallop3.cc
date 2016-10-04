@@ -208,7 +208,7 @@ bool scallop3::resolve_hyper_tree(int status)
 
 		if(rt.status != status) continue;
 		
-		if(status == 5) complete_graph(rt.ug, rt.u2e, root);
+		if(status == 5) complete_graph(rt.ug, rt.u2e, i);
 
 		MID m;
 		get_weights(i, m);

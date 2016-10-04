@@ -77,8 +77,6 @@ int router::build()
 		if(ug.degree(i + gr.in_degree(root)) == 0) b2 = false;
 	}
 
-	assert(b1 == false || b2 == false);
-
 	if(b1 == true || b2 == true)
 	{
 		status = 5;
