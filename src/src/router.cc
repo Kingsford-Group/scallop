@@ -79,7 +79,8 @@ int router::build()
 
 	if(b1 == true || b2 == true)
 	{
-		status = 5;
+		if(vv.size() == 2 && ug.num_edges() + 2 == ug.num_vertices()) status = 5;
+		else status = 6;
 		return 0;
 	}
 
