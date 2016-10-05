@@ -793,7 +793,7 @@ int bundle::remove_edges()
 		int32_t p2 = gr.get_vertex_info(t).lpos;
 		double w = gr.get_edge_weight(*it1);
 
-		if(w > ww && p2 > p1)
+		if(w > ww && p2 > p1 && s != 0 && t != gr.num_vertices() - 1)
 		{
 			ww = w;
 			ee = (*it1);
@@ -810,9 +810,19 @@ int bundle::remove_edges()
 		sv2.insert(s);
 	}
 
-	se.insert(ee);
-	sv1.insert(ee->target());
-	sv2.insert(ee->source());
+	if(ee != null_edge)
+	{
+		se.insert(ee);
+		sv1.insert(ee->target());
+		sv2.insert(ee->source());
+	}
+
+	/*
+	for(SE::iterator it = se.begin(); it != se.end(); it++)
+	{
+		printf("reserved edge (%d, %d), weight = %.2lf\n", (*it)->source(), (*it)->target(), gr.get_edge_weight(*it));
+	}
+	*/
 
 	while(true)
 	{
