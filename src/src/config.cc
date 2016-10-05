@@ -12,7 +12,7 @@ using namespace std;
 // for bam file and reads
 int min_flank_length = 5;
 int32_t min_bundle_gap = 50;
-int min_num_hits_in_bundle = 20;
+int min_num_hits_in_bundle = 10;
 uint32_t min_mapping_quality = 1;
 int32_t min_splice_boundary_hits = 1;
 
@@ -29,7 +29,7 @@ double min_splice_edge_weight = 4.5;
 double min_boundary_edge_weight = 5.0;
 double max_split_error_ratio = 0.15;
 double min_transcript_coverage = 10.0;
-double min_splice_graph_coverage = 20.0;
+double min_splice_graph_coverage = 10.0;
 double smallest_edge_ratio_scalor1 = 0.2;
 double smallest_edge_ratio_scalor2 = 1.0;
 
