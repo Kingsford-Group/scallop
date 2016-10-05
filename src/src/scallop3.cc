@@ -228,7 +228,8 @@ bool scallop3::resolve_hyper_tree(int status)
 
 	int se = -1;
 	double ratio2 = compute_smallest_edge(root, se) * smallest_edge_ratio_scalor2;
-	if(status == 5 && ratio1 > max_split_error_ratio) return false;
+	if(status == 5 && ratio1 > 0.01) return false;
+	//if(status == 5 && ratio1 > max_split_error_ratio) return false;
 	if(status == 5) ratio2 = 999;
 
 	if(ratio1 <= ratio2)
