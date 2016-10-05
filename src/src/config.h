@@ -32,6 +32,7 @@ extern int32_t min_splice_boundary_hits;
 
 // for identifying subgraphs
 extern double max_indel_ratio;
+extern double min_smooth_ratio;
 extern int32_t min_subregion_gap;
 extern double min_subregion_overlap;
 extern int32_t min_subregion_length;
