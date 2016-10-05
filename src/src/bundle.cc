@@ -787,18 +787,18 @@ int bundle::remove_edges()
 	edge_descriptor ee = null_edge;
 	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
 	{
+		int s = (*it1)->source();
+		int t = (*it1)->target();
+		int32_t p1 = gr.get_vertex_info(s).rpos;
+		int32_t p2 = gr.get_vertex_info(t).lpos;
 		double w = gr.get_edge_weight(*it1);
 
-		if(w > ww)
+		if(w > ww && p2 > p1)
 		{
 			ww = w;
 			ee = (*it1);
 		}
 
-		int s = (*it1)->source();
-		int t = (*it1)->target();
-		int32_t p1 = gr.get_vertex_info(s).rpos;
-		int32_t p2 = gr.get_vertex_info(t).lpos;
 		if(gr.get_vertex_weight(s) < min_vertex_weight) continue;
 		if(gr.get_vertex_weight(t) < min_vertex_weight) continue;
 		if(s == 0 && w < min_boundary_edge_weight) continue;
@@ -810,12 +810,9 @@ int bundle::remove_edges()
 		sv2.insert(s);
 	}
 
-	if(ww >= 2.5)
-	{
-		se.insert(ee);
-		sv1.insert(ee->target());
-		sv2.insert(ee->source());
-	}
+	se.insert(ee);
+	sv1.insert(ee->target());
+	sv2.insert(ee->source());
 
 	while(true)
 	{
