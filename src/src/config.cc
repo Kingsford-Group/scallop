@@ -20,7 +20,7 @@ int32_t min_splice_boundary_hits = 1;
 double max_indel_ratio = 0.2;
 int32_t min_subregion_gap = 3;
 int32_t min_subregion_length = 15;
-double min_subregion_overlap = 2;
+double min_subregion_overlap = 10;
 int min_subregion_ladders = 0;
 
 // for splice graph
