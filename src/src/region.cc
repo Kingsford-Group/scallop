@@ -11,7 +11,6 @@ region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split
 {
 
 	build_join_interval_map();
-	smooth_join_interval_map();
 	build_partial_exons();
 }
 
@@ -27,10 +26,15 @@ int region::build_join_interval_map()
 	if(lit == mmap->end() || rit == mmap->end()) return 0;
 
 	SIMI it = lit;
+	int tt = 0;
+
 	while(true)
 	{
-		// TODO
-		//if(it->second >= 2) 
+		int32_t p1 = lower(it->first);
+		int32_t p2 = upper(it->first);
+
+		if(it->second >= 3) tt += (p2 - p1);
+
 		jmap += make_pair(it->first, 1);
 		if(it == rit) break;
 		it++;
@@ -41,20 +45,7 @@ int region::build_join_interval_map()
 		assert(it->second == 1);
 	}
 
-	return 0;
-}
-
-int region::smooth_join_interval_map()
-{
-	int tt = 0;
-	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
-	{
-		int32_t p1 = lower(it->first);
-		int32_t p2 = upper(it->first);
-		assert(p2 > p1);
-		tt += (p2 - p1);
-	}
-
+	// smooth
 	double ratio = tt * 1.0 / (rpos - lpos);
 
 	int32_t gap = min_subregion_gap;
