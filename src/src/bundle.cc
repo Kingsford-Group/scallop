@@ -810,6 +810,7 @@ int bundle::remove_edges()
 		sv2.insert(s);
 	}
 
+	/*
 	if(ee != null_edge)
 	{
 		se.insert(ee);
@@ -817,7 +818,6 @@ int bundle::remove_edges()
 		sv2.insert(ee->source());
 	}
 
-	/*
 	for(SE::iterator it = se.begin(); it != se.end(); it++)
 	{
 		printf("reserved edge (%d, %d), weight = %.2lf\n", (*it)->source(), (*it)->target(), gr.get_edge_weight(*it));
