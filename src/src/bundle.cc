@@ -666,11 +666,11 @@ int bundle::remove_inner_start_boundaries()
 
 		//if(t != i + 1) continue;
 		//if(vi.rpos != gr.get_vertex_info(t).lpos) continue;
-		//if(vi.stddev >= 0.01) continue;
 		//if(ww < 1.5 * wv) continue;
+		//if(wv > min_inner_boundary_weight) continue;
 		if(s != 0) continue;
 		if(gr.in_degree(t) == 1) continue;
-		if(wv > min_inner_boundary_weight) continue;
+		if(vi.stddev >= 0.01) continue;
 
 		printf("remove inner start boundary: vertex = %d, weight = %.2lf, length = %d\n", i, wv, vi.length);
 
@@ -697,13 +697,13 @@ int bundle::remove_inner_end_boundaries()
 		double wv = gr.get_vertex_weight(i);
 		double ww = gr.get_vertex_weight(s);
 
-		//if(vi.stddev >= 0.01) continue;
 		//if(ww < 1.5 * wv) continue;
 		//if(vi.lpos != gr.get_vertex_info(s).rpos) continue;
 		//if(i != s + 1) continue;
+		//if(wv > min_inner_boundary_weight) continue;
 		if(t != gr.num_vertices() - 1) continue;
 		if(gr.out_degree(s) == 1) continue;
-		if(wv > min_inner_boundary_weight) continue;
+		if(vi.stddev >= 0.01) continue;
 
 		printf("remove inner end boundary: vertex = %d, weight = %.2lf, length = %d\n", i, wv, vi.length);
 
