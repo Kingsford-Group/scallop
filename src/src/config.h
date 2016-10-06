@@ -42,6 +42,7 @@ extern int max_dp_table_size;
 extern int min_router_count;
 
 // for splice graph
+extern double min_inner_vertex_weight;
 extern double min_boundary_edge_weight;
 extern double min_splice_edge_weight;
 extern double min_vertex_weight;

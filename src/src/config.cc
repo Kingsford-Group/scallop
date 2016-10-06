@@ -25,6 +25,7 @@ int min_subregion_ladders = 0;
 
 // for splice graph
 double min_vertex_weight = 3.0;
+double min_inner_vertex_weight = 10.0;
 double min_splice_edge_weight = 4.5;
 double min_boundary_edge_weight = 5.0;
 double max_split_error_ratio = 0.15;
@@ -88,6 +89,7 @@ int print_parameters()
 	printf("min_boundary_edge_weight = %.2lf\n", min_boundary_edge_weight);
 	printf("min_splice_edge_weight = %.2lf\n", min_splice_edge_weight);
 	printf("min_vertex_weight = %.2lf\n", min_vertex_weight);
+	printf("min_inner_vertex_weight = %.2lf\n", min_inner_vertex_weight);
 	printf("min_transcript_coverage = %.2lf\n", min_transcript_coverage);
 	printf("min_splice_graph_coverage = %.2lf\n", min_splice_graph_coverage);
 	printf("max_split_error_ratio = %.2lf\n", max_split_error_ratio);
@@ -261,6 +263,11 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--min_vertex_weight")
 		{
 			min_vertex_weight = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_inner_vertex_weight")
+		{
+			min_inner_vertex_weight = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_transcript_coverage")

@@ -49,13 +49,11 @@ int bundle::build()
 	link_partial_exons();
 	build_splice_graph();
 
-
-	// remove/add necessary edges
-	//while(remove_single_read());
-	//refine_splice_graph();
-
-	remove_edges();
+	// revise splice graph
+	remove_small_edges();
 	refine_splice_graph();
+
+	remove_inner_vertices();
 
 	identify_start_suspend_boundaries();
 	identify_end_suspend_boundaries();
@@ -733,6 +731,45 @@ int bundle::identify_end_suspend_boundaries()
 	return 0;
 }
 
+int bundle::remove_inner_vertices()
+{
+	for(int i = 1; i < gr.num_vertices(); i++)
+	{
+		if(gr.in_degree(i) != 1) continue;
+		if(gr.out_degree(i) != 1) continue;
+
+		edge_iterator it1, it2;
+		tie(it1, it2) = gr.in_edges(i);
+		edge_descriptor e1 = (*it1);
+		tie(it1, it2) = gr.out_edges(i);
+		edge_descriptor e2 = (*it1);
+		int s = e1->source();
+		int t = e2->target();
+		double wv = gr.get_vertex_weight(i);
+		vertex_info vi = gr.get_vertex_info(i);
+
+		if(s == 0) continue;
+		if(t == gr.num_vertices() - 1) continue;
+		if(gr.get_vertex_info(s).rpos != vi.lpos) continue;
+		if(gr.get_vertex_info(t).lpos != vi.rpos) continue;
+
+		PEB p = gr.edge(s, t);
+		if(p.second == false) continue;
+
+		edge_descriptor ee = p.first;
+		double we = gr.get_edge_weight(ee);
+
+		if(wv > we) continue;
+		if(wv > min_inner_vertex_weight) continue;
+
+		printf("clear inner exon %d, weight = %.2lf, length = %d, edge weight = %.2lf\n", i, wv, vi.length, we);
+
+		gr.clear_vertex(i);
+	}
+	return 0;
+}
+
+
 int bundle::refine_splice_graph()
 {
 	while(true)
@@ -750,34 +787,7 @@ int bundle::refine_splice_graph()
 	return 0;
 }
 
-bool bundle::remove_single_read()
-{
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
-	{
-		edge_descriptor e = (*it1);
-		double w = gr.get_edge_weight(e);
-		if(w >= 1.1) continue;
-
-		int s = e->source();
-		int t = e->target();
-		int n = gr.num_vertices() - 1;
-		if(s == 0 && gr.out_degree(0) <= 1) continue;
-		if(t == n && gr.in_degree(n) <= 1) continue;
-
-		int32_t p1 = gr.get_vertex_info(s).rpos;
-		int32_t p2 = gr.get_vertex_info(t).lpos;
-		if(p1 == p2) continue;
-
-		printf("remove single read %d -> %d\n", s, t);
-		gr.remove_edge(e);
-
-		return true;
-	}
-	return false;
-}
-
-int bundle::remove_edges()
+int bundle::remove_small_edges()
 {
 	set<int> sv1;
 	set<int> sv2;
