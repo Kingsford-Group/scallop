@@ -664,13 +664,19 @@ int bundle::remove_inner_start_boundaries()
 		double wv = gr.get_vertex_weight(i);
 		double ww = gr.get_vertex_weight(t);
 
-		//if(t != i + 1) continue;
-		//if(vi.rpos != gr.get_vertex_info(t).lpos) continue;
-		//if(ww < 1.5 * wv) continue;
-		//if(wv > min_inner_boundary_weight) continue;
 		if(s != 0) continue;
 		if(gr.in_degree(t) == 1) continue;
-		if(vi.stddev >= 0.01) continue;
+
+		bool b1 = true;
+		if(vi.stddev >= 0.01) b1 = false;
+
+		bool b2 = true;
+		if(wv > min_inner_boundary_weight) b2 = false;
+		if(t != i + 1) b2 = false;
+		if(vi.rpos != gr.get_vertex_info(t).lpos) b2 = false;
+		//if(ww < 1.5 * wv) continue;
+
+		if(b1 == false && b2 == false) continue;
 
 		printf("remove inner start boundary: vertex = %d, weight = %.2lf, length = %d\n", i, wv, vi.length);
 
@@ -697,13 +703,20 @@ int bundle::remove_inner_end_boundaries()
 		double wv = gr.get_vertex_weight(i);
 		double ww = gr.get_vertex_weight(s);
 
-		//if(ww < 1.5 * wv) continue;
-		//if(vi.lpos != gr.get_vertex_info(s).rpos) continue;
-		//if(i != s + 1) continue;
-		//if(wv > min_inner_boundary_weight) continue;
 		if(t != gr.num_vertices() - 1) continue;
 		if(gr.out_degree(s) == 1) continue;
-		if(vi.stddev >= 0.01) continue;
+
+		//if(ww < 1.5 * wv) continue;
+	
+		bool b1 = true;
+		if(vi.stddev >= 0.01) b1 = false;
+
+		bool b2 = true;
+		if(vi.lpos != gr.get_vertex_info(s).rpos) b2 = false;
+		if(i != s + 1) b2 = false;
+		if(wv > min_inner_boundary_weight) b2 = false;
+	
+		if(b1 == false && b2 == false) continue;
 
 		printf("remove inner end boundary: vertex = %d, weight = %.2lf, length = %d\n", i, wv, vi.length);
 
@@ -789,10 +802,6 @@ int bundle::remove_small_edges()
 		int t = (*it1)->target();
 		int32_t p1 = gr.get_vertex_info(s).rpos;
 		int32_t p2 = gr.get_vertex_info(t).lpos;
-		if(gr.get_vertex_weight(s) < min_vertex_weight) continue;
-		if(gr.get_vertex_weight(t) < min_vertex_weight) continue;
-		if(s == 0 && w < min_boundary_edge_weight) continue;
-		if(t == gr.num_vertices() - 1 && w < min_boundary_edge_weight) continue;
 		if(w < min_splice_edge_weight) continue;
 		//if(p1 == p2 && w < min_consecutive_edge_weight) continue;
 		se.insert(*it1);
@@ -800,7 +809,7 @@ int bundle::remove_small_edges()
 		sv2.insert(s);
 	}
 
-	if(ww >= 2.5)
+	if(ee != null_edge)
 	{
 		se.insert(ee);
 		sv1.insert(ee->target());
