@@ -740,7 +740,7 @@ int bundle::remove_inner_vertices()
 		edge_descriptor ee = p.first;
 		double we = gr.get_edge_weight(ee);
 
-		if(wv > 1.5 * we) continue;
+		if(wv > we) continue;
 		if(wv > min_inner_vertex_weight) continue;
 
 		printf("clear inner exon %d, weight = %.2lf, length = %d, edge weight = %.2lf\n", i, wv, vi.length, we);
@@ -778,18 +778,17 @@ int bundle::remove_small_edges()
 	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
 	{
 		double w = gr.get_edge_weight(*it1);
-		int s = (*it1)->source();
-		int t = (*it1)->target();
-		int32_t p1 = gr.get_vertex_info(s).rpos;
-		int32_t p2 = gr.get_vertex_info(t).lpos;
 
-		if(w > ww && p1 != p2 && s != 0 && t != gr.num_vertices() - 1)
+		if(w > ww)
 		{
 			ww = w;
 			ee = (*it1);
 		}
 
-
+		int s = (*it1)->source();
+		int t = (*it1)->target();
+		int32_t p1 = gr.get_vertex_info(s).rpos;
+		int32_t p2 = gr.get_vertex_info(t).lpos;
 		if(gr.get_vertex_weight(s) < min_vertex_weight) continue;
 		if(gr.get_vertex_weight(t) < min_vertex_weight) continue;
 		if(s == 0 && w < min_boundary_edge_weight) continue;
@@ -801,7 +800,7 @@ int bundle::remove_small_edges()
 		sv2.insert(s);
 	}
 
-	if(ww >= 1.5)
+	if(ww >= 2.5)
 	{
 		se.insert(ee);
 		sv1.insert(ee->target());
