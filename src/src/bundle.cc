@@ -54,9 +54,8 @@ int bundle::build()
 	refine_splice_graph();
 
 	remove_inner_vertices();
-
-	identify_start_suspend_boundaries();
-	identify_end_suspend_boundaries();
+	remove_inner_start_boundaries();
+	remove_inner_end_boundaries();
 
 	extend_isolated_start_boundaries();
 	extend_isolated_end_boundaries();
@@ -647,7 +646,7 @@ int bundle::extend_isolated_start_boundaries()
 	return 0;
 }
 
-int bundle::identify_start_suspend_boundaries()
+int bundle::remove_inner_start_boundaries()
 {
 	for(int i = 1; i < gr.num_vertices(); i++)
 	{
@@ -666,30 +665,20 @@ int bundle::identify_start_suspend_boundaries()
 		double ww = gr.get_vertex_weight(t);
 
 		if(s != 0) continue;
+		if(t != i + 1) continue;
 		if(gr.in_degree(t) == 1) continue;
-		if(vi.length > 100) continue;
+		if(wv > min_inner_boundary_weight) continue;
+		if(ww < 1.5 * wv) continue;
+		if(vi.rpos != gr.get_vertex_info(t).lpos) continue;
 
-		bool b1 = true, b2 = true;
-		if(vi.stddev >= 0.01) b1 = false;
+		printf("remove inner start boundary: vertex = %d, weight = %.2lf, length = %d\n", i, wv, vi.length);
 
-		if(wv > 10.0) b2 = false;
-		if(ww < wv * 2) b2 = false;
-		if(t - 1 == i) b2 = false;
-		if(gr.get_vertex_info(t - 1).rpos != gr.get_vertex_info(t).lpos) b2 = false;
-
-		b2 = false;
-
-		if(b1 == false && b2 == false) continue;
-		printf("start suspend boundary: vertex = %d weight = %.2lf stddev = %.2lf length = %d, type = (%c, %c)\n", 
-				i, wv, vi.stddev, vi.length, b1 ? 'T' : 'F', b2 ? 'T' : 'F');
-
-		gr.remove_edge(e1);
-		gr.remove_edge(e2);
+		gr.clear_vertex(i);
 	}
 	return 0;
 }
 
-int bundle::identify_end_suspend_boundaries()
+int bundle::remove_inner_end_boundaries()
 {
 	for(int i = 1; i < gr.num_vertices(); i++)
 	{
@@ -708,25 +697,15 @@ int bundle::identify_end_suspend_boundaries()
 		double ww = gr.get_vertex_weight(s);
 
 		if(t != gr.num_vertices() - 1) continue;
+		if(i != s + 1) continue;
 		if(gr.out_degree(s) == 1) continue;
-		if(vi.length > 100) continue;
+		if(wv > min_inner_boundary_weight) continue;
+		if(ww < 1.5 * wv) continue;
+		if(vi.lpos != gr.get_vertex_info(s).rpos) continue;
 
-		bool b1 = true, b2 = true;
-		if(vi.stddev >= 0.01) b1 = false;
+		printf("remove inner end boundary: vertex = %d, weight = %.2lf, length = %d\n", i, wv, vi.length);
 
-		if(ww < wv * 2.0) b2 = false;
-		if(wv > 10.0) b2 = false;
-		if(i == s + 1) b2 = false;
-		if(gr.get_vertex_info(s).rpos != gr.get_vertex_info(s + 1).lpos) b2 = false;
-
-		b2 = false;
-
-		if(b1 == false && b2 == false) continue;
-		printf("end suspend boundary: vertex = %d weight = %.2lf stddev = %.2lf length = %d, type = (%c, %c)\n", 
-				i, wv, vi.stddev, vi.length, b1 ? 'T' : 'F', b2 ? 'T' : 'F');
-
-		gr.remove_edge(e1);
-		gr.remove_edge(e2);
+		gr.clear_vertex(i);
 	}
 	return 0;
 }
@@ -768,7 +747,6 @@ int bundle::remove_inner_vertices()
 	}
 	return 0;
 }
-
 
 int bundle::refine_splice_graph()
 {

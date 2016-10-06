@@ -62,10 +62,10 @@ private:
 	int refine_splice_graph();
 	int remove_small_edges();
 	int remove_inner_vertices();
+	int remove_inner_start_boundaries();
+	int remove_inner_end_boundaries();
 	int extend_isolated_start_boundaries();
 	int extend_isolated_end_boundaries();
-	int identify_start_suspend_boundaries();
-	int identify_end_suspend_boundaries();
 };
 
 #endif
