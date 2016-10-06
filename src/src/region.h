@@ -34,6 +34,7 @@ public:
 
 private:
 	int build_join_interval_map();
+	int smooth_join_interval_map();
 	bool empty_subregion(int32_t p1, int32_t p2);
 	int build_partial_exons();
 	int32_t identify_boundary(bool tag);

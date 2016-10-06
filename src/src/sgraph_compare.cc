@@ -20,8 +20,8 @@ int sgraph_compare::compare(const string &file)
 
 	if(file != "") draw(gr3, file);
 
-	compare_boundary_edges();
-	compare_splice_positions();
+	//compare_boundary_edges();
+	//compare_splice_positions();
 
 	return 0;
 }

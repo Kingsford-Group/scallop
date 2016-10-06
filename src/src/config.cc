@@ -18,7 +18,6 @@ int32_t min_splice_boundary_hits = 1;
 
 // for identifying subgraphs
 double max_indel_ratio = 0.2;
-double min_smooth_ratio = 0.9;
 int32_t min_subregion_gap = 3;
 int32_t min_subregion_length = 15;
 double min_subregion_overlap = 2;
@@ -80,7 +79,6 @@ int print_parameters()
 
 	// for identifying subgraphs
 	printf("max_indel_ratio = %.2lf\n", max_indel_ratio);
-	printf("min_smooth_ratio = %.2lf\n", min_smooth_ratio);
 	printf("min_subregion_gap = %d\n", min_subregion_gap);
 	printf("min_subregion_length = %d\n", min_subregion_length);
 	printf("min_subregion_overlap = %.2lf\n", min_subregion_overlap);
@@ -221,11 +219,6 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--max_indel_ratio")
 		{
 			max_indel_ratio = atof(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--min_smooth_ratio")
-		{
-			min_smooth_ratio = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_subregion_gap")

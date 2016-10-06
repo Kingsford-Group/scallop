@@ -11,6 +11,7 @@ region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split
 {
 
 	build_join_interval_map();
+	smooth_join_interval_map();
 	build_partial_exons();
 }
 
@@ -26,15 +27,10 @@ int region::build_join_interval_map()
 	if(lit == mmap->end() || rit == mmap->end()) return 0;
 
 	SIMI it = lit;
-	int tt = 0;
-
 	while(true)
 	{
-		int32_t p1 = lower(it->first);
-		int32_t p2 = upper(it->first);
-
-		if(it->second >= 3) tt += (p2 - p1);
-
+		// TODO
+		//if(it->second >= 2) 
 		jmap += make_pair(it->first, 1);
 		if(it == rit) break;
 		it++;
@@ -45,14 +41,24 @@ int region::build_join_interval_map()
 		assert(it->second == 1);
 	}
 
-	// smooth
-	double ratio = tt * 1.0 / (rpos - lpos);
+	return 0;
+}
 
+int region::smooth_join_interval_map()
+{
 	int32_t gap = min_subregion_gap;
-	if(ratio >= min_smooth_ratio) gap = rpos - lpos;
 
-	int32_t p = lpos;
+	/*
+	bool b1 = false, b2 = false;
+	if(ltype == START_BOUNDARY) b1 = true;
+	if(ltype == RIGHT_SPLICE) b1 = true;
+	if(rtype == END_BOUNDARY) b2 = true;
+	if(rtype == LEFT_SPLICE) b2 = true;
+	if(b1 == true && b2 == true) gap = 2 * min_subregion_gap;
+	*/
+
 	vector<PI32> v;
+	int32_t p = lpos;
 	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
 	{
 		int32_t p1 = lower(it->first);
