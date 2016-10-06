@@ -740,7 +740,7 @@ int bundle::remove_inner_vertices()
 		edge_descriptor ee = p.first;
 		double we = gr.get_edge_weight(ee);
 
-		if(wv > we) continue;
+		if(wv > 1.5 * we) continue;
 		if(wv > min_inner_vertex_weight) continue;
 
 		printf("clear inner exon %d, weight = %.2lf, length = %d, edge weight = %.2lf\n", i, wv, vi.length, we);
