@@ -57,8 +57,11 @@ int bundle::build()
 	remove_inner_start_boundaries();
 	remove_inner_end_boundaries();
 
-	extend_isolated_start_boundaries();
-	extend_isolated_end_boundaries();
+	if(extend_isolated_boundary == true)
+	{
+		extend_isolated_start_boundaries();
+		extend_isolated_end_boundaries();
+	}
 
 	build_hyper_edges2();
 	//gr.draw("gr.tex");

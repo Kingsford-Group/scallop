@@ -50,6 +50,7 @@ extern double min_transcript_coverage;
 extern double min_splice_graph_coverage;
 extern double smallest_edge_ratio_scalor1;
 extern double smallest_edge_ratio_scalor2;
+extern bool extend_isolated_boundary;
 
 // for identifying new boundaries
 extern bool identify_extra_boundary;
