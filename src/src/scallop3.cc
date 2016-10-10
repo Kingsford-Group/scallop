@@ -240,7 +240,6 @@ bool scallop3::resolve_hyper_tree(int status)
 
 		balance_vertex(root);
 		if(status == 5) complete_graph(rt.ug, rt.u2e, root);
-
 		balance_vertex(rt.ug, rt.u2e, gr.in_degree(root), vpi);
 
 		printf("resolve hyper tree-%d %d, ratio = (%.3lf, %.3lf), degree = (%d, %d)\n", status, root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
@@ -962,6 +961,9 @@ double scallop3::balance_vertex(undirected_graph &ug, const vector<int> &u2e, in
 			ve.push_back(e);
 		}
 	}
+
+	assert(uv.size() == 0);
+	assert(ne0 == ve.size());
 
 	// routes weight variables
 	vector<GRBVar> rvars;
