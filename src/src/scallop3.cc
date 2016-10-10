@@ -212,7 +212,7 @@ bool scallop3::resolve_hyper_tree(int status)
 		get_weights(i, m);
 
 		balance_vertex(i);
-		//if(status == 5) complete_graph(rt.ug, rt.u2e, i);
+		if(status == 5) complete_graph(rt.ug, rt.u2e, i);
 
 		double r = balance_vertex(rt.ug, rt.u2e, gr.in_degree(i), vpi);
 
@@ -229,7 +229,6 @@ bool scallop3::resolve_hyper_tree(int status)
 	int se = -1;
 	double ratio2 = compute_smallest_edge(root, se) * smallest_edge_ratio_scalor2;
 	if(status == 5 && ratio1 > 0.01) return false;
-	//if(status == 5 && ratio1 > max_split_error_ratio) return false;
 	if(status == 5) ratio2 = 999;
 
 	if(ratio1 <= ratio2)
@@ -240,7 +239,7 @@ bool scallop3::resolve_hyper_tree(int status)
 		assert(rt.status == status);
 
 		balance_vertex(root);
-		//if(status == 5) complete_graph(rt.ug, rt.u2e, root);
+		if(status == 5) complete_graph(rt.ug, rt.u2e, root);
 
 		balance_vertex(rt.ug, rt.u2e, gr.in_degree(root), vpi);
 
