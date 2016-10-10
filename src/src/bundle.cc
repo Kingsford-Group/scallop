@@ -868,6 +868,16 @@ int bundle::remove_small_edges()
 	return 0;
 }
 
+int bundle::count_junctions() const
+{
+	int x = 0;
+	for(int i = 0; i < junctions.size(); i++)
+	{
+		x += junctions[i].count;
+	}
+	return x;
+}
+
 int bundle::print(int index)
 {
 	printf("\nBundle %d: ", index);

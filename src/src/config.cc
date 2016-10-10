@@ -30,6 +30,7 @@ double min_splice_edge_weight = 3.5;
 double max_split_error_ratio = 0.15;
 double min_transcript_coverage = 10.0;
 double min_splice_graph_coverage = 20.0;
+int min_junction_count = 5;
 double smallest_edge_ratio_scalor1 = 0.2;
 double smallest_edge_ratio_scalor2 = 1.0;
 bool extend_isolated_boundary = true;
@@ -91,6 +92,7 @@ int print_parameters()
 	printf("min_inner_boundary_weight = %.2lf\n", min_inner_boundary_weight);
 	printf("min_transcript_coverage = %.2lf\n", min_transcript_coverage);
 	printf("min_splice_graph_coverage = %.2lf\n", min_splice_graph_coverage);
+	printf("min_junction_count = %d\n", min_junction_count);
 	printf("max_split_error_ratio = %.2lf\n", max_split_error_ratio);
 	printf("smallest_edge_ratio_scalor1 = %.2lf\n", smallest_edge_ratio_scalor1);
 	printf("smallest_edge_ratio_scalor2 = %.2lf\n", smallest_edge_ratio_scalor2);
@@ -273,6 +275,11 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--min_splice_graph_coverage")
 		{
 			min_splice_graph_coverage = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_junction_count")
+		{
+			min_junction_count = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--max_split_error_ratio")

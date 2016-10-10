@@ -194,6 +194,25 @@ edge_descriptor splice_graph::max_in_edge(int v)
 	return ee;
 }
 
+int splice_graph::count_junctions()
+{
+	int cnt = 0;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = edges(); it1 != it2; it1++)
+	{
+		int s = (*it1)->source();
+		int t = (*it1)->target();
+		if(s == 0) continue;
+		if(t == num_vertices() - 1) continue;
+		int32_t p1 = get_vertex_info(s).rpos;
+		int32_t p2 = get_vertex_info(t).lpos;
+		if(p1 >= p2) continue;
+		double w = get_edge_weight(*it1);
+		cnt += (int)(w);
+	}
+	return cnt;
+}
+
 edge_descriptor splice_graph::compute_maximum_edge_w()
 {
 	edge_iterator it1, it2;

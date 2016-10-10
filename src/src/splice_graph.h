@@ -50,6 +50,8 @@ public:
 	double get_in_weights(int v);
 	double get_out_weights(int v);
 
+	int count_junctions();
+
 	// modify the splice_graph
 	int clear();
 	int copy(const splice_graph &gr, MEE &x2y, MEE &y2x);
