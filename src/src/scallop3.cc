@@ -214,7 +214,7 @@ bool scallop3::resolve_hyper_tree(int status)
 		balance_vertex(i);
 		if(status == 5) complete_graph(rt.ug, rt.u2e, i);
 
-		double r = balance_vertex(rt.ug, rt.u2e, gr.in_degree(i), vpi);
+		double r = balance_vertex(rt.ug, rt.u2e, vpi);
 
 		set_weights(m);
 
@@ -229,6 +229,7 @@ bool scallop3::resolve_hyper_tree(int status)
 	int se = -1;
 	double ratio2 = compute_smallest_edge(root, se) * smallest_edge_ratio_scalor2;
 	if(status == 5 && ratio1 > 0.01) return false;
+	//if(status == 5 && ratio1 > max_split_error_ratio) return false;
 	if(status == 5) ratio2 = 999;
 
 	if(ratio1 <= ratio2)
@@ -240,7 +241,8 @@ bool scallop3::resolve_hyper_tree(int status)
 
 		balance_vertex(root);
 		if(status == 5) complete_graph(rt.ug, rt.u2e, root);
-		balance_vertex(rt.ug, rt.u2e, gr.in_degree(root), vpi);
+
+		balance_vertex(rt.ug, rt.u2e, vpi);
 
 		printf("resolve hyper tree-%d %d, ratio = (%.3lf, %.3lf), degree = (%d, %d)\n", status, root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
 
@@ -921,7 +923,7 @@ int scallop3::complete_graph(undirected_graph &ug, const vector<int> &u2e, int r
 	return 0;
 }
 
-double scallop3::balance_vertex(undirected_graph &ug, const vector<int> &u2e, int nv1, vector<PPID> &vpi)
+double scallop3::balance_vertex(undirected_graph &ug, const vector<int> &u2e, vector<PPID> &vpi)
 {
 	GRBEnv *env = new GRBEnv();
 	GRBModel *model = new GRBModel(*env);
@@ -935,42 +937,11 @@ double scallop3::balance_vertex(undirected_graph &ug, const vector<int> &u2e, in
 		ve.push_back(e);
 	}
 
-	int ne0 = ve.size();
-
-	// add edges for untouched vertices
-	set<int> uv;
-	for(int i = 0; i < nv1; i++)
-	{
-		int d = ug.degree(i);
-		if(d >= 1) continue;
-		uv.insert(i);
-		for(int k = nv1; k < u2e.size(); k++) 
-		{
-			edge_descriptor e = ug.add_edge(i, k);
-			ve.push_back(e);
-		}
-	}
-	for(int i = nv1; i < u2e.size(); i++)
-	{
-		int d = ug.degree(i);
-		if(d >= 1) continue;
-		uv.insert(i);
-		for(int k = 0; k < nv1; k++) 
-		{
-			edge_descriptor e = ug.add_edge(k, i);
-			ve.push_back(e);
-		}
-	}
-
-	assert(uv.size() == 0);
-	assert(ne0 == ve.size());
-
 	// routes weight variables
 	vector<GRBVar> rvars;
 	for(int i = 0; i < ve.size(); i++)
 	{
-		double lb = (i < ne0) ? 1.0 : 0.0;
-		GRBVar rvar = model->addVar(lb, GRB_INFINITY, 0, GRB_CONTINUOUS);
+		GRBVar rvar = model->addVar(1.0, GRB_INFINITY, 0, GRB_CONTINUOUS);
 		rvars.push_back(rvar);
 	}
 
@@ -993,46 +964,10 @@ double scallop3::balance_vertex(undirected_graph &ug, const vector<int> &u2e, in
 		exprs[u1] += rvars[i];
 		exprs[u2] += rvars[i];
 	}
+
 	for(int i = 0; i < u2e.size(); i++)
 	{
 		model->addConstr(exprs[i], GRB_EQUAL, wvars[i]);
-	}
-
-	double wmax = 0;
-	for(int i = 0; i < u2e.size(); i++)
-	{
-		int e = u2e[i];
-		double w = gr.get_edge_weight(i2e[e]);
-		if(w > wmax) wmax = w;
-	}
-
-	// binary variables for new added edges
-	vector<GRBVar> bvars;
-	for(int i = ne0; i < ve.size(); i++)
-	{
-		GRBVar bvar = model->addVar(0, 1, 0, GRB_BINARY);
-		bvars.push_back(bvar);
-	}
-	model->update();
-	for(int i = ne0; i < ve.size(); i++)
-	{
-		model->addConstr(rvars[i], GRB_LESS_EQUAL, bvars[i - ne0] * wmax);
-	}
-
-	for(set<int>::iterator it = uv.begin(); it != uv.end(); it++)
-	{
-		int v = (*it);
-		GRBLinExpr expr;
-		for(int k = 0; k < ve.size(); k++)
-		{
-			edge_descriptor e = ve[k];
-			int s = e->source();
-			int t = e->target();
-			if(s != v && t != v) continue;
-			assert(k >= ne0);
-			expr += bvars[k - ne0];
-		}
-		model->addConstr(expr, GRB_EQUAL, 1);
 	}
 
 	// objective 
@@ -1050,8 +985,6 @@ double scallop3::balance_vertex(undirected_graph &ug, const vector<int> &u2e, in
 	model->optimize();
 
 	int f = model->get(GRB_IntAttr_Status);
-	assert(f == GRB_OPTIMAL);
-
 	if(f != GRB_OPTIMAL)
 	{
 		delete model;
@@ -1081,7 +1014,6 @@ double scallop3::balance_vertex(undirected_graph &ug, const vector<int> &u2e, in
 		PI p(es, et);
 		if(s > t) p = PI(et, es);
 		double w = rvars[i].get(GRB_DoubleAttr_X);
-		if(i >= ne0 && bvars[i - ne0].get(GRB_DoubleAttr_X) < 0.5) continue;
 		vpi.push_back(PPID(p, w));
 	}
 

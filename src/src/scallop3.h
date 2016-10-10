@@ -63,7 +63,7 @@ private:
 	// smooth vertex
 	int balance_vertex(int x);
 	double compute_balance_ratio(int x);
-	double balance_vertex(undirected_graph &ug, const vector<int> &u2e, int nv1, vector<PPID> &vpi);
+	double balance_vertex(undirected_graph &ug, const vector<int> &u2e, vector<PPID> &vpi);
 	int complete_graph(undirected_graph &ug, const vector<int> &u2e, int root);
 
 	int get_weights(int v, MID &m);
