@@ -968,7 +968,8 @@ double scallop3::balance_vertex(undirected_graph &ug, const vector<int> &u2e, in
 	vector<GRBVar> rvars;
 	for(int i = 0; i < ve.size(); i++)
 	{
-		GRBVar rvar = model->addVar(0, GRB_INFINITY, 0, GRB_CONTINUOUS);
+		double lb = (i < ne0) ? 1.0 : 0.0;
+		GRBVar rvar = model->addVar(lb, GRB_INFINITY, 0, GRB_CONTINUOUS);
 		rvars.push_back(rvar);
 	}
 
@@ -976,7 +977,7 @@ double scallop3::balance_vertex(undirected_graph &ug, const vector<int> &u2e, in
 	vector<GRBVar> wvars;
 	for(int i = 0; i < u2e.size(); i++)
 	{
-		GRBVar wvar = model->addVar(0.0, GRB_INFINITY, 0, GRB_CONTINUOUS);
+		GRBVar wvar = model->addVar(1.0, GRB_INFINITY, 0, GRB_CONTINUOUS);
 		wvars.push_back(wvar);
 	}
 	model->update();
@@ -1048,6 +1049,8 @@ double scallop3::balance_vertex(undirected_graph &ug, const vector<int> &u2e, in
 	model->optimize();
 
 	int f = model->get(GRB_IntAttr_Status);
+	assert(f == GRB_OPTIMAL);
+
 	if(f != GRB_OPTIMAL)
 	{
 		delete model;
@@ -1077,6 +1080,7 @@ double scallop3::balance_vertex(undirected_graph &ug, const vector<int> &u2e, in
 		PI p(es, et);
 		if(s > t) p = PI(et, es);
 		double w = rvars[i].get(GRB_DoubleAttr_X);
+		if(i >= ne0 && bvars[i - ne0].get(GRB_DoubleAttr_X) < 0.5) continue;
 		vpi.push_back(PPID(p, w));
 	}
 
