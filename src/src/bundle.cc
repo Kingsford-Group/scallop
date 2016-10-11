@@ -776,12 +776,18 @@ bool bundle::remove_spanning_edges()
 		edge_descriptor e = (*it1);
 		int s = e->source();
 		int t = e->target();
+		if(s == 0) continue;
+		if(t == gr.num_vertices() - 1) continue;
 		double w = gr.get_edge_weight(e);
+		double w1 = gr.get_vertex_weight(s);
+		double w2 = gr.get_vertex_weight(s);
 		assert(s < t);
 		if(t == s + 1) continue;
 		if(gr.out_degree(s) == 1) continue;
 		if(gr.in_degree(t) == 1) continue;
 		if(w >= min_spanning_edge_weight) continue;
+		if(w >= 0.5 * w1) continue;
+		if(w >= 0.5 * w2) continue;
 
 		int32_t p1 = gr.get_vertex_info(s).rpos;
 		int32_t p2 = gr.get_vertex_info(s + 1).lpos;
