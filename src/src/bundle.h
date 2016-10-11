@@ -60,12 +60,13 @@ private:
 	bool bridge_read(int x, int y, vector<int> &s);
 
 	// update splice graph
-	int refine_splice_graph();
 	VE compute_maximal_edges();
+	int refine_splice_graph();
 	int remove_small_edges();
 	int remove_inner_vertices();
 	int remove_inner_start_boundaries();
 	int remove_inner_end_boundaries();
+	bool remove_spanning_edges();
 	int extend_isolated_start_boundaries();
 	int extend_isolated_end_boundaries();
 };

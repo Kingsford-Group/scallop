@@ -44,6 +44,7 @@ extern int min_router_count;
 // for splice graph
 extern double min_inner_vertex_weight;
 extern double min_inner_boundary_weight;
+extern double min_spanning_edge_weight;
 extern double min_splice_edge_weight;
 extern double max_split_error_ratio;
 extern double min_transcript_coverage;
