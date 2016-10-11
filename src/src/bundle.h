@@ -61,6 +61,7 @@ private:
 
 	// update splice graph
 	int refine_splice_graph();
+	VE compute_maximal_edges();
 	int remove_small_edges();
 	int remove_inner_vertices();
 	int remove_inner_start_boundaries();

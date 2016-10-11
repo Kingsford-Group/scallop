@@ -9,6 +9,7 @@
 #include "region.h"
 #include "config.h"
 #include "util.h"
+#include "undirected_graph.h"
 
 bundle::bundle(const bundle_base &bb)
 	: bundle_base(bb)
@@ -766,6 +767,49 @@ int bundle::remove_inner_vertices()
 	return 0;
 }
 
+VE bundle::compute_maximal_edges()
+{
+	typedef pair<double, edge_descriptor> PDE;
+	vector<PDE> ve;
+
+	undirected_graph ug;
+	edge_iterator it1, it2;
+	for(int i = 0; i < gr.num_vertices(); i++) ug.add_vertex();
+	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	{
+		edge_descriptor e = (*it1);
+		double w = gr.get_edge_weight(e);
+		int s = e->source();
+		int t = e->target();
+		if(s == 0) continue;
+		if(t == gr.num_vertices() - 1) continue;
+		ug.add_edge(s, t);
+		ve.push_back(PDE(w, e));
+	}
+
+	vector<int> vv = ug.assign_connected_components();
+
+	sort(ve.begin(), ve.end());
+
+	VE x;
+	set<int> sc;
+	for(int i = ve.size() - 1; i >= 0; i--)
+	{
+		edge_descriptor e = ve[i].second;
+		int s = e->source();
+		int t = e->target();
+		if(s == 0) continue;
+		if(t == gr.num_vertices()) continue;
+		int c1 = vv[s];
+		int c2 = vv[t];
+		assert(c1 == c2);
+		if(sc.find(c1) != sc.end()) continue;
+		x.push_back(e);
+		sc.insert(c1);
+	}
+	return x;
+}
+
 int bundle::refine_splice_graph()
 {
 	while(true)
@@ -789,17 +833,19 @@ int bundle::remove_small_edges()
 	set<int> sv2;
 	SE se;
 	edge_iterator it1, it2;
-	double ww = 0;
-	edge_descriptor ee = null_edge;
+	//double ww = 0;
+	//edge_descriptor ee = null_edge;
 	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
 	{
 		double w = gr.get_edge_weight(*it1);
 
+		/*
 		if(w > ww)
 		{
 			ww = w;
 			ee = (*it1);
 		}
+		*/
 
 		int s = (*it1)->source();
 		int t = (*it1)->target();
@@ -812,8 +858,19 @@ int bundle::remove_small_edges()
 		sv2.insert(s);
 	}
 
+	/*
 	if(ee != null_edge)
 	{
+		se.insert(ee);
+		sv1.insert(ee->target());
+		sv2.insert(ee->source());
+	}
+	*/
+
+	VE me = compute_maximal_edges();
+	for(int i = 0; i < me.size(); i++)
+	{
+		edge_descriptor ee = me[i];
 		se.insert(ee);
 		sv1.insert(ee->target());
 		sv2.insert(ee->source());
@@ -861,7 +918,7 @@ int bundle::remove_small_edges()
 
 	for(int i = 0; i < ve.size(); i++)
 	{
-		//printf("remove edge (%d, %d), weight = %.2lf\n", ve[i]->source(), ve[i]->target(), gr.get_edge_weight(ve[i]));
+		printf("remove edge (%d, %d), weight = %.2lf\n", ve[i]->source(), ve[i]->target(), gr.get_edge_weight(ve[i]));
 		gr.remove_edge(ve[i]);
 	}
 

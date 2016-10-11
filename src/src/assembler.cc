@@ -164,7 +164,8 @@ int assembler::process(const bundle_base &bb)
 
 		int cnt = gr.count_junctions();
 		double ss = gr.compute_coverage() / average_read_length;
-		if(ss < min_splice_graph_coverage && cnt < min_junction_count) continue;
+		//if(ss < min_splice_graph_coverage && cnt < min_junction_count) continue;
+		if(ss < min_splice_graph_coverage) continue;
 
 		scallop3 sc(gid, gr, hs);
 		sc.assemble();

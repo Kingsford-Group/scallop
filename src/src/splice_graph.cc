@@ -971,7 +971,7 @@ int splice_graph::print()
 {
 	for(int i = 0; i < num_vertices(); i++)
 	{
-		if(degree(i) <= 1) continue;
+		//if(degree(i) <= 1) continue;
 		vertex_info vi = get_vertex_info(i);
 		edge_iterator it1, it2;
 		printf("vertex %d, range = [%d, %d), length = %d\n", i, vi.lpos, vi.rpos, vi.rpos - vi.lpos);
