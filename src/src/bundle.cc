@@ -57,7 +57,8 @@ int bundle::build()
 	remove_inner_vertices();
 	remove_inner_start_boundaries();
 	remove_inner_end_boundaries();
-	while(remove_spanning_edges());
+
+	//while(remove_spanning_edges());
 
 	if(extend_isolated_boundary == true)
 	{
@@ -828,11 +829,15 @@ VE bundle::compute_maximal_edges()
 
 	sort(ve.begin(), ve.end());
 
+	for(int i = 1; i < ve.size(); i++) assert(ve[i - 1].first >= ve[i].first);
+
 	VE x;
 	set<int> sc;
 	for(int i = ve.size() - 1; i >= 0; i--)
 	{
 		edge_descriptor e = ve[i].second;
+		double w = gr.get_edge_weight(e);
+		if(w < 1.5) break;
 		int s = e->source();
 		int t = e->target();
 		if(s == 0) continue;
@@ -870,22 +875,11 @@ int bundle::remove_small_edges()
 	set<int> sv2;
 	SE se;
 	edge_iterator it1, it2;
-	//double ww = 0;
-	//edge_descriptor ee = null_edge;
 	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
 	{
-		double w = gr.get_edge_weight(*it1);
-
-		/*
-		if(w > ww)
-		{
-			ww = w;
-			ee = (*it1);
-		}
-		*/
-
 		int s = (*it1)->source();
 		int t = (*it1)->target();
+		double w = gr.get_edge_weight(*it1);
 		int32_t p1 = gr.get_vertex_info(s).rpos;
 		int32_t p2 = gr.get_vertex_info(t).lpos;
 		if(w < min_splice_edge_weight) continue;
@@ -894,15 +888,6 @@ int bundle::remove_small_edges()
 		sv1.insert(t);
 		sv2.insert(s);
 	}
-
-	/*
-	if(ee != null_edge)
-	{
-		se.insert(ee);
-		sv1.insert(ee->target());
-		sv2.insert(ee->source());
-	}
-	*/
 
 	VE me = compute_maximal_edges();
 	for(int i = 0; i < me.size(); i++)
