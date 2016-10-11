@@ -829,7 +829,7 @@ VE bundle::compute_maximal_edges()
 
 	sort(ve.begin(), ve.end());
 
-	for(int i = 1; i < ve.size(); i++) assert(ve[i - 1].first >= ve[i].first);
+	for(int i = 1; i < ve.size(); i++) assert(ve[i - 1].first <= ve[i].first);
 
 	VE x;
 	set<int> sc;
