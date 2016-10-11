@@ -782,7 +782,7 @@ bool bundle::remove_spanning_edges()
 		double w1 = gr.get_vertex_weight(s);
 		double w2 = gr.get_vertex_weight(s);
 		assert(s < t);
-		if(t == s + 1) continue;
+		if(t <= s + 2) continue;
 		if(gr.out_degree(s) == 1) continue;
 		if(gr.in_degree(t) == 1) continue;
 		if(w >= min_spanning_edge_weight) continue;
