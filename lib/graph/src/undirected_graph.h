@@ -28,6 +28,7 @@ public:
 	// algorithms
 	virtual bool intersect(edge_descriptor ex, edge_descriptor ey);
 	vector< set<int> > compute_connected_components();
+	vector<int> assign_connected_components();
 
 	// print and draw
 	int draw(const string &file, const MIS &mis, const MES &mes, double len);

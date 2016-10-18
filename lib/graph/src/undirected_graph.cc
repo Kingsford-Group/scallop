@@ -79,6 +79,26 @@ PEEI undirected_graph::out_edges(int x)
 	return p;
 }
 
+vector<int> undirected_graph::assign_connected_components()
+{
+	vector<bool> mm;
+	vector<int> vv;
+	mm.assign(num_vertices(), false);
+	vv.assign(num_vertices(), -1);
+
+	int cc = 0;
+	for(int i = 0; i < num_vertices(); i++)
+	{
+		if(mm[i] == true) continue;
+		vector<int> v;
+		bfs(i, v);
+		for(int k = 0; k < v.size(); k++) mm[v[k]] = true;
+		for(int k = 0; k < v.size(); k++) vv[v[k]] = cc;
+		cc++;
+	}
+	return vv;
+}
+
 vector< set<int> > undirected_graph::compute_connected_components()
 {
 	vector<bool> m;
