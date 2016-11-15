@@ -9,7 +9,6 @@
 #include "splice_graph.h"
 #include "hyper_set.h"
 #include "path.h"
-#include "segment.h"
 #include "gene.h"
 #include "transcript.h"
 

@@ -14,8 +14,7 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  vertex_info.h vertex_info.cc \
 				  edge_info.h edge_info.cc \
 				  interval_map.h interval_map.cc \
-				  subsetsum1.h subsetsum1.cc \
-				  subsetsum4.h subsetsum4.cc \
+				  subsetsum.h subsetsum.cc \
 				  config.h config.cc \
 				  hit.h hit.cc \
 				  partial_exon.h partial_exon.cc \
@@ -30,8 +29,6 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  smoother.h smoother.cc \
 				  equation.h equation.cc \
 				  gtf.h gtf.cc \
-				  nested_graph.h nested_graph.cc \
-				  scallop1.h scallop1.cc \
-				  scallop3.h scallop3.cc \
+				  scallop.h scallop.cc \
 				  assembler.h assembler.cc \
 				  main.cc

@@ -19,12 +19,12 @@ typedef map<int, double> MID;
 typedef pair<PI, double> PPID;
 
 // for noisy splice graph
-class scallop3
+class scallop
 {
 public:
-	scallop3();
-	scallop3(const string &name, const splice_graph &gr, const hyper_set &hs);
-	virtual ~scallop3();
+	scallop();
+	scallop(const string &name, const splice_graph &gr, const hyper_set &hs);
+	virtual ~scallop();
 
 public:
 	int assemble();

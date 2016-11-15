@@ -2,7 +2,7 @@
 #include "util.h"
 #include "gurobi_c++.h"
 #include "smoother.h"
-#include "subsetsum4.h"
+#include "subsetsum.h"
 #include <cstdio>
 #include <algorithm>
 #include <set>
@@ -228,7 +228,7 @@ int router::split()
 		assert(eqn0.t.size() >= 1);
 	}
 
-	// split using subsetsum4
+	// split using subsetsum
 	equation eqn1;
 	eqn1.e = -1;
 
@@ -239,7 +239,7 @@ int router::split()
 
 	if(ss.size() >= 2 && tt.size() >= 2)
 	{
-		subsetsum4 sss(ss, tt);
+		subsetsum sss(ss, tt);
 		sss.solve();
 
 		eqn1.e = sss.eqn.e;

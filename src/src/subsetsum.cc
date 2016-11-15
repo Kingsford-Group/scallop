@@ -1,4 +1,4 @@
-#include "subsetsum4.h"
+#include "subsetsum.h"
 #include "config.h"
 #include <cstdio>
 #include <cmath>
@@ -6,12 +6,12 @@
 #include <algorithm>
 #include <cassert>
 
-subsetsum4::subsetsum4(const vector<PI> &s, const vector<PI> &t)
+subsetsum::subsetsum(const vector<PI> &s, const vector<PI> &t)
 	: source(s), target(t)
 {
 }
 
-int subsetsum4::solve()
+int subsetsum::solve()
 {
 	rescale();
 	init(source, table1, ubound1);
@@ -22,7 +22,7 @@ int subsetsum4::solve()
 	return 0;
 }
 
-int subsetsum4::rescale()
+int subsetsum::rescale()
 {
 	int s1 = 0, s2 = 0;
 	for(int i = 0; i < source.size(); i++) s1 += source[i].first;
@@ -63,7 +63,7 @@ int subsetsum4::rescale()
 	return 0;
 }
 
-int subsetsum4::init(const vector<PI> &vv, vector< vector<int> > &table, int ubound)
+int subsetsum::init(const vector<PI> &vv, vector< vector<int> > &table, int ubound)
 {
 	table.resize(vv.size() + 1);
 	for(int i = 0; i < table.size(); i++)
@@ -83,7 +83,7 @@ int subsetsum4::init(const vector<PI> &vv, vector< vector<int> > &table, int ubo
 	return 0;
 }
 
-int subsetsum4::fill(const vector<PI> &vv, vector< vector<int> > &table, int ubound)
+int subsetsum::fill(const vector<PI> &vv, vector< vector<int> > &table, int ubound)
 {
 	for(int j = 1; j <= ubound; j++)
 	{
@@ -104,7 +104,7 @@ int subsetsum4::fill(const vector<PI> &vv, vector< vector<int> > &table, int ubo
 	return 0;
 }
 
-int subsetsum4::backtrace(int t, const vector<PI> &vv, const vector< vector<int> > &table, vector<int> &ss)
+int subsetsum::backtrace(int t, const vector<PI> &vv, const vector< vector<int> > &table, vector<int> &ss)
 {
 	ss.clear();
 	if(table.size() <= 0) return -1;
@@ -127,7 +127,7 @@ int subsetsum4::backtrace(int t, const vector<PI> &vv, const vector< vector<int>
 	return 0;
 }
 
-int subsetsum4::optimize()
+int subsetsum::optimize()
 {
 	vector<PI> v;
 	int n1 = source.size();
@@ -198,7 +198,7 @@ int subsetsum4::optimize()
 	return 0;
 }
 
-int subsetsum4::print()
+int subsetsum::print()
 {
 	printf("source: ");
 	for(int i = 0; i < source.size(); i++) printf("%d:%d, ", source[i].second, source[i].first);
@@ -253,7 +253,7 @@ int subsetsum4::print()
 	return 0;
 }
 
-int subsetsum4::test()
+int subsetsum::test()
 {
 	//118:0 1:1 63:2 1:3 
 	//57:4 237:5 
@@ -267,7 +267,7 @@ int subsetsum4::test()
 	t.push_back(PI(29, 1));
 	t.push_back(PI(54, 2));
 
-	subsetsum4 sss(v, t);
+	subsetsum sss(v, t);
 	sss.solve();
 	sss.print();
 

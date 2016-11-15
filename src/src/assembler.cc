@@ -6,7 +6,7 @@
 #include "gtf.h"
 #include "config.h"
 #include "assembler.h"
-#include "scallop3.h"
+#include "scallop.h"
 #include "sgraph_compare.h"
 #include "super_graph.h"
 
@@ -167,7 +167,7 @@ int assembler::process(const bundle_base &bb)
 		//if(ss < min_splice_graph_coverage && cnt < min_junction_count) continue;
 		if(ss < min_splice_graph_coverage) continue;
 
-		scallop3 sc(gid, gr, hs);
+		scallop sc(gid, gr, hs);
 		sc.assemble();
 
 		vector<path> pp;

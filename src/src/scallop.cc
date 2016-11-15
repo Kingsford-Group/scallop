@@ -1,4 +1,4 @@
-#include "scallop3.h"
+#include "scallop.h"
 #include "config.h"
 #include "gurobi_c++.h"
 #include "binomial.h"
@@ -9,10 +9,10 @@
 #include <cfloat>
 #include <algorithm>
 
-scallop3::scallop3()
+scallop::scallop()
 {}
 
-scallop3::scallop3(const string &s, const splice_graph &g, const hyper_set &h)
+scallop::scallop(const string &s, const splice_graph &g, const hyper_set &h)
 	: name(s), gr(g), hs(h)
 {
 	round = 0;
@@ -26,11 +26,11 @@ scallop3::scallop3(const string &s, const splice_graph &g, const hyper_set &h)
 	print();
 }
 
-scallop3::~scallop3()
+scallop::~scallop()
 {
 }
 
-int scallop3::assemble()
+int scallop::assemble()
 {
 	classify();
 
@@ -91,7 +91,7 @@ int scallop3::assemble()
 	return 0;
 }
 
-int scallop3::assert_weights()
+int scallop::assert_weights()
 {
 	edge_iterator it1, it2;
 	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
@@ -102,7 +102,7 @@ int scallop3::assert_weights()
 	return 0;
 }
 
-int scallop3::refine_splice_graph()
+int scallop::refine_splice_graph()
 {
 	while(true)
 	{
@@ -134,7 +134,7 @@ int scallop3::refine_splice_graph()
 	return 0;
 }
 
-bool scallop3::resolve_hyper_vertex(int status)
+bool scallop::resolve_hyper_vertex(int status)
 {
 	int root = -1, se = -1;
 	double ratio1 = compute_smallest_splitable_vertex(root, status);
@@ -190,7 +190,7 @@ bool scallop3::resolve_hyper_vertex(int status)
 	return false;
 }
 
-bool scallop3::resolve_hyper_tree(int status)
+bool scallop::resolve_hyper_tree(int status)
 {
 	int root = -1;
 	undirected_graph ug;
@@ -275,7 +275,7 @@ bool scallop3::resolve_hyper_tree(int status)
 	return false;
 }
 
-bool scallop3::resolve_hyper_edge0()
+bool scallop::resolve_hyper_edge0()
 {
 	int ee1 = -1, ee2 = -1, root = -1;
 	for(int i = 1; i < gr.num_vertices(); i++)
@@ -335,7 +335,7 @@ bool scallop3::resolve_hyper_edge0()
 	return true;
 }
 
-bool scallop3::resolve_hyper_edge1()
+bool scallop::resolve_hyper_edge1()
 {
 	edge_iterator it1, it2;
 	vector<int> v1, v2;
@@ -426,7 +426,7 @@ bool scallop3::resolve_hyper_edge1()
 	return true;
 }
 
-bool scallop3::resolve_small_edges()
+bool scallop::resolve_small_edges()
 {
 	int se = -1;
 	double ratio = compute_smallest_removable_edge(se);
@@ -445,7 +445,7 @@ bool scallop3::resolve_small_edges()
 	return true;
 }
 
-bool scallop3::resolve_trivial_vertex()
+bool scallop::resolve_trivial_vertex()
 {
 	int root = -1;
 	double ratio = -1;
@@ -473,7 +473,7 @@ bool scallop3::resolve_trivial_vertex()
 	return true;
 }
 
-int scallop3::classify()
+int scallop::classify()
 {
 	assert(gr.num_vertices() >= 2);
 	if(gr.num_vertices() == 2) return TRIVIAL;
@@ -499,7 +499,7 @@ int scallop3::classify()
 	else return NORMAL;
 }
 
-int scallop3::add_pseudo_hyper_edges()
+int scallop::add_pseudo_hyper_edges()
 {
 	for(int k = 1; k < gr.num_vertices() - 1; k++)
 	{
@@ -535,7 +535,7 @@ int scallop3::add_pseudo_hyper_edges()
 	return 0;
 }
 
-int scallop3::init_super_edges()
+int scallop::init_super_edges()
 {
 	mev.clear();
 	med.clear();
@@ -551,7 +551,7 @@ int scallop3::init_super_edges()
 	return 0;
 }
 
-int scallop3::init_inner_weights()
+int scallop::init_inner_weights()
 {
 	edge_iterator it1, it2;
 	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
@@ -565,7 +565,7 @@ int scallop3::init_inner_weights()
 	return 0;
 }
 
-int scallop3::init_vertex_map()
+int scallop::init_vertex_map()
 {
 	v2v.clear();
 	for(int i = 0; i < gr.num_vertices(); i++)
@@ -575,7 +575,7 @@ int scallop3::init_vertex_map()
 	return 0;
 }
 
-int scallop3::get_weights(int x, MID &m)
+int scallop::get_weights(int x, MID &m)
 {
 	edge_iterator it1, it2;
 	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
@@ -593,7 +593,7 @@ int scallop3::get_weights(int x, MID &m)
 	return 0;
 }
 
-int scallop3::set_weights(MID &m)
+int scallop::set_weights(MID &m)
 {
 	for(MID::iterator it = m.begin(); it != m.end(); it++)
 	{
@@ -604,7 +604,7 @@ int scallop3::set_weights(MID &m)
 	return 0;
 }
 
-int scallop3::decompose_tree(const vector<PPID> &vpi)
+int scallop::decompose_tree(const vector<PPID> &vpi)
 {
 	map<int, int> m;
 	for(int i = 0; i < vpi.size(); i++)
@@ -643,7 +643,7 @@ int scallop3::decompose_tree(const vector<PPID> &vpi)
 	return 0;
 }
 
-int scallop3::decompose_trivial_vertex(int x)
+int scallop::decompose_trivial_vertex(int x)
 {
 	balance_vertex(x);
 
@@ -668,7 +668,7 @@ int scallop3::decompose_trivial_vertex(int x)
 	return 0;
 }
 
-int scallop3::greedy_decompose(int num)
+int scallop::greedy_decompose(int num)
 {
 	if(gr.num_edges() == 0) return 0;
 
@@ -698,7 +698,7 @@ int scallop3::greedy_decompose(int num)
 	return 0;
 }
 
-int scallop3::split_merge_path(const VE &p, double wx)
+int scallop::split_merge_path(const VE &p, double wx)
 {
 	vector<int> v;
 	for(int i = 0; i < p.size(); i++)
@@ -710,7 +710,7 @@ int scallop3::split_merge_path(const VE &p, double wx)
 	return split_merge_path(v, wx);
 }
 
-int scallop3::split_merge_path(const vector<int> &p, double ww)
+int scallop::split_merge_path(const vector<int> &p, double ww)
 {
 	if(p.size() == 0) return -1;
 	int ee = split_edge(p[0], ww);
@@ -722,7 +722,7 @@ int scallop3::split_merge_path(const vector<int> &p, double ww)
 	return ee;
 }
 
-int scallop3::merge_adjacent_equal_edges(int x, int y)
+int scallop::merge_adjacent_equal_edges(int x, int y)
 {
 	if(i2e[x] == null_edge) return -1;
 	if(i2e[y] == null_edge) return -1;
@@ -796,7 +796,7 @@ int scallop3::merge_adjacent_equal_edges(int x, int y)
 	return n;
 }
 
-int scallop3::remove_edge(int e)
+int scallop::remove_edge(int e)
 {
 	edge_descriptor ee = i2e[e];
 	assert(ee != null_edge);
@@ -810,7 +810,7 @@ int scallop3::remove_edge(int e)
 	return 0;
 }
 
-int scallop3::merge_adjacent_edges(int x, int y, double ww)
+int scallop::merge_adjacent_edges(int x, int y, double ww)
 {
 	if(i2e[x] == null_edge) return -1;
 	if(i2e[y] == null_edge) return -1;
@@ -833,7 +833,7 @@ int scallop3::merge_adjacent_edges(int x, int y, double ww)
 	return xy;
 }
 
-int scallop3::merge_adjacent_edges(int x, int y)
+int scallop::merge_adjacent_edges(int x, int y)
 {
 
 	if(i2e[x] == null_edge) return -1;
@@ -849,7 +849,7 @@ int scallop3::merge_adjacent_edges(int x, int y)
 	return merge_adjacent_edges(x, y, ww);
 }
 
-int scallop3::split_edge(int ei, double w)
+int scallop::split_edge(int ei, double w)
 {
 	assert(i2e[ei] != null_edge);
 	edge_descriptor ee = i2e[ei];
@@ -896,7 +896,7 @@ int scallop3::split_edge(int ei, double w)
 	return n;
 }
 
-int scallop3::complete_graph(undirected_graph &ug, const vector<int> &u2e, int root)
+int scallop::complete_graph(undirected_graph &ug, const vector<int> &u2e, int root)
 {
 	edge_descriptor e1 = gr.max_in_edge(root);
 	edge_descriptor e2 = gr.max_out_edge(root);
@@ -923,7 +923,7 @@ int scallop3::complete_graph(undirected_graph &ug, const vector<int> &u2e, int r
 	return 0;
 }
 
-double scallop3::balance_vertex(undirected_graph &ug, const vector<int> &u2e, vector<PPID> &vpi)
+double scallop::balance_vertex(undirected_graph &ug, const vector<int> &u2e, vector<PPID> &vpi)
 {
 	GRBEnv *env = new GRBEnv();
 	GRBModel *model = new GRBModel(*env);
@@ -1022,7 +1022,7 @@ double scallop3::balance_vertex(undirected_graph &ug, const vector<int> &u2e, ve
 	return ww2 / ww1;
 }
 
-int scallop3::balance_vertex(int v)
+int scallop::balance_vertex(int v)
 {
 	if(gr.degree(v) <= 0) return 0;
 
@@ -1090,7 +1090,7 @@ int scallop3::balance_vertex(int v)
 	return 0;
 }
 
-double scallop3::compute_balance_ratio(int v)
+double scallop::compute_balance_ratio(int v)
 {
 	edge_iterator it1, it2;
 	double w1 = 0, w2 = 0;
@@ -1112,7 +1112,7 @@ double scallop3::compute_balance_ratio(int v)
 	else return w2 / w1;
 }
 
-int scallop3::split_vertex(int x, const vector<int> &xe, const vector<int> &ye)
+int scallop::split_vertex(int x, const vector<int> &xe, const vector<int> &ye)
 {
 	assert(x != 0);
 	assert(x != gr.num_vertices() - 1);
@@ -1176,7 +1176,7 @@ int scallop3::split_vertex(int x, const vector<int> &xe, const vector<int> &ye)
 	return 0;
 }
 
-vector<int> scallop3::topological_sort()
+vector<int> scallop::topological_sort()
 {
 	vector<PI> v;
 	for(int i = 0; i < v2v.size(); i++)
@@ -1194,7 +1194,7 @@ vector<int> scallop3::topological_sort()
 	return vv;
 }
 
-int scallop3::collect_existing_st_paths()
+int scallop::collect_existing_st_paths()
 {
 	for(int i = 0; i < i2e.size(); i++)
 	{
@@ -1206,7 +1206,7 @@ int scallop3::collect_existing_st_paths()
 	return 0;
 }
 
-int scallop3::collect_path(int e)
+int scallop::collect_path(int e)
 {
 	assert(mev.find(i2e[e]) != mev.end());
 	assert(med.find(i2e[e]) != med.end());
@@ -1241,7 +1241,7 @@ int scallop3::collect_path(int e)
 	return 0;
 }
 
-double scallop3::compute_smallest_splitable_vertex(int &root, int status)
+double scallop::compute_smallest_splitable_vertex(int &root, int status)
 {
 	root = -1;
 	double ratio = 999;
@@ -1268,7 +1268,7 @@ double scallop3::compute_smallest_splitable_vertex(int &root, int status)
 	return ratio;
 }
 
-double scallop3::compute_smallest_removable_edge(int &se)
+double scallop::compute_smallest_removable_edge(int &se)
 {
 	se = -1;
 	int root = -1;
@@ -1296,7 +1296,7 @@ double scallop3::compute_smallest_removable_edge(int &se)
 	return ratio;
 }
 
-double scallop3::compute_smallest_edge(int x, int &e)
+double scallop::compute_smallest_edge(int x, int &e)
 {
 	e = -1;
 	edge_iterator it1, it2;
@@ -1336,7 +1336,7 @@ double scallop3::compute_smallest_edge(int x, int &e)
 	return ratio;
 }
 
-int scallop3::stats()
+int scallop::stats()
 {
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
@@ -1348,7 +1348,7 @@ int scallop3::stats()
 	return 0;
 }
 
-int scallop3::print()
+int scallop::print()
 {
 	int n = 0;
 	for(int i = 0; i < gr.num_vertices(); i++) 
@@ -1376,7 +1376,7 @@ int scallop3::print()
 	return 0;
 }
 
-int scallop3::draw_splice_graph(const string &file) 
+int scallop::draw_splice_graph(const string &file) 
 {
 	MIS mis;
 	char buf[10240];

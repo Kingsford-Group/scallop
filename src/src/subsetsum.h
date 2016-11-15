@@ -11,10 +11,10 @@ typedef pair<int, int> PI;
 // partition s and t into s1/s2 and t1/t2
 // such that sum(s1) is close to sum(t1)
 // AND sum(s2) is close to sum(t2)
-class subsetsum4
+class subsetsum
 {
 public:
-	subsetsum4(const vector<PI> &s, const vector<PI> &t);
+	subsetsum(const vector<PI> &s, const vector<PI> &t);
 
 private:
 	vector<PI> source;					// given input
