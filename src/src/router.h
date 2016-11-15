@@ -9,6 +9,8 @@
 
 using namespace std;
 
+typedef pair<PI, double> PPID;
+
 class router
 {
 public:
@@ -27,13 +29,12 @@ public:
 	vector<int> u2e;			// index to edge
 	undirected_graph ug;		// bipartite graph
 
+	int status;					// splitable or not
 	double ratio;				// worst ratio
-	vector<equation> eqns;		// divide results
-
-	// 0: trivial
-	// 1: ug is a tree
-	// 2: ug has a single component, but not a tree
-	int status;					
+	double obj1;				// increase of objective for splitable vertex
+	double obj2;				// increase of objective for insplitable vertex
+	vector<equation> eqns;		// decomposotion result for splitable vertex
+	vector<PPID> vpi;			// decomposition result for insplitable vertex
 
 public:
 	// recompute everything
@@ -41,10 +42,9 @@ public:
 
 	int build_indices();					// build u2e and e2u
 	int build_bipartite_graph();			// build bipartite graph
+	int classify();							// classify, splitable/insplitable
 	int add_single_equation();				// cannot be divided
 	int split();							// use subsetsum4
-	//bool balance();							// balance weight with tree
-	vector<PI> build_tree_order();			// compute tree order
 
 	// print and stats
 	int print() const;

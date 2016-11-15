@@ -16,7 +16,6 @@ typedef pair<int, int> PI;
 typedef map<int, int> MI;
 typedef pair<int, double> PID;
 typedef map<int, double> MID;
-typedef pair<PI, double> PPID;
 
 // for noisy splice graph
 class scallop
@@ -40,7 +39,6 @@ public:
 	hyper_set hs;						// hyper edges
 	int round;							// round in iteration
 	vector<path> paths;					// predicted transcripts
-	vector<router> routers;
 
 private:
 	// init
