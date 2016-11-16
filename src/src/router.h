@@ -29,8 +29,8 @@ public:
 	vector<int> u2e;			// index to edge
 	undirected_graph ug;		// bipartite graph
 
-	double beta1;				// factor for insplitable vertex
-	double beta2;				// factor for splitable vertex
+	vector<double> bw;			// balanced weight
+	double bratio;				// balanced ratio
 
 	int status;					// splitable or not
 	double ratio;
@@ -41,18 +41,18 @@ public:
 public:
 	// recompute everything
 	int build();
+	int solve();
 
-	int compute_params();					// compute beta1 and beta2
-	int assert_balance();					// root is balanced
+	int print() const;
+	int stats();
+
+private:
 	int build_indices();					// build u2e and e2u
 	int build_bipartite_graph();			// build bipartite graph
+	int build_balanced_weights();			// compute balanced weights
 	int classify();							// classify, splitable/insplitable
 	int decompose();						// for insplitable root
 	int split();							// for splitable root
-
-	// print and stats
-	int print() const;
-	int stats();
 };
 
 #endif

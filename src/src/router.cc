@@ -30,8 +30,9 @@ router& router::operator=(const router &rt)
 	e2u = rt.e2u;
 	u2e = rt.u2e;
 
-	beta1 = rt.beta1;
-	beta2 = rt.beta2;
+	bw = rt.bw;
+	bratio = rt.bratio;
+
 	delta = rt.delta;
 	status = rt.status;
 	eqns = rt.eqns;
@@ -50,52 +51,17 @@ int router::build()
 	eqns.clear();
 	vpi.clear();
 
-	assert_balance();
 	build_indices();
 	build_bipartite_graph();
-	compute_params();
 	classify();
 
+	return status;
+}
+
+int router::solve()
+{
 	if(status == SPLITABLE) split();
 	else if(status == INSPLITABLE) decompose();
-
-	return 0;
-}
-
-int router::assert_balance()
-{
-	edge_iterator it1, it2;
-	double w1 = 0, w2 = 0;
-	for(tie(it1, it2) = gr.in_edges(root); it1 != it2; it1++)
-	{
-		double w = gr.get_edge_weight(*it1);
-		w1 += w;
-	}
-	for(tie(it1, it2) = gr.out_edges(root); it1 != it2; it1++)
-	{
-		double w = gr.get_edge_weight(*it1);
-		w2 += w;
-	}
-	assert(fabs(w1 - w2) <= SMIN);
-	return 0;
-}
-
-int router::compute_params()
-{
-	beta1 = beta2 = 0;
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.in_edges(root); it1 != it2; it1++)
-	{
-		double w = gr.get_edge_weight(*it1);
-		beta1 += w;
-	}
-	for(tie(it1, it2) = gr.out_edges(root); it1 != it2; it1++)
-	{
-		double w = gr.get_edge_weight(*it1);
-		beta1 += w;
-	}
-	beta1 = 1.0 / beta1 / beta1;
-	beta2 = 1.0;
 	return 0;
 }
 
@@ -161,20 +127,44 @@ int router::classify()
 	return 0;
 }
 
+int router::build_balanced_weights()
+{
+	bw.clear();
+	double sum1 = 0, sum2 = 0;
+	for(int i = 0; i < u2e.size(); i++)
+	{
+		edge_descriptor e = i2e[u2e[i]];
+		assert(e != null_edge);
+		double w = gr.get_edge_weight(e);
+		bw.push_back(w);
+		if(i < gr.in_degree(root)) sum1 += w;
+		else sum2 += w;
+	}
+
+	if(sum1 >= sum2) bratio = sqrt(sum1 / sum2);
+	else bratio = sqrt(sum2 / sum1);
+
+	for(int i = 0; i < gr.in_degree(root); i++)
+	{
+		if(sum1 >= sum2) bw[i] /= bratio;
+		else bw[i] *= bratio;
+	}
+
+	for(int i = gr.in_degree(root); i < gr.degree(root); i++)
+	{
+		if(sum2 >= sum1) bw[i] /= bratio;
+		else bw[i] *= bratio;
+	}
+	return 0;
+}
+
 int router::split()
 {
 	if(status != SPLITABLE) return 0;
 
 	vector< set<int> > vv = ug.compute_connected_components();
 
-	vector<double> vw;
-	for(int i = 0; i < u2e.size(); i++)
-	{
-		edge_descriptor e = i2e[u2e[i]];
-		assert(e != null_edge);
-		double w = gr.get_edge_weight(e);
-		vw.push_back(w);
-	}
+	build_balanced_weights();
 
 	vector<PI> ss;
 	vector<PI> tt;
@@ -183,7 +173,7 @@ int router::split()
 		double ww = 0;
 		for(set<int>::iterator it = vv[i].begin(); it != vv[i].end(); it++)
 		{
-			double w = vw[*it];
+			double w = bw[*it];
 			if(*it >= gr.in_degree(root)) w = 0 - w;
 			ww += w;
 		}
@@ -242,9 +232,7 @@ int router::split()
 	eqns.push_back(eqn1);
 	eqns.push_back(eqn2);
 
-	delta = -2.0 * param_alpha * beta1 * eqn1.e * eqn2.e + (1.0 - param_alpha) * beta2;
-
-	//printf("eqn.e = (%.3lf, %.3lf), alpha = %.3lf, beta = (%.3lf, %.3lf), delta = %.3lf\n", eqn1.e, eqn2.e, param_alpha, beta1, beta2, delta);
+	delta = -1.0 * param_alpha * bratio * (eqn1.e * 0.5 + eqn2.e * 0.5) + (1.0 - param_alpha);
 
 	return 0;
 }
@@ -276,6 +264,8 @@ int router::decompose()
 		if(ug.degree(j) >= 1) continue;
 		ug.add_edge(k1, j);
 	}
+
+	build_balanced_weights();
 
 	// run quadratic programming
 	GRBEnv *env = new GRBEnv();
@@ -327,7 +317,8 @@ int router::decompose()
 	GRBQuadExpr obj;
 	for(int i = 0; i < u2e.size(); i++)
 	{
-		double w = gr.get_edge_weight(i2e[u2e[i]]);
+		//double w = gr.get_edge_weight(i2e[u2e[i]]);
+		double w = bw[i];
 		obj += (wvars[i] - w) * (wvars[i] - w);
 	}
 
@@ -361,8 +352,16 @@ int router::decompose()
 		vpi.push_back(PPID(p, w));
 	}
 
-	double opt = model->get(GRB_DoubleAttr_ObjVal);
-	delta = -1.0 * param_alpha * beta1 * opt + (1 - param_alpha) * beta2 * (gr.degree(root) * 1.0 - 1.0 - ve.size() * 1.0);
+	double var = 0;
+	double sum = 0;
+	for(int i = 0; i < wvars.size(); i++)
+	{
+		double w = wvars[i].get(GRB_DoubleAttr_X);
+		var += fabs(w - bw[i]);
+		sum += bw[i];
+	}
+	var = var / sum;
+	delta = -1.0 * param_alpha * bratio * var + (1 - param_alpha) * (gr.degree(root) * 1.0 - 1.0 - ve.size() * 1.0);
 	//printf("opt = %.3lf, alpha = %.3lf, beta = (%.3lf, %.3lf), delta = %.3lf, degree = (%d, %lu)\n", opt, param_alpha, beta1, beta2, delta, gr.degree(root), ve.size());
 
 	delete model;

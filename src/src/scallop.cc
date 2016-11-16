@@ -37,7 +37,7 @@ int scallop::assemble()
 	while(true)
 	{
 		refine_splice_graph();
-		bool b = iterate();
+		bool b = resolve_splitable_vertex();
 		if(b == true) print();
 		if(b == true) continue;
 		break;
@@ -91,19 +91,16 @@ int scallop::refine_splice_graph()
 	return 0;
 }
 
-bool scallop::iterate()
+bool scallop::resolve_splitable_vertex()
 {
 	int root = -1;
-	int status = -1;
-	double delta = 0 - DBL_MAX;
-	vector<PPID> vpi;
+	double delta = 0;
 	equation eqn;
-
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.degree(i) <= 0) continue;
-		assert(gr.in_degree(i) >= 1);
-		assert(gr.out_degree(i) >= 1);
+		if(gr.in_degree(i) <= 1) continue;
+		if(gr.out_degree(i) <= 1) continue;
 
 		MID m;
 		get_weights(i, m);
@@ -670,7 +667,6 @@ int scallop::decompose_tree(const vector<PPID> &vpi)
 int scallop::decompose_trivial_vertex(int x)
 {
 	balance_vertex(x);
-
 	vector<PPID> vpi;
 	edge_iterator it1, it2;
 	edge_iterator ot1, ot2;
@@ -687,7 +683,6 @@ int scallop::decompose_trivial_vertex(int x)
 			vpi.push_back(PPID(PI(e1, e2), w));
 		}
 	}
-
 	decompose_tree(vpi);
 	return 0;
 }
