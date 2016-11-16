@@ -96,7 +96,7 @@ bool scallop::iterate()
 {
 	int root = -1;
 	int status = -1;
-	double delta = DBL_MIN;
+	double delta = 0 - DBL_MAX;
 	vector<PPID> vpi;
 	equation eqn;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
