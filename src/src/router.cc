@@ -84,13 +84,18 @@ int router::compute_params()
 {
 	beta1 = beta2 = 0;
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	for(tie(it1, it2) = gr.in_edges(root); it1 != it2; it1++)
 	{
 		double w = gr.get_edge_weight(*it1);
 		beta1 += w;
 	}
-	beta1 = 1.0 / beta1;
-	beta2 = 1.0 / gr.num_edges();
+	for(tie(it1, it2) = gr.out_edges(root); it1 != it2; it1++)
+	{
+		double w = gr.get_edge_weight(*it1);
+		beta1 += w;
+	}
+	beta1 = 1.0 / beta1 / beta1;
+	beta2 = 1.0;
 	return 0;
 }
 
@@ -239,6 +244,8 @@ int router::split()
 
 	delta = -2.0 * param_alpha * beta1 * eqn1.e * eqn2.e + (1.0 - param_alpha) * beta2;
 
+	//printf("eqn.e = (%.3lf, %.3lf), alpha = %.3lf, beta = (%.3lf, %.3lf), delta = %.3lf\n", eqn1.e, eqn2.e, param_alpha, beta1, beta2, delta);
+
 	return 0;
 }
 
@@ -355,7 +362,8 @@ int router::decompose()
 	}
 
 	double opt = model->get(GRB_DoubleAttr_ObjVal);
-	delta = -1.0 * param_alpha * beta1 * opt + (1 - param_alpha) * beta2 * (1 + gr.degree(root) - ve.size());
+	delta = -1.0 * param_alpha * beta1 * opt + (1 - param_alpha) * beta2 * (gr.degree(root) * 1.0 - 1.0 - ve.size() * 1.0);
+	//printf("opt = %.3lf, alpha = %.3lf, beta = (%.3lf, %.3lf), delta = %.3lf, degree = (%d, %lu)\n", opt, param_alpha, beta1, beta2, delta, gr.degree(root), ve.size());
 
 	delete model;
 	delete env;

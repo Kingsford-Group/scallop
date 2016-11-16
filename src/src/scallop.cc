@@ -71,11 +71,10 @@ int scallop::refine_splice_graph()
 			int s = (*it1)->source();
 			int t = (*it1)->target();
 			int e = e2i[*it1];
-			//if(s == 0) continue;
-			//if(t == gr.num_vertices() - 1) continue;
-
+			
 			//printf(" refine (%d, %d), degree = (%d, %d)\n", s, t, gr.in_degree(s), gr.out_degree(t));
 
+			if(s == 0 && t == gr.num_vertices() - 1) continue;
 			if(gr.in_degree(s) >= 1 && gr.out_degree(t) >= 1) continue;
 			if(s == 0 && gr.out_degree(t) >= 1) continue;
 			if(t == gr.num_vertices() - 1 && gr.in_degree(s) >= 1) continue;
@@ -99,10 +98,12 @@ bool scallop::iterate()
 	double delta = 0 - DBL_MAX;
 	vector<PPID> vpi;
 	equation eqn;
+
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
-		if(gr.in_degree(i) <= 1) continue;
-		if(gr.out_degree(i) <= 1) continue;
+		if(gr.degree(i) <= 0) continue;
+		assert(gr.in_degree(i) >= 1);
+		assert(gr.out_degree(i) >= 1);
 
 		MID m;
 		get_weights(i, m);
@@ -1131,8 +1132,8 @@ double scallop::compute_balance_ratio(int v)
 	assert(w1 >= SMIN);
 	assert(w2 >= SMIN);
 
-	if(w1 >= w2) return w1 / w2;
-	else return w2 / w1;
+	if(w1 >= w2) return sqrt(w1 / w2);
+	else return sqrt(w2 / w1);
 }
 
 int scallop::split_vertex(int x, const vector<int> &xe, const vector<int> &ye)
