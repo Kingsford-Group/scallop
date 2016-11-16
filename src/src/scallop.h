@@ -51,6 +51,7 @@ private:
 	int refine_splice_graph();
 
 	// resolve iteratively
+	bool iterate();
 	bool resolve_small_edges();
 	bool resolve_hyper_tree(int status);
 	bool resolve_hyper_vertex(int status);

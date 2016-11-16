@@ -29,7 +29,7 @@ int subsetsum::rescale()
 	for(int i = 0; i < target.size(); i++) s2 += target[i].first;
 
 	int ubound = (s1 > s2) ? s1 : s2;
-	if(ubound > 1000) ubound = 1000;
+	if(ubound > max_dp_table_size) ubound = max_dp_table_size;
 
 	double r1 = ubound * 1.0 / s1;
 	double r2 = ubound * 1.0 / s2;
@@ -50,12 +50,12 @@ int subsetsum::rescale()
 	for(int i = 0; i < source.size(); i++) s1 += source[i].first;
 	for(int i = 0; i < target.size(); i++) s2 += target[i].first;
 
-	/*
-	ubound1 = s1;		// TODO -1
-	ubound2 = s2;		// TODO -1
-	*/
-	ubound1 = s1 - 1;
-	ubound2 = s2 - 1;
+	ubound1 = s1;
+	ubound2 = s2;
+
+	// TODO
+	//ubound1 = s1 - 1;
+	//ubound2 = s2 - 1;
 
 	sort(source.begin(), source.end());
 	sort(target.begin(), target.end());
@@ -133,7 +133,7 @@ int subsetsum::optimize()
 	int n1 = source.size();
 	int n2 = target.size();
 
-	//v.push_back(PI(0, 0));
+	v.push_back(PI(0, 0));
 
 	for(int i = 1; i <= ubound1; i++)
 	{
@@ -162,7 +162,7 @@ int subsetsum::optimize()
 
 	int d = INT_MAX;
 	int k = -1;
-	for(int i = 0; i < v.size() - 1; i++)
+	for(int i = 0; i < v.size() - 2; i++)
 	{
 		if(v[i].second == v[i + 1].second) continue;
 		if(v[i + 1].first - v[i].first >= d) continue;
@@ -262,10 +262,12 @@ int subsetsum::test()
 	v.push_back(PI(10, 1));
 	v.push_back(PI(20, 2));
 	v.push_back(PI(39, 3));
+	v.push_back(PI(2, 4));
 
 	vector<PI> t;
 	t.push_back(PI(29, 1));
 	t.push_back(PI(54, 2));
+	t.push_back(PI(2, 3));
 
 	subsetsum sss(v, t);
 	sss.solve();

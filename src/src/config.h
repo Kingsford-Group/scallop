@@ -21,8 +21,8 @@ using namespace std;
 
 #define MAX_NUM_CIGAR 7
 
-#define SPLITABLE 0
 #define INSPLITABLE 1
+#define SPLITABLE 2
 
 
 //// parameters
@@ -83,8 +83,7 @@ extern bool output_tex_files;
 extern string fixed_gene_name;
 extern int max_num_bundles;
 extern bool strand_reverse;
-extern int min_gtf_transcripts_num;
-extern bool fast_mode;
+extern double param_alpha;
 
 // parse arguments
 int print_command_line(int argc, const char ** argv);

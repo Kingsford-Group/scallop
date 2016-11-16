@@ -29,22 +29,26 @@ public:
 	vector<int> u2e;			// index to edge
 	undirected_graph ug;		// bipartite graph
 
+	double beta1;				// factor for insplitable vertex
+	double beta2;				// factor for splitable vertex
+
 	int status;					// splitable or not
-	double ratio;				// worst ratio
-	double obj1;				// increase of objective for splitable vertex
-	double obj2;				// increase of objective for insplitable vertex
-	vector<equation> eqns;		// decomposotion result for splitable vertex
+	double ratio;
+	double delta;				// decrease of the objective function
 	vector<PPID> vpi;			// decomposition result for insplitable vertex
+	vector<equation> eqns;		// decomposotion result for splitable vertex
 
 public:
 	// recompute everything
 	int build();
 
+	int compute_params();					// compute beta1 and beta2
+	int assert_balance();					// root is balanced
 	int build_indices();					// build u2e and e2u
 	int build_bipartite_graph();			// build bipartite graph
 	int classify();							// classify, splitable/insplitable
-	int add_single_equation();				// cannot be divided
-	int split();							// use subsetsum4
+	int decompose();						// for insplitable root
+	int split();							// for splitable root
 
 	// print and stats
 	int print() const;

@@ -66,8 +66,7 @@ int32_t average_read_length = 100;
 bool strand_reverse = false;
 bool output_tex_files = false;
 string fixed_gene_name = "";
-int min_gtf_transcripts_num = 0;
-bool fast_mode = true;
+double param_alpha = 0.5;
 
 int print_parameters()
 {
@@ -130,8 +129,7 @@ int print_parameters()
 	printf("strand_reverse = %c\n", strand_reverse ? 'T' : 'F');
 	printf("output_tex_files = %c\n", output_tex_files ? 'T' : 'F');
 	printf("fixed_gene_name = %s\n", fixed_gene_name.c_str());
-	printf("min_gtf_transcripts_num = %d\n", min_gtf_transcripts_num);
-	printf("fast_mode = %c\n", fast_mode ? 'T' : 'F');
+	printf("param_alpha = %.2lf\n", param_alpha);
 
 	printf("\n");
 
@@ -339,6 +337,11 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--min_router_count")
 		{
 			min_router_count = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--alpha")
+		{
+			param_alpha = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--strand_reverse")
