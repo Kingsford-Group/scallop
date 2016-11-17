@@ -36,10 +36,20 @@ int scallop::assemble()
 
 	while(true)
 	{
+		bool b = false;
 		refine_splice_graph();
-		bool b = resolve_splitable_vertex();
+
+		b = resolve_splitable_vertex();
 		if(b == true) print();
 		if(b == true) continue;
+
+		b = resolve_trivial_vertex();
+		if(b == true) continue;
+
+		b = resolve_insplitable_vertex();
+		if(b == true) print();
+		if(b == true) continue;
+
 		break;
 	}
 
@@ -98,36 +108,85 @@ bool scallop::resolve_splitable_vertex()
 	equation eqn;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
-		if(gr.degree(i) <= 0) continue;
 		if(gr.in_degree(i) <= 1) continue;
 		if(gr.out_degree(i) <= 1) continue;
 
-		MID m;
-		get_weights(i, m);
-
-		balance_vertex(i);
 		vector<PI> p = hs.get_routes(i, gr, e2i);
 		router rt(i, gr, e2i, i2e, p);
 		rt.build();
+		if(rt.status != SPLITABLE) continue;
 
-		set_weights(m);
-
+		rt.solve();
 		if(rt.delta < delta) continue;
+		assert(rt.eqns.size() == 2);
 
 		root = i;
-		status = rt.status;
 		delta = rt.delta;
-		if(status == INSPLITABLE) vpi = rt.vpi;
-		if(status == SPLITABLE) eqn = rt.eqns[0];
+		eqn = rt.eqns[0];
 	}
 
 	if(root == -1) return false;
 
-	printf("resolve vertex %d, status = %d, delta = %.3lf, degree = (%d, %d)\n", root, status, delta, gr.in_degree(root), gr.out_degree(root));
+	printf("resolve splitable vertex %d, delta = %.3lf, degree = (%d, %d)\n", root, delta, gr.in_degree(root), gr.out_degree(root));
 
-	if(status == INSPLITABLE) decompose_tree(vpi);
-	if(status == SPLITABLE) split_vertex(root, eqn.s, eqn.t);
+	split_vertex(root, eqn.s, eqn.t);
 
+	return true;
+}
+
+bool scallop::resolve_insplitable_vertex()
+{
+	int root = -1;
+	double delta = 0 - DBL_MAX;
+	vector<PPID> vpi;
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		if(gr.in_degree(i) <= 1) continue;
+		if(gr.out_degree(i) <= 1) continue;
+
+		vector<PI> p = hs.get_routes(i, gr, e2i);
+		router rt(i, gr, e2i, i2e, p);
+		rt.build();
+		if(rt.status != INSPLITABLE) continue;
+
+		rt.solve();
+		if(rt.delta < delta) continue;
+
+		root = i;
+		delta = rt.delta;
+		vpi = rt.vpi;
+	}
+
+	if(root == -1) return false;
+
+	printf("resolve insplitable vertex %d, delta = %.3lf, degree = (%d, %d)\n", root, delta, gr.in_degree(root), gr.out_degree(root));
+
+	decompose_tree(vpi);
+	return true;
+}
+
+bool scallop::resolve_trivial_vertex()
+{
+	int root = -1;
+	double ratio = -1;
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		if(gr.degree(i) == 0) continue;
+		if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) continue;
+
+		int e;
+		double r = compute_balance_ratio(i);
+		if(ratio < r) continue;
+
+		root = i;
+		ratio = r;
+	}
+
+	if(root == -1) return false;
+
+	printf("resolve trivial vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
+
+	decompose_trivial_vertex(root);
 	return true;
 }
 
@@ -439,34 +498,6 @@ bool scallop::resolve_small_edges()
 	remove_edge(se);
 	hs.remove(se);
 
-	return true;
-}
-
-bool scallop::resolve_trivial_vertex()
-{
-	int root = -1;
-	double ratio = -1;
-	int se = -1;
-	for(int i = 1; i < gr.num_vertices() - 1; i++)
-	{
-		if(gr.degree(i) == 0) continue;
-		if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) continue;
-
-		int e;
-		double r = compute_balance_ratio(i);
-		if(ratio >= 0 && ratio < r) continue;
-
-		root = i;
-		ratio = r;
-		se = e;
-	}
-
-	if(root == -1) return false;
-
-	printf("resolve trivial vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
-
-	decompose_trivial_vertex(root);
-	assert(gr.degree(root) == 0);
 	return true;
 }
 

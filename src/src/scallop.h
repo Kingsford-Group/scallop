@@ -52,10 +52,11 @@ private:
 
 	// resolve iteratively
 	bool resolve_splitable_vertex();
+	bool resolve_insplitable_vertex();
+	bool resolve_trivial_vertex();
 	bool resolve_small_edges();
 	bool resolve_hyper_tree(int status);
 	bool resolve_hyper_vertex(int status);
-	bool resolve_trivial_vertex();
 	bool resolve_hyper_edge1();
 	bool resolve_hyper_edge0();
 
