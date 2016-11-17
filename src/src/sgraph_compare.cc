@@ -384,7 +384,7 @@ int sgraph_compare::draw(splice_graph &gr, const string &file)
 
 	draw_header(fout);
 
-	double len = 4.0;
+	double len = 3.0;
 
 	fout<<"\\def\\len{"<<len<<"cm}\n";
 

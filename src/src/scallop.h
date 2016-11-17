@@ -51,8 +51,8 @@ private:
 	int refine_splice_graph();
 
 	// resolve iteratively
-	bool resolve_splitable_vertex();
-	bool resolve_insplitable_vertex();
+	bool resolve_splitable_vertex(int status);
+	bool resolve_insplitable_vertex(int status);
 	bool resolve_trivial_vertex();
 	bool resolve_small_edges();
 	bool resolve_hyper_tree(int status);
@@ -70,8 +70,8 @@ private:
 	int set_weights(MID &m);
 
 	// decomposing subroutines
-	int decompose_tree(const vector<PPID> &vpi);
 	int decompose_trivial_vertex(int v);
+	int decompose_vertex(int v, const vector<PPID> &vpi);
 	int split_vertex(int x, const vector<int> &xe, const vector<int> &ye);
 	int split_edge(int exi, double w);
 	int merge_adjacent_edges(int x, int y);

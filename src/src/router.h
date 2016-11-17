@@ -33,7 +33,7 @@ public:
 	double bratio;				// balanced ratio
 
 	int status;					// splitable or not
-	double ratio;
+	double ratio;				// split/decompose ratio
 	double delta;				// decrease of the objective function
 	vector<PPID> vpi;			// decomposition result for insplitable vertex
 	vector<equation> eqns;		// decomposotion result for splitable vertex
@@ -47,12 +47,13 @@ public:
 	int stats();
 
 private:
-	int build_indices();					// build u2e and e2u
-	int build_bipartite_graph();			// build bipartite graph
-	int build_balanced_weights();			// compute balanced weights
-	int classify();							// classify, splitable/insplitable
-	int decompose();						// for insplitable root
-	int split();							// for splitable root
+	int build_indices();								// build u2e and e2u
+	int build_bipartite_graph();						// build bipartite graph
+	int build_balanced_weights();						// compute balanced weights
+	int build_balanced_weights(const set<int> &fb);		// compute balanced weights
+	int classify();										// classify, splitable/insplitable
+	int decompose();									// for insplitable root
+	int split();										// for splitable root
 };
 
 #endif

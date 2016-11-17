@@ -18,7 +18,7 @@ scallop::scallop(const string &s, const splice_graph &g, const hyper_set &h)
 	round = 0;
 	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 	gr.get_edge_indices(i2e, e2i);
-	//add_pseudo_hyper_edges();
+	add_pseudo_hyper_edges();// TODO
 	hs.build(gr, e2i);
 	init_super_edges();
 	init_vertex_map();
@@ -43,7 +43,19 @@ int scallop::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_splitable_vertex();
+		b = resolve_splitable_vertex(SPLITABLE_UNIQUE);
+		if(b == true) print();
+		if(b == true) continue;
+
+		b = resolve_insplitable_vertex(INSPLITABLE_TREE);
+		if(b == true) print();
+		if(b == true) continue;
+
+		b = resolve_insplitable_vertex(INSPLITABLE_GRAPH);
+		if(b == true) print();
+		if(b == true) continue;
+
+		b = resolve_splitable_vertex(SPLITABLE_AMBIGUOUS);
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -51,7 +63,7 @@ int scallop::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_insplitable_vertex();
+		b = resolve_insplitable_vertex(INSPLITABLE_INCOMPLETE);
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -106,10 +118,10 @@ int scallop::refine_splice_graph()
 	return 0;
 }
 
-bool scallop::resolve_splitable_vertex()
+bool scallop::resolve_splitable_vertex(int status)
 {
 	int root = -1;
-	double delta = 0 - DBL_MAX;
+	double ratio = DBL_MAX;
 	equation eqn;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
@@ -119,30 +131,30 @@ bool scallop::resolve_splitable_vertex()
 		vector<PI> p = hs.get_routes(i, gr, e2i);
 		router rt(i, gr, e2i, i2e, p);
 		rt.build();
-		if(rt.status != SPLITABLE) continue;
+		if(rt.status != status) continue;
 
 		rt.solve();
-		if(rt.delta < delta) continue;
+		if(rt.ratio > ratio) continue;
 		assert(rt.eqns.size() == 2);
 
 		root = i;
-		delta = rt.delta;
+		ratio = rt.ratio;
 		eqn = rt.eqns[0];
 	}
 
 	if(root == -1) return false;
 
-	printf("resolve splitable vertex %d, delta = %.3lf, degree = (%d, %d)\n", root, delta, gr.in_degree(root), gr.out_degree(root));
+	printf("resolve splitable vertex %d, status = %d, ratio = %.3lf, degree = (%d, %d)\n", root, status, ratio, gr.in_degree(root), gr.out_degree(root));
 
 	split_vertex(root, eqn.s, eqn.t);
 
 	return true;
 }
 
-bool scallop::resolve_insplitable_vertex()
+bool scallop::resolve_insplitable_vertex(int status)
 {
 	int root = -1;
-	double delta = 0 - DBL_MAX;
+	double ratio = DBL_MAX;
 	vector<PPID> vpi;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
@@ -152,21 +164,21 @@ bool scallop::resolve_insplitable_vertex()
 		vector<PI> p = hs.get_routes(i, gr, e2i);
 		router rt(i, gr, e2i, i2e, p);
 		rt.build();
-		if(rt.status != INSPLITABLE) continue;
+		if(rt.status != status) continue;
 
 		rt.solve();
-		if(rt.delta < delta) continue;
+		if(rt.ratio > ratio) continue;
 
 		root = i;
-		delta = rt.delta;
+		ratio = rt.ratio;
 		vpi = rt.vpi;
 	}
 
 	if(root == -1) return false;
 
-	printf("resolve insplitable vertex %d, delta = %.3lf, degree = (%d, %d)\n", root, delta, gr.in_degree(root), gr.out_degree(root));
+	printf("resolve insplitable vertex %d, status = %d, ratio = %.3lf, degree = (%d, %d)\n", root, status, ratio, gr.in_degree(root), gr.out_degree(root));
 
-	decompose_tree(vpi);
+	decompose_vertex(root, vpi);
 	return true;
 }
 
@@ -307,7 +319,7 @@ bool scallop::resolve_hyper_tree(int status)
 
 		printf("resolve hyper tree-%d %d, ratio = (%.3lf, %.3lf), degree = (%d, %d)\n", status, root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
 
-		decompose_tree(vpi);
+		decompose_vertex(root, vpi);
 		assert(gr.degree(root) == 0);
 
 		return true;
@@ -637,7 +649,7 @@ int scallop::set_weights(MID &m)
 	return 0;
 }
 
-int scallop::decompose_tree(const vector<PPID> &vpi)
+int scallop::decompose_vertex(int root, const vector<PPID> &vpi)
 {
 	MID md;
 	for(int i = 0; i < vpi.size(); i++)
@@ -649,11 +661,6 @@ int scallop::decompose_tree(const vector<PPID> &vpi)
 		else md[e1] += w;
 		if(md.find(e2) == md.end()) md.insert(PID(e2, w));
 		else md[e2] += w;
-		/*
-		double w1 = gr.get_edge_weight(i2e[e1]);
-		double w2 = gr.get_edge_weight(i2e[e2]);
-		printf("connecting edge %d(%.2lf) + %d(%.2lf) -> %.4lf\n", e1, w1, e2, w2, w);
-		*/
 	}
 
 	for(MID::iterator it = md.begin(); it != md.end(); it++)
@@ -661,6 +668,27 @@ int scallop::decompose_tree(const vector<PPID> &vpi)
 		edge_descriptor e = i2e[it->first];
 		double w = it->second;
 		gr.set_edge_weight(e, w);
+	}
+
+	vector<int> dve;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.in_edges(root); it1 != it2; it1++)
+	{
+		int e = e2i[*it1];
+		if(md.find(e) != md.end()) continue;
+		dve.push_back(e);
+	}
+	for(tie(it1, it2) = gr.out_edges(root); it1 != it2; it1++)
+	{
+		int e = e2i[*it1];
+		if(md.find(e) != md.end()) continue;
+		dve.push_back(e);
+	}
+	for(int i = 0; i < dve.size(); i++)
+	{
+		int e = dve[i];
+		remove_edge(e);
+		hs.remove(e);
 	}
 
 	map<int, int> m;
@@ -719,7 +747,7 @@ int scallop::decompose_trivial_vertex(int x)
 			vpi.push_back(PPID(PI(e1, e2), w));
 		}
 	}
-	decompose_tree(vpi);
+	decompose_vertex(x, vpi);
 	return 0;
 }
 
