@@ -109,7 +109,7 @@ int scallop::refine_splice_graph()
 bool scallop::resolve_splitable_vertex()
 {
 	int root = -1;
-	double delta = 0;
+	double delta = 0 - DBL_MAX;
 	equation eqn;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{

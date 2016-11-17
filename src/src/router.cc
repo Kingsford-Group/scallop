@@ -232,7 +232,7 @@ int router::split()
 	eqns.push_back(eqn1);
 	eqns.push_back(eqn2);
 
-	delta = -1.0 * param_alpha * bratio * (eqn1.e * 0.5 + eqn2.e * 0.5) + (1.0 - param_alpha);
+	delta = -1.0 * param_alpha * bratio * (eqn1.e * 0.5 + eqn2.e * 0.5) - (1.0 - param_alpha) * vv.size();
 
 	return 0;
 }
