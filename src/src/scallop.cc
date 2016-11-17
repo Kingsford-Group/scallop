@@ -39,11 +39,16 @@ int scallop::assemble()
 		bool b = false;
 		refine_splice_graph();
 
+		b = resolve_small_edges();
+		if(b == true) print();
+		if(b == true) continue;
+
 		b = resolve_splitable_vertex();
 		if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_trivial_vertex();
+		if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_insplitable_vertex();
