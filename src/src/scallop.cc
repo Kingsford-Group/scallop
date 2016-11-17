@@ -168,7 +168,7 @@ bool scallop::resolve_insplitable_vertex()
 bool scallop::resolve_trivial_vertex()
 {
 	int root = -1;
-	double ratio = -1;
+	double ratio = DBL_MAX;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.degree(i) == 0) continue;
