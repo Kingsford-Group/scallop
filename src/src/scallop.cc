@@ -18,7 +18,7 @@ scallop::scallop(const string &s, const splice_graph &g, const hyper_set &h)
 	round = 0;
 	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 	gr.get_edge_indices(i2e, e2i);
-	add_pseudo_hyper_edges();// TODO
+	//add_pseudo_hyper_edges();// TODO
 	hs.build(gr, e2i);
 	init_super_edges();
 	init_vertex_map();
@@ -145,6 +145,7 @@ bool scallop::resolve_splitable_vertex(int status)
 	if(root == -1) return false;
 
 	printf("resolve splitable vertex %d, status = %d, ratio = %.3lf, degree = (%d, %d)\n", root, status, ratio, gr.in_degree(root), gr.out_degree(root));
+	eqn.print(88);
 
 	split_vertex(root, eqn.s, eqn.t);
 
@@ -167,6 +168,9 @@ bool scallop::resolve_insplitable_vertex(int status)
 		if(rt.status != status) continue;
 
 		rt.solve();
+
+		//printf("test insplitable vertex %d, ratio = %.3lf\n", i, rt.ratio);
+
 		if(rt.ratio > ratio) continue;
 
 		root = i;
@@ -1361,14 +1365,20 @@ double scallop::compute_smallest_removable_edge(int &se)
 
 		int e;
 		double r = compute_smallest_edge(i, e);
+		//printf("A: test smallest edge of vertex %d, edge = %d, ratio = %.3lf\n", i, e, r);
 
 		if(ratio < r) continue;
 
 		if(i2e[e]->target() == i && hs.right_extend(e)) continue;
 		if(i2e[e]->source() == i && hs.left_extend(e)) continue;
 
+		//printf("B: test smallest edge of vertex %d, edge = %d, ratio = %.3lf\n", i, e, r);
+
+		// TODO
 		if(gr.in_degree(i2e[e]->target()) <= 1) continue;
 		if(gr.out_degree(i2e[e]->source()) <= 1) continue;
+
+		//printf("C: test smallest edge of vertex %d, edge = %d, ratio = %.3lf\n", i, e, r);
 
 		ratio = r;
 		se = e;

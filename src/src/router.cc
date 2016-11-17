@@ -410,7 +410,7 @@ int router::decompose()
 		sum += bw[i];
 	}
 	var = var / sum;
-	ratio = bratio * var;
+	ratio = (bratio - 1.0) + var;
 	delta = -1.0 * param_alpha * ratio + (1 - param_alpha) * (gr.degree(root) * 1.0 - 1.0 - ve.size() * 1.0);
 
 	delete model;
@@ -420,7 +420,7 @@ int router::decompose()
 
 int router::print() const
 {
-	printf("router %d, #routes = %lu, delta = %.2lf\n", root, routes.size(), delta);
+	printf("router %d, #routes = %lu, status = %d\n", root, routes.size(), status);
 	printf("in-edges = ( ");
 	for(int i = 0; i < gr.in_degree(root); i++) printf("%d ", u2e[i]);
 	printf("), out-edges = ( ");
@@ -432,7 +432,7 @@ int router::print() const
 		printf("route %d (%d, %d)\n", i, routes[i].first, routes[i].second);
 	}
 
-	for(int i = 0; i < eqns.size(); i++) eqns[i].print(i);
+	//for(int i = 0; i < eqns.size(); i++) eqns[i].print(i);
 
 	printf("\n");
 	return 0;
