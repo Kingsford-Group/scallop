@@ -38,6 +38,8 @@ int scallop::assemble()
 	{
 		bool b	= false;
 
+		refine_splice_graph();
+
 		b = resolve_small_edges();
 		if(b == true) print();
 		if(b == true) continue;
@@ -119,6 +121,7 @@ int scallop::refine_splice_graph()
 			//printf(" refine (%d, %d), degree = (%d, %d)\n", s, t, gr.in_degree(s), gr.out_degree(t));
 
 			if(gr.in_degree(s) >= 1 && gr.out_degree(t) >= 1) continue;
+			if(s == 0 && t == gr.num_vertices() - 1) continue;
 			if(s == 0 && gr.out_degree(t) >= 1) continue;
 			if(t == gr.num_vertices() - 1 && gr.in_degree(s) >= 1) continue;
 
@@ -1286,8 +1289,8 @@ double scallop::compute_smallest_removable_edge(int &se)
 		if(i2e[e]->target() == i && hs.right_extend(e)) continue;
 		if(i2e[e]->source() == i && hs.left_extend(e)) continue;
 
-		if(gr.in_degree(i2e[e]->target()) <= 1) continue;
-		if(gr.out_degree(i2e[e]->source()) <= 1) continue;
+		//if(gr.in_degree(i2e[e]->target()) <= 1) continue;
+		//if(gr.out_degree(i2e[e]->source()) <= 1) continue;
 
 		ratio = r;
 		se = e;
