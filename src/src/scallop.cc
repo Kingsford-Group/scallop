@@ -164,8 +164,8 @@ bool scallop::resolve_hyper_vertex(int status)
 		for(int i = 0; i < rt.eqns.size(); i++) rt.eqns[i].print(99);
 
 		equation &eqn = rt.eqns[0];
-		assert(eqn.s.size() >= 1);
-		assert(eqn.t.size() >= 1);
+		//assert(eqn.s.size() >= 1);
+		//assert(eqn.t.size() >= 1);
 
 		split_vertex(root, eqn.s, eqn.t);
 		return true;
@@ -1119,8 +1119,6 @@ int scallop::split_vertex(int x, const vector<int> &xe, const vector<int> &ye)
 {
 	assert(x != 0);
 	assert(x != gr.num_vertices() - 1);
-	if(xe.size() <= 0) return 0;
-	if(ye.size() <= 0) return 0;
 
 	double w1 = 0, w2 = 0;
 	for(int i = 0; i < xe.size(); i++) w1 += gr.get_edge_weight(i2e[xe[i]]);
