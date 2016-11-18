@@ -28,6 +28,7 @@ public:
 	string transcript_id;
 	int32_t expression;
 	double coverage;
+	double covratio;
 	double RPKM;
 	vector<PI32> exons;
 	char strand;

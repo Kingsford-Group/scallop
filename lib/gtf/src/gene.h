@@ -29,6 +29,7 @@ public:
 	int remove_single_exon_transcripts();
 	int remove_transcripts(double expression);
 	int assign_RPKM(double factor);
+	int assign_coverage_ratio();
 
 	// fetch information
 	string get_gene_id() const;

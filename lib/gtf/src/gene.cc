@@ -111,6 +111,21 @@ int gene::assign_RPKM(double factor)
 	return 0;
 }
 
+int gene::assign_coverage_ratio()
+{
+	double sum = 0;
+	for(int i = 0; i < transcripts.size(); i++)
+	{
+		sum += transcripts[i].coverage;
+	}
+	for(int i = 0; i < transcripts.size(); i++)
+	{
+		transcripts[i].covratio = transcripts[i].coverage / sum;
+	}
+	return 0;
+}
+
+
 set<int32_t> gene::get_exon_boundaries() const
 {
 	set<int32_t> s;
