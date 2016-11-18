@@ -21,13 +21,6 @@ using namespace std;
 
 #define MAX_NUM_CIGAR 7
 
-#define INSPLITABLE_TREE 1
-#define INSPLITABLE_GRAPH 2
-#define INSPLITABLE_INCOMPLETE 3
-#define SPLITABLE_UNIQUE 4
-#define SPLITABLE_AMBIGUOUS 5
-
-#define SPLITABLE(x) ((x) >= 4)
 
 //// parameters
 // for bam file and reads
@@ -87,7 +80,8 @@ extern bool output_tex_files;
 extern string fixed_gene_name;
 extern int max_num_bundles;
 extern bool strand_reverse;
-extern double param_alpha;
+extern int min_gtf_transcripts_num;
+extern bool fast_mode;
 
 // parse arguments
 int print_command_line(int argc, const char ** argv);

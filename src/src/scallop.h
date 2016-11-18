@@ -16,6 +16,7 @@ typedef pair<int, int> PI;
 typedef map<int, int> MI;
 typedef pair<int, double> PID;
 typedef map<int, double> MID;
+typedef pair<PI, double> PPID;
 
 // for noisy splice graph
 class scallop
@@ -39,6 +40,7 @@ public:
 	hyper_set hs;						// hyper edges
 	int round;							// round in iteration
 	vector<path> paths;					// predicted transcripts
+	vector<router> routers;
 
 private:
 	// init
@@ -51,12 +53,10 @@ private:
 	int refine_splice_graph();
 
 	// resolve iteratively
-	bool resolve_splitable_vertex(int status);
-	bool resolve_insplitable_vertex(int status);
-	bool resolve_trivial_vertex();
 	bool resolve_small_edges();
 	bool resolve_hyper_tree(int status);
 	bool resolve_hyper_vertex(int status);
+	bool resolve_trivial_vertex();
 	bool resolve_hyper_edge1();
 	bool resolve_hyper_edge0();
 
@@ -70,8 +70,8 @@ private:
 	int set_weights(MID &m);
 
 	// decomposing subroutines
+	int decompose_tree(const vector<PPID> &vpi);
 	int decompose_trivial_vertex(int v);
-	int decompose_vertex(int v, const vector<PPID> &vpi);
 	int split_vertex(int x, const vector<int> &xe, const vector<int> &ye);
 	int split_edge(int exi, double w);
 	int merge_adjacent_edges(int x, int y);

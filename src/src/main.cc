@@ -9,7 +9,6 @@
 
 #include "config.h"
 #include "assembler.h"
-#include "subsetsum.h"
 
 using namespace std;
 

@@ -21,7 +21,7 @@ private:
 	vector<PI> target;					// given target numbers
 	int ubound1;						// ubound for source
 	int ubound2;						// ubound for target
-	vector< vector<int> > table1;		// dp table1
+	vector< vector<int> > table1;		// dp table2
 	vector< vector<int> > table2;		// dp table2
 
 public:
