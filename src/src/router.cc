@@ -208,10 +208,6 @@ int router::split()
 	subsetsum sss(ss, tt);
 	sss.solve();
 
-	eqn1.e = sss.eqn.e;
-	eqn2.e = sss.eqn.e;
-	assert(eqn1.e >= 0);
-
 	for(int i = 0; i < sss.eqn.s.size(); i++)
 	{
 		int k = sss.eqn.s[i];
@@ -252,8 +248,24 @@ int router::split()
 	eqns.push_back(eqn1);
 	eqns.push_back(eqn2);
 
-	ratio = (eqn1.e * 0.5 + eqn2.e * 0.5);
-	//ratio = (eqn1.e * 0.5 + eqn2.e * 0.5) * bratio;
+	double sum1 = 0, sum2 = 0, sum = 0;
+	for(int i = 0; i < eqn1.s.size(); i++)
+	{
+		int e = e2u[eqn1.s[i]];
+		sum1 += bw[e];
+	}
+	for(int i = 0; i < eqn1.t.size(); i++)
+	{
+		int e = e2u[eqn1.t[i]];
+		sum2 += bw[e];
+	}
+	for(int i = 0; i < bw.size(); i++)
+	{
+		sum += bw[i];
+	}
+	
+	ratio = fabs(sum1 - sum2) / sum;
+	eqn1.e = eqn2.e = ratio;
 
 	return 0;
 }

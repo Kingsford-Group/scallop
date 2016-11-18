@@ -1261,6 +1261,8 @@ double scallop::compute_smallest_splitable_vertex(int &root, int status)
 		assert(rt.ratio >= 0);
 		assert(rt.eqns.size() == 2);
 
+		//printf("splitable vertex = %d, status = %d, ratio = %.3lf\n", i, status, rt.ratio);
+
 		if(ratio < rt.ratio) continue;
 
 		root = i;
