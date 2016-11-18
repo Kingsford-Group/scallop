@@ -30,9 +30,6 @@ router& router::operator=(const router &rt)
 	e2u = rt.e2u;
 	u2e = rt.u2e;
 
-	bw = rt.bw;
-	bratio = rt.bratio;
-
 	ratio = rt.ratio;
 	eqns = rt.eqns;
 
@@ -70,31 +67,37 @@ int router::build()
 		return 0;
 	}
 
-	bool b1 = true;
-	bool b2 = true;
-	vector<int> v = ug.assign_connected_components();
-	for(int i = 1; i < gr.in_degree(root); i++)
+	split();
+
+	if(vv.size() == 2 && eqns.size() == 2)
 	{
-		if(v[i] != v[0]) b1 = false;
-	}
-	for(int i = gr.in_degree(root) + 1; i < gr.degree(root); i++)
-	{
-		if(v[i] != v[gr.in_degree(root)]) b2 = false;
-	}
-	
-	if(b1 == true || b2 == true)
-	{
-		status = 5;
+		status = 3;
 		return 0;
 	}
 
-	if(vv.size() == 2) status = 3;
-	else status = 4;
+	if(vv.size() >= 3 && eqns.size() == 2)
+	{
+		status = 4;
+		return 0;
+	}
 
-	split();
+	bool b1 = true, b2 = true;
+	for(int i = 0; i < gr.in_degree(root); i++)
+	{
+		if(ug.degree(i) == 0) b1 = false;
+	}
+	for(int i = 0; i < gr.out_degree(root); i++)
+	{
+		if(ug.degree(i + gr.in_degree(root)) == 0) b2 = false;
+	}
 
-	assert(eqns.size() == 2);
+	assert(b1 == true || b2 == true);
+	assert(b1 == false || b2 == false);
 
+	//if(vv.size() == 2 && ug.num_edges() + 2 == ug.num_vertices()) status = 5;
+	//else status = 6;
+
+	status = 5;
 	return 0;
 }
 
@@ -142,49 +145,29 @@ int router::build_bipartite_graph()
 	return 0;
 }
 
-int router::build_balanced_weights()
-{
-	set<int> fb;
-	return build_balanced_weights(fb);
-}
-
-int router::build_balanced_weights(const set<int> &fb)
-{
-	bw.assign(u2e.size(), 0);
-	double sum1 = 0, sum2 = 0;
-	for(int i = 0; i < u2e.size(); i++)
-	{
-		if(fb.find(i) != fb.end()) continue;
-		edge_descriptor e = i2e[u2e[i]];
-		assert(e != null_edge);
-		double w = gr.get_edge_weight(e);
-		bw[i] = w;
-		if(i < gr.in_degree(root)) sum1 += w;
-		else sum2 += w;
-	}
-
-	if(sum1 >= sum2) bratio = sqrt(sum1 / sum2);
-	else bratio = sqrt(sum2 / sum1);
-
-	for(int i = 0; i < gr.in_degree(root); i++)
-	{
-		if(sum1 >= sum2) bw[i] /= bratio;
-		else bw[i] *= bratio;
-	}
-
-	for(int i = gr.in_degree(root); i < gr.degree(root); i++)
-	{
-		if(sum2 >= sum1) bw[i] /= bratio;
-		else bw[i] *= bratio;
-	}
-	return 0;
-}
-
 int router::split()
 {
 	vector< set<int> > vv = ug.compute_connected_components();
 
-	build_balanced_weights();
+	// smooth weights (locally)
+	vector<double> vw;
+	double sum1 = 0, sum2 = 0;
+	for(int i = 0; i < u2e.size(); i++)
+	{
+		edge_descriptor e = i2e[u2e[i]];
+		assert(e != null_edge);
+		double w = gr.get_edge_weight(e);
+		if(i < gr.in_degree(root)) sum1 += w;
+		else sum2 += w;
+		vw.push_back(w);
+	}
+
+	double sum = (sum1 > sum2) ? sum1 : sum2;
+	double r1 = (sum1 > sum2) ? 1.0 : sum2 / sum1;
+	double r2 = (sum1 < sum2) ? 1.0 : sum1 / sum2;
+
+	for(int i = 0; i < gr.in_degree(root); i++) vw[i] *= r1;
+	for(int i = gr.in_degree(root); i < gr.degree(root); i++) vw[i] *= r2;
 
 	vector<PI> ss;
 	vector<PI> tt;
@@ -193,7 +176,7 @@ int router::split()
 		double ww = 0;
 		for(set<int>::iterator it = vv[i].begin(); it != vv[i].end(); it++)
 		{
-			double w = bw[*it];
+			double w = vw[*it];
 			if(*it >= gr.in_degree(root)) w = 0 - w;
 			ww += w;
 		}
@@ -201,71 +184,138 @@ int router::split()
 		else tt.push_back(PI((int)(0 - ww), i));
 	}
 
+	// evaluate every single nontrivial component
+	equation eqn0;
+	eqn0.e = -1;
+	for(int k = 0; k < ss.size(); k++)
+	{
+		set<int> &s = vv[ss[k].second];
+		if(s.size() <= 1) continue;
+
+		double r = ss[k].first * 1.0 / (sum1 * r1);
+		if(eqn0.e >= 0 && r >= eqn0.e) continue;
+
+		eqn0.clear();
+		eqn0.e = r;
+		assert(eqn0.e >= 0);
+		for(set<int>::iterator it = s.begin(); it != s.end(); it++)
+		{
+			int e = *it;
+			if(e < gr.in_degree(root)) eqn0.s.push_back(u2e[e]);
+			else eqn0.t.push_back(u2e[e]);
+		}
+		assert(eqn0.s.size() >= 1);
+		assert(eqn0.t.size() >= 1);
+	}
+
+	for(int k = 0; k < tt.size(); k++)
+	{
+		set<int> &s = vv[tt[k].second];
+		if(s.size() <= 1) continue;
+
+		double r = tt[k].first * 1.0 / (sum1 * r1);
+		if(eqn0.e >= 0 && r >= eqn0.e) continue;
+
+		eqn0.clear();
+		eqn0.e = r;
+		assert(eqn0.e >= 0);
+		for(set<int>::iterator it = s.begin(); it != s.end(); it++)
+		{
+			int e = *it;
+			if(e < gr.in_degree(root)) eqn0.s.push_back(u2e[e]);
+			else eqn0.t.push_back(u2e[e]);
+		}
+		assert(eqn0.s.size() >= 1);
+		assert(eqn0.t.size() >= 1);
+	}
+
 	// split using subsetsum
 	equation eqn1;
+	eqn1.e = -1;
+
+	/*
+	for(int i = 0; i < ss.size(); i++) printf("ss %d = %d:%d\n", i, ss[i].first, ss[i].second);
+	for(int i = 0; i < tt.size(); i++) printf("tt %d = %d:%d\n", i, tt[i].first, tt[i].second);
+	*/
+
+	if(ss.size() >= 2 && tt.size() >= 2)
+	{
+		subsetsum sss(ss, tt);
+		sss.solve();
+
+		eqn1.e = sss.eqn.e;
+		assert(eqn1.e >= 0);
+		for(int i = 0; i < sss.eqn.s.size(); i++)
+		{
+			int k = sss.eqn.s[i];
+			for(set<int>::iterator it = vv[k].begin(); it != vv[k].end(); it++)
+			{
+				int e = *it;
+				if(e < gr.in_degree(root)) eqn1.s.push_back(u2e[e]);
+				else eqn1.t.push_back(u2e[e]);
+			}
+		}
+		for(int i = 0; i < sss.eqn.t.size(); i++)
+		{
+			int k = sss.eqn.t[i];
+			for(set<int>::iterator it = vv[k].begin(); it != vv[k].end(); it++)
+			{
+				int e = *it;
+				if(e < gr.in_degree(root)) eqn1.s.push_back(u2e[e]);
+				else eqn1.t.push_back(u2e[e]);
+			}
+		}
+
+		sum1 = sum2 = 0;
+		for(int i = 0; i < eqn1.s.size(); i++)
+		{
+			int e = e2u[eqn1.s[i]];
+			sum1 += vw[e];
+		}
+		for(int i = 0; i < eqn1.t.size(); i++)
+		{
+			int e = e2u[eqn1.t[i]];
+			sum2 += vw[e];
+		}
+		eqn1.e = fabs(sum1 - sum2) / sum;
+	}
+
 	equation eqn2;
+	if(eqn0.e < -0.5 && eqn1.e < -0.5) return 0;
+	assert(eqn0.e >= 0 || eqn1.e >= 0);
 
-	subsetsum sss(ss, tt);
-	sss.solve();
+	if(eqn1.e < -0.5) eqn2 = eqn0;
+	else if(eqn0.e < -0.5) eqn2 = eqn1;
+	else if(eqn0.e > eqn1.e) eqn2 = eqn1;
+	else eqn2 = eqn0;
 
-	for(int i = 0; i < sss.eqn.s.size(); i++)
-	{
-		int k = sss.eqn.s[i];
-		for(set<int>::iterator it = vv[k].begin(); it != vv[k].end(); it++)
-		{
-			int e = *it;
-			if(e < gr.in_degree(root)) eqn1.s.push_back(u2e[e]);
-			else eqn1.t.push_back(u2e[e]);
-		}
-	}
-	for(int i = 0; i < sss.eqn.t.size(); i++)
-	{
-		int k = sss.eqn.t[i];
-		for(set<int>::iterator it = vv[k].begin(); it != vv[k].end(); it++)
-		{
-			int e = *it;
-			if(e < gr.in_degree(root)) eqn1.s.push_back(u2e[e]);
-			else eqn1.t.push_back(u2e[e]);
-		}
-	}
+	assert(eqn2.s.size() >= 1);
+	assert(eqn2.t.size() >= 1);
 
-	set<int> s1(eqn1.s.begin(), eqn1.s.end());
-	set<int> s2(eqn1.t.begin(), eqn1.t.end());
+	set<int> s1(eqn2.s.begin(), eqn2.s.end());
+	set<int> s2(eqn2.t.begin(), eqn2.t.end());
 
+	equation eqn3;
 	for(int i = 0; i < gr.in_degree(root); i++)
 	{
 		int e = u2e[i];
 		if(s1.find(e) != s1.end()) continue;
-		eqn2.s.push_back(e);
+		eqn3.s.push_back(e);
 	}
 	for(int i = gr.in_degree(root); i < gr.degree(root); i++)
 	{
 		int e = u2e[i];
 		if(s2.find(e) != s2.end()) continue;
-		eqn2.t.push_back(e);
+		eqn3.t.push_back(e);
 	}
 
-	eqns.push_back(eqn1);
+	if(eqn3.s.size() <= 0 || eqn3.t.size() <= 0) return 0;
+
+	ratio = eqn2.e;
+	eqn3.e = ratio;
+
 	eqns.push_back(eqn2);
-
-	double sum1 = 0, sum2 = 0, sum = 0;
-	for(int i = 0; i < eqn1.s.size(); i++)
-	{
-		int e = e2u[eqn1.s[i]];
-		sum1 += bw[e];
-	}
-	for(int i = 0; i < eqn1.t.size(); i++)
-	{
-		int e = e2u[eqn1.t[i]];
-		sum2 += bw[e];
-	}
-	for(int i = 0; i < bw.size(); i++)
-	{
-		sum += bw[i];
-	}
-	
-	ratio = fabs(sum1 - sum2) / sum;
-	eqn1.e = eqn2.e = ratio;
+	eqns.push_back(eqn3);
 
 	return 0;
 }

@@ -38,8 +38,6 @@ int scallop::assemble()
 	{
 		bool b	= false;
 
-		refine_splice_graph();
-
 		b = resolve_small_edges();
 		if(b == true) print();
 		if(b == true) continue;
@@ -121,7 +119,6 @@ int scallop::refine_splice_graph()
 			//printf(" refine (%d, %d), degree = (%d, %d)\n", s, t, gr.in_degree(s), gr.out_degree(t));
 
 			if(gr.in_degree(s) >= 1 && gr.out_degree(t) >= 1) continue;
-			if(s == 0 && t == gr.num_vertices() - 1) continue;
 			if(s == 0 && gr.out_degree(t) >= 1) continue;
 			if(t == gr.num_vertices() - 1 && gr.in_degree(s) >= 1) continue;
 
@@ -164,8 +161,8 @@ bool scallop::resolve_hyper_vertex(int status)
 		for(int i = 0; i < rt.eqns.size(); i++) rt.eqns[i].print(99);
 
 		equation &eqn = rt.eqns[0];
-		//assert(eqn.s.size() >= 1);
-		//assert(eqn.t.size() >= 1);
+		assert(eqn.s.size() >= 1);
+		assert(eqn.t.size() >= 1);
 
 		split_vertex(root, eqn.s, eqn.t);
 		return true;
@@ -1119,6 +1116,8 @@ int scallop::split_vertex(int x, const vector<int> &xe, const vector<int> &ye)
 {
 	assert(x != 0);
 	assert(x != gr.num_vertices() - 1);
+	if(xe.size() <= 0) return 0;
+	if(ye.size() <= 0) return 0;
 
 	double w1 = 0, w2 = 0;
 	for(int i = 0; i < xe.size(); i++) w1 += gr.get_edge_weight(i2e[xe[i]]);
@@ -1261,8 +1260,6 @@ double scallop::compute_smallest_splitable_vertex(int &root, int status)
 		assert(rt.ratio >= 0);
 		assert(rt.eqns.size() == 2);
 
-		//printf("splitable vertex = %d, status = %d, ratio = %.3lf\n", i, status, rt.ratio);
-
 		if(ratio < rt.ratio) continue;
 
 		root = i;
@@ -1289,8 +1286,8 @@ double scallop::compute_smallest_removable_edge(int &se)
 		if(i2e[e]->target() == i && hs.right_extend(e)) continue;
 		if(i2e[e]->source() == i && hs.left_extend(e)) continue;
 
-		//if(gr.in_degree(i2e[e]->target()) <= 1) continue;
-		//if(gr.out_degree(i2e[e]->source()) <= 1) continue;
+		if(gr.in_degree(i2e[e]->target()) <= 1) continue;
+		if(gr.out_degree(i2e[e]->source()) <= 1) continue;
 
 		ratio = r;
 		se = e;
