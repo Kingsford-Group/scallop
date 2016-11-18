@@ -27,6 +27,9 @@ public:
 	vector<int> u2e;			// index to edge
 	undirected_graph ug;		// bipartite graph
 
+	vector<int> bw;
+	double bratio;
+
 	double ratio;				// worst ratio
 	vector<equation> eqns;		// divide results
 
@@ -43,8 +46,8 @@ public:
 	int build_bipartite_graph();			// build bipartite graph
 	int add_single_equation();				// cannot be divided
 	int split();							// use subsetsum4
-	//bool balance();							// balance weight with tree
-	vector<PI> build_tree_order();			// compute tree order
+	int build_balanced_weights();
+	int build_balanced_weights(const set<int> &fb);
 
 	// print and stats
 	int print() const;

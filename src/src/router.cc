@@ -30,6 +30,9 @@ router& router::operator=(const router &rt)
 	e2u = rt.e2u;
 	u2e = rt.u2e;
 
+	bw = rt.bw;
+	bratio = rt.bratio;
+
 	ratio = rt.ratio;
 	eqns = rt.eqns;
 
@@ -67,37 +70,31 @@ int router::build()
 		return 0;
 	}
 
+	bool b1 = true;
+	bool b2 = true;
+	vector<int> v = ug.assign_connected_components();
+	for(int i = 1; i < gr.in_degree(root); i++)
+	{
+		if(v[i] != v[0]) b1 = false;
+	}
+	for(int i = gr.in_degree(root) + 1; i < gr.degree(root); i++)
+	{
+		if(v[i] != v[gr.in_degree(root)]) b2 = false;
+	}
+	
+	if(b1 == true || b2 == true)
+	{
+		status = 5;
+		return 0;
+	}
+
+	if(vv.size() == 2) status = 3;
+	else status = 4;
+
 	split();
 
-	if(vv.size() == 2 && eqns.size() == 2)
-	{
-		status = 3;
-		return 0;
-	}
+	assert(eqns.size() == 2);
 
-	if(vv.size() >= 3 && eqns.size() == 2)
-	{
-		status = 4;
-		return 0;
-	}
-
-	bool b1 = true, b2 = true;
-	for(int i = 0; i < gr.in_degree(root); i++)
-	{
-		if(ug.degree(i) == 0) b1 = false;
-	}
-	for(int i = 0; i < gr.out_degree(root); i++)
-	{
-		if(ug.degree(i + gr.in_degree(root)) == 0) b2 = false;
-	}
-
-	assert(b1 == true || b2 == true);
-	assert(b1 == false || b2 == false);
-
-	//if(vv.size() == 2 && ug.num_edges() + 2 == ug.num_vertices()) status = 5;
-	//else status = 6;
-
-	status = 5;
 	return 0;
 }
 
@@ -145,28 +142,49 @@ int router::build_bipartite_graph()
 	return 0;
 }
 
+int router::build_balanced_weights()
+{
+	set<int> fb;
+	return build_balanced_weights(fb);
+}
+
+int router::build_balanced_weights(const set<int> &fb)
+{
+	bw.assign(u2e.size(), 0);
+	double sum1 = 0, sum2 = 0;
+	for(int i = 0; i < u2e.size(); i++)
+	{
+		if(fb.find(i) != fb.end()) continue;
+		edge_descriptor e = i2e[u2e[i]];
+		assert(e != null_edge);
+		double w = gr.get_edge_weight(e);
+		bw[i] = w;
+		if(i < gr.in_degree(root)) sum1 += w;
+		else sum2 += w;
+	}
+
+	if(sum1 >= sum2) bratio = sqrt(sum1 / sum2);
+	else bratio = sqrt(sum2 / sum1);
+
+	for(int i = 0; i < gr.in_degree(root); i++)
+	{
+		if(sum1 >= sum2) bw[i] /= bratio;
+		else bw[i] *= bratio;
+	}
+
+	for(int i = gr.in_degree(root); i < gr.degree(root); i++)
+	{
+		if(sum2 >= sum1) bw[i] /= bratio;
+		else bw[i] *= bratio;
+	}
+	return 0;
+}
+
 int router::split()
 {
 	vector< set<int> > vv = ug.compute_connected_components();
 
-	// smooth weights (locally)
-	vector<double> vw;
-	double sum1 = 0, sum2 = 0;
-	for(int i = 0; i < u2e.size(); i++)
-	{
-		edge_descriptor e = i2e[u2e[i]];
-		assert(e != null_edge);
-		double w = gr.get_edge_weight(e);
-		if(i < gr.in_degree(root)) sum1 += w;
-		else sum2 += w;
-		vw.push_back(w);
-	}
-
-	double r1 = (sum1 > sum2) ? 1.0 : sum2 / sum1;
-	double r2 = (sum1 < sum2) ? 1.0 : sum1 / sum2;
-
-	for(int i = 0; i < gr.in_degree(root); i++) vw[i] *= r1;
-	for(int i = gr.in_degree(root); i < gr.degree(root); i++) vw[i] *= r2;
+	build_balanced_weights();
 
 	vector<PI> ss;
 	vector<PI> tt;
@@ -175,7 +193,7 @@ int router::split()
 		double ww = 0;
 		for(set<int>::iterator it = vv[i].begin(); it != vv[i].end(); it++)
 		{
-			double w = vw[*it];
+			double w = bw[*it];
 			if(*it >= gr.in_degree(root)) w = 0 - w;
 			ww += w;
 		}
@@ -183,234 +201,61 @@ int router::split()
 		else tt.push_back(PI((int)(0 - ww), i));
 	}
 
-	// evaluate every single nontrivial component
-	equation eqn0;
-	eqn0.e = -1;
-	for(int k = 0; k < ss.size(); k++)
-	{
-		set<int> &s = vv[ss[k].second];
-		if(s.size() <= 1) continue;
-
-		double r = ss[k].first * 1.0 / (sum1 * r1);
-		if(eqn0.e >= 0 && r >= eqn0.e) continue;
-
-		eqn0.clear();
-		eqn0.e = r;
-		assert(eqn0.e >= 0);
-		for(set<int>::iterator it = s.begin(); it != s.end(); it++)
-		{
-			int e = *it;
-			if(e < gr.in_degree(root)) eqn0.s.push_back(u2e[e]);
-			else eqn0.t.push_back(u2e[e]);
-		}
-		assert(eqn0.s.size() >= 1);
-		assert(eqn0.t.size() >= 1);
-	}
-
-	for(int k = 0; k < tt.size(); k++)
-	{
-		set<int> &s = vv[tt[k].second];
-		if(s.size() <= 1) continue;
-
-		double r = tt[k].first * 1.0 / (sum1 * r1);
-		if(eqn0.e >= 0 && r >= eqn0.e) continue;
-
-		eqn0.clear();
-		eqn0.e = r;
-		assert(eqn0.e >= 0);
-		for(set<int>::iterator it = s.begin(); it != s.end(); it++)
-		{
-			int e = *it;
-			if(e < gr.in_degree(root)) eqn0.s.push_back(u2e[e]);
-			else eqn0.t.push_back(u2e[e]);
-		}
-		assert(eqn0.s.size() >= 1);
-		assert(eqn0.t.size() >= 1);
-	}
-
 	// split using subsetsum
 	equation eqn1;
-	eqn1.e = -1;
+	equation eqn2;
 
-	/*
-	for(int i = 0; i < ss.size(); i++) printf("ss %d = %d:%d\n", i, ss[i].first, ss[i].second);
-	for(int i = 0; i < tt.size(); i++) printf("tt %d = %d:%d\n", i, tt[i].first, tt[i].second);
-	*/
+	subsetsum sss(ss, tt);
+	sss.solve();
 
-	if(ss.size() >= 2 && tt.size() >= 2)
+	eqn1.e = sss.eqn.e;
+	eqn2.e = sss.eqn.e;
+	assert(eqn1.e >= 0);
+
+	for(int i = 0; i < sss.eqn.s.size(); i++)
 	{
-		subsetsum sss(ss, tt);
-		sss.solve();
-
-		eqn1.e = sss.eqn.e;
-		assert(eqn1.e >= 0);
-		for(int i = 0; i < sss.eqn.s.size(); i++)
+		int k = sss.eqn.s[i];
+		for(set<int>::iterator it = vv[k].begin(); it != vv[k].end(); it++)
 		{
-			int k = sss.eqn.s[i];
-			for(set<int>::iterator it = vv[k].begin(); it != vv[k].end(); it++)
-			{
-				int e = *it;
-				if(e < gr.in_degree(root)) eqn1.s.push_back(u2e[e]);
-				else eqn1.t.push_back(u2e[e]);
-			}
+			int e = *it;
+			if(e < gr.in_degree(root)) eqn1.s.push_back(u2e[e]);
+			else eqn1.t.push_back(u2e[e]);
 		}
-		for(int i = 0; i < sss.eqn.t.size(); i++)
+	}
+	for(int i = 0; i < sss.eqn.t.size(); i++)
+	{
+		int k = sss.eqn.t[i];
+		for(set<int>::iterator it = vv[k].begin(); it != vv[k].end(); it++)
 		{
-			int k = sss.eqn.t[i];
-			for(set<int>::iterator it = vv[k].begin(); it != vv[k].end(); it++)
-			{
-				int e = *it;
-				if(e < gr.in_degree(root)) eqn1.s.push_back(u2e[e]);
-				else eqn1.t.push_back(u2e[e]);
-			}
+			int e = *it;
+			if(e < gr.in_degree(root)) eqn1.s.push_back(u2e[e]);
+			else eqn1.t.push_back(u2e[e]);
 		}
 	}
 
+	set<int> s1(eqn1.s.begin(), eqn1.s.end());
+	set<int> s2(eqn1.t.begin(), eqn1.t.end());
 
-	equation eqn2;
-	if(eqn0.e < -0.5 && eqn1.e < -0.5) return 0;
-	assert(eqn0.e >= 0 || eqn1.e >= 0);
-
-	if(eqn1.e < -0.5) eqn2 = eqn0;
-	else if(eqn0.e < -0.5) eqn2 = eqn1;
-	else if(eqn0.e > eqn1.e) eqn2 = eqn1;
-	else eqn2 = eqn0;
-
-	assert(eqn2.s.size() >= 1);
-	assert(eqn2.t.size() >= 1);
-
-	set<int> s1(eqn2.s.begin(), eqn2.s.end());
-	set<int> s2(eqn2.t.begin(), eqn2.t.end());
-
-	equation eqn3;
 	for(int i = 0; i < gr.in_degree(root); i++)
 	{
 		int e = u2e[i];
 		if(s1.find(e) != s1.end()) continue;
-		eqn3.s.push_back(e);
+		eqn2.s.push_back(e);
 	}
 	for(int i = gr.in_degree(root); i < gr.degree(root); i++)
 	{
 		int e = u2e[i];
 		if(s2.find(e) != s2.end()) continue;
-		eqn3.t.push_back(e);
+		eqn2.t.push_back(e);
 	}
 
-	if(eqn3.s.size() <= 0 || eqn3.t.size() <= 0) return 0;
-
-	ratio = eqn2.e;
-	eqn3.e = ratio;
-
+	eqns.push_back(eqn1);
 	eqns.push_back(eqn2);
-	eqns.push_back(eqn3);
+
+	ratio = (eqn1.e * 0.5 + eqn2.e * 0.5);
+	//ratio = (eqn1.e * 0.5 + eqn2.e * 0.5) * bratio;
 
 	return 0;
-}
-
-/*
-bool router::balance()
-{
-	assert(status == 1);
-
-	GRBEnv *env = new GRBEnv();
-	GRBModel *model = new GRBModel(*env);
-
-	// routes weight variables
-	vector<GRBVar> rvars;
-	for(int i = 0; i < routes.size(); i++)
-	{
-		GRBVar rvar = model->addVar(1.0, GRB_INFINITY, 0, GRB_CONTINUOUS);
-		rvars.push_back(rvar);
-	}
-
-	// new weights variables
-	vector<GRBVar> wvars;
-	for(int i = 0; i < u2e.size(); i++)
-	{
-		GRBVar wvar = model->addVar(1.0, GRB_INFINITY, 0, GRB_CONTINUOUS);
-		wvars.push_back(wvar);
-	}
-	model->update();
-
-	// expression for each edge
-	vector<GRBLinExpr> exprs(u2e.size());
-	for(int i = 0; i < routes.size(); i++)
-	{
-		int e1 = routes[i].first;
-		int e2 = routes[i].second;
-		int u1 = e2u[e1];
-		int u2 = e2u[e2];
-		exprs[u1] += rvars[i];
-		exprs[u2] += rvars[i];
-	}
-
-	for(int i = 0; i < u2e.size(); i++)
-	{
-		model->addConstr(exprs[i], GRB_EQUAL, wvars[i]);
-	}
-
-	// objective 
-	GRBQuadExpr obj;
-	for(int i = 0; i < u2e.size(); i++)
-	{
-		double w = gr.get_edge_weight(i2e[u2e[i]]);
-		obj += (wvars[i] - w) * (wvars[i] - w);
-	}
-
-	model->setObjective(obj, GRB_MINIMIZE);
-	model->getEnv().set(GRB_IntParam_OutputFlag, 0);
-	model->update();
-
-	model->optimize();
-
-	int f = model->get(GRB_IntAttr_Status);
-	if(f != GRB_OPTIMAL)
-	{
-		delete model;
-		delete env;
-		return false;
-	}
-
-	for(int i = 0; i < wvars.size(); i++)
-	{
-		double w = wvars[i].get(GRB_DoubleAttr_X);
-		gr.set_edge_weight(i2e[u2e[i]], w);
-	}
-
-	delete model;
-	delete env;
-	return true;
-}
-*/
-
-vector<PI> router::build_tree_order()
-{
-	assert(status == 1);
-	vector<PI> v;
-	undirected_graph ug2(ug);
-	while(true)
-	{
-		edge_iterator it1, it2;
-		for(tie(it1, it2) = ug2.edges(); it1 != it2; it1++)
-		{
-			int s = (*it1)->source();
-			int t = (*it1)->target();
-			assert(s != t);
-			if(s > t) 
-			{
-				s = (*it1)->target();
-				t = (*it1)->source();
-			}
-			if(ug2.degree(s) != 1 && ug2.degree(t) != 1) continue;
-
-			v.push_back(PI(u2e[s], u2e[t]));
-			ug2.remove_edge(*it1);
-			break;
-		}
-		if(ug2.num_edges() == 0) break;
-	}
-	assert(v.size() == routes.size());
-	return v;
 }
 
 int router::build_indices()
