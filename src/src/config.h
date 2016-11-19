@@ -82,6 +82,7 @@ extern int max_num_bundles;
 extern bool strand_reverse;
 extern int min_gtf_transcripts_num;
 extern bool fast_mode;
+extern bool use_second_alignment;
 
 // parse arguments
 int print_command_line(int argc, const char ** argv);

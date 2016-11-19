@@ -68,6 +68,7 @@ bool output_tex_files = false;
 string fixed_gene_name = "";
 int min_gtf_transcripts_num = 0;
 bool fast_mode = true;
+bool use_second_alignment = true;
 
 int print_parameters()
 {
@@ -132,6 +133,7 @@ int print_parameters()
 	printf("fixed_gene_name = %s\n", fixed_gene_name.c_str());
 	printf("min_gtf_transcripts_num = %d\n", min_gtf_transcripts_num);
 	printf("fast_mode = %c\n", fast_mode ? 'T' : 'F');
+	printf("use_second_alignment = %c\n", use_second_alignment ? 'T' : 'F');
 
 	printf("\n");
 
@@ -346,6 +348,13 @@ int parse_arguments(int argc, const char ** argv)
 			string s(argv[i + 1]);
 			if(s == "true") strand_reverse = true;
 			else strand_reverse = false;
+			i++;
+		}
+		else if(string(argv[i]) == "--use_second_alignment")
+		{
+			string s(argv[i + 1]);
+			if(s == "true") use_second_alignment = true;
+			else use_second_alignment = false;
 			i++;
 		}
 	}
