@@ -153,6 +153,8 @@ int assembler::process(const bundle_base &bb)
 		if(k == 0 || fixed_gene_name != "") bd.print(index);
 		if(k == 0 || fixed_gene_name != "") sg.print();
 
+		if(algo == "empty") continue;
+
 		splice_graph &gr = sg.subs[k];
 		hyper_set &hs = sg.hss[k];
 
