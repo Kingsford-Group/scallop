@@ -1,4 +1,5 @@
 #include "router.h"
+#include "config.h"
 #include "util.h"
 #include "gurobi_c++.h"
 #include "smoother.h"
@@ -38,19 +39,16 @@ router& router::operator=(const router &rt)
 	return (*this);
 }
 
-int router::build()
+int router::classify()
 {
 	assert(gr.in_degree(root) >= 1);
 	assert(gr.out_degree(root) >= 1);
 
-	eqns.clear();
-	ratio = -1;
 	status = -1;
 
 	if(gr.in_degree(root) == 1 || gr.out_degree(root) == 1)
 	{
-		add_single_equation();
-		status = 0;
+		status = TRIVIAL;
 		return 0;
 	}
 
@@ -58,15 +56,16 @@ int router::build()
 	build_bipartite_graph();
 
 	vector< set<int> > vv = ug.compute_connected_components();
-	vector<int> v = ug.assign_connected_components();
 
 	if(vv.size() == 1)
 	{
-		if(ug.num_edges() == ug.num_vertices() - 1) status = 1;
-		else if(ug.num_edges() >= u2e.size()) status = 2;
+		if(ug.num_edges() == ug.num_vertices() - 1) status = INSPLITABLE_TREE;
+		else if(ug.num_edges() >= u2e.size()) status = INSPLITABLE_GRAPH;
 		else assert(false);
 		return 0;
 	}
+
+	vector<int> v = ug.assign_connected_components();
 
 	bool b1 = true;
 	bool b2 = true;
@@ -81,67 +80,54 @@ int router::build()
 	
 	if(b1 == true || b2 == true)
 	{
-		status = 5;
+		status = INSPLITABLE_INCOMPLETE;
 		return 0;
 	}
 
-	split();
-	assert(eqns.size() == 2);
-
 	if(vv.size() == 2)
 	{
-		status = 3;
+		status = SPLITABLE_UNIQUE;
 		return 0;
 	}
 
 	if(vv.size() >= 3)
 	{
-		status = 4;
+		status = SPLITABLE_AMBIGUOUS;
 		return 0;
 	}
 
-	b1 = true;
-	b2 = true;
-	for(int i = 0; i < gr.in_degree(root); i++)
-	{
-		if(ug.degree(i) == 0) b1 = false;
-	}
-	for(int i = 0; i < gr.out_degree(root); i++)
-	{
-		if(ug.degree(i + gr.in_degree(root)) == 0) b2 = false;
-	}
-
-	assert(b1 == true || b2 == true);
-	assert(b1 == false || b2 == false);
-
-	//if(vv.size() == 2 && ug.num_edges() + 2 == ug.num_vertices()) status = 5;
-	//else status = 6;
-
-	status = 5;
 	return 0;
 }
 
-int router::add_single_equation()
+int router::build()
 {
-	equation eqn;
-	double sum1 = 0, sum2 = 0;
-	for(int i = 0; i < gr.in_degree(root); i++)
-	{
-		eqn.s.push_back(u2e[i]);
-		sum1 += gr.get_edge_weight(i2e[u2e[i]]);
-	}
-	for(int i = gr.in_degree(root); i < gr.degree(root); i++)
-	{
-		eqn.t.push_back(u2e[i]);
-		sum2 += gr.get_edge_weight(i2e[u2e[i]]);
-	}
-	assert(eqn.s.size() >= 1);
-	assert(eqn.t.size() >= 1);
-	
-	ratio = fabs(sum1 - sum2) / (sum1 + sum2);
-	eqn.e = ratio;
+	classify();
 
-	eqns.push_back(eqn);
+	if(SPLITABLE(status) == true) split();
+	if(INSPLITABLE(status) == true) decompose();
+
+	return 0;
+}
+
+int router::build_indices()
+{
+	e2u.clear();
+	u2e.clear();
+
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.in_edges(root); it1 != it2; it1++)
+	{
+		int e = e2i[*it1];
+		e2u.insert(PI(e, e2u.size()));
+		u2e.push_back(e);
+	}
+	for(tie(it1, it2) = gr.out_edges(root); it1 != it2; it1++)
+	{
+		int e = e2i[*it1];
+		e2u.insert(PI(e, e2u.size()));
+		u2e.push_back(e);
+	}
+
 	return 0;
 }
 
@@ -167,9 +153,10 @@ int router::build_bipartite_graph()
 
 int router::split()
 {
-	vector< set<int> > vv = ug.compute_connected_components();
+	assert(SPLITABLE(status));
+	eqns.clear();
 
-	// smooth weights (locally)
+	// locally smooth weights
 	vector<double> vw;
 	double sum1 = 0, sum2 = 0;
 	for(int i = 0; i < u2e.size(); i++)
@@ -188,6 +175,8 @@ int router::split()
 
 	for(int i = 0; i < gr.in_degree(root); i++) vw[i] *= r1;
 	for(int i = gr.in_degree(root); i < gr.degree(root); i++) vw[i] *= r2;
+
+	vector< set<int> > vv = ug.compute_connected_components();
 
 	vector<PI> ss;
 	vector<PI> tt;
@@ -249,7 +238,6 @@ int router::split()
 		assert(eqn0.t.size() >= 1);
 	}
 
-	// split using subsetsum
 	equation eqn1;
 	eqn1.e = -1;
 
@@ -340,25 +328,10 @@ int router::split()
 	return 0;
 }
 
-int router::build_indices()
+int router::decompose()
 {
-	e2u.clear();
-	u2e.clear();
-
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.in_edges(root); it1 != it2; it1++)
-	{
-		int e = e2i[*it1];
-		e2u.insert(PI(e, e2u.size()));
-		u2e.push_back(e);
-	}
-	for(tie(it1, it2) = gr.out_edges(root); it1 != it2; it1++)
-	{
-		int e = e2i[*it1];
-		e2u.insert(PI(e, e2u.size()));
-		u2e.push_back(e);
-	}
-
+	// TODO
+	assert(INSPLITABLE(status));
 	return 0;
 }
 

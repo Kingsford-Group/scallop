@@ -21,6 +21,14 @@ using namespace std;
 
 #define MAX_NUM_CIGAR 7
 
+#define INSPLITABLE_TREE 1
+#define INSPLITABLE_GRAPH 2
+#define SPLITABLE_UNIQUE 3
+#define SPLITABLE_AMBIGUOUS 4
+#define INSPLITABLE_INCOMPLETE 5
+
+#define SPLITABLE(x) ((x) >= 3 && (x) <= 4)
+#define INSPLITABLE(x) ((x) <= 2 || (x) >= 5)
 
 //// parameters
 // for bam file and reads

@@ -36,13 +36,14 @@ public:
 	int status;					
 
 public:
-	int build();
-	int classify();
+	int classify();							// compute status
+	int build();							// give solution
 
 	int build_indices();					// build u2e and e2u
 	int build_bipartite_graph();			// build bipartite graph
 	int add_single_equation();				// cannot be divided
 	int split();							// use subsetsum4
+	int decompose();						// run LP 
 
 	// print and stats
 	int print() const;
