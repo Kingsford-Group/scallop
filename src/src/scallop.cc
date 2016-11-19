@@ -132,35 +132,53 @@ int scallop::refine_splice_graph()
 
 bool scallop::resolve_splitable_vertex(int status)
 {
-	int root = -1, se = -1;
-	double ratio1 = compute_smallest_splitable_vertex(root, status);
+	assert(SPLITABLE(status));
+
+	int root = -1;
+	double ratio1 = DBL_MAX;
+	vector<equation> eqns;
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		if(gr.in_degree(i) <= 1) continue;
+		if(gr.out_degree(i) <= 1) continue;
+
+		vector<PI> p = hs.get_routes(i, gr, e2i);
+
+		if(p.size() == 0) continue;		// TODO
+
+		router rt(i, gr, e2i, i2e, p);
+		rt.classify();
+
+		if(rt.status != status) continue;
+
+		rt.build();
+		assert(rt.eqns.size() == 2);
+
+		if(ratio1 < rt.ratio) continue;
+
+		root = i;
+		ratio1 = rt.ratio;
+		eqns = rt.eqns;
+	}
+
 	if(root == -1) return false;
 
+	int se = -1;
 	double ratio2 = compute_smallest_edge(root, se) * smallest_edge_ratio_scalor1;
+	assert(se != -1);
 	if(status == 3) ratio2 = 999;
 
 	if(ratio1 <= ratio2)
 	{
 		if(ratio1 > max_split_error_ratio) return false;
 
-		vector<PI> p = hs.get_routes(root, gr, e2i);
-		router rt(root, gr, e2i, i2e, p);
-		rt.build();
-
-		assert(rt.ratio >= 0);
-		assert(rt.eqns.size() == 2);
-		assert(rt.status == status);
-
 		printf("split hyper-%d vertex %d, ratio = %.2lf / %.2lf, degree = (%d, %d)\n", 
 				status, root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
 
-		for(int i = 0; i < rt.eqns.size(); i++) rt.eqns[i].print(99);
+		eqns[0].print(88);
+		eqns[1].print(99);
 
-		equation &eqn = rt.eqns[0];
-		assert(eqn.s.size() >= 1);
-		assert(eqn.t.size() >= 1);
-
-		split_vertex(root, eqn.s, eqn.t);
+		split_vertex(root, eqns[0].s, eqns[0].t);
 		return true;
 	}
 
