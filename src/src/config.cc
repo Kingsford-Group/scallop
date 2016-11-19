@@ -68,7 +68,7 @@ bool output_tex_files = false;
 string fixed_gene_name = "";
 int min_gtf_transcripts_num = 0;
 bool fast_mode = true;
-bool use_second_alignment = true;
+bool use_second_alignment = false;
 
 int print_parameters()
 {
