@@ -36,8 +36,8 @@ public:
 	int status;					
 
 public:
-	// recompute everything
 	int build();
+	int classify();
 
 	int build_indices();					// build u2e and e2u
 	int build_bipartite_graph();			// build bipartite graph

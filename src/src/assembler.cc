@@ -139,9 +139,11 @@ int assembler::process(const bundle_base &bb)
 		maxv = sg.subs[k].num_vertices();
 	}
 
+	/*
 	if(ref_file != "") compare(bd.gr, ref_file, "compare.tex");
 	if(ref_file1 != "" && bd.strand == '+') compare(bd.gr, ref_file1, "compare1.tex");
 	if(ref_file2 != "" && bd.strand == '-') compare(bd.gr, ref_file2, "compare2.tex");
+	*/
 
 	for(int k = 0; k < sg.subs.size(); k++)
 	{
@@ -158,11 +160,9 @@ int assembler::process(const bundle_base &bb)
 		splice_graph &gr = sg.subs[k];
 		hyper_set &hs = sg.hss[k];
 
-		/*
 		if(ref_file != "") compare(gr, ref_file, "compare.tex");
 		if(ref_file1 != "" && bd.strand == '+') compare(gr, ref_file1, "compare1.tex");
 		if(ref_file2 != "" && bd.strand == '-') compare(gr, ref_file2, "compare2.tex");
-		*/
 
 		int cnt = gr.count_junctions();
 		double ss = gr.compute_coverage() / average_read_length;

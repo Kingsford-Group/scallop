@@ -47,8 +47,6 @@ int router::build()
 	ratio = -1;
 	status = -1;
 
-	build_indices();
-
 	if(gr.in_degree(root) == 1 || gr.out_degree(root) == 1)
 	{
 		add_single_equation();
@@ -56,8 +54,11 @@ int router::build()
 		return 0;
 	}
 
+	build_indices();
 	build_bipartite_graph();
+
 	vector< set<int> > vv = ug.compute_connected_components();
+	vector<int> v = ug.assign_connected_components();
 
 	if(vv.size() == 1)
 	{
@@ -67,21 +68,40 @@ int router::build()
 		return 0;
 	}
 
-	split();
+	bool b1 = true;
+	bool b2 = true;
+	for(int i = 1; i < gr.in_degree(root); i++)
+	{
+		if(v[i] != v[0]) b1 = false;
+	}
+	for(int i = gr.in_degree(root) + 1; i < gr.degree(root); i++)
+	{
+		if(v[i] != v[gr.in_degree(root)]) b2 = false;
+	}
+	
+	if(b1 == true || b2 == true)
+	{
+		status = 5;
+		return 0;
+	}
 
-	if(vv.size() == 2 && eqns.size() == 2)
+	split();
+	assert(eqns.size() == 2);
+
+	if(vv.size() == 2)
 	{
 		status = 3;
 		return 0;
 	}
 
-	if(vv.size() >= 3 && eqns.size() == 2)
+	if(vv.size() >= 3)
 	{
 		status = 4;
 		return 0;
 	}
 
-	bool b1 = true, b2 = true;
+	b1 = true;
+	b2 = true;
 	for(int i = 0; i < gr.in_degree(root); i++)
 	{
 		if(ug.degree(i) == 0) b1 = false;
