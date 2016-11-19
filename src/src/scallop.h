@@ -16,7 +16,6 @@ typedef pair<int, int> PI;
 typedef map<int, int> MI;
 typedef pair<int, double> PID;
 typedef map<int, double> MID;
-typedef pair<PI, double> PPID;
 
 // for noisy splice graph
 class scallop
@@ -54,9 +53,9 @@ private:
 
 	// resolve iteratively
 	bool resolve_small_edges();
-	bool resolve_hyper_tree(int status);
-	bool resolve_hyper_vertex(int status);
 	bool resolve_trivial_vertex();
+	bool resolve_splitable_vertex(int status);
+	bool resolve_insplitable_vertex(int status);
 	bool resolve_hyper_edge1();
 	bool resolve_hyper_edge0();
 

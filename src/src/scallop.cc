@@ -42,19 +42,19 @@ int scallop::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_hyper_vertex(3);
+		b = resolve_splitable_vertex(SPLITABLE_UNIQUE);
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_hyper_tree(1);
+		b = resolve_insplitable_vertex(INSPLITABLE_TREE);
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_hyper_tree(2);
+		b = resolve_insplitable_vertex(INSPLITABLE_GRAPH);
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_hyper_vertex(4);
+		b = resolve_splitable_vertex(SPLITABLE_AMBIGUOUS);
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -62,14 +62,10 @@ int scallop::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_hyper_tree(5);
+		b = resolve_insplitable_vertex(INSPLITABLE_INCOMPLETE);
 		if(b == true) print();
 		if(b == true) continue;
 
-		/*
-		b = hs.rebuild(1);
-		if(b == true) continue;
-		*/
 
 		b = resolve_hyper_edge1();
 		if(b == true) print();
@@ -134,7 +130,7 @@ int scallop::refine_splice_graph()
 	return 0;
 }
 
-bool scallop::resolve_hyper_vertex(int status)
+bool scallop::resolve_splitable_vertex(int status)
 {
 	int root = -1, se = -1;
 	double ratio1 = compute_smallest_splitable_vertex(root, status);
@@ -190,7 +186,7 @@ bool scallop::resolve_hyper_vertex(int status)
 	return false;
 }
 
-bool scallop::resolve_hyper_tree(int status)
+bool scallop::resolve_insplitable_vertex(int status)
 {
 	int root = -1;
 	undirected_graph ug;
@@ -1283,8 +1279,12 @@ double scallop::compute_smallest_removable_edge(int &se)
 
 		if(ratio < r) continue;
 
+		/* TODO
 		if(i2e[e]->target() == i && hs.right_extend(e)) continue;
 		if(i2e[e]->source() == i && hs.left_extend(e)) continue;
+		*/
+
+		if(hs.left_extend(e) && hs.right_extend(e)) continue;
 
 		if(gr.in_degree(i2e[e]->target()) <= 1) continue;
 		if(gr.out_degree(i2e[e]->source()) <= 1) continue;

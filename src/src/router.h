@@ -7,6 +7,8 @@
 #include "equation.h"
 #include "undirected_graph.h"
 
+typedef pair<PI, double> PPID;
+
 using namespace std;
 
 class router
@@ -27,13 +29,10 @@ public:
 	vector<int> u2e;			// index to edge
 	undirected_graph ug;		// bipartite graph
 
-	double ratio;				// worst ratio
-	vector<equation> eqns;		// divide results
-
-	// 0: trivial
-	// 1: ug is a tree
-	// 2: ug has a single component, but not a tree
 	int status;					
+	double ratio;				// worst ratio
+	vector<equation> eqns;		// split results
+	vector<PPID> vpi;			// decompose resutls
 
 public:
 	int classify();							// compute status
@@ -41,9 +40,9 @@ public:
 
 	int build_indices();					// build u2e and e2u
 	int build_bipartite_graph();			// build bipartite graph
-	int add_single_equation();				// cannot be divided
-	int split();							// use subsetsum4
-	int decompose();						// run LP 
+	int split();							// split
+	int decompose();						// decompose
+	int complete();							// complete graph
 
 	// print and stats
 	int print() const;
