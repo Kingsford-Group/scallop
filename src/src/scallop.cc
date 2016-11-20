@@ -1161,10 +1161,9 @@ int scallop::compute_removable_edge(int x, double &ratio)
 	if(gr.out_degree(i2e[e]->source()) <= 1) return -1;
 	if(hs.right_extend(e) && hs.left_extend(e)) return -1;
 
-	assert(hs.right_extend(e) == false || hs.left_extend(e) == false);
-
 	if(w <= min_removable_weight) return e;
-	if(w >= max_removable_weight) return -1;
+	//if(w >= max_removable_weight) return -1;
+	//if(ratio >= max_split_error_ratio) return -1;
 
 	if(i2e[e]->target() == x && hs.right_extend(e)) return -1;
 	if(i2e[e]->source() == x && hs.left_extend(e)) return -1;
