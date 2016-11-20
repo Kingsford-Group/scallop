@@ -113,6 +113,7 @@ bool scallop::resolve_small_edges()
 	printf("remove small edge %d, weight = %.2lf, ratio = %.2lf, vertex = (%d, %d), degree = (%d, %d)\n", 
 			se, sw, ratio, s, t, gr.out_degree(s), gr.in_degree(t));
 
+	assert(hs.right_extend(se) == false || hs.left_extend(se) == false);
 	remove_edge(se);
 	hs.remove(se);
 
@@ -153,7 +154,8 @@ bool scallop::resolve_splitable_vertex(int status)
 	if(root == -1) return false;
 
 	double ratio2;
-	int se = compute_removable_edge(root, ratio2) * smallest_edge_ratio_scalor1;
+	int se = compute_removable_edge(root, ratio2);
+	ratio2 = ratio2 * smallest_edge_ratio_scalor1;
 
 	if(ratio1 <= ratio2 || status == SPLITABLE_UNIQUE)
 	{
@@ -178,6 +180,7 @@ bool scallop::resolve_splitable_vertex(int status)
 
 		printf("remove splitable vertex-%d edge %d, weight = %.2lf, ratio = %.2lf / %.2lf\n", status, se, sw, ratio1, ratio2);
 
+		assert(hs.right_extend(se) == false || hs.left_extend(se) == false);
 		remove_edge(se);
 		hs.remove(se);
 		return true;
@@ -216,7 +219,8 @@ bool scallop::resolve_insplitable_vertex(int status)
 	if(status == 5 && ratio1 > 0.01) return false;
 
 	double ratio2;
-	int se = compute_removable_edge(root, ratio2) * smallest_edge_ratio_scalor2;
+	int se = compute_removable_edge(root, ratio2);
+	ratio2 = ratio2 * smallest_edge_ratio_scalor2;
 	if(status == 5) ratio2 = 999;
 
 	if(ratio1 <= ratio2)
@@ -240,6 +244,7 @@ bool scallop::resolve_insplitable_vertex(int status)
 		printf("remove insplitable vertex-%d edge %d, weight = %.2lf, ratio = %.2lf / %.2lf\n", status, se, sw, ratio1, ratio2);
 
 		remove_edge(se);
+		assert(hs.right_extend(se) == false || hs.left_extend(se) == false);
 		hs.remove(se);
 		return true;
 	}
@@ -1156,11 +1161,13 @@ int scallop::compute_removable_edge(int x, double &ratio)
 	if(gr.out_degree(i2e[e]->source()) <= 1) return -1;
 	if(hs.right_extend(e) && hs.left_extend(e)) return -1;
 
+	assert(hs.right_extend(e) == false || hs.left_extend(e) == false);
+
 	if(w <= min_removable_weight) return e;
 	if(w >= max_removable_weight) return -1;
 
-	if(i2e[e]->target() == x && hs.right_extend(e)) -1;
-	if(i2e[e]->source() == x && hs.left_extend(e)) -1;
+	if(i2e[e]->target() == x && hs.right_extend(e)) return -1;
+	if(i2e[e]->source() == x && hs.left_extend(e)) return -1;
 
 	return e;
 }
