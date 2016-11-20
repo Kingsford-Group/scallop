@@ -60,14 +60,15 @@ int scallop::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
-		/*
 		max_split_error_ratio += 0.1;
 		max_decompose_error_ratio += 0.1;
 
-		if(max_split_error_ratio < 0.5) continue;
-		if(max_decompose_error_ratio < 0.5) continue;
-		*/
+		if(max_split_error_ratio <= 1.0) continue;
+		if(max_decompose_error_ratio <= 1.0) continue;
 
+		break;
+
+		/*
 		b = resolve_hyper_edge1();
 		if(b == true) print();
 		if(b == true) continue;
@@ -77,6 +78,7 @@ int scallop::assemble()
 		if(b == true) continue;
 
 		break;
+		*/
 	}
 
 	collect_existing_st_paths();
