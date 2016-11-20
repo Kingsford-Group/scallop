@@ -224,7 +224,8 @@ int hyper_set::replace(const vector<int> &v, int e)
 		int k = (*it);
 		vector<int> &vv = edges[k];
 		int b = consecutive_subset(vv, v);
-		assert(b >= 0);
+		//assert(b >= 0);		// TODO
+		if(b < 0) continue;
 		vv[b] = e;
 		vv.erase(vv.begin() + b + 1, vv.begin() + b + v.size());
 
