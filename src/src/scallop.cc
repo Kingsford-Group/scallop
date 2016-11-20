@@ -60,6 +60,14 @@ int scallop::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
+		/*
+		max_split_error_ratio += 0.1;
+		max_decompose_error_ratio += 0.1;
+
+		if(max_split_error_ratio < 0.5) continue;
+		if(max_decompose_error_ratio < 0.5) continue;
+		*/
+
 		b = resolve_hyper_edge1();
 		if(b == true) print();
 		if(b == true) continue;
@@ -216,40 +224,15 @@ bool scallop::resolve_insplitable_vertex(int type, int degree)
 	}
 
 	if(root == -1) return false;
-	if(type == MULTIPLE && ratio1 > 0.01) return false;
+	if(ratio1 > max_decompose_error_ratio) return false;
 
-	double ratio2;
-	int se = compute_removable_edge(root, ratio2);
-	//ratio2 = ratio2 * smallest_edge_ratio_scalor2;
-	if(type == MULTIPLE) ratio2 = 999;
+	printf("resolve insplitable degree-%d vertex %d, ratio = %.3lf, degree = (%d, %d)\n",
+			degree, root, ratio1, gr.in_degree(root), gr.out_degree(root));
 
-	if(ratio1 <= ratio2)
-	{
-		printf("resolve insplitable degree-%d vertex %d, ratio = (%.3lf, %.3lf), degree = (%d, %d)\n",
-				degree, root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
+	decompose_vertex(root, vpi);
+	assert(gr.degree(root) == 0);
 
-		decompose_vertex(root, vpi);
-		assert(gr.degree(root) == 0);
-
-		return true;
-	}
-
-	if(ratio2 < ratio1)
-	{
-		if(se == -1) return false;
-		if(ratio2 > max_split_error_ratio) return false;
-
-		double sw = gr.get_edge_weight(i2e[se]);
-
-		printf("remove insplitable degree-%d edge %d, weight = %.2lf, ratio = %.2lf / %.2lf\n", degree, se, sw, ratio1, ratio2);
-
-		remove_edge(se);
-		assert(hs.right_extend(se) == false || hs.left_extend(se) == false);
-		hs.remove(se);
-		return true;
-	}
-
-	return false;
+	return true;
 }
 
 bool scallop::resolve_hyper_edge0()
@@ -406,9 +389,9 @@ bool scallop::resolve_hyper_edge1()
 
 bool scallop::resolve_trivial_vertex()
 {
-	int root = -1;
-	double ratio = -1;
 	int se = -1;
+	int root = -1;
+	double ratio = DBL_MAX;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.degree(i) == 0) continue;
@@ -416,7 +399,7 @@ bool scallop::resolve_trivial_vertex()
 
 		int e;
 		double r = compute_balance_ratio(i);
-		if(ratio >= 0 && ratio < r) continue;
+		if(ratio < r) continue;
 
 		root = i;
 		ratio = r;

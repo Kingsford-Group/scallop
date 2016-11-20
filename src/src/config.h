@@ -50,6 +50,7 @@ extern double min_inner_boundary_weight;
 extern double min_spanning_edge_weight;
 extern double min_splice_edge_weight;
 extern double max_split_error_ratio;
+extern double max_decompose_error_ratio;
 extern double min_transcript_coverage;
 extern double min_splice_graph_coverage;
 extern int min_junction_count;
