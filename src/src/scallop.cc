@@ -92,9 +92,12 @@ bool scallop::resolve_small_edges()
 
 		double r;
 		int e = compute_removable_edge(i, r);
+		double w = gr.get_edge_weight(i2e[e]);
 
 		if(e == -1) continue;
 		if(ratio < r) continue;
+		if(w > min_removable_weight && i2e[e]->target() == i && hs.right_extend(e)) continue;
+		if(w > min_removable_weight && i2e[e]->source() == i && hs.left_extend(e)) continue;
 
 		ratio = r;
 		se = e;
@@ -151,7 +154,7 @@ bool scallop::resolve_splitable_vertex(int degree)
 
 	double ratio2;
 	int se = compute_removable_edge(root, ratio2);
-	ratio2 = ratio2 * smallest_edge_ratio_scalor1;
+	ratio2 = ratio2 * smallest_edge_ratio_scalor1;	// TODO
 
 	if(ratio1 <= ratio2 || degree == 1)
 	{
@@ -216,7 +219,7 @@ bool scallop::resolve_insplitable_vertex(int type, int degree)
 
 	double ratio2;
 	int se = compute_removable_edge(root, ratio2);
-	ratio2 = ratio2 * smallest_edge_ratio_scalor2;
+	//ratio2 = ratio2 * smallest_edge_ratio_scalor2;
 	if(type == MULTIPLE) ratio2 = 999;
 
 	if(ratio1 <= ratio2)
@@ -1156,13 +1159,6 @@ int scallop::compute_removable_edge(int x, double &ratio)
 	if(gr.in_degree(i2e[e]->target()) <= 1) return -1;
 	if(gr.out_degree(i2e[e]->source()) <= 1) return -1;
 	if(hs.right_extend(e) && hs.left_extend(e)) return -1;
-
-	if(w <= min_removable_weight) return e;
-	//if(w >= max_removable_weight) return -1;
-	//if(ratio >= max_split_error_ratio) return -1;
-
-	if(i2e[e]->target() == x && hs.right_extend(e)) return -1;
-	if(i2e[e]->source() == x && hs.left_extend(e)) return -1;
 
 	return e;
 }
