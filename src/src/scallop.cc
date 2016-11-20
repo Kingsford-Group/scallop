@@ -92,10 +92,11 @@ bool scallop::resolve_small_edges()
 
 		double r;
 		int e = compute_removable_edge(i, r);
-		double w = gr.get_edge_weight(i2e[e]);
 
 		if(e == -1) continue;
 		if(ratio < r) continue;
+
+		double w = gr.get_edge_weight(i2e[e]);
 		if(w > min_removable_weight && i2e[e]->target() == i && hs.right_extend(e)) continue;
 		if(w > min_removable_weight && i2e[e]->source() == i && hs.left_extend(e)) continue;
 
