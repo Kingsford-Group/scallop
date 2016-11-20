@@ -101,11 +101,8 @@ int router::classify()
 
 int router::build()
 {
-	classify();
-
 	if(SPLITABLE(status) == true) split();
 	if(INSPLITABLE(status) == true) decompose();
-
 	return 0;
 }
 

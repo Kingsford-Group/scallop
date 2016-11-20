@@ -206,11 +206,11 @@ bool scallop::resolve_splitable_vertex(int status)
 
 bool scallop::resolve_insplitable_vertex(int status)
 {
+	assert(INSPLITABLE(status));
+
 	int root = -1;
-	undirected_graph ug;
-	vector<int> u2e;
 	vector<PPID> vpi;
-	double ratio1 = 999;
+	double ratio1 = DBL_MAX;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.in_degree(i) <= 1) continue;
@@ -218,49 +218,30 @@ bool scallop::resolve_insplitable_vertex(int status)
 
 		vector<PI> p = hs.get_routes(i, gr, e2i);
 		router rt(i, gr, e2i, i2e, p);
-		rt.build();
+		rt.classify();
 
 		if(rt.status != status) continue;
-		
-		MID m;
-		get_weights(i, m);
 
-		balance_vertex(i);
-		if(status == 5) complete_graph(rt.ug, rt.u2e, i);
+		rt.build();
 
-		double r = balance_vertex(rt.ug, rt.u2e, vpi);
-
-		set_weights(m);
-
-		if(ratio1 < r) continue;
+		if(ratio1 < rt.ratio) continue;
 
 		root = i;
-		ratio1 = r;
+		ratio1 = rt.ratio;
 	}
 
 	if(root == -1) return false;
+	if(status == 5 && ratio1 > 0.01) return false;
 
 	int se = -1;
 	double ratio2 = compute_smallest_edge(root, se) * smallest_edge_ratio_scalor2;
-	if(status == 5 && ratio1 > 0.01) return false;
-	//if(status == 5 && ratio1 > max_split_error_ratio) return false;
 	if(status == 5) ratio2 = 999;
 
 	if(ratio1 <= ratio2)
 	{
-		vector<PI> p = hs.get_routes(root, gr, e2i);
-		router rt(root, gr, e2i, i2e, p);
-		rt.build();
-		assert(rt.status == status);
-
-		balance_vertex(root);
-		if(status == 5) complete_graph(rt.ug, rt.u2e, root);
-
-		balance_vertex(rt.ug, rt.u2e, vpi);
-
 		printf("resolve hyper tree-%d %d, ratio = (%.3lf, %.3lf), degree = (%d, %d)\n", status, root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
 
-		decompose_tree(vpi);
+		decompose_tree(root, vpi);
 		assert(gr.degree(root) == 0);
 
 		return true;
@@ -618,8 +599,48 @@ int scallop::set_weights(MID &m)
 	return 0;
 }
 
-int scallop::decompose_tree(const vector<PPID> &vpi)
+int scallop::decompose_tree(int root, const vector<PPID> &vpi)
 {
+	MID md;
+	for(int i = 0; i < vpi.size(); i++)
+	{
+		int e1 = vpi[i].first.first;
+		int e2 = vpi[i].first.second;
+		double w = vpi[i].second;
+		if(md.find(e1) == md.end()) md.insert(PID(e1, w));
+		else md[e1] += w;
+		if(md.find(e2) == md.end()) md.insert(PID(e2, w));
+		else md[e2] += w;
+	}
+
+	for(MID::iterator it = md.begin(); it != md.end(); it++)
+	{
+		edge_descriptor e = i2e[it->first];
+		double w = it->second;
+		gr.set_edge_weight(e, w);
+	}
+
+	vector<int> dve;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.in_edges(root); it1 != it2; it1++)
+	{
+		int e = e2i[*it1];
+		if(md.find(e) != md.end()) continue;
+		dve.push_back(e);
+	}
+	for(tie(it1, it2) = gr.out_edges(root); it1 != it2; it1++)
+	{
+		int e = e2i[*it1];
+		if(md.find(e) != md.end()) continue;
+		dve.push_back(e);
+	}
+	for(int i = 0; i < dve.size(); i++)
+	{
+		int e = dve[i];
+		remove_edge(e);
+		hs.remove(e);
+	}
+
 	map<int, int> m;
 	for(int i = 0; i < vpi.size(); i++)
 	{
@@ -678,7 +699,7 @@ int scallop::decompose_trivial_vertex(int x)
 		}
 	}
 
-	decompose_tree(vpi);
+	decompose_tree(x, vpi);
 	return 0;
 }
 
@@ -1268,9 +1289,11 @@ double scallop::compute_smallest_splitable_vertex(int &root, int status)
 		if(p.size() == 0) continue;
 
 		router rt(i, gr, e2i, i2e, p);
-		rt.build();
+		rt.classify();
 
 		if(rt.status != status) continue;
+		rt.build();
+
 		assert(rt.ratio >= 0);
 		assert(rt.eqns.size() == 2);
 
@@ -1297,12 +1320,11 @@ double scallop::compute_smallest_removable_edge(int &se)
 
 		if(ratio < r) continue;
 
-		/* TODO
 		if(i2e[e]->target() == i && hs.right_extend(e)) continue;
 		if(i2e[e]->source() == i && hs.left_extend(e)) continue;
-		*/
 
-		if(hs.left_extend(e) && hs.right_extend(e)) continue;
+		// TODO
+		//if(hs.left_extend(e) && hs.right_extend(e)) continue;
 
 		if(gr.in_degree(i2e[e]->target()) <= 1) continue;
 		if(gr.out_degree(i2e[e]->source()) <= 1) continue;
@@ -1360,6 +1382,7 @@ int scallop::stats()
 	{
 		vector<PI> p = hs.get_routes(i, gr, e2i);
 		router rt(i, gr, e2i, i2e, p);
+		rt.classify();
 		rt.build();
 		rt.stats();
 	}

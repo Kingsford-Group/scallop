@@ -69,7 +69,7 @@ private:
 	int set_weights(MID &m);
 
 	// decomposing subroutines
-	int decompose_tree(const vector<PPID> &vpi);
+	int decompose_tree(int root, const vector<PPID> &vpi);
 	int decompose_trivial_vertex(int v);
 	int split_vertex(int x, const vector<int> &xe, const vector<int> &ye);
 	int split_edge(int exi, double w);
