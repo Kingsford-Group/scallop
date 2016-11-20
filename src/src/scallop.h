@@ -48,6 +48,7 @@ private:
 	int init_inner_weights();
 	int add_pseudo_hyper_edges();
 	int refine_splice_graph();
+	int filter_hyper_edges();
 
 	// resolve iteratively
 	bool resolve_small_edges();
@@ -77,7 +78,7 @@ private:
 	int collect_existing_st_paths();
 	int greedy_decompose(int num);
 
-	// print and draw
+	// stats, print, and draw
 	int print();
 	int stats();
 	int draw_splice_graph(const string &file);

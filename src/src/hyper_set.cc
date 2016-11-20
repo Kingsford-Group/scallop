@@ -36,36 +36,7 @@ int hyper_set::build(directed_graph &gr, MEI& e2i)
 {
 	build_edges(gr, e2i);
 	build_index();
-	purify();
-	build_index();
 	return 0;
-}
-
-bool hyper_set::rebuild(int k)
-{
-	VVI vvi;
-	vector<int> vv;
-	bool b = false;
-	for(int i = 0; i < edges.size(); i++)
-	{
-		if(edges[i].size() <= 1) continue;
-
-		if(ecnts[i] <= k)
-		{
-			b = true;
-			continue;
-		}
-
-		vvi.push_back(edges[i]);
-		vv.push_back(ecnts[i]);
-	}
-	edges = vvi;
-	ecnts = vv;
-
-	build_index();
-	purify();
-	build_index();
-	return b;
 }
 
 int hyper_set::build_edges(directed_graph &gr, MEI& e2i)
@@ -78,15 +49,12 @@ int hyper_set::build_edges(directed_graph &gr, MEI& e2i)
 
 		const vector<int> &vv = it->first;
 		vector<int> ve;
-		bool b = true;
 		for(int k = 0; k < vv.size() - 1; k++)
 		{
 			PEB p = gr.edge(vv[k], vv[k + 1]);
-			if(p.second == false) b = false;
-			if(b == false) break;
-			ve.push_back(e2i[p.first]);
+			if(p.second == false) ve.push_back(-1);
+			else ve.push_back(e2i[p.first]);
 		}
-		if(b == false) continue;
 		edges.push_back(ve);
 		ecnts.push_back(c);
 	}
@@ -103,6 +71,7 @@ int hyper_set::build_index()
 		for(int j = 0; j < v.size(); j++)
 		{
 			int e = v[j];
+			if(e == -1) continue;
 			if(e2s.find(e) == e2s.end())
 			{
 				set<int> s;
@@ -122,11 +91,13 @@ set<int> hyper_set::get_intersection(const vector<int> &v)
 {
 	set<int> ss;
 	if(v.size() == 0) return ss;
+	assert(v[0] >= 0);
 	if(e2s.find(v[0]) == e2s.end()) return ss;
 	ss = e2s[v[0]];
 	vector<int> vv(ss.size());
 	for(int i = 1; i < v.size(); i++)
 	{
+		assert(v[i] >= 0);
 		set<int> s;
 		if(e2s.find(v[i]) == e2s.end()) return s;
 		s = e2s[v[i]];
@@ -146,7 +117,10 @@ set<int> hyper_set::get_successors(int e)
 		vector<int> &v = edges[*it];
 		for(int i = 0; i < v.size(); i++)
 		{
-			if(v[i] == e && i < v.size() - 1) s.insert(v[i + 1]);
+			if(v[i] != e) continue;
+			if(i >= v.size() - 1) continue;
+			if(v[i + 1] == -1) continue;
+			s.insert(v[i + 1]);
 		}
 	}
 	return s;
@@ -162,7 +136,10 @@ set<int> hyper_set::get_predecessors(int e)
 		vector<int> &v = edges[*it];
 		for(int i = 0; i < v.size(); i++)
 		{
-			if(v[i] == e && i >= 1) s.insert(v[i - 1]);
+			if(v[i] != e) continue;
+			if(i == 0) continue;
+			if(v[i - 1] == -1) continue;
+			s.insert(v[i - 1]);
 		}
 	}
 	return s;
@@ -186,25 +163,38 @@ vector<PI> hyper_set::get_routes(int x, directed_graph &gr, MEI &e2i)
 	return v;
 }
 
-int hyper_set::purify()
+int hyper_set::get_routes(int x, directed_graph &gr, MEI &e2i, MPII &mpi)
 {
-	VVI vv;
-	for(int i = 0; i < edges.size(); i++)
+	edge_iterator it1, it2;
+	mpi.clear();
+	int total = 0;
+	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
 	{
-		vector<int> &v = edges[i];
-		set<int> s = get_intersection(v);
-		assert(s.find(i) != s.end());
-		for(set<int>::iterator it = s.begin(); it != s.end(); it++)
+		assert(e2i.find(*it1) != e2i.end());
+		int e = e2i[*it1];
+
+		if(e2s.find(e) == e2s.end()) continue;
+		set<int> &ss = e2s[e];
+		for(set<int>::iterator it = ss.begin(); it != ss.end(); it++)
 		{
-			if((*it) == i) continue;
-			int b = consecutive_subset(edges[*it], v);
-			assert(b >= 0);
+			int k = *it;
+			assert(k >= 0 && k < edges.size());
+			assert(k >= 0 && k < ecnts.size());
+			vector<int> &v = edges[k];
+			int cnt = ecnts[k];
+			for(int i = 0; i < v.size(); i++)
+			{
+				if(v[i] != e) continue;
+				if(i == v.size() - 1) continue;
+				if(v[i + 1] == -1) continue;
+				PI p(e, v[i + 1]);
+				total += cnt;
+				if(mpi.find(p) != mpi.end()) mpi[p] += cnt;
+				else mpi.insert(PPII(p, cnt));
+			}
 		}
-		if(s.size() >= 2) continue;
-		vv.push_back(v);
 	}
-	edges = vv;
-	return 0;
+	return total;
 }
 
 int hyper_set::replace(int x, int e)
@@ -282,11 +272,40 @@ int hyper_set::remove(int e)
 		vector<int> &vv = edges[k];
 		assert(vv.size() >= 1);
 
+		for(int i = 0; i < vv.size(); i++)
+		{
+			if(vv[i] == e) vv[i] = -1;
+		}
+
+		/*
 		if(vv[0] == e) vv.erase(vv.begin());
 		else if(vv[vv.size() - 1] == e) vv.pop_back();
 		else assert(false);
+		*/
 	}
 	e2s.erase(e);
+	return 0;
+}
+
+int hyper_set::remove_pair(int x, int y)
+{
+	if(e2s.find(x) == e2s.end()) return 0;
+	set<int> s = e2s[x];
+	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
+	{
+		int k = (*it);
+		vector<int> &vv = edges[k];
+		assert(vv.size() >= 1);
+
+		for(int i = 0; i < vv.size(); i++)
+		{
+			if(i == vv.size() - 1) continue;
+			if(vv[i] != x) continue;
+			if(vv[i + 1] != y) continue;
+			vv.insert(vv.begin() + i + 1, -1);
+			break;
+		}
+	}
 	return 0;
 }
 
@@ -304,7 +323,11 @@ bool hyper_set::left_extend(int e)
 		int k = (*it);
 		vector<int> &vv = edges[k];
 		assert(vv.size() >= 1);
-		if(vv[0] != e) return true;
+
+		for(int i = 1; i < vv.size(); i++)
+		{
+			if(vv[i] == e && vv[i - 1] != -1) return true; 
+		}
 	}
 	return false;
 }
@@ -318,7 +341,11 @@ bool hyper_set::right_extend(int e)
 		int k = (*it);
 		vector<int> &vv = edges[k];
 		assert(vv.size() >= 1);
-		if(vv[vv.size() - 1] != e) return true;
+
+		for(int i = 0; i < vv.size() - 1; i++)
+		{
+			if(vv[i] == e && vv[i + 1] != -1) return true; 
+		}
 	}
 	return false;
 }
@@ -363,5 +390,3 @@ int hyper_set::print()
 	}
 	return 0;
 }
-
-

@@ -15,6 +15,8 @@ typedef map<vector<int>, int> MVII;
 typedef map< int, set<int> > MISI;
 typedef pair< int, set<int> > PISI;
 typedef vector< vector<int> > VVI;
+typedef map< pair<int, int>, int> MPII;
+typedef pair< pair<int, int>, int> PPII;
 
 class hyper_set
 {
@@ -32,12 +34,11 @@ public:
 	int build(directed_graph &gr, MEI &e2i);
 	int build_edges(directed_graph &gr, MEI &e2i);
 	int build_index();
-	bool rebuild(int k);
 	set<int> get_intersection(const vector<int> &v);
 	set<int> get_successors(int e);
 	set<int> get_predecessors(int e);
 	vector<PI> get_routes(int x, directed_graph &gr, MEI &e2i);
-	int purify();
+	int get_routes(int x, directed_graph &gr, MEI &e2i, MPII &mpi);
 	int print();
 
 public:
@@ -47,6 +48,7 @@ public:
 	int remove(int e);
 	int remove(const vector<int> &x);
 	int remove(const set<int> &x);
+	int remove_pair(int x, int y);
 	bool extend(int e);
 	bool left_extend(int e);
 	bool left_extend(const set<int> &s);

@@ -18,6 +18,7 @@ scallop::scallop(const string &s, const splice_graph &g, const hyper_set &h)
 	gr.get_edge_indices(i2e, e2i);
 	//add_pseudo_hyper_edges();
 	hs.build(gr, e2i);
+	filter_hyper_edges();
 	init_super_edges();
 	init_vertex_map();
 	init_inner_weights();
@@ -1241,5 +1242,48 @@ int scallop::draw_splice_graph(const string &file)
 	
 	vector<int> tp = topological_sort();
 	gr.draw(file, mis, mes, 4.5, tp);
+	return 0;
+}
+
+int scallop::filter_hyper_edges()
+{
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		if(gr.in_degree(i) <= 1) continue;
+		if(gr.out_degree(i) <= 1) continue;
+
+		MPII mpi;
+		int total = hs.get_routes(i, gr, e2i, mpi);
+		vector<PI> p = hs.get_routes(i, gr, e2i);
+
+		assert(p.size() == mpi.size());
+		
+		if(p.size() == 0) continue;
+
+		router rt(i, gr, e2i, i2e, p);
+		rt.classify();
+
+
+		int maxcount = 0;
+		for(MPII::iterator it = mpi.begin(); it != mpi.end(); it++)
+		{
+			int cnt = it->second;
+			if(cnt > maxcount) maxcount = cnt;
+		}
+
+		for(MPII::iterator it = mpi.begin(); it != mpi.end(); it++)
+		{
+			PI pi = it->first;
+			int cnt = it->second;
+			double ratio = cnt * 1.0 / maxcount;
+
+			if(cnt > 0.01) continue;
+
+			printf("filter hyper edge: type %d degree %d vertex %d indegree %d outdegree %d hedges %lu total %d maxcount %d current %d\n", 
+					rt.type, rt.degree, i, gr.in_degree(i), gr.out_degree(i), mpi.size(), total, maxcount, cnt);
+
+			hs.remove_pair(pi.first, pi.second);
+		}
+	}
 	return 0;
 }
