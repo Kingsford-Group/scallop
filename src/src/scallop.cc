@@ -143,7 +143,7 @@ bool scallop::resolve_splitable_vertex(int degree)
 		rt.build();
 		assert(rt.eqns.size() == 2);
 
-		if(ratio1 < rt.ratio) continue;
+		if(rt.degree == degree && ratio1 < rt.ratio) continue;
 
 		root = i;
 		ratio1 = rt.ratio;
@@ -183,7 +183,7 @@ bool scallop::resolve_insplitable_vertex(int type, int degree)
 
 		rt.build();
 
-		if(ratio1 < rt.ratio) continue;
+		if(rt.degree == degree && ratio1 < rt.ratio) continue;
 
 		root = i;
 		ratio1 = rt.ratio;
