@@ -228,6 +228,7 @@ bool scallop::resolve_insplitable_vertex(int status)
 
 		root = i;
 		ratio1 = rt.ratio;
+		vpi = rt.vpi;
 	}
 
 	if(root == -1) return false;
