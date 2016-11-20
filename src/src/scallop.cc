@@ -60,12 +60,6 @@ int scallop::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
-		max_split_error_ratio += 0.1;
-		max_decompose_error_ratio += 0.1;
-
-		if(max_split_error_ratio <= 1.0) continue;
-		if(max_decompose_error_ratio <= 1.0) continue;
-
 		b = resolve_hyper_edge1();
 		if(b == true) print();
 		if(b == true) continue;
