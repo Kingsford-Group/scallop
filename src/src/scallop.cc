@@ -175,15 +175,8 @@ bool scallop::resolve_splitable_vertex(int status)
 		if(ratio2 > max_split_error_ratio) return false;
 
 		double sw = gr.get_edge_weight(i2e[se]);
-		int s = i2e[se]->source();
-		int t = i2e[se]->target();
 
-		if(hs.left_extend(se) && hs.right_extend(se)) return false;
-		if(gr.in_degree(t) <= 1) return false;
-		if(gr.out_degree(s) <= 1) return false;
-
-		printf("remove splitable vertex-%d edge %d, weight = %.2lf, ratio = %.2lf / %.2lf, vertex = (%d, %d), degree = (%d, %d)\n", 
-				status, se, sw, ratio1, ratio2, s, t, gr.out_degree(s), gr.in_degree(t));
+		printf("remove splitable vertex-%d edge %d, weight = %.2lf, ratio = %.2lf / %.2lf\n", status, se, sw, ratio1, ratio2);
 
 		remove_edge(se);
 		hs.remove(se);
@@ -228,7 +221,8 @@ bool scallop::resolve_insplitable_vertex(int status)
 
 	if(ratio1 <= ratio2)
 	{
-		printf("resolve insplitable vertex-%d %d, ratio = (%.3lf, %.3lf), degree = (%d, %d)\n", status, root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
+		printf("resolve insplitable vertex-%d %d, ratio = (%.3lf, %.3lf), degree = (%d, %d)\n",
+				status, root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
 
 		decompose_vertex(root, vpi);
 		assert(gr.degree(root) == 0);
@@ -242,15 +236,8 @@ bool scallop::resolve_insplitable_vertex(int status)
 		if(ratio2 > max_split_error_ratio) return false;
 
 		double sw = gr.get_edge_weight(i2e[se]);
-		int s = i2e[se]->source();
-		int t = i2e[se]->target();
 
-		if(hs.left_extend(se) && hs.right_extend(se)) return false;
-		if(gr.in_degree(t) <= 1) return false;
-		if(gr.out_degree(s) <= 1) return false;
-
-		printf("remove insplitable vertex-%d edge %d, weight = %.2lf, ratio = %.2lf / %.2lf, vertex = (%d, %d), degree = (%d, %d)\n", 
-				status, se, sw, ratio1, ratio2, s, t, gr.out_degree(s), gr.in_degree(t));
+		printf("remove insplitable vertex-%d edge %d, weight = %.2lf, ratio = %.2lf / %.2lf\n", status, se, sw, ratio1, ratio2);
 
 		remove_edge(se);
 		hs.remove(se);
