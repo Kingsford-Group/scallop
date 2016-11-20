@@ -351,7 +351,7 @@ int router::decompose()
 	GRBEnv *env = new GRBEnv();
 	GRBModel *model = new GRBModel(*env);
 
-	//complete();		// TODO
+	complete();		// TODO
 
 	// edge list of ug
 	VE ve;

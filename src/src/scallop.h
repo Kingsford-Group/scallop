@@ -62,6 +62,7 @@ private:
 	double compute_balance_ratio(int x);
 
 	// decomposing subroutines
+	int compute_removable_edge(int x, double &ratio);
 	int decompose_vertex(int v, const vector<PPID> &vpi);
 	int decompose_trivial_vertex(int v);
 	int split_vertex(int x, const vector<int> &xe, const vector<int> &ye);
@@ -75,7 +76,6 @@ private:
 	int collect_path(int e);
 	int collect_existing_st_paths();
 	int greedy_decompose(int num);
-	double compute_smallest_edge(int x, int &e);
 
 	// print and draw
 	int print();

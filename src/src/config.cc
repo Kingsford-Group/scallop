@@ -34,6 +34,8 @@ double min_splice_graph_coverage = 20.0;
 int min_junction_count = 5;
 double smallest_edge_ratio_scalor1 = 0.2;
 double smallest_edge_ratio_scalor2 = 1.0;
+double min_removable_weight = 5.0;
+double max_removable_weight = 30.0;
 bool extend_isolated_boundary = true;
 
 // for identifying new boundaries
@@ -99,6 +101,8 @@ int print_parameters()
 	printf("max_split_error_ratio = %.2lf\n", max_split_error_ratio);
 	printf("smallest_edge_ratio_scalor1 = %.2lf\n", smallest_edge_ratio_scalor1);
 	printf("smallest_edge_ratio_scalor2 = %.2lf\n", smallest_edge_ratio_scalor2);
+	printf("min_removable_weight = %.2lf\n", min_removable_weight);
+	printf("max_removable_weight = %.2lf\n", max_removable_weight);
 	printf("extend_isolated_bounary = %c\n", extend_isolated_boundary ? 'T' : 'F');
 
 	// for identifying new boundaries
@@ -304,6 +308,16 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--smallest_edge_ratio_scalor2")
 		{
 			smallest_edge_ratio_scalor2 = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_removable_weight")
+		{
+			min_removable_weight = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--max_removable_weight")
+		{
+			max_removable_weight = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--extend_isolated_boundary")
