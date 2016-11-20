@@ -29,7 +29,8 @@ public:
 	vector<int> u2e;			// index to edge
 	undirected_graph ug;		// bipartite graph
 
-	int status;					
+	int type;					// trivial, splitable, single, or multiple 
+	int degree;					// level
 	double ratio;				// worst ratio
 	vector<equation> eqns;		// split results
 	vector<PPID> vpi;			// decompose resutls

@@ -52,8 +52,8 @@ private:
 	// resolve iteratively
 	bool resolve_small_edges();
 	bool resolve_trivial_vertex();
-	bool resolve_splitable_vertex(int status);
-	bool resolve_insplitable_vertex(int status);
+	bool resolve_splitable_vertex(int degree);
+	bool resolve_insplitable_vertex(int type, int degree);
 	bool resolve_hyper_edge1();
 	bool resolve_hyper_edge0();
 

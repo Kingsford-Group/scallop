@@ -9,12 +9,12 @@
 #include <set>
 
 router::router(int r, splice_graph &g, MEI &ei, VE &ie)
-	:root(r), gr(g), e2i(ei), i2e(ie), status(0)
+	:root(r), gr(g), e2i(ei), i2e(ie), degree(-1), type(-1)
 {
 }
 
 router::router(int r, splice_graph &g, MEI &ei, VE &ie, const vector<PI> &p)
-	:root(r), gr(g), e2i(ei), i2e(ie), routes(p), status(0)
+	:root(r), gr(g), e2i(ei), i2e(ie), routes(p), degree(-1), type(-1)
 {
 }
 
@@ -31,7 +31,8 @@ router& router::operator=(const router &rt)
 	e2u = rt.e2u;
 	u2e = rt.u2e;
 
-	status = rt.status;
+	type = rt.type;
+	degree = rt.degree;
 	ratio = rt.ratio;
 	eqns = rt.eqns;
 	vpi = rt.vpi;
@@ -44,11 +45,12 @@ int router::classify()
 	assert(gr.in_degree(root) >= 1);
 	assert(gr.out_degree(root) >= 1);
 
-	status = -1;
+	degree = -1;
 
 	if(gr.in_degree(root) == 1 || gr.out_degree(root) == 1)
 	{
-		status = TRIVIAL;
+		type = TRIVIAL;
+		degree = gr.degree(root);
 		return 0;
 	}
 
@@ -59,9 +61,8 @@ int router::classify()
 
 	if(vv.size() == 1)
 	{
-		if(ug.num_edges() == ug.num_vertices() - 1) status = INSPLITABLE_TREE;
-		else if(ug.num_edges() >= u2e.size()) status = INSPLITABLE_GRAPH;
-		else assert(false);
+		type = SINGLE;
+		degree = ug.num_edges() - ug.num_vertices() + vv.size() + vv.size();
 		return 0;
 	}
 
@@ -80,29 +81,21 @@ int router::classify()
 	
 	if(b1 == true || b2 == true)
 	{
-		status = INSPLITABLE_INCOMPLETE;
+		type = MULTIPLE;
+		degree = ug.num_edges() - ug.num_vertices() + vv.size() + vv.size();
 		return 0;
 	}
 
-	if(vv.size() == 2)
-	{
-		status = SPLITABLE_UNIQUE;
-		return 0;
-	}
-
-	if(vv.size() >= 3)
-	{
-		status = SPLITABLE_AMBIGUOUS;
-		return 0;
-	}
+	type = SPLITABLE;
+	degree = vv.size() - 1;
 
 	return 0;
 }
 
 int router::build()
 {
-	if(SPLITABLE(status) == true) split();
-	if(INSPLITABLE(status) == true) decompose();
+	if(type == SPLITABLE) split();
+	if(type == SINGLE || type == MULTIPLE) decompose();
 	return 0;
 }
 
@@ -150,7 +143,7 @@ int router::build_bipartite_graph()
 
 int router::split()
 {
-	assert(SPLITABLE(status));
+	assert(type == SPLITABLE);
 	eqns.clear();
 
 	// locally smooth weights
@@ -327,8 +320,7 @@ int router::split()
 
 int router::decompose()
 {
-	assert(INSPLITABLE(status));
-
+	assert(type == SINGLE || type == MULTIPLE);
 	// locally balance weights
 	vector<double> vw;
 	double sum1 = 0, sum2 = 0;
@@ -483,7 +475,7 @@ int router::complete()
 
 int router::print() const
 {
-	printf("router %d, #routes = %lu, ratio = %.2lf\n", root, routes.size(), ratio);
+	printf("router %d, #routes = %lu, type = %d, degree = %d, ratio = %.2lf\n", root, routes.size(), type, degree, ratio);
 	printf("in-edges = ( ");
 	for(int i = 0; i < gr.in_degree(root); i++) printf("%d ", u2e[i]);
 	printf("), out-edges = ( ");

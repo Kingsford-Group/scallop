@@ -34,25 +34,21 @@ int scallop::assemble()
 
 	while(true)
 	{
-		bool b	= false;
+		bool b = false;
 
 		b = resolve_small_edges();
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_splitable_vertex(SPLITABLE_UNIQUE);
+		b = resolve_splitable_vertex(1);
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_insplitable_vertex(INSPLITABLE_TREE);
+		b = resolve_insplitable_vertex(SINGLE, 1);
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_insplitable_vertex(INSPLITABLE_GRAPH);
-		if(b == true) print();
-		if(b == true) continue;
-
-		b = resolve_splitable_vertex(SPLITABLE_AMBIGUOUS);
+		b = resolve_splitable_vertex(999);
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -60,7 +56,7 @@ int scallop::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_insplitable_vertex(INSPLITABLE_INCOMPLETE);
+		b = resolve_insplitable_vertex(MULTIPLE, 999);
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -120,10 +116,8 @@ bool scallop::resolve_small_edges()
 	return true;
 }
 
-bool scallop::resolve_splitable_vertex(int status)
+bool scallop::resolve_splitable_vertex(int degree)
 {
-	assert(SPLITABLE(status));
-
 	int root = -1;
 	double ratio1 = DBL_MAX;
 	vector<equation> eqns;
@@ -139,7 +133,8 @@ bool scallop::resolve_splitable_vertex(int status)
 		router rt(i, gr, e2i, i2e, p);
 		rt.classify();
 
-		if(rt.status != status) continue;
+		if(rt.type != SPLITABLE) continue;
+		if(rt.degree > degree) continue;
 
 		rt.build();
 		assert(rt.eqns.size() == 2);
@@ -149,6 +144,7 @@ bool scallop::resolve_splitable_vertex(int status)
 		root = i;
 		ratio1 = rt.ratio;
 		eqns = rt.eqns;
+		degree = rt.degree;
 	}
 
 	if(root == -1) return false;
@@ -157,12 +153,12 @@ bool scallop::resolve_splitable_vertex(int status)
 	int se = compute_removable_edge(root, ratio2);
 	ratio2 = ratio2 * smallest_edge_ratio_scalor1;
 
-	if(ratio1 <= ratio2 || status == SPLITABLE_UNIQUE)
+	if(ratio1 <= ratio2 || degree == 1)
 	{
 		if(ratio1 > max_split_error_ratio) return false;
 
-		printf("resolve splitable vertex-%d vertex %d, ratio = %.2lf / %.2lf, degree = (%d, %d)\n", 
-				status, root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
+		printf("resolve splitable degree-%d vertex %d, ratio = %.2lf / %.2lf, degree = (%d, %d)\n", 
+				degree, root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
 
 		eqns[0].print(88);
 		eqns[1].print(99);
@@ -178,7 +174,7 @@ bool scallop::resolve_splitable_vertex(int status)
 
 		double sw = gr.get_edge_weight(i2e[se]);
 
-		printf("remove splitable vertex-%d edge %d, weight = %.2lf, ratio = %.2lf / %.2lf\n", status, se, sw, ratio1, ratio2);
+		printf("remove splitable degree-%d edge %d, weight = %.2lf, ratio = %.2lf / %.2lf\n", degree, se, sw, ratio1, ratio2);
 
 		assert(hs.right_extend(se) == false || hs.left_extend(se) == false);
 		remove_edge(se);
@@ -188,10 +184,8 @@ bool scallop::resolve_splitable_vertex(int status)
 	return false;
 }
 
-bool scallop::resolve_insplitable_vertex(int status)
+bool scallop::resolve_insplitable_vertex(int type, int degree)
 {
-	assert(INSPLITABLE(status));
-
 	int root = -1;
 	vector<PPID> vpi;
 	double ratio1 = DBL_MAX;
@@ -204,7 +198,8 @@ bool scallop::resolve_insplitable_vertex(int status)
 		router rt(i, gr, e2i, i2e, p);
 		rt.classify();
 
-		if(rt.status != status) continue;
+		if(rt.type != type) continue;
+		if(rt.degree > degree) continue;
 
 		rt.build();
 
@@ -213,20 +208,21 @@ bool scallop::resolve_insplitable_vertex(int status)
 		root = i;
 		ratio1 = rt.ratio;
 		vpi = rt.vpi;
+		degree = rt.degree;
 	}
 
 	if(root == -1) return false;
-	if(status == 5 && ratio1 > 0.01) return false;
+	if(type == MULTIPLE && ratio1 > 0.01) return false;
 
 	double ratio2;
 	int se = compute_removable_edge(root, ratio2);
 	ratio2 = ratio2 * smallest_edge_ratio_scalor2;
-	if(status == 5) ratio2 = 999;
+	if(type == MULTIPLE) ratio2 = 999;
 
 	if(ratio1 <= ratio2)
 	{
-		printf("resolve insplitable vertex-%d %d, ratio = (%.3lf, %.3lf), degree = (%d, %d)\n",
-				status, root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
+		printf("resolve insplitable degree-%d vertex %d, ratio = (%.3lf, %.3lf), degree = (%d, %d)\n",
+				degree, root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
 
 		decompose_vertex(root, vpi);
 		assert(gr.degree(root) == 0);
@@ -241,7 +237,7 @@ bool scallop::resolve_insplitable_vertex(int status)
 
 		double sw = gr.get_edge_weight(i2e[se]);
 
-		printf("remove insplitable vertex-%d edge %d, weight = %.2lf, ratio = %.2lf / %.2lf\n", status, se, sw, ratio1, ratio2);
+		printf("remove insplitable degree-%d edge %d, weight = %.2lf, ratio = %.2lf / %.2lf\n", degree, se, sw, ratio1, ratio2);
 
 		remove_edge(se);
 		assert(hs.right_extend(se) == false || hs.left_extend(se) == false);

@@ -34,7 +34,7 @@ double min_splice_graph_coverage = 20.0;
 int min_junction_count = 5;
 double smallest_edge_ratio_scalor1 = 0.2;
 double smallest_edge_ratio_scalor2 = 1.0;
-double min_removable_weight = 10.0;
+double min_removable_weight = 5.0;
 double max_removable_weight = 50.0;
 bool extend_isolated_boundary = true;
 
