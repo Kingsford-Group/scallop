@@ -162,40 +162,16 @@ bool scallop::resolve_splitable_vertex(int degree)
 	}
 
 	if(root == -1) return false;
+	if(ratio1 > max_split_error_ratio) return false;
 
-	double ratio2;
-	int se = compute_removable_edge(root, ratio2);
-	//ratio2 = ratio2 * smallest_edge_ratio_scalor1;	// TODO
+	printf("resolve splitable degree-%d vertex %d, ratio = %.2lf, degree = (%d, %d)\n", 
+			degree, root, ratio1, gr.in_degree(root), gr.out_degree(root));
 
-	if(ratio1 <= ratio2 || degree == 1)
-	{
-		if(ratio1 > max_split_error_ratio) return false;
+	eqns[0].print(88);
+	eqns[1].print(99);
 
-		printf("resolve splitable degree-%d vertex %d, ratio = %.2lf / %.2lf, degree = (%d, %d)\n", 
-				degree, root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
-
-		eqns[0].print(88);
-		eqns[1].print(99);
-
-		split_vertex(root, eqns[0].s, eqns[0].t);
-		return true;
-	}
-
-	if(ratio2 < ratio1)
-	{
-		if(se == -1) return false;
-		if(ratio2 > max_split_error_ratio) return false;
-
-		double sw = gr.get_edge_weight(i2e[se]);
-
-		printf("remove splitable degree-%d edge %d, weight = %.2lf, ratio = %.2lf / %.2lf\n", degree, se, sw, ratio1, ratio2);
-
-		assert(hs.right_extend(se) == false || hs.left_extend(se) == false);
-		remove_edge(se);
-		hs.remove(se);
-		return true;
-	}
-	return false;
+	split_vertex(root, eqns[0].s, eqns[0].t);
+	return true;
 }
 
 bool scallop::resolve_insplitable_vertex(int type, int degree)
