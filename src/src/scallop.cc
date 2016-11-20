@@ -130,7 +130,7 @@ bool scallop::resolve_splitable_vertex(int status)
 
 		vector<PI> p = hs.get_routes(i, gr, e2i);
 
-		//if(p.size() == 0) continue;		// TODO
+		if(p.size() == 0) continue;		// TODO
 
 		router rt(i, gr, e2i, i2e, p);
 		rt.classify();
