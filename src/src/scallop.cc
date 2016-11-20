@@ -48,15 +48,15 @@ int scallop::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
+		b = resolve_insplitable_vertex(MULTIPLE, 999);
+		if(b == true) print();
+		if(b == true) continue;
+
 		b = resolve_splitable_vertex(999);
 		if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_trivial_vertex();
-		if(b == true) print();
-		if(b == true) continue;
-
-		b = resolve_insplitable_vertex(MULTIPLE, 999);
 		if(b == true) print();
 		if(b == true) continue;
 
