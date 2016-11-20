@@ -165,7 +165,7 @@ bool scallop::resolve_splitable_vertex(int degree)
 
 	double ratio2;
 	int se = compute_removable_edge(root, ratio2);
-	ratio2 = ratio2 * smallest_edge_ratio_scalor1;	// TODO
+	//ratio2 = ratio2 * smallest_edge_ratio_scalor1;	// TODO
 
 	if(ratio1 <= ratio2 || degree == 1)
 	{
