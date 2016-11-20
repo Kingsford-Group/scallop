@@ -39,7 +39,6 @@ public:
 	hyper_set hs;						// hyper edges
 	int round;							// round in iteration
 	vector<path> paths;					// predicted transcripts
-	vector<router> routers;
 
 private:
 	// init
@@ -62,14 +61,9 @@ private:
 	// smooth vertex
 	int balance_vertex(int x);
 	double compute_balance_ratio(int x);
-	double balance_vertex(undirected_graph &ug, const vector<int> &u2e, vector<PPID> &vpi);
-	int complete_graph(undirected_graph &ug, const vector<int> &u2e, int root);
-
-	int get_weights(int v, MID &m);
-	int set_weights(MID &m);
 
 	// decomposing subroutines
-	int decompose_tree(int root, const vector<PPID> &vpi);
+	int decompose_vertex(int v, const vector<PPID> &vpi);
 	int decompose_trivial_vertex(int v);
 	int split_vertex(int x, const vector<int> &xe, const vector<int> &ye);
 	int split_edge(int exi, double w);
@@ -83,8 +77,6 @@ private:
 	int collect_existing_st_paths();
 	int greedy_decompose(int num);
 	double compute_smallest_edge(int x, int &e);
-	double compute_smallest_removable_edge(int &se);
-	double compute_smallest_splitable_vertex(int &root, int status);
 
 	// print and draw
 	int print();

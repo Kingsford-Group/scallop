@@ -1,7 +1,5 @@
 #include "scallop.h"
 #include "config.h"
-#include "gurobi_c++.h"
-#include "binomial.h"
 #include "smoother.h"
 
 #include <cstdio>
@@ -242,7 +240,7 @@ bool scallop::resolve_insplitable_vertex(int status)
 	{
 		printf("resolve hyper tree-%d %d, ratio = (%.3lf, %.3lf), degree = (%d, %d)\n", status, root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
 
-		decompose_tree(root, vpi);
+		decompose_vertex(root, vpi);
 		assert(gr.degree(root) == 0);
 
 		return true;
@@ -425,7 +423,31 @@ bool scallop::resolve_hyper_edge1()
 bool scallop::resolve_small_edges()
 {
 	int se = -1;
-	double ratio = compute_smallest_removable_edge(se);
+	int root = -1;
+	double ratio = DBL_MAX;
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		if(gr.in_degree(i) <= 1) continue;
+		if(gr.out_degree(i) <= 1) continue;
+
+		int e;
+		double r = compute_smallest_edge(i, e);
+
+		if(ratio < r) continue;
+
+		if(i2e[e]->target() == i && hs.right_extend(e)) continue;
+		if(i2e[e]->source() == i && hs.left_extend(e)) continue;
+
+		// TODO
+		//if(hs.left_extend(e) && hs.right_extend(e)) continue;
+
+		if(gr.in_degree(i2e[e]->target()) <= 1) continue;
+		if(gr.out_degree(i2e[e]->source()) <= 1) continue;
+
+		ratio = r;
+		se = e;
+		root = i;
+	}
 
 	if(se == -1) return false;
 
@@ -571,36 +593,7 @@ int scallop::init_vertex_map()
 	return 0;
 }
 
-int scallop::get_weights(int x, MID &m)
-{
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
-	{
-		int e = e2i[*it1];
-		double w = gr.get_edge_weight(*it1);
-		m.insert(PID(e, w));
-	}
-	for(tie(it1, it2) = gr.out_edges(x); it1 != it2; it1++)
-	{
-		int e = e2i[*it1];
-		double w = gr.get_edge_weight(*it1);
-		m.insert(PID(e, w));
-	}
-	return 0;
-}
-
-int scallop::set_weights(MID &m)
-{
-	for(MID::iterator it = m.begin(); it != m.end(); it++)
-	{
-		edge_descriptor e = i2e[it->first];
-		double w = it->second;
-		gr.set_edge_weight(e, w);
-	}
-	return 0;
-}
-
-int scallop::decompose_tree(int root, const vector<PPID> &vpi)
+int scallop::decompose_vertex(int root, const vector<PPID> &vpi)
 {
 	MID md;
 	for(int i = 0; i < vpi.size(); i++)
@@ -700,7 +693,7 @@ int scallop::decompose_trivial_vertex(int x)
 		}
 	}
 
-	decompose_tree(x, vpi);
+	decompose_vertex(x, vpi);
 	return 0;
 }
 
@@ -932,132 +925,6 @@ int scallop::split_edge(int ei, double w)
 	return n;
 }
 
-int scallop::complete_graph(undirected_graph &ug, const vector<int> &u2e, int root)
-{
-	edge_descriptor e1 = gr.max_in_edge(root);
-	edge_descriptor e2 = gr.max_out_edge(root);
-	
-	int k1 = -1, k2 = -1;
-	for(int i = 0; i < u2e.size(); i++)
-	{
-		if(u2e[i] == e2i[e1]) k1 = i;
-		if(u2e[i] == e2i[e2]) k2 = i;
-	}
-	assert(k1 != -1 && k2 != -1);
-
-	for(int i = 0; i < gr.in_degree(root); i++)
-	{
-		if(ug.degree(i) >= 1) continue;
-		ug.add_edge(i, k2);
-	}
-	for(int i = 0; i < gr.out_degree(root); i++)
-	{
-		int j = i + gr.in_degree(root);
-		if(ug.degree(j) >= 1) continue;
-		ug.add_edge(k1, j);
-	}
-	return 0;
-}
-
-double scallop::balance_vertex(undirected_graph &ug, const vector<int> &u2e, vector<PPID> &vpi)
-{
-	GRBEnv *env = new GRBEnv();
-	GRBModel *model = new GRBModel(*env);
-
-	// edge list of ug
-	VE ve;
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = ug.edges(); it1 != it2; it1++)
-	{
-		edge_descriptor e = (*it1);
-		ve.push_back(e);
-	}
-
-	// routes weight variables
-	vector<GRBVar> rvars;
-	for(int i = 0; i < ve.size(); i++)
-	{
-		GRBVar rvar = model->addVar(1.0, GRB_INFINITY, 0, GRB_CONTINUOUS);
-		rvars.push_back(rvar);
-	}
-
-	// new weights variables
-	vector<GRBVar> wvars;
-	for(int i = 0; i < u2e.size(); i++)
-	{
-		GRBVar wvar = model->addVar(1.0, GRB_INFINITY, 0, GRB_CONTINUOUS);
-		wvars.push_back(wvar);
-	}
-	model->update();
-
-	// expression for each edge
-	vector<GRBLinExpr> exprs(u2e.size());
-	for(int i = 0; i < ve.size(); i++)
-	{
-		edge_descriptor e = ve[i];
-		int u1 = e->source();
-		int u2 = e->target();
-		exprs[u1] += rvars[i];
-		exprs[u2] += rvars[i];
-	}
-
-	for(int i = 0; i < u2e.size(); i++)
-	{
-		model->addConstr(exprs[i], GRB_EQUAL, wvars[i]);
-	}
-
-	// objective 
-	GRBQuadExpr obj;
-	for(int i = 0; i < u2e.size(); i++)
-	{
-		double w = gr.get_edge_weight(i2e[u2e[i]]);
-		obj += (wvars[i] - w) * (wvars[i] - w);
-	}
-
-	model->setObjective(obj, GRB_MINIMIZE);
-	model->getEnv().set(GRB_IntParam_OutputFlag, 0);
-	model->update();
-
-	model->optimize();
-
-	int f = model->get(GRB_IntAttr_Status);
-	if(f != GRB_OPTIMAL)
-	{
-		delete model;
-		delete env;
-		return -1;
-	}
-
-	double ww1 = 0;
-	double ww2 = 0;
-	for(int i = 0; i < wvars.size(); i++)
-	{
-		double w1 = gr.get_edge_weight(i2e[u2e[i]]);
-		double w2 = wvars[i].get(GRB_DoubleAttr_X);
-		gr.set_edge_weight(i2e[u2e[i]], w2);
-		ww1 += w1;
-		ww2 += fabs(w1 - w2);
-	}
-
-	vpi.clear();
-	for(int i = 0; i < ve.size(); i++)
-	{
-		edge_descriptor e = ve[i];
-		int s = e->source();
-		int t = e->target();
-		int es = u2e[s];
-		int et = u2e[t];
-		PI p(es, et);
-		if(s > t) p = PI(et, es);
-		double w = rvars[i].get(GRB_DoubleAttr_X);
-		vpi.push_back(PPID(p, w));
-	}
-
-	delete model;
-	delete env;
-	return ww2 / ww1;
-}
-
 int scallop::balance_vertex(int v)
 {
 	if(gr.degree(v) <= 0) return 0;
@@ -1275,66 +1142,6 @@ int scallop::collect_path(int e)
 	i2e[e] = null_edge;
 
 	return 0;
-}
-
-double scallop::compute_smallest_splitable_vertex(int &root, int status)
-{
-	root = -1;
-	double ratio = 999;
-	for(int i = 1; i < gr.num_vertices() - 1; i++)
-	{
-		if(gr.in_degree(i) <= 1) continue;
-		if(gr.out_degree(i) <= 1) continue;
-
-		vector<PI> p = hs.get_routes(i, gr, e2i);
-		if(p.size() == 0) continue;
-
-		router rt(i, gr, e2i, i2e, p);
-		rt.classify();
-
-		if(rt.status != status) continue;
-		rt.build();
-
-		assert(rt.ratio >= 0);
-		assert(rt.eqns.size() == 2);
-
-		if(ratio < rt.ratio) continue;
-
-		root = i;
-		ratio = rt.ratio;
-	}
-	return ratio;
-}
-
-double scallop::compute_smallest_removable_edge(int &se)
-{
-	se = -1;
-	int root = -1;
-	double ratio = 999;
-	for(int i = 1; i < gr.num_vertices() - 1; i++)
-	{
-		if(gr.in_degree(i) <= 1) continue;
-		if(gr.out_degree(i) <= 1) continue;
-
-		int e;
-		double r = compute_smallest_edge(i, e);
-
-		if(ratio < r) continue;
-
-		if(i2e[e]->target() == i && hs.right_extend(e)) continue;
-		if(i2e[e]->source() == i && hs.left_extend(e)) continue;
-
-		// TODO
-		//if(hs.left_extend(e) && hs.right_extend(e)) continue;
-
-		if(gr.in_degree(i2e[e]->target()) <= 1) continue;
-		if(gr.out_degree(i2e[e]->source()) <= 1) continue;
-
-		ratio = r;
-		se = e;
-		root = i;
-	}
-	return ratio;
 }
 
 double scallop::compute_smallest_edge(int x, int &e)
