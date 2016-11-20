@@ -48,7 +48,7 @@ int scallop::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_insplitable_vertex(MULTIPLE, 999);
+		b = resolve_hyper_edge1();
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -57,6 +57,10 @@ int scallop::assemble()
 		if(b == true) continue;
 
 		b = resolve_trivial_vertex();
+		if(b == true) print();
+		if(b == true) continue;
+
+		b = resolve_insplitable_vertex(MULTIPLE, 999);
 		if(b == true) print();
 		if(b == true) continue;
 
