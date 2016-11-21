@@ -126,8 +126,8 @@ bool scallop::resolve_small_edges2()
 {
 	int se = -1;
 	int root = -1;
-	double ratio = DBL_MAX;
-	
+	double ratio = 0.05;
+	double maxw = 10.0;
 	edge_iterator it1, it2;
 	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
 	{
@@ -135,6 +135,9 @@ bool scallop::resolve_small_edges2()
 		int ee = e2i[e];
 		int s = e->source();
 		int t = e->target();
+		double w = gr.get_edge_weight(e);
+
+		if(w > maxw) continue;
 		if(gr.in_degree(s) != 1) continue;
 		if(gr.in_degree(t) == 1) continue;
 		if(gr.out_degree(s) == 1) continue;
