@@ -186,10 +186,14 @@ PI router::filter_hyper_edge()
 	if(cmin * 1.0 / cmax > 0.05) return PI(-1, -1);
 	if(u2e[ee] != p.first && u2e[ee] != p.second) return PI(-1, -1);
 
+	return p;
+	// TODO, bug here
+	/*
+	printf("edge from (%d, %d) -> (%d, %d)\n", p.first, p.second, e2u[p.first], e2u[p.second]);
 	PEB e = ug.edge(e2u[p.first], e2u[p.second]);
 	assert(e.second == true);
 	ug.remove_edge(e.first);
-	return p;
+	*/
 }
 
 int router::split()

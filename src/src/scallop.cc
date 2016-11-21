@@ -1227,14 +1227,12 @@ int scallop::filter_hyper_edges()
 		if(rt.type != 2) continue;
 		if(rt.degree == 1) continue;
 
-		int maxcount = 0;
-
 		PI p = rt.filter_hyper_edge();
 
 		if(p.first == -1 || p.second == -1) continue;
 
-		printf("filter hyper edge: type %d degree %d vertex %d indegree %d outdegree %d hedges %lu total %d maxcount %d\n", 
-					rt.type, rt.degree, i, gr.in_degree(i), gr.out_degree(i), mpi.size(), total, maxcount);
+		printf("filter hyper edge: type %d degree %d vertex %d indegree %d outdegree %d hedges %lu total %d\n", 
+					rt.type, rt.degree, i, gr.in_degree(i), gr.out_degree(i), mpi.size(), total);
 
 		hs.remove_pair(p.first, p.second);
 	}
