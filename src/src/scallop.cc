@@ -110,7 +110,6 @@ bool scallop::resolve_small_edges()
 	printf("remove small edge %d, weight = %.2lf, ratio = %.2lf, vertex = (%d, %d), degree = (%d, %d)\n", 
 			se, sw, ratio, s, t, gr.out_degree(s), gr.in_degree(t));
 
-	//assert(hs.right_extend(se) == false || hs.left_extend(se) == false);
 	remove_edge(se);
 	hs.remove(se);
 
@@ -213,15 +212,18 @@ bool scallop::resolve_insplitable_vertex(int type, int degree)
 	}
 
 	if(root == -1) return false;
-	if(type == MULTIPLE && ratio1 > 0.01) return false;
+	//if(type == MULTIPLE && ratio1 > 0.01) return false;
 
 	double ratio2;
 	int se = compute_removable_edge(root, ratio2);
 	ratio2 = ratio2 * smallest_edge_ratio_scalor2;
 	if(type == MULTIPLE) ratio2 = 999;
+	if(type == SINGLE) ratio2 = 999;
 
 	if(ratio1 <= ratio2)
 	{
+		if(ratio1 > max_decompose_error_ratio) return false;
+
 		printf("resolve insplitable degree-%d vertex %d, ratio = (%.3lf, %.3lf), degree = (%d, %d)\n",
 				degree, root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
 
