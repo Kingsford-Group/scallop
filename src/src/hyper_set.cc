@@ -284,7 +284,7 @@ int hyper_set::replace(const vector<int> &v, int e)
 		vector<int> &vv = edges[k];
 		vector<int> bv = consecutive_subset(vv, v);
 
-		if(bv.size() < 0) continue;
+		if(bv.size() <= 0) continue;
 
 		sort(bv.begin(), bv.end());
 
@@ -295,6 +295,7 @@ int hyper_set::replace(const vector<int> &v, int e)
 			vv.erase(vv.begin() + b + 1, vv.begin() + b + v.size());
 		}
 
+		/* TODO
 		for(int i = 0; i < v.size(); i++) 
 		{
 			int x = v[i];
@@ -302,6 +303,7 @@ int hyper_set::replace(const vector<int> &v, int e)
 			assert(e2s[x].find(k) != e2s[x].end());
 			e2s[x].erase(k);
 		}
+		*/
 
 		if(e2s.find(e) == e2s.end())
 		{
@@ -355,7 +357,16 @@ int hyper_set::remove(int e)
 
 	for(int i = 0; i < edges.size(); i++)
 	{
-		for(int k = 0; k < edges[i].size(); k++) assert(edges[i][k] != e);
+		for(int k = 0; k < edges[i].size(); k++)
+		{
+			if(edges[i][k] == e)
+			{
+				printf("WITH %d: ", e);
+				printv(edges[i]);
+				printf("\n");
+			}
+			assert(edges[i][k] != e);
+		}
 	}
 	return 0;
 }
