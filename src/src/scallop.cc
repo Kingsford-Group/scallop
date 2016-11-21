@@ -41,10 +41,6 @@ int scallop::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_splitable_vertex(1);
-		if(b == true) print();
-		if(b == true) continue;
-
 		b = resolve_insplitable_vertex(SINGLE, 999);
 		if(b == true) print();
 		if(b == true) continue;
@@ -195,7 +191,7 @@ bool scallop::resolve_insplitable_vertex(int type, int degree)
 
 	if(root == -1) return false;
 	if(type == MULTIPLE && ratio1 > 0.01) return false;
-	if(type == SINGLE && ratio1 > 0.01) return false;
+	//if(type == SINGLE && ratio1 > 0.01) return false;
 	//if(ratio1 > max_decompose_error_ratio) return false;
 
 	double ratio2;
