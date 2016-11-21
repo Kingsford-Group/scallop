@@ -7,6 +7,8 @@
 #include <cstdio>
 #include <algorithm>
 #include <set>
+#include <cfloat>
+#include <stdint.h>
 
 router::router(int r, splice_graph &g, MEI &ei, VE &ie)
 	:root(r), gr(g), e2i(ei), i2e(ie), degree(-1), type(-1)
@@ -18,6 +20,17 @@ router::router(int r, splice_graph &g, MEI &ei, VE &ie, const vector<PI> &p)
 {
 }
 
+router::router(int r, splice_graph &g, MEI &ei, VE &ie, const MPII &mpi)
+	:root(r), gr(g), e2i(ei), i2e(ie), degree(-1), type(-1)
+{
+	routes.clear();
+	counts.clear();
+	for(MPII::const_iterator it = mpi.begin(); it != mpi.end(); it++)
+	{
+		routes.push_back(it->first);
+		counts.push_back(it->second);
+	}
+}
 
 router& router::operator=(const router &rt)
 {
@@ -135,10 +148,45 @@ int router::build_bipartite_graph()
 		int t = e2u[e2];
 		assert(s >= 0 && s < gr.in_degree(root));
 		assert(t >= gr.in_degree(root) && t < gr.degree(root));
-		ug.add_edge(s, t);
+		edge_descriptor e = ug.add_edge(s, t);
+	}
+	return 0;
+}
+
+PI router::filter_hyper_edge()
+{
+	if(routes.size() == 0) return PI(-1, -1);
+	// compute the smallest edge
+	int ee = -1;
+	double ww = DBL_MAX;
+	for(int i = 0; i < u2e.size(); i++)
+	{
+		double w = gr.get_edge_weight(i2e[u2e[i]]);
+		if(w > ww) continue;
+		ww = w;
+		ee = i;
 	}
 
-	return 0;
+	if(ug.degree(ee) <= 1) return PI(-1, -1);
+
+	// compute the smallest hyper edge
+	PI p(-1, -1);
+	int cmin = 99999999;
+	int cmax = 0;
+	for(int i = 0; i < counts.size(); i++)
+	{
+		if(counts[i] > cmax) cmax = counts[i];
+		if(counts[i] < cmin) cmin = counts[i];
+		if(counts[i] < cmin) p = routes[i];
+	}
+
+	if(cmin * 1.0 / cmax > 0.05) return PI(-1, -1);
+	if(u2e[ee] != p.first && u2e[ee] != p.second) return PI(-1, -1);
+
+	PEB e = ug.edge(e2u[p.first], e2u[p.second]);
+	assert(e.second == true);
+	ug.remove_edge(e.first);
+	return p;
 }
 
 int router::split()

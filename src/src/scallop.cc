@@ -18,7 +18,7 @@ scallop::scallop(const string &s, const splice_graph &g, const hyper_set &h)
 	gr.get_edge_indices(i2e, e2i);
 	//add_pseudo_hyper_edges();
 	hs.build(gr, e2i);
-	//filter_hyper_edges();
+	filter_hyper_edges();
 	init_super_edges();
 	init_vertex_map();
 	init_inner_weights();
@@ -203,8 +203,8 @@ bool scallop::resolve_insplitable_vertex(int type, int degree)
 	ratio2 = ratio2 * smallest_edge_ratio_scalor2;
 	if(ratio1 > ratio2) return false;
 
-	printf("resolve insplitable degree-%d vertex %d, ratio1 = %.3lf, ratio2 = %.3lf, degree = (%d, %d)\n",
-			degree, root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
+	printf("resolve insplitable type = %d, degree-%d vertex %d, ratio1 = %.3lf, ratio2 = %.3lf, degree = (%d, %d)\n",
+			type, degree, root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
 
 	decompose_vertex(root, vpi);
 	assert(gr.degree(root) == 0);
@@ -1218,33 +1218,25 @@ int scallop::filter_hyper_edges()
 
 		MPII mpi;
 		int total = hs.get_routes(i, gr, e2i, mpi);
-		vector<PI> p = hs.get_routes(i, gr, e2i);
 
-		assert(p.size() == mpi.size());
-		
-		if(p.size() == 0) continue;
+		if(mpi.size() == 0) continue;
 
-		router rt(i, gr, e2i, i2e, p);
+		router rt(i, gr, e2i, i2e, mpi);
 		rt.classify();
 
-		if(rt.type == 1) continue;
+		if(rt.type != 2) continue;
 		if(rt.degree == 1) continue;
 
 		int maxcount = 0;
 
-		for(MPII::iterator it = mpi.begin(); it != mpi.end(); it++)
-		{
-			PI pi = it->first;
-			int cnt = it->second;
-			double ratio = cnt * 1.0 / maxcount;
+		PI p = rt.filter_hyper_edge();
 
-			if(ratio > 0.05) continue;
+		if(p.first == -1 || p.second == -1) continue;
 
-			printf("filter hyper edge: type %d degree %d vertex %d indegree %d outdegree %d hedges %lu total %d maxcount %d current %d\n", 
-					rt.type, rt.degree, i, gr.in_degree(i), gr.out_degree(i), mpi.size(), total, maxcount, cnt);
+		printf("filter hyper edge: type %d degree %d vertex %d indegree %d outdegree %d hedges %lu total %d maxcount %d\n", 
+					rt.type, rt.degree, i, gr.in_degree(i), gr.out_degree(i), mpi.size(), total, maxcount);
 
-			hs.remove_pair(pi.first, pi.second);
-		}
+		hs.remove_pair(p.first, p.second);
 	}
 	return 0;
 }

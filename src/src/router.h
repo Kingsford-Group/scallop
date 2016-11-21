@@ -6,6 +6,7 @@
 #include "splice_graph.h"
 #include "equation.h"
 #include "undirected_graph.h"
+#include "hyper_set.h"
 
 typedef pair<PI, double> PPID;
 
@@ -16,6 +17,7 @@ class router
 public:
 	router(int r, splice_graph &g, MEI &ei, VE &ie);
 	router(int r, splice_graph &g, MEI &ei, VE &ie, const vector<PI> &p);
+	router(int r, splice_graph &g, MEI &ei, VE &ie, const MPII &mpi);
 	router& operator=(const router &rt);
 
 public:
@@ -24,6 +26,7 @@ public:
 	MEI &e2i;					// reference map of edge to index
 	VE &i2e;					// reference map of index to edge
 	vector<PI> routes;			// pairs of connections
+	vector<int> counts;			// counts for routes
 
 	MI e2u;						// edge to index
 	vector<int> u2e;			// index to edge
@@ -41,6 +44,7 @@ public:
 
 	int build_indices();					// build u2e and e2u
 	int build_bipartite_graph();			// build bipartite graph
+	PI filter_hyper_edge();					// try to filter hyper-edge
 	int split();							// split
 	int decompose();						// decompose
 	int complete();							// complete graph
