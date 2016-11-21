@@ -596,7 +596,7 @@ bool scallop::filter_hyper_edges()
 		rt.classify();
 
 		if(rt.type == 1) continue;
-		if(rt.type == 2 && rt.degree == 1) continue;
+		//if(rt.type == 2 && rt.degree == 1) continue;
 
 		PI p = rt.filter_hyper_edge();
 
