@@ -176,8 +176,11 @@ PI router::filter_hyper_edge()
 	for(int i = 0; i < counts.size(); i++)
 	{
 		if(counts[i] > cmax) cmax = counts[i];
-		if(counts[i] < cmin) cmin = counts[i];
-		if(counts[i] < cmin) p = routes[i];
+		if(counts[i] < cmin)
+		{
+			cmin = counts[i];
+			p = routes[i];
+		}
 	}
 
 	if(cmin * 1.0 / cmax > 0.05) return PI(-1, -1);
