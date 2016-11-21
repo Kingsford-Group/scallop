@@ -164,6 +164,19 @@ vector<PI> hyper_set::get_routes(int x, directed_graph &gr, MEI &e2i)
 {
 	edge_iterator it1, it2;
 	vector<PI> v;
+	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
+	{
+		assert(e2i.find(*it1) != e2i.end());
+		int e = e2i[*it1];
+		set<int> s = get_successors(e);
+		for(set<int>::iterator it = s.begin(); it != s.end(); it++)
+		{
+			PI p(e, *it);
+			v.push_back(p);
+		}
+	}
+	return v;
+
 	set<int> s1;
 	set<int> s2;
 	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
@@ -196,20 +209,6 @@ vector<PI> hyper_set::get_routes(int x, directed_graph &gr, MEI &e2i)
 			assert(s1.find(*it) != s1.end());
 		}
 	}
-
-	/*
-	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
-	{
-		assert(e2i.find(*it1) != e2i.end());
-		int e = e2i[*it1];
-		set<int> s = get_successors(e);
-		for(set<int>::iterator it = s.begin(); it != s.end(); it++)
-		{
-			PI p(e, *it);
-			v.push_back(p);
-		}
-	}
-	*/
 	return v;
 }
 
@@ -342,6 +341,7 @@ int hyper_set::remove(int e)
 		*/
 	}
 	e2s.erase(e);
+	return 0;
 
 	for(int i = 0; i < edges.size(); i++)
 	{
@@ -352,7 +352,6 @@ int hyper_set::remove(int e)
 
 int hyper_set::remove_pair(int x, int y)
 {
-	assert(false);
 	if(e2s.find(x) == e2s.end()) return 0;
 	set<int> s = e2s[x];
 	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
