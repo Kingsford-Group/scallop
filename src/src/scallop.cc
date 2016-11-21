@@ -110,7 +110,7 @@ bool scallop::resolve_small_edges()
 	printf("remove small edge %d, weight = %.2lf, ratio = %.2lf, vertex = (%d, %d), degree = (%d, %d)\n", 
 			se, sw, ratio, s, t, gr.out_degree(s), gr.in_degree(t));
 
-	assert(hs.right_extend(se) == false || hs.left_extend(se) == false);
+	//assert(hs.right_extend(se) == false || hs.left_extend(se) == false);
 	remove_edge(se);
 	hs.remove(se);
 
@@ -240,8 +240,8 @@ bool scallop::resolve_insplitable_vertex(int type, int degree)
 
 		printf("remove insplitable degree-%d edge %d, weight = %.2lf, ratio = %.2lf / %.2lf\n", degree, se, sw, ratio1, ratio2);
 
+		//assert(hs.right_extend(se) == false || hs.left_extend(se) == false);
 		remove_edge(se);
-		assert(hs.right_extend(se) == false || hs.left_extend(se) == false);
 		hs.remove(se);
 		return true;
 	}
@@ -1158,7 +1158,7 @@ int scallop::compute_removable_edge(int x, double &ratio)
 
 	if(gr.in_degree(i2e[e]->target()) <= 1) return -1;
 	if(gr.out_degree(i2e[e]->source()) <= 1) return -1;
-	if(hs.right_extend(e) && hs.left_extend(e)) return -1;
+	//if(hs.right_extend(e) && hs.left_extend(e)) return -1;
 
 	if(w <= min_removable_weight) return e;
 	//if(w >= max_removable_weight) return -1;
@@ -1265,13 +1265,10 @@ int scallop::filter_hyper_edges()
 		router rt(i, gr, e2i, i2e, p);
 		rt.classify();
 
+		if(rt.type == 1) continue;
+		if(rt.degree == 1) continue;
 
 		int maxcount = 0;
-		for(MPII::iterator it = mpi.begin(); it != mpi.end(); it++)
-		{
-			int cnt = it->second;
-			if(cnt > maxcount) maxcount = cnt;
-		}
 
 		for(MPII::iterator it = mpi.begin(); it != mpi.end(); it++)
 		{
