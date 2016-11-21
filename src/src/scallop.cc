@@ -18,7 +18,6 @@ scallop::scallop(const string &s, const splice_graph &g, const hyper_set &h)
 	gr.get_edge_indices(i2e, e2i);
 	//add_pseudo_hyper_edges();
 	hs.build(gr, e2i);
-	filter_hyper_edges();
 	init_super_edges();
 	init_vertex_map();
 	init_inner_weights();
@@ -36,6 +35,8 @@ int scallop::assemble()
 	while(true)
 	{
 		bool b = false;
+
+		filter_hyper_edges();
 
 		b = resolve_small_edges();
 		if(b == true) print();
@@ -526,6 +527,35 @@ int scallop::refine_splice_graph()
 	return 0;
 }
 
+int scallop::filter_hyper_edges()
+{
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		if(gr.in_degree(i) <= 1) continue;
+		if(gr.out_degree(i) <= 1) continue;
+
+		MPII mpi;
+		int total = hs.get_routes(i, gr, e2i, mpi);
+
+		if(mpi.size() == 0) continue;
+
+		router rt(i, gr, e2i, i2e, mpi);
+		rt.classify();
+
+		if(rt.type == 1) continue;
+		if(rt.type == 2 && rt.degree == 1) continue;
+
+		PI p = rt.filter_hyper_edge();
+
+		if(p.first == -1 || p.second == -1) continue;
+
+		printf("filter hyper edge: type %d degree %d vertex %d indegree %d outdegree %d hedges %lu total %d\n", 
+					rt.type, rt.degree, i, gr.in_degree(i), gr.out_degree(i), mpi.size(), total);
+
+		hs.remove_pair(p.first, p.second);
+	}
+	return 0;
+}
 int scallop::decompose_vertex(int root, const vector<PPID> &vpi)
 {
 	MID md;
@@ -1209,32 +1239,4 @@ int scallop::draw_splice_graph(const string &file)
 	return 0;
 }
 
-int scallop::filter_hyper_edges()
-{
-	for(int i = 1; i < gr.num_vertices() - 1; i++)
-	{
-		if(gr.in_degree(i) <= 1) continue;
-		if(gr.out_degree(i) <= 1) continue;
 
-		MPII mpi;
-		int total = hs.get_routes(i, gr, e2i, mpi);
-
-		if(mpi.size() == 0) continue;
-
-		router rt(i, gr, e2i, i2e, mpi);
-		rt.classify();
-
-		if(rt.type != 2) continue;
-		if(rt.degree == 1) continue;
-
-		PI p = rt.filter_hyper_edge();
-
-		if(p.first == -1 || p.second == -1) continue;
-
-		printf("filter hyper edge: type %d degree %d vertex %d indegree %d outdegree %d hedges %lu total %d\n", 
-					rt.type, rt.degree, i, gr.in_degree(i), gr.out_degree(i), mpi.size(), total);
-
-		hs.remove_pair(p.first, p.second);
-	}
-	return 0;
-}
