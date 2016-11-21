@@ -58,13 +58,14 @@ int hyper_set::build_edges(directed_graph &gr, MEI& e2i)
 			else ve.push_back(e2i[p.first]);
 		}
 
+		/*
 		if(b == true && ve.size() >= 2)
 		{
 			edges.push_back(ve);
 			ecnts.push_back(c);
 		}
-
 		continue;
+		*/
 
 		vector<int> v;
 		for(int k = 0; k < ve.size(); k++)
@@ -82,6 +83,11 @@ int hyper_set::build_edges(directed_graph &gr, MEI& e2i)
 			{
 				v.push_back(ve[k]);
 			}
+		}
+		if(v.size() >= 2)
+		{
+			edges.push_back(v);
+			ecnts.push_back(c);
 		}
 	}
 	return 0;
