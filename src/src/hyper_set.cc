@@ -49,12 +49,22 @@ int hyper_set::build_edges(directed_graph &gr, MEI& e2i)
 
 		const vector<int> &vv = it->first;
 		vector<int> ve;
+		bool b = true;
 		for(int k = 0; k < vv.size() - 1; k++)
 		{
 			PEB p = gr.edge(vv[k], vv[k + 1]);
+			if(p.second == false) b = false;
 			if(p.second == false) ve.push_back(-1);
 			else ve.push_back(e2i[p.first]);
 		}
+
+		if(b == true && ve.size() >= 2)
+		{
+			edges.push_back(ve);
+			ecnts.push_back(c);
+		}
+
+		continue;
 
 		vector<int> v;
 		for(int k = 0; k < ve.size(); k++)

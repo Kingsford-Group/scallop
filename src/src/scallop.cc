@@ -1279,7 +1279,7 @@ int scallop::filter_hyper_edges()
 			int cnt = it->second;
 			double ratio = cnt * 1.0 / maxcount;
 
-			if(cnt > 0.01) continue;
+			if(ratio > 0.01) continue;
 
 			printf("filter hyper edge: type %d degree %d vertex %d indegree %d outdegree %d hedges %lu total %d maxcount %d current %d\n", 
 					rt.type, rt.degree, i, gr.in_degree(i), gr.out_degree(i), mpi.size(), total, maxcount, cnt);
