@@ -18,7 +18,7 @@ scallop::scallop(const string &s, const splice_graph &g, const hyper_set &h)
 	gr.get_edge_indices(i2e, e2i);
 	//add_pseudo_hyper_edges();
 	hs.build(gr, e2i);
-	filter_hyper_edges();
+	//filter_hyper_edges();
 	init_super_edges();
 	init_vertex_map();
 	init_inner_weights();
@@ -626,6 +626,7 @@ int scallop::decompose_vertex(int root, const vector<PPID> &vpi)
 		int e = merge_adjacent_edges(e1, e2, w);
 
 		hs.replace(e1, e2, e);
+
 		if(m[e1] == 1) hs.replace(e1, e);
 		if(m[e2] == 1) hs.replace(e2, e);
 	}
@@ -639,6 +640,7 @@ int scallop::decompose_vertex(int root, const vector<PPID> &vpi)
 		hs.remove(e1);
 		hs.remove(e2);
 	}
+
 	return 0;
 }
 
