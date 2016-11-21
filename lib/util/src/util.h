@@ -127,25 +127,26 @@ int compute_mean_dev(const vector<T> &v, int si, int ti, double &ave, double &de
 }
 
 template<typename T>
-int consecutive_subset(const vector<T> &ref, const vector<T> &x)
+vector<int> consecutive_subset(const vector<T> &ref, const vector<T> &x)
 {
-	if(x.size() == 0) return 0;
-	if(ref.size() == 0) return -1;
-	int k = -1;
-	for(int i = 0; i < ref.size(); i++)
+	vector<int> v;
+	if(x.size() == 0) return v;
+	if(ref.size() == 0) return v;
+	if(x.size() > ref.size()) return v;
+	for(int i = 0; i <= ref.size() - x.size(); i++)
 	{
 		if(ref[i] != x[0]) continue;
-		k = i;
-		break;
+		int k = i;
+		bool b = true;
+		for(int j = 0; j < x.size(); j++)
+		{
+			if(x[j] != ref[j + k]) b = false;
+			if(b == false) break;
+		}
+		if(b == false) continue;
+		v.push_back(k);
 	}
-	if(k == -1) return -1;
-
-	for(int i = 0; i < x.size(); i++)
-	{
-		if(i + k >= ref.size()) return -1;
-		if(x[i] != ref[i + k]) return -1;
-	}
-	return k;
+	return v;
 }
 
 #endif
