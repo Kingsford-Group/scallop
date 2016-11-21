@@ -48,7 +48,6 @@ private:
 	int init_inner_weights();
 	int add_pseudo_hyper_edges();
 	int refine_splice_graph();
-	int filter_hyper_edges();
 
 	// resolve iteratively
 	bool resolve_small_edges();
@@ -57,6 +56,7 @@ private:
 	bool resolve_insplitable_vertex(int type, int degree);
 	bool resolve_hyper_edge1();
 	bool resolve_hyper_edge0();
+	bool filter_hyper_edges();
 
 	// smooth vertex
 	int balance_vertex(int x);

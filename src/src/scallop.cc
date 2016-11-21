@@ -36,7 +36,8 @@ int scallop::assemble()
 	{
 		bool b = false;
 
-		filter_hyper_edges();
+		b = filter_hyper_edges();
+		if(b == true) continue;
 
 		b = resolve_small_edges();
 		if(b == true) print();
@@ -527,8 +528,9 @@ int scallop::refine_splice_graph()
 	return 0;
 }
 
-int scallop::filter_hyper_edges()
+bool scallop::filter_hyper_edges()
 {
+	bool flag = false;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.in_degree(i) <= 1) continue;
@@ -549,13 +551,16 @@ int scallop::filter_hyper_edges()
 
 		if(p.first == -1 || p.second == -1) continue;
 
+		flag = true;
+
 		printf("filter hyper edge: type %d degree %d vertex %d indegree %d outdegree %d hedges %lu total %d\n", 
 					rt.type, rt.degree, i, gr.in_degree(i), gr.out_degree(i), mpi.size(), total);
 
 		hs.remove_pair(p.first, p.second);
 	}
-	return 0;
+	return flag;
 }
+
 int scallop::decompose_vertex(int root, const vector<PPID> &vpi)
 {
 	MID md;
