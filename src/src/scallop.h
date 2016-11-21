@@ -50,7 +50,8 @@ private:
 	int refine_splice_graph();
 
 	// resolve iteratively
-	bool resolve_small_edges();
+	bool resolve_small_edges1();
+	bool resolve_small_edges2();
 	bool resolve_trivial_vertex();
 	bool resolve_splitable_vertex(int degree);
 	bool resolve_insplitable_vertex(int type, int degree);

@@ -39,7 +39,11 @@ int scallop::assemble()
 		b = filter_hyper_edges();
 		if(b == true) continue;
 
-		b = resolve_small_edges();
+		b = resolve_small_edges1();
+		if(b == true) print();
+		if(b == true) continue;
+
+		b = resolve_small_edges2();
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -83,7 +87,7 @@ int scallop::assemble()
 	return 0;
 }
 
-bool scallop::resolve_small_edges()
+bool scallop::resolve_small_edges1()
 {
 	int se = -1;
 	int root = -1;
@@ -109,7 +113,49 @@ bool scallop::resolve_small_edges()
 	double sw = gr.get_edge_weight(i2e[se]);
 	int s = i2e[se]->source();
 	int t = i2e[se]->target();
-	printf("remove small edge %d, weight = %.2lf, ratio = %.2lf, vertex = (%d, %d), degree = (%d, %d)\n", 
+	printf("remove small edge1 %d, weight = %.2lf, ratio = %.2lf, vertex = (%d, %d), degree = (%d, %d)\n", 
+			se, sw, ratio, s, t, gr.out_degree(s), gr.in_degree(t));
+
+	remove_edge(se);
+	hs.remove(se);
+
+	return true;
+}
+
+bool scallop::resolve_small_edges2()
+{
+	int se = -1;
+	int root = -1;
+	double ratio = DBL_MAX;
+	
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	{
+		edge_descriptor e = (*it1);
+		int ee = e2i[e];
+		int s = e->source();
+		int t = e->target();
+		if(gr.in_degree(s) != 1) continue;
+		if(gr.in_degree(t) == 1) continue;
+		if(gr.out_degree(s) == 1) continue;
+		if(gr.out_degree(t) != 1) continue;
+
+		double rs, rt;
+		int es = compute_removable_edge(s, rs);
+		int et = compute_removable_edge(t, rt);
+		double rr = rs * 0.5 + rt * 0.5;
+		if(es != ee || et != ee) continue;
+		if(rr > ratio) continue;
+		se = ee;
+		ratio = rr;
+	}
+
+	if(se == -1) return false;
+
+	double sw = gr.get_edge_weight(i2e[se]);
+	int s = i2e[se]->source();
+	int t = i2e[se]->target();
+	printf("remove small edge2 %d, weight = %.2lf, ratio = %.2lf, vertex = (%d, %d), degree = (%d, %d)\n", 
 			se, sw, ratio, s, t, gr.out_degree(s), gr.in_degree(t));
 
 	remove_edge(se);
