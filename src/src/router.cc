@@ -108,11 +108,7 @@ int router::classify()
 int router::build()
 {
 	if(type == SPLITABLE) split();
-	if(type == SINGLE || type == MULTIPLE)
-	{
-		if(gr.degree(root) <= 10) decompose2();
-		else decompose1();
-	}
+	if(type == SINGLE || type == MULTIPLE) decompose1();
 	return 0;
 }
 
@@ -159,6 +155,13 @@ int router::build_bipartite_graph()
 
 PI router::filter_hyper_edge()
 {
+	PI p = filter_small_hyper_edge();
+	if(p != PI(-1, -1)) return p;
+	else return filter_cycle_hyper_edge();
+}
+
+PI router::filter_small_hyper_edge()
+{
 	if(routes.size() == 0) return PI(-1, -1);
 
 	// compute the smallest edge
@@ -198,6 +201,42 @@ PI router::filter_hyper_edge()
 	assert(e.second == true);
 	ug.remove_edge(e.first);
 	*/
+}
+
+PI router::filter_cycle_hyper_edge()
+{
+	if(routes.size() == 0) return PI(-1, -1);
+
+	set<PI> spi;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = ug.edges(); it1 != it2; it1++)
+	{
+		int s = (*it1)->source();
+		int t = (*it1)->target();
+		SE fb;
+		fb.insert(*it1);
+		vector<int> v;
+		v.push_back(s);
+		bool b = ug.bfs(v, t, fb);
+		if(b == false) continue;
+		spi.insert(PI(s, t));
+		spi.insert(PI(t, s));
+	}
+
+	if(spi.size() == 0) return PI(-1, -1);
+
+	int cmin = 9999999;
+	PI pi(-1, -1);
+	for(int i = 0; i < counts.size(); i++)
+	{
+		PI p = routes[i];
+		int c = counts[i];
+		if(spi.find(p) == spi.end()) continue;
+		if(c > cmin) continue;
+		cmin = c;
+		pi = p;
+	}
+	return pi;
 }
 
 int router::split()
