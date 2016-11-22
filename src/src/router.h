@@ -46,7 +46,8 @@ public:
 	int build_bipartite_graph();			// build bipartite graph
 	PI filter_hyper_edge();					// try to filter hyper-edge
 	int split();							// split
-	int decompose();						// decompose
+	int decompose1();						// decompose with LP
+	int decompose2();						// decompose with ILP
 	int complete();							// complete graph
 
 	// print and stats
