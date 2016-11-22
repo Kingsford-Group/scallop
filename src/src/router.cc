@@ -160,6 +160,7 @@ int router::build_bipartite_graph()
 PI router::filter_hyper_edge()
 {
 	if(routes.size() == 0) return PI(-1, -1);
+
 	// compute the smallest edge
 	int ee = -1;
 	double ww = DBL_MAX;
@@ -174,18 +175,22 @@ PI router::filter_hyper_edge()
 	if(ug.degree(ee) <= 1) return PI(-1, -1);
 
 	// compute the smallest hyper edge
-	PI pi(-1, -1);
-	int cmin = 9999999;
+	PI p(-1, -1);
+	int cmin = 99999999;
+	int cmax = 0;
 	for(int i = 0; i < counts.size(); i++)
 	{
-		PI p = routes[i];
-		if(u2e[ee] != p.first && u2e[ee] != p.second) continue;
-		if(counts[i] > cmin) continue;
-		cmin = counts[i];
-		pi = p;
+		if(counts[i] > cmax) cmax = counts[i];
+		if(counts[i] < cmin)
+		{
+			cmin = counts[i];
+			p = routes[i];
+		}
 	}
 
-	return pi;
+	if(u2e[ee] != p.first && u2e[ee] != p.second) return PI(-1, -1);
+
+	return p;
 	// TODO, bug here
 	/*
 	printf("edge from (%d, %d) -> (%d, %d)\n", p.first, p.second, e2u[p.first], e2u[p.second]);
