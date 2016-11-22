@@ -204,16 +204,17 @@ bool scallop::resolve_insplitable_vertex(int type, int degree)
 
 	if(root == -1) return false;
 	if(type == MULTIPLE && ratio1 > 0.01) return false;
-	//if(type == SINGLE && ratio1 > 0.01) return false;
-	//if(ratio1 > max_decompose_error_ratio) return false;
+	if(type == SINGLE && ratio1 > 0.01) return false;
 
+	/*
 	double ratio2;
 	int se = compute_smallest_edge(root, ratio2);
 	ratio2 = ratio2 * smallest_edge_ratio_scalor2;
 	if(ratio1 > ratio2) return false;
+	*/
 
-	printf("resolve insplitable type = %d, degree-%d vertex %d, ratio1 = %.3lf, ratio2 = %.3lf, degree = (%d, %d)\n",
-			type, degree, root, ratio1, ratio2, gr.in_degree(root), gr.out_degree(root));
+	printf("resolve insplitable type = %d, degree-%d vertex %d, ratio1 = %.3lf, degree = (%d, %d)\n",
+			type, degree, root, ratio1, gr.in_degree(root), gr.out_degree(root));
 
 	decompose_vertex(root, vpi);
 	assert(gr.degree(root) == 0);
