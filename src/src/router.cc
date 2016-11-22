@@ -622,7 +622,7 @@ int router::decompose1()
 	vector<GRBVar> rvars;
 	for(int i = 0; i < ve.size(); i++)
 	{
-		GRBVar rvar = model->addVar(0.0, GRB_INFINITY, 0, GRB_CONTINUOUS); // TODO, [1.0, ]
+		GRBVar rvar = model->addVar(1.0, GRB_INFINITY, 0, GRB_CONTINUOUS); // TODO, [1.0, ]
 		rvars.push_back(rvar);
 	}
 
@@ -702,7 +702,7 @@ int router::decompose1()
 		PI p(es, et);
 		if(s > t) p = PI(et, es);
 		double w = rvars[i].get(GRB_DoubleAttr_X);
-		if(w <= 1.0) continue;
+		//if(w <= 0.5) continue;
 		vpi.push_back(PPID(p, w));
 	}
 
