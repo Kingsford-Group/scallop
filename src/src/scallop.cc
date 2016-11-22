@@ -614,6 +614,7 @@ bool scallop::filter_hyper_edges()
 
 int scallop::decompose_vertex(int root, const vector<PPID> &vpi)
 {
+	// remove edges that are not covered
 	MID md;
 	for(int i = 0; i < vpi.size(); i++)
 	{
@@ -652,6 +653,18 @@ int scallop::decompose_vertex(int root, const vector<PPID> &vpi)
 		int e = dve[i];
 		remove_edge(e);
 		hs.remove(e);
+	}
+
+	// remove hyper-edges that are not covered
+	set<PI> spi;
+	for(int i = 0; i < vpi.size(); i++) spi.insert(vpi[i].first);
+
+	vector<PI> vp = hs.get_routes(root, gr, e2i);
+
+	for(int i = 0; i < vp.size(); i++)
+	{
+		if(spi.find(vp[i]) != spi.end()) continue;
+		hs.remove_pair(vp[i].first, vp[i].second);
 	}
 
 	map<int, int> m;

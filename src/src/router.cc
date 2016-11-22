@@ -392,7 +392,7 @@ int router::decompose2()
 	double ubound = 0;
 	for(int i = 0; i < vw.size(); i++)
 	{
-		if(vw[i] > ubound) ubound = vw[i];
+		ubound += vw[i];
 	}
 
 	// run quadratic programming
@@ -414,18 +414,33 @@ int router::decompose2()
 	vector<GRBVar> rvars;
 	for(int i = 0; i < ve.size(); i++)
 	{
-		GRBVar rvar = model->addVar(1.0, GRB_INFINITY, 0, GRB_CONTINUOUS);
+		GRBVar rvar = model->addVar(0.0, GRB_INFINITY, 0, GRB_CONTINUOUS);
 		rvars.push_back(rvar);
 	}
 
 	// binary routes variables
 	vector<GRBVar> bvars;
-	GRBLinExpr bsum;
 	for(int i = 0; i < ve.size(); i++)
 	{
 		GRBVar bvar = model->addVar(0, 1, 0, GRB_BINARY);
 		bvars.push_back(bvar);
-		bsum += bvar;
+	}
+
+	// new weights variables
+	vector<GRBVar> wvars;
+	for(int i = 0; i < u2e.size(); i++)
+	{
+		GRBVar wvar = model->addVar(0.0, GRB_INFINITY, 0, GRB_CONTINUOUS);
+		wvars.push_back(wvar);
+	}
+
+	model->update();
+
+	// add constraints
+	GRBLinExpr bsum;
+	for(int i = 0; i < ve.size(); i++)
+	{
+		bsum += bvars[i];
 	}
 
 	// constraints for rvars and bvars
@@ -437,15 +452,6 @@ int router::decompose2()
 
 	// constraints for guarantee a tree
 	model->addConstr(bsum, GRB_EQUAL, u2e.size() - 1);
-
-	// new weights variables
-	vector<GRBVar> wvars;
-	for(int i = 0; i < u2e.size(); i++)
-	{
-		GRBVar wvar = model->addVar(0.0, GRB_INFINITY, 0, GRB_CONTINUOUS);
-		wvars.push_back(wvar);
-	}
-	model->update();
 
 	// expression for each edge
 	vector<GRBLinExpr> exprs(u2e.size());
@@ -514,6 +520,8 @@ int router::decompose2()
 		PI p(es, et);
 		if(s > t) p = PI(et, es);
 		double w = rvars[i].get(GRB_DoubleAttr_X);
+		assert(w <= 0.01 || w >= 0.99);
+		if(w <= 0.01) continue;
 		vpi.push_back(PPID(p, w));
 	}
 
