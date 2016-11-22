@@ -31,9 +31,7 @@ bool extend_isolated_boundary = true;
 
 // for decomposing splice graph
 double max_split_error_ratio = 0.15;
-double max_decompose_error_ratio = 0.05;
-double smallest_edge_ratio_scalor1 = 0.2;
-double smallest_edge_ratio_scalor2 = 1.0;
+double max_decompose_error_ratio = 0.01;
 double min_removable_weight = 5.0;
 double max_removable_weight = 50.0;
 
@@ -101,8 +99,6 @@ int print_parameters()
 	printf("min_splice_graph_coverage = %.2lf\n", min_splice_graph_coverage);
 	printf("max_split_error_ratio = %.2lf\n", max_split_error_ratio);
 	printf("max_decompose_error_ratio = %.2lf\n", max_decompose_error_ratio);
-	printf("smallest_edge_ratio_scalor1 = %.2lf\n", smallest_edge_ratio_scalor1);
-	printf("smallest_edge_ratio_scalor2 = %.2lf\n", smallest_edge_ratio_scalor2);
 	printf("min_removable_weight = %.2lf\n", min_removable_weight);
 	printf("max_removable_weight = %.2lf\n", max_removable_weight);
 	printf("extend_isolated_bounary = %c\n", extend_isolated_boundary ? 'T' : 'F');
@@ -295,16 +291,6 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--max_decompose_error_ratio")
 		{
 			max_decompose_error_ratio = atof(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--smallest_edge_ratio_scalor1")
-		{
-			smallest_edge_ratio_scalor1 = atof(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--smallest_edge_ratio_scalor2")
-		{
-			smallest_edge_ratio_scalor2 = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_removable_weight")

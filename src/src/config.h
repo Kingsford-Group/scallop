@@ -53,8 +53,6 @@ extern double max_decompose_error_ratio;
 extern double min_transcript_coverage;
 extern double min_transcript_abundance;
 extern double min_splice_graph_coverage;
-extern double smallest_edge_ratio_scalor1;
-extern double smallest_edge_ratio_scalor2;
 extern double max_removable_weight;
 extern double min_removable_weight;
 extern bool extend_isolated_boundary;

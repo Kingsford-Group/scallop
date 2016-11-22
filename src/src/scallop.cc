@@ -105,12 +105,18 @@ bool scallop::resolve_small_edges()
 		if(gr.out_degree(i2e[e]->source()) <= 1) continue;
 		if(hs.right_extend(e) && hs.left_extend(e)) continue;
 
+		/*
 		double w = gr.get_edge_weight(i2e[e]);
+		if(w > max_removable_weight) continue;
 		if(w > min_removable_weight)
 		{
 			if(i2e[e]->target() == i && hs.right_extend(e)) continue;
 			if(i2e[e]->source() == i && hs.left_extend(e)) continue;
 		}
+		*/
+
+		if(i2e[e]->target() == i && hs.right_extend(e)) continue;
+		if(i2e[e]->source() == i && hs.left_extend(e)) continue;
 
 		ratio = r;
 		se = e;
@@ -134,7 +140,7 @@ bool scallop::resolve_small_edges()
 bool scallop::resolve_splitable_vertex(int degree)
 {
 	int root = -1;
-	double ratio1 = DBL_MAX;
+	double ratio = DBL_MAX;
 	vector<equation> eqns;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
@@ -154,19 +160,19 @@ bool scallop::resolve_splitable_vertex(int degree)
 		rt.build();
 		assert(rt.eqns.size() == 2);
 
-		if(rt.degree == degree && ratio1 < rt.ratio) continue;
+		if(rt.degree == degree && ratio < rt.ratio) continue;
 
 		root = i;
-		ratio1 = rt.ratio;
+		ratio = rt.ratio;
 		eqns = rt.eqns;
 		degree = rt.degree;
 	}
 
 	if(root == -1) return false;
-	if(ratio1 > max_split_error_ratio) return false;
+	if(ratio > max_split_error_ratio) return false;
 
 	printf("resolve splitable degree-%d vertex %d, ratio = %.2lf, degree = (%d, %d)\n", 
-			degree, root, ratio1, gr.in_degree(root), gr.out_degree(root));
+			degree, root, ratio, gr.in_degree(root), gr.out_degree(root));
 
 	eqns[0].print(88);
 	eqns[1].print(99);
@@ -179,7 +185,7 @@ bool scallop::resolve_insplitable_vertex(int type, int degree)
 {
 	int root = -1;
 	vector<PPID> vpi;
-	double ratio1 = DBL_MAX;
+	double ratio = DBL_MAX;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.in_degree(i) <= 1) continue;
@@ -194,27 +200,19 @@ bool scallop::resolve_insplitable_vertex(int type, int degree)
 
 		rt.build();
 
-		if(rt.degree == degree && ratio1 < rt.ratio) continue;
+		if(rt.degree == degree && ratio < rt.ratio) continue;
 
 		root = i;
-		ratio1 = rt.ratio;
+		ratio = rt.ratio;
 		vpi = rt.vpi;
 		degree = rt.degree;
 	}
 
 	if(root == -1) return false;
-	if(type == MULTIPLE && ratio1 > 0.01) return false;
-	if(type == SINGLE && ratio1 > 0.01) return false;
+	if(ratio > max_decompose_error_ratio) return false;
 
-	/*
-	double ratio2;
-	int se = compute_smallest_edge(root, ratio2);
-	ratio2 = ratio2 * smallest_edge_ratio_scalor2;
-	if(ratio1 > ratio2) return false;
-	*/
-
-	printf("resolve insplitable type = %d, degree-%d vertex %d, ratio1 = %.3lf, degree = (%d, %d)\n",
-			type, degree, root, ratio1, gr.in_degree(root), gr.out_degree(root));
+	printf("resolve insplitable type = %d, degree-%d vertex %d, ratio = %.3lf, degree = (%d, %d)\n",
+			type, degree, root, ratio, gr.in_degree(root), gr.out_degree(root));
 
 	decompose_vertex(root, vpi);
 	assert(gr.degree(root) == 0);
