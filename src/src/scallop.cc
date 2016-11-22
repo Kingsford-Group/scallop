@@ -36,6 +36,8 @@ int scallop::assemble()
 	{
 		bool b = false;
 
+		refine_splice_graph();
+
 		b = filter_hyper_edges();
 		if(b == true) continue;
 
