@@ -36,26 +36,21 @@ int scallop::assemble()
 	{
 		bool b = false;
 
-		printf("AAA\n");
 		b = filter_hyper_edges1();
 		if(b == true) continue;
 
-		printf("BBB\n");
 		b = resolve_small_edges();
 		if(b == true) print();
 		if(b == true) continue;
 
-		printf("CCC\n");
 		b = resolve_splitable_vertex(1);
 		if(b == true) print();
 		if(b == true) continue;
 
-		printf("DDD\n");
 		b = resolve_insplitable_vertex(SINGLE, 999);
 		if(b == true) print();
 		if(b == true) continue;
 
-		printf("EEE\n");
 		b = resolve_insplitable_vertex(MULTIPLE, 999);
 		if(b == true) print();
 		if(b == true) continue;
@@ -66,17 +61,14 @@ int scallop::assemble()
 		if(b == true) continue;
 		*/
 
-		printf("FFF\n");
 		b = resolve_trivial_vertex();
 		if(b == true) print();
 		if(b == true) continue;
 
-		printf("GGG\n");
 		b = resolve_hyper_edge1();
 		if(b == true) print();
 		if(b == true) continue;
 
-		printf("HHH\n");
 		b = resolve_hyper_edge0();
 		if(b == true) print();
 		if(b == true) continue;
