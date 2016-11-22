@@ -155,6 +155,8 @@ int router::build_bipartite_graph()
 
 PI router::filter_hyper_edge()
 {
+	return filter_small_hyper_edge();
+
 	PI p = filter_small_hyper_edge();
 	if(p != PI(-1, -1)) return p;
 	else return filter_cycle_hyper_edge();
