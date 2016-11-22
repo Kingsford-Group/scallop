@@ -108,7 +108,11 @@ int router::classify()
 int router::build()
 {
 	if(type == SPLITABLE) split();
-	if(type == SINGLE || type == MULTIPLE) decompose2();
+	if(type == SINGLE || type == MULTIPLE)
+	{
+		if(gr.degree(root) <= 10) decompose2();
+		else decompose1();
+	}
 	return 0;
 }
 
