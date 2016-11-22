@@ -149,4 +149,16 @@ vector<int> consecutive_subset(const vector<T> &ref, const vector<T> &x)
 	return v;
 }
 
+template<typename K, typename V>
+vector<K> get_keys(const map<K, V> &m)
+{
+	vector<K> v;
+    typedef typename std::map<K,V>::const_iterator MIT;
+	for(MIT it = m.begin(); it != m.end(); it++)
+	{
+		v.push_back(it->first);
+	}
+	return v;
+}
+
 #endif
