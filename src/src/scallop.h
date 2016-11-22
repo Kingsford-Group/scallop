@@ -50,21 +50,22 @@ private:
 	int refine_splice_graph();
 
 	// resolve iteratively
-	bool resolve_small_edges1();
-	bool resolve_small_edges2();
+	bool resolve_small_edges();
 	bool resolve_trivial_vertex();
 	bool resolve_splitable_vertex(int degree);
 	bool resolve_insplitable_vertex(int type, int degree);
 	bool resolve_hyper_edge1();
 	bool resolve_hyper_edge0();
 	bool filter_hyper_edges();
+	bool filter_hyper_edges1();
+	bool filter_hyper_edges2();
 
 	// smooth vertex
 	int balance_vertex(int x);
 	double compute_balance_ratio(int x);
 
 	// decomposing subroutines
-	int compute_removable_edge(int x, double &ratio);
+	int compute_smallest_edge(int x, double &ratio);
 	int decompose_vertex(int v, const vector<PPID> &vpi);
 	int decompose_trivial_vertex(int v);
 	int split_vertex(int x, const vector<int> &xe, const vector<int> &ye);
