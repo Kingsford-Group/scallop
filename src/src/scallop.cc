@@ -540,6 +540,8 @@ bool scallop::filter_hyper_edges2()
 	bool flag = false;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
+		if(gr.degree(i) <= 0) continue;
+
 		double r;
 		int e = compute_smallest_edge(i, r);
 
