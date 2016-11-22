@@ -551,7 +551,7 @@ bool scallop::filter_hyper_edges2()
 			set<int> s = hs.get_successors(e);
 			for(set<int>::iterator it = s.begin(); it != s.end(); it++)
 			{
-				v.push_back(PI(*it, i));
+				v.push_back(PI(e, *it));
 			}
 		}
 		else if(i2e[e]->source() == i)
@@ -559,7 +559,7 @@ bool scallop::filter_hyper_edges2()
 			set<int> s = hs.get_predecessors(e);
 			for(set<int>::iterator it = s.begin(); it != s.end(); it++)
 			{
-				v.push_back(PI(i, *it));
+				v.push_back(PI(*it, e));
 			}
 		}
 		else assert(false);

@@ -22,21 +22,24 @@ int32_t min_subregion_gap = 3;
 int32_t min_subregion_length = 15;
 double min_subregion_overlap = 2;
 
-// for splice graph
+// for revising splice graph
 double min_inner_vertex_weight = 10;
 double min_inner_boundary_weight = 4.0;
 double min_splice_edge_weight = 3.5;
+double min_splice_graph_coverage = 20.0;
+bool extend_isolated_boundary = true;
+
+// for decomposing splice graph
 double max_split_error_ratio = 0.15;
 double max_decompose_error_ratio = 0.05;
-double min_transcript_coverage = 10.0;
-double min_transcript_abundance = 1.1;
-double min_splice_graph_coverage = 20.0;
-int min_junction_count = 5;
 double smallest_edge_ratio_scalor1 = 0.2;
 double smallest_edge_ratio_scalor2 = 1.0;
 double min_removable_weight = 5.0;
 double max_removable_weight = 50.0;
-bool extend_isolated_boundary = true;
+
+// for selecting paths
+double min_transcript_coverage = 10.0;
+double min_transcript_abundance = 1.1;
 
 // for identifying new boundaries
 bool identify_extra_boundary = false;
@@ -96,7 +99,6 @@ int print_parameters()
 	printf("min_transcript_coverage = %.2lf\n", min_transcript_coverage);
 	printf("min_transcript_abundance = %.2lf\n", min_transcript_abundance);
 	printf("min_splice_graph_coverage = %.2lf\n", min_splice_graph_coverage);
-	printf("min_junction_count = %d\n", min_junction_count);
 	printf("max_split_error_ratio = %.2lf\n", max_split_error_ratio);
 	printf("max_decompose_error_ratio = %.2lf\n", max_decompose_error_ratio);
 	printf("smallest_edge_ratio_scalor1 = %.2lf\n", smallest_edge_ratio_scalor1);
@@ -283,11 +285,6 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--min_splice_graph_coverage")
 		{
 			min_splice_graph_coverage = atof(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--min_junction_count")
-		{
-			min_junction_count = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--max_split_error_ratio")
