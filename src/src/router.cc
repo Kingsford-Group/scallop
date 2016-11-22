@@ -193,6 +193,7 @@ PI router::filter_small_hyper_edge()
 		}
 	}
 
+	if(cmin + cmin > cmax) return PI(-1, -1);
 	if(u2e[ee] != p.first && u2e[ee] != p.second) return PI(-1, -1);
 
 	return p;
