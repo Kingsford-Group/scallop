@@ -430,7 +430,7 @@ int router::decompose2()
 	vector<GRBVar> wvars;
 	for(int i = 0; i < u2e.size(); i++)
 	{
-		GRBVar wvar = model->addVar(0.0, GRB_INFINITY, 0, GRB_CONTINUOUS);
+		GRBVar wvar = model->addVar(1.0, GRB_INFINITY, 0, GRB_CONTINUOUS);
 		wvars.push_back(wvar);
 	}
 
