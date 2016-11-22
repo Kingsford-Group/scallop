@@ -16,7 +16,6 @@ class router
 {
 public:
 	router(int r, splice_graph &g, MEI &ei, VE &ie);
-	router(int r, splice_graph &g, MEI &ei, VE &ie, const vector<PI> &p);
 	router(int r, splice_graph &g, MEI &ei, VE &ie, const MPII &mpi);
 	router& operator=(const router &rt);
 

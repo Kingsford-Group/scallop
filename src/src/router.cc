@@ -15,11 +15,6 @@ router::router(int r, splice_graph &g, MEI &ei, VE &ie)
 {
 }
 
-router::router(int r, splice_graph &g, MEI &ei, VE &ie, const vector<PI> &p)
-	:root(r), gr(g), e2i(ei), i2e(ie), routes(p), degree(-1), type(-1)
-{
-}
-
 router::router(int r, splice_graph &g, MEI &ei, VE &ie, const MPII &mpi)
 	:root(r), gr(g), e2i(ei), i2e(ie), degree(-1), type(-1)
 {

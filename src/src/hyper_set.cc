@@ -136,96 +136,70 @@ set<int> hyper_set::get_intersection(const vector<int> &v)
 	return ss;
 }
 
-set<int> hyper_set::get_successors(int e)
+MI hyper_set::get_successors(int e)
 {
-	set<int> s;
+	MI s;
 	if(e2s.find(e) == e2s.end()) return s;
 	set<int> &ss = e2s[e];
 	for(set<int>::iterator it = ss.begin(); it != ss.end(); it++)
 	{
 		vector<int> &v = edges[*it];
+		int c = ecnts[*it];
 		for(int i = 0; i < v.size(); i++)
 		{
 			if(v[i] != e) continue;
 			if(i >= v.size() - 1) continue;
-			if(v[i + 1] == -1) continue;
-			s.insert(v[i + 1]);
+			int k = v[i + 1];
+			if(k == -1) continue;
+			if(s.find(k) == s.end()) s.insert(PI(k, c));
+			else s[k] += c;
 		}
 	}
 	return s;
 }
 
-set<int> hyper_set::get_predecessors(int e)
+MI hyper_set::get_predecessors(int e)
 {
-	set<int> s;
+	MI s;
 	if(e2s.find(e) == e2s.end()) return s;
 	set<int> &ss = e2s[e];
 	for(set<int>::iterator it = ss.begin(); it != ss.end(); it++)
 	{
 		vector<int> &v = edges[*it];
+		int c = ecnts[*it];
 		for(int i = 0; i < v.size(); i++)
 		{
 			if(v[i] != e) continue;
 			if(i == 0) continue;
-			if(v[i - 1] == -1) continue;
-			s.insert(v[i - 1]);
+			int k = v[i - 1];
+			if(k == -1) continue;
+			if(s.find(k) == s.end()) s.insert(PI(k, c));
+			else s[k] += c;
 		}
 	}
 	return s;
 }
 
-vector<PI> hyper_set::get_routes(int x, directed_graph &gr, MEI &e2i)
+MPII hyper_set::get_routes(int x, directed_graph &gr, MEI &e2i)
 {
+	MPII mpi;
 	edge_iterator it1, it2;
 	vector<PI> v;
 	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
 	{
 		assert(e2i.find(*it1) != e2i.end());
 		int e = e2i[*it1];
-		set<int> s = get_successors(e);
-		for(set<int>::iterator it = s.begin(); it != s.end(); it++)
+		MI s = get_successors(e);
+		for(MI::iterator it = s.begin(); it != s.end(); it++)
 		{
-			PI p(e, *it);
-			v.push_back(p);
+			PI p(e, it->first);
+			mpi.insert(PPII(p, it->second));
 		}
 	}
-	return v;
-
-	set<int> s1;
-	set<int> s2;
-	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
-	{
-		int e = e2i[*it1];
-		s1.insert(e);
-	}
-	for(tie(it1, it2) = gr.out_edges(x); it1 != it2; it1++)
-	{
-		int e = e2i[*it1];
-		s2.insert(e);
-	}
-	for(set<int>::iterator it1 = s1.begin(); it1 != s1.end(); it1++)
-	{
-		int e = (*it1);
-		set<int> s = get_successors(e);
-		for(set<int>::iterator it = s.begin(); it != s.end(); it++)
-		{
-			assert(s2.find(*it) != s2.end());
-			PI p(e, *it);
-			v.push_back(p);
-		}
-	}
-	for(set<int>::iterator it2 = s2.begin(); it2 != s2.end(); it2++)
-	{
-		int e = (*it2);
-		set<int> s = get_predecessors(e);
-		for(set<int>::iterator it = s.begin(); it != s.end(); it++)
-		{
-			assert(s1.find(*it) != s1.end());
-		}
-	}
-	return v;
+	return mpi;
 }
 
+/*
 int hyper_set::get_routes(int x, directed_graph &gr, MEI &e2i, MPII &mpi)
 {
 	edge_iterator it1, it2;
@@ -259,6 +233,7 @@ int hyper_set::get_routes(int x, directed_graph &gr, MEI &e2i, MPII &mpi)
 	}
 	return total;
 }
+*/
 
 int hyper_set::replace(int x, int e)
 {
@@ -438,20 +413,20 @@ bool hyper_set::right_extend(int e)
 	return false;
 }
 
-bool hyper_set::left_extend(const set<int> &s)
+bool hyper_set::left_extend(const vector<int> &s)
 {
-	for(set<int>::const_iterator it = s.begin(); it != s.end(); it++)
+	for(int i = 0; i < s.size(); i++)
 	{
-		if(left_extend(*it) == true) return true;
+		if(left_extend(s[i]) == true) return true;
 	}
 	return false;
 }
 
-bool hyper_set::right_extend(const set<int> &s)
+bool hyper_set::right_extend(const vector<int> &s)
 {
-	for(set<int>::const_iterator it = s.begin(); it != s.end(); it++)
+	for(int i = 0; i < s.size(); i++)
 	{
-		if(right_extend(*it) == true) return true;
+		if(right_extend(s[i]) == true) return true;
 	}
 	return false;
 }

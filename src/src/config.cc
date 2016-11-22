@@ -38,8 +38,8 @@ double min_removable_weight = 5.0;
 double max_removable_weight = 50.0;
 
 // for selecting paths
-double min_transcript_coverage = 10.0;
-double min_transcript_abundance = 1.1;
+double min_transcript_coverage = 20.0;
+double min_transcript_abundance = 1.9;
 
 // for identifying new boundaries
 bool identify_extra_boundary = false;

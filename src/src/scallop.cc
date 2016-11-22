@@ -36,7 +36,7 @@ int scallop::assemble()
 	{
 		bool b = false;
 
-		b = filter_hyper_edges2();
+		b = filter_hyper_edges();
 		if(b == true) continue;
 
 		b = resolve_small_edges();
@@ -141,11 +141,11 @@ bool scallop::resolve_splitable_vertex(int degree)
 		if(gr.in_degree(i) <= 1) continue;
 		if(gr.out_degree(i) <= 1) continue;
 
-		vector<PI> p = hs.get_routes(i, gr, e2i);
+		MPII mpi = hs.get_routes(i, gr, e2i);
 
-		if(p.size() == 0) continue;		// TODO
+		if(mpi.size() == 0) continue;		// TODO
 
-		router rt(i, gr, e2i, i2e, p);
+		router rt(i, gr, e2i, i2e, mpi);
 		rt.classify();
 
 		if(rt.type != SPLITABLE) continue;
@@ -185,8 +185,8 @@ bool scallop::resolve_insplitable_vertex(int type, int degree)
 		if(gr.in_degree(i) <= 1) continue;
 		if(gr.out_degree(i) <= 1) continue;
 
-		vector<PI> p = hs.get_routes(i, gr, e2i);
-		router rt(i, gr, e2i, i2e, p);
+		MPII mpi = hs.get_routes(i, gr, e2i);
+		router rt(i, gr, e2i, i2e, mpi);
 		rt.classify();
 
 		if(rt.type != type) continue;
@@ -235,16 +235,16 @@ bool scallop::resolve_hyper_edge0()
 			int e2 = -1;
 			double w1 = gr.get_edge_weight(*it1);
 			double w2 = 0;
-			set<int> s = hs.get_successors(e1);
+			MI s = hs.get_successors(e1);
 			if(s.size() <= 0) continue;
-			for(set<int>::iterator it = s.begin(); it != s.end(); it++)
+			for(MI::iterator it = s.begin(); it != s.end(); it++)
 			{
-				double w = gr.get_edge_weight(i2e[*it]);
+				double w = gr.get_edge_weight(i2e[it->first]);
 				if(hs.left_extend(e1)) continue;
-				if(hs.right_extend(*it)) continue;
+				if(hs.right_extend(it->first)) continue;
 				if(w <= w2) continue;
 				w2 = w;
-				e2 = (*it);
+				e2 = it->first;
 			}
 			if(e1 == -1 || e2 == -1) continue;
 			if(w1 <= ww || w2 <= ww) continue;
@@ -289,21 +289,21 @@ bool scallop::resolve_hyper_edge1()
 	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
 	{
 		int e = e2i[*it1];
-		set<int> s;
+		MI s;
 
 		s = hs.get_successors(e);
-		if(s.size() >= 2 && hs.right_extend(s) == false)
+		if(s.size() >= 2 && hs.right_extend(get_keys(s)) == false)
 		{
 			v1.push_back(e);
-			v2.insert(v2.begin(), s.begin(), s.end());
+			v2 = get_keys(s);
 			root = (*it1)->target();
 			break;
 		}
 
 		s = hs.get_predecessors(e);
-		if(s.size() >= 2 && hs.left_extend(s) == false)
+		if(s.size() >= 2 && hs.left_extend(get_keys(s)) == false)
 		{
-			v1.insert(v1.begin(), s.begin(), s.end());
+			v1 = get_keys(s);
 			v2.push_back(e);
 			root = (*it1)->source();
 			break;
@@ -535,51 +535,7 @@ int scallop::refine_splice_graph()
 	return 0;
 }
 
-bool scallop::filter_hyper_edges2()
-{
-	bool flag = false;
-	for(int i = 1; i < gr.num_vertices() - 1; i++)
-	{
-		if(gr.degree(i) <= 0) continue;
-
-		double r;
-		int e = compute_smallest_edge(i, r);
-
-		vector<PI> v;
-		if(i2e[e]->target() == i)
-		{
-			set<int> s = hs.get_successors(e);
-			for(set<int>::iterator it = s.begin(); it != s.end(); it++)
-			{
-				v.push_back(PI(e, *it));
-			}
-		}
-		else if(i2e[e]->source() == i)
-		{
-			set<int> s = hs.get_predecessors(e);
-			for(set<int>::iterator it = s.begin(); it != s.end(); it++)
-			{
-				v.push_back(PI(*it, e));
-			}
-		}
-		else assert(false);
-
-		if(v.size() <= 1) continue;
-
-		flag = true;
-
-		for(int k = 0; k < v.size(); k++)
-		{
-			printf("filter hyper edge (%d, %d) of vertex %d indegree %d outdegree %d\n", 
-					v[k].first, v[k].second, i, gr.in_degree(i), gr.out_degree(i));
-
-			hs.remove_pair(v[k].first, v[k].second);
-		}
-	}
-	return flag;
-}
-
-bool scallop::filter_hyper_edges1()
+bool scallop::filter_hyper_edges()
 {
 	bool flag = false;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
@@ -587,8 +543,7 @@ bool scallop::filter_hyper_edges1()
 		if(gr.in_degree(i) <= 1) continue;
 		if(gr.out_degree(i) <= 1) continue;
 
-		MPII mpi;
-		int total = hs.get_routes(i, gr, e2i, mpi);
+		MPII mpi = hs.get_routes(i, gr, e2i);
 
 		if(mpi.size() == 0) continue;
 
@@ -604,8 +559,8 @@ bool scallop::filter_hyper_edges1()
 
 		flag = true;
 
-		printf("filter hyper edge: type %d degree %d vertex %d indegree %d outdegree %d hedges %lu total %d\n", 
-					rt.type, rt.degree, i, gr.in_degree(i), gr.out_degree(i), mpi.size(), total);
+		printf("filter hyper edge: type %d degree %d vertex %d indegree %d outdegree %d hedges %lu\n", 
+					rt.type, rt.degree, i, gr.in_degree(i), gr.out_degree(i), mpi.size());
 
 		hs.remove_pair(p.first, p.second);
 	}
@@ -659,12 +614,11 @@ int scallop::decompose_vertex(int root, const vector<PPID> &vpi)
 	set<PI> spi;
 	for(int i = 0; i < vpi.size(); i++) spi.insert(vpi[i].first);
 
-	vector<PI> vp = hs.get_routes(root, gr, e2i);
-
-	for(int i = 0; i < vp.size(); i++)
+	MPII mpi = hs.get_routes(root, gr, e2i);
+	for(MPII::iterator it = mpi.begin(); it != mpi.end(); it++)
 	{
-		if(spi.find(vp[i]) != spi.end()) continue;
-		hs.remove_pair(vp[i].first, vp[i].second);
+		if(spi.find(it->first) != spi.end()) continue;
+		hs.remove_pair(it->first.first, it->first.second);
 	}
 
 	map<int, int> m;
@@ -1216,19 +1170,6 @@ int scallop::compute_smallest_edge(int x, double &ratio)
 	}
 	assert(e >= 0);
 	return e;
-}
-
-int scallop::stats()
-{
-	for(int i = 1; i < gr.num_vertices() - 1; i++)
-	{
-		vector<PI> p = hs.get_routes(i, gr, e2i);
-		router rt(i, gr, e2i, i2e, p);
-		rt.classify();
-		rt.build();
-		rt.stats();
-	}
-	return 0;
 }
 
 int scallop::print()

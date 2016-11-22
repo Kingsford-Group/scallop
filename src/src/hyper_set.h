@@ -35,10 +35,9 @@ public:
 	int build_edges(directed_graph &gr, MEI &e2i);
 	int build_index();
 	set<int> get_intersection(const vector<int> &v);
-	set<int> get_successors(int e);
-	set<int> get_predecessors(int e);
-	vector<PI> get_routes(int x, directed_graph &gr, MEI &e2i);
-	int get_routes(int x, directed_graph &gr, MEI &e2i, MPII &mpi);
+	MI get_successors(int e);
+	MI get_predecessors(int e);
+	MPII get_routes(int x, directed_graph &gr, MEI &e2i);
 	int print();
 
 public:
@@ -51,9 +50,9 @@ public:
 	int remove_pair(int x, int y);
 	bool extend(int e);
 	bool left_extend(int e);
-	bool left_extend(const set<int> &s);
+	bool left_extend(const vector<int> &s);
 	bool right_extend(int e);
-	bool right_extend(const set<int> &s);
+	bool right_extend(const vector<int> &s);
 };
 
 #endif
