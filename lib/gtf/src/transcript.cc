@@ -126,7 +126,7 @@ int transcript::write(ofstream &fout) const
 		fout<<"exon \""<<k + 1<<"\"; ";
 		fout<<"RPKM \""<<RPKM<<"\"; ";
 		fout<<"coverage \""<<coverage<<"\"; ";
-		fout<<"covratio\""<<covratio<<"\"; ";
+		fout<<"covratio \""<<covratio<<"\"; ";
 		fout<<"expression \""<<expression<<"\";"<<endl;
 	}
 	return 0;
