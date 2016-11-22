@@ -47,7 +47,6 @@ extern int min_router_count;
 // for splice graph
 extern double min_inner_vertex_weight;
 extern double min_inner_boundary_weight;
-extern double min_spanning_edge_weight;
 extern double min_splice_edge_weight;
 extern double max_split_error_ratio;
 extern double max_decompose_error_ratio;
@@ -88,7 +87,6 @@ extern string fixed_gene_name;
 extern int max_num_bundles;
 extern bool strand_reverse;
 extern int min_gtf_transcripts_num;
-extern bool fast_mode;
 extern bool use_second_alignment;
 
 // parse arguments

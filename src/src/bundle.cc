@@ -58,8 +58,6 @@ int bundle::build()
 	remove_inner_start_boundaries();
 	remove_inner_end_boundaries();
 
-	//while(remove_spanning_edges());
-
 	if(extend_isolated_boundary == true)
 	{
 		extend_isolated_start_boundaries();
@@ -767,42 +765,6 @@ int bundle::remove_inner_vertices()
 		gr.clear_vertex(i);
 	}
 	return 0;
-}
-
-bool bundle::remove_spanning_edges()
-{
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
-	{
-		edge_descriptor e = (*it1);
-		int s = e->source();
-		int t = e->target();
-		if(s == 0) continue;
-		if(t == gr.num_vertices() - 1) continue;
-		double w = gr.get_edge_weight(e);
-		double w1 = gr.get_vertex_weight(s);
-		double w2 = gr.get_vertex_weight(s);
-		assert(s < t);
-		if(t <= s + 2) continue;
-		if(gr.out_degree(s) == 1) continue;
-		if(gr.in_degree(t) == 1) continue;
-		if(w >= min_spanning_edge_weight) continue;
-		if(w >= 0.5 * w1) continue;
-		if(w >= 0.5 * w2) continue;
-
-		int32_t p1 = gr.get_vertex_info(s).rpos;
-		int32_t p2 = gr.get_vertex_info(s + 1).lpos;
-		int32_t q1 = gr.get_vertex_info(t - 1).rpos;
-		int32_t q2 = gr.get_vertex_info(t).lpos;
-
-		if(p1 != p2 && q1 != q2) continue;
-		if(gr.edge(s, s + 1).second == false) continue;
-		if(gr.edge(t - 1, t).second == false) continue;
-
-		gr.remove_edge(e);
-		return true;
-	}
-	return false;
 }
 
 VE bundle::compute_maximal_edges()

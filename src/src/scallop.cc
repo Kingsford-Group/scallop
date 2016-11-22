@@ -36,7 +36,7 @@ int scallop::assemble()
 	{
 		bool b = false;
 
-		b = filter_hyper_edges2();
+		b = filter_hyper_edges1();
 		if(b == true) continue;
 
 		b = resolve_small_edges();
