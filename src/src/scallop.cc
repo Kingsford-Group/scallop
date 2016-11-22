@@ -128,31 +128,25 @@ bool scallop::resolve_small_edges2()
 {
 	int se = -1;
 	int root = -1;
-	double ratio = 0.05;
-	double maxw = 10.0;
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	double ratio = max_split_error_ratio;
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
-		edge_descriptor e = (*it1);
-		int ee = e2i[e];
-		int s = e->source();
-		int t = e->target();
-		double w = gr.get_edge_weight(e);
+		if(gr.in_degree(i) <= 1 && gr.out_degree(i) <= 1) continue;
 
-		if(w > maxw) continue;
-		if(gr.in_degree(s) != 1) continue;
-		if(gr.in_degree(t) == 1) continue;
-		if(gr.out_degree(s) == 1) continue;
-		if(gr.out_degree(t) != 1) continue;
+		double r;
+		int e = compute_removable_edge(i, r);
 
-		double rs, rt;
-		int es = compute_removable_edge(s, rs);
-		int et = compute_removable_edge(t, rt);
-		double rr = rs * 0.5 + rt * 0.5;
-		if(es != ee || et != ee) continue;
-		if(rr > ratio) continue;
-		se = ee;
-		ratio = rr;
+		if(e == -1) continue;
+		if(ratio < r) continue;
+		if(i2e[e]->target() == i && hs.right_extend(e)) continue;
+		if(i2e[e]->source() == i && hs.left_extend(e)) continue;
+
+		vector<PI> p = hs.get_routes(i, gr, e2i);
+		if(p.size() < gr.degree(i) - 2) continue;
+
+		ratio = r;
+		se = e;
+		root = i;
 	}
 
 	if(se == -1) return false;
