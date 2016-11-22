@@ -120,11 +120,12 @@ int gene::assign_coverage_ratio()
 	}
 	for(int i = 0; i < transcripts.size(); i++)
 	{
-		transcripts[i].covratio = transcripts[i].coverage / sum;
+		double r = -1;
+		if(sum >= 1.0) r = transcripts[i].coverage / sum;
+		transcripts[i].covratio = r;
 	}
 	return 0;
 }
-
 
 set<int32_t> gene::get_exon_boundaries() const
 {

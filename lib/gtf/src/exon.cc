@@ -59,7 +59,7 @@ int exon::parse(const string &s)
 
 		sstr.getline(buf2, 10240, ';');
 	}
-	
+
 	return 0;
 }
 
