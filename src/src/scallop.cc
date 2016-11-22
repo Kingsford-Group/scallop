@@ -36,21 +36,26 @@ int scallop::assemble()
 	{
 		bool b = false;
 
+		printf("AAA\n");
 		b = filter_hyper_edges1();
 		if(b == true) continue;
 
+		printf("BBB\n");
 		b = resolve_small_edges();
 		if(b == true) print();
 		if(b == true) continue;
 
+		printf("CCC\n");
 		b = resolve_splitable_vertex(1);
 		if(b == true) print();
 		if(b == true) continue;
 
+		printf("DDD\n");
 		b = resolve_insplitable_vertex(SINGLE, 999);
 		if(b == true) print();
 		if(b == true) continue;
 
+		printf("EEE\n");
 		b = resolve_insplitable_vertex(MULTIPLE, 999);
 		if(b == true) print();
 		if(b == true) continue;
@@ -61,14 +66,17 @@ int scallop::assemble()
 		if(b == true) continue;
 		*/
 
+		printf("FFF\n");
 		b = resolve_trivial_vertex();
 		if(b == true) print();
 		if(b == true) continue;
 
+		printf("GGG\n");
 		b = resolve_hyper_edge1();
 		if(b == true) print();
 		if(b == true) continue;
 
+		printf("HHH\n");
 		b = resolve_hyper_edge0();
 		if(b == true) print();
 		if(b == true) continue;
@@ -103,7 +111,7 @@ bool scallop::resolve_small_edges()
 
 		if(gr.in_degree(i2e[e]->target()) <= 1) continue;
 		if(gr.out_degree(i2e[e]->source()) <= 1) continue;
-		if(hs.right_extend(e) && hs.left_extend(e)) return -1;
+		if(hs.right_extend(e) && hs.left_extend(e)) continue;
 
 		double w = gr.get_edge_weight(i2e[e]);
 		if(w > min_removable_weight)
@@ -540,30 +548,39 @@ bool scallop::filter_hyper_edges2()
 	bool flag = false;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
-		if(gr.in_degree(i) <= 1) continue;
-		if(gr.out_degree(i) <= 1) continue;
+		double r;
+		int e = compute_smallest_edge(i, r);
 
-		MPII mpi;
-		int total = hs.get_routes(i, gr, e2i, mpi);
+		vector<PI> v;
+		if(i2e[e]->target() == i)
+		{
+			set<int> s = hs.get_successors(e);
+			for(set<int>::iterator it = s.begin(); it != s.end(); it++)
+			{
+				v.push_back(PI(*it, i));
+			}
+		}
+		else if(i2e[e]->source() == i)
+		{
+			set<int> s = hs.get_predecessors(e);
+			for(set<int>::iterator it = s.begin(); it != s.end(); it++)
+			{
+				v.push_back(PI(i, *it));
+			}
+		}
+		else assert(false);
 
-		if(mpi.size() == 0) continue;
-
-		router rt(i, gr, e2i, i2e, mpi);
-		rt.classify();
-
-		//if(rt.type == 1) continue;
-		//if(rt.type == 2 && rt.degree == 1) continue;
-
-		PI p = rt.filter_hyper_edge();
-
-		if(p.first == -1 || p.second == -1) continue;
+		if(v.size() <= 1) continue;
 
 		flag = true;
 
-		printf("filter hyper edge: type %d degree %d vertex %d indegree %d outdegree %d hedges %lu total %d\n", 
-					rt.type, rt.degree, i, gr.in_degree(i), gr.out_degree(i), mpi.size(), total);
+		for(int k = 0; k < v.size(); k++)
+		{
+			printf("filter hyper edge (%d, %d) of vertex %d indegree %d outdegree %d\n", 
+					v[k].first, v[k].second, i, gr.in_degree(i), gr.out_degree(i));
 
-		hs.remove_pair(p.first, p.second);
+			hs.remove_pair(v[k].first, v[k].second);
+		}
 	}
 	return flag;
 }
@@ -1204,7 +1221,6 @@ int scallop::compute_smallest_edge(int x, double &ratio)
 		e = e2i[*it1];
 	}
 	assert(e >= 0);
-
 	return e;
 }
 
