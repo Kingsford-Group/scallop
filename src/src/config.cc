@@ -31,6 +31,7 @@ double min_spanning_edge_weight = 5.5;
 double max_split_error_ratio = 0.15;
 double max_decompose_error_ratio = 0.05;
 double min_transcript_coverage = 10.0;
+double min_transcript_abundance = 1.0;
 double min_splice_graph_coverage = 20.0;
 int min_junction_count = 5;
 double smallest_edge_ratio_scalor1 = 0.2;
@@ -97,6 +98,7 @@ int print_parameters()
 	printf("min_inner_vertex_weight = %.2lf\n", min_inner_vertex_weight);
 	printf("min_inner_boundary_weight = %.2lf\n", min_inner_boundary_weight);
 	printf("min_transcript_coverage = %.2lf\n", min_transcript_coverage);
+	printf("min_transcript_abundance = %.2lf\n", min_transcript_abundance);
 	printf("min_splice_graph_coverage = %.2lf\n", min_splice_graph_coverage);
 	printf("min_junction_count = %d\n", min_junction_count);
 	printf("max_split_error_ratio = %.2lf\n", max_split_error_ratio);
@@ -285,6 +287,11 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--min_transcript_coverage")
 		{
 			min_transcript_coverage = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_transcript_abundance")
+		{
+			min_transcript_abundance = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_splice_graph_coverage")

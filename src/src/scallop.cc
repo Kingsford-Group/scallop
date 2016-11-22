@@ -1162,7 +1162,7 @@ int scallop::collect_path(int e)
 	p.abd = gr.get_edge_weight(i2e[e]);
 	p.v = v;
 
-	if(p.reads / 100.0 >= min_transcript_coverage) 
+	if(p.reads / 100.0 >= min_transcript_coverage && p.abd >= min_transcript_abundance) 
 	{
 		paths.push_back(p);
 	}
