@@ -33,7 +33,7 @@ bool extend_isolated_boundary = true;
 double max_split_error_ratio = 0.15;
 double max_decompose_error_ratio = 0.01;
 double min_removable_weight = 5.0;
-double max_removable_weight = 50.0;
+double max_removable_weight = 100.0;
 
 // for selecting paths
 double min_transcript_coverage = 20.0;
