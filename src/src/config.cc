@@ -33,7 +33,7 @@ bool extend_isolated_boundary = true;
 double max_split_error_ratio = 0.15;
 double max_decompose_error_ratio = 0.01;
 double min_removable_weight = 5.0;
-double max_removable_weight = 100.0;
+double min_removable_ratio = 0.05;
 
 // for selecting paths
 double min_transcript_coverage = 20.0;
@@ -100,7 +100,7 @@ int print_parameters()
 	printf("max_split_error_ratio = %.2lf\n", max_split_error_ratio);
 	printf("max_decompose_error_ratio = %.2lf\n", max_decompose_error_ratio);
 	printf("min_removable_weight = %.2lf\n", min_removable_weight);
-	printf("max_removable_weight = %.2lf\n", max_removable_weight);
+	printf("min_removable_ratio = %.2lf\n", min_removable_ratio);
 	printf("extend_isolated_bounary = %c\n", extend_isolated_boundary ? 'T' : 'F');
 
 	// for identifying new boundaries
@@ -298,9 +298,9 @@ int parse_arguments(int argc, const char ** argv)
 			min_removable_weight = atof(argv[i + 1]);
 			i++;
 		}
-		else if(string(argv[i]) == "--max_removable_weight")
+		else if(string(argv[i]) == "--min_removable_ratio")
 		{
-			max_removable_weight = atof(argv[i + 1]);
+			min_removable_ratio = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--extend_isolated_boundary")
