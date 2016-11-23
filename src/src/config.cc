@@ -15,12 +15,14 @@ int32_t min_bundle_gap = 50;
 int min_num_hits_in_bundle = 20;
 uint32_t min_mapping_quality = 1;
 int32_t min_splice_boundary_hits = 1;
+bool use_second_alignment = false;
+bool strand_reverse = false;
 
 // for identifying subgraphs
 double max_indel_ratio = 0.2;
+double min_subregion_overlap = 2;
 int32_t min_subregion_gap = 3;
 int32_t min_subregion_length = 15;
-double min_subregion_overlap = 2;
 
 // for revising splice graph
 double min_inner_vertex_weight = 10;
@@ -33,7 +35,6 @@ bool extend_isolated_boundary = true;
 double max_split_error_ratio = 0.15;
 double max_decompose_error_ratio = 0.01;
 double min_removable_weight = 5.0;
-double min_removable_ratio = 0.05;
 
 // for selecting paths
 double min_transcript_coverage = 20.0;
@@ -64,14 +65,9 @@ string ref_file2;
 string output_file;
 
 // for controling
-int max_num_bundles = -1;
 int32_t average_read_length = 100;
-bool strand_reverse = false;
 bool output_tex_files = false;
 string fixed_gene_name = "";
-int min_gtf_transcripts_num = 0;
-bool fast_mode = true;
-bool use_second_alignment = false;
 
 int print_parameters()
 {
@@ -100,7 +96,6 @@ int print_parameters()
 	printf("max_split_error_ratio = %.2lf\n", max_split_error_ratio);
 	printf("max_decompose_error_ratio = %.2lf\n", max_decompose_error_ratio);
 	printf("min_removable_weight = %.2lf\n", min_removable_weight);
-	printf("min_removable_ratio = %.2lf\n", min_removable_ratio);
 	printf("extend_isolated_bounary = %c\n", extend_isolated_boundary ? 'T' : 'F');
 
 	// for identifying new boundaries
@@ -128,13 +123,10 @@ int print_parameters()
 	printf("output_file = %s\n", output_file.c_str());
 
 	// for controling
-	printf("max_num_bundles = %d\n", max_num_bundles);
 	printf("average_read_length = %d\n", average_read_length);
 	printf("strand_reverse = %c\n", strand_reverse ? 'T' : 'F');
 	printf("output_tex_files = %c\n", output_tex_files ? 'T' : 'F');
 	printf("fixed_gene_name = %s\n", fixed_gene_name.c_str());
-	printf("min_gtf_transcripts_num = %d\n", min_gtf_transcripts_num);
-	printf("fast_mode = %c\n", fast_mode ? 'T' : 'F');
 	printf("use_second_alignment = %c\n", use_second_alignment ? 'T' : 'F');
 
 	printf("\n");
@@ -296,11 +288,6 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--min_removable_weight")
 		{
 			min_removable_weight = atof(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--min_removable_ratio")
-		{
-			min_removable_ratio = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--extend_isolated_boundary")
