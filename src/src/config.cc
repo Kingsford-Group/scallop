@@ -32,13 +32,13 @@ double min_splice_graph_coverage = 20.0;
 bool extend_isolated_boundary = true;
 
 // for decomposing splice graph
-double max_split_error_ratio = 0.15;
+double max_split_error_ratio = 0.25;
 double max_decompose_error_ratio = 0.01;
 double min_removable_weight = 5.0;
 
 // for selecting paths
 double min_transcript_coverage = 20.0;
-double min_transcript_abundance = 1.9;
+double min_transcript_abundance = 2.1;
 
 // for identifying new boundaries
 bool identify_extra_boundary = false;
