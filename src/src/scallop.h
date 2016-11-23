@@ -74,9 +74,10 @@ private:
 	int remove_edge(int e);
 	int split_merge_path(const VE &p, double w);
 	int split_merge_path(const vector<int> &p, double w);
-	int collect_path(int e);
-	int collect_existing_st_paths();
 	int greedy_decompose(int num);
+	int collect_existing_st_paths();
+	int collect_path(int e);
+	int compute_length(const path &p);
 
 	// stats, print, and draw
 	int print();

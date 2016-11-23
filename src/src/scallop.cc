@@ -1116,9 +1116,9 @@ int scallop::collect_path(int e)
 
 	bool accept = true;
 
-	if(p.reads / 100.0 < 0.5 * min_transcript_coverage) accept = false;
-	if(p.abd < 0.5 * min_transcript_abundance) accept = false;
-	if(p.reads / 100.0 < min_transcript_coverage && p.abd < min_transcript_abundance) accept = false;
+	if(compute_length(p) < min_transcript_length) accept = false;
+	if(p.abd < min_transcript_abundance) accept = false;
+	if(p.reads / average_read_length < min_transcript_coverage) accept = false;
 
 	if(accept == true) paths.push_back(p);
 
@@ -1167,6 +1167,19 @@ int scallop::compute_smallest_edge(int x, double &ratio)
 	}
 	assert(e >= 0);
 	return e;
+}
+
+int scallop::compute_length(const path &p)
+{
+	int s = 0;
+	for(int i = 0; i < p.v.size(); i++)
+	{
+		int v = p.v[i];
+		if(v == 0) continue;
+		if(v == gr.num_vertices() - 1) continue;
+		s += gr.get_vertex_info(v).length;
+	}
+	return s;
 }
 
 int scallop::print()

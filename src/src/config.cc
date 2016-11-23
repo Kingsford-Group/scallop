@@ -39,6 +39,7 @@ double min_removable_weight = 5.0;
 // for selecting paths
 double min_transcript_coverage = 20.0;
 double min_transcript_abundance = 2.1;
+int min_transcript_length = 200;
 
 // for identifying new boundaries
 bool identify_extra_boundary = false;
@@ -92,6 +93,7 @@ int print_parameters()
 	printf("min_inner_boundary_weight = %.2lf\n", min_inner_boundary_weight);
 	printf("min_transcript_coverage = %.2lf\n", min_transcript_coverage);
 	printf("min_transcript_abundance = %.2lf\n", min_transcript_abundance);
+	printf("min_transcript_length = %.2lf\n", min_transcript_length);
 	printf("min_splice_graph_coverage = %.2lf\n", min_splice_graph_coverage);
 	printf("max_split_error_ratio = %.2lf\n", max_split_error_ratio);
 	printf("max_decompose_error_ratio = %.2lf\n", max_decompose_error_ratio);
@@ -268,6 +270,11 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--min_transcript_abundance")
 		{
 			min_transcript_abundance = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_transcript_length")
+		{
+			min_transcript_length = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_splice_graph_coverage")
