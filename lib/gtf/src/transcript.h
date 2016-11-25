@@ -29,6 +29,7 @@ public:
 	int32_t expression;
 	double coverage;
 	double covratio;
+	int numreads;
 	double RPKM;
 	vector<PI32> exons;
 	char strand;

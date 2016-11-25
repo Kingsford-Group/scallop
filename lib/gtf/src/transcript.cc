@@ -108,8 +108,7 @@ int transcript::write(ofstream &fout) const
 	fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
 	fout<<"RPKM \""<<RPKM<<"\"; ";
 	fout<<"coverage \""<<coverage<<"\"; ";
-	fout<<"covratio \""<<covratio<<"\"; ";
-	fout<<"expression \""<<expression<<"\";"<<endl;
+	fout<<"numreads \""<<numreads<<"\";"<<endl;
 
 	for(int k = 0; k < exons.size(); k++)
 	{
@@ -126,8 +125,7 @@ int transcript::write(ofstream &fout) const
 		fout<<"exon \""<<k + 1<<"\"; ";
 		fout<<"RPKM \""<<RPKM<<"\"; ";
 		fout<<"coverage \""<<coverage<<"\"; ";
-		fout<<"covratio \""<<covratio<<"\"; ";
-		fout<<"expression \""<<expression<<"\";"<<endl;
+		fout<<"numreads \""<<numreads<<"\"; "<<endl;
 	}
 	return 0;
 }

@@ -11,13 +11,6 @@ exon::exon(const string &s)
 	parse(s);
 }
 
-exon::exon(const string &_transcript_id, const string &_gene_id, int32_t _start, int32_t _end, int32_t _expression, double _coverage, double _RPKM)
-	: seqname("chr1"), source("simulation"), start(_start), end(_end), transcript_id(_transcript_id), coverage(_coverage), RPKM(_RPKM),
-	gene_id(_gene_id), expression(_expression), feature("exon"), score(1000), strand('+'), frame(0)
-{
-}
-
-
 int exon::parse(const string &s)
 {
 	char buf[10240];
@@ -55,6 +48,7 @@ int exon::parse(const string &s)
 		else if(string(buf) == "gene_id") gene_id = v;
 		else if(string(buf) == "expression") expression = atoi(v.c_str());
 		else if(string(buf) == "coverage") coverage = atof(v.c_str());
+		else if(string(buf) == "numreads") numreads = atoi(v.c_str());
 		else if(string(buf) == "RPKM") RPKM = atof(v.c_str());
 
 		sstr.getline(buf2, 10240, ';');
@@ -65,9 +59,9 @@ int exon::parse(const string &s)
 
 int exon::print() const
 {
-	printf("%s\t%s\t%s\t%d\t%d\t%.1lf\t%c\t%c\ttranscript_id \"%s\"; gene_id \"%s\"; expression \"%d\"; coverage \"%.lf\"; RPKM \"%.2lf\"\n",
+	printf("%s\t%s\t%s\t%d\t%d\t%.1lf\t%c\t%c\ttranscript_id \"%s\"; gene_id \"%s\"; expression \"%d\"; coverage \"%.2f\"; numreads \"%d\"; RPKM \"%.2lf\"\n",
 			seqname.c_str(), source.c_str(), feature.c_str(), start, end, score, strand, frame,
-			transcript_id.c_str(), gene_id.c_str(), expression, coverage, RPKM);
+			transcript_id.c_str(), gene_id.c_str(), expression, coverage, numreads, RPKM);
 	return 0;
 }
 

@@ -116,12 +116,12 @@ int gene::assign_coverage_ratio()
 	double sum = 0;
 	for(int i = 0; i < transcripts.size(); i++)
 	{
-		sum += transcripts[i].coverage;
+		sum += transcripts[i].numreads;
 	}
 	for(int i = 0; i < transcripts.size(); i++)
 	{
 		double r = -1;
-		if(sum >= 1.0) r = transcripts[i].coverage / sum;
+		if(sum >= 1.0) r = transcripts[i].numreads / sum;
 		transcripts[i].covratio = r;
 	}
 	return 0;
