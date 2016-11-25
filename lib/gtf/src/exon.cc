@@ -49,7 +49,7 @@ int exon::parse(const string &s)
 
 		if(string(buf) == "" || v == "") break;
 
-		printf("|%s|%s|\n", buf, v.c_str());
+		//printf("|%s|%s|\n", buf, v.c_str());
 
 		if(string(buf) == "transcript_id") transcript_id = v;
 		else if(string(buf) == "gene_id") gene_id = v;
