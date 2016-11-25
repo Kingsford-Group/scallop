@@ -37,21 +37,29 @@ int exon::parse(const string &s)
 	while(sstr.eof() == false)
 	{
 		sstr>>buf;
+		/*
 		sstr.getline(buf2, 10240, '"');
 		sstr.getline(buf2, 10240, '"');
+		*/
+		sstr.getline(buf2, 10240, ';');
 		string v(buf2);
+		int k1 = v.find('"');
+		int k2 = v.rfind('"');
+		if(k1 >= 0 && k1 < k2 && k2 < v.size()) v = v.substr(k1 + 1, k2 - k1 - 1);
+
 		if(string(buf) == "" || v == "") break;
 
-		//printf(" |%s|%s|%lu|%lu|\n", buf, k.c_str(), p1, p2);
+		printf("|%s|%s|\n", buf, v.c_str());
 
 		if(string(buf) == "transcript_id") transcript_id = v;
 		else if(string(buf) == "gene_id") gene_id = v;
 		else if(string(buf) == "expression") expression = atoi(v.c_str());
+		else if(string(buf) == "cov") coverage = atof(v.c_str());
 		else if(string(buf) == "coverage") coverage = atof(v.c_str());
 		else if(string(buf) == "numreads") numreads = atoi(v.c_str());
 		else if(string(buf) == "RPKM") RPKM = atof(v.c_str());
 
-		sstr.getline(buf2, 10240, ';');
+		//sstr.getline(buf2, 10240, ';');
 	}
 
 	return 0;
