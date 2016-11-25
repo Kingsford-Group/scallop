@@ -69,7 +69,7 @@ public:
 	int compute_independent_subgraphs();
 	double compute_average_vertex_weight();
 	double compute_average_edge_weight();
-	double compute_coverage();
+	double compute_numreads();
 
 	// algorithms with weight contraints
 	edge_descriptor compute_maximum_edge_w();

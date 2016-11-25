@@ -978,8 +978,8 @@ int bundle::output_transcript(ofstream &fout, const path &p, const string &gid, 
 	fout<<fixed;
 
 	const vector<int> &v = p.v;
-	double abd = p.abd;
-	double cov = p.reads / average_read_length;
+	double coverage = p.abd;		// number of molecular
+	double numreads = p.reads / average_read_length;
 
 	assert(v[0] == 0);
 	assert(v[v.size() - 1] == pexons.size() + 1);
@@ -1000,8 +1000,8 @@ int bundle::output_transcript(ofstream &fout, const path &p, const string &gid, 
 	fout<<".\t";					// frame
 	fout<<"gene_id \""<<gid.c_str()<<"\"; ";
 	fout<<"transcript_id \""<<tid.c_str()<<"\"; ";
-	fout<<"coverage \""<<cov<<"\"; ";
-	fout<<"expression \""<<abd<<"\";"<<endl;
+	fout<<"coverage \""<<coverage<<"\"; ";
+	fout<<"numreads \""<<numreads<<"\";"<<endl;
 
 	join_interval_map jmap;
 	for(int k = 1; k < v.size() - 1; k++)
@@ -1024,8 +1024,8 @@ int bundle::output_transcript(ofstream &fout, const path &p, const string &gid, 
 		fout<<"gene_id \""<<gid.c_str()<<"\"; ";
 		fout<<"transcript_id \""<<tid.c_str()<<"\"; ";
 		fout<<"exon_number \""<<++cnt<<"\"; ";
-		fout<<"coverage \""<<cov<<"\"; ";
-		fout<<"expression \""<<abd<<"\";"<<endl;
+		fout<<"coverage \""<<coverage<<"\"; ";
+		fout<<"numreads \""<<numreads<<"\";"<<endl;
 	}
 	return 0;
 }
@@ -1048,8 +1048,8 @@ int bundle::output_transcript(transcript &trst, const path &p, const string &gid
 	trst.source = algo;
 	trst.gene_id = gid;
 	trst.transcript_id = tid;
-	trst.expression = p.abd;
-	trst.coverage = p.reads / average_read_length;
+	trst.coverage = p.abd;
+	trst.numreads = p.reads / average_read_length;
 	trst.strand = strand;
 
 	const vector<int> &v = p.v;

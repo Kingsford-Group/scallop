@@ -164,10 +164,6 @@ int assembler::process(const bundle_base &bb)
 		if(ref_file1 != "" && bd.strand == '+') compare(gr, ref_file1, "compare1.tex");
 		if(ref_file2 != "" && bd.strand == '-') compare(gr, ref_file2, "compare2.tex");
 
-		int cnt = gr.count_junctions();
-		double ss = gr.compute_coverage() / average_read_length;
-		if(ss < min_splice_graph_coverage) continue;
-
 		scallop sc(gid, gr, hs);
 		sc.assemble();
 

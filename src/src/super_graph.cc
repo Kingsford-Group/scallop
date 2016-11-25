@@ -461,10 +461,9 @@ int super_graph::print()
 
 		double vv = gr.compute_average_vertex_weight();
 		double ee = gr.compute_average_edge_weight();
-		double reads = gr.compute_coverage() / average_read_length;
 
-		printf("subgraph %d, #edges = %lu, #vertices = %lu / %lu, #starting = %d, #ending = %d, range = [%d, %d), reads = %.2lf\n", 
-				i, gr.num_edges(), gr.num_vertices() - 2, root.num_vertices() - 2, d0, dn, lpos, rpos, reads);
+		printf("subgraph %d, #edges = %lu, #vertices = %lu / %lu, #starting = %d, #ending = %d, range = [%d, %d)\n", 
+				i, gr.num_edges(), gr.num_vertices() - 2, root.num_vertices() - 2, d0, dn, lpos, rpos);
 	}
 	return 0;
 }

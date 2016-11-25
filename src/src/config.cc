@@ -28,7 +28,6 @@ int32_t min_subregion_length = 15;
 double min_inner_vertex_weight = 10;
 double min_inner_boundary_weight = 4.0;
 double min_splice_edge_weight = 3.5;
-double min_splice_graph_coverage = 20.0;
 bool extend_isolated_boundary = true;
 
 // for decomposing splice graph
@@ -37,9 +36,8 @@ double max_decompose_error_ratio = 0.01;
 double min_removable_weight = 5.0;
 
 // for selecting paths
-double min_transcript_coverage = 40.0;
-double min_transcript_abundance = 3.0;
-int min_transcript_length = 400;
+double min_transcript_coverage = 1.5;
+int min_transcript_length = 200;
 
 // for identifying new boundaries
 bool identify_extra_boundary = false;
@@ -92,9 +90,7 @@ int print_parameters()
 	printf("min_inner_vertex_weight = %.2lf\n", min_inner_vertex_weight);
 	printf("min_inner_boundary_weight = %.2lf\n", min_inner_boundary_weight);
 	printf("min_transcript_coverage = %.2lf\n", min_transcript_coverage);
-	printf("min_transcript_abundance = %.2lf\n", min_transcript_abundance);
 	printf("min_transcript_length = %d\n", min_transcript_length);
-	printf("min_splice_graph_coverage = %.2lf\n", min_splice_graph_coverage);
 	printf("max_split_error_ratio = %.2lf\n", max_split_error_ratio);
 	printf("max_decompose_error_ratio = %.2lf\n", max_decompose_error_ratio);
 	printf("min_removable_weight = %.2lf\n", min_removable_weight);
@@ -267,19 +263,9 @@ int parse_arguments(int argc, const char ** argv)
 			min_transcript_coverage = atof(argv[i + 1]);
 			i++;
 		}
-		else if(string(argv[i]) == "--min_transcript_abundance")
-		{
-			min_transcript_abundance = atof(argv[i + 1]);
-			i++;
-		}
 		else if(string(argv[i]) == "--min_transcript_length")
 		{
 			min_transcript_length = atoi(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--min_splice_graph_coverage")
-		{
-			min_splice_graph_coverage = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--max_split_error_ratio")

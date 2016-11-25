@@ -51,9 +51,7 @@ extern double min_splice_edge_weight;
 extern double max_split_error_ratio;
 extern double max_decompose_error_ratio;
 extern double min_transcript_coverage;
-extern double min_transcript_abundance;
 extern int min_transcript_length;
-extern double min_splice_graph_coverage;
 extern double min_removable_weight;
 extern bool extend_isolated_boundary;
 

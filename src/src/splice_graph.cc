@@ -1,5 +1,6 @@
 #include "splice_graph.h"
 #include "util.h"
+#include "config.h"
 #include <sstream>
 #include <fstream>
 #include <cfloat>
@@ -896,14 +897,14 @@ double splice_graph::compute_average_edge_weight()
 	return sum;
 }
 
-double splice_graph::compute_coverage()
+double splice_graph::compute_numreads()
 {
 	double sum = 0;
 	for(int i = 1; i < num_vertices() - 1; i++)
 	{
 		sum += get_vertex_weight(i) * get_vertex_info(i).length;
 	}
-	return sum;
+	return sum / average_read_length;
 }
 
 double splice_graph::compute_average_vertex_weight()
