@@ -12,7 +12,7 @@ int main(int argc, const char **argv)
 {
  	if(argc != 3 && argc != 4)
 	{
-		cout<<"usage: "<<argv[0]<< " <in-gtf-file> <out-gtf-file> <min-expression>"<<endl;
+		cout<<"usage: "<<argv[0]<< " <in-gtf-file> <out-gtf-file> <min-coverage>"<<endl;
 		return 0;
 	}
 
@@ -22,7 +22,7 @@ int main(int argc, const char **argv)
 	{
 		for(int i = 0; i < g.genes.size(); i++) 
 		{
-			g.genes[i].remove_transcripts(atof(argv[3]));
+			g.genes[i].filter_low_coverage_transcripts(atof(argv[3]));
 		}
 	}
 
