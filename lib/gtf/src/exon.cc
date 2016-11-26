@@ -5,6 +5,7 @@
 #include <sstream>
 #include <cassert>
 #include <cstdio>
+#include <cmath>
 
 exon::exon(const string &s)
 {
@@ -83,4 +84,22 @@ int exon::length() const
 {
 	assert(end > start);
 	return end - start;
+}
+
+bool exon::merge(const exon &e)
+{
+	if(end != e.start) return false;
+	assert(seqname == e.seqname);
+	assert(source == e.source);
+	assert(feature == e.feature);
+	assert(transcript_id == e.transcript_id);
+	assert(gene_id == e.gene_id);
+	assert(fabs(coverage - e.coverage) < 0.1);
+	assert(fabs(RPKM - e.RPKM) < 0.1);
+	assert(numreads == numreads);
+	assert(expression == e.expression);
+	assert(frame == e.frame);
+	assert(strand == e.strand);
+	end = e.end;
+	return true;
 }

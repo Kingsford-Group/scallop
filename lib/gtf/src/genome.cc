@@ -59,6 +59,8 @@ int genome::read(const string &file)
 	for(int i = 0; i < genes.size(); i++)
 	{
 		genes[i].build_transcripts();
+		genes[i].sort();
+		genes[i].shrink();
 		genes[i].assign_coverage_ratio();
 	}
 

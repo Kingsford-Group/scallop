@@ -31,14 +31,15 @@ public:
 	double covratio;
 	int numreads;
 	double RPKM;
-	vector<PI32> exons;
 	char strand;
+	vector<PI32> exons;
 
 public:
 	int add_exon(int s, int t);
 	int add_exon(const exon &e);
 	int assign_RPKM(double factor);
 	int sort();
+	int shrink();
 	int write(ofstream &fout) const;
 	int length() const;
 	PI32 get_bounds() const;

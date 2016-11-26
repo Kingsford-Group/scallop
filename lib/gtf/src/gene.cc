@@ -92,6 +92,7 @@ int gene::remove_transcripts(double expression)
 	transcripts = vv;
 	return 0;
 }
+
 int gene::sort()
 {
 	std::sort(exons.begin(), exons.end());
@@ -99,6 +100,32 @@ int gene::sort()
 	{
 		transcripts[i].sort();
 	}
+	return 0;
+}
+
+int gene::shrink()
+{
+	if(exons.size() == 0) return 0;
+	vector<exon> v;
+	exon p = exons[0];
+	for(int i = 1; i < exons.size(); i++)
+	{
+		exon &q = exons[i];
+		if(p.end == q.start)
+		{
+			p.end = q.end;
+		}
+		else
+		{
+			assert(p.end < q.start);
+			v.push_back(p);
+			p = q;
+		}
+	}
+	v.push_back(p);
+	exons = v;
+
+	for(int i = 0; i < transcripts.size(); i++) transcripts[i].shrink();
 	return 0;
 }
 

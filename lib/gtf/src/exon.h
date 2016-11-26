@@ -16,6 +16,7 @@ public:
 	bool operator<(const exon &ge) const;
 	int print() const;
 	int length() const;
+	bool merge(const exon &e);
 
 public:
 	string seqname;

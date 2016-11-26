@@ -53,6 +53,30 @@ int transcript::sort()
 	return 0;
 }
 
+int transcript::shrink()
+{
+	if(exons.size() == 0) return 0;
+	vector<PI32> v;
+	PI32 p = exons[0];
+	for(int i = 1; i < exons.size(); i++)
+	{
+		PI32 &q = exons[i];
+		if(p.second == q.first)
+		{
+			p.second = q.second;
+		}
+		else
+		{
+			assert(p.second < q.first);
+			v.push_back(p);
+			p = q;
+		}
+	}
+	v.push_back(p);
+	exons = v;
+	return 0;
+}
+
 int transcript::assign_RPKM(double factor)
 {
 	RPKM = coverage * factor / length();

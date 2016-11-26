@@ -24,6 +24,7 @@ public:
 
 	// modify
 	int sort();
+	int shrink();
 	int clear();
 	int set_gene_id(const string &id);
 	int remove_single_exon_transcripts();
