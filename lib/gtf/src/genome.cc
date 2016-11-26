@@ -20,6 +20,7 @@ genome::~genome()
 
 int genome::add_gene(const gene &g)
 {
+	//printf("add gene %s with %lu transcripts\n", g.get_gene_id().c_str(), g.transcripts.size());
 	assert(g2i.find(g.get_gene_id()) == g2i.end());
 	g2i.insert(pair<string, int>(g.get_gene_id(), genes.size()));
 	genes.push_back(g);
