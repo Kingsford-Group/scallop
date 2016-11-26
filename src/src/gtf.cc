@@ -21,11 +21,12 @@ int gtf::build_split_interval_map()
 	for(int i = 0; i < transcripts.size(); i++)
 	{
 		transcript &t = transcripts[i];
-		if(t.expression == 0) t.expression = 1;
+		if(t.coverage <= 1) t.coverage = 1;
+		int k = (int)(t.coverage);
 		for(int j = 0; j < t.exons.size(); j++)
 		{
 			PI32 p = t.exons[j];
-			imap += make_pair(ROI(p.first, p.second), t.expression);
+			imap += make_pair(ROI(p.first, p.second), k);
 		}
 	}
 	return 0;
@@ -34,7 +35,7 @@ int gtf::build_split_interval_map()
 int gtf::add_vertices(splice_graph &gr)
 {
 	PI32 pi = get_bounds();
-	double sum = compute_sum_expression();
+	double sum = compute_sum_coverage();
 	gr.add_vertex();
 	vertex_info vi0;
 	vi0.lpos = pi.first;
@@ -69,13 +70,13 @@ int gtf::add_edges(splice_graph &gr)
 	{
 		transcript &tt = transcripts[i];
 		assert(tt.exons.size() >= 1);
-		int32_t expr = tt.expression;
+		int32_t expr = (int32_t)(tt.coverage);
 		int u = 0;
 		for(int k = 0; k < tt.exons.size(); k++)
 		{
 			PI32 &ge = tt.exons[k];
 			SIMI it = imap.find(ge.first);
-			assert(it != imap.end());		// make sure all input transcripts with >= 1 expression
+			assert(it != imap.end());		// make sure all input transcripts with >= 1 coverage 
 			while(true)
 			{
 				int uu = distance((SIMI)(imap.begin()), it) + 1;
@@ -107,12 +108,12 @@ int gtf::add_single_edge(int s, int t, double w, splice_graph &gr)
 	return 0;
 }
 
-double gtf::compute_sum_expression()
+double gtf::compute_sum_coverage()
 {
 	double s = 0;
 	for(int i = 0; i < transcripts.size(); i++)
 	{
-		s += transcripts[i].expression;
+		s += transcripts[i].coverage;
 	}
 	return s;
 }
@@ -147,7 +148,7 @@ int gtf::output_gtf(ofstream &fout, const vector<path> &paths, const string &pre
 		fout<<".\t";								// frame
 		fout<<"gene_id \""<<gene.c_str()<<"\"; ";
 		fout<<"transcript_id \""<<gene.c_str()<<"."<<i + 1<<"\"; ";
-		fout<<"expression \""<<abd<<"\";"<<endl;
+		fout<<"coverage \""<<abd<<"\";"<<endl;
 
 		assert(v[0] == 0);
 		join_interval_map jmap;
@@ -172,7 +173,7 @@ int gtf::output_gtf(ofstream &fout, const vector<path> &paths, const string &pre
 			fout<<"gene_id \""<<gene.c_str()<<"\"; ";
 			fout<<"transcript_id \""<<gene.c_str()<<"."<<i + 1<<"\"; ";
 			fout<<"exon \""<<++cnt<<"\"; ";
-			fout<<"expression \""<<abd<<"\";"<<endl;
+			fout<<"coverage \""<<abd<<"\";"<<endl;
 		}
 	}
 	return 0;

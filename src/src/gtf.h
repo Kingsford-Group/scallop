@@ -26,7 +26,7 @@ public:
 
 private:
 	int build_split_interval_map();
-	double compute_sum_expression();
+	double compute_sum_coverage();
 	int add_vertices(splice_graph &gr);
 	int add_edges(splice_graph &gr);
 	int add_single_edge(int s, int t, double w, splice_graph &gr);
