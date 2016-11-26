@@ -8,7 +8,7 @@ simulator::simulator(int _num_exons, int _num_transcripts, int _max_length, int 
 {
 }
 
-int simulator::simulate_transcript(const string &tid, const string &gid, gene &g)
+int simulator::simulate_transcript(const string &tid, const string &gid, transcript &t)
 {
 	// number of exons in this transcript
 	int num = rand() % max_length + 1;
@@ -32,15 +32,18 @@ int simulator::simulate_transcript(const string &tid, const string &gid, gene &g
 	// generate expression level
 	int x = rand() % max_expression + 1;
 
+	t.clear();
+	t.transcript_id = tid;
+	t.gene_id = gid;
+	t.coverage = x;
+
 	// build transcript
 	for(int i = 0; i < s.size(); i++)
 	{
 		int ss = s[i] * 3 + 1;
 		int tt = s[i] * 3 + 3;
-		exon e(tid, gid, ss, tt, x, 1, 1);
-		g.add_exon(e);
+		t.add_exon(ss, tt);
 	}
-
 	return 0;
 }
 
@@ -49,8 +52,9 @@ int simulator::simulate_gene(const string &gid, gene &g)
 	for(int i = 0; i < num_transcripts; i++)
 	{
 		string tid = "transcript" + tostring(i + 1);
-		simulate_transcript(tid, gid, g);
+		transcript t;
+		simulate_transcript(tid, gid, t);
+		g.add_transcript(t);
 	}
-	g.build_transcripts();
 	return 0;
 }

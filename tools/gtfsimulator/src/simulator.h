@@ -1,8 +1,8 @@
 #ifndef __SIMULATOR_H__
 #define __SIMULATOR_H__
 
-#include "exon.h"
 #include "gene.h"
+#include "item.h"
 
 using namespace std;
 
@@ -18,7 +18,7 @@ public:
 	int max_length;
 	
 public:
-	int simulate_transcript(const string &tid, const string &gid, gene &g);
+	int simulate_transcript(const string &tid, const string &gid, transcript &t);
 	int simulate_gene(const string &gid, gene &g);
 };
 
