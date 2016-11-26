@@ -60,14 +60,14 @@ int transcript::shrink()
 	PI32 p = exons[0];
 	for(int i = 1; i < exons.size(); i++)
 	{
-		PI32 &q = exons[i];
+		PI32 q = exons[i];
 		if(p.second == q.first)
 		{
 			p.second = q.second;
 		}
 		else
 		{
-			assert(p.second < q.first);
+			//assert(p.second < q.first);
 			v.push_back(p);
 			p = q;
 		}

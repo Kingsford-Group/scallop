@@ -110,14 +110,14 @@ int gene::shrink()
 	exon p = exons[0];
 	for(int i = 1; i < exons.size(); i++)
 	{
-		exon &q = exons[i];
+		exon q = exons[i];
 		if(p.end == q.start)
 		{
 			p.end = q.end;
 		}
 		else
 		{
-			assert(p.end < q.start);
+			//assert(p.end < q.start);
 			v.push_back(p);
 			p = q;
 		}
