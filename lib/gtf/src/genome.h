@@ -16,7 +16,7 @@ public:
 
 public:
 	vector<gene> genes;
-	map<string, int> s2i;
+	map<string, int> g2i;
 
 public:
 	// read and write

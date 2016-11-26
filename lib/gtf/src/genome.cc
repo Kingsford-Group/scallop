@@ -12,8 +12,6 @@ genome::genome()
 genome::genome(const string &file)
 {
 	read(file);
-	sort();
-	build_index();
 }
 
 genome::~genome()
@@ -22,6 +20,8 @@ genome::~genome()
 
 int genome::add_gene(const gene &g)
 {
+	assert(g2i.find(g.get_gene_id()) == g2i.end());
+	g2i.insert(pair<string, int>(g.get_gene_id(), genes.size()));
 	genes.push_back(g);
 	return 0;
 }
@@ -38,62 +38,39 @@ int genome::read(const string &file)
 	char line[102400];
 	
 	genes.clear();
-	map<string, int> m;
+	g2i.clear();
 	while(fin.getline(line, 102400, '\n'))
 	{
-		exon ge(line);
-		if(ge.feature != "exon") continue;
-		if(m.find(ge.gene_id) == m.end())
+		item ge(line);
+		if(ge.feature == "transcript")
 		{
-			gene gg;
-			gg.add_exon(ge);
-			genes.push_back(gg);
-			m.insert(pair<string, int>(ge.gene_id, genes.size() - 1));
+			if(g2i.find(ge.gene_id) == g2i.end())
+			{
+				gene gg;
+				gg.add_transcript(ge);
+				g2i.insert(pair<string, int>(ge.gene_id, genes.size()));
+				genes.push_back(gg);
+			}
+			else
+			{
+				int k = g2i[ge.gene_id];
+				genes[k].add_exon(ge);
+			}
 		}
-		else
+		else if(ge.feature != "exon")
 		{
-			genes[m[ge.gene_id]].add_exon(ge);
+			assert(g2i.find(ge.gene_id) != g2i.end());
+			int k = g2i[ge.gene_id];
+			genes[k].add_exon(ge);
 		}
 	}
 
 	for(int i = 0; i < genes.size(); i++)
 	{
-		genes[i].build_transcripts();
 		genes[i].sort();
 		genes[i].shrink();
 		genes[i].assign_coverage_ratio();
 	}
-
-	/*
-	genes.clear();
-	vector< vector<exon> > vv;
-	map<string, int> m;
-	while(fin.getline(line, 102400, '\n'))
-	{
-		exon ge(line);
-		if(ge.feature != "exon") continue;
-		if(m.find(ge.gene_id) == m.end())
-		{
-			vector<exon> v;
-			v.push_back(ge);
-			vv.push_back(v);
-			m.insert(pair<string, int>(ge.gene_id, vv.size() - 1));
-		}
-		else
-		{
-			vv[m[ge.gene_id]].push_back(ge);
-		}
-	}
-
-	for(int i = 0; i < vv.size(); i++)
-	{
-		gene gg;
-		gg.build(vv[i]);
-		genes.push_back(gg);
-	}
-	*/
-
-	write("test.gtf");
 
 	return 0;
 }
@@ -109,16 +86,6 @@ int genome::write(const string &file) const
 	return 0;
 }
 
-int genome::build_index()
-{
-	s2i.clear();
-	for(int i = 0; i < genes.size(); i++)
-	{
-		s2i.insert(pair<string, int>(genes[i].get_gene_id(), i));
-	}
-	return 0;
-}
-
 int genome::sort()
 {
 	for(int i = 0; i < genes.size(); i++)
@@ -130,8 +97,8 @@ int genome::sort()
 
 const gene* genome::get_gene(string name) const
 {
-	map<string, int>::const_iterator it = s2i.find(name);
-	if(it == s2i.end()) return NULL;
+	map<string, int>::const_iterator it = g2i.find(name);
+	if(it == g2i.end()) return NULL;
 	int k = it->second;
 	return &(genes[k]);
 }

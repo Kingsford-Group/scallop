@@ -8,7 +8,23 @@
 
 transcript::transcript()
 {
-	RPKM = 0;
+}
+
+transcript::transcript(const item &e)
+{
+	assert(e.feature == "transcript");
+	seqname = e.seqname;
+	source = e.source;
+	feature = e.feature;
+	gene_id = e.gene_id;
+	transcript_id = e.transcript_id;
+	start = e.start;
+	end = e.end;
+	strand = e.strand;
+	frame = e.frame;
+	coverage = e.coverage;
+	numreads = e.numreads;
+	RPKM = e.RPKM;
 }
 
 transcript::~transcript()
@@ -32,18 +48,9 @@ int transcript::add_exon(int s, int t)
 	return 0;
 }
 
-int transcript::add_exon(const exon &e)
+int transcript::add_exon(const item &e)
 {
-	seqname = e.seqname;
-	source = e.source;
-	feature = e.feature;
-	transcript_id = e.transcript_id;
-	gene_id = e.gene_id;
-	expression = e.expression;
-	coverage = e.coverage;
-	strand = e.strand;
-	RPKM = e.RPKM;
-	exons.push_back(PI32(e.start, e.end));
+	add_exon(e.start, e.end);
 	return 0;
 }
 
@@ -116,17 +123,16 @@ int transcript::write(ofstream &fout) const
 	fout<<fixed;
 
 	if(exons.size() == 0) return 0;
-
-	int lpos = exons[0].first;
-	int rpos = exons[exons.size() - 1].second;
+	
+	PI32 p = get_bounds();
 
 	fout<<seqname.c_str()<<"\t";				// chromosome name
 	fout<<source.c_str()<<"\t";					// source
 	fout<<"transcript\t";						// feature
-	fout<<lpos + 1<<"\t";							// left position
-	fout<<rpos<<"\t";							// right position
+	fout<<p.first + 1<<"\t";					// left position
+	fout<<p.second<<"\t";						// right position
 	fout<<1000<<"\t";							// score, now as expression
-	fout<<strand<<"\t";					// strand
+	fout<<strand<<"\t";							// strand
 	fout<<".\t";								// frame
 	fout<<"gene_id \""<<gene_id.c_str()<<"\"; ";
 	fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
@@ -139,8 +145,8 @@ int transcript::write(ofstream &fout) const
 		fout<<seqname.c_str()<<"\t";		// chromosome name
 		fout<<source.c_str()<<"\t";			// source
 		fout<<"exon\t";						// feature
-		fout<<exons[k].first + 1<<"\t";			// left position
-		fout<<exons[k].second<<"\t";	// right position
+		fout<<exons[k].first + 1<<"\t";		// left position
+		fout<<exons[k].second<<"\t";		// right position
 		fout<<1000<<"\t";					// score, now as expression
 		fout<<strand<<"\t";					// strand
 		fout<<".\t";						// frame

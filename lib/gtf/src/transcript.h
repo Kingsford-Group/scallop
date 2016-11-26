@@ -4,7 +4,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include "exon.h"
+#include "item.h"
 
 using namespace std;
 
@@ -13,6 +13,7 @@ typedef pair<int32_t, int32_t> PI32;
 class transcript
 {
 public:
+	transcript(const item &ie);
 	transcript();
 	~transcript();
 
@@ -24,26 +25,29 @@ public:
 	string source;
 	string feature;
 	string gene_id;
-
 	string transcript_id;
-	int32_t expression;
+	int32_t start;
+	int32_t end;
+	double score;
+	char strand;
+	int frame;
 	double coverage;
 	double covratio;
 	int numreads;
 	double RPKM;
-	char strand;
+
 	vector<PI32> exons;
 
 public:
 	int add_exon(int s, int t);
-	int add_exon(const exon &e);
+	int add_exon(const item &e);
 	int assign_RPKM(double factor);
 	int sort();
 	int shrink();
-	int write(ofstream &fout) const;
 	int length() const;
 	PI32 get_bounds() const;
 	string label() const;
+	int write(ofstream &fout) const;
 };
 
 #endif

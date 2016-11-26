@@ -5,7 +5,7 @@
 #include <vector>
 #include <set>
 
-#include "exon.h"
+#include "item.h"
 #include "transcript.h"
 
 using namespace std;
@@ -14,13 +14,13 @@ class gene
 {
 public:
 	vector<transcript> transcripts;			
-	vector<exon> exons;
+	map<string, int> t2i;
 
 public:
 	// build
-	int add_exon(const exon &e);
-	int build_transcripts();
 	int add_transcript(const transcript &t);
+	int add_transcript(const item &e);
+	int add_exon(const item &e);
 
 	// modify
 	int sort();
@@ -28,16 +28,13 @@ public:
 	int clear();
 	int set_gene_id(const string &id);
 	int remove_single_exon_transcripts();
-	int remove_transcripts(double expression);
 	int assign_RPKM(double factor);
 	int assign_coverage_ratio();
 
-	// fetch information
-	string get_gene_id() const;
-	string get_seqname() const;
-	char get_strand() const;
 	set<int32_t> get_exon_boundaries() const;
 	PI32 get_bounds() const;
+	string get_seqname() const;
+	string get_gene_id() const;
 
 	// write
 	int write(ofstream &fout) const;	

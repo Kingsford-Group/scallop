@@ -3,57 +3,37 @@
 #include <cassert>
 #include "gene.h"
 
+int gene::clear()
+{
+	transcripts.clear();
+	t2i.clear();
+	return 0;
+}
+
+int gene::add_transcript(const item&e)
+{
+	assert(e.feature == "transcript");
+	assert(t2i.find(e.transcript_id) == t2i.end());
+	t2i.insert(pair<string, int>(e.transcript_id, t2i.size()));
+	transcripts.push_back(transcript(e));
+	return 0;
+}
+
 int gene::add_transcript(const transcript &t)
 {
+	assert(t2i.find(t.transcript_id) == t2i.end());
+	t2i.insert(pair<string, int>(t.transcript_id, t2i.size()));
 	transcripts.push_back(t);
 	return 0;
 }
 
-int gene::clear()
+int gene::add_exon(const item&e)
 {
-	transcripts.clear();
-	exons.clear();
+	assert(e.feature == "exon");
+	assert(t2i.find(e.transcript_id) != t2i.end());
+	int k = t2i[e.transcript_id];
+	transcripts[k].add_exon(e);
 	return 0;
-}
-
-int gene::add_exon(const exon &e)
-{
-	exons.push_back(e);
-	return 0;
-}
-
-int gene::build_transcripts()
-{
-	transcripts.clear();
-	map<string, int> m;
-	for(int i = 0; i < exons.size(); i++)
-	{
-		const exon &e = exons[i];
-		if(m.find(e.transcript_id) == m.end())
-		{
-			transcript t;
-			t.add_exon(e);
-			m.insert(pair<string, int>(e.transcript_id, transcripts.size()));
-			transcripts.push_back(t);
-		}
-		else
-		{
-			transcripts[m[e.transcript_id]].add_exon(e);
-		}
-	}
-	return 0;
-}
-
-string gene::get_seqname() const
-{
-	if(exons.size() == 0) return "";
-	else return exons[0].seqname;
-}
-
-string gene::get_gene_id() const
-{
-	if(exons.size() == 0) return "";
-	else return exons[0].gene_id;
 }
 
 int gene::set_gene_id(const string &id) 
@@ -62,31 +42,17 @@ int gene::set_gene_id(const string &id)
 	{
 		transcripts[i].gene_id = id;
 	}
-	for(int i = 0; i < exons.size(); i++)
-	{
-		exons[i].gene_id = id;
-	}
 	return 0;
 }
 
 int gene::remove_single_exon_transcripts()
 {
 	vector<transcript> vv;
+	t2i.clear();
 	for(int i = 0; i < transcripts.size(); i++)
 	{
 		if(transcripts[i].exons.size() <= 1) continue;
-		vv.push_back(transcripts[i]);
-	}
-	transcripts = vv;
-	return 0;
-}
-
-int gene::remove_transcripts(double expression)
-{
-	vector<transcript> vv;
-	for(int i = 0; i < transcripts.size(); i++)
-	{
-		if(transcripts[i].expression < expression) continue;
+		t2i.insert(pair<string, int>(transcripts[i].transcript_id, vv.size()));
 		vv.push_back(transcripts[i]);
 	}
 	transcripts = vv;
@@ -95,7 +61,6 @@ int gene::remove_transcripts(double expression)
 
 int gene::sort()
 {
-	std::sort(exons.begin(), exons.end());
 	for(int i = 0; i < transcripts.size(); i++)
 	{
 		transcripts[i].sort();
@@ -105,27 +70,10 @@ int gene::sort()
 
 int gene::shrink()
 {
-	if(exons.size() == 0) return 0;
-	vector<exon> v;
-	exon p = exons[0];
-	for(int i = 1; i < exons.size(); i++)
+	for(int i = 0; i < transcripts.size(); i++)
 	{
-		exon q = exons[i];
-		if(p.end == q.start)
-		{
-			p.end = q.end;
-		}
-		else
-		{
-			//assert(p.end < q.start);
-			v.push_back(p);
-			p = q;
-		}
+		transcripts[i].shrink();
 	}
-	v.push_back(p);
-	exons = v;
-
-	for(int i = 0; i < transcripts.size(); i++) transcripts[i].shrink();
 	return 0;
 }
 
@@ -157,28 +105,42 @@ int gene::assign_coverage_ratio()
 set<int32_t> gene::get_exon_boundaries() const
 {
 	set<int32_t> s;
-	for(int i = 0; i < exons.size(); i++)
+	for(int k = 0; k < transcripts.size(); k++)
 	{
-		int32_t l = exons[i].start;
-		int32_t r = exons[i].end;
-		s.insert(l);
-		s.insert(r);
+		const vector<PI32> &v = transcripts[k].exons;
+		for(int i = 0; i < v.size(); i++)
+		{
+			int32_t l = v[i].first;
+			int32_t r = v[i].second;
+			s.insert(l);
+			s.insert(r);
+		}
 	}
 	return s;
 }
 
 PI32 gene::get_bounds() const
 {
-	if(exons.size() == 0) return PI32(-1, -1);
-	int32_t l = exons[0].start;
-	int32_t r = exons[exons.size() - 1].end;
-	return PI32(l, r);
+	PI32 pp(-1, -1);
+	for(int k = 0; k < transcripts.size(); k++)
+	{
+		PI32 p = transcripts[k].get_bounds();
+		if(pp.first == -1 || pp.first > p.first) pp.first = p.first;
+		if(pp.second == -1 || pp.second < p.second) pp.second = p.second;
+	}
+	return pp;
 }
 
-char gene::get_strand() const
+string gene::get_seqname() const
 {
-	if(exons.size() == 0) return '.';
-	return exons[0].strand;
+	if(transcripts.size() == 0) return "";
+	else return transcripts[0].seqname;
+}
+
+string gene::get_gene_id() const
+{
+	if(transcripts.size() == 0) return "";
+	else return transcripts[0].gene_id;
 }
 
 int gene::write(ofstream &fout) const
