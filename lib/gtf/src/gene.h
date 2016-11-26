@@ -4,6 +4,7 @@
 #include <fstream>
 #include <vector>
 #include <set>
+#include <map>
 
 #include "item.h"
 #include "transcript.h"
@@ -27,9 +28,12 @@ public:
 	int shrink();
 	int clear();
 	int set_gene_id(const string &id);
-	int remove_single_exon_transcripts();
 	int assign_RPKM(double factor);
 	int assign_coverage_ratio();
+
+	// filter
+	int filter_single_exon_transcripts();
+	int filter_low_coverage_transcripts(double min_coverage);
 
 	set<int32_t> get_exon_boundaries() const;
 	PI32 get_bounds() const;

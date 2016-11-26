@@ -42,26 +42,19 @@ int genome::read(const string &file)
 	while(fin.getline(line, 102400, '\n'))
 	{
 		item ge(line);
-		if(ge.feature == "transcript")
+		if(g2i.find(ge.gene_id) == g2i.end())
 		{
-			if(g2i.find(ge.gene_id) == g2i.end())
-			{
-				gene gg;
-				gg.add_transcript(ge);
-				g2i.insert(pair<string, int>(ge.gene_id, genes.size()));
-				genes.push_back(gg);
-			}
-			else
-			{
-				int k = g2i[ge.gene_id];
-				genes[k].add_exon(ge);
-			}
+			gene gg;
+			if(ge.feature == "transcript") gg.add_transcript(ge);
+			else if(ge.feature == "exon") gg.add_exon(ge);
+			g2i.insert(pair<string, int>(ge.gene_id, genes.size()));
+			genes.push_back(gg);
 		}
-		else if(ge.feature != "exon")
+		else
 		{
-			assert(g2i.find(ge.gene_id) != g2i.end());
 			int k = g2i[ge.gene_id];
-			genes[k].add_exon(ge);
+			if(ge.feature == "transcript") genes[k].add_transcript(ge);
+			else if(ge.feature == "exon") genes[k].add_exon(ge);
 		}
 	}
 
@@ -129,6 +122,24 @@ int genome::assign_RPKM(double factor)
 	for(int i = 0; i < genes.size(); i++)
 	{
 		genes[i].assign_RPKM(factor);
+	}
+	return 0;
+}
+
+int genome::filter_single_exon_transcripts()
+{
+	for(int i = 0; i < genes.size(); i++)
+	{
+		genes[i].filter_single_exon_transcripts();
+	}
+	return 0;
+}
+
+int genome::filter_low_coverage_transcripts(double min_coverage)
+{
+	for(int i = 0; i < genes.size(); i++)
+	{
+		genes[i].filter_low_coverage_transcripts(min_coverage);
 	}
 	return 0;
 }

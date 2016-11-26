@@ -43,7 +43,9 @@ public:
 	int add_exon(const item &e);
 	int assign_RPKM(double factor);
 	int sort();
+	int clear();
 	int shrink();
+	int assign(const item &e);
 	int length() const;
 	PI32 get_bounds() const;
 	string label() const;

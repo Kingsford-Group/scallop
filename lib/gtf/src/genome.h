@@ -29,6 +29,10 @@ public:
 	int build_index();
 	int assign_RPKM(double factor);
 
+	// filter
+	int filter_single_exon_transcripts();
+	int filter_low_coverage_transcripts(double min_coverage);
+
 	// fetch information
 	const gene* get_gene(string name) const;
 	const gene* locate_gene(const string &chr, const PI32 &p) const;

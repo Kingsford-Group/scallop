@@ -13,9 +13,16 @@ int gene::clear()
 int gene::add_transcript(const item&e)
 {
 	assert(e.feature == "transcript");
-	assert(t2i.find(e.transcript_id) == t2i.end());
-	t2i.insert(pair<string, int>(e.transcript_id, t2i.size()));
-	transcripts.push_back(transcript(e));
+	if(t2i.find(e.transcript_id) == t2i.end())
+	{
+		t2i.insert(pair<string, int>(e.transcript_id, t2i.size()));
+		transcripts.push_back(transcript(e));
+	}
+	else
+	{
+		int k = t2i[e.transcript_id];
+		transcripts[k].assign(e);
+	}
 	return 0;
 }
 
@@ -30,9 +37,20 @@ int gene::add_transcript(const transcript &t)
 int gene::add_exon(const item&e)
 {
 	assert(e.feature == "exon");
-	assert(t2i.find(e.transcript_id) != t2i.end());
-	int k = t2i[e.transcript_id];
-	transcripts[k].add_exon(e);
+	if(t2i.find(e.transcript_id) != t2i.end())
+	{
+		int k = t2i[e.transcript_id];
+		transcripts[k].add_exon(e);
+	}
+	else
+	{
+		transcript t;
+		t.gene_id = e.gene_id;
+		t.transcript_id = e.transcript_id;
+		t.feature = "transcript";
+		t.add_exon(e);
+		add_transcript(t);
+	}
 	return 0;
 }
 
@@ -45,13 +63,27 @@ int gene::set_gene_id(const string &id)
 	return 0;
 }
 
-int gene::remove_single_exon_transcripts()
+int gene::filter_single_exon_transcripts()
 {
 	vector<transcript> vv;
 	t2i.clear();
 	for(int i = 0; i < transcripts.size(); i++)
 	{
 		if(transcripts[i].exons.size() <= 1) continue;
+		t2i.insert(pair<string, int>(transcripts[i].transcript_id, vv.size()));
+		vv.push_back(transcripts[i]);
+	}
+	transcripts = vv;
+	return 0;
+}
+
+int gene::filter_low_coverage_transcripts(double min_coverage)
+{
+	vector<transcript> vv;
+	t2i.clear();
+	for(int i = 0; i < transcripts.size(); i++)
+	{
+		if(transcripts[i].coverage < min_coverage) continue;
 		t2i.insert(pair<string, int>(transcripts[i].transcript_id, vv.size()));
 		vv.push_back(transcripts[i]);
 	}

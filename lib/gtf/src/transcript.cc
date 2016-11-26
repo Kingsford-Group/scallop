@@ -12,6 +12,16 @@ transcript::transcript()
 
 transcript::transcript(const item &e)
 {
+	assign(e);
+	exons.clear();
+}
+
+transcript::~transcript()
+{
+}
+
+int transcript::assign(const item &e)
+{
 	assert(e.feature == "transcript");
 	seqname = e.seqname;
 	source = e.source;
@@ -25,10 +35,7 @@ transcript::transcript(const item &e)
 	coverage = e.coverage;
 	numreads = e.numreads;
 	RPKM = e.RPKM;
-}
-
-transcript::~transcript()
-{
+	return 0;
 }
 
 bool transcript::operator< (const transcript &t) const
@@ -42,6 +49,24 @@ bool transcript::operator< (const transcript &t) const
 	else return false;
 }
 
+int transcript::clear()
+{
+	exons.clear();
+	seqname = "";
+	source = "";
+	feature = "";
+	gene_id = "";
+	transcript_id = "";
+	start = 0;
+	end = 0;
+	strand = '.';
+	frame = -1;
+	coverage = 0;
+	numreads = 0;
+	RPKM = 0;
+	return 0;
+}
+
 int transcript::add_exon(int s, int t)
 {
 	exons.push_back(PI32(s, t));
@@ -50,6 +75,7 @@ int transcript::add_exon(int s, int t)
 
 int transcript::add_exon(const item &e)
 {
+	assert(e.transcript_id == transcript_id);
 	add_exon(e.start, e.end);
 	return 0;
 }
