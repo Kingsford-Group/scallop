@@ -6,28 +6,25 @@
 
 #include "genome.h"
 #include "compare.h"
+#include "config.h"
 
 using namespace std;
 
 int main(int argc, const char **argv)
 {
-	if(argc != 4)
+	if(argc < 3)
 	{
-		cout<<"usage: "<<argv[0]<< " <gtf-file-1> <gtf-file-2> <mode: (1: strict, 2: intron_chain)>"<<endl;
+		cout<<"usage: "<<argv[0]<< " <gtf-file-1> <gtf-file-2> [-l length -a algo -s]"<<endl;
 		return 0;
 	}
 
-	int mode = atoi(argv[3]);
+	parse_parameters(argc, argv);
 
 	genome g1(argv[1]);
 	genome g2(argv[2]);
 
-	remove_single_exon_transcripts(g1);
-	remove_single_exon_transcripts(g2);
-
-	if(mode == 1) compare_genome1(g1, g2);
-	if(mode == 2) compare_genome2(g1, g2);
-	if(mode == 3) compare_genome3(g1, g2);
+	if(algo == 1) compare_genome1(g1, g2);
+	if(algo == 2) compare_genome2(g1, g2);
 
     return 0;
 }

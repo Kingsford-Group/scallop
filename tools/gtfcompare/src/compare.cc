@@ -1,15 +1,8 @@
 #include "compare.h"
+#include "config.h"
 #include <cassert>
 #include <cmath>
-
-int remove_single_exon_transcripts(genome &gm)
-{
-	for(int i = 0; i < gm.genes.size(); i++)
-	{
-		gm.genes[i].remove_single_exon_transcripts();
-	}
-	return 0;
-}
+#include <algorithm>
 
 bool compare_structure(const transcript &x, const transcript &y)
 {
@@ -50,20 +43,22 @@ bool compare_intron_chain(const transcript &x, const transcript &y)
 
 bool compare_expression(const transcript &x, const transcript &y)
 {
-	if(x.expression == y.expression) return true;
+	if(fabs(x.coverage - y.coverage) < 0.5) return true;
 	else return false;
 }
 
-int compare_gene(const gene &x, const gene &y, int mode)
+int compare_transcripts(const vector<transcript> &y, const vector<transcript> &x)
 {
-	return compare_transcripts(x.transcripts, y.transcripts, mode);
+	vector<bool> v;
+	return compare_transcripts(y, x, v);
 }
 
-int compare_transcripts(const vector<transcript> &y, const vector<transcript> &x, int mode)
+int compare_transcripts(const vector<transcript> &y, const vector<transcript> &x, vector<bool> &vv)
 {
 	int cnt = 0;
 	vector<bool> v;
 	v.assign(y.size(), false);
+	vv.clear();
 	for(int i = 0; i < x.size(); i++)
 	{
 		const transcript &t1 = x[i];
@@ -73,56 +68,42 @@ int compare_transcripts(const vector<transcript> &y, const vector<transcript> &x
 			if(v[j] == true) continue;
 			const transcript &t2 = y[j];
 			bool b = false;
-			if(mode == 1)
+			if(algo == 1)
 			{
 				if(compare_structure(t1, t2) == false) b = false;
 				if(compare_expression(t1, t2) == false) b = false;
 			}
-			if(mode == 2)
+			if(algo == 2)
 			{
 				b = compare_intron_chain(t1, t2);
-
-				if(b == true)
-				{
-					printf("TRUE %s %s %s %c %lu %d %.2lf %.3lf %.2lf %s %s %s %c %lu %d %.2lf %.3lf %.2lf\n", 
-							t1.gene_id.c_str(), t1.transcript_id.c_str(), t1.label().c_str(), t1.strand, 
-							t1.exons.size(), t1.length(), t1.coverage, t1.covratio, t1.RPKM,
-							t2.gene_id.c_str(), t2.transcript_id.c_str(), t2.label().c_str(), t2.strand, 
-							t2.exons.size(), t2.length(), t2.coverage, t2.covratio, t2.RPKM);
-				}
-
 				if(t1.strand != t2.strand) b = false;
 			}
 
 			if(b == false) continue;
 
+			printf("TRUE %s %s %s %c %lu %d %.2lf %.3lf %.2lf %s %s %s %c %lu %d %.2lf %.3lf %.2lf\n", 
+					t1.gene_id.c_str(), t1.transcript_id.c_str(), t1.label().c_str(), t1.strand, 
+					t1.exons.size(), t1.length(), t1.coverage, t1.covratio, t1.RPKM,
+					t2.gene_id.c_str(), t2.transcript_id.c_str(), t2.label().c_str(), t2.strand, 
+					t2.exons.size(), t2.length(), t2.coverage, t2.covratio, t2.RPKM);
+			
 			flag = true;
 			v[j] = true;
 			cnt++;
 			break;
 		}
 
-		if(flag == false) printf("FALSE %s %s %s %c %lu %d %.2lf %.3lf %.2lf\n", 
+		vv.push_back(flag);
+
+		if(flag == false)
+		{
+			printf("FALSE %s %s %s %c %lu %d %.2lf %.3lf %.2lf\n", 
 				t1.gene_id.c_str(), t1.transcript_id.c_str(), t1.label().c_str(), t1.strand, 
 				t1.exons.size(), t1.length(), t1.coverage, t1.covratio, t1.RPKM);
+
+		}
 	}
 	return cnt;
-}
-
-int compare_gene_bounds(const gene &x, const gene &y)
-{
-	if(x.get_seqname() != y.get_seqname()) return 0;
-	PI32 px = x.get_bounds();
-	PI32 py = y.get_bounds();
-	assert(px.first < px.second);
-	assert(py.first < py.second);
-
-	if(py.first < px.first && px.first < py.second && py.second < px.second) printf("%s %c %s:%d-%d %s %c %s:%d-%d overlap1\n", x.get_gene_id().c_str(), x.get_strand(), x.get_seqname().c_str(), px.first, px.second, y.get_gene_id().c_str(), y.get_strand(), y.get_seqname().c_str(), py.first, py.second);
-	if(px.first < py.first && py.first < px.second && px.second < py.second) printf("%s %c %s:%d-%d %s %c %s:%d-%d overlap2\n", x.get_gene_id().c_str(), x.get_strand(), x.get_seqname().c_str(), px.first, px.second, y.get_gene_id().c_str(), y.get_strand(), y.get_seqname().c_str(), py.first, py.second);
-	if(px.first <= py.first && px.second >= py.second) printf("%s %c %s:%d-%d %s %c %s:%d-%d inclusive1\n", x.get_gene_id().c_str(), x.get_strand(), x.get_seqname().c_str(), px.first, px.second, y.get_gene_id().c_str(), y.get_strand(), y.get_seqname().c_str(), py.first, py.second);
-	if(py.first <= px.first && py.second >= px.second) printf("%s %c %s:%d-%d %s %c %s:%d-%d inclusive2\n", x.get_gene_id().c_str(), x.get_strand(), x.get_seqname().c_str(), px.first, px.second, y.get_gene_id().c_str(), y.get_strand(), y.get_seqname().c_str(), py.first, py.second);
-
-	return 0;
 }
 
 int compare_genome1(const genome &x, const genome &y)
@@ -138,7 +119,7 @@ int compare_genome1(const genome &x, const genome &y)
 		if(gx == NULL || gy == NULL) continue;
 		int tx = gx->transcripts.size();
 		int ty = gy->transcripts.size();
-		int t0 = compare_gene(*gx, *gy, 1);
+		int t0 = compare_transcripts(gx->transcripts, gy->transcripts);
 		assert(t0 <= tx);
 		assert(t0 <= ty);
 		ttotal += tx;
@@ -167,7 +148,13 @@ int compare_genome2(const genome &x, const genome &y)
 	for(int i = 0; i < x.genes.size(); i++)
 	{
 		string chrm = x.genes[i].get_seqname();
-		const vector<transcript> &v = x.genes[i].transcripts;
+		const vector<transcript> &v0 = x.genes[i].transcripts;
+		vector<transcript> v;
+		for(int k = 0; k < v0.size(); k++)
+		{
+			if(v0[k].exons.size() <= 1 && multiple_exon == true) continue;
+			v.push_back(v0[k]);
+		}
 		xtotal += v.size();
 		if(m1.find(chrm) == m1.end())
 		{
@@ -182,7 +169,14 @@ int compare_genome2(const genome &x, const genome &y)
 	for(int i = 0; i < y.genes.size(); i++)
 	{
 		string chrm = y.genes[i].get_seqname();
-		const vector<transcript> &v = y.genes[i].transcripts;
+		const vector<transcript> &v0 = y.genes[i].transcripts;
+		vector<transcript> v;
+		for(int k = 0; k < v0.size(); k++)
+		{
+			if(v0[k].exons.size() <= 1 && multiple_exon == true) continue;
+			if(v0[k].length() < min_transcript_length) continue;
+			v.push_back(v0[k]);
+		}
 		ytotal += v.size();
 		if(m2.find(chrm) == m2.end())
 		{
@@ -195,74 +189,56 @@ int compare_genome2(const genome &x, const genome &y)
 	}
 
 	int correct = 0;
+	vector<PTB> vv;
 	for(MSVT::iterator it = m1.begin(); it != m1.end(); it++)
 	{
 		const vector<transcript> &v1 = it->second;
 		if(m2.find(it->first) == m2.end()) continue;
 		const vector<transcript> &v2 = m2[it->first];
-
-		correct += compare_transcripts(v1, v2, 2);
+		vector<bool> vb;
+		correct += compare_transcripts(v1, v2, vb);
+		assert(v2.size() == vb.size());
+		for(int k = 0; k < v2.size(); k++) vv.push_back(PTB(v2[k], vb[k]));
 	}
 
 	double s = (xtotal == 0) ? 0 : correct * 100.0 / xtotal;
 	double p = (ytotal == 0) ? 0 : correct * 100.0 / ytotal;
-	printf("reference = %d prediction = %d correct = %d sensitivity = %.2lf precision = %.2lf\n", xtotal, ytotal, correct, s, p);
+	printf("SUMMARY: reference = %d prediction = %d correct = %d sensitivity = %.2lf precision = %.2lf\n", xtotal, ytotal, correct, s, p);
+
+	ROC(vv, xtotal);
 
 	return 0;
 }
 
-int compare_genome3(const genome &x, const genome &y)
+int ROC(vector<PTB> &vv, int xtotal)
 {
-	typedef pair< string, vector<int> > PSVI;
-	typedef map< string, vector<int> > MSVI;
-	MSVI m1;
-	MSVI m2;
+	if(vv.size() == 0) return 0;
 
-	for(int i = 0; i < x.genes.size(); i++)
+	sort(vv.begin(), vv.end(), transcript_cmp);
+	int correct = 0;
+	for(int i = 0; i < vv.size(); i++) if(vv[i].second == true) correct++;
+
+	double sen0 = correct * 100.0 / xtotal;
+	for(int i = 0; i < vv.size(); i++)
 	{
-		string chrm = x.genes[i].get_seqname();
-		if(m1.find(chrm) == m1.end())
+		double sen = correct * 100.0 / xtotal;
+		double pre = correct * 100.0 / (vv.size() - i);
+
+		if(sen * 2.0 < sen0) break;
+
+		if(i % 100 == 0)
 		{
-			vector<int> v;
-			v.push_back(i);
-			m1.insert(PSVI(chrm, v));
+			printf("ROC: reference = %d prediction = %lu correct = %d sensitivity = %.2lf precision = %.2lf | coverage = %.3lf\n",
+				xtotal, vv.size() - i, correct, sen, pre, vv[i].first.coverage);
 		}
-		else
-		{
-			m1[chrm].push_back(i);
-		}
+
+		if(vv[i].second == true) correct--;
 	}
-
-	for(int i = 0; i < y.genes.size(); i++)
-	{
-		string chrm = y.genes[i].get_seqname();
-		if(m2.find(chrm) == m2.end())
-		{
-			vector<int> v;
-			v.push_back(i);
-			m2.insert(PSVI(chrm, v));
-		}
-		else
-		{
-			m2[chrm].push_back(i);
-		}
-	}
-
-	for(MSVI::iterator it = m1.begin(); it != m1.end(); it++)
-	{
-		vector<int> v1 = it->second;
-		if(m2.find(it->first) == m2.end()) continue;
-		vector<int> v2 = m2[it->first];
-
-		for(int i = 0; i < v1.size(); i++)
-		{
-			for(int j = 0; j < v2.size(); j++)
-			{
-				compare_gene_bounds(x.genes[v1[i]], y.genes[v2[j]]);
-			}
-		}
-	}
-
 	return 0;
 }
 
+bool transcript_cmp(const PTB &x, const PTB &y)
+{
+	if(x.first.coverage < y.first.coverage) return true;
+	else return false;
+}
