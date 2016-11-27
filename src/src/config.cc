@@ -27,7 +27,7 @@ int32_t min_subregion_length = 15;
 // for revising splice graph
 double min_inner_vertex_weight = 10;
 double min_inner_boundary_weight = 4.0;
-double min_splice_edge_weight = 1.5;
+double min_splice_edge_weight = 0.5;
 bool extend_isolated_boundary = true;
 
 // for decomposing splice graph
@@ -37,7 +37,7 @@ double min_removable_weight = 5.0;
 
 // for selecting paths
 double min_transcript_coverage = 1.5;
-int min_transcript_length = 200;
+int min_transcript_length = 500;
 
 // for identifying new boundaries
 bool identify_extra_boundary = false;
@@ -337,7 +337,7 @@ int parse_arguments(int argc, const char ** argv)
 	}
 
 	// TODO
-	min_splice_edge_weight = min_transcript_coverage;
+	//min_splice_edge_weight = min_transcript_coverage;
 
 	return 0;
 }
