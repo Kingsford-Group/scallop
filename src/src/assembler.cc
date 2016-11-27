@@ -164,6 +164,8 @@ int assembler::process(const bundle_base &bb)
 		if(ref_file1 != "" && bd.strand == '+') compare(gr, ref_file1, "compare1.tex");
 		if(ref_file2 != "" && bd.strand == '-') compare(gr, ref_file2, "compare2.tex");
 
+		if(gr.num_vertices() <= 3 && sg.subs.size() >= 2) continue;
+
 		scallop sc(gid, gr, hs);
 		sc.assemble();
 
