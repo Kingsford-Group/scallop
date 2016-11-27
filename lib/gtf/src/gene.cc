@@ -45,9 +45,7 @@ int gene::add_exon(const item&e)
 	else
 	{
 		transcript t;
-		t.gene_id = e.gene_id;
-		t.transcript_id = e.transcript_id;
-		t.feature = "transcript";
+		t.assign(e);
 		t.add_exon(e);
 		add_transcript(t);
 	}

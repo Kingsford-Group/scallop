@@ -22,7 +22,7 @@ transcript::~transcript()
 
 int transcript::assign(const item &e)
 {
-	assert(e.feature == "transcript");
+	//assert(e.feature == "transcript");
 	seqname = e.seqname;
 	source = e.source;
 	feature = e.feature;
