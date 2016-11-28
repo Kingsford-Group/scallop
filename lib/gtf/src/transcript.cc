@@ -163,7 +163,7 @@ int transcript::write(ofstream &fout) const
 	fout<<"gene_id \""<<gene_id.c_str()<<"\"; ";
 	fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
 	fout<<"RPKM \""<<RPKM<<"\"; ";
-	fout<<"coverage \""<<coverage<<"\"; ";
+	fout<<"cov \""<<coverage<<"\"; ";
 	fout<<"numreads \""<<numreads<<"\";"<<endl;
 
 	for(int k = 0; k < exons.size(); k++)
@@ -180,7 +180,7 @@ int transcript::write(ofstream &fout) const
 		fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
 		fout<<"exon \""<<k + 1<<"\"; ";
 		fout<<"RPKM \""<<RPKM<<"\"; ";
-		fout<<"coverage \""<<coverage<<"\"; ";
+		fout<<"cov \""<<coverage<<"\"; ";
 		fout<<"numreads \""<<numreads<<"\"; "<<endl;
 	}
 	return 0;
