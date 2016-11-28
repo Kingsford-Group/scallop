@@ -11,7 +11,7 @@ using namespace std;
 //// parameters
 // for bam file and reads
 int min_flank_length = 5;
-int32_t min_bundle_gap = 50;
+int32_t min_bundle_gap = 10;
 int min_num_hits_in_bundle = 20;
 uint32_t min_mapping_quality = 1;
 int32_t min_splice_boundary_hits = 1;
@@ -21,7 +21,7 @@ bool strand_reverse = false;
 // for identifying subgraphs
 double max_indel_ratio = 0.2;
 double min_subregion_overlap = 2;
-int32_t min_subregion_gap = 3;
+int32_t min_subregion_gap = 10;
 int32_t min_subregion_length = 15;
 
 // for revising splice graph
