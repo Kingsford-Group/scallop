@@ -1,6 +1,6 @@
 #!/bin/bash
 
-libs="gtfcompare hayer gtfformat gtfsimulator"
+libs="gtfcompare hayer gtfformat gtfsimulator cuffroc"
 dir=`pwd`
 
 for i in `echo $libs`
