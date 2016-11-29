@@ -41,7 +41,6 @@ public:
 	hit(int32_t p);
 	hit(bam1_t *b);
 	hit(const hit &h);
-	~hit();
 	bool operator<(const hit &h) const;
 
 public:
@@ -59,6 +58,6 @@ public:
 	int get_matched_intervals(vector<int64_t> &v) const;
 };
 
-bool hit_compare_by_name(const hit &x, const hit &y);
+//inline bool hit_compare_by_name(const hit &x, const hit &y);
 
 #endif

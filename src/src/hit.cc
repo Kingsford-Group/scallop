@@ -22,10 +22,8 @@ hit::hit(const hit &h)
 	qname = h.qname;
 	strand = h.strand;
 	xs = h.xs;
-	for(int i = 0; i < MAX_NUM_CIGAR; i++)
-	{
-		cigar[i] = h.cigar[i];
-	}
+	memcpy(cigar, h.cigar, sizeof cigar);
+	//for(int i = 0; i < MAX_NUM_CIGAR; i++) cigar[i] = h.cigar[i];
 }
 
 hit::hit(bam1_t *b)
@@ -74,14 +72,13 @@ hit::hit(bam1_t *b)
 	*/
 }
 
-hit::~hit()
-{
-}
-
 bool hit::operator<(const hit &h) const
 {
-	if(pos < h.pos) return true;
-	else return false;
+	if(qname < h.qname) return true;
+	if(qname > h.qname) return false;
+	return (pos < h.pos);
+	//if(pos < h.pos) return true;
+	//else return false;
 }
 
 int hit::print() const
@@ -162,14 +159,14 @@ int hit::get_matched_intervals(vector<int64_t> &v) const
 	return get_mid_intervals(v, vi, vd);
 }
 
-bool hit_compare_by_name(const hit &x, const hit &y)
+/*
+inline bool hit_compare_by_name(const hit &x, const hit &y)
 {
 	if(x.qname < y.qname) return true;
 	if(x.qname > y.qname) return false;
 	return (x.pos < y.pos);
 }
 
-/*
 inline bool hit_compare_left(const hit &x, const hit &y)
 {
 	if(x.pos < y.pos) return true;

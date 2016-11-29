@@ -279,7 +279,8 @@ int bundle::build_hyper_edges1()
 
 int bundle::build_hyper_edges2()
 {
-	sort(hits.begin(), hits.end(), hit_compare_by_name);
+	//sort(hits.begin(), hits.end(), hit_compare_by_name);
+	sort(hits.begin(), hits.end());
 
 	hs.clear();
 

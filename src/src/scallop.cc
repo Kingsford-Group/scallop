@@ -40,7 +40,7 @@ int scallop::assemble()
 		if(b == true) continue;
 
 		b = resolve_small_edges();
-		if(b == true) print();
+		//if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_splitable_vertex(1);
@@ -62,7 +62,7 @@ int scallop::assemble()
 		*/
 
 		b = resolve_trivial_vertex();
-		if(b == true) print();
+		//if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_hyper_edge1();
