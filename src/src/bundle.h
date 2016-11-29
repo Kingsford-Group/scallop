@@ -67,6 +67,7 @@ private:
 	int remove_inner_end_boundaries();
 	int extend_isolated_start_boundaries();
 	int extend_isolated_end_boundaries();
+	int join_single_exon_transcripts();
 };
 
 #endif

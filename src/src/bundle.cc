@@ -51,6 +51,8 @@ int bundle::build()
 	build_splice_graph();
 
 	// revise splice graph
+	join_single_exon_transcripts();
+
 	remove_small_edges();
 	refine_splice_graph();
 
@@ -763,6 +765,53 @@ int bundle::remove_inner_vertices()
 		printf("clear inner exon %d, weight = %.2lf, length = %d, edge weight = %.2lf\n", i, wv, vi.length, we);
 
 		gr.clear_vertex(i);
+	}
+	return 0;
+}
+
+int bundle::join_single_exon_transcripts()
+{
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		int x = i;
+		int y = i + 1;
+		if(gr.in_degree(x) != 1) continue;
+		if(gr.in_degree(y) != 1) continue;
+		if(gr.out_degree(x) != 1) continue;
+		if(gr.out_degree(y) != 1) continue;
+
+		edge_iterator it1, it2;
+
+		tie(it1, it2) = gr.in_edges(x);
+		edge_descriptor e1 = (*it1);
+		tie(it1, it2) = gr.out_edges(x);
+		edge_descriptor e2 = (*it1);
+
+		tie(it1, it2) = gr.in_edges(y);
+		edge_descriptor e3 = (*it1);
+		tie(it1, it2) = gr.out_edges(y);
+		edge_descriptor e4 = (*it1);
+
+		if(e1->source() != 0) continue;
+		if(e2->target() != gr.num_vertices() - 1) continue;
+		if(e3->source() != 0) continue;
+		if(e4->target() != gr.num_vertices() - 1) continue;
+
+		int32_t p1 = gr.get_vertex_info(x).rpos;
+		int32_t p2 = gr.get_vertex_info(y).lpos;
+
+		if(p1 >= p2 || p2 - p1 > min_bundle_gap) continue;
+
+		double w2 = gr.get_edge_weight(e2);
+		double w3 = gr.get_edge_weight(e3);
+
+		gr.remove_edge(e2);
+		gr.remove_edge(e3);
+
+		edge_descriptor ee = gr.add_edge(x, y);
+		double ww = 0.5 * w2 + 0.5 * w3;
+		gr.set_edge_weight(ee, ww);
+		gr.set_edge_info(ee, edge_info());
 	}
 	return 0;
 }
