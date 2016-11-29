@@ -51,7 +51,7 @@ int bundle::build()
 	build_splice_graph();
 
 	// revise splice graph
-	join_single_exon_transcripts();
+	//join_single_exon_transcripts();
 
 	remove_small_edges();
 	refine_splice_graph();
