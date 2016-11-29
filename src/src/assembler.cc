@@ -200,18 +200,23 @@ int assembler::filter_transcripts(gene &gn)
 {
 	vector<transcript> v = gn.transcripts;
 	if(v.size() == 0) return 0;
-	bool multiple = false;
+
+	transcript trst;
+	trst.transcript_id = "shaomingfu";
+	trst.coverage = 0.0;
 	for(int i = 0; i < v.size(); i++)
 	{
-		if(v[i].exons.size() >= 2) multiple = true;
-		if(multiple == true) break;
+		if(v[i].exons.size() != 1) continue;
+		if(v[i].coverage < trst.coverage) continue;
+		trst = v[i];
 	}
-	if(multiple == false) return 0;
+	if(trst.transcript_id == "shaomingfu") return 0;
 
 	gn.clear();
+	gn.add_transcript(trst);
 	for(int i = 0; i < v.size(); i++)
 	{
-		if(v[i].exons.size() <= 1) continue;
+		if(v[i].exons.size() == 1) continue;
 		gn.add_transcript(v[i]);
 	}
 	return 0;
