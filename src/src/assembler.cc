@@ -186,12 +186,34 @@ int assembler::process(const bundle_base &bb)
 
 		gene gn;
 		bd.output_transcripts(gn, pp, gid);
+		filter_transcripts(gn);
 		if(gn.transcripts.size() >= 1) gm.add_gene(gn);
 
 		if(fixed_gene_name != "" && gid == fixed_gene_name) terminate = true;
 		if(terminate == true) return 0;
 	}
 
+	return 0;
+}
+
+int assembler::filter_transcripts(gene &gn)
+{
+	vector<transcript> v = gn.transcripts;
+	if(v.size() == 0) return 0;
+	bool multiple = false;
+	for(int i = 0; i < v.size(); i++)
+	{
+		if(v[i].exons.size() >= 2) multiple = true;
+		if(multiple == true) break;
+	}
+	if(multiple == false) return 0;
+
+	gn.clear();
+	for(int i = 0; i < v.size(); i++)
+	{
+		if(v[i].exons.size() <= 1) continue;
+		gn.add_transcript(v[i]);
+	}
 	return 0;
 }
 

@@ -1114,14 +1114,12 @@ int scallop::collect_path(int e)
 	p.abd = gr.get_edge_weight(i2e[e]);
 	p.v = v;
 
-
 	double r1 = compute_length(p) * 1.0 / min_transcript_length;
 	double r2 = p.abd * 1.0 / min_transcript_coverage;
 
 	bool accept = true;
 	if(r1 < 1.0) accept = false;
 	if(r2 < 1.0) accept = false;
-	if(v.size() == 3 && n + 1 > 3) accept = false;
 	if(accept == true) paths.push_back(p);
 
 	gr.remove_edge(i2e[e]);
