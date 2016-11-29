@@ -169,7 +169,7 @@ int assembler::process(const bundle_base &bb)
 		if(ref_file2 != "" && bd.strand == '-') compare(gr, ref_file2, "compare2.tex");
 
 		//if(gr.num_vertices() <= 3 && sg.subs.size() >= 2) continue;
-		if(gr.num_vertices() <= 3 && bd.junctions.size() >= 1) continue;
+		//if(gr.num_vertices() <= 3 && bd.junctions.size() >= 1) continue;
 
 		scallop sc(gid, gr, hs);
 		sc.assemble();
