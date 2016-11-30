@@ -43,8 +43,8 @@ int cuffitem::print(int n) const
 
 bool cuffitem::operator<(const cuffitem &ge) const
 {
-	//if(coverage < ge.coverage) return true;
-	if(length < ge.length) return true;
+	if(coverage < ge.coverage) return true;
+	//if(length < ge.length) return true;
 	else return false;
 }
 
