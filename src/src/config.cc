@@ -37,7 +37,7 @@ double min_removable_weight = 5.0;
 
 // for selecting paths
 double min_transcript_coverage = 1.5;
-double min_transcript_numreads = 20;
+double min_transcript_numreads = 30;
 int min_transcript_length = 500;
 
 // for identifying new boundaries
