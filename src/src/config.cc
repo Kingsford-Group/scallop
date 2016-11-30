@@ -37,6 +37,7 @@ double min_removable_weight = 5.0;
 
 // for selecting paths
 double min_transcript_coverage = 1.5;
+double min_transcript_numreads = 20;
 int min_transcript_length = 500;
 
 // for identifying new boundaries
@@ -90,6 +91,7 @@ int print_parameters()
 	printf("min_inner_vertex_weight = %.2lf\n", min_inner_vertex_weight);
 	printf("min_inner_boundary_weight = %.2lf\n", min_inner_boundary_weight);
 	printf("min_transcript_coverage = %.2lf\n", min_transcript_coverage);
+	printf("min_transcript_numreads = %.2lf\n", min_transcript_numreads);
 	printf("min_transcript_length = %d\n", min_transcript_length);
 	printf("max_split_error_ratio = %.2lf\n", max_split_error_ratio);
 	printf("max_decompose_error_ratio = %.2lf\n", max_decompose_error_ratio);
@@ -261,6 +263,11 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--min_transcript_coverage")
 		{
 			min_transcript_coverage = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_transcript_numreads")
+		{
+			min_transcript_numreads = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_transcript_length")
