@@ -1122,6 +1122,9 @@ int scallop::collect_path(int e)
 	if(r1 < 1.0) accept = false;
 	if(r2 < 1.0) accept = false;
 	if(r3 < 1.0) accept = false;
+	if(r1 < 2 && r2 < 2) accept = false;
+	if(r1 < 2 && r3 < 2) accept = false;
+	if(r2 < 2 && r3 < 2) accept = false;
 	if(accept == true) paths.push_back(p);
 
 	gr.remove_edge(i2e[e]);
