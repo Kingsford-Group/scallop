@@ -11,14 +11,25 @@ using namespace std;
 
 int main(int argc, const char **argv)
 {
-	if(argc != 3)
+	if(argc != 4 && argc != 5)
 	{
-		cout<<"usage: "<<argv[0]<< " <cuff.tmap> <ref-size>"<<endl;
+		cout<<"usage: "<<argv[0]<< " <cuff.tmap> <gtffile> <ref-size> [min_exon_num]"<<endl;
 		return 0;
 	}
 
-	cuffroc roc(argv[1], atoi(argv[2]));
-	roc.solve();
+	if(argc == 4)
+	{
+		cuffroc roc(argv[1], argv[2], atoi(argv[3]));
+		roc.solve();
+		roc.print();
+	}
+
+	if(argc == 5)
+	{
+		cuffroc roc(argv[1], argv[2], atoi(argv[3]), atoi(argv[4]));
+		roc.solve();
+		roc.print();
+	}
 
     return 0;
 }
