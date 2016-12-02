@@ -21,7 +21,7 @@ bundle::~bundle()
 
 int bundle::build()
 {
-	compute_strand();
+	//compute_strand();
 	check_left_ascending();
 
 	build_junctions();
