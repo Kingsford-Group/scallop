@@ -48,7 +48,8 @@ public:
 	int32_t qlen;							// read length
 	string qname;							// query name
 	char strand;							// strandness
-	char xs;								// xs aux in sam
+	char xs;								// XS aux in sam
+	int hi;									// HI aux in sam
 	uint32_t cigar[MAX_NUM_CIGAR];			// cigar, use samtools
 
 public:

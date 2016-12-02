@@ -11,6 +11,7 @@ hit::hit(int32_t p)
 	bam1_core_t::pos = p;
 	strand = '.';
 	xs = '.';
+	hi = -1;
 	qlen = 0;
 }
 
@@ -22,6 +23,7 @@ hit::hit(const hit &h)
 	qname = h.qname;
 	strand = h.strand;
 	xs = h.xs;
+	hi = h.hi;
 	memcpy(cigar, h.cigar, sizeof cigar);
 	//for(int i = 0; i < MAX_NUM_CIGAR; i++) cigar[i] = h.cigar[i];
 }
@@ -60,8 +62,13 @@ hit::hit(bam1_t *b)
 	else if(strand_reverse == true && strand == '-') strand = '+';
 
 	xs = '.';
-	uint8_t *p = bam_aux_get(b, "XS");
-	if(p && (*p) == 'A') xs = bam_aux2A(p);
+	uint8_t *p1 = bam_aux_get(b, "XS");
+	if(p1 && (*p1) == 'A') xs = bam_aux2A(p1);
+
+	hi = -1;
+	uint8_t *p2 = bam_aux_get(b, "HI");
+	if(p2 && (*p2) == 'i') hi = bam_aux2i(p2);
+
 	//if(xs == '-' || xs == '+') strand = xs;
 
 	/*
@@ -76,9 +83,9 @@ bool hit::operator<(const hit &h) const
 {
 	if(qname < h.qname) return true;
 	if(qname > h.qname) return false;
+	if(hi != -1 && h.hi != -1 && hi < h.hi) return true;
+	if(hi != -1 && h.hi != -1 && hi > h.hi) return false;
 	return (pos < h.pos);
-	//if(pos < h.pos) return true;
-	//else return false;
 }
 
 int hit::print() const

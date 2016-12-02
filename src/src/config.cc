@@ -15,7 +15,7 @@ int32_t min_bundle_gap = 50;
 int min_num_hits_in_bundle = 20;
 uint32_t min_mapping_quality = 1;
 int32_t min_splice_boundary_hits = 1;
-bool use_second_alignment = false;
+bool use_second_alignment = true;
 bool strand_reverse = false;
 
 // for identifying subgraphs
