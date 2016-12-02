@@ -53,14 +53,12 @@ int bundle::build()
 	// revise splice graph
 	//join_single_exon_transcripts();
 
+	remove_small_edges();
 	refine_splice_graph();
 
-	/*
-	remove_small_edges();
 	remove_inner_vertices();
 	remove_inner_start_boundaries();
 	remove_inner_end_boundaries();
-	*/
 
 	if(extend_isolated_boundary == true)
 	{
@@ -287,6 +285,7 @@ int bundle::build_hyper_edges2()
 	hs.clear();
 
 	string qname;
+	int hi = -2;
 	vector<int> sp1;
 	for(int i = 0; i < hits.size(); i++)
 	{
@@ -299,7 +298,7 @@ int bundle::build_hyper_edges2()
 		h.print();
 		*/
 
-		if(h.qname != qname)
+		if(h.qname != qname || h.hi != hi)
 		{
 			set<int> s(sp1.begin(), sp1.end());
 			if(s.size() >= 2) hs.add_node_list(s);
@@ -307,6 +306,7 @@ int bundle::build_hyper_edges2()
 		}
 
 		qname = h.qname;
+		hi = h.hi;
 
 		if((h.flag & 0x4) >= 1) continue;
 
