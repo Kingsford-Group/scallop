@@ -58,8 +58,8 @@ hit::hit(bam1_t *b)
 	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '-';		// F2R1
 	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '+';		// R2F1
 
-	if(strand_reverse == true && strand == '+') strand = '-';
-	else if(strand_reverse == true && strand == '-') strand = '+';
+	if(library_type == "second" && strand == '+') strand = '-';
+	if(library_type == "second" && strand == '-') strand = '+';
 
 	hi = -1;
 	uint8_t *p2 = bam_aux_get(b, "HI");

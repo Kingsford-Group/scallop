@@ -16,7 +16,7 @@ int min_num_hits_in_bundle = 20;
 uint32_t min_mapping_quality = 1;
 int32_t min_splice_boundary_hits = 1;
 bool use_second_alignment = false;
-bool strand_reverse = false;
+string library_type = "unstrand";
 
 // for identifying subgraphs
 double max_indel_ratio = 0.2;
@@ -27,13 +27,12 @@ int32_t min_subregion_length = 15;
 // for revising splice graph
 double min_inner_vertex_weight = 10;
 double min_inner_boundary_weight = 4.0;
-double min_splice_edge_weight = 3.5;
+double min_splice_edge_weight = 2.5;
 bool extend_isolated_boundary = true;
 
 // for decomposing splice graph
 double max_split_error_ratio = 0.25;
 double max_decompose_error_ratio = 0.01;
-double min_removable_weight = 5.0;
 
 // for selecting paths
 double min_transcript_coverage = 0.9;
@@ -95,7 +94,6 @@ int print_parameters()
 	printf("min_transcript_length = %d\n", min_transcript_length);
 	printf("max_split_error_ratio = %.2lf\n", max_split_error_ratio);
 	printf("max_decompose_error_ratio = %.2lf\n", max_decompose_error_ratio);
-	printf("min_removable_weight = %.2lf\n", min_removable_weight);
 	printf("extend_isolated_bounary = %c\n", extend_isolated_boundary ? 'T' : 'F');
 
 	// for identifying new boundaries
@@ -124,7 +122,7 @@ int print_parameters()
 
 	// for controling
 	printf("average_read_length = %d\n", average_read_length);
-	printf("strand_reverse = %c\n", strand_reverse ? 'T' : 'F');
+	printf("library_type = %s\n", library_type.c_str());
 	printf("output_tex_files = %c\n", output_tex_files ? 'T' : 'F');
 	printf("fixed_gene_name = %s\n", fixed_gene_name.c_str());
 	printf("use_second_alignment = %c\n", use_second_alignment ? 'T' : 'F');
@@ -285,11 +283,6 @@ int parse_arguments(int argc, const char ** argv)
 			max_decompose_error_ratio = atof(argv[i + 1]);
 			i++;
 		}
-		else if(string(argv[i]) == "--min_removable_weight")
-		{
-			min_removable_weight = atof(argv[i + 1]);
-			i++;
-		}
 		else if(string(argv[i]) == "--extend_isolated_boundary")
 		{
 			string s(argv[i + 1]);
@@ -327,11 +320,9 @@ int parse_arguments(int argc, const char ** argv)
 			min_router_count = atoi(argv[i + 1]);
 			i++;
 		}
-		else if(string(argv[i]) == "--strand_reverse")
+		else if(string(argv[i]) == "--library_type")
 		{
-			string s(argv[i + 1]);
-			if(s == "true") strand_reverse = true;
-			else strand_reverse = false;
+			library_type = string(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--use_second_alignment")

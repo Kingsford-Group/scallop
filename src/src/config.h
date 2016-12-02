@@ -53,7 +53,6 @@ extern double max_decompose_error_ratio;
 extern double min_transcript_coverage;
 extern double min_transcript_numreads;
 extern int min_transcript_length;
-extern double min_removable_weight;
 extern bool extend_isolated_boundary;
 
 // for identifying new boundaries
@@ -81,7 +80,7 @@ extern int32_t average_read_length;
 extern bool output_tex_files;
 extern string fixed_gene_name;
 extern int max_num_bundles;
-extern bool strand_reverse;
+extern string library_type;
 extern int min_gtf_transcripts_num;
 extern bool use_second_alignment;
 
