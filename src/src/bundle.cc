@@ -53,12 +53,14 @@ int bundle::build()
 	// revise splice graph
 	//join_single_exon_transcripts();
 
-	remove_small_edges();
 	refine_splice_graph();
 
+	/*
+	remove_small_edges();
 	remove_inner_vertices();
 	remove_inner_start_boundaries();
 	remove_inner_end_boundaries();
+	*/
 
 	if(extend_isolated_boundary == true)
 	{
