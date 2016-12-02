@@ -25,6 +25,10 @@ using namespace std;
 #define SINGLE 2
 #define MULTIPLE 3
 
+#define UNSTRAND 0
+#define FR_FIRST 1
+#define FR_SECOND 2
+
 //// parameters
 // for bam file and reads
 extern int min_flank_length;
@@ -80,7 +84,7 @@ extern int32_t average_read_length;
 extern bool output_tex_files;
 extern string fixed_gene_name;
 extern int max_num_bundles;
-extern string library_type;
+extern int library_type;
 extern int min_gtf_transcripts_num;
 extern bool use_second_alignment;
 

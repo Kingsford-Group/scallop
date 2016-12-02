@@ -21,7 +21,7 @@ bundle::~bundle()
 
 int bundle::build()
 {
-	if(library_type == "unstrand") compute_strand();
+	if(library_type == UNSTRAND) compute_strand();
 
 	check_left_ascending();
 

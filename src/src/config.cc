@@ -16,7 +16,7 @@ int min_num_hits_in_bundle = 20;
 uint32_t min_mapping_quality = 1;
 int32_t min_splice_boundary_hits = 1;
 bool use_second_alignment = false;
-string library_type = "unstrand";
+int library_type = UNSTRAND;
 
 // for identifying subgraphs
 double max_indel_ratio = 0.2;
@@ -122,7 +122,7 @@ int print_parameters()
 
 	// for controling
 	printf("average_read_length = %d\n", average_read_length);
-	printf("library_type = %s\n", library_type.c_str());
+	printf("library_type = %d\n", library_type);
 	printf("output_tex_files = %c\n", output_tex_files ? 'T' : 'F');
 	printf("fixed_gene_name = %s\n", fixed_gene_name.c_str());
 	printf("use_second_alignment = %c\n", use_second_alignment ? 'T' : 'F');
@@ -322,7 +322,10 @@ int parse_arguments(int argc, const char ** argv)
 		}
 		else if(string(argv[i]) == "--library_type")
 		{
-			library_type = string(argv[i + 1]);
+			string s(argv[i + 1]);
+			if(s == "unstrand") library_type = UNSTRAND;
+			if(s == "first") library_type = FR_FIRST;
+			if(s == "second") library_type = FR_SECOND;
 			i++;
 		}
 		else if(string(argv[i]) == "--use_second_alignment")
