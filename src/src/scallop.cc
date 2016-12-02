@@ -89,7 +89,7 @@ bool scallop::resolve_small_edges()
 {
 	int se = -1;
 	int root = -1;
-	double ratio = DBL_MAX;
+	double ratio = max_split_error_ratio;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.in_degree(i) <= 1) continue;
