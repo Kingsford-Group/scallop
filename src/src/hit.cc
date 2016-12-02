@@ -61,13 +61,13 @@ hit::hit(bam1_t *b)
 	if(strand_reverse == true && strand == '+') strand = '-';
 	else if(strand_reverse == true && strand == '-') strand = '+';
 
+	hi = -1;
+	uint8_t *p2 = bam_aux_get(b, "HI");
+	if(p2 && (*p2) == 'C') hi = bam_aux2i(p2);
+
 	xs = '.';
 	uint8_t *p1 = bam_aux_get(b, "XS");
 	if(p1 && (*p1) == 'A') xs = bam_aux2A(p1);
-
-	hi = -1;
-	uint8_t *p2 = bam_aux_get(b, "HI");
-	if(p2 && (*p2) == 'i') hi = bam_aux2i(p2);
 
 	//if(xs == '-' || xs == '+') strand = xs;
 
@@ -99,8 +99,8 @@ int hit::print() const
 	}
 
 	// print basic information
-	printf("Hit %s: [%d-%d), mpos = %d, cigar = %s, flag = %d, quality = %d, strand = %c, isize = %d, qlen = %d\n", 
-			qname.c_str(), pos, rpos, mpos, sstr.str().c_str(), flag, qual, strand, isize, qlen);
+	printf("Hit %s: [%d-%d), mpos = %d, cigar = %s, flag = %d, quality = %d, strand = %c, isize = %d, qlen = %d, hi = %d\n", 
+			qname.c_str(), pos, rpos, mpos, sstr.str().c_str(), flag, qual, strand, isize, qlen, hi);
 
 	return 0;
 }

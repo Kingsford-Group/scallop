@@ -49,7 +49,7 @@ public:
 	string qname;							// query name
 	char strand;							// strandness
 	char xs;								// XS aux in sam
-	int hi;									// HI aux in sam
+	int32_t hi;									// HI aux in sam
 	uint32_t cigar[MAX_NUM_CIGAR];			// cigar, use samtools
 
 public:

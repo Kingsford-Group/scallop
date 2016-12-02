@@ -282,6 +282,12 @@ int bundle::build_hyper_edges2()
 	//sort(hits.begin(), hits.end(), hit_compare_by_name);
 	sort(hits.begin(), hits.end());
 
+	/*
+	printf("----------------------\n");
+	for(int k = 9; k < hits.size(); k++) hits[k].print();
+	printf("======================\n");
+	*/
+
 	hs.clear();
 
 	string qname;
