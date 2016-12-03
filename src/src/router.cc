@@ -525,6 +525,7 @@ int router::decompose2()
 	}
 
 	model->setObjective(obj, GRB_MINIMIZE);
+	model->getEnv().set(GRB_IntParam_Threads, 1);
 	model->getEnv().set(GRB_IntParam_OutputFlag, 0);
 	model->update();
 

@@ -37,6 +37,7 @@ int smoother::smooth_vertex(int i)
 		set_objective();
 
 		model->getEnv().set(GRB_IntParam_OutputFlag, 0);
+		model->getEnv().set(GRB_IntParam_Threads, 1);
 
 		model->optimize();
 
