@@ -58,8 +58,10 @@ int bundle::build()
 	refine_splice_graph();
 
 	remove_inner_vertices();
+	/*
 	remove_inner_start_boundaries();
 	remove_inner_end_boundaries();
+	*/
 
 	if(extend_isolated_boundary == true)
 	{
