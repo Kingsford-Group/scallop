@@ -57,8 +57,8 @@ int bundle::build()
 	remove_small_edges();
 	refine_splice_graph();
 
-	remove_inner_vertices();
 	/*
+	remove_inner_vertices();
 	remove_inner_start_boundaries();
 	remove_inner_end_boundaries();
 	*/
