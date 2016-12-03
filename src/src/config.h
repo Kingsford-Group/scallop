@@ -49,15 +49,12 @@ extern int max_dp_table_size;
 extern int min_router_count;
 
 // for splice graph
-extern double min_inner_vertex_weight;
-extern double min_inner_boundary_weight;
 extern double min_splice_edge_weight;
 extern double max_split_error_ratio;
 extern double max_decompose_error_ratio;
 extern double min_transcript_coverage;
 extern double min_transcript_numreads;
 extern int min_transcript_length;
-extern bool extend_isolated_boundary;
 
 // for identifying new boundaries
 extern bool identify_extra_boundary;

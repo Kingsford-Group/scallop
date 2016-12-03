@@ -62,12 +62,8 @@ private:
 	VE compute_maximal_edges();
 	int refine_splice_graph();
 	int remove_small_edges();
-	int remove_inner_vertices();
-	int remove_inner_start_boundaries();
-	int remove_inner_end_boundaries();
 	int extend_isolated_start_boundaries();
 	int extend_isolated_end_boundaries();
-	int join_single_exon_transcripts();
 };
 
 #endif

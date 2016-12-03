@@ -24,13 +24,8 @@ double min_subregion_overlap = 2;
 int32_t min_subregion_gap = 3;
 int32_t min_subregion_length = 15;
 
-// for revising splice graph
-double min_inner_vertex_weight = 10;
-double min_inner_boundary_weight = 4.0;
+// for revising/decomposing splice graph
 double min_splice_edge_weight = 1.5;
-bool extend_isolated_boundary = true;
-
-// for decomposing splice graph
 double max_split_error_ratio = 0.25;
 double max_decompose_error_ratio = 0.01;
 
@@ -87,14 +82,11 @@ int print_parameters()
 
 	// for splice graph
 	printf("min_splice_edge_weight = %.2lf\n", min_splice_edge_weight);
-	printf("min_inner_vertex_weight = %.2lf\n", min_inner_vertex_weight);
-	printf("min_inner_boundary_weight = %.2lf\n", min_inner_boundary_weight);
 	printf("min_transcript_coverage = %.2lf\n", min_transcript_coverage);
 	printf("min_transcript_numreads = %.2lf\n", min_transcript_numreads);
 	printf("min_transcript_length = %d\n", min_transcript_length);
 	printf("max_split_error_ratio = %.2lf\n", max_split_error_ratio);
 	printf("max_decompose_error_ratio = %.2lf\n", max_decompose_error_ratio);
-	printf("extend_isolated_bounary = %c\n", extend_isolated_boundary ? 'T' : 'F');
 
 	// for identifying new boundaries
 	printf("identify_extra_boundary = %c\n", identify_extra_boundary ? 'T' : 'F');
@@ -248,16 +240,6 @@ int parse_arguments(int argc, const char ** argv)
 			min_splice_edge_weight = atof(argv[i + 1]);
 			i++;
 		}
-		else if(string(argv[i]) == "--min_inner_vertex_weight")
-		{
-			min_inner_vertex_weight = atof(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--min_inner_boundary_weight")
-		{
-			min_inner_boundary_weight = atof(argv[i + 1]);
-			i++;
-		}
 		else if(string(argv[i]) == "--min_transcript_coverage")
 		{
 			min_transcript_coverage = atof(argv[i + 1]);
@@ -281,13 +263,6 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--max_decompose_error_ratio")
 		{
 			max_decompose_error_ratio = atof(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--extend_isolated_boundary")
-		{
-			string s(argv[i + 1]);
-			if(s == "true") extend_isolated_boundary = true;
-			else extend_isolated_boundary = false;
 			i++;
 		}
 		else if(string(argv[i]) == "--min_boundary_length")
