@@ -52,10 +52,11 @@ int bundle::build()
 	build_splice_graph();
 
 	// revise splice graph
-	extend_isolated_start_boundaries();
-	extend_isolated_end_boundaries();
 	remove_small_edges();
 	refine_splice_graph();
+
+	extend_isolated_start_boundaries();
+	extend_isolated_end_boundaries();
 
 	build_hyper_edges2();
 	//gr.draw("gr.tex");

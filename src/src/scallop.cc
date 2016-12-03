@@ -103,11 +103,11 @@ bool scallop::resolve_small_edges()
 		if(e == -1) continue;
 		if(ratio < r) continue;
 
-		int s = i2e[e]->target();
-		int t = i2e[e]->source();
+		int s = i2e[e]->source();
+		int t = i2e[e]->target();
 
-		if(gr.in_degree(t) <= 1) continue;
-		if(gr.out_degree(s) <= 1) continue;
+		if(gr.out_degree(s) <= 1 && gr.locate(s) != 4) continue;
+		if(gr.in_degree(t) <= 1 && gr.locate(t) != 5) continue;
 		if(hs.right_extend(e) && hs.left_extend(e)) continue;
 
 		double w = gr.get_edge_weight(i2e[e]);
