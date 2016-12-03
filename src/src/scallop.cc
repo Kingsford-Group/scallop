@@ -198,11 +198,15 @@ bool scallop::resolve_insplitable_vertex(int type, int degree)
 		rt.build();
 
 		if(rt.degree == degree && ratio < rt.ratio) continue;
+		if(rt.ratio > max_decompose_error_ratio) continue;
 
 		root = i;
 		ratio = rt.ratio;
 		vpi = rt.vpi;
 		degree = rt.degree;
+
+		// jump out immediately to save time
+		break;
 	}
 
 	if(root == -1) return false;
