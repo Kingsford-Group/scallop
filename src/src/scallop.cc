@@ -36,7 +36,7 @@ int scallop::assemble()
 	{
 		bool b = false;
 
-		refine_splice_graph();
+		//refine_splice_graph();
 
 		b = filter_hyper_edges();
 		if(b == true) continue;
@@ -91,7 +91,7 @@ bool scallop::resolve_small_edges()
 {
 	int se = -1;
 	int root = -1;
-	double ratio = max_split_error_ratio;
+	double ratio = max_small_error_ratio;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.in_degree(i) <= 1) continue;
@@ -106,8 +106,8 @@ bool scallop::resolve_small_edges()
 		int s = i2e[e]->source();
 		int t = i2e[e]->target();
 
-		if(gr.out_degree(s) <= 1 && gr.locate(s) != 4) continue;
-		if(gr.in_degree(t) <= 1 && gr.locate(t) != 5) continue;
+		if(gr.out_degree(s) <= 1) continue;
+		if(gr.in_degree(t) <= 1) continue;
 		if(hs.right_extend(e) && hs.left_extend(e)) continue;
 
 		double w = gr.get_edge_weight(i2e[e]);
