@@ -20,7 +20,6 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  partial_exon.h partial_exon.cc \
 				  hyper_set.h hyper_set.cc \
 				  router.h router.cc \
-				  binomial.h binomial.cc \
 				  region.h region.cc \
 				  junction.h junction.cc \
 				  bundle_base.h bundle_base.cc \

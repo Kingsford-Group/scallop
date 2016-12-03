@@ -16,6 +16,13 @@ int main(int argc, const char **argv)
 {
 	srand(time(0));
 
+	if(argc == 1)
+	{
+		print_logo();
+		print_help();
+		return 0;
+	}
+
 	print_command_line(argc, argv);
 	parse_arguments(argc, argv);
 	print_parameters();

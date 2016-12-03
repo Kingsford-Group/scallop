@@ -35,13 +35,6 @@ double min_transcript_coverage = 0.9;
 double min_transcript_numreads = 20;
 int min_transcript_length = 200;
 
-// for identifying new boundaries
-bool identify_extra_boundary = false;
-int min_boundary_length = 80;
-int min_boundary_score = 100;
-double min_boundary_ave_ratio = 3.0;
-double min_boundary_sigma = 5.0;
-
 // for subsetsum and router
 int max_dp_table_size = 10000;
 int min_router_count = 1;
@@ -89,13 +82,6 @@ int print_parameters()
 	printf("max_small_error_ratio = %.2lf\n", max_small_error_ratio);
 	printf("max_split_error_ratio = %.2lf\n", max_split_error_ratio);
 	printf("max_decompose_error_ratio = %.2lf\n", max_decompose_error_ratio);
-
-	// for identifying new boundaries
-	printf("identify_extra_boundary = %c\n", identify_extra_boundary ? 'T' : 'F');
-	printf("min_boundary_length = %d\n", min_boundary_length);
-	printf("min_boundary_score = %d\n", min_boundary_score);
-	printf("min_boundary_ave_ratio = %.2lf\n", min_boundary_ave_ratio);
-	printf("min_boundary_signma = %.2lf\n", min_boundary_sigma);
 
 	// for subsetsum and router
 	printf("max_dp_table_size = %d\n", max_dp_table_size);
@@ -230,13 +216,6 @@ int parse_arguments(int argc, const char ** argv)
 			min_subregion_overlap = atof(argv[i + 1]);
 			i++;
 		}
-		else if(string(argv[i]) == "--identify_extra_boundary")
-		{
-			string s(argv[i + 1]);
-			if(s == "true") identify_extra_boundary = true;
-			else identify_extra_boundary = false;
-			i++;
-		}
 		else if(string(argv[i]) == "--min_splice_edge_weight")
 		{
 			min_splice_edge_weight = atof(argv[i + 1]);
@@ -272,26 +251,6 @@ int parse_arguments(int argc, const char ** argv)
 			max_decompose_error_ratio = atof(argv[i + 1]);
 			i++;
 		}
-		else if(string(argv[i]) == "--min_boundary_length")
-		{
-			min_boundary_length = atoi(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--min_boundary_score")
-		{
-			min_boundary_score = atoi(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--min_boundary_ave_ratio")
-		{
-			min_boundary_ave_ratio = atof(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--min_boundary_sigma")
-		{
-			min_boundary_sigma = atof(argv[i + 1]);
-			i++;
-		}
 		else if(string(argv[i]) == "--max_dp_table_size")
 		{
 			max_dp_table_size = atoi(argv[i + 1]);
@@ -322,5 +281,28 @@ int parse_arguments(int argc, const char ** argv)
 	// TODO
 	//min_splice_edge_weight = min_transcript_coverage;
 
+	return 0;
+}
+
+int print_logo()
+{
+	printf("      ___           ___           ___                                       ___           ___    \n");
+	printf("     /  /\\         /  /\\         /  /\\                                     /  /\\         /  /\\   \n");
+	printf("    /  /:/_       /  /:/        /  /::\\                                   /  /::\\       /  /::\\  \n");
+	printf("   /  /:/ /\\     /  /:/        /  /:/\\:\\    ___     ___   ___     ___    /  /:/\\:\\     /  /:/\\:\\ \n");
+	printf("  /  /:/ /::\\   /  /:/  ___   /  /:/~/::\\  /__/\\   /  /\\ /__/\\   /  /\\  /  /:/  \\:\\   /  /:/~/:/ \n");
+	printf(" /__/:/ /:/\\:\\ /__/:/  /  /\\ /__/:/ /:/\\:\\ \\  \\:\\ /  /:/ \\  \\:\\ /  /:/ /__/:/ \\__\\:\\ /__/:/ /:/  \n");
+	printf(" \\  \\:\\/:/~/:/ \\  \\:\\ /  /:/ \\  \\:\\/:/__\\/  \\  \\:\\  /:/   \\  \\:\\  /:/  \\  \\:\\ /  /:/ \\  \\:\\/:/   \n");
+	printf("  \\  \\::/ /:/   \\  \\:\\  /:/   \\  \\::/        \\  \\:\\/:/     \\  \\:\\/:/    \\  \\:\\  /:/   \\  \\::/    \n");
+	printf("   \\__\\/ /:/     \\  \\:\\/:/     \\  \\:\\         \\  \\::/       \\  \\::/      \\  \\:\\/:/     \\  \\:\\    \n");
+	printf("     /__/:/       \\  \\::/       \\  \\:\\         \\__\\/         \\__\\/        \\  \\::/       \\  \\:\\   \n");
+	printf("     \\__\\/         \\__\\/         \\__\\/                                     \\__\\/         \\__\\/   \n");
+	printf("\n");
+
+	return 0;
+}
+
+int print_help()
+{
 	return 0;
 }

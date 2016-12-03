@@ -5,7 +5,6 @@
 #include <fstream>
 
 #include "bundle.h"
-#include "binomial.h"
 #include "region.h"
 #include "config.h"
 #include "util.h"
@@ -27,25 +26,8 @@ int bundle::build()
 
 	build_junctions();
 
-	bool bb = identify_extra_boundary;
-
-	if(identify_extra_boundary == true)
-	{
-		build_regions(5);
-		build_partial_exons();
-
-		identify_extra_boundary = false;
-
-		build_regions(0);
-		build_partial_exons();
-
-		identify_extra_boundary = true;
-	}
-	else
-	{
-		build_regions(0);
-		build_partial_exons();
-	}
+	build_regions(0);
+	build_partial_exons();
 
 	build_partial_exon_map();
 	link_partial_exons();

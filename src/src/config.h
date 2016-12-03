@@ -57,13 +57,6 @@ extern double min_transcript_coverage;
 extern double min_transcript_numreads;
 extern int min_transcript_length;
 
-// for identifying new boundaries
-extern bool identify_extra_boundary;
-extern int min_boundary_score;
-extern int min_boundary_length;
-extern double min_boundary_ave_ratio;
-extern double min_boundary_sigma;
-
 // for simulation
 extern int simulation_num_vertices;
 extern int simulation_num_edges;
@@ -90,5 +83,8 @@ extern bool use_second_alignment;
 int print_command_line(int argc, const char ** argv);
 int parse_arguments(int argc, const char ** argv);
 int print_parameters();
+
+int print_logo();
+int print_help();
 
 #endif
