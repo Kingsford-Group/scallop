@@ -26,7 +26,7 @@ int32_t min_subregion_length = 15;
 
 // for revising/decomposing splice graph
 double min_splice_edge_weight = 1.5;
-double max_small_error_ratio = 0.15;
+double max_small_error_ratio = 0.33;
 double max_split_error_ratio = 0.25;
 double max_decompose_error_ratio = 0.01;
 
