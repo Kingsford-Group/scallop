@@ -1124,13 +1124,6 @@ int scallop::collect_path(int e)
 	double r2 = compute_length(p) * 1.0 / min_transcript_length;
 	double r3 = p.reads * 1.0 / average_read_length / min_transcript_numreads;
 
-	if(v.size() == 3)
-	{
-		r1 *= 0.1;
-		r2 *= 0.2;
-		r3 *= 0.2;
-	}
-
 	bool accept = true;
 	if(r1 < 1.0) accept = false;
 	if(r2 < 1.0) accept = false;
