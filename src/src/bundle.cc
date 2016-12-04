@@ -197,7 +197,7 @@ int bundle::locate_left_partial_exon(int32_t x)
 	assert(p2 >= x);
 	assert(p1 <= x);
 
-	//if(x - p1 > min_flank_length && p2 - x < min_flank_length) k++;
+	if(x - p1 > min_flank_length && p2 - x < min_flank_length) k++;
 
 	if(k >= pexons.size()) return -1;
 	return k;
@@ -216,7 +216,7 @@ int bundle::locate_right_partial_exon(int32_t x)
 	assert(p1 < x);
 	assert(p2 >= x);
 
-	//if(p2 - x > min_flank_length && x - p1 <= min_flank_length) k--;
+	if(p2 - x > min_flank_length && x - p1 <= min_flank_length) k--;
 
 	return k;
 }

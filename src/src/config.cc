@@ -10,7 +10,7 @@ using namespace std;
 
 //// parameters
 // for bam file and reads
-int min_flank_length = 5;
+int min_flank_length = 3;
 int32_t min_bundle_gap = 50;
 int min_num_hits_in_bundle = 20;
 uint32_t min_mapping_quality = 1;
