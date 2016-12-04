@@ -304,5 +304,6 @@ int print_logo()
 
 int print_help()
 {
+	printf("typical command line: ./scallop -i bam-file -o gtf-file\n");
 	return 0;
 }
