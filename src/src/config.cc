@@ -19,7 +19,6 @@ bool use_second_alignment = false;
 int library_type = UNSTRAND;
 
 // for identifying subgraphs
-double max_indel_ratio = 0.2;
 int32_t min_subregion_gap = 3;
 double min_subregion_overlap = 1.5;
 int32_t min_subregion_length = 15;
@@ -69,7 +68,6 @@ int print_parameters()
 	printf("min_splice_boundary_hits = %d\n", min_splice_boundary_hits);
 
 	// for identifying subgraphs
-	printf("max_indel_ratio = %.2lf\n", max_indel_ratio);
 	printf("min_subregion_gap = %d\n", min_subregion_gap);
 	printf("min_subregion_length = %d\n", min_subregion_length);
 	printf("min_subregion_overlap = %.2lf\n", min_subregion_overlap);
@@ -194,11 +192,6 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--min_splice_boundary_hits")
 		{
 			min_splice_boundary_hits = atoi(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--max_indel_ratio")
-		{
-			max_indel_ratio = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_subregion_gap")

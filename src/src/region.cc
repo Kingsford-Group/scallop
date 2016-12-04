@@ -100,14 +100,6 @@ bool region::empty_subregion(int32_t p1, int32_t p2)
 	//printf(" region = [%d, %d), subregion [%d, %d), overlap = %.2lf\n", lpos, rpos, p1, p2, ratio);
 	if(ratio < min_subregion_overlap) return true;
 
-	int32_t indel = 0;
-	SIMI jit1 = imap->lower_bound(ROI(p1, p1 + 1));
-	SIMI jit2 = imap->upper_bound(ROI(p2 - 1, p2));
-	for(SIMI jit = jit1; jit != jit2; jit++) indel += jit->second;
-
-	//printf(" region = [%d, %d), subregion [%d, %d), indel = %d\n", lpos, rpos, p1, p2, indel);
-	if(indel * 1.0 / (p2 - p1) > max_indel_ratio) return true;
-
 	return false;
 }
 
