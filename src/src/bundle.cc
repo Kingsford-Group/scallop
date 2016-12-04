@@ -26,7 +26,7 @@ int bundle::build()
 
 	build_junctions();
 
-	build_regions(0);
+	build_regions();
 	build_partial_exons();
 
 	build_partial_exon_map();
@@ -41,7 +41,6 @@ int bundle::build()
 	extend_isolated_end_boundaries();
 
 	build_hyper_edges2();
-	//gr.draw("gr.tex");
 
 	return 0;
 }
@@ -112,7 +111,7 @@ int bundle::build_junctions()
 	return 0;
 }
 
-int bundle::build_regions(int count)
+int bundle::build_regions()
 {
 	MPI s;
 	s.insert(PI(lpos, START_BOUNDARY));
@@ -123,7 +122,6 @@ int bundle::build_regions(int count)
 
 		double ave, dev;
 		evaluate_rectangle(mmap, jc.lpos, jc.rpos, ave, dev);
-		if(jc.count < count && ave >= count) continue;
 
 		int32_t l = jc.lpos;
 		int32_t r = jc.rpos;
@@ -217,7 +215,6 @@ int bundle::locate_right_partial_exon(int32_t x)
 	assert(p2 >= x);
 
 	if(p2 - x > min_flank_length && x - p1 <= min_flank_length) k--;
-
 	return k;
 }
 
@@ -556,7 +553,6 @@ int bundle::build_splice_graph()
 		gr.set_edge_info(p, ei);
 	}
 
-
 	return 0;
 }
 
@@ -714,13 +710,13 @@ int bundle::remove_small_edges()
 		double w = gr.get_edge_weight(*it1);
 		int32_t p1 = gr.get_vertex_info(s).rpos;
 		int32_t p2 = gr.get_vertex_info(t).lpos;
-		if(w < min_splice_edge_weight) continue;
-		//if(p1 == p2 && w < min_consecutive_edge_weight) continue;
+		if(w < min_surviving_edge_weight) continue;
 		se.insert(*it1);
 		sv1.insert(t);
 		sv2.insert(s);
 	}
 
+	/*
 	VE me = compute_maximal_edges();
 	for(int i = 0; i < me.size(); i++)
 	{
@@ -729,6 +725,7 @@ int bundle::remove_small_edges()
 		sv1.insert(ee->target());
 		sv2.insert(ee->source());
 	}
+	*/
 
 	while(true)
 	{

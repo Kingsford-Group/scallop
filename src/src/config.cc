@@ -24,7 +24,7 @@ double min_subregion_overlap = 1.5;
 int32_t min_subregion_length = 15;
 
 // for revising/decomposing splice graph
-double min_splice_edge_weight = 1.5;
+double min_surviving_edge_weight = 1.5;
 double max_small_error_ratio = 0.33;
 double max_split_error_ratio = 0.25;
 double max_decompose_error_ratio = 0.01;
@@ -73,7 +73,7 @@ int print_parameters()
 	printf("min_subregion_overlap = %.2lf\n", min_subregion_overlap);
 
 	// for splice graph
-	printf("min_splice_edge_weight = %.2lf\n", min_splice_edge_weight);
+	printf("min_surviving_edge_weight = %.2lf\n", min_surviving_edge_weight);
 	printf("min_transcript_coverage = %.2lf\n", min_transcript_coverage);
 	printf("min_transcript_numreads = %.2lf\n", min_transcript_numreads);
 	printf("min_transcript_length = %d\n", min_transcript_length);
@@ -209,9 +209,9 @@ int parse_arguments(int argc, const char ** argv)
 			min_subregion_overlap = atof(argv[i + 1]);
 			i++;
 		}
-		else if(string(argv[i]) == "--min_splice_edge_weight")
+		else if(string(argv[i]) == "--min_surviving_edge_weight")
 		{
-			min_splice_edge_weight = atof(argv[i + 1]);
+			min_surviving_edge_weight = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_transcript_coverage")
@@ -270,9 +270,6 @@ int parse_arguments(int argc, const char ** argv)
 			i++;
 		}
 	}
-
-	// TODO
-	//min_splice_edge_weight = min_transcript_coverage;
 
 	return 0;
 }

@@ -146,7 +146,7 @@ bool scallop::resolve_splitable_vertex(int degree)
 
 		MPII mpi = hs.get_routes(i, gr, e2i);
 
-		if(mpi.size() == 0) continue;		// TODO
+		if(mpi.size() == 0) continue;
 
 		router rt(i, gr, e2i, i2e, mpi);
 		rt.classify();

@@ -445,7 +445,7 @@ int router::decompose2()
 	GRBEnv *env = new GRBEnv();
 	GRBModel *model = new GRBModel(*env);
 
-	complete();		// TODO
+	complete();	
 
 	// edge list of ug
 	VE ve;
@@ -549,7 +549,6 @@ int router::decompose2()
 		//double w1 = gr.get_edge_weight(i2e[u2e[i]]);
 		double w1 = vw[i];
 		double w2 = wvars[i].get(GRB_DoubleAttr_X);
-		//gr.set_edge_weight(i2e[u2e[i]], w2); TODO
 		ww1 += w1;
 		ww2 += fabs(w1 - w2);
 	}
@@ -603,7 +602,7 @@ int router::decompose1()
 	GRBEnv *env = new GRBEnv();
 	GRBModel *model = new GRBModel(*env);
 
-	complete();		// TODO
+	complete();
 
 	// edge list of ug
 	VE ve;
@@ -680,7 +679,6 @@ int router::decompose1()
 		//double w1 = gr.get_edge_weight(i2e[u2e[i]]);
 		double w1 = vw[i];
 		double w2 = wvars[i].get(GRB_DoubleAttr_X);
-		//gr.set_edge_weight(i2e[u2e[i]], w2); TODO
 		ww1 += w1;
 		ww2 += fabs(w1 - w2);
 	}

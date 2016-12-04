@@ -45,7 +45,7 @@ private:
 
 	// splice graph
 	int build_junctions();
-	int build_regions(int count);
+	int build_regions();
 	int build_partial_exons();
 	int link_partial_exons();
 	int build_splice_graph();

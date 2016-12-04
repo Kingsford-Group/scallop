@@ -295,7 +295,7 @@ int splice_graph::write(const string &file) const
 	fin<<n<<endl;
 	for(int i = 0; i < n; i++)
 	{
-		string name = "TODO";
+		string name = "scallop";
 		double weight = get_vertex_weight(i);
 		vertex_info vi = get_vertex_info(i);
 		fin<<name.c_str()<<" "<<weight<<" "<<vi.length<<endl;
