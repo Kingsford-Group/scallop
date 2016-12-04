@@ -18,8 +18,9 @@ int main(int argc, const char **argv)
 
 	if(argc == 1)
 	{
-		print_logo();
 		print_help();
+		printf("\n");
+		print_logo();
 		return 0;
 	}
 
