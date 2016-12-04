@@ -716,7 +716,6 @@ int bundle::remove_small_edges()
 		sv2.insert(s);
 	}
 
-	/*
 	VE me = compute_maximal_edges();
 	for(int i = 0; i < me.size(); i++)
 	{
@@ -725,7 +724,6 @@ int bundle::remove_small_edges()
 		sv1.insert(ee->target());
 		sv2.insert(ee->source());
 	}
-	*/
 
 	while(true)
 	{
