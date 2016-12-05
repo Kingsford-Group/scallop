@@ -9,6 +9,7 @@
 #include "scallop.h"
 #include "sgraph_compare.h"
 #include "super_graph.h"
+#include "filter.h"
 
 assembler::assembler()
 {
@@ -186,7 +187,11 @@ int assembler::process(const bundle_base &bb)
 
 		gene gn;
 		bd.output_transcripts(gn, pp, gid);
-		//filter_transcripts(gn);
+
+		filter ft(gn.transcripts);
+		ft.join();
+		gn.assign(ft.trs);
+
 		if(gn.transcripts.size() >= 1) gm.add_gene(gn);
 
 		if(fixed_gene_name != "" && gid == fixed_gene_name) terminate = true;

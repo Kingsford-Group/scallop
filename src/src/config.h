@@ -55,6 +55,7 @@ extern double max_decompose_error_ratio;
 extern double min_transcript_coverage;
 extern double min_transcript_numreads;
 extern int min_transcript_length;
+extern int max_joining_gap;
 
 // for simulation
 extern int simulation_num_vertices;
