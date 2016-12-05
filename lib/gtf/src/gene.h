@@ -24,6 +24,7 @@ public:
 	int add_exon(const item &e);
 
 	// modify
+	int assign(const vector<transcript> &v);
 	int sort();
 	int shrink();
 	int clear();

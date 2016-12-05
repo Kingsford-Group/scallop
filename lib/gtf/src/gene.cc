@@ -10,6 +10,16 @@ int gene::clear()
 	return 0;
 }
 
+int gene::assign(const vector<transcript> &v)
+{
+	clear();
+	for(int i = 0; i < v.size(); i++)
+	{
+		add_transcript(v[i]);
+	}
+	return 0;
+}
+
 int gene::add_transcript(const item&e)
 {
 	assert(e.feature == "transcript");
