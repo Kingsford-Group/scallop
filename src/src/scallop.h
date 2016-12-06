@@ -64,6 +64,7 @@ private:
 
 	// decomposing subroutines
 	int compute_smallest_edge(int x, double &ratio);
+	int compute_removable_edge(int x, double &ratio);
 	int decompose_vertex(int v, const vector<PPID> &vpi);
 	int decompose_trivial_vertex(int v);
 	int split_vertex(int x, const vector<int> &xe, const vector<int> &ye);
