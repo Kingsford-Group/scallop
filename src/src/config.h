@@ -52,9 +52,11 @@ extern double min_surviving_edge_weight;
 extern double max_small_error_ratio;
 extern double max_split_error_ratio;
 extern double max_decompose_error_ratio;
-extern double min_transcript_coverage;
 extern double min_transcript_numreads;
+extern double min_transcript_coverage;
+extern double min_single_exon_coverage;
 extern int min_transcript_length;
+extern int min_exon_length;
 extern int max_joining_gap;
 
 // for simulation

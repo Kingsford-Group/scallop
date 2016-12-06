@@ -13,6 +13,7 @@ public:
 
 public:
 	int join();
+	int select();
 
 private:
 	bool join_transcripts();

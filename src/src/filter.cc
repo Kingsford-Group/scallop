@@ -7,6 +7,21 @@ filter::filter(const vector<transcript> &v)
 	:trs(v)
 {}
 
+int filter::select()
+{
+	vector<transcript> v;
+	for(int i = 0; i < trs.size(); i++)
+	{
+		int e = trs[i].exons.size();
+		int minl = min_transcript_length + e * min_exon_length;
+		if(trs[i].length() < minl) continue;
+		if(e == 1 && trs[i].coverage < min_single_exon_coverage) continue;
+		v.push_back(trs[i]);
+	}
+	trs = v;
+	return 0;
+}
+
 int filter::join()
 {
 	while(true)
@@ -42,6 +57,7 @@ bool filter::join_transcripts()
 		int32_t p1 = trs[ki].get_bounds().second;
 		int32_t p2 = trs[kj].get_bounds().second;
 		trs[ki].add_exon(p1, p2);
+		trs[kj].sort();
 		trs[ki].shrink();
 		trs.erase(trs.begin() + kj);
 		return true;
@@ -52,6 +68,7 @@ bool filter::join_transcripts()
 		int32_t p1 = trs[ki].get_bounds().first;
 		int32_t p2 = trs[kj].get_bounds().first;
 		trs[kj].add_exon(p1, p2);
+		trs[kj].sort();
 		trs[kj].shrink();
 		trs.erase(trs.begin() + ki);
 		return true;
@@ -63,6 +80,7 @@ bool filter::join_transcripts()
 		int32_t p1 = trs[ki].get_bounds().first;
 		int32_t p2 = trs[kj].get_bounds().first;
 		trs[kj].add_exon(p1, p2);
+		trs[kj].sort();
 		trs[kj].shrink();
 		double cov = 0;
 		cov += trs[ki].coverage * trs[ki].length();

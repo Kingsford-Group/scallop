@@ -190,6 +190,7 @@ int assembler::process(const bundle_base &bb)
 
 		filter ft(gn.transcripts);
 		ft.join();
+		ft.select();
 		gn.assign(ft.trs);
 
 		if(gn.transcripts.size() >= 1) gm.add_gene(gn);
