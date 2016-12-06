@@ -3,15 +3,18 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <cmath>
 
 using namespace std;
 
-cuffroc::cuffroc(const string &cufffile, const string &gtffile, int r, int m)
+cuffroc::cuffroc(const string &cufffile, const string &gtffile, int r, int m, int f, double p)
 {
 	read_cuff(cufffile);
 	read_gtf(gtffile);
 	refsize = r;
 	mexons = m;
+	pratio = p;
+	ftype = f;
 }
 
 int cuffroc::read_cuff(const string &file)
@@ -55,7 +58,14 @@ int cuffroc::filter_items()
 	{
 		string s = items[i].transcript_id;
 		if(t2e.find(s) == t2e.end()) continue;
-		if(t2e[s] < mexons) continue;
+		if(mexons >= 0 && t2e[s] != mexons) continue;
+
+		/* TODO
+		int min_length = t2e[s] * 50 + 200;
+		if(items[i].length < min_length) continue;
+		if(t2e[s] == 1 && items[i].coverage < 20) continue;
+		*/
+
 		v.push_back(items[i]);
 	}
 	items = v;
@@ -68,27 +78,52 @@ int cuffroc::solve()
 
 	if(items.size() == 0) return 0;
 
-	sort(items.begin(), items.end());
+	if(ftype == 1) sort(items.begin(), items.end(), cuffitem_cmp_coverage);
+	else if(ftype == 2) sort(items.begin(), items.end(), cuffitem_cmp_length);
+	else return 0;
 
 	int correct = 0;
 	for(int i = 0; i < items.size(); i++) if(items[i].code == '=') correct++;
 
+	double max_com = 999;
+	double max_sen = 0;
+	double max_pre = 0;
+	double max_cov = 0;
+	int max_len = 0;
+	int max_correct = 0;
+	int max_size = 0;
 	double sen0 = correct * 100.0 / refsize;
 	for(int i = 0; i < items.size(); i++)
 	{
 		double sen = correct * 100.0 / refsize;
 		double pre = correct * 100.0 / (items.size() - i);
 
+		double com = fabs(pre - pratio);
+
+		if(com < max_com)
+		{
+			max_com = com;
+			max_sen = sen;
+			max_pre = pre;
+			max_cov = items[i].coverage;
+			max_len = items[i].length;
+			max_correct = correct;
+			max_size = items.size() - i;
+		}
+
 		if(sen * 2.0 < sen0) break;
 
 		if(i % 100 == 0)
 		{
-			printf("ROC: reference = %d prediction = %lu correct = %d sensitivity = %.2lf precision = %.2lf | coverage = %.3lf\n",
-				refsize, items.size() - i, correct, sen, pre, items[i].coverage);
+			printf("ROC: reference = %d prediction = %lu correct = %d sensitivity = %.2lf precision = %.2lf | coverage = %.3lf, length = %d\n",
+				refsize, items.size() - i, correct, sen, pre, items[i].coverage, items[i].length);
 		}
 
 		if(items[i].code == '=') correct--;
 	}
+
+	printf("BESTCOM: reference = %d prediction = %d correct = %d sensitivity = %.2lf precision = %.2lf | coverage = %.3lf, length = %d\n",
+				refsize, max_size, max_correct, max_sen, max_pre, max_cov, max_len);
 
 	return 0;
 }

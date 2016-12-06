@@ -41,10 +41,14 @@ int cuffitem::print(int n) const
 	return 0;
 }
 
-bool cuffitem::operator<(const cuffitem &ge) const
+bool cuffitem_cmp_coverage(const cuffitem &x, const cuffitem &y)
 {
-	if(coverage < ge.coverage) return true;
-	//if(length < ge.length) return true;
+	if(x.coverage < y.coverage) return true;
 	else return false;
 }
 
+bool cuffitem_cmp_length(const cuffitem &x, const cuffitem &y)
+{
+	if(x.length < y.length) return true;
+	else return false;
+}

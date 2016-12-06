@@ -10,13 +10,15 @@ using namespace std;
 class cuffroc
 {
 public:
-	cuffroc(const string &cufffile, const string &gtffile, int r, int m = -1);
+	cuffroc(const string &cufffile, const string &gtffile, int r, int m = -1, int f = 1, double p = 0.2);
 
 public:
 	vector<cuffitem> items;
 	map<string, int> t2e;
 	int refsize;
 	int mexons;
+	int ftype;
+	double pratio;
 
 public:
 	int read_cuff(const string &file);

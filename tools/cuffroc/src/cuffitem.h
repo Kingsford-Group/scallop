@@ -12,7 +12,6 @@ public:
 
 public:
 	int parse(const string &s);
-	bool operator<(const cuffitem &ge) const;
 	int print(int n) const;
 
 public:
@@ -24,5 +23,8 @@ public:
 	int length;
 	double coverage;
 };
+
+bool cuffitem_cmp_coverage(const cuffitem &x, const cuffitem &y);
+bool cuffitem_cmp_length(const cuffitem &x, const cuffitem &y);
 
 #endif
