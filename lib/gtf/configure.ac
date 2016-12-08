@@ -4,7 +4,7 @@
 AC_PREREQ([2.69])
 AC_INIT(gtf, 1.0, shaomingfu@gmail.com)
 AM_INIT_AUTOMAKE()
-AC_CONFIG_SRCDIR([src/exon.cc])
+AC_CONFIG_SRCDIR([src/main.cc])
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
