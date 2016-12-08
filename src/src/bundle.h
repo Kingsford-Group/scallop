@@ -62,6 +62,7 @@ private:
 	VE compute_maximal_edges();
 	int refine_splice_graph();
 	int remove_small_edges();
+	int remove_inner_vertices();
 	int extend_isolated_start_boundaries();
 	int extend_isolated_end_boundaries();
 };

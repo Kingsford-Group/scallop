@@ -37,6 +37,8 @@ int bundle::build()
 	remove_small_edges();
 	refine_splice_graph();
 
+	remove_inner_vertices();
+
 	extend_isolated_start_boundaries();
 	extend_isolated_end_boundaries();
 
@@ -773,6 +775,45 @@ int bundle::remove_small_edges()
 
 	return 0;
 }
+
+int bundle::remove_inner_vertices()
+{
+	for(int i = 1; i < gr.num_vertices(); i++)
+	{
+		if(gr.in_degree(i) != 1) continue;
+		if(gr.out_degree(i) != 1) continue;
+
+		edge_iterator it1, it2;
+		tie(it1, it2) = gr.in_edges(i);
+		edge_descriptor e1 = (*it1);
+		tie(it1, it2) = gr.out_edges(i);
+		edge_descriptor e2 = (*it1);
+		int s = e1->source();
+		int t = e2->target();
+		double wv = gr.get_vertex_weight(i);
+		vertex_info vi = gr.get_vertex_info(i);
+
+		if(s == 0) continue;
+		if(t == gr.num_vertices() - 1) continue;
+		if(gr.get_vertex_info(s).rpos != vi.lpos) continue;
+		if(gr.get_vertex_info(t).lpos != vi.rpos) continue;
+
+		PEB p = gr.edge(s, t);
+		if(p.second == false) continue;
+
+		edge_descriptor ee = p.first;
+		double we = gr.get_edge_weight(ee);
+
+		if(wv > we) continue;
+		if(wv > min_inner_vertex_weight) continue;
+
+		printf("clear inner exon %d, weight = %.2lf, length = %d, edge weight = %.2lf\n", i, wv, vi.length, we);
+
+		gr.clear_vertex(i);
+	}
+	return 0;
+}
+
 
 int bundle::count_junctions() const
 {

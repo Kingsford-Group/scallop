@@ -25,6 +25,7 @@ int32_t min_subregion_length = 15;
 
 // for revising/decomposing splice graph
 double min_surviving_edge_weight = 1.5;
+double min_inner_vertex_weight = 10;
 double max_small_error_ratio = 0.33;
 double max_split_error_ratio = 0.25;
 double max_decompose_error_ratio = 0.01;
@@ -77,6 +78,7 @@ int print_parameters()
 
 	// for splice graph
 	printf("min_surviving_edge_weight = %.2lf\n", min_surviving_edge_weight);
+	printf("min_inner_vertex_weight = %.2lf\n", min_inner_vertex_weight);
 	printf("min_transcript_coverage = %.2lf\n", min_transcript_coverage);
 	printf("min_single_exon_coverage = %.2lf\n", min_single_exon_coverage);
 	printf("min_transcript_numreads = %.2lf\n", min_transcript_numreads);
@@ -218,6 +220,11 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--min_surviving_edge_weight")
 		{
 			min_surviving_edge_weight = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_inner_vertex_weight")
+		{
+			min_inner_vertex_weight = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_transcript_coverage")
