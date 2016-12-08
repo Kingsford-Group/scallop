@@ -12,7 +12,7 @@ int main(int argc, const char **argv)
 {
  	if(argc != 3 && argc != 4)
 	{
-		cout<<"usage: "<<argv[0]<< " <in-gtf-file> <out-gtf-file> <min-coverage>"<<endl;
+		cout<<"usage: "<<argv[0]<< " <in-gtf-file> <out-gtf-file> [min-coverage]"<<endl;
 		return 0;
 	}
 
