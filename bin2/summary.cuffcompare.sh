@@ -1,26 +1,31 @@
 #!/bin/bash
 
-tmp0=/tmp/tmp0
-tmp1=/tmp/tmp1
-tmp2=/tmp/tmp2
-tmp3=/tmp/tmp3
-tmp4=/tmp/tmp4
-tmp5=/tmp/tmp5
+list="EP.tophat \
+	  EP.star \
+	  ER.tophat \
+	  ER.star \
+	  GSM981256.tophat \
+	  GSM981256.star \
+	  GSM981256.hisat \
+	  GSM981244.tophat \
+	  GSM981244.star \
+	  GSM981244.hisat \
+	  GSM984609.star \
+	  GSM984609.hisat \
+	  SRR307911.tophat \
+	  SRR307911.star \
+	  SRR307911.hisat \
+	  SRR387662.tophat \
+	  SRR387662.star \
+	  SRR387662.hisat"
 
-ls $1 | grep -v gtf | grep -v log | grep -v track | grep -v loci > $tmp0
+ver=`stringtie --version`
 
-s=`cat $tmp0`
+for k in `echo $list`
+do
+	sc=`./cuffcompare.sh $k/scallop.$1/cuffcmp.stats`
+	st=`./cuffcompare.sh $k/stringtie.$ver/cuffcmp.stats`
+	tc=`./cuffcompare.sh $k/transcomb/cuffcmp.stats`
 
-cd $1
-
-cat $s | grep mRNA | grep Query | cut -c 26-27 > $tmp1
-cat $s | grep mRNA | grep Reference | cut -c 26-27 > $tmp2
-
-paste $tmp0 $tmp1 $tmp2 | awk '$2 != 0' > $tmp3
-paste $tmp0 $tmp1 $tmp2 | awk '$2 == 0' > $tmp4
-
-cat $s | grep chain | grep Intron | cut -c 22-26 > $tmp1
-cat $s | grep chain | grep Intron | cut -c 28-32 > $tmp2
-
-paste $tmp3 $tmp1 $tmp2
-paste $tmp4 $tmp4 $tmp4 | cut -f 1,2,3,5,8
+	echo $k $sc $st $tc | awk '{print $1, $2, $6, $10, $3, $7, $11, $4, $8, $12, $5, $9, $13}'
+done
