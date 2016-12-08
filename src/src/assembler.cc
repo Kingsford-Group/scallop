@@ -48,7 +48,7 @@ int assembler::assemble()
 		// DEBUG
 		//if(ht.pos > 117365807 && ht.rpos < 117367284) ht.print();
 
-		if(ht.strand == '.') continue;	// TODO
+		//if(ht.strand == '.') continue;	// TODO
 
 		truncate(ht);
 		add_hit(ht);
@@ -72,10 +72,9 @@ int assembler::add_hit(const hit &ht)
 	{
 		bundle_base &bb = vbb[i];
 		assert(bb.hits.size() >= 1);
-		assert(bb.strand != '.');
+		//assert(bb.strand != '.');
 
-		//if(bb.overlap(ht) == false) continue;
-		if(ht.strand != bb.strand) continue;
+		if(library_type != UNSTRANDED && ht.strand != bb.strand) continue;
 		if(ht.tid != bb.tid) continue;
 		if(ht.pos > bb.rpos + min_bundle_gap) continue;
 

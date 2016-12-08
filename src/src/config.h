@@ -25,7 +25,7 @@ using namespace std;
 #define SINGLE 2
 #define MULTIPLE 3
 
-#define UNSTRAND 0
+#define UNSTRANDED 0
 #define FR_FIRST 1
 #define FR_SECOND 2
 

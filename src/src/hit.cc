@@ -47,19 +47,18 @@ hit::hit(bam1_t *b)
 	memcpy(cigar, bam_get_cigar(b), 4 * n_cigar);
 
 	// get strandness
-	/*
-	if(bam_is_rev(b) == true) strand = '-';
-	else strand = '+';
-	*/
 
 	strand = '.';
-	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '+';		// F1R2
-	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '-';		// R1F2
-	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '-';		// F2R1
-	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '+';		// R2F1
+	if(library_type != UNSTRANDED)
+	{
+		if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '-';		// F1R2
+		if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '+';		// R1F2
+		if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '+';		// F2R1
+		if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '-';		// R2F1
 
-	if(library_type == FR_SECOND && strand == '+') strand = '-';
-	else if(library_type == FR_SECOND && strand == '-') strand = '+';
+		if(library_type == FR_SECOND && strand == '+') strand = '-';
+		else if(library_type == FR_SECOND && strand == '-') strand = '+';
+	}
 
 	hi = -1;
 	uint8_t *p2 = bam_aux_get(b, "HI");
@@ -68,8 +67,6 @@ hit::hit(bam1_t *b)
 	xs = '.';
 	uint8_t *p1 = bam_aux_get(b, "XS");
 	if(p1 && (*p1) == 'A') xs = bam_aux2A(p1);
-
-	//if(xs == '-' || xs == '+') strand = xs;
 
 	/*
 	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '-';

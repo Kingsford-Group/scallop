@@ -16,7 +16,7 @@ int min_num_hits_in_bundle = 20;
 uint32_t min_mapping_quality = 1;
 int32_t min_splice_boundary_hits = 1;
 bool use_second_alignment = false;
-int library_type = UNSTRAND;
+int library_type = UNSTRANDED;
 
 // for identifying subgraphs
 int32_t min_subregion_gap = 3;
@@ -285,7 +285,7 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--library_type")
 		{
 			string s(argv[i + 1]);
-			if(s == "unstrand") library_type = UNSTRAND;
+			if(s == "unstranded") library_type = UNSTRANDED;
 			if(s == "first") library_type = FR_FIRST;
 			if(s == "second") library_type = FR_SECOND;
 			i++;
