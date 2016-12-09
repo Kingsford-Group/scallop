@@ -49,7 +49,7 @@ int assembler::assemble()
 		//if(ht.pos > 117365807 && ht.rpos < 117367284) ht.print();
 
 		//if(ht.strand == '.') continue;	// TODO
-		if(ht.concordant == false) continue;
+		//if(ht.concordant == false) continue;
 
 		truncate(ht);
 		add_hit(ht);
