@@ -99,6 +99,16 @@ bool hit::operator<(const hit &h) const
 	return (pos < h.pos);
 }
 
+bool hit::spliced() const
+{
+	for(int i = 0; i < MAX_NUM_CIGAR; i++)
+	{
+		char c = bam_cigar_opchr(cigar[i]);
+		if(c == 'N') return true;
+	}
+	return false;
+}
+
 int hit::print() const
 {
 	// get cigar string

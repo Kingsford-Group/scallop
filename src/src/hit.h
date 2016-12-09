@@ -54,6 +54,7 @@ public:
 	uint32_t cigar[MAX_NUM_CIGAR];			// cigar, use samtools
 
 public:
+	bool spliced() const;
 	int print() const;
 	int get_splice_positions(vector<int64_t> &v) const;
 	int get_mid_intervals(vector<int64_t> &vm, vector<int64_t> &vi, vector<int64_t> &vd) const;
