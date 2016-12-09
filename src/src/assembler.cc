@@ -50,7 +50,7 @@ int assembler::assemble()
 		//if(ht.concordant == false) continue;
 
 		// DEBUG
-		if(ht.strand == '.') ht.print();
+		//if(ht.strand == '.') ht.print();
 
 		truncate(ht);
 		add_hit(ht);
