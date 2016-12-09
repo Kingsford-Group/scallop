@@ -49,6 +49,7 @@ int assembler::assemble()
 		//if(ht.pos > 117365807 && ht.rpos < 117367284) ht.print();
 
 		//if(ht.strand == '.') continue;	// TODO
+		if(ht.concordant == false) continue;
 
 		truncate(ht);
 		add_hit(ht);
@@ -110,7 +111,6 @@ int assembler::truncate(const hit &ht)
 int assembler::process(const bundle_base &bb)
 {
 	//printf("hits.size = %lu, min-num = %d\n", bb.hits.size(), min_num_hits_in_bundle);
-
 	if(bb.hits.size() < min_num_hits_in_bundle) return 0;
 
 	char buf[1024];

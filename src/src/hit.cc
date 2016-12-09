@@ -13,6 +13,7 @@ hit::hit(int32_t p)
 	xs = '.';
 	hi = -1;
 	qlen = 0;
+	concordant = false;
 }
 
 hit::hit(const hit &h)
@@ -46,8 +47,14 @@ hit::hit(bam1_t *b)
 	assert(n_cigar >= 1);
 	memcpy(cigar, bam_get_cigar(b), 4 * n_cigar);
 
-	// get strandness
+	// check concordance
+	concordant = false;
+	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) concordant = true;
+	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) concordant = true;
+	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) concordant = true;
+	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) concordant = true;
 
+	// get strandness
 	strand = '.';
 	if(library_type != UNSTRANDED)
 	{
@@ -55,7 +62,6 @@ hit::hit(bam1_t *b)
 		if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '+';		// R1F2
 		if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '+';		// F2R1
 		if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '-';		// R2F1
-
 		if(library_type == FR_SECOND && strand == '+') strand = '-';
 		else if(library_type == FR_SECOND && strand == '-') strand = '+';
 	}
