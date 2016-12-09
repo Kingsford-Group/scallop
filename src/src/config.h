@@ -35,6 +35,7 @@ extern int min_flank_length;
 extern int32_t min_bundle_gap;
 extern int min_num_hits_in_bundle;
 extern uint32_t min_mapping_quality;
+extern uint32_t min_max_boundary_quality;
 extern int32_t min_splice_boundary_hits;
 
 // for identifying subgraphs
