@@ -283,6 +283,7 @@ int bundle::build_hyper_edges2()
 	hs.clear();
 
 	string qname;
+	bool cc = false;
 	int hi = -2;
 	vector<int> sp1;
 	for(int i = 0; i < hits.size(); i++)
@@ -296,7 +297,7 @@ int bundle::build_hyper_edges2()
 		h.print();
 		*/
 
-		if(h.qname != qname || h.hi != hi)
+		if(h.qname != qname || h.hi != hi || cc == false || h.concordant == false)
 		{
 			set<int> s(sp1.begin(), sp1.end());
 			if(s.size() >= 2) hs.add_node_list(s);
@@ -305,6 +306,7 @@ int bundle::build_hyper_edges2()
 
 		qname = h.qname;
 		hi = h.hi;
+		cc = h.concordant;
 
 		if((h.flag & 0x4) >= 1) continue;
 
