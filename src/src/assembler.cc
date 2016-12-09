@@ -46,11 +46,7 @@ int assembler::assemble()
 		qlen += ht.qlen;
 
 
-		//if(ht.strand == '.') continue;	// TODO
-		//if(ht.concordant == false) continue;
-
-		// DEBUG
-		//if(ht.strand == '.') ht.print();
+		if(library_type != UNSTRANDED && ht.concordant == false) continue;
 
 		truncate(ht);
 		add_hit(ht);

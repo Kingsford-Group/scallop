@@ -53,18 +53,12 @@ hit::hit(bam1_t *b)
 	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) concordant = true;
 	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) concordant = true;
 	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) concordant = true;
+	if((flag & 0x8) >= 1) concordant = false;
 
 	// get strandness
 	strand = '.';
 	if(library_type != UNSTRANDED)
 	{
-		/*
-		if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '-';		// F1R2
-		if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '+';		// R1F2
-		if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '+';		// F2R1
-		if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '-';		// R2F1
-		*/
-
 		if((flag & 0x10) <= 0 && (flag & 0x40) >= 1) strand = '-';		// F1R2
 		if((flag & 0x10) >= 1 && (flag & 0x40) >= 1) strand = '+';		// R1F2
 		if((flag & 0x10) <= 0 && (flag & 0x40) <= 0) strand = '+';		// F2R1
