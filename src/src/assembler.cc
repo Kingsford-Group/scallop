@@ -45,11 +45,12 @@ int assembler::assemble()
 		hit ht(b1t);
 		qlen += ht.qlen;
 
-		// DEBUG
-		//if(ht.pos > 117365807 && ht.rpos < 117367284) ht.print();
 
 		//if(ht.strand == '.') continue;	// TODO
 		//if(ht.concordant == false) continue;
+
+		// DEBUG
+		if(ht.strand == '.') ht.print();
 
 		truncate(ht);
 		add_hit(ht);
