@@ -15,6 +15,7 @@ public:
 public:
 	vector<cuffitem> items;
 	map<string, int> t2e;
+	map<string, char> t2s;
 	int refsize;
 	int mexons;
 	int ftype;

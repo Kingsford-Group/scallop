@@ -4,6 +4,7 @@
 #include <fstream>
 #include <algorithm>
 #include <cmath>
+#include <cassert>
 
 using namespace std;
 
@@ -36,6 +37,7 @@ int cuffroc::read_cuff(const string &file)
 int cuffroc::read_gtf(const string &file)
 {
 	t2e.clear();
+	t2s.clear();
 	genome gn(file);
 	for(int i = 0; i < gn.genes.size(); i++)
 	{
@@ -44,8 +46,11 @@ int cuffroc::read_gtf(const string &file)
 		{
 			string s = v[k].transcript_id;
 			int e = v[k].exons.size();
+			char c = v[k].strand;
 			if(t2e.find(s) != t2e.end()) continue;
+			assert(t2s.find(s) == t2s.end());
 			t2e.insert(pair<string, int>(s, e));
+			t2s.insert(pair<string, char>(s, c));
 		}
 	}
 	return 0;
@@ -122,8 +127,8 @@ int cuffroc::solve()
 		if(items[i].code == '=') correct--;
 	}
 
-	printf("BESTCOM: reference = %d prediction = %d correct = %d sensitivity = %.2lf precision = %.2lf | coverage = %.3lf, length = %d\n",
-				refsize, max_size, max_correct, max_sen, max_pre, max_cov, max_len);
+	//printf("BESTCOM: reference = %d prediction = %d correct = %d sensitivity = %.2lf precision = %.2lf | coverage = %.3lf, length = %d\n",
+	//			refsize, max_size, max_correct, max_sen, max_pre, max_cov, max_len);
 
 	return 0;
 }
@@ -133,9 +138,11 @@ int cuffroc::print()
 	for(int i = 0; i < items.size(); i++)
 	{
 		int n = 0;
+		char c = '@';
 		string s = items[i].transcript_id;
 		if(t2e.find(s) != t2e.end()) n = t2e[s];
-		items[i].print(n);
+		if(t2s.find(s) != t2s.end()) c = t2s[s];
+		items[i].print(n, c);
 	}
 	return 0;
 }

@@ -12,7 +12,7 @@ public:
 
 public:
 	int parse(const string &s);
-	int print(int n) const;
+	int print(int n, char c) const;
 
 public:
 	string ref_gene_id;

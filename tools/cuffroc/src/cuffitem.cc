@@ -35,9 +35,9 @@ int cuffitem::parse(const string &s)
 	return 0;
 }
 
-int cuffitem::print(int n) const
+int cuffitem::print(int n, char c) const
 {
-	printf("%s %s %s %s %c %.3lf %d %d\n", ref_gene_id.c_str(), ref_transcript_id.c_str(), transcript_id.c_str(), gene_id.c_str(), code, coverage, length, n);
+	printf("%s %s %s %s %c %.3lf %d %d %c\n", ref_gene_id.c_str(), ref_transcript_id.c_str(), transcript_id.c_str(), gene_id.c_str(), code, coverage, length, n, c);
 	return 0;
 }
 
