@@ -85,10 +85,11 @@ int bundle::check_right_ascending()
 
 int bundle::build_junctions()
 {
-	map<int64_t, int> m;
-	vector<int64_t> v;
+	int min_max_boundary_quality = 3;
+	map< int64_t, vector<int> > m;
 	for(int i = 0; i < hits.size(); i++)
 	{
+		vector<int64_t> v;
 		hits[i].get_splice_positions(v);
 		if(v.size() == 0) continue;
 
@@ -97,16 +98,33 @@ int bundle::build_junctions()
 		{
 			int64_t p = v[k];
 			//printf(" %d-%d\n", low32(p), high32(p));
-			if(m.find(p) == m.end()) m.insert(pair<int64_t, int>(p, 1));
-			else m[p]++;
+			if(m.find(p) == m.end())
+			{
+				vector<int> hv;
+				hv.push_back(i);
+				m.insert(pair< int64_t, vector<int> >(p, hv));
+			}
+			else
+			{
+				m[p].push_back(i);
+			}
 		}
 	}
 
-	map<int64_t, int>::iterator it;
+	map< int64_t, vector<int> >::iterator it;
 	for(it = m.begin(); it != m.end(); it++)
 	{
-		if(it->second < min_splice_boundary_hits) continue;
-		junctions.push_back(junction(it->first, it->second));
+		vector<int> &v = it->second;
+		if(v.size() < min_splice_boundary_hits) continue;
+
+		uint32_t max_qual = 0;
+		for(int k = 0; k < v.size(); k++)
+		{
+			hit &h = hits[v[k]];
+			if(h.qual > max_qual) max_qual = h.qual;
+		}
+		if(max_qual < min_max_boundary_quality) continue;
+		junctions.push_back(junction(it->first, v.size()));
 	}
 	return 0;
 }
