@@ -281,4 +281,16 @@ int test_split_interval_map()
 	return 0;
 }
 
+int test_join_interval_map()
+{
+	join_interval_map jmap;
+	jmap += make_pair(ROI(1, 10), 1);
+	jmap += make_pair(ROI(2, 3), -1);
+	jmap += make_pair(ROI(6, 8), -1);
 
+	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
+	{
+		printf("[%d, %d) -> %d\n", lower(it->first), upper(it->first), it->second);
+	}
+	return 0;
+}

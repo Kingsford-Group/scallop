@@ -49,5 +49,6 @@ int evaluate_triangle(const split_interval_map &imap, int ll, int rr, double &av
 
 // testing
 int test_split_interval_map();
+int test_join_interval_map();
 
 #endif

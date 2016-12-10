@@ -11,7 +11,6 @@ region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split
 
 	build_join_interval_map();
 	smooth_join_interval_map();
-	split_join_interval_map();
 	build_partial_exons();
 }
 
@@ -29,7 +28,6 @@ int region::build_join_interval_map()
 	SIMI it = lit;
 	while(true)
 	{
-		//if(it->second >= 2) 
 		jmap += make_pair(it->first, 1);
 		if(it == rit) break;
 		it++;
@@ -45,8 +43,8 @@ int region::build_join_interval_map()
 
 int region::smooth_join_interval_map()
 {
-	int32_t gap = min_subregion_gap;
 	/*
+	int32_t gap = min_subregion_gap;
 	bool b1 = false, b2 = false;
 	if(ltype == START_BOUNDARY) b1 = true;
 	if(ltype == RIGHT_SPLICE) b1 = true;
@@ -57,24 +55,22 @@ int region::smooth_join_interval_map()
 
 	vector<PI32> v;
 	int32_t p = lpos;
-	//double pave = 1.0;
+	double pave = 1.0;
 	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
 	{
 		int32_t p1 = lower(it->first);
 		int32_t p2 = upper(it->first);
 		assert(p1 >= p);
 		assert(p2 > p1);
-		/*
 		double ave, dev;
 		evaluate_rectangle(*mmap, p1, p2, ave, dev);
-		int32_t gap = (int32_t)(75.0 / ave / pave);
-		*/
+		int32_t gap = (int32_t)(average_read_length / ave / pave);
 		if(p1 - p <= gap) v.push_back(PI32(p, p1));
 		p = p2;
-		//pave = ave;
+		pave = ave;
 	}
 
-	//int32_t gap = (int32_t)(75.0 / pave);
+	int32_t gap = (int32_t)(average_read_length / pave);
 	if(p < rpos && rpos - p <= gap) v.push_back(PI32(p, rpos));
 
 	for(int i = 0; i < v.size(); i++)
@@ -117,6 +113,17 @@ int region::build_partial_exons()
 	if(jmap.size() == 0) return 0;
 
 	//printf("size = %lu, size2 = %lu, [%d, %d), [%d, %d)\n", jmap.size(), distance(jmap.begin(), jmap.end()), lower(jmap.begin()->first), upper(jmap.begin()->first), lpos, rpos);
+
+	/*
+	for(JIMI xi = jmap.begin(); xi != jmap.end(); xi++)
+	{
+		int32_t x1 = lower(xi->first);
+		int32_t x2 = upper(xi->first);
+
+		printf("[%d, %d) -> %d\n", x1, x2, xi->second);
+	}
+	printf("---\n");
+	*/
 
 	if(lower(jmap.begin()->first) == lpos && upper(jmap.begin()->first) == rpos)
 	{
@@ -171,7 +178,7 @@ int region::build_partial_exons()
 int region::split_join_interval_map()
 {
 	if(lower(jmap.begin()->first) != lpos) return 0;
-	if(upper(jmap.begin()->first) == rpos) return 0;
+	if(upper(jmap.begin()->first) != rpos) return 0;
 
 	SIMI lit, rit;
 	tie(lit, rit) = locate_boundary_iterators(*mmap, lpos, rpos);
