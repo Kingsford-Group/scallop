@@ -123,7 +123,7 @@ int bundle::build_junctions()
 			hit &h = hits[v[k]];
 			if(h.qual > max_qual) max_qual = h.qual;
 		}
-		if(max_qual < min_max_boundary_quality) continue;
+		assert(max_qual >= min_max_boundary_quality);
 		junctions.push_back(junction(it->first, v.size()));
 	}
 	return 0;
