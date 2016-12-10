@@ -13,7 +13,6 @@ hit::hit(int32_t p)
 	xs = '.';
 	hi = -1;
 	qlen = 0;
-	concordant = false;
 }
 
 hit::hit(const hit &h)
@@ -47,26 +46,20 @@ hit::hit(bam1_t *b)
 	assert(n_cigar >= 1);
 	memcpy(cigar, bam_get_cigar(b), 4 * n_cigar);
 
-	// check concordance
-	concordant = false;
-	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) concordant = true;
-	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) concordant = true;
-	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) concordant = true;
-	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) concordant = true;
-	if((flag & 0x8) >= 1) concordant = false;
-
 	// get strandness
-	strand = '.';
-	if(library_type != UNSTRANDED)
-	{
-		if((flag & 0x10) <= 0 && (flag & 0x40) >= 1) strand = '-';		// F1R2
-		if((flag & 0x10) >= 1 && (flag & 0x40) >= 1) strand = '+';		// R1F2
-		if((flag & 0x10) <= 0 && (flag & 0x40) <= 0) strand = '+';		// F2R1
-		if((flag & 0x10) >= 1 && (flag & 0x40) <= 0) strand = '-';		// R2F1
+	/*
+	if(bam_is_rev(b) == true) strand = '-';
+	else strand = '+';
+	*/
 
-		if(library_type == FR_SECOND && strand == '+') strand = '-';
-		else if(library_type == FR_SECOND && strand == '-') strand = '+';
-	}
+	strand = '.';
+	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '+';		// F1R2
+	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '-';		// R1F2
+	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '-';		// F2R1
+	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '+';		// R2F1
+
+	if(library_type == FR_SECOND && strand == '+') strand = '-';
+	else if(library_type == FR_SECOND && strand == '-') strand = '+';
 
 	hi = -1;
 	uint8_t *p2 = bam_aux_get(b, "HI");
@@ -75,6 +68,8 @@ hit::hit(bam1_t *b)
 	xs = '.';
 	uint8_t *p1 = bam_aux_get(b, "XS");
 	if(p1 && (*p1) == 'A') xs = bam_aux2A(p1);
+
+	//if(xs == '-' || xs == '+') strand = xs;
 
 	/*
 	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '-';
@@ -91,16 +86,6 @@ bool hit::operator<(const hit &h) const
 	if(hi != -1 && h.hi != -1 && hi < h.hi) return true;
 	if(hi != -1 && h.hi != -1 && hi > h.hi) return false;
 	return (pos < h.pos);
-}
-
-bool hit::spliced() const
-{
-	for(int i = 0; i < MAX_NUM_CIGAR; i++)
-	{
-		char c = bam_cigar_opchr(cigar[i]);
-		if(c == 'N') return true;
-	}
-	return false;
 }
 
 int hit::print() const

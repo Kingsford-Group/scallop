@@ -20,7 +20,7 @@ bundle::~bundle()
 
 int bundle::build()
 {
-	if(library_type == UNSTRANDED) compute_strand();
+	if(library_type == UNSTRAND) compute_strand();
 
 	check_left_ascending();
 
@@ -36,8 +36,6 @@ int bundle::build()
 	// revise splice graph
 	remove_small_edges();
 	refine_splice_graph();
-
-	remove_inner_vertices();
 
 	extend_isolated_start_boundaries();
 	extend_isolated_end_boundaries();
@@ -87,10 +85,10 @@ int bundle::check_right_ascending()
 
 int bundle::build_junctions()
 {
-	map< int64_t, vector<int> > m;
+	map<int64_t, int> m;
+	vector<int64_t> v;
 	for(int i = 0; i < hits.size(); i++)
 	{
-		vector<int64_t> v;
 		hits[i].get_splice_positions(v);
 		if(v.size() == 0) continue;
 
@@ -99,33 +97,16 @@ int bundle::build_junctions()
 		{
 			int64_t p = v[k];
 			//printf(" %d-%d\n", low32(p), high32(p));
-			if(m.find(p) == m.end())
-			{
-				vector<int> hv;
-				hv.push_back(i);
-				m.insert(pair< int64_t, vector<int> >(p, hv));
-			}
-			else
-			{
-				m[p].push_back(i);
-			}
+			if(m.find(p) == m.end()) m.insert(pair<int64_t, int>(p, 1));
+			else m[p]++;
 		}
 	}
 
-	map< int64_t, vector<int> >::iterator it;
+	map<int64_t, int>::iterator it;
 	for(it = m.begin(); it != m.end(); it++)
 	{
-		vector<int> &v = it->second;
-		if(v.size() < min_splice_boundary_hits) continue;
-
-		uint32_t max_qual = 0;
-		for(int k = 0; k < v.size(); k++)
-		{
-			hit &h = hits[v[k]];
-			if(h.qual > max_qual) max_qual = h.qual;
-		}
-		if(max_qual < min_max_boundary_quality) continue;
-		junctions.push_back(junction(it->first, v.size()));
+		if(it->second < min_splice_boundary_hits) continue;
+		junctions.push_back(junction(it->first, it->second));
 	}
 	return 0;
 }
@@ -283,7 +264,6 @@ int bundle::build_hyper_edges2()
 	hs.clear();
 
 	string qname;
-	bool cc = false;
 	int hi = -2;
 	vector<int> sp1;
 	for(int i = 0; i < hits.size(); i++)
@@ -297,7 +277,7 @@ int bundle::build_hyper_edges2()
 		h.print();
 		*/
 
-		if(h.qname != qname || h.hi != hi || cc == false || h.concordant == false)
+		if(h.qname != qname || h.hi != hi)
 		{
 			set<int> s(sp1.begin(), sp1.end());
 			if(s.size() >= 2) hs.add_node_list(s);
@@ -306,7 +286,6 @@ int bundle::build_hyper_edges2()
 
 		qname = h.qname;
 		hi = h.hi;
-		cc = h.concordant;
 
 		if((h.flag & 0x4) >= 1) continue;
 
@@ -794,45 +773,6 @@ int bundle::remove_small_edges()
 
 	return 0;
 }
-
-int bundle::remove_inner_vertices()
-{
-	for(int i = 1; i < gr.num_vertices(); i++)
-	{
-		if(gr.in_degree(i) != 1) continue;
-		if(gr.out_degree(i) != 1) continue;
-
-		edge_iterator it1, it2;
-		tie(it1, it2) = gr.in_edges(i);
-		edge_descriptor e1 = (*it1);
-		tie(it1, it2) = gr.out_edges(i);
-		edge_descriptor e2 = (*it1);
-		int s = e1->source();
-		int t = e2->target();
-		double wv = gr.get_vertex_weight(i);
-		vertex_info vi = gr.get_vertex_info(i);
-
-		if(s == 0) continue;
-		if(t == gr.num_vertices() - 1) continue;
-		if(gr.get_vertex_info(s).rpos != vi.lpos) continue;
-		if(gr.get_vertex_info(t).lpos != vi.rpos) continue;
-
-		PEB p = gr.edge(s, t);
-		if(p.second == false) continue;
-
-		edge_descriptor ee = p.first;
-		double we = gr.get_edge_weight(ee);
-
-		if(wv > we) continue;
-		if(wv > min_inner_vertex_weight) continue;
-
-		printf("clear inner exon %d, weight = %.2lf, length = %d, edge weight = %.2lf\n", i, wv, vi.length, we);
-
-		gr.clear_vertex(i);
-	}
-	return 0;
-}
-
 
 int bundle::count_junctions() const
 {

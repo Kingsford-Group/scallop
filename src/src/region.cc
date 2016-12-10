@@ -28,6 +28,7 @@ int region::build_join_interval_map()
 	SIMI it = lit;
 	while(true)
 	{
+		//if(it->second >= 2) 
 		jmap += make_pair(it->first, 1);
 		if(it == rit) break;
 		it++;
@@ -43,16 +44,7 @@ int region::build_join_interval_map()
 
 int region::smooth_join_interval_map()
 {
-	/*
-	int32_t gap = min_subregion_gap;
-	bool b1 = false, b2 = false;
-	if(ltype == START_BOUNDARY) b1 = true;
-	if(ltype == RIGHT_SPLICE) b1 = true;
-	if(rtype == END_BOUNDARY) b2 = true;
-	if(rtype == LEFT_SPLICE) b2 = true;
-	if(b1 == true && b2 == true) gap = 2 * min_subregion_gap;
-	*/
-
+	//int32_t gap = min_subregion_gap;
 	vector<PI32> v;
 	int32_t p = lpos;
 	double pave = 1.0;
@@ -82,7 +74,6 @@ int region::smooth_join_interval_map()
 	{
 		assert(it->second == 1);
 	}
-
 	return 0;
 }
 
@@ -113,17 +104,6 @@ int region::build_partial_exons()
 	if(jmap.size() == 0) return 0;
 
 	//printf("size = %lu, size2 = %lu, [%d, %d), [%d, %d)\n", jmap.size(), distance(jmap.begin(), jmap.end()), lower(jmap.begin()->first), upper(jmap.begin()->first), lpos, rpos);
-
-	/*
-	for(JIMI xi = jmap.begin(); xi != jmap.end(); xi++)
-	{
-		int32_t x1 = lower(xi->first);
-		int32_t x2 = upper(xi->first);
-
-		printf("[%d, %d) -> %d\n", x1, x2, xi->second);
-	}
-	printf("---\n");
-	*/
 
 	if(lower(jmap.begin()->first) == lpos && upper(jmap.begin()->first) == rpos)
 	{
@@ -170,59 +150,6 @@ int region::build_partial_exons()
 		pe.ave = 1.0;
 		pe.dev = 1.0;
 		pexons.push_back(pe);
-	}
-
-	return 0;
-}
-
-int region::split_join_interval_map()
-{
-	if(lower(jmap.begin()->first) != lpos) return 0;
-	if(upper(jmap.begin()->first) != rpos) return 0;
-
-	SIMI lit, rit;
-	tie(lit, rit) = locate_boundary_iterators(*mmap, lpos, rpos);
-	if(lit == mmap->end() || rit == mmap->end()) return 0;
-
-	int32_t min_split_middle_length = 10;
-	int32_t min_split_boundary_length = 50;
-	int32_t max_split_middle_coverage = 3;
-	double min_split_boundary_coverage = 10;
-
-	if(rpos - lpos < 10 + 50 + 50) return 0;
-
-	int32_t p = lpos;
-	for(SIMI it = lit; it != rit; it++)
-	{
-		int32_t p1 = lower(it->first);
-		int32_t p2 = upper(it->first);
-		int32_t cov = it->second;
-
-		if(cov <= max_split_middle_coverage) continue;
-
-		int32_t q = p1;
-		bool b = true;
-		if(q - p < min_split_middle_length) b = false;
-		if(p - lpos < min_split_boundary_length) b = false;
-		if(rpos - q < min_split_boundary_length) b = false;
-
-		double ave1 = -1, ave2 = -1;
-		double dev1 = -1, dev2 = -1;
-		evaluate_rectangle(*mmap, lpos, p, ave1, dev1);
-		evaluate_rectangle(*mmap, q, rpos, ave2, dev2);
-
-		if(ave1 < min_split_boundary_coverage) b = false;
-		if(ave2 < min_split_boundary_coverage) b = false;
-
-		if(b == true)
-		{
-			printf("SPLIT: type = (%d, %d), pos = %d-%d, mid = %d-%d, ave = (%.3lf, %.3lf), dev = (%.3lf, %.3lf)\n", 
-					ltype, rtype, lpos, rpos, p, q, ave1, ave2, dev1, dev2);
-
-			jmap += make_pair(ROI(p, q), -1);
-		}
-
-		p = p2;
 	}
 
 	return 0;

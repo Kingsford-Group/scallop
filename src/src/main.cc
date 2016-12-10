@@ -9,7 +9,6 @@
 
 #include "config.h"
 #include "assembler.h"
-#include "interval_map.h"
 
 using namespace std;
 
@@ -39,4 +38,3 @@ int main(int argc, const char **argv)
 
 	return 0;
 }
-

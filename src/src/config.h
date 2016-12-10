@@ -25,7 +25,7 @@ using namespace std;
 #define SINGLE 2
 #define MULTIPLE 3
 
-#define UNSTRANDED 0
+#define UNSTRAND 0
 #define FR_FIRST 1
 #define FR_SECOND 2
 
@@ -35,7 +35,6 @@ extern int min_flank_length;
 extern int32_t min_bundle_gap;
 extern int min_num_hits_in_bundle;
 extern uint32_t min_mapping_quality;
-extern uint32_t min_max_boundary_quality;
 extern int32_t min_splice_boundary_hits;
 
 // for identifying subgraphs
@@ -50,7 +49,6 @@ extern int min_router_count;
 
 // for splice graph
 extern double min_surviving_edge_weight;
-extern double min_inner_vertex_weight;
 extern double max_small_error_ratio;
 extern double max_split_error_ratio;
 extern double max_decompose_error_ratio;

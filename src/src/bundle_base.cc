@@ -30,11 +30,8 @@ int bundle_base::add_hit(const hit &ht)
 	assert(tid == ht.tid);
 
 	// set strand
-	if(library_type != UNSTRANDED)
-	{
-		if(strand == '.') strand = ht.strand;
-		assert(strand == ht.strand);
-	}
+	if(strand == '.') strand = ht.strand;
+	assert(strand == ht.strand);
 
 	// add intervals
 	vector<int64_t> vm;

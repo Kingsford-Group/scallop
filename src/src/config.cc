@@ -14,10 +14,9 @@ int min_flank_length = 3;
 int32_t min_bundle_gap = 50;
 int min_num_hits_in_bundle = 20;
 uint32_t min_mapping_quality = 1;
-uint32_t min_max_boundary_quality = 1;
 int32_t min_splice_boundary_hits = 1;
 bool use_second_alignment = false;
-int library_type = UNSTRANDED;
+int library_type = UNSTRAND;
 
 // for identifying subgraphs
 int32_t min_subregion_gap = 3;
@@ -26,7 +25,6 @@ int32_t min_subregion_length = 15;
 
 // for revising/decomposing splice graph
 double min_surviving_edge_weight = 1.5;
-double min_inner_vertex_weight = 0;
 double max_small_error_ratio = 0.33;
 double max_split_error_ratio = 0.25;
 double max_decompose_error_ratio = 0.01;
@@ -70,7 +68,6 @@ int print_parameters()
 	printf("min_bundle_gap = %d\n", min_bundle_gap);
 	printf("min_num_hits_in_bundle = %d\n", min_num_hits_in_bundle);
 	printf("min_mapping_quality = %d\n", min_mapping_quality);
-	printf("min_max_boundary_quality = %d\n", min_max_boundary_quality);
 	printf("min_splice_boundary_hits = %d\n", min_splice_boundary_hits);
 
 	// for identifying subgraphs
@@ -80,7 +77,6 @@ int print_parameters()
 
 	// for splice graph
 	printf("min_surviving_edge_weight = %.2lf\n", min_surviving_edge_weight);
-	printf("min_inner_vertex_weight = %.2lf\n", min_inner_vertex_weight);
 	printf("min_transcript_coverage = %.2lf\n", min_transcript_coverage);
 	printf("min_single_exon_coverage = %.2lf\n", min_single_exon_coverage);
 	printf("min_transcript_numreads = %.2lf\n", min_transcript_numreads);
@@ -199,11 +195,6 @@ int parse_arguments(int argc, const char ** argv)
 			min_mapping_quality = atoi(argv[i + 1]);
 			i++;
 		}
-		else if(string(argv[i]) == "--min_max_boundary_quality")
-		{
-			min_max_boundary_quality = atoi(argv[i + 1]);
-			i++;
-		}
 		else if(string(argv[i]) == "--min_splice_boundary_hits")
 		{
 			min_splice_boundary_hits = atoi(argv[i + 1]);
@@ -227,11 +218,6 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--min_surviving_edge_weight")
 		{
 			min_surviving_edge_weight = atof(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--min_inner_vertex_weight")
-		{
-			min_inner_vertex_weight = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_transcript_coverage")
@@ -292,7 +278,7 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--library_type")
 		{
 			string s(argv[i + 1]);
-			if(s == "unstranded") library_type = UNSTRANDED;
+			if(s == "unstrand") library_type = UNSTRAND;
 			if(s == "first") library_type = FR_FIRST;
 			if(s == "second") library_type = FR_SECOND;
 			i++;

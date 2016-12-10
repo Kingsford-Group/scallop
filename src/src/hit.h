@@ -49,12 +49,10 @@ public:
 	string qname;							// query name
 	char strand;							// strandness
 	char xs;								// XS aux in sam
-	int32_t hi;								// HI aux in sam
-	bool concordant;						// whether it is concordant
+	int32_t hi;									// HI aux in sam
 	uint32_t cigar[MAX_NUM_CIGAR];			// cigar, use samtools
 
 public:
-	bool spliced() const;
 	int print() const;
 	int get_splice_positions(vector<int64_t> &v) const;
 	int get_mid_intervals(vector<int64_t> &vm, vector<int64_t> &vi, vector<int64_t> &vd) const;
