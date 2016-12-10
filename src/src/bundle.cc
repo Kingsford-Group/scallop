@@ -85,7 +85,7 @@ int bundle::check_right_ascending()
 
 int bundle::build_junctions()
 {
-	int min_max_boundary_quality = 1;
+	int min_max_boundary_quality = min_mapping_quality;
 	map< int64_t, vector<int> > m;
 	for(int i = 0; i < hits.size(); i++)
 	{
