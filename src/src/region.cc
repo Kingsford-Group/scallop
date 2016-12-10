@@ -11,7 +11,7 @@ region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split
 
 	build_join_interval_map();
 	smooth_join_interval_map();
-	split_join_interval_map();
+	//split_join_interval_map();
 	build_partial_exons();
 }
 
