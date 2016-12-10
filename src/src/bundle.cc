@@ -375,9 +375,9 @@ bool bundle::bridge_read(int x, int y, vector<int> &v)
 
 	PEB e = gr.edge(x + 1, y + 1);
 	if(e.second == true) return true;
-	else return false;
+	//else return false;
 
-	if(y - x >= 10) return false;
+	if(y - x >= 6) return false;
 
 	long max = 9999999999;
 	vector<long> table;
