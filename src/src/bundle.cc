@@ -40,6 +40,9 @@ int bundle::build()
 	extend_isolated_start_boundaries();
 	extend_isolated_end_boundaries();
 
+	remove_inner_start_boundaries();
+	remove_inner_end_boundaries();
+
 	build_hyper_edges2();
 
 	return 0;
@@ -791,6 +794,85 @@ int bundle::remove_small_edges()
 
 	return 0;
 }
+
+int bundle::remove_inner_start_boundaries()
+{
+	for(int i = 1; i < gr.num_vertices(); i++)
+	{
+		if(gr.in_degree(i) != 1) continue;
+		if(gr.out_degree(i) != 1) continue;
+
+		edge_iterator it1, it2;
+		tie(it1, it2) = gr.in_edges(i);
+		edge_descriptor e1 = (*it1);
+		tie(it1, it2) = gr.out_edges(i);
+		edge_descriptor e2 = (*it1);
+		int s = e1->source();
+		int t = e2->target();
+		vertex_info vi = gr.get_vertex_info(i);
+		double wv = gr.get_vertex_weight(i);
+		double ww = gr.get_vertex_weight(t);
+
+		if(s != 0) continue;
+		if(gr.in_degree(t) == 1) continue;
+
+		bool b1 = true;
+		if(vi.stddev >= 0.01) b1 = false;
+
+		bool b2 = true;
+		if(t != i + 1) b2 = false;
+		if(1.5 * wv > ww) b2 = false;
+		if(vi.rpos == gr.get_vertex_info(t).lpos) b2 = false;
+
+		if(b1 == false && b2 == false) continue;
+
+		printf("remove inner start boundary: vertex = %d, weight = %.2lf, length = %d\n", i, wv, vi.length);
+
+		gr.clear_vertex(i);
+	}
+	return 0;
+}
+
+int bundle::remove_inner_end_boundaries()
+{
+	for(int i = 1; i < gr.num_vertices(); i++)
+	{
+		if(gr.in_degree(i) != 1) continue;
+		if(gr.out_degree(i) != 1) continue;
+
+		edge_iterator it1, it2;
+		tie(it1, it2) = gr.in_edges(i);
+		edge_descriptor e1 = (*it1);
+		tie(it1, it2) = gr.out_edges(i);
+		edge_descriptor e2 = (*it1);
+		int s = e1->source();
+		int t = e2->target();
+		vertex_info vi = gr.get_vertex_info(i);
+		double wv = gr.get_vertex_weight(i);
+		double ww = gr.get_vertex_weight(s);
+
+		if(t != gr.num_vertices() - 1) continue;
+		if(gr.out_degree(s) == 1) continue;
+
+		//if(ww < 1.5 * wv) continue;
+	
+		bool b1 = true;
+		if(vi.stddev >= 0.01) b1 = false;
+
+		bool b2 = true;
+		if(vi.lpos == gr.get_vertex_info(s).rpos) b2 = false;
+		if(i != s + 1) b2 = false;
+		if(1.5 * wv > ww) b2 = false;
+	
+		if(b1 == false && b2 == false) continue;
+
+		printf("remove inner end boundary: vertex = %d, weight = %.2lf, length = %d\n", i, wv, vi.length);
+
+		gr.clear_vertex(i);
+	}
+	return 0;
+}
+
 
 int bundle::count_junctions() const
 {
