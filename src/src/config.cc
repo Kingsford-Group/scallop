@@ -24,6 +24,7 @@ double min_subregion_overlap = 1.5;
 int32_t min_subregion_length = 15;
 
 // for revising/decomposing splice graph
+double max_intron_contamination_coverage = 2.0;
 double min_surviving_edge_weight = 1.5;
 double max_small_error_ratio = 0.33;
 double max_split_error_ratio = 0.25;
@@ -75,6 +76,7 @@ int print_parameters()
 	printf("min_subregion_overlap = %.2lf\n", min_subregion_overlap);
 
 	// for splice graph
+	printf("max_intron_contamination_coverage = %.2lf\n", max_intron_contamination_coverage);
 	printf("min_surviving_edge_weight = %.2lf\n", min_surviving_edge_weight);
 	printf("min_transcript_coverage = %.2lf\n", min_transcript_coverage);
 	printf("min_single_exon_coverage = %.2lf\n", min_single_exon_coverage);
@@ -216,6 +218,11 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--min_surviving_edge_weight")
 		{
 			min_surviving_edge_weight = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--max_intron_contamination_coverage")
+		{
+			max_intron_contamination_coverage = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_transcript_coverage")

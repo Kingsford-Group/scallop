@@ -66,6 +66,7 @@ private:
 	int extend_isolated_end_boundaries();
 	int remove_inner_start_boundaries();
 	int remove_inner_end_boundaries();
+	int remove_intron_contamination();
 };
 
 #endif

@@ -20,7 +20,7 @@ bundle::~bundle()
 
 int bundle::build()
 {
-	if(library_type == UNSTRANDED) compute_strand();
+	if(library_type == UNSTRAND) compute_strand();
 
 	check_left_ascending();
 
@@ -37,13 +37,10 @@ int bundle::build()
 	remove_small_edges();
 	refine_splice_graph();
 
+	remove_inner_vertices();
+
 	extend_isolated_start_boundaries();
 	extend_isolated_end_boundaries();
-
-	remove_inner_start_boundaries();
-	remove_inner_end_boundaries();
-
-	remove_intron_contamination();
 
 	build_hyper_edges2();
 
@@ -90,11 +87,10 @@ int bundle::check_right_ascending()
 
 int bundle::build_junctions()
 {
-	int min_max_boundary_quality = min_mapping_quality;
-	map< int64_t, vector<int> > m;
+	map<int64_t, int> m;
+	vector<int64_t> v;
 	for(int i = 0; i < hits.size(); i++)
 	{
-		vector<int64_t> v;
 		hits[i].get_splice_positions(v);
 		if(v.size() == 0) continue;
 
@@ -103,38 +99,16 @@ int bundle::build_junctions()
 		{
 			int64_t p = v[k];
 			//printf(" %d-%d\n", low32(p), high32(p));
-			if(m.find(p) == m.end())
-			{
-				vector<int> hv;
-				hv.push_back(i);
-				m.insert(pair< int64_t, vector<int> >(p, hv));
-			}
-			else
-			{
-				m[p].push_back(i);
-			}
+			if(m.find(p) == m.end()) m.insert(pair<int64_t, int>(p, 1));
+			else m[p]++;
 		}
 	}
 
-	map< int64_t, vector<int> >::iterator it;
+	map<int64_t, int>::iterator it;
 	for(it = m.begin(); it != m.end(); it++)
 	{
-		vector<int> &v = it->second;
-		if(v.size() < min_splice_boundary_hits) continue;
-
-		int32_t p1 = high32(it->first);
-		int32_t p2 = low32(it->first);
-
-		if(p2 - p1 > 100000 && v.size() < 10) continue;
-
-		uint32_t max_qual = 0;
-		for(int k = 0; k < v.size(); k++)
-		{
-			hit &h = hits[v[k]];
-			if(h.qual > max_qual) max_qual = h.qual;
-		}
-		assert(max_qual >= min_max_boundary_quality);
-		junctions.push_back(junction(it->first, v.size()));
+		if(it->second < min_splice_boundary_hits) continue;
+		junctions.push_back(junction(it->first, it->second));
 	}
 	return 0;
 }
@@ -385,9 +359,9 @@ bool bundle::bridge_read(int x, int y, vector<int> &v)
 
 	PEB e = gr.edge(x + 1, y + 1);
 	if(e.second == true) return true;
-	//else return false;
+	else return false;
 
-	if(y - x >= 6) return false;
+	if(y - x >= 10) return false;
 
 	long max = 9999999999;
 	vector<long> table;
@@ -802,92 +776,7 @@ int bundle::remove_small_edges()
 	return 0;
 }
 
-int bundle::remove_inner_start_boundaries()
-{
-	for(int i = 1; i < gr.num_vertices(); i++)
-	{
-		if(gr.in_degree(i) != 1) continue;
-		if(gr.out_degree(i) != 1) continue;
-
-		edge_iterator it1, it2;
-		tie(it1, it2) = gr.in_edges(i);
-		edge_descriptor e1 = (*it1);
-		tie(it1, it2) = gr.out_edges(i);
-		edge_descriptor e2 = (*it1);
-		int s = e1->source();
-		int t = e2->target();
-		vertex_info vi = gr.get_vertex_info(i);
-		double wv = gr.get_vertex_weight(i);
-		double ww = gr.get_vertex_weight(t);
-
-		if(s != 0) continue;
-		if(gr.in_degree(t) == 1) continue;
-
-		bool b1 = true;
-		if(vi.stddev >= 0.01) b1 = false;
-
-		bool b2 = true;
-		//if(t != i + 1) b2 = false;
-		if(1.5 * wv > ww) b2 = false;
-		if(vi.rpos == gr.get_vertex_info(t).lpos) b2 = false;
-		if(vi.length > 50) b2 = false;
-		if(wv > 10.0) b2 = false;
-
-		if(b1 == false && b2 == false) continue;
-
-		printf("remove inner start boundary: vertex = %d, weight = %.2lf, length = %d, pos = %d-%d, t = %d, t.left = %d\n",
-				i, wv, vi.length, vi.lpos, vi.rpos, t, gr.get_vertex_info(t).lpos);
-
-		gr.clear_vertex(i);
-	}
-	return 0;
-}
-
-int bundle::remove_inner_end_boundaries()
-{
-	for(int i = 1; i < gr.num_vertices(); i++)
-	{
-		if(gr.in_degree(i) != 1) continue;
-		if(gr.out_degree(i) != 1) continue;
-
-		edge_iterator it1, it2;
-		tie(it1, it2) = gr.in_edges(i);
-		edge_descriptor e1 = (*it1);
-		tie(it1, it2) = gr.out_edges(i);
-		edge_descriptor e2 = (*it1);
-		int s = e1->source();
-		int t = e2->target();
-		vertex_info vi = gr.get_vertex_info(i);
-		double wv = gr.get_vertex_weight(i);
-		double ww = gr.get_vertex_weight(s);
-
-		if(t != gr.num_vertices() - 1) continue;
-		if(gr.out_degree(s) == 1) continue;
-
-		//if(ww < 1.5 * wv) continue;
-	
-		bool b1 = true;
-		if(vi.stddev >= 0.01) b1 = false;
-
-		bool b2 = true;
-		if(vi.lpos == gr.get_vertex_info(s).rpos) b2 = false;
-		//if(i != s + 1) b2 = false;
-		if(1.5 * wv > ww) b2 = false;
-		if(vi.length > 50) b2 = false;
-		if(wv > 10.0) b2 = false;
-
-		if(b1 == false && b2 == false) continue;
-
-		printf("remove inner end boundary: vertex = %d, weight = %.2lf, length = %d, pos = %d-%d, s = %d, s.right = %d\n",
-				i, wv, vi.length, vi.lpos, vi.rpos, s, gr.get_vertex_info(s).rpos);
-
-
-		gr.clear_vertex(i);
-	}
-	return 0;
-}
-
-int bundle::remove_intron_contamination()
+int bundle::remove_inner_vertices()
 {
 	for(int i = 1; i < gr.num_vertices(); i++)
 	{
@@ -916,9 +805,9 @@ int bundle::remove_intron_contamination()
 		double we = gr.get_edge_weight(ee);
 
 		if(wv > we) continue;
-		if(wv > max_intron_contamination_coverage) continue;
+		if(wv > min_inner_vertex_weight) continue;
 
-		printf("clear intron contamination %d, weight = %.2lf, length = %d, edge weight = %.2lf\n", i, wv, vi.length, we);
+		printf("clear inner exon %d, weight = %.2lf, length = %d, edge weight = %.2lf\n", i, wv, vi.length, we);
 
 		gr.clear_vertex(i);
 	}
