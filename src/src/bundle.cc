@@ -823,11 +823,13 @@ int bundle::remove_inner_start_boundaries()
 		if(t != i + 1) b2 = false;
 		if(1.5 * wv > ww) b2 = false;
 		if(vi.rpos == gr.get_vertex_info(t).lpos) b2 = false;
-		if(vi.length > 20) b2 = false;
+		if(vi.length > 50) b2 = false;
+		if(wv > 10.0) b2 = false;
 
 		if(b1 == false && b2 == false) continue;
 
-		printf("remove inner start boundary: vertex = %d, weight = %.2lf, length = %d\n", i, wv, vi.length);
+		printf("remove inner start boundary: vertex = %d, weight = %.2lf, length = %d, pos = %d-%d, t = %d, t.left = %d\n",
+				i, wv, vi.length, vi.lpos, vi.rpos, t, gr.get_vertex_info(t).lpos);
 
 		gr.clear_vertex(i);
 	}
@@ -864,11 +866,14 @@ int bundle::remove_inner_end_boundaries()
 		if(vi.lpos == gr.get_vertex_info(s).rpos) b2 = false;
 		if(i != s + 1) b2 = false;
 		if(1.5 * wv > ww) b2 = false;
-		if(vi.length > 20) b2 = false;
-	
+		if(vi.length > 50) b2 = false;
+		if(wv > 10.0) b2 = false;
+
 		if(b1 == false && b2 == false) continue;
 
-		printf("remove inner end boundary: vertex = %d, weight = %.2lf, length = %d\n", i, wv, vi.length);
+		printf("remove inner end boundary: vertex = %d, weight = %.2lf, length = %d, pos = %d-%d, s = %d, s.right = %d\n",
+				i, wv, vi.length, vi.lpos, vi.rpos, s, gr.get_vertex_info(s).rpos);
+
 
 		gr.clear_vertex(i);
 	}
