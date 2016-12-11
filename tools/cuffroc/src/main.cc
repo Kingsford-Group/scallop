@@ -20,6 +20,7 @@ int main(int argc, const char **argv)
 	if(argc == 4)
 	{
 		cuffroc roc(argv[1], argv[2], atoi(argv[3]));
+		roc.classify();
 		roc.solve();
 		roc.print();
 	}

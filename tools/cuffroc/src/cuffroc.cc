@@ -9,9 +9,10 @@
 using namespace std;
 
 cuffroc::cuffroc(const string &cufffile, const string &gtffile, int r, int m, int f, double p)
+	: gm(gtffile)
 {
 	read_cuff(cufffile);
-	read_gtf(gtffile);
+	build_indices();
 	refsize = r;
 	mexons = m;
 	pratio = p;
@@ -24,24 +25,31 @@ int cuffroc::read_cuff(const string &file)
 	if(fin.fail()) return -1;
 
 	char line[10240];
-
 	while(fin.getline(line, 10240, '\n'))
 	{
 		cuffitem x(line);
 		if(x.code == '@') continue;
 		items.push_back(x);
 	}
+
+	fin.close();
 	return 0;
 }
 
-int cuffroc::read_gtf(const string &file)
+int cuffroc::build_indices()
 {
+	t2i.clear();
+	for(int i = 0; i < items.size(); i++)
+	{
+		string s = items[i].transcript_id;
+		t2i.insert(pair<string, int>(s, i));
+	}
+
 	t2e.clear();
 	t2s.clear();
-	genome gn(file);
-	for(int i = 0; i < gn.genes.size(); i++)
+	for(int i = 0; i < gm.genes.size(); i++)
 	{
-		vector<transcript> &v = gn.genes[i].transcripts;
+		vector<transcript> &v = gm.genes[i].transcripts;
 		for(int k = 0; k < v.size(); k++)
 		{
 			string s = v[k].transcript_id;
@@ -53,6 +61,32 @@ int cuffroc::read_gtf(const string &file)
 			t2s.insert(pair<string, char>(s, c));
 		}
 	}
+
+	return 0;
+}
+
+int cuffroc::classify()
+{
+	ofstream f1("true.gtf");
+	ofstream f2("false.gtf");
+	for(int i = 0; i < gm.genes.size(); i++)
+	{
+		vector<transcript> &v = gm.genes[i].transcripts;
+		for(int k = 0; k < v.size(); k++)
+		{
+			string s = v[k].transcript_id;
+			bool b = false;
+			if(t2i.find(s) != t2i.end())
+			{
+				if(items[t2i[s]].code == '=') b = true;
+				else b = false;
+			}
+			if(b == true) v[k].write(f1);
+			else v[k].write(f2);
+		}
+	}
+	f1.close();
+	f2.close();
 	return 0;
 }
 
