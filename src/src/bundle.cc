@@ -122,10 +122,11 @@ int bundle::build_junctions()
 		vector<int> &v = it->second;
 		if(v.size() < min_splice_boundary_hits) continue;
 
+		/*
 		int32_t p1 = high32(it->first);
 		int32_t p2 = low32(it->first);
-
 		if(p2 - p1 > 100000 && v.size() < 10) continue;
+		*/
 
 		uint32_t max_qual = 0;
 		for(int k = 0; k < v.size(); k++)
