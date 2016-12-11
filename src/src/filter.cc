@@ -35,6 +35,8 @@ int filter::join()
 bool filter::join_transcripts()
 {
 	sort(trs.begin(), trs.end(), transcript_cmp);
+	print();
+
 	int32_t mind = min_bundle_gap;
 	int ki = -1, kj = -1;
 	for(int i = 0; i < trs.size(); i++)
@@ -50,6 +52,8 @@ bool filter::join_transcripts()
 	}
 	if(ki == -1 || kj == -1) return false;
 	if(mind > min_bundle_gap - 1) return false;
+
+	printf("join transcript %d and %d\n", ki, kj);
 
 	if(trs[ki].exons.size() >= 2)
 	{
@@ -112,6 +116,17 @@ int filter::locate_next_transcript(int t)
 	}
 	assert(false);
 	return -1;
+}
+
+int filter::print()
+{
+	for(int i = 0; i < trs.size(); i++)
+	{
+		transcript &t = trs[i];
+		printf("transcript %d: exons = %lu, pos = %d-%d\n",
+				i, t.exons.size(), t.get_bounds().first, t.get_bounds().second);
+	}
+	return 0;
 }
 
 bool transcript_cmp(const transcript &x, const transcript &y)

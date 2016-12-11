@@ -14,6 +14,7 @@ public:
 public:
 	int join();
 	int select();
+	int print();
 
 private:
 	bool join_transcripts();
