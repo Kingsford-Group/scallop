@@ -35,7 +35,6 @@ double min_single_exon_coverage = 20;
 double min_transcript_numreads = 20;
 int min_transcript_length = 200;
 int min_exon_length = 50;
-int max_joining_gap = 40;
 
 // for subsetsum and router
 int max_dp_table_size = 10000;
@@ -82,7 +81,6 @@ int print_parameters()
 	printf("min_transcript_numreads = %.2lf\n", min_transcript_numreads);
 	printf("min_transcript_length = %d\n", min_transcript_length);
 	printf("min_exon_length = %d\n", min_exon_length);
-	printf("max_joining_gap = %d\n", max_joining_gap);
 	printf("max_small_error_ratio = %.2lf\n", max_small_error_ratio);
 	printf("max_split_error_ratio = %.2lf\n", max_split_error_ratio);
 	printf("max_decompose_error_ratio = %.2lf\n", max_decompose_error_ratio);
@@ -243,11 +241,6 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--min_exon_length")
 		{
 			min_exon_length = atoi(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--max_joining_gap")
-		{
-			max_joining_gap = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--max_split_error_ratio")

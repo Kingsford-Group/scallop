@@ -35,7 +35,7 @@ int filter::join()
 bool filter::join_transcripts()
 {
 	sort(trs.begin(), trs.end(), transcript_cmp);
-	int32_t mind = max_joining_gap + 1;
+	int32_t mind = min_bundle_gap;
 	int ki = -1, kj = -1;
 	for(int i = 0; i < trs.size(); i++)
 	{
@@ -49,7 +49,7 @@ bool filter::join_transcripts()
 		kj = j;
 	}
 	if(ki == -1 || kj == -1) return false;
-	if(mind > max_joining_gap) return false;
+	if(mind > min_bundle_gap - 1) return false;
 
 	if(trs[ki].exons.size() >= 2)
 	{
