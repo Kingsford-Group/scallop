@@ -829,9 +829,9 @@ int bundle::remove_inner_start_boundaries()
 
 		bool b2 = true;
 		//if(t != i + 1) b2 = false;
-		if(1.5 * wv > ww) b2 = false;
+		if(2.0 * wv > ww) b2 = false;
 		if(vi.rpos == gr.get_vertex_info(t).lpos) b2 = false;
-		if(vi.length > 50 && wv > 2.0) b2 = false;
+		if(vi.length > 50 && wv > 3.0) b2 = false;
 		if(wv > 10.0) b2 = false;
 
 		if(b1 == false && b2 == false) continue;
@@ -873,8 +873,8 @@ int bundle::remove_inner_end_boundaries()
 		bool b2 = true;
 		if(vi.lpos == gr.get_vertex_info(s).rpos) b2 = false;
 		//if(i != s + 1) b2 = false;
-		if(1.5 * wv > ww) b2 = false;
-		if(vi.length > 50 && wv > 2.0) b2 = false;
+		if(2.0 * wv > ww) b2 = false;
+		if(vi.length > 50 && wv > 3.0) b2 = false;
 		if(wv > 10.0) b2 = false;
 
 		if(b1 == false && b2 == false) continue;
