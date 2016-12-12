@@ -1,6 +1,0 @@
-GEN_DIR			.
-REF_FILE_NAME	ensembl/mouse/gtf/p2.gtf
-LOAD_CODING		true
-LOAD_NONCODING	false
-PRO_FILE_NAME	profile
-LIB_FILE_NAME	libfile
