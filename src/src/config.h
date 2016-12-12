@@ -36,6 +36,8 @@ extern int32_t min_bundle_gap;
 extern int min_num_hits_in_bundle;
 extern uint32_t min_mapping_quality;
 extern int32_t min_splice_boundary_hits;
+extern bool uniquely_mapped_only;
+extern bool use_second_alignment;
 
 // for identifying subgraphs
 extern int32_t min_subregion_gap;
@@ -79,7 +81,6 @@ extern string fixed_gene_name;
 extern int max_num_bundles;
 extern int library_type;
 extern int min_gtf_transcripts_num;
-extern bool use_second_alignment;
 
 // parse arguments
 int print_command_line(int argc, const char ** argv);

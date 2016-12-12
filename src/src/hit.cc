@@ -12,6 +12,7 @@ hit::hit(int32_t p)
 	strand = '.';
 	xs = '.';
 	hi = -1;
+	nh = -1;
 	qlen = 0;
 }
 
@@ -69,6 +70,10 @@ hit::hit(bam1_t *b)
 	hi = -1;
 	uint8_t *p2 = bam_aux_get(b, "HI");
 	if(p2 && (*p2) == 'C') hi = bam_aux2i(p2);
+
+	nh = -1;
+	uint8_t *p3 = bam_aux_get(b, "NH");
+	if(p3 && (*p3) == 'C') nh = bam_aux2i(p3);
 
 	xs = '.';
 	uint8_t *p1 = bam_aux_get(b, "XS");

@@ -49,6 +49,7 @@ int assembler::assemble()
 		//if(ht.pos > 117365807 && ht.rpos < 117367284) ht.print();
 
 		if(ht.strand == '.') continue;	// TODO
+		if(uniquely_mapped_only == true && ht.nh != 1) continue;
 
 		truncate(ht);
 		add_hit(ht);

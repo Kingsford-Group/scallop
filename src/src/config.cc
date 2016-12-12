@@ -16,6 +16,7 @@ int min_num_hits_in_bundle = 20;
 uint32_t min_mapping_quality = 1;
 int32_t min_splice_boundary_hits = 1;
 bool use_second_alignment = false;
+bool uniquely_mapped_only = false;
 int library_type = UNSTRANDED;
 
 // for identifying subgraphs
@@ -110,6 +111,7 @@ int print_parameters()
 	printf("output_tex_files = %c\n", output_tex_files ? 'T' : 'F');
 	printf("fixed_gene_name = %s\n", fixed_gene_name.c_str());
 	printf("use_second_alignment = %c\n", use_second_alignment ? 'T' : 'F');
+	printf("uniquely_mapped_only = %c\n", uniquely_mapped_only ? 'T' : 'F');
 
 	printf("\n");
 
@@ -288,6 +290,13 @@ int parse_arguments(int argc, const char ** argv)
 			string s(argv[i + 1]);
 			if(s == "true") use_second_alignment = true;
 			else use_second_alignment = false;
+			i++;
+		}
+		else if(string(argv[i]) == "--uniquely_mapped_only")
+		{
+			string s(argv[i + 1]);
+			if(s == "true") uniquely_mapped_only = true;
+			else uniquely_mapped_only = false;
 			i++;
 		}
 	}
