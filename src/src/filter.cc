@@ -16,6 +16,7 @@ int filter::select()
 		int minl = min_transcript_length + e * min_exon_length;
 		if(trs[i].length() < minl) continue;
 		if(e == 1 && trs[i].coverage < min_single_exon_coverage) continue;
+		if(e >= 2 && trs[i].coverage < min_transcript_coverage) continue;
 		v.push_back(trs[i]);
 	}
 	trs = v;
