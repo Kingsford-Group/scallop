@@ -617,7 +617,7 @@ int router::decompose1()
 	vector<GRBVar> rvars;
 	for(int i = 0; i < ve.size(); i++)
 	{
-		GRBVar rvar = model->addVar(1.0, GRB_INFINITY, 0, GRB_CONTINUOUS); // TODO, [1.0, ]
+		GRBVar rvar = model->addVar(0.5, GRB_INFINITY, 0, GRB_CONTINUOUS); // TODO, [0.5, ]
 		rvars.push_back(rvar);
 	}
 

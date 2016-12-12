@@ -92,15 +92,10 @@ bool scallop::resolve_small_edges()
 	int se = -1;
 	int root = -1;
 	double ratio = max_small_error_ratio;
-	int max_trivial = 100;
-	vector<int> pv = get_random_permutation(gr.num_vertices() - 2);
-	for(int k = 0; k < pv.size(); k++)
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
-		int i = pv[k] + 1;
 		if(gr.in_degree(i) <= 1) continue;
 		if(gr.out_degree(i) <= 1) continue;
-
-		max_trivial--;
 
 		double r;
 		int e = compute_smallest_edge(i, r);
@@ -123,8 +118,6 @@ bool scallop::resolve_small_edges()
 		ratio = r;
 		se = e;
 		root = i;
-
-		if(max_trivial <= 0) break;
 	}
 
 	if(se == -1) return false;
@@ -146,18 +139,14 @@ bool scallop::resolve_splitable_vertex(int degree)
 	int root = -1;
 	double ratio = DBL_MAX;
 	vector<equation> eqns;
-	int max_trivial = 100;
-	vector<int> pv = get_random_permutation(gr.num_vertices() - 2);
-	for(int k = 0; k < pv.size(); k++)
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
-		int i = pv[k] + 1;
 		if(gr.in_degree(i) <= 1) continue;
 		if(gr.out_degree(i) <= 1) continue;
 
 		MPII mpi = hs.get_routes(i, gr, e2i);
-		if(mpi.size() == 0) continue;
 
-		max_trivial--;
+		if(mpi.size() == 0) continue;
 
 		router rt(i, gr, e2i, i2e, mpi);
 		rt.classify();
@@ -174,8 +163,6 @@ bool scallop::resolve_splitable_vertex(int degree)
 		ratio = rt.ratio;
 		eqns = rt.eqns;
 		degree = rt.degree;
-
-		if(max_trivial <= 0) break;
 	}
 
 	if(root == -1) return false;
@@ -218,7 +205,8 @@ bool scallop::resolve_insplitable_vertex(int type, int degree)
 		vpi = rt.vpi;
 		degree = rt.degree;
 
-		break; // jump out immediately to save time
+		// jump out immediately to save time
+		break;
 	}
 
 	if(root == -1) return false;
@@ -1201,19 +1189,17 @@ int scallop::print()
 		if(gr.degree(i) >= 1) n++;
 	}
 
-	/*
 	int p1 = gr.compute_num_paths();
 	int p2 = gr.compute_decomp_paths();
 	printf("statistics: %lu edges, %d vertices, total %d paths, %d required\n", gr.num_edges(), n, p1, p2);
-	*/
-
-	printf("statistics: %lu edges, %d vertices\n", gr.num_edges(), n);
 
 	//hs.print();
 
 	if(output_tex_files == true)
 	{
 		draw_splice_graph(name + "." + tostring(round) + ".tex");
+		//nested_graph nt(gr);
+		//nt.draw(name + "." + tostring(round) + ".nt.tex");
 	}
 
 	printf("finish round %d\n\n", round);

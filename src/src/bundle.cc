@@ -34,8 +34,8 @@ int bundle::build()
 	build_splice_graph();
 
 	// revise splice graph
-	remove_small_edges();
-	refine_splice_graph();
+	//remove_small_edges();
+	//refine_splice_graph();
 
 	keep_surviving_edges();
 	refine_splice_graph();
@@ -867,13 +867,13 @@ int bundle::remove_inner_start_boundaries()
 		if(gr.in_degree(t) == 1) continue;
 
 		bool b1 = true;
-		if(vi.stddev >= 0.5) b1 = false;
+		if(vi.stddev >= 0.01) b1 = false;
 
 		bool b2 = true;
 		//if(t != i + 1) b2 = false;
 		if(1.5 * wv > ww) b2 = false;
 		if(vi.rpos == gr.get_vertex_info(t).lpos) b2 = false;
-		if(vi.length > 50 && wv > 2.5) b2 = false;
+		if(vi.length > 50 && wv > 2.0) b2 = false;
 		if(wv > 10.0) b2 = false;
 
 		if(b1 == false && b2 == false) continue;
@@ -910,13 +910,13 @@ int bundle::remove_inner_end_boundaries()
 		//if(ww < 1.5 * wv) continue;
 	
 		bool b1 = true;
-		if(vi.stddev >= 0.5) b1 = false;
+		if(vi.stddev >= 0.01) b1 = false;
 
 		bool b2 = true;
 		if(vi.lpos == gr.get_vertex_info(s).rpos) b2 = false;
 		//if(i != s + 1) b2 = false;
 		if(1.5 * wv > ww) b2 = false;
-		if(vi.length > 50 && wv > 2.5) b2 = false;
+		if(vi.length > 50 && wv > 2.0) b2 = false;
 		if(wv > 10.0) b2 = false;
 
 		if(b1 == false && b2 == false) continue;
