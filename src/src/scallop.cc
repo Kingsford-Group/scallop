@@ -21,7 +21,6 @@ scallop::scallop(const string &s, const splice_graph &g, const hyper_set &h)
 	init_super_edges();
 	init_vertex_map();
 	init_inner_weights();
-	print();
 }
 
 scallop::~scallop()
@@ -42,7 +41,7 @@ int scallop::assemble()
 		if(b == true) continue;
 
 		b = resolve_small_edges();
-		//if(b == true) print();
+		if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_splitable_vertex(1);
@@ -64,7 +63,7 @@ int scallop::assemble()
 		*/
 
 		b = resolve_trivial_vertex();
-		//if(b == true) print();
+		if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_hyper_edge1();
@@ -415,13 +414,11 @@ int scallop::classify()
 		if(gr.degree(i) == 0) p1++;
 	}
 
-	printf("vertices = %lu, edges = %lu, p0 = %ld, p1 = %ld\n", gr.num_vertices(), gr.num_edges(), p0, p1);
-
-	//assert(p0 >= p1);
-
 	bool b = (p0 <= p1) ? true : false;
+	printf("\ninstance %s, vertices = %lu, edges = %lu, p0 = %ld, p1 = %ld, type = %s\n", 
+			name.c_str(), gr.num_vertices(), gr.num_edges(), p0, p1, b ? "TRIVIAL" : "NORMAL");
 
-	printf("\nprocess %s %s\n", name.c_str(), b ? "TRIVIAL" : "NORMAL");
+	gr.print();
 
 	if(p0 == p1) return TRIVIAL;
 	else return NORMAL;
@@ -1244,5 +1241,3 @@ int scallop::draw_splice_graph(const string &file)
 	gr.draw(file, mis, mes, 4.5, tp);
 	return 0;
 }
-
-

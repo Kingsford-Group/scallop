@@ -970,24 +970,22 @@ int splice_graph::print_nontrivial_vertices()
 
 int splice_graph::print()
 {
-	for(int i = 0; i < num_vertices(); i++)
+	for(int i = 1; i < num_vertices() - 1; i++)
 	{
 		//if(degree(i) <= 1) continue;
 		vertex_info vi = get_vertex_info(i);
 		edge_iterator it1, it2;
-		printf("vertex %d, range = [%d, %d), length = %d\n", i, vi.lpos, vi.rpos, vi.rpos - vi.lpos);
-		printf(" in-vertices ="); 
-		for(tie(it1, it2) = in_edges(i); it1 != it2; it1++)
-		{
-			printf(" %d, ", (*it1)->source());
-		}
-		printf("\n out-vertices = ");
-		for(tie(it1, it2) = out_edges(i); it1 != it2; it1++)
-		{
-			printf(" %d, ", (*it1)->target());
-		}
-		printf("\n");
+		printf("vertex %d, range = %d-%d, length = %d, weight = %.3lf\n", i, vi.lpos, vi.rpos, vi.rpos - vi.lpos, get_vertex_weight(i));
 	}
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = edges(); it1 != it2; it1++)
+	{
+		edge_descriptor e = (*it1);
+		int s = e->source();
+		int t = e->target();
+		printf("edge (%d, %d), weight = %.3lf\n", s, t, get_edge_weight(e));
+	}
+	printf("\n");
 	return 0;
 }
 

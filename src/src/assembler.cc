@@ -158,13 +158,19 @@ int assembler::process(const bundle_base &bb)
 		string gid = "bundle." + tostring(index) + "." + tostring(k);
 		if(fixed_gene_name != "" && gid != fixed_gene_name) continue;
 
+		/*
 		if(k == 0 || fixed_gene_name != "") bd.print(index);
 		if(k == 0 || fixed_gene_name != "") sg.print();
+		*/
 
 		if(algo == "empty") continue;
 
 		splice_graph &gr = sg.subs[k];
 		hyper_set &hs = sg.hss[k];
+
+		if(gr.num_edges() <= 0) continue;
+
+		printf("start processing instance %s on chrm %s\n", gid.c_str(), bd.chrm.c_str());
 
 		if(ref_file != "") compare(gr, ref_file, "compare.tex");
 		if(ref_file1 != "" && bd.strand == '+') compare(gr, ref_file1, "compare1.tex");

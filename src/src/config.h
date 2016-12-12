@@ -51,7 +51,9 @@ extern int min_router_count;
 
 // for splice graph
 extern double max_intron_contamination_coverage;
+extern double min_surviving_vertex_weight;
 extern double min_surviving_edge_weight;
+extern double min_surviving_edge_ratio;
 extern double max_small_error_ratio;
 extern double max_split_error_ratio;
 extern double max_decompose_error_ratio;

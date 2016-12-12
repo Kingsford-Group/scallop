@@ -10,37 +10,39 @@ using namespace std;
 
 //// parameters
 // for bam file and reads
-int min_flank_length = 3;
+int min_flank_length = 8;
 int32_t min_bundle_gap = 50;
 int min_num_hits_in_bundle = 20;
-uint32_t min_mapping_quality = 1;
-int32_t min_splice_boundary_hits = 1;
+uint32_t min_mapping_quality = 10;
+int32_t min_splice_boundary_hits = 10;
 bool use_second_alignment = false;
-bool uniquely_mapped_only = false;
+bool uniquely_mapped_only = true;
 int library_type = UNSTRANDED;
 
 // for identifying subgraphs
-int32_t min_subregion_gap = 3;
-double min_subregion_overlap = 1.5;
-int32_t min_subregion_length = 15;
+int32_t min_subregion_gap = 0;
+double min_subregion_overlap = 5.0;
+int32_t min_subregion_length = 30;
 
 // for revising/decomposing splice graph
 double max_intron_contamination_coverage = 2.0;
-double min_surviving_edge_weight = 1.5;
+double min_surviving_vertex_weight = 10;
+double min_surviving_edge_weight = 10;
+double min_surviving_edge_ratio = 0.01;
 double max_small_error_ratio = 0.33;
 double max_split_error_ratio = 0.25;
 double max_decompose_error_ratio = 0.01;
 
 // for selecting paths
-double min_transcript_coverage = 0.9;
-double min_single_exon_coverage = 20;
+double min_transcript_coverage = 10.0;
+double min_single_exon_coverage = 100;
 double min_transcript_numreads = 20;
-int min_transcript_length = 200;
+int min_transcript_length = 300;
 int min_exon_length = 50;
 
 // for subsetsum and router
 int max_dp_table_size = 10000;
-int min_router_count = 1;
+int min_router_count = 5;
 
 // for simulation
 int simulation_num_vertices = 0;
@@ -79,6 +81,8 @@ int print_parameters()
 	// for splice graph
 	printf("max_intron_contamination_coverage = %.2lf\n", max_intron_contamination_coverage);
 	printf("min_surviving_edge_weight = %.2lf\n", min_surviving_edge_weight);
+	printf("min_surviving_vertex_weight = %.2lf\n", min_surviving_vertex_weight);
+	printf("min_surviving_edge_ratio = %.2lf\n", min_surviving_edge_ratio);
 	printf("min_transcript_coverage = %.2lf\n", min_transcript_coverage);
 	printf("min_single_exon_coverage = %.2lf\n", min_single_exon_coverage);
 	printf("min_transcript_numreads = %.2lf\n", min_transcript_numreads);
@@ -220,6 +224,16 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--min_surviving_edge_weight")
 		{
 			min_surviving_edge_weight = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_surviving_vertex_weight")
+		{
+			min_surviving_vertex_weight = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_surviving_edge_ratio")
+		{
+			min_surviving_edge_ratio = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--max_intron_contamination_coverage")

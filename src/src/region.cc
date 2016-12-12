@@ -10,8 +10,8 @@ region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split
 {
 
 	build_join_interval_map();
-	smooth_join_interval_map();
-	//split_join_interval_map();
+	//smooth_join_interval_map();
+	split_join_interval_map();
 	build_partial_exons();
 }
 
@@ -52,9 +52,9 @@ int region::split_join_interval_map()
 	tie(lit, rit) = locate_boundary_iterators(*mmap, lpos, rpos);
 	if(lit == mmap->end() || rit == mmap->end()) return 0;
 
-	int32_t min_split_middle_length = 10;
+	int32_t min_split_middle_length = 20;
+	int32_t max_split_middle_coverage = 3;
 	int32_t min_split_boundary_length = 40;
-	int32_t max_split_middle_coverage = 2;
 	double min_split_boundary_coverage = 10;
 
 	if(rpos - lpos < 100) return 0;
@@ -71,6 +71,8 @@ int region::split_join_interval_map()
 		int32_t q = p1;
 		bool b = true;
 		if(q - p < min_split_middle_length) b = false;
+
+		/*
 		if(p - lpos < min_split_boundary_length) b = false;
 		if(rpos - q < min_split_boundary_length) b = false;
 
@@ -81,12 +83,11 @@ int region::split_join_interval_map()
 
 		if(ave1 < min_split_boundary_coverage) b = false;
 		if(ave2 < min_split_boundary_coverage) b = false;
+		*/
 
 		if(b == true)
 		{
-			printf("SPLIT: type = (%d, %d), pos = %d-%d, mid = %d-%d, ave = (%.3lf, %.3lf), dev = (%.3lf, %.3lf)\n", 
-					ltype, rtype, lpos, rpos, p, q, ave1, ave2, dev1, dev2);
-
+			//printf("SPLIT: type = (%d, %d), pos = %d-%d, mid = %d-%d, ave = (%.3lf, %.3lf), dev = (%.3lf, %.3lf)\n", ltype, rtype, lpos, rpos, p, q, ave1, ave2, dev1, dev2);
 			jmap += make_pair(ROI(p, q), -1);
 		}
 

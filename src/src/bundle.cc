@@ -34,14 +34,17 @@ int bundle::build()
 	build_splice_graph();
 
 	// revise splice graph
-	//remove_small_edges();
-	//refine_splice_graph();
-
-	keep_surviving_edges();
+	remove_small_vertices();
 	refine_splice_graph();
 
-	extend_isolated_start_boundaries();
-	extend_isolated_end_boundaries();
+	remove_small_edges();
+	refine_splice_graph();
+
+	//keep_surviving_edges();
+	//refine_splice_graph();
+
+	//extend_isolated_start_boundaries();
+	//extend_isolated_end_boundaries();
 
 	remove_inner_start_boundaries();
 	remove_inner_end_boundaries();
@@ -729,6 +732,17 @@ int bundle::refine_splice_graph()
 	return 0;
 }
 
+int bundle::remove_small_vertices()
+{
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		double w = gr.get_vertex_weight(i);
+		if(w >= min_surviving_vertex_weight) continue;
+		gr.clear_vertex(i);
+	}
+	return 0;
+}
+
 int bundle::remove_small_edges()
 {
 	vector<double> max1(gr.num_vertices(), 0);
@@ -752,13 +766,16 @@ int bundle::remove_small_edges()
 		if(p1 == p2) continue;
 
 		double w = gr.get_edge_weight(*it1);
-		if(w >= 10.0) continue;
+	
+		bool b = true;
+		if(w < min_surviving_edge_weight) b = false;
 
 		double r1 = w / max2[s];
 		double r2 = w / max1[t];
-		if(r1 > 0.01 && r2 > 0.01) continue;
+		if(r1 < min_surviving_edge_ratio) b = false;
+		if(r2 < min_surviving_edge_ratio) b = false;
 
-		se.insert(*it1);
+		if(b == false) se.insert(*it1);
 	}
 	
 	for(SE::iterator it = se.begin(); it != se.end(); it++)
