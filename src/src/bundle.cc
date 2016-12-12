@@ -37,6 +37,9 @@ int bundle::build()
 	remove_small_edges();
 	refine_splice_graph();
 
+	keep_surviving_edges();
+	refine_splice_graph();
+
 	extend_isolated_start_boundaries();
 	extend_isolated_end_boundaries();
 
@@ -727,6 +730,45 @@ int bundle::refine_splice_graph()
 }
 
 int bundle::remove_small_edges()
+{
+	vector<double> max1(gr.num_vertices(), 0);
+	vector<double> max2(gr.num_vertices(), 0);
+	for(int i = 0; i < gr.num_vertices(); i++)
+	{
+		edge_descriptor e1 = gr.max_in_edge(i);
+		edge_descriptor e2 = gr.max_out_edge(i);
+		if(e1 != null_edge) max1[i] = gr.get_edge_weight(e1);
+		if(e2 != null_edge) max2[i] = gr.get_edge_weight(e2);
+	}
+
+	SE se;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	{
+		int s = (*it1)->source();
+		int t = (*it1)->target();
+		int32_t p1 = gr.get_vertex_info(s).rpos;
+		int32_t p2 = gr.get_vertex_info(t).lpos;
+		if(p1 == p2) continue;
+
+		double w = gr.get_edge_weight(*it1);
+		if(w >= 10.0) continue;
+
+		double r1 = w / max2[s];
+		double r2 = w / max1[t];
+		if(r1 > 0.01 && r2 > 0.01) continue;
+
+		se.insert(*it1);
+	}
+	
+	for(SE::iterator it = se.begin(); it != se.end(); it++)
+	{
+		gr.remove_edge(*it);
+	}
+	return 0;
+}
+
+int bundle::keep_surviving_edges()
 {
 	set<int> sv1;
 	set<int> sv2;
