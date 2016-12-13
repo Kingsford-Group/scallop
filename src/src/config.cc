@@ -42,7 +42,7 @@ int min_exon_length = 50;
 
 // for subsetsum and router
 int max_dp_table_size = 10000;
-int min_router_count = 5;
+int min_router_count = 2;
 
 // for simulation
 int simulation_num_vertices = 0;
