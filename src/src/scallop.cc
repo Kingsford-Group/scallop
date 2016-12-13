@@ -29,7 +29,9 @@ scallop::~scallop()
 
 int scallop::assemble()
 {
-	classify();
+	int c = classify();
+	
+	if(c != TRIVIAL) return 0;
 
 	while(true)
 	{
