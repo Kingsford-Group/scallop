@@ -29,8 +29,8 @@ public:
 	char strand;
 	int frame;
 	double coverage;
-	int numreads;
 	double RPKM;
+	double TPM;
 };
 
 #endif

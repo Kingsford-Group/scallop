@@ -63,7 +63,6 @@ int genome::read(const string &file)
 	{
 		genes[i].sort();
 		genes[i].shrink();
-		genes[i].assign_coverage_ratio();
 	}
 
 	return 0;

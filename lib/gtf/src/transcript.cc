@@ -33,8 +33,8 @@ int transcript::assign(const item &e)
 	strand = e.strand;
 	frame = e.frame;
 	coverage = e.coverage;
-	numreads = e.numreads;
 	RPKM = e.RPKM;
+	TPM = e.TPM;
 	return 0;
 }
 
@@ -62,8 +62,8 @@ int transcript::clear()
 	strand = '.';
 	frame = -1;
 	coverage = 0;
-	numreads = 0;
 	RPKM = 0;
+	TPM = 0;
 	return 0;
 }
 
@@ -112,7 +112,7 @@ int transcript::shrink()
 
 int transcript::assign_RPKM(double factor)
 {
-	RPKM = coverage * factor / length();
+	RPKM = coverage * factor;
 	return 0;
 }
 
@@ -143,7 +143,7 @@ string transcript::label() const
 	return string(buf);
 }
 
-int transcript::write(ofstream &fout) const
+int transcript::write(ostream &fout) const
 {
 	fout.precision(4);
 	fout<<fixed;
@@ -163,8 +163,7 @@ int transcript::write(ofstream &fout) const
 	fout<<"gene_id \""<<gene_id.c_str()<<"\"; ";
 	fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
 	fout<<"RPKM \""<<RPKM<<"\"; ";
-	fout<<"cov \""<<coverage<<"\"; ";
-	fout<<"numreads \""<<numreads<<"\";"<<endl;
+	fout<<"cov \""<<coverage<<"\";"<<endl;
 
 	for(int k = 0; k < exons.size(); k++)
 	{
@@ -180,8 +179,7 @@ int transcript::write(ofstream &fout) const
 		fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
 		fout<<"exon \""<<k + 1<<"\"; ";
 		fout<<"RPKM \""<<RPKM<<"\"; ";
-		fout<<"cov \""<<coverage<<"\"; ";
-		fout<<"numreads \""<<numreads<<"\"; "<<endl;
+		fout<<"cov \""<<coverage<<"\";"<<endl;
 	}
 	return 0;
 }

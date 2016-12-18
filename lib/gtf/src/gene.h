@@ -30,7 +30,6 @@ public:
 	int clear();
 	int set_gene_id(const string &id);
 	int assign_RPKM(double factor);
-	int assign_coverage_ratio();
 
 	// filter
 	int filter_single_exon_transcripts();

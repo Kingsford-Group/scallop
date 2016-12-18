@@ -2,6 +2,7 @@
 #define __GTF_TRANSCRIPT_H__
 
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
 #include "item.h"
@@ -33,8 +34,8 @@ public:
 	int frame;
 	double coverage;
 	double covratio;
-	int numreads;
 	double RPKM;
+	double TPM;
 
 	vector<PI32> exons;
 
@@ -49,7 +50,7 @@ public:
 	int length() const;
 	PI32 get_bounds() const;
 	string label() const;
-	int write(ofstream &fout) const;
+	int write(ostream &fout) const;
 };
 
 #endif
