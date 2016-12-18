@@ -28,6 +28,7 @@ public:
 	int sort();
 	int build_index();
 	int assign_RPKM(double factor);
+	int assign_TPM_by_RPKM();
 
 	// filter
 	int filter_single_exon_transcripts();

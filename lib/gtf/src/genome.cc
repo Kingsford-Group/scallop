@@ -126,6 +126,31 @@ int genome::assign_RPKM(double factor)
 	return 0;
 }
 
+int genome::assign_TPM_by_RPKM()
+{
+	double sum = 0;
+	for(int i = 0; i < genes.size(); i++)
+	{
+		vector<transcript> &v = genes[i].transcripts;
+		for(int k = 0; k < v.size(); k++)
+		{
+			transcript &t = v[k];
+			sum += t.RPKM;
+		}
+	}
+
+	for(int i = 0; i < genes.size(); i++)
+	{
+		vector<transcript> &v = genes[i].transcripts;
+		for(int k = 0; k < v.size(); k++)
+		{
+			transcript &t = v[k];
+			t.TPM = t.RPKM * 1e6 / sum;
+		}
+	}
+	return 0;
+}
+
 int genome::filter_single_exon_transcripts()
 {
 	for(int i = 0; i < genes.size(); i++)
