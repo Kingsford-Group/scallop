@@ -56,6 +56,7 @@ int gtfquant::filter()
 			int x = t2i[t.transcript_id];
 			if(items[x].tpm < min_tpm) continue;
 			if(items[x].numreads < min_numreads) continue;
+			t.TPM = items[x].tpm;
 			t.write(cout);
 		}
 	}
