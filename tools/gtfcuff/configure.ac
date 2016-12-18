@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT(cuffroc, 1.0, shaomingfu@gmail.com)
+AC_INIT(gtfcuff, 1.0, shaomingfu@gmail.com)
 AM_INIT_AUTOMAKE()
 AC_CONFIG_SRCDIR([src/main.cc])
 AC_CONFIG_HEADERS([config.h])

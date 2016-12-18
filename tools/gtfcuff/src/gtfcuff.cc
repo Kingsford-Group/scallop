@@ -1,4 +1,4 @@
-#include "cuffroc.h"
+#include "gtfcuff.h"
 #include "genome.h"
 #include <iostream>
 #include <fstream>
@@ -8,18 +8,15 @@
 
 using namespace std;
 
-cuffroc::cuffroc(const string &cufffile, const string &gtffile, int r, int m, int f, double p)
+gtfcuff::gtfcuff(const string &cufffile, const string &gtffile)
 	: gm(gtffile)
 {
 	read_cuff(cufffile);
 	build_indices();
-	refsize = r;
-	mexons = m;
-	pratio = p;
-	ftype = f;
+	refsize = 0;
 }
 
-int cuffroc::read_cuff(const string &file)
+int gtfcuff::read_cuff(const string &file)
 {
 	ifstream fin(file.c_str());
 	if(fin.fail()) return -1;
@@ -36,7 +33,7 @@ int cuffroc::read_cuff(const string &file)
 	return 0;
 }
 
-int cuffroc::build_indices()
+int gtfcuff::build_indices()
 {
 	t2i.clear();
 	for(int i = 0; i < items.size(); i++)
@@ -65,10 +62,10 @@ int cuffroc::build_indices()
 	return 0;
 }
 
-int cuffroc::classify()
+int gtfcuff::classify(const string &fn1, const string &fn2)
 {
-	ofstream f1("true.gtf");
-	ofstream f2("false.gtf");
+	ofstream f1(fn1.c_str());
+	ofstream f2(fn2.c_str());
 	for(int i = 0; i < gm.genes.size(); i++)
 	{
 		vector<transcript> &v = gm.genes[i].transcripts;
@@ -90,16 +87,16 @@ int cuffroc::classify()
 	return 0;
 }
 
-int cuffroc::filter_items()
+int gtfcuff::filter_items()
 {
 	vector<cuffitem> v;
 	for(int i = 0; i < items.size(); i++)
 	{
 		string s = items[i].transcript_id;
 		if(t2e.find(s) == t2e.end()) continue;
-		if(mexons >= 0 && t2e[s] != mexons) continue;
 
 		/* TODO
+		if(mexons >= 0 && t2e[s] != mexons) continue;
 		int min_length = t2e[s] * 50 + 200;
 		if(items[i].length < min_length) continue;
 		if(t2e[s] == 1 && items[i].coverage < 20) continue;
@@ -111,20 +108,19 @@ int cuffroc::filter_items()
 	return 0;
 }
 
-int cuffroc::solve()
+int gtfcuff::roc()
 {
-	filter_items();
-
 	if(items.size() == 0) return 0;
 
+	/*
 	if(ftype == 1) sort(items.begin(), items.end(), cuffitem_cmp_coverage);
 	else if(ftype == 2) sort(items.begin(), items.end(), cuffitem_cmp_length);
 	else return 0;
+	*/
 
 	int correct = 0;
 	for(int i = 0; i < items.size(); i++) if(items[i].code == '=') correct++;
 
-	double max_com = 999;
 	double max_sen = 0;
 	double max_pre = 0;
 	double max_cov = 0;
@@ -137,19 +133,6 @@ int cuffroc::solve()
 		double sen = correct * 100.0 / refsize;
 		double pre = correct * 100.0 / (items.size() - i);
 
-		double com = fabs(pre - pratio);
-
-		if(com < max_com)
-		{
-			max_com = com;
-			max_sen = sen;
-			max_pre = pre;
-			max_cov = items[i].coverage;
-			max_len = items[i].length;
-			max_correct = correct;
-			max_size = items.size() - i;
-		}
-
 		if(sen * 2.0 < sen0) break;
 
 		if(i % 100 == 0)
@@ -161,13 +144,10 @@ int cuffroc::solve()
 		if(items[i].code == '=') correct--;
 	}
 
-	//printf("BESTCOM: reference = %d prediction = %d correct = %d sensitivity = %.2lf precision = %.2lf | coverage = %.3lf, length = %d\n",
-	//			refsize, max_size, max_correct, max_sen, max_pre, max_cov, max_len);
-
 	return 0;
 }
 
-int cuffroc::print()
+int gtfcuff::print()
 {
 	for(int i = 0; i < items.size(); i++)
 	{
