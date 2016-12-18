@@ -25,6 +25,7 @@ private:
 	bool terminate;
 
 	genome gm;
+	int qcnt;
 	double qlen;
 
 public:

@@ -19,6 +19,7 @@ assembler::assembler()
 	terminate = false;
 	index = -1;
 	qlen = 0;
+	qcnt = 0;
 }
 
 assembler::~assembler()
@@ -43,13 +44,12 @@ int assembler::assemble()
 		if(p.n_cigar < 1) continue;												// should never happen
 
 		hit ht(b1t);
-		qlen += ht.qlen;
-
-		// DEBUG
-		//if(ht.pos > 117365807 && ht.rpos < 117367284) ht.print();
 
 		if(ht.strand == '.') continue;	// TODO
 		if(uniquely_mapped_only == true && ht.nh != 1) continue;
+
+		qlen += ht.qlen;
+		qcnt += 1;
 
 		truncate(ht);
 		add_hit(ht);
@@ -59,7 +59,7 @@ int assembler::assemble()
 
 	if(output_file == "") return 0;
 
-	double factor = 1e9 * average_read_length / qlen;
+	double factor = 1e9 * qlen;
 	gm.assign_RPKM(factor);
 	gm.write(output_file);
 

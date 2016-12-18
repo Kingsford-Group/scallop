@@ -32,10 +32,10 @@ double max_split_error_ratio = 0.25;
 double max_decompose_error_ratio = 0.01;
 
 // for selecting paths
-double min_transcript_coverage = 0.9;
+double min_transcript_coverage = 1.01;
 double min_single_exon_coverage = 20;
 double min_transcript_numreads = 20;
-int min_transcript_length = 200;
+int min_transcript_length = 250;
 int min_exon_length = 50;
 
 // for subsetsum and router
@@ -56,7 +56,6 @@ string ref_file2;
 string output_file;
 
 // for controling
-int32_t average_read_length = 100;
 bool output_tex_files = false;
 string fixed_gene_name = "";
 
@@ -106,7 +105,6 @@ int print_parameters()
 	printf("output_file = %s\n", output_file.c_str());
 
 	// for controling
-	printf("average_read_length = %d\n", average_read_length);
 	printf("library_type = %d\n", library_type);
 	printf("output_tex_files = %c\n", output_tex_files ? 'T' : 'F');
 	printf("fixed_gene_name = %s\n", fixed_gene_name.c_str());

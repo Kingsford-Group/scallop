@@ -75,7 +75,6 @@ extern string ref_file2;
 extern string output_file;
 
 // for controling
-extern int32_t average_read_length;
 extern bool output_tex_files;
 extern string fixed_gene_name;
 extern int max_num_bundles;

@@ -897,16 +897,6 @@ double splice_graph::compute_average_edge_weight()
 	return sum;
 }
 
-double splice_graph::compute_numreads()
-{
-	double sum = 0;
-	for(int i = 1; i < num_vertices() - 1; i++)
-	{
-		sum += get_vertex_weight(i) * get_vertex_info(i).length;
-	}
-	return sum / average_read_length;
-}
-
 double splice_graph::compute_average_vertex_weight()
 {
 	double sum = 0;
