@@ -31,6 +31,7 @@ public:
 
 	int roc(int refsize);
 	int classify(const string &f1, const string &f2);
+	int quant();
 };
 
 #endif
