@@ -11,23 +11,26 @@ using namespace std;
 class gtfcuff
 {
 public:
-	gtfcuff(const string &cufffile, const string &gtffile);
+	gtfcuff(const string &cufffile);
 
 public:
-	genome gm;
 	vector<cuffitem> items;
-	map<string, int> t2i;		// transcript to item-index
-	map<string, int> t2e;		// transcript to num-exon
-	map<string, char> t2s;		// transcript to strand
-	int refsize;
+	vector<transcript> vpred;	// predicted transcripts
+	vector<transcript> vref;	// reference transcripts
+	map<string, int> t2i;		// transcript_id to item-index
+	map<string, int> t2p;		// transcript_id to pred-index
+	map<string, int> t2r;		// transcript_id to ref-index
 
 public:
 	int read_cuff(const string &file);
-	int build_indices();
-	int filter_items();
+	int assign_ref(const string &file);
+	int assign_pred(const string &file);
+	int build_cuff_index();
+	int build_pred_index();
+	int build_ref_index();
+
+	int roc(int refsize);
 	int classify(const string &f1, const string &f2);
-	int roc();
-	int print();
 };
 
 #endif

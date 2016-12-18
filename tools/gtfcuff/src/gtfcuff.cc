@@ -8,12 +8,26 @@
 
 using namespace std;
 
-gtfcuff::gtfcuff(const string &cufffile, const string &gtffile)
-	: gm(gtffile)
+gtfcuff::gtfcuff(const string &cufffile)
 {
 	read_cuff(cufffile);
-	build_indices();
-	refsize = 0;
+	build_cuff_index();
+}
+
+int gtfcuff::assign_pred(const string &file)
+{
+	genome gm(file);
+	vpred = gm.collect_transcripts();
+	build_pred_index();
+	return 0;
+}
+
+int gtfcuff::assign_ref(const string &file)
+{
+	genome gm(file);
+	vref = gm.collect_transcripts();
+	build_ref_index();
+	return 0;
 }
 
 int gtfcuff::read_cuff(const string &file)
@@ -33,7 +47,7 @@ int gtfcuff::read_cuff(const string &file)
 	return 0;
 }
 
-int gtfcuff::build_indices()
+int gtfcuff::build_cuff_index()
 {
 	t2i.clear();
 	for(int i = 0; i < items.size(); i++)
@@ -41,24 +55,30 @@ int gtfcuff::build_indices()
 		string s = items[i].transcript_id;
 		t2i.insert(pair<string, int>(s, i));
 	}
+	return 0;
+}
 
-	t2e.clear();
-	t2s.clear();
-	for(int i = 0; i < gm.genes.size(); i++)
+int gtfcuff::build_pred_index()
+{
+	t2p.clear();
+	for(int i = 0; i < vpred.size(); i++)
 	{
-		vector<transcript> &v = gm.genes[i].transcripts;
-		for(int k = 0; k < v.size(); k++)
-		{
-			string s = v[k].transcript_id;
-			int e = v[k].exons.size();
-			char c = v[k].strand;
-			if(t2e.find(s) != t2e.end()) continue;
-			assert(t2s.find(s) == t2s.end());
-			t2e.insert(pair<string, int>(s, e));
-			t2s.insert(pair<string, char>(s, c));
-		}
+		transcript &t = vpred[i];
+		string s = t.transcript_id;
+		t2p.insert(pair<string, int>(s, i));
 	}
+	return 0;
+}
 
+int gtfcuff::build_ref_index()
+{
+	t2r.clear();
+	for(int i = 0; i < vref.size(); i++)
+	{
+		transcript &t = vref[i];
+		string s = t.transcript_id;
+		t2r.insert(pair<string, int>(s, i));
+	}
 	return 0;
 }
 
@@ -66,57 +86,30 @@ int gtfcuff::classify(const string &fn1, const string &fn2)
 {
 	ofstream f1(fn1.c_str());
 	ofstream f2(fn2.c_str());
-	for(int i = 0; i < gm.genes.size(); i++)
+
+	for(int k = 0; k < vpred.size(); k++)
 	{
-		vector<transcript> &v = gm.genes[i].transcripts;
-		for(int k = 0; k < v.size(); k++)
+		string s = vpred[k].transcript_id;
+		bool b = false;
+		if(t2i.find(s) != t2i.end())
 		{
-			string s = v[k].transcript_id;
-			bool b = false;
-			if(t2i.find(s) != t2i.end())
-			{
-				if(items[t2i[s]].code == '=') b = true;
-				else b = false;
-			}
-			if(b == true) v[k].write(f1);
-			else v[k].write(f2);
+			if(items[t2i[s]].code == '=') b = true;
+			else b = false;
 		}
+		if(b == true) vpred[k].write(f1);
+		else vpred[k].write(f2);
 	}
+
 	f1.close();
 	f2.close();
 	return 0;
 }
 
-int gtfcuff::filter_items()
-{
-	vector<cuffitem> v;
-	for(int i = 0; i < items.size(); i++)
-	{
-		string s = items[i].transcript_id;
-		if(t2e.find(s) == t2e.end()) continue;
-
-		/* TODO
-		if(mexons >= 0 && t2e[s] != mexons) continue;
-		int min_length = t2e[s] * 50 + 200;
-		if(items[i].length < min_length) continue;
-		if(t2e[s] == 1 && items[i].coverage < 20) continue;
-		*/
-
-		v.push_back(items[i]);
-	}
-	items = v;
-	return 0;
-}
-
-int gtfcuff::roc()
+int gtfcuff::roc(int refsize)
 {
 	if(items.size() == 0) return 0;
 
-	/*
-	if(ftype == 1) sort(items.begin(), items.end(), cuffitem_cmp_coverage);
-	else if(ftype == 2) sort(items.begin(), items.end(), cuffitem_cmp_length);
-	else return 0;
-	*/
+	sort(items.begin(), items.end(), cuffitem_cmp_coverage);
 
 	int correct = 0;
 	for(int i = 0; i < items.size(); i++) if(items[i].code == '=') correct++;
@@ -144,19 +137,5 @@ int gtfcuff::roc()
 		if(items[i].code == '=') correct--;
 	}
 
-	return 0;
-}
-
-int gtfcuff::print()
-{
-	for(int i = 0; i < items.size(); i++)
-	{
-		int n = 0;
-		char c = '@';
-		string s = items[i].transcript_id;
-		if(t2e.find(s) != t2e.end()) n = t2e[s];
-		if(t2s.find(s) != t2s.end()) c = t2s[s];
-		items[i].print(n, c);
-	}
 	return 0;
 }
