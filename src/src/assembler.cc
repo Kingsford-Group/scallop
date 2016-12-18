@@ -59,7 +59,7 @@ int assembler::assemble()
 
 	if(output_file == "") return 0;
 
-	double factor = 1e9 * qlen;
+	double factor = 1e9 / qlen;
 	gm.assign_RPKM(factor);
 	gm.write(output_file);
 
