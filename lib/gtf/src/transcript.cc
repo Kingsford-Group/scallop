@@ -34,6 +34,7 @@ int transcript::assign(const item &e)
 	frame = e.frame;
 	coverage = e.coverage;
 	RPKM = e.RPKM;
+	FPKM = e.FPKM;
 	TPM = e.TPM;
 	return 0;
 }
@@ -163,6 +164,8 @@ int transcript::write(ostream &fout) const
 	fout<<"gene_id \""<<gene_id.c_str()<<"\"; ";
 	fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
 	fout<<"RPKM \""<<RPKM<<"\"; ";
+	fout<<"FPKM \""<<FPKM<<"\"; ";
+	fout<<"TPM \""<<TPM<<"\"; ";
 	fout<<"cov \""<<coverage<<"\";"<<endl;
 
 	for(int k = 0; k < exons.size(); k++)
@@ -179,6 +182,8 @@ int transcript::write(ostream &fout) const
 		fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
 		fout<<"exon \""<<k + 1<<"\"; ";
 		fout<<"RPKM \""<<RPKM<<"\"; ";
+		fout<<"FPKM \""<<FPKM<<"\"; ";
+		fout<<"TPM \""<<TPM<<"\"; ";
 		fout<<"cov \""<<coverage<<"\";"<<endl;
 	}
 	return 0;

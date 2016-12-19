@@ -29,6 +29,7 @@ public:
 	char strand;
 	int frame;
 	double coverage;
+	double FPKM;
 	double RPKM;
 	double TPM;
 };

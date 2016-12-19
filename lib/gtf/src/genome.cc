@@ -151,6 +151,31 @@ int genome::assign_TPM_by_RPKM()
 	return 0;
 }
 
+int genome::assign_TPM_by_FPKM()
+{
+	double sum = 0;
+	for(int i = 0; i < genes.size(); i++)
+	{
+		vector<transcript> &v = genes[i].transcripts;
+		for(int k = 0; k < v.size(); k++)
+		{
+			transcript &t = v[k];
+			sum += t.FPKM;
+		}
+	}
+
+	for(int i = 0; i < genes.size(); i++)
+	{
+		vector<transcript> &v = genes[i].transcripts;
+		for(int k = 0; k < v.size(); k++)
+		{
+			transcript &t = v[k];
+			t.TPM = t.FPKM * 1e6 / sum;
+		}
+	}
+	return 0;
+}
+
 int genome::filter_single_exon_transcripts()
 {
 	for(int i = 0; i < genes.size(); i++)
@@ -167,4 +192,15 @@ int genome::filter_low_coverage_transcripts(double min_coverage)
 		genes[i].filter_low_coverage_transcripts(min_coverage);
 	}
 	return 0;
+}
+
+vector<transcript> genome::collect_transcripts()
+{
+	vector<transcript> vv;
+	for(int i = 0; i < genes.size(); i++)
+	{
+		vector<transcript> &v = genes[i].transcripts;
+		vv.insert(vv.end(), v.begin(), v.end());
+	}
+	return vv;
 }

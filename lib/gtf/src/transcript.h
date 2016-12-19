@@ -35,6 +35,7 @@ public:
 	double coverage;
 	double covratio;
 	double RPKM;
+	double FPKM;
 	double TPM;
 
 	vector<PI32> exons;

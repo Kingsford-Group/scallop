@@ -29,6 +29,7 @@ public:
 	int build_index();
 	int assign_RPKM(double factor);
 	int assign_TPM_by_RPKM();
+	int assign_TPM_by_FPKM();
 
 	// filter
 	int filter_single_exon_transcripts();
@@ -37,7 +38,7 @@ public:
 	// fetch information
 	const gene* get_gene(string name) const;
 	const gene* locate_gene(const string &chr, const PI32 &p) const;
-
+	vector<transcript> collect_transcripts();
 };
 
 #endif
