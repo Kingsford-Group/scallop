@@ -170,10 +170,18 @@ int gtfcuff::quant()
 					rr.insert(r);
 					b = true;
 					prcnt++;
+
+					printf("pred = %s, ref = %s, pred-quant = %.3lf, ref-quant = %.3lf\n",
+							s.c_str(), r.c_str(), ptpm, rtpm);
 				}
 			}
 		}
-		if(b == false) pcnt++;
+		if(b == false)
+		{
+			printf("pred = %s, ref = %s, pred-quant = %.3lf, ref-quant = %.3lf\n", s.c_str(), "N/A", ptpm, rtpm);
+			pcnt++;
+		}
+			
 		qpred.push_back(ptpm);
 		qref.push_back(rtpm);
 	}
@@ -187,17 +195,26 @@ int gtfcuff::quant()
 		double rtpm = t.TPM;
 		qpred.push_back(ptpm);
 		qref.push_back(rtpm);
+		printf("pred = %s, ref = %s, pred-quant = %.3lf, ref-quant = %.3lf\n", "N/A", s.c_str(), ptpm, rtpm);
 		rcnt++;
 	}
 	
 	// compute pearson
+	double sumx = 0;
+	double sumy = 0;
+	for(int i = 0; i < qpred.size(); i++)
+	{
+		sumx += qpred[i];
+		sumy += qref[i];
+	}
+
 	vector<double> vx;
 	vector<double> vy;
 
 	for(int i = 0; i < qpred.size(); i++)
 	{
-		double x = log(qpred[i] + 1.0);
-		double y = log(qref[i] + 1.0);
+		double x = log(qpred[i] * 1e6 / sumx + 1.0);
+		double y = log(qref[i] * 1e6 / sumy + 1.0);
 		vx.push_back(x);
 		vy.push_back(y);
 	}
