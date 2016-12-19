@@ -10,23 +10,34 @@ using namespace std;
 
 int main(int argc, const char **argv)
 {
- 	if(argc != 3 && argc != 4)
+ 	if(argc != 4)
 	{
-		cout<<"usage: "<<argv[0]<< " <in-gtf-file> <out-gtf-file> [min-coverage]"<<endl;
+		cout<<"usage: " << endl;
+		cout<<"       " << argv[0] << " RPKM2TPM <in-gtf-file> <out-gtf-file>"<<endl;
+		cout<<"       " << argv[0] << " FPKM2TPM <in-gtf-file> <out-gtf-file>"<<endl;
+		cout<<"       " << argv[0] << " format <in-gtf-file> <out-gtf-file>"<<endl;
 		return 0;
 	}
 
-	genome g(argv[1]);
-
-	if(argc == 4)
+	if(string(argv[1]) == "FPKM2TPM")
 	{
-		for(int i = 0; i < g.genes.size(); i++) 
-		{
-			g.genes[i].filter_low_coverage_transcripts(atof(argv[3]));
-		}
+		genome gm(argv[2]);
+		gm.assign_TPM_by_FPKM();
+		gm.write(argv[3]);
 	}
 
-	g.write(argv[2]);
+	if(string(argv[1]) == "RPKM2TPM")
+	{
+		genome gm(argv[2]);
+		gm.assign_TPM_by_RPKM();
+		gm.write(argv[3]);
+	}
+
+	if(string(argv[1]) == "format")
+	{
+		genome gm(argv[2]);
+		gm.write(argv[3]);
+	}
 
     return 0;
 }
