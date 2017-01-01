@@ -299,6 +299,10 @@ int parse_arguments(int argc, const char ** argv)
 		}
 	}
 
+	if(min_surviving_edge_weight < 0.5 + min_transcript_coverage) 
+	{
+		min_surviving_edge_weight = 0.5 + min_transcript_coverage;
+	}
 	return 0;
 }
 
