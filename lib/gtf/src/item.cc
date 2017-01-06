@@ -57,10 +57,10 @@ int item::parse(const string &s)
 		else if(string(buf) == "gene_id") gene_id = v;
 		else if(string(buf) == "cov") coverage = atof(v.c_str());
 		else if(string(buf) == "coverage") coverage = atof(v.c_str());
+		else if(string(buf) == "expression") coverage = atof(v.c_str());
 		else if(string(buf) == "TPM") TPM = atof(v.c_str());
 		else if(string(buf) == "RPKM") RPKM = atof(v.c_str());
 		else if(string(buf) == "FPKM") FPKM = atof(v.c_str());
-		//else if(string(buf) == "expression") expression = atoi(v.c_str());
 
 		//sstr.getline(buf2, 10240, ';');
 	}
