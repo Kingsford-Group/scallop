@@ -80,6 +80,8 @@ extern string fixed_gene_name;
 extern int max_num_bundles;
 extern int library_type;
 extern int min_gtf_transcripts_num;
+extern int batch_bundle_size;
+extern bool verbose;
 
 // parse arguments
 int print_command_line(int argc, const char ** argv);

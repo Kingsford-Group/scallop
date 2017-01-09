@@ -53,10 +53,12 @@ int assembler::assemble()
 		qcnt += 1;
 
 		truncate(ht);
+		process(batch_bundle_size);
 		add_hit(ht);
     }
 
-	for(int i = 0; i < vbb.size(); i++) process(vbb[i]);
+	process(0);
+	for(int i = 0; i < vbb.size(); i++) assemble(vbb[i]);
 
 	if(output_file == "") return 0;
 
@@ -103,14 +105,25 @@ int assembler::truncate(const hit &ht)
 		bundle_base &bb = vbb[i];
 		if(ht.pos <= bb.rpos + min_bundle_gap && ht.tid == bb.tid) continue;
 
-		process(bb);
+		pool.push_back(bb);
 		vbb.erase(vbb.begin() + i);
 		truncate(ht);
 	}
 	return 0;
 }
 
-int assembler::process(const bundle_base &bb)
+int assembler::process(int n)
+{
+	if(pool.size() < n) return 0;
+	for(int i = 0; i < pool.size(); i++)
+	{
+		assemble(pool[i]);
+	}
+	pool.clear();
+	return 0;
+}
+
+int assembler::assemble(const bundle_base &bb)
 {
 	//printf("hits.size = %lu, min-num = %d\n", bb.hits.size(), min_num_hits_in_bundle);
 

@@ -58,6 +58,8 @@ string output_file;
 // for controling
 bool output_tex_files = false;
 string fixed_gene_name = "";
+int batch_bundle_size = 5000;
+bool verbose = false;
 
 int print_parameters()
 {
@@ -110,6 +112,8 @@ int print_parameters()
 	printf("fixed_gene_name = %s\n", fixed_gene_name.c_str());
 	printf("use_second_alignment = %c\n", use_second_alignment ? 'T' : 'F');
 	printf("uniquely_mapped_only = %c\n", uniquely_mapped_only ? 'T' : 'F');
+	printf("verbose = %c\n", verbose ? 'T' : 'F');
+	printf("batch_bundle_size = %d\n", batch_bundle_size);
 
 	printf("\n");
 
@@ -297,6 +301,20 @@ int parse_arguments(int argc, const char ** argv)
 			else uniquely_mapped_only = false;
 			i++;
 		}
+		else if(string(argv[i]) == "--verbose")
+		{
+			string s(argv[i + 1]);
+			if(s == "true") verbose = true;
+			else verbose = false;
+			i++;
+		}
+		else if(string(argv[i]) == "--batch_bundle_size")
+		{
+			batch_bundle_size = atoi(argv[i + 1]);
+			i++;
+		}
+
+
 	}
 
 	if(min_surviving_edge_weight < 0.5 + min_transcript_coverage) 
