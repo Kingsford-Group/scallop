@@ -58,7 +58,7 @@ string output_file;
 // for controling
 bool output_tex_files = false;
 string fixed_gene_name = "";
-int batch_bundle_size = 5000;
+int batch_bundle_size = 1000;
 bool verbose = false;
 
 int print_parameters()
