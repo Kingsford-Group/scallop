@@ -13,6 +13,7 @@ public:
 
 public:
 	vector<int> v;
+	int length;
 	double abd;
 	double reads;
 
