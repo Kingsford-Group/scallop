@@ -941,12 +941,13 @@ int scallop::balance_vertex(int v)
 	//double ww = sqrt(w1 * w2);
 
 	// use linear combination
+	double ww = w1 * 0.5 + w2 * 0.5;
 	//double ww1 = w1 * weight_balance_ratio + w2 * (1 - weight_balance_ratio);
 	//double ww2 = w2 * weight_balance_ratio + w1 * (1 - weight_balance_ratio);
 	//double ww = (w1 > w2) ? ww1 : ww2;
 
 	// use convex combination
-	double ww = sqrt(0.5 * w1 * w1 + 0.5 * w2 * w2);
+	//double ww = sqrt(0.5 * w1 * w1 + 0.5 * w2 * w2);
 
 	double r1 = ww / w1;
 	double r2 = ww / w2;
@@ -1009,7 +1010,8 @@ double scallop::compute_balance_ratio(int v)
 	assert(w1 >= SMIN);
 	assert(w2 >= SMIN);
 
-	double ww = sqrt(0.5 * w1 * w1 + 0.5 * w2 * w2);
+	//double ww = sqrt(0.5 * w1 * w1 + 0.5 * w2 * w2);
+	double ww = 0.5 * w1 + 0.5 * w2;
 
 	if(w1 >= w2) return w1 / ww;
 	else return w2 / ww;
