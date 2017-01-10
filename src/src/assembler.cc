@@ -190,16 +190,18 @@ int assembler::assemble(const bundle_base &bb)
 		scallop sc(gid, gr, hs);
 		sc.assemble();
 
+		/*
 		estimator est(gr, sc.paths);
 		est.estimate();
+		*/
 
 		vector<path> pp;
-		for(int i = 0; i < est.paths.size(); i++)
+		for(int i = 0; i < sc.paths.size(); i++)
 		{
 			path p;
-			p.v = sg.get_root_vertices(k, est.paths[i].v);
-			p.abd = est.paths[i].abd;
-			p.reads = est.paths[i].reads;
+			p.v = sg.get_root_vertices(k, sc.paths[i].v);
+			p.abd = sc.paths[i].abd;
+			p.reads = sc.paths[i].reads;
 			pp.push_back(p);
 		}
 

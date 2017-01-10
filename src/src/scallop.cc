@@ -936,8 +936,18 @@ int scallop::balance_vertex(int v)
 	// use max-meature
 	//double ww = (wv >= w1 && wv >= w2) ? wv : (w1 >= w2 ? w1 : w2);
 	//assert(ww >= w1 && ww >= w2);
+
 	// use sqrt-meature
-	double ww = sqrt(w1 * w2);
+	//double ww = sqrt(w1 * w2);
+
+	// use linear combination
+	//double ww1 = w1 * weight_balance_ratio + w2 * (1 - weight_balance_ratio);
+	//double ww2 = w2 * weight_balance_ratio + w1 * (1 - weight_balance_ratio);
+	//double ww = (w1 > w2) ? ww1 : ww2;
+
+	// use convex combination
+	double ww = sqrt(0.5 * w1 * w1 + 0.5 * w2 * w2);
+
 	double r1 = ww / w1;
 	double r2 = ww / w2;
 
@@ -999,8 +1009,10 @@ double scallop::compute_balance_ratio(int v)
 	assert(w1 >= SMIN);
 	assert(w2 >= SMIN);
 
-	if(w1 >= w2) return w1 / w2;
-	else return w2 / w1;
+	double ww = sqrt(0.5 * w1 * w1 + 0.5 * w2 * w2);
+
+	if(w1 >= w2) return w1 / ww;
+	else return w2 / ww;
 }
 
 int scallop::split_vertex(int x, const vector<int> &xe, const vector<int> &ye)

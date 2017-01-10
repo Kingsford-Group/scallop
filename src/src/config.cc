@@ -30,6 +30,7 @@ double min_surviving_edge_weight = 1.5;
 double max_small_error_ratio = 0.33;
 double max_split_error_ratio = 0.25;
 double max_decompose_error_ratio = 0.01;
+double weight_balance_ratio = 0.5;
 
 // for selecting paths
 double min_transcript_coverage = 1.01;
@@ -88,6 +89,7 @@ int print_parameters()
 	printf("max_small_error_ratio = %.2lf\n", max_small_error_ratio);
 	printf("max_split_error_ratio = %.2lf\n", max_split_error_ratio);
 	printf("max_decompose_error_ratio = %.2lf\n", max_decompose_error_ratio);
+	printf("weight_balance_ratio = %.2lf\n", weight_balance_ratio);
 
 	// for subsetsum and router
 	printf("max_dp_table_size = %d\n", max_dp_table_size);
@@ -267,6 +269,11 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--max_decompose_error_ratio")
 		{
 			max_decompose_error_ratio = atof(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--weight_balance_ratio")
+		{
+			weight_balance_ratio = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--max_dp_table_size")
