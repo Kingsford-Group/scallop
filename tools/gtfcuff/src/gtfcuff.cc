@@ -82,7 +82,7 @@ int gtfcuff::build_ref_index()
 	return 0;
 }
 
-int gtfcuff::classify(const string &fn1, const string &fn2)
+int gtfcuff::split(const string &fn1, const string &fn2)
 {
 	ofstream f1(fn1.c_str());
 	ofstream f2(fn2.c_str());
@@ -126,7 +126,7 @@ int gtfcuff::roc(int refsize)
 		double sen = correct * 100.0 / refsize;
 		double pre = correct * 100.0 / (items.size() - i);
 
-		if(sen * 2.0 < sen0) break;
+		if(sen * 10.0 < sen0) break;
 
 		if(i % 100 == 0)
 		{
@@ -250,3 +250,32 @@ int gtfcuff::quant()
 
 	return 0;
 }
+
+int gtfcuff::classify()
+{
+	int n = 10;
+	vector<int> v1(n, 0);		// correct
+	vector<int> v2(n, 0);		// total
+	for(int k = 0; k < vpred.size(); k++)
+	{
+		string s = vpred[k].transcript_id;
+		bool b = false;
+		if(t2i.find(s) != t2i.end())
+		{
+			if(items[t2i[s]].code == '=') b = true;
+			else b = false;
+		}
+		int e = vpred[k].exons.size();
+		assert(e >= 1);
+		if(e >= 10) e = 10;
+		v2[e - 1]++;
+		if(b == true) v1[e - 1]++;
+	}
+
+	for(int k = 0; k < n; k++)
+	{
+		printf("exons = %d correct = %d total = %d\n", k + 1, v1[k], v2[k]);
+	}
+	return 0;
+}
+

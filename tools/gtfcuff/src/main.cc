@@ -16,7 +16,8 @@ int main(int argc, const char **argv)
 	{
 		cout<<"usage: " <<endl;
 		cout<<"       " <<argv[0] << " roc <cuff.tmap> <ref-size>"<<endl;
-		cout<<"       " <<argv[0] << " classify <cuff.tmap> <pred-gtf-file> <true-file> <false-file> "<<endl;
+		cout<<"       " <<argv[0] << " split <cuff.tmap> <pred-gtf-file> <true-file> <false-file>"<<endl;
+		cout<<"       " <<argv[0] << " classify <cuff.tmap> <pred-gtf-file>"<<endl;
 		cout<<"       " <<argv[0] << " quant <cuff.tmap> <pred-gtf-file> <ref-gtf-file>"<<endl;
 		return 0;
 	}
@@ -28,12 +29,20 @@ int main(int argc, const char **argv)
 		cuff.roc(atoi(argv[3]));
 	}
 
-	if(string(argv[1]) == "classify")
+	if(string(argv[1]) == "split")
 	{
 		assert(argc == 6);
 		gtfcuff cuff(argv[2]);
 		cuff.assign_pred(argv[3]);
-		cuff.classify(argv[4], argv[5]);
+		cuff.split(argv[4], argv[5]);
+	}
+
+	if(string(argv[1]) == "classify")
+	{
+		assert(argc == 4);
+		gtfcuff cuff(argv[2]);
+		cuff.assign_pred(argv[3]);
+		cuff.classify();
 	}
 
 	if(string(argv[1]) == "quant")
