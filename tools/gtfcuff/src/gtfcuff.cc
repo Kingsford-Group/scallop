@@ -80,6 +80,7 @@ int gtfcuff::build_quant_index()
 	for(int i = 0; i < qitems.size(); i++)
 	{
 		string s = qitems[i].transcript_id;
+		//printf("%s -> %d\n", s.c_str(), i);
 		t2q.insert(pair<string, int>(s, i));
 	}
 	return 0;
@@ -196,12 +197,12 @@ int gtfcuff::roc_quant(const string &qfile, double min_tpm, double max_tpm)
 	if(items.size() == 0) return 0;
 	if(qitems.size() == 0) return 0;
 
-	int refsize = 0;
+	int refsize = qitems.size();
 	vector<cuffitem> vt;
 	for(int i = 0; i < items.size(); i++)
 	{
 		cuffitem ci = items[i];
-		string s = ci.transcript_id;
+		string s = ci.ref_transcript_id;
 		if(t2q.find(s) == t2q.end()) ci.code = 'x';
 		vt.push_back(ci);
 	}
@@ -234,6 +235,46 @@ int gtfcuff::roc_quant(const string &qfile, double min_tpm, double max_tpm)
 		if(vt[i].code == '=') correct--;
 	}
 
+	return 0;
+}
+
+int gtfcuff::acc_quant(const string &qfile, double tpm_threshold)
+{
+	read_quant(qfile);
+	vector<quantitem> vq;
+	for(int i = 0; i < qitems.size(); i++)
+	{
+		if(qitems[i].tpm < tpm_threshold) continue;
+		vq.push_back(qitems[i]);
+	}
+	sort(vq.begin(), vq.end());
+
+	int n = vq.size() / 2;
+	set<string> s1;
+	set<string> s2;
+	for(int i = 0; i < n; i++) s1.insert(vq[i].transcript_id);
+	for(int i = n; i < vq.size(); i++) s2.insert(vq[i].transcript_id);
+
+	if(items.size() == 0) return 0;
+
+	int refsize1 = n;
+	int refsize2 = vq.size() - n;
+	int correct1 = 0;
+	int correct2 = 0;
+	for(int i = 0; i < items.size(); i++)
+	{
+		cuffitem c = items[i];
+		string s = c.ref_transcript_id;
+		if(s1.find(s) != s1.end() && c.code == '=') correct1++;
+		if(s2.find(s) != s2.end() && c.code == '=') correct2++;
+	}
+
+	double sen1 = 100.0 * correct1 / items.size();
+	double sen2 = 100.0 * correct2 / items.size();
+	double pre1 = 100.0 * correct1 / refsize1;
+	double pre2 = 100.0 * correct2 / refsize2;
+	printf("ROC1: reference = %d prediction = %lu correct = %d sensitivity = %.2lf precision = %.2lf\n", refsize1, items.size(), correct1, sen1, pre1);
+	printf("ROC2: reference = %d prediction = %lu correct = %d sensitivity = %.2lf precision = %.2lf\n", refsize2, items.size(), correct2, sen2, pre2);
 	return 0;
 }
 

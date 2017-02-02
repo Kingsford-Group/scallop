@@ -36,7 +36,8 @@ public:
 
 	int roc(int refsize);
 	int roc_trunc(int refsize, double min_coverage, double max_coverage);
-	int roc_quant(const string &qfile, double min_coverage, double max_coverage);
+	int roc_quant(const string &qfile, double min_tpm, double max_tpm);
+	int acc_quant(const string &qfile, double tpm_threshold);
 	int split(const string &f1, const string &f2);
 	int classify();
 	int quant();

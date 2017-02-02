@@ -9,6 +9,7 @@ class quantitem
 {
 public:
 	quantitem(const string &s);
+	bool operator<(const quantitem &qt) const;
 
 public:
 	int parse(const string &s);

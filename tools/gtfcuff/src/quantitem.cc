@@ -12,6 +12,12 @@ quantitem::quantitem(const string &s)
 	parse(s);
 }
 
+bool quantitem::operator<(const quantitem &qt) const
+{
+	if(tpm < qt.tpm) return true;
+	else return false;
+}
+
 int quantitem::parse(const string &s)
 {
 	char buf[10240];
