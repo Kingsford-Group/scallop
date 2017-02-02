@@ -30,6 +30,7 @@ public:
 	int build_ref_index();
 
 	int roc(int refsize);
+	int roc_trunc(int refsize, double min_coverage, double max_coverage);
 	int split(const string &f1, const string &f2);
 	int classify();
 	int quant();

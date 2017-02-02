@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cassert>
+#include <cfloat>
 
 using namespace std;
 
@@ -107,12 +108,25 @@ int gtfcuff::split(const string &fn1, const string &fn2)
 
 int gtfcuff::roc(int refsize)
 {
+	return roc_trunc(refsize, -1, DBL_MAX);
+}
+
+int gtfcuff::roc_trunc(int refsize, double min_coverage, double max_coverage)
+{
 	if(items.size() == 0) return 0;
 
-	sort(items.begin(), items.end(), cuffitem_cmp_coverage);
+	vector<cuffitem> vt;
+	for(int i = 0; i < items.size(); i++)
+	{
+		if(items[i].coverage < min_coverage) continue;
+		if(items[i].coverage > max_coverage) continue;
+		vt.push_back(items[i]);
+	}
+
+	sort(vt.begin(), vt.end(), cuffitem_cmp_coverage);
 
 	int correct = 0;
-	for(int i = 0; i < items.size(); i++) if(items[i].code == '=') correct++;
+	for(int i = 0; i < vt.size(); i++) if(vt[i].code == '=') correct++;
 
 	double max_sen = 0;
 	double max_pre = 0;
@@ -121,20 +135,20 @@ int gtfcuff::roc(int refsize)
 	int max_correct = 0;
 	int max_size = 0;
 	double sen0 = correct * 100.0 / refsize;
-	for(int i = 0; i < items.size(); i++)
+	for(int i = 0; i < vt.size(); i++)
 	{
 		double sen = correct * 100.0 / refsize;
-		double pre = correct * 100.0 / (items.size() - i);
+		double pre = correct * 100.0 / (vt.size() - i);
 
 		if(sen * 10.0 < sen0) break;
 
 		if(i % 100 == 0)
 		{
 			printf("ROC: reference = %d prediction = %lu correct = %d sensitivity = %.2lf precision = %.2lf | coverage = %.3lf, length = %d\n",
-				refsize, items.size() - i, correct, sen, pre, items[i].coverage, items[i].length);
+				refsize, vt.size() - i, correct, sen, pre, vt[i].coverage, vt[i].length);
 		}
 
-		if(items[i].code == '=') correct--;
+		if(vt[i].code == '=') correct--;
 	}
 
 	return 0;
@@ -253,7 +267,7 @@ int gtfcuff::quant()
 
 int gtfcuff::classify()
 {
-	int n = 10;
+	int n = 20;
 	vector<int> v1(n, 0);		// correct
 	vector<int> v2(n, 0);		// total
 	for(int k = 0; k < vpred.size(); k++)
@@ -267,14 +281,14 @@ int gtfcuff::classify()
 		}
 		int e = vpred[k].exons.size();
 		assert(e >= 1);
-		if(e >= 10) e = 10;
+		if(e >= n) e = n;
 		v2[e - 1]++;
 		if(b == true) v1[e - 1]++;
 	}
 
 	for(int k = 0; k < n; k++)
 	{
-		printf("exons = %d correct = %d total = %d\n", k + 1, v1[k], v2[k]);
+		printf("exons = %d correct = %d total = %d precision = %.2lf\n", k + 1, v1[k], v2[k], v1[k] * 100.0 / v2[k]);
 	}
 	return 0;
 }
