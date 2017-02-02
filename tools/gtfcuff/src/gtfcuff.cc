@@ -48,6 +48,21 @@ int gtfcuff::read_cuff(const string &file)
 	return 0;
 }
 
+int gtfcuff::read_quant(const string &file)
+{
+	ifstream fin(file.c_str());
+	if(fin.fail()) return -1;
+
+	char line[10240];
+	while(fin.getline(line, 10240, '\n'))
+	{
+		quantitem x(line);
+		qitems.push_back(x);
+	}
+	fin.close();
+	return 0;
+}
+
 int gtfcuff::build_cuff_index()
 {
 	t2i.clear();
@@ -55,6 +70,17 @@ int gtfcuff::build_cuff_index()
 	{
 		string s = items[i].transcript_id;
 		t2i.insert(pair<string, int>(s, i));
+	}
+	return 0;
+}
+
+int gtfcuff::build_quant_index()
+{
+	t2q.clear();
+	for(int i = 0; i < qitems.size(); i++)
+	{
+		string s = qitems[i].transcript_id;
+		t2q.insert(pair<string, int>(s, i));
 	}
 	return 0;
 }
@@ -121,6 +147,63 @@ int gtfcuff::roc_trunc(int refsize, double min_coverage, double max_coverage)
 		if(items[i].coverage < min_coverage) continue;
 		if(items[i].coverage > max_coverage) continue;
 		vt.push_back(items[i]);
+	}
+
+	sort(vt.begin(), vt.end(), cuffitem_cmp_coverage);
+
+	int correct = 0;
+	for(int i = 0; i < vt.size(); i++) if(vt[i].code == '=') correct++;
+
+	double max_sen = 0;
+	double max_pre = 0;
+	double max_cov = 0;
+	int max_len = 0;
+	int max_correct = 0;
+	int max_size = 0;
+	double sen0 = correct * 100.0 / refsize;
+	for(int i = 0; i < vt.size(); i++)
+	{
+		double sen = correct * 100.0 / refsize;
+		double pre = correct * 100.0 / (vt.size() - i);
+
+		if(sen * 10.0 < sen0) break;
+
+		if(i % 100 == 0)
+		{
+			printf("ROC: reference = %d prediction = %lu correct = %d sensitivity = %.2lf precision = %.2lf | coverage = %.3lf, length = %d\n",
+				refsize, vt.size() - i, correct, sen, pre, vt[i].coverage, vt[i].length);
+		}
+
+		if(vt[i].code == '=') correct--;
+	}
+
+	return 0;
+}
+
+int gtfcuff::roc_quant(const string &qfile, double min_tpm, double max_tpm)
+{
+	read_quant(qfile);
+	vector<quantitem> vq;
+	for(int i = 0; i < qitems.size(); i++)
+	{
+		if(qitems[i].tpm < min_tpm) continue;
+		if(qitems[i].tpm > max_tpm) continue;
+		vq.push_back(qitems[i]);
+	}
+	qitems = vq;
+	build_quant_index();
+
+	if(items.size() == 0) return 0;
+	if(qitems.size() == 0) return 0;
+
+	int refsize = 0;
+	vector<cuffitem> vt;
+	for(int i = 0; i < items.size(); i++)
+	{
+		cuffitem ci = items[i];
+		string s = ci.transcript_id;
+		if(t2q.find(s) == t2q.end()) ci.code = 'x';
+		vt.push_back(ci);
 	}
 
 	sort(vt.begin(), vt.end(), cuffitem_cmp_coverage);
