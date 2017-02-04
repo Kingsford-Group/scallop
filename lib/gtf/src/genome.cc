@@ -29,6 +29,8 @@ int genome::add_gene(const gene &g)
 
 int genome::read(const string &file)
 {
+	if(file == "") return 0;
+
 	ifstream fin(file.c_str());
 	if(fin.fail())
 	{
