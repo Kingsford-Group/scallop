@@ -31,6 +31,7 @@ double max_small_error_ratio = 0.33;
 double max_split_error_ratio = 0.25;
 double max_decompose_error_ratio = 0.01;
 double weight_balance_ratio = 0.5;
+bool use_hyper_edges = true;
 
 // for selecting paths
 double min_transcript_coverage = 1.01;
@@ -90,6 +91,7 @@ int print_parameters()
 	printf("max_split_error_ratio = %.2lf\n", max_split_error_ratio);
 	printf("max_decompose_error_ratio = %.2lf\n", max_decompose_error_ratio);
 	printf("weight_balance_ratio = %.2lf\n", weight_balance_ratio);
+	printf("use_hyper_edges = %c\n", use_hyper_edges ? 'T' : 'F');
 
 	// for subsetsum and router
 	printf("max_dp_table_size = %d\n", max_dp_table_size);
@@ -299,6 +301,13 @@ int parse_arguments(int argc, const char ** argv)
 			string s(argv[i + 1]);
 			if(s == "true") use_second_alignment = true;
 			else use_second_alignment = false;
+			i++;
+		}
+		else if(string(argv[i]) == "--use_hyper_edges")
+		{
+			string s(argv[i + 1]);
+			if(s == "true") use_hyper_edges = true;
+			else use_hyper_edges = false;
 			i++;
 		}
 		else if(string(argv[i]) == "--uniquely_mapped_only")
