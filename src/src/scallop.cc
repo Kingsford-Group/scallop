@@ -16,8 +16,11 @@ scallop::scallop(const string &s, const splice_graph &g, const hyper_set &h)
 	round = 0;
 	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 	gr.get_edge_indices(i2e, e2i);
+
 	//add_pseudo_hyper_edges();
 	hs.build(gr, e2i);
+	if(use_hyper_edges == false) assert(hs.nodes.size() == 0);
+
 	init_super_edges();
 	init_vertex_map();
 	init_inner_weights();
@@ -46,14 +49,17 @@ int scallop::assemble()
 		if(b == true) continue;
 
 		b = resolve_splitable_vertex(1);
+		if(use_hyper_edges == false) assert(b == false);
 		if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_insplitable_vertex(SINGLE, 999);
+		if(use_hyper_edges == false) assert(b == false);
 		if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_insplitable_vertex(MULTIPLE, 999);
+		if(use_hyper_edges == false) assert(b == false);
 		if(b == true) print();
 		if(b == true) continue;
 
