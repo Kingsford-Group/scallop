@@ -52,7 +52,7 @@ int genome1::build_intron_index()
 	return 0;
 }
 
-int genome1::query(const transcript &t)
+int genome1::query(const transcript &t, const set<int> &fb)
 {
 	if(t.exons.size() <= 1) return -1;
 	PI32 p = t.get_first_intron();
@@ -65,6 +65,7 @@ int genome1::query(const transcript &t)
 		if(x.strand != t.strand) continue;
 		if(x.exons.size() != t.exons.size()) continue;
 		if(x.intron_chain_match(t) == false) continue;
+		if(fb.find(k) != fb.end()) continue;
 		return k;
 	}
 	return -1;

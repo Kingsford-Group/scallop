@@ -21,7 +21,7 @@ public:
 public:
 	int build();
 	int print(int index);
-	int query(const transcript &t);
+	int query(const transcript &t, const set<int> &fb);
 
 private:
 	int collect_multiexon_transcripts();
