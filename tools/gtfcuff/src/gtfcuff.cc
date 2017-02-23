@@ -238,6 +238,34 @@ int gtfcuff::roc_quant(const string &qfile, double min_tpm, double max_tpm)
 	return 0;
 }
 
+int gtfcuff::acc(int refsize)
+{
+	if(items.size() == 0) return 0;
+	sort(items.begin(), items.end(), cuffitem_cmp_coverage);
+	int n = items.size() / 3;
+
+	int correct1 = 0;
+	int correct2 = 0;
+	int correct3 = 0;
+	for(int i = 0; i < items.size(); i++)
+	{
+		if(i >= n * 0 && i < n * 1 && items[i].code == '=') correct1++;
+		if(i >= n * 1 && i < n * 2 && items[i].code == '=') correct2++;
+		if(i >= n * 2 && i < n * 3 && items[i].code == '=') correct3++;
+	}
+
+	double sen1 = 100.0 * correct1 / refsize;
+	double sen2 = 100.0 * correct2 / refsize;
+	double sen3 = 100.0 * correct3 / refsize;
+	double pre1 = 100.0 * correct1 / n;
+	double pre2 = 100.0 * correct2 / n;
+	double pre3 = 100.0 * correct3 / n;
+	printf("ROC1: reference = %d prediction = %d correct = %d sensitivity = %.2lf precision = %.2lf\n", refsize, n, correct1, sen1, pre1);
+	printf("ROC2: reference = %d prediction = %d correct = %d sensitivity = %.2lf precision = %.2lf\n", refsize, n, correct2, sen2, pre2);
+	printf("ROC3: reference = %d prediction = %d correct = %d sensitivity = %.2lf precision = %.2lf\n", refsize, n, correct3, sen3, pre3);
+	return 0;
+}
+
 int gtfcuff::acc_quant(const string &qfile, double tpm_threshold)
 {
 	read_quant(qfile);
@@ -247,34 +275,48 @@ int gtfcuff::acc_quant(const string &qfile, double tpm_threshold)
 		if(qitems[i].tpm < tpm_threshold) continue;
 		vq.push_back(qitems[i]);
 	}
+
 	sort(vq.begin(), vq.end());
 
-	int n = vq.size() / 2;
+	int n = vq.size() / 3;
 	set<string> s1;
 	set<string> s2;
-	for(int i = 0; i < n; i++) s1.insert(vq[i].transcript_id);
-	for(int i = n; i < vq.size(); i++) s2.insert(vq[i].transcript_id);
+	set<string> s3;
+	set<string> s4;
+	for(int i = n * 0; i < n * 1; i++) s1.insert(vq[i].transcript_id);
+	for(int i = n * 1; i < n * 2; i++) s2.insert(vq[i].transcript_id);
+	for(int i = n * 2; i < n * 3; i++) s3.insert(vq[i].transcript_id);
+	//for(int i = n * 3; i < n * 4; i++) s4.insert(vq[i].transcript_id);
 
 	if(items.size() == 0) return 0;
 
-	int refsize1 = n;
-	int refsize2 = vq.size() - n;
+	int refsize = n;
 	int correct1 = 0;
 	int correct2 = 0;
+	int correct3 = 0;
+	int correct4 = 0;
 	for(int i = 0; i < items.size(); i++)
 	{
 		cuffitem c = items[i];
 		string s = c.ref_transcript_id;
 		if(s1.find(s) != s1.end() && c.code == '=') correct1++;
 		if(s2.find(s) != s2.end() && c.code == '=') correct2++;
+		if(s3.find(s) != s3.end() && c.code == '=') correct3++;
+		if(s4.find(s) != s4.end() && c.code == '=') correct4++;
 	}
 
 	double sen1 = 100.0 * correct1 / items.size();
 	double sen2 = 100.0 * correct2 / items.size();
-	double pre1 = 100.0 * correct1 / refsize1;
-	double pre2 = 100.0 * correct2 / refsize2;
-	printf("ROC1: reference = %d prediction = %lu correct = %d sensitivity = %.2lf precision = %.2lf\n", refsize1, items.size(), correct1, sen1, pre1);
-	printf("ROC2: reference = %d prediction = %lu correct = %d sensitivity = %.2lf precision = %.2lf\n", refsize2, items.size(), correct2, sen2, pre2);
+	double sen3 = 100.0 * correct3 / items.size();
+	double sen4 = 100.0 * correct4 / items.size();
+	double pre1 = 100.0 * correct1 / refsize;
+	double pre2 = 100.0 * correct2 / refsize;
+	double pre3 = 100.0 * correct3 / refsize;
+	double pre4 = 100.0 * correct4 / refsize;
+	printf("ROC1: reference = %d prediction = %lu correct = %d sensitivity = %.2lf precision = %.2lf\n", refsize, items.size(), correct1, sen1, pre1);
+	printf("ROC2: reference = %d prediction = %lu correct = %d sensitivity = %.2lf precision = %.2lf\n", refsize, items.size(), correct2, sen2, pre2);
+	printf("ROC3: reference = %d prediction = %lu correct = %d sensitivity = %.2lf precision = %.2lf\n", refsize, items.size(), correct3, sen3, pre3);
+	//printf("ROC4: reference = %d prediction = %lu correct = %d sensitivity = %.2lf precision = %.2lf\n", refsize, items.size(), correct4, sen4, pre4);
 	return 0;
 }
 

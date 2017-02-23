@@ -35,6 +35,7 @@ public:
 	int build_quant_index();
 
 	int roc(int refsize);
+	int acc(int refsize);
 	int roc_trunc(int refsize, double min_coverage, double max_coverage);
 	int roc_quant(const string &qfile, double min_tpm, double max_tpm);
 	int acc_quant(const string &qfile, double tpm_threshold);
