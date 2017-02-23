@@ -12,7 +12,7 @@ class genome
 public:
 	genome();
 	genome(const string &file);
-	~genome();
+	virtual ~genome();
 
 public:
 	vector<gene> genes;
