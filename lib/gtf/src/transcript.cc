@@ -144,6 +144,21 @@ PI32 transcript::get_first_intron() const
 	return PI32(p, q);
 }
 
+bool transcript::intron_chain_match(const transcript &t) const
+{
+	if(exons.size() != t.exons.size()) return false;
+	if(exons.size() <= 1) return false;
+	int n = exons.size() - 1;
+	if(exons[0].second != t.exons[0].second) return false;
+	if(exons[n].first != t.exons[n].first) return false;
+	for(int k = 1; k < n - 1; k++)
+	{
+		if(exons[k].first != t.exons[k].first) return false;
+		if(exons[k].second != t.exons[k].second) return false;
+	}
+	return true;
+}
+
 string transcript::label() const
 {
 	char buf[10240];

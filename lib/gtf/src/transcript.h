@@ -51,6 +51,7 @@ public:
 	int length() const;
 	PI32 get_bounds() const;
 	PI32 get_first_intron() const;
+	bool intron_chain_match(const transcript &t) const;
 	string label() const;
 	int write(ostream &fout) const;
 };
