@@ -50,6 +50,7 @@ public:
 	int assign(const item &e);
 	int length() const;
 	PI32 get_bounds() const;
+	PI32 get_first_intron() const;
 	string label() const;
 	int write(ostream &fout) const;
 };

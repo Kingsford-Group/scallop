@@ -136,6 +136,14 @@ PI32 transcript::get_bounds() const
 	return PI32(p, q);
 }
 
+PI32 transcript::get_first_intron() const
+{
+	if(exons.size() <= 1) return PI32(-1, -1);
+	int32_t p = exons[0].second;
+	int32_t q = exons[1].first;
+	return PI32(p, q);
+}
+
 string transcript::label() const
 {
 	char buf[10240];
