@@ -1,4 +1,5 @@
 #include "genome1.h"
+#include "config.h"
 #include <cassert>
 #include <fstream>
 
@@ -156,7 +157,9 @@ int genome1::write(const string &file)
 	if(fout.fail()) return 0;
 	for(int i = 0; i < transcripts.size(); i++)
 	{
-		transcripts[i].write(fout);
+		transcript &t = transcripts[i];
+		if(t.coverage < min_transcript_coverage) continue;
+		t.write(fout);
 	}
 	fout.close();
 }

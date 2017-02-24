@@ -12,6 +12,7 @@ public:
 
 public:
 	int add_genome(const string &file);
+	int add_genomes(const string &file);
 	int build_union(genome1 &gm);
 	int print();
 };

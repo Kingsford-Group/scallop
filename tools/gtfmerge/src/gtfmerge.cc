@@ -10,6 +10,20 @@ int gtfmerge::add_genome(const string &file)
 	return 0;
 }
 
+int gtfmerge::add_genomes(const string &file)
+{
+	ifstream fin(file.c_str());
+	if(fin.fail()) return 0;
+
+	string line;
+	while(getline(fin, line))
+	{
+		if(line == "") continue;
+		add_genome(line);
+	}
+	return 0;
+}
+
 int gtfmerge::build_union(genome1 &gm)
 {
 	gm.clear();

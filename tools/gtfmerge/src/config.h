@@ -7,10 +7,7 @@
 
 using namespace std;
 
-extern int algo;
-extern double min_transcript_length;
-extern bool multiple_exon;
-
+extern double min_transcript_coverage;
 int parse_parameters(int argc, const char ** argv);
 
 #endif

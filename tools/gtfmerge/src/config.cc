@@ -8,27 +8,16 @@
 
 using namespace std;
 
-int algo = 2;
-double min_transcript_length = 0;
-bool multiple_exon = true;
+double min_transcript_coverage = -1;
 
 int parse_parameters(int argc, const char ** argv)
 {
 	for(int i = 1; i < argc; i++)
 	{
-		if(string(argv[i]) == "-a")
+		if(string(argv[i]) == "-c")
 		{
-			algo = atoi(argv[i + 1]);
+			min_transcript_coverage = atof(argv[i + 1]);
 			i++;
-		}
-		else if(string(argv[i]) == "-l")
-		{
-			min_transcript_length = atoi(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "-s")
-		{
-			multiple_exon = false;
 		}
 	}
 	return 0;
