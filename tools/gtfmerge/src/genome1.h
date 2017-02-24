@@ -7,8 +7,10 @@ using namespace std;
 
 typedef pair<PI32, set<int> > PPIS;
 typedef map<PI32, set<int> > MPIS;
+typedef pair<int, int> PII;
+typedef map<int, int> MII;
 
-class genome1: public genome
+class genome1
 {
 public:
 	genome1();
@@ -19,13 +21,19 @@ public:
 	MPIS intron_index;	
 
 public:
-	int build();
+	int build(const string &file);
+	int build(const vector<transcript> &v);
+	int clear();
 	int print(int index);
-	int query(const transcript &t, const set<int> &fb);
+	int write(const string &file);
+	int add_prefix(const string &p);
+	int build_union(const genome1 &gm);
 
 private:
-	int collect_multiexon_transcripts();
+	int build_multiexon_transcripts(const string &file);
 	int build_intron_index();
+	int query(const transcript &t, const set<int> &fb);
+	int compare(const genome1 &gy, MII &x2y, MII &y2x);
 };
 
 #endif
