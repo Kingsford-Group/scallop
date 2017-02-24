@@ -1,4 +1,5 @@
 #include "gtfmerge.h"
+#include <string>
 
 int gtfmerge::add_genome(const string &file)
 {
@@ -14,6 +15,7 @@ int gtfmerge::build_union(genome1 &gm)
 	gm.clear();
 	for(int i = 0; i < genomes.size(); i++)
 	{
+		genomes[i].add_suffix("u" + to_string(i));
 		gm.build_union(genomes[i]);
 	}
 	return 0;

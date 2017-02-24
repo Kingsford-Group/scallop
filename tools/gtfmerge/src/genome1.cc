@@ -133,7 +133,7 @@ int genome1::build_union(const genome1 &gm)
 	return 0;
 }
 
-int genome1::add_prefix(const string &p)
+int genome1::add_suffix(const string &p)
 {
 	for(int i = 0; i < transcripts.size(); i++)
 	{

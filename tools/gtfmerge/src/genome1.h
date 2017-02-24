@@ -26,7 +26,7 @@ public:
 	int clear();
 	int print(int index);
 	int write(const string &file);
-	int add_prefix(const string &p);
+	int add_suffix(const string &p);
 	int build_union(const genome1 &gm);
 
 private:
