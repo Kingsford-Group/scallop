@@ -10,7 +10,7 @@ using namespace std;
 
 int main(int argc, const char **argv)
 {
- 	if(argc != 4)
+ 	if(argc == 1)
 	{
 		cout<<"usage: " << endl;
 		cout<<"       " << argv[0] << " RPKM2TPM <in-gtf-file> <out-gtf-file>"<<endl;
