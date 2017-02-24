@@ -16,6 +16,7 @@ int main(int argc, const char **argv)
 		cout<<"       " << argv[0] << " RPKM2TPM <in-gtf-file> <out-gtf-file>"<<endl;
 		cout<<"       " << argv[0] << " FPKM2TPM <in-gtf-file> <out-gtf-file>"<<endl;
 		cout<<"       " << argv[0] << " format <in-gtf-file> <out-gtf-file>"<<endl;
+		cout<<"       " << argv[0] << " filter <min-transcript-coverage> <in-gtf-file> <out-gtf-file>"<<endl;
 		return 0;
 	}
 
@@ -37,6 +38,14 @@ int main(int argc, const char **argv)
 	{
 		genome gm(argv[2]);
 		gm.write(argv[3]);
+	}
+
+	if(string(argv[1]) == "filter")
+	{
+		double c = atof(argv[2]);
+		genome gm(argv[3]);
+		gm.filter_low_coverage_transcripts(c);
+		gm.write(argv[4]);
 	}
 
     return 0;
