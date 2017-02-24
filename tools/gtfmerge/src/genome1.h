@@ -23,11 +23,12 @@ public:
 public:
 	int build(const string &file);
 	int build(const vector<transcript> &v);
+	int build_union(const genome1 &gm);
+	int build_intersection(const genome1 &gm, genome1 &out);
 	int clear();
 	int print(int index);
 	int write(const string &file);
 	int add_suffix(const string &p);
-	int build_union(const genome1 &gm);
 
 private:
 	int build_multiexon_transcripts(const string &file);

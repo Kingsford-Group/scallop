@@ -107,6 +107,30 @@ int genome1::compare(const genome1 &gy, MII &x2y, MII &y2x)
 	return 0;
 }
 
+int genome1::build_intersection(const genome1 &gm, genome1 &out)
+{
+	vector<transcript> vv;
+	MII x2y;
+	MII y2x;
+	compare(gm, x2y, y2x);
+	for(MII::iterator it = x2y.begin(); it != x2y.end(); it++)
+	{
+		int i = it->first;
+		int j = it->second;
+		transcript x = transcripts[i];
+		const transcript &y = gm.transcripts[j];
+		x.coverage += y.coverage;
+		x.RPKM += y.RPKM;
+		x.FPKM += y.FPKM;
+		x.TPM += y.TPM;
+		vv.push_back(x);
+	}
+
+	out.clear();
+	out.build(vv);
+	return 0;
+}
+
 int genome1::build_union(const genome1 &gm)
 {
 	MII x2y;
