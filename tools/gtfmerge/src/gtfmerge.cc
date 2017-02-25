@@ -20,6 +20,7 @@ int gtfmerge::add_genomes(const string &file)
 	{
 		if(line == "") continue;
 		add_genome(line);
+		cout << "add genome " << line.c_str() << endl << flush;
 	}
 	return 0;
 }
@@ -42,21 +43,16 @@ int gtfmerge::build_pairwise_intersection(genome1 &gm)
 		genomes[i].add_suffix("u" + to_string(i));
 	}
 
-	vector<genome1> vv;
+	gm.clear();
 	for(int i = 0; i < genomes.size(); i++)
 	{
 		for(int j = i + 1; j < genomes.size(); j++)
 		{
 			genome1 g1;
 			genomes[i].build_intersection(genomes[j], g1);
-			vv.push_back(g1);
+			gm.build_union(g1);
+			cout << "union the intersection between " << i << " and " << j << endl << flush;
 		}
-	}
-
-	gm.clear();
-	for(int i = 0; i < vv.size(); i++)
-	{
-		gm.build_union(vv[i]);
 	}
 	return 0;
 }
