@@ -32,6 +32,7 @@ int gtfmerge::build_union(genome1 &gm)
 	{
 		genomes[i].add_suffix("u" + to_string(i));
 		gm.build_union(genomes[i]);
+		cout << "union genome " << i << endl << flush;
 	}
 	return 0;
 }
