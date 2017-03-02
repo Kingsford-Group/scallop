@@ -329,8 +329,6 @@ int parse_arguments(int argc, const char ** argv)
 			batch_bundle_size = atoi(argv[i + 1]);
 			i++;
 		}
-
-
 	}
 
 	if(min_surviving_edge_weight < 0.5 + min_transcript_coverage) 
@@ -361,6 +359,19 @@ int print_logo()
 int print_help()
 {
 	printf("\n");
-	printf("Command line: scallop -i bam-file -o gtf-file\n");
+	printf("Usage: scallop -i <bam-file> -o <gtf-file> [options]\n");
+	printf("\n");
+	printf("Options:\n");
+	printf(" %-27s  %s\n", "--library_type",  "{first, second, unstranded}, default: unstranded");
+	printf(" %-27s  %s\n", "--min_mapping_quality",  "ignore reads with mapping quality less than this value, default: 1");
+	printf(" %-27s  %s\n", "--min_flank_length",  "minimum match length required in each side for a spliced read, default: 3");
+	printf(" %-27s  %s\n", "--min_bundle_gap",  "the minimum distances required to start a new bundle, default: 50");
+	printf(" %-27s  %s\n", "--min_num_hits_in_bundle",  "the minimum number of reads required in a bundle, default: 20");
+	printf(" %-27s  %s\n", "--min_splice_bundary_hits",  "the minimum number of spliced reads required to support a junction, default: 1");
+	printf(" %-27s  %s\n", "--min_transcript_coverage",  "the minimum coverage required to output a multi-exon transcript, default: 1.01");
+	printf(" %-27s  %s\n", "--min_single_exon_coverage",  "the minimum coverage required to output a single-exon transcript, default: 20");
+	printf(" %-27s  %s\n", "--min_exon_length",  "default: 50");
+	printf(" %-27s  %s\n", "--min_transcript_length",  "default: 250, the minimum length of a transcript would be");
+	printf(" %-27s  %s\n", "",  "--min_transcript_length + --min_exon_length * num-of-exons-in-this-transcript");
 	return 0;
 }
