@@ -364,6 +364,7 @@ int print_help()
 	printf("Options:\n");
 	printf(" %-27s  %s\n", "--library_type",  "{first, second, unstranded}, default: unstranded");
 	printf(" %-27s  %s\n", "--min_transcript_coverage",  "the minimum coverage required to output a multi-exon transcript, default: 1.01");
+	printf(" %-27s  %s\n", "--min_single_exon_coverage",  "the minimum coverage required to output a single-exon transcript, default: 20");
 	printf(" %-27s  %s\n", "--min_exon_length",  "default: 50");
 	printf(" %-27s  %s\n", "--min_transcript_length",  "default: 250, the minimum length of a transcript would be");
 	printf(" %-27s  %s\n", "",  "--min_transcript_length + --min_exon_length * num-of-exons-in-this-transcript");
@@ -372,6 +373,5 @@ int print_help()
 	printf(" %-27s  %s\n", "--min_num_hits_in_bundle",  "the minimum number of reads required in a bundle, default: 20");
 	printf(" %-27s  %s\n", "--min_flank_length",  "the minimum match length required in each side for a spliced read, default: 3");
 	printf(" %-27s  %s\n", "--min_splice_bundary_hits",  "the minimum number of spliced reads required to support a junction, default: 1");
-	printf(" %-27s  %s\n", "--min_single_exon_coverage",  "the minimum coverage required to output a single-exon transcript, default: 20");
 	return 0;
 }
