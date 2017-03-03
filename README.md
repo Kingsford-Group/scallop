@@ -1,11 +1,18 @@
 # Overview
-Scallop is an accurate reference-based transcript assembler. Scallop features its high accuracy in assembling multi-exon transcripts as well as lowly expressed transcripts. Scallop achieves this improvement through a novel algorithm that unifies multiple objectives into a single optimization framework.
+Scallop is an accurate reference-based transcript assembler. Scallop features
+its high accuracy in assembling multi-exon transcripts as well as lowly
+expressed transcripts. Scallop achieves this improvement through a novel
+algorithm that unifies multiple objectives into a single optimization
+framework.
 
 # Installation
-To install Scallop, you need to first download/compile a few software packages (Samtools, Boost, and GUROBI), setup the corresponding environmental variables, and then compile the source code of Scallop.
+To install Scallop, you need to first download/compile a few software packages
+(htslib, Boost, and GUROBI), setup the corresponding environmental variables,
+and then compile the source code of Scallop.
 
-## Install Samtools
-Download Samtools from (http://www.htslib.org/) with version 1.2 or higher.
+## Install htslib
+Download htslib [(license)](https://github.com/samtools/htslib/blob/develop/LICENSE)
+from (http://www.htslib.org/) with version 1.2 or higher.
 Compile it to generate the htslib file `libhts.a`. 
 Set environment variable `HTSLIB` to indicate the directory of `libhts.a`.
 For example, for Unix platforms, add the following statement to the file `~/.bash_profile`:
@@ -14,7 +21,8 @@ export HTSLIB="/directory/to/your/htslib/htslib-1.2.1"
 ```
 
 ## Install Boost
-Download Boost from (http://www.boost.org).
+Download Boost [(license)](http://www.boost.org/LICENSE_1_0.txt)
+from (http://www.boost.org).
 Uncompress it somewhere (compiling and installing are not necessary).
 Set environment variable `BOOST_HOME` to indicate the directory of Boost.
 For example, for Unix platforms, add the following statement to the file `~/.bash_profile`:
@@ -23,12 +31,13 @@ export BOOST_HOME="/directory/to/your/boost/boost_1_60_0"
 ```
 
 ## Install GUROBI
-Download GUROBI from (http://www.gurobi.com/) and uncompress the package somewhere (compiling and installing are not required).
-You need to apply an academic license to use the full features of 
-GUROBI (Please refer to the GUROBI documentation for more information.)
-After that, set two environment variables, `GUROBI_HOME` and `GRB_LICENSE_FILE`,
-which indicates the directory of GUROBI, and the location of your license file, respectively.
-For example, for Unix platforms, add the following two statements to the file `~/.bash_profile`:
+Download GUROBI from (http://www.gurobi.com/) and uncompress the package
+somewhere (compiling and installing are not required).  You need to apply an
+academic license to use the full features of GUROBI (Please refer to the GUROBI
+documentation for more information.) After that, set two environment
+variables, `GUROBI_HOME` and `GRB_LICENSE_FILE`, which indicates the directory
+of GUROBI, and the location of your license file, respectively.  For example,
+for Unix platforms, add the following two statements to the file `~/.bash_profile`:
 ```
 export GUROBI_HOME="/directory/to/your/gurobi/linux64"
 export GRB_LICENSE_FILE="/location/of/your/license/gurobi.lic"
