@@ -546,7 +546,6 @@ int scallop::add_pseudo_hyper_edges()
 int scallop::init_super_edges()
 {
 	mev.clear();
-	med.clear();
 	edge_iterator it1, it2;
 	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
 	{
@@ -554,7 +553,6 @@ int scallop::init_super_edges()
 		int s = (*it1)->source();
 		v.push_back(s);
 		mev.insert(PEV(*it1, v));
-		med.insert(PED(*it1, 0));
 	}
 	return 0;
 }
@@ -695,6 +693,7 @@ int scallop::decompose_vertex_extend(int root, const vector<PPID> &vpi)
 	{
 		edge_descriptor e = i2e[it->first];
 		int k = it->second;
+
 		gr.move_edge(e, e->source(), k);
 
 		double w = gr.get_edge_weight(e);
@@ -706,7 +705,8 @@ int scallop::decompose_vertex_extend(int root, const vector<PPID> &vpi)
 	{
 		edge_descriptor e = i2e[it->first];
 		int k = it->second;
-		gr.move_edge(e, e->source(), k);
+
+		gr.move_edge(e, k, e->target());
 
 		gr.set_vertex_info(k, vertex_info());
 		gr.set_vertex_weight(k, 0);
@@ -991,14 +991,6 @@ int scallop::merge_adjacent_equal_edges(int x, int y)
 	double r2 = gr.get_vertex_weight(xt) - r1;
 	gr.set_vertex_weight(xt, r2);
 
-	//printf("sum = %.2lf, wx0 + wy0 = %.2lf, r1 = %.2lf, r2 = %.2lf\n", sum, (wx0 + wy0) * 0.5, r1, r2);
-	double reads = med[xx] + med[yy] + r1 * gr.get_vertex_info(xt).length;
-
-	//printf("set reads %.2lf to new edge\n", reads);
-
-	if(med.find(p) != med.end()) med[p] = reads;
-	else med.insert(PED(p, reads));
-
 	assert(i2e[n] == p);
 	assert(e2i.find(p) != e2i.end());
 	assert(e2i[p] == n);
@@ -1086,22 +1078,6 @@ int scallop::split_edge(int ei, double w)
 
 	if(mev.find(p2) != mev.end()) mev[p2] = mev[ee];
 	else mev.insert(PEV(p2, mev[ee]));
-
-	assert(med.find(ee) != med.end());
-	double reads = med[ee];
-	double reads1 = w / ww * reads;
-	double reads2 = reads - reads1;
-	
-	//printf("ei = %d, w = %.2lf, ww = %.2lf, reads = %.2lf, reads1 = %.2lf, reads2 = %.2lf\n", ei, w, ww, reads, reads1, reads2);
-
-	assert(reads1 >= 0);
-	assert(reads2 >= 0);
-
-	//printf("set reads %.2lf to new edge, %.2lf to old edge\n", reads1, reads2);
-
-	med[ee] = reads2;
-	if(med.find(p2) != med.end()) med[p2] = reads1;
-	else med.insert(PED(p2, reads1));
 
 	int n = i2e.size();
 	i2e.push_back(p2);
@@ -1317,9 +1293,6 @@ int scallop::collect_existing_st_paths()
 int scallop::collect_path(int e)
 {
 	assert(mev.find(i2e[e]) != mev.end());
-	assert(med.find(i2e[e]) != med.end());
-
-	//printf("reads for edge %d = %.2lf\n", e, med[i2e[e]]);
 
 	vector<int> v0 = mev[i2e[e]];
 	vector<int> v;
@@ -1337,7 +1310,6 @@ int scallop::collect_path(int e)
 	v.push_back(n);
 
 	path p;
-	p.reads = med[i2e[e]];
 	p.abd = gr.get_edge_weight(i2e[e]);
 	p.v = v;
 	paths.push_back(p);
