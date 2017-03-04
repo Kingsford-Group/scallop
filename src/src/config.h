@@ -16,6 +16,7 @@ using namespace std;
 #define LEFT_RIGHT_SPLICE 5
 #define MIDDLE_CUT 6
 
+#define NOHYPER -1
 #define TRIVIAL 0
 #define NORMAL 1
 
@@ -54,6 +55,7 @@ extern double max_intron_contamination_coverage;
 extern double min_surviving_edge_weight;
 extern double max_small_error_ratio;
 extern double max_split_error_ratio;
+extern double max_unsplit_error_ratio;
 extern double max_decompose_error_ratio;
 extern double min_transcript_numreads;
 extern double min_transcript_coverage;

@@ -29,6 +29,7 @@ double max_intron_contamination_coverage = 2.0;
 double min_surviving_edge_weight = 1.5;
 double max_small_error_ratio = 0.33;
 double max_split_error_ratio = 0.25;
+double max_unsplit_error_ratio = 0.01;
 double max_decompose_error_ratio = 0.01;
 double weight_balance_ratio = 0.5;
 bool use_hyper_edges = true;

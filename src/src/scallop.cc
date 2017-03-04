@@ -50,29 +50,33 @@ int scallop::assemble()
 		//if(b == true) print();
 		if(b == true) continue;
 
+		b = resolve_unsplittable_vertex(SINGLE);
+		if(b == true) print();
+		if(b == true) continue;
+
+		b = resolve_unsplittable_vertex(MULTIPLE);
+		if(b == true) print();
+		if(b == true) continue;
+
+		b = resolve_trivial_vertex(1);
+		//if(b == true) print();
+		if(b == true) continue;
+
 		b = resolve_splitable_vertex(1);
 		if(use_hyper_edges == false) assert(b == false);
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_insplitable_vertex(SINGLE, 999);
-		if(use_hyper_edges == false) assert(b == false);
-		if(b == true) print();
+		b = resolve_trivial_vertex(2);
+		//if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_insplitable_vertex(MULTIPLE, 999);
-		if(use_hyper_edges == false) assert(b == false);
-		if(b == true) print();
+		b = resolve_trivial_vertex(3);
+		//if(b == true) print();
 		if(b == true) continue;
 
-		/*
 		b = resolve_splitable_vertex(999);
 		if(b == true) print();
-		if(b == true) continue;
-		*/
-
-		b = resolve_trivial_vertex();
-		//if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_hyper_edge1();
@@ -223,7 +227,47 @@ bool scallop::resolve_insplitable_vertex(int type, int degree)
 	printf("resolve insplitable type = %d, degree-%d vertex %d, ratio = %.3lf, degree = (%d, %d)\n",
 			type, degree, root, ratio, gr.in_degree(root), gr.out_degree(root));
 
-	decompose_vertex(root, vpi);
+	decompose_vertex_replace(root, vpi);
+	assert(gr.degree(root) == 0);
+
+	return true;
+}
+
+bool scallop::resolve_unsplittable_vertex(int type)
+{
+	int root = -1;
+	vector<PPID> vpi;
+	double ratio = DBL_MAX;
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		if(gr.in_degree(i) <= 1) continue;
+		if(gr.out_degree(i) <= 1) continue;
+
+		MPII mpi = hs.get_routes(i, gr, e2i);
+		router rt(i, gr, e2i, i2e, mpi);
+		rt.classify();
+
+		if(rt.type != type) continue;
+
+		rt.build();
+
+		if(rt.ratio > max_unsplit_error_ratio) continue;
+
+		root = i;
+		ratio = rt.ratio;
+		vpi = rt.vpi;
+
+		// jump out immediately to save time
+		break;
+	}
+
+	if(root == -1) return false;
+	if(ratio > max_unsplit_error_ratio) return false;
+
+	printf("resolve unsplittable vertex, type = %d, vertex = %d, ratio = %.3lf, degree = (%d, %d)\n",
+			type, root, ratio, gr.in_degree(root), gr.out_degree(root));
+
+	decompose_vertex_extend(root, vpi);
 	assert(gr.degree(root) == 0);
 
 	return true;
@@ -380,6 +424,34 @@ bool scallop::resolve_hyper_edge1()
 	return true;
 }
 
+bool scallop::resolve_trivial_vertex(int type)
+{
+	int root = -1;
+	double ratio = -1;
+	int se = -1;
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		if(gr.degree(i) == 0) continue;
+		if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) continue;
+		if(classify_trivial_vertex(i) != type) continue;
+
+		int e;
+		double r = compute_balance_ratio(i);
+		if(ratio >= 0 && ratio < r) continue;
+
+		root = i;
+		ratio = r;
+		se = e;
+	}
+
+	if(root == -1) return false;
+
+	printf("resolve trivial vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
+
+	decompose_trivial_vertex(root);
+	assert(gr.degree(root) == 0);
+	return true;
+}
 
 bool scallop::resolve_trivial_vertex()
 {
@@ -575,7 +647,7 @@ bool scallop::filter_hyper_edges()
 	return flag;
 }
 
-int scallop::decompose_unsplittable_vertex(int root, const vector<PPID> &vpi)
+int scallop::decompose_vertex_extend(int root, const vector<PPID> &vpi)
 {
 	// add edge-vertex for each adjacent edge of root
 	int m = gr.num_vertices() - 1;
@@ -656,7 +728,7 @@ int scallop::decompose_unsplittable_vertex(int root, const vector<PPID> &vpi)
 	return 0;
 }
 
-int scallop::decompose_vertex(int root, const vector<PPID> &vpi)
+int scallop::decompose_vertex_replace(int root, const vector<PPID> &vpi)
 {
 	// remove edges that are not covered
 	MID md;
@@ -775,8 +847,24 @@ int scallop::decompose_trivial_vertex(int x)
 		}
 	}
 
-	decompose_vertex(x, vpi);
+	decompose_vertex_replace(x, vpi);
 	return 0;
+}
+
+int scallop::classify_trivial_vertex(int x)
+{
+	int d1 = gr.in_degree(x);
+	int d2 = gr.out_degree(x);
+	if(d1 != 1 && d2 != 1) return -1;
+	int md = (d1 > d2) ? d1 : d2;
+
+	MPII mpi = hs.get_routes(x, gr, e2i);
+	assert(mpi.size() <= md);
+
+	if(mpi.size() == md) return 1;
+	if(d1 == 1 && hs.left_extend(x) == false) return 2;
+	if(d2 == 1 && hs.right_extend(x) == false) return 2;
+	return 3;
 }
 
 int scallop::greedy_decompose(int num)
@@ -1220,7 +1308,11 @@ int scallop::collect_path(int e)
 
 	vector<int> v0 = mev[i2e[e]];
 	vector<int> v;
-	for(int i = 0; i < v0.size(); i++) v.push_back(v2v[v0[i]]);
+	for(int i = 0; i < v0.size(); i++) 
+	{
+		if(v2v[v0[i]] < 0) continue;
+		v.push_back(v2v[v0[i]]);
+	}
 
 	sort(v.begin(), v.end());
 

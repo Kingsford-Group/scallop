@@ -53,7 +53,12 @@ int router::classify()
 	assert(gr.in_degree(root) >= 1);
 	assert(gr.out_degree(root) >= 1);
 
-	degree = -1;
+	if(gr.num_edges() == 0)
+	{
+		type = NOHYPER;
+		degree = -1;
+		return 0;
+	}
 
 	if(gr.in_degree(root) == 1 || gr.out_degree(root) == 1)
 	{
@@ -96,7 +101,6 @@ int router::classify()
 
 	type = SPLITABLE;
 	degree = vv.size() - 1;
-
 	return 0;
 }
 

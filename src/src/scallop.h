@@ -50,9 +50,11 @@ private:
 	int refine_splice_graph();
 
 	// resolve iteratively
+	bool resolve_unsplittable_vertex(int type);
 	bool filter_hyper_edges();
 	bool resolve_small_edges();
 	bool resolve_trivial_vertex();
+	bool resolve_trivial_vertex(int type);
 	bool resolve_splitable_vertex(int degree);
 	bool resolve_insplitable_vertex(int type, int degree);
 	bool resolve_hyper_edge1();
@@ -62,13 +64,12 @@ private:
 	int balance_vertex(int x);
 	double compute_balance_ratio(int x);
 
-	// decomposing main-routines
-	int decompose_unsplittable_vertex(int v, const vector<PPID> &vpi);
-
 	// decomposing subroutines
 	int compute_smallest_edge(int x, double &ratio);
-	int decompose_vertex(int v, const vector<PPID> &vpi);
 	int decompose_trivial_vertex(int v);
+	int decompose_vertex_extend(int v, const vector<PPID> &vpi);
+	int decompose_vertex_replace(int v, const vector<PPID> &vpi);
+	int classify_trivial_vertex(int v);
 	int split_vertex(int x, const vector<int> &xe, const vector<int> &ye);
 	int split_edge(int exi, double w);
 	int merge_adjacent_edges(int x, int y);
