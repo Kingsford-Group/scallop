@@ -48,6 +48,7 @@ public:
 	int remove(const vector<int> &x);
 	int remove(const set<int> &x);
 	int remove_pair(int x, int y);
+	int insert_between(int x, int y, int e);
 	bool extend(int e);
 	bool left_extend(int e);
 	bool left_extend(const vector<int> &s);

@@ -372,6 +372,40 @@ int hyper_set::remove_pair(int x, int y)
 	return 0;
 }
 
+int hyper_set::insert_between(int x, int y, int e)
+{
+	if(e2s.find(x) == e2s.end()) return 0;
+	set<int> s = e2s[x];
+	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
+	{
+		int k = (*it);
+		vector<int> &vv = edges[k];
+		assert(vv.size() >= 1);
+
+		for(int i = 0; i < vv.size(); i++)
+		{
+			if(i == vv.size() - 1) continue;
+			if(vv[i] != x) continue;
+			if(vv[i + 1] != y) continue;
+			vv.insert(vv.begin() + i + 1, e);
+
+			if(e2s.find(e) == e2s.end())
+			{
+				set<int> ss;
+				ss.insert(k);
+				e2s.insert(PISI(e, ss));
+			}
+			else
+			{
+				e2s[e].insert(k);
+			}
+
+			break;
+		}
+	}
+	return 0;
+}
+
 bool hyper_set::extend(int e)
 {
 	return (left_extend(e) || right_extend(e));

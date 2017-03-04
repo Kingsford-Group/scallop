@@ -62,6 +62,9 @@ private:
 	int balance_vertex(int x);
 	double compute_balance_ratio(int x);
 
+	// decomposing main-routines
+	int decompose_unsplittable_vertex(int v, const vector<PPID> &vpi);
+
 	// decomposing subroutines
 	int compute_smallest_edge(int x, double &ratio);
 	int decompose_vertex(int v, const vector<PPID> &vpi);

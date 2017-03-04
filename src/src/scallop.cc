@@ -41,8 +41,10 @@ int scallop::assemble()
 
 		//refine_splice_graph();
 
+		/*
 		b = filter_hyper_edges();
 		if(b == true) continue;
+		*/
 
 		b = resolve_small_edges();
 		//if(b == true) print();
@@ -571,6 +573,87 @@ bool scallop::filter_hyper_edges()
 		hs.remove_pair(p.first, p.second);
 	}
 	return flag;
+}
+
+int scallop::decompose_unsplittable_vertex(int root, const vector<PPID> &vpi)
+{
+	// add edge-vertex for each adjacent edge of root
+	int m = gr.num_vertices() - 1;
+	for(int i = 0; i < gr.degree(root); i++)
+	{
+		gr.add_vertex();
+		v2v.push_back(-1);
+	}
+	int n = gr.num_vertices() - 1;
+	v2v[n] = v2v[m];
+
+	// use vertex-n instead of vertex-m as sink vertex
+	VE ve;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.in_edges(m); it1 != it2; it1++) ve.push_back(*it1);
+
+	for(int i = 0; i < ve.size(); i++)
+	{
+		edge_descriptor e = ve[i];
+		int s = e->source(); 
+		int t = e->target();
+		assert(t == m);
+		gr.move_edge(e, s, n);
+	}
+	assert(gr.degree(m) == 0);
+
+	// map adjacent edges of root to vertices [m, n)
+	int k = m;
+	map<int, int> ev1, ev2;
+	for(tie(it1, it2) = gr.in_edges(root); it1 != it2; it1++)
+	{
+		int e = e2i[*it1];
+		ev1.insert(PI(e, k));
+		double w = gr.get_edge_weight(*it1);
+		gr.set_vertex_info(k, gr.get_vertex_info(root));
+		gr.set_vertex_weight(k, w);
+		v2v[k] = v2v[root];
+		k++;
+	}
+	for(tie(it1, it2) = gr.out_edges(root); it1 != it2; it1++)
+	{
+		int e = e2i[*it1];
+		ev2.insert(PI(e, k));
+		gr.set_vertex_info(k, vertex_info());
+		gr.set_vertex_weight(k, 0);
+		v2v[k] = -2;
+		k++;
+	}
+	assert(ev1.size() + ev2.size() == n - m);
+
+	// connecting edges according to vpi
+	for(int i = 0; i < vpi.size(); i++)
+	{
+		int e1 = vpi[i].first.first;
+		int e2 = vpi[i].first.second;
+		double w = vpi[i].second;
+
+		assert(ev1.find(e1) != ev1.end());
+		assert(ev2.find(e2) != ev2.end());
+		int v1 = ev1[e1];
+		int v2 = ev2[e2];
+
+		edge_descriptor p = gr.add_edge(v1, v2);
+		
+		int z = i2e.size();
+		i2e.push_back(p);
+		e2i.insert(PEI(p, z));
+
+		gr.set_edge_weight(p, w);
+		gr.set_edge_info(p, edge_info());
+
+		vector<int> v0;
+		if(mev.find(p) != mev.end()) mev[p] = v0;
+		else mev.insert(PEV(p, v0));
+
+		hs.insert_between(e1, e2, z);
+	}
+	return 0;
 }
 
 int scallop::decompose_vertex(int root, const vector<PPID> &vpi)
@@ -1275,5 +1358,3 @@ int scallop::draw_splice_graph(const string &file)
 	gr.draw(file, mis, mes, 4.5, tp);
 	return 0;
 }
-
-
