@@ -625,6 +625,7 @@ int scallop::decompose_vertex(int root, const vector<PPID> &vpi)
 	{
 		if(spi.find(it->first) != spi.end()) continue;
 		hs.remove_pair(it->first.first, it->first.second);
+		//printf("AA: remove hyper edge pair (%d, %d)\n", it->first.first, it->first.second);
 	}
 
 	map<int, int> m;
@@ -659,6 +660,10 @@ int scallop::decompose_vertex(int root, const vector<PPID> &vpi)
 		int e2 = vpi[i].first.second;
 		assert(hs.left_extend(e1) == false || hs.right_extend(e1) == false);
 		assert(hs.left_extend(e2) == false || hs.right_extend(e2) == false);
+		//if(hs.left_extend(e1)) printf("BB: remove left extend %d\n", e1);
+		//if(hs.left_extend(e2)) printf("BB: remove left extend %d\n", e2);
+		if(hs.right_extend(e1)) printf("BB: remove right extend %d\n", e1);
+		if(hs.right_extend(e2)) printf("BB: remove right extend %d\n", e2);
 		hs.remove(e1);
 		hs.remove(e2);
 	}
@@ -1041,6 +1046,10 @@ int scallop::split_vertex(int x, const vector<int> &xe, const vector<int> &ye)
 	int n = gr.num_vertices();
 	assert(v2v.size() == n);
 
+	// vertex-n => new sink vertex
+	// vertex-(n-1) => splitted vertex for xe and ye
+	// vertex-x => splitted vertex for xe2 and ye2
+
 	gr.add_vertex();
 	gr.set_vertex_info(n, gr.get_vertex_info(n - 1));
 	gr.set_vertex_info(n - 1, gr.get_vertex_info(x));
@@ -1051,9 +1060,11 @@ int scallop::split_vertex(int x, const vector<int> &xe, const vector<int> &ye)
 	v2v.push_back(v2v[n - 1]);
 	v2v[n - 1] = v2v[x];
 
-	edge_iterator it1, it2;
 	VE ve;
+	edge_iterator it1, it2;
 	for(tie(it1, it2) = gr.in_edges(n - 1); it1 != it2; it1++) ve.push_back(*it1);
+
+	// use vertex-n instead of vertex-(n-1) as sink vertex
 	for(int i = 0; i < ve.size(); i++)
 	{
 		edge_descriptor e = ve[i];
@@ -1064,6 +1075,7 @@ int scallop::split_vertex(int x, const vector<int> &xe, const vector<int> &ye)
 	}
 	assert(gr.degree(n - 1) == 0);
 
+	// attach edges in xe and ye to vertex-(n-1)
 	for(int i = 0; i < xe.size(); i++)
 	{
 		edge_descriptor e = i2e[xe[i]];
@@ -1073,7 +1085,6 @@ int scallop::split_vertex(int x, const vector<int> &xe, const vector<int> &ye)
 		assert(t == x);
 		gr.move_edge(e, s, n - 1);
 	}
-
 	for(int i = 0; i < ye.size(); i++)
 	{
 		edge_descriptor e = i2e[ye[i]];
