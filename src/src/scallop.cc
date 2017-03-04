@@ -680,23 +680,38 @@ int scallop::decompose_vertex_extend(int root, const vector<PPID> &vpi)
 	for(tie(it1, it2) = gr.in_edges(root); it1 != it2; it1++)
 	{
 		int e = e2i[*it1];
-		ev1.insert(PI(e, k));
-		double w = gr.get_edge_weight(*it1);
-		gr.set_vertex_info(k, gr.get_vertex_info(root));
-		gr.set_vertex_weight(k, w);
-		v2v[k] = v2v[root];
-		k++;
+		ev1.insert(PI(e, k++));
 	}
 	for(tie(it1, it2) = gr.out_edges(root); it1 != it2; it1++)
 	{
 		int e = e2i[*it1];
-		ev2.insert(PI(e, k));
+		ev2.insert(PI(e, k++));
+	}
+	assert(ev1.size() + ev2.size() == n - m);
+
+	// set vertex info for new vertices
+	// detach edge from root to new vertex
+	for(map<int, int>::iterator it = ev1.begin(); it != ev1.end(); it++)
+	{
+		edge_descriptor e = i2e[it->first];
+		int k = it->second;
+		gr.move_edge(e, e->source(), k);
+
+		double w = gr.get_edge_weight(e);
+		gr.set_vertex_info(k, gr.get_vertex_info(root));
+		gr.set_vertex_weight(k, w);
+		v2v[k] = v2v[root];
+	}
+	for(map<int, int>::iterator it = ev1.begin(); it != ev1.end(); it++)
+	{
+		edge_descriptor e = i2e[it->first];
+		int k = it->second;
+		gr.move_edge(e, e->source(), k);
+
 		gr.set_vertex_info(k, vertex_info());
 		gr.set_vertex_weight(k, 0);
 		v2v[k] = -2;
-		k++;
 	}
-	assert(ev1.size() + ev2.size() == n - m);
 
 	// connecting edges according to vpi
 	for(int i = 0; i < vpi.size(); i++)
