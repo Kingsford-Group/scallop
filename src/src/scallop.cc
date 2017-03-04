@@ -702,7 +702,7 @@ int scallop::decompose_vertex_extend(int root, const vector<PPID> &vpi)
 		gr.set_vertex_weight(k, w);
 		v2v[k] = v2v[root];
 	}
-	for(map<int, int>::iterator it = ev1.begin(); it != ev1.end(); it++)
+	for(map<int, int>::iterator it = ev2.begin(); it != ev2.end(); it++)
 	{
 		edge_descriptor e = i2e[it->first];
 		int k = it->second;
