@@ -745,8 +745,8 @@ int scallop::decompose_vertex(int root, const vector<PPID> &vpi)
 		assert(hs.left_extend(e2) == false || hs.right_extend(e2) == false);
 		//if(hs.left_extend(e1)) printf("BB: remove left extend %d\n", e1);
 		//if(hs.left_extend(e2)) printf("BB: remove left extend %d\n", e2);
-		if(hs.right_extend(e1)) printf("BB: remove right extend %d\n", e1);
-		if(hs.right_extend(e2)) printf("BB: remove right extend %d\n", e2);
+		//if(hs.right_extend(e1)) printf("BB: remove right extend %d\n", e1);
+		//if(hs.right_extend(e2)) printf("BB: remove right extend %d\n", e2);
 		hs.remove(e1);
 		hs.remove(e2);
 	}

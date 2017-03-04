@@ -613,110 +613,126 @@ int router::decompose1()
 	for(int i = 0; i < gr.in_degree(root); i++) vw[i] *= r1;
 	for(int i = gr.in_degree(root); i < gr.degree(root); i++) vw[i] *= r2;
 
-	// run quadratic programming
-	GRBEnv *env = new GRBEnv();
-	GRBModel *model = new GRBModel(*env);
-
-	complete();
-
-	// edge list of ug
-	VE ve;
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = ug.edges(); it1 != it2; it1++)
+	try
 	{
-		edge_descriptor e = (*it1);
-		ve.push_back(e);
-	}
+		// run quadratic programming
+		GRBEnv *env = new GRBEnv();
+		GRBModel *model = new GRBModel(*env);
 
-	// routes weight variables
-	vector<GRBVar> rvars;
-	for(int i = 0; i < ve.size(); i++)
-	{
-		GRBVar rvar = model->addVar(1.0, GRB_INFINITY, 0, GRB_CONTINUOUS); // TODO, [0.5, ]
-		rvars.push_back(rvar);
-	}
+		complete();
 
-	// new weights variables
-	vector<GRBVar> wvars;
-	for(int i = 0; i < u2e.size(); i++)
-	{
-		GRBVar wvar = model->addVar(0.0, GRB_INFINITY, 0, GRB_CONTINUOUS);
-		wvars.push_back(wvar);
-	}
-	model->update();
+		// edge list of ug
+		VE ve;
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = ug.edges(); it1 != it2; it1++)
+		{
+			edge_descriptor e = (*it1);
+			ve.push_back(e);
+		}
 
-	// expression for each edge
-	vector<GRBLinExpr> exprs(u2e.size());
-	for(int i = 0; i < ve.size(); i++)
-	{
-		edge_descriptor e = ve[i];
-		int u1 = e->source();
-		int u2 = e->target();
-		exprs[u1] += rvars[i];
-		exprs[u2] += rvars[i];
-	}
+		// routes weight variables
+		vector<GRBVar> rvars;
+		for(int i = 0; i < ve.size(); i++)
+		{
+			GRBVar rvar = model->addVar(1.0, GRB_INFINITY, 0, GRB_CONTINUOUS); // TODO, [0.5, ]
+			rvars.push_back(rvar);
+		}
 
-	for(int i = 0; i < u2e.size(); i++)
-	{
-		model->addConstr(exprs[i], GRB_EQUAL, wvars[i]);
-	}
+		// new weights variables
+		vector<GRBVar> wvars;
+		for(int i = 0; i < u2e.size(); i++)
+		{
+			GRBVar wvar = model->addVar(0.0, GRB_INFINITY, 0, GRB_CONTINUOUS);
+			wvars.push_back(wvar);
+		}
+		model->update();
 
-	// objective 
-	GRBQuadExpr obj;
-	for(int i = 0; i < u2e.size(); i++)
-	{
-		//double w = gr.get_edge_weight(i2e[u2e[i]]);
-		double w = vw[i];
-		obj += (wvars[i] - w) * (wvars[i] - w);
-	}
+		// expression for each edge
+		vector<GRBLinExpr> exprs(u2e.size());
+		for(int i = 0; i < ve.size(); i++)
+		{
+			edge_descriptor e = ve[i];
+			int u1 = e->source();
+			int u2 = e->target();
+			exprs[u1] += rvars[i];
+			exprs[u2] += rvars[i];
+		}
 
-	model->setObjective(obj, GRB_MINIMIZE);
-	model->getEnv().set(GRB_IntParam_OutputFlag, 0);
-	model->update();
+		for(int i = 0; i < u2e.size(); i++)
+		{
+			model->addConstr(exprs[i], GRB_EQUAL, wvars[i]);
+		}
 
-	model->optimize();
+		// objective 
+		GRBQuadExpr obj;
+		for(int i = 0; i < u2e.size(); i++)
+		{
+			//double w = gr.get_edge_weight(i2e[u2e[i]]);
+			double w = vw[i];
+			obj += (wvars[i] - w) * (wvars[i] - w);
+		}
 
-	int f = model->get(GRB_IntAttr_Status);
+		model->setObjective(obj, GRB_MINIMIZE);
+		model->getEnv().set(GRB_IntParam_OutputFlag, 0);
+		model->update();
 
-	assert(f == GRB_OPTIMAL);
+		model->optimize();
 
-	if(f != GRB_OPTIMAL)
-	{
+		int f = model->get(GRB_IntAttr_Status);
+
+		assert(f == GRB_OPTIMAL);
+
+		if(f != GRB_OPTIMAL)
+		{
+			delete model;
+			delete env;
+			return -1;
+		}
+
+		double ww1 = 0;
+		double ww2 = 0;
+		for(int i = 0; i < wvars.size(); i++)
+		{
+			//double w1 = gr.get_edge_weight(i2e[u2e[i]]);
+			double w1 = vw[i];
+			double w2 = wvars[i].get(GRB_DoubleAttr_X);
+			ww1 += w1;
+			ww2 += fabs(w1 - w2);
+		}
+
+		ratio = ww2 / ww1;
+
+		vpi.clear();
+		for(int i = 0; i < ve.size(); i++)
+		{
+			edge_descriptor e = ve[i];
+			int s = e->source();
+			int t = e->target();
+			int es = u2e[s];
+			int et = u2e[t];
+			PI p(es, et);
+			if(s > t) p = PI(et, es);
+			double w = rvars[i].get(GRB_DoubleAttr_X);
+			//if(w <= 0.5) continue;
+			vpi.push_back(PPID(p, w));
+		}
+
 		delete model;
 		delete env;
-		return -1;
-	}
 
-	double ww1 = 0;
-	double ww2 = 0;
-	for(int i = 0; i < wvars.size(); i++)
+	}
+	catch(GRBException e)
 	{
-		//double w1 = gr.get_edge_weight(i2e[u2e[i]]);
-		double w1 = vw[i];
-		double w2 = wvars[i].get(GRB_DoubleAttr_X);
-		ww1 += w1;
-		ww2 += fabs(w1 - w2);
+		printf("GRB error code: %d\n", e.getErrorCode());
+		printf("GRB error message: %s\n", e.getMessage().c_str());
+		exit(-1);
 	}
-
-	ratio = ww2 / ww1;
-
-	vpi.clear();
-	for(int i = 0; i < ve.size(); i++)
+	catch(...)
 	{
-		edge_descriptor e = ve[i];
-		int s = e->source();
-		int t = e->target();
-		int es = u2e[s];
-		int et = u2e[t];
-		PI p(es, et);
-		if(s > t) p = PI(et, es);
-		double w = rvars[i].get(GRB_DoubleAttr_X);
-		//if(w <= 0.5) continue;
-		vpi.push_back(PPID(p, w));
+		printf("GRB exception\n");
+		exit(-1);
 	}
 
-	delete model;
-	delete env;
 	return 0;
 }
 
