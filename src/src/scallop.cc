@@ -893,8 +893,14 @@ int scallop::classify_trivial_vertex(int x)
 	//MPII mpi = hs.get_routes(x, gr, e2i);
 	//assert(mpi.size() <= md);
 
-	if(d1 == 1 && hs.left_extend(x) == false) return 1;
-	if(d2 == 1 && hs.right_extend(x) == false) return 1;
+	edge_iterator it1, it2;
+	tie(it1, it2) = gr.in_edges(x);
+	int e1 = e2i[*it1];
+	tie(it1, it2) = gr.out_edges(x);
+	int e2 = e2i[*it1];
+
+	if(d1 == 1 && hs.left_extend(e1) == false) return 1;
+	if(d2 == 1 && hs.right_extend(e2) == false) return 1;
 	return 2;
 }
 
