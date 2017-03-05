@@ -54,6 +54,8 @@ public:
 	bool left_extend(const vector<int> &s);
 	bool right_extend(int e);
 	bool right_extend(const vector<int> &s);
+	bool left_dominate(int e);
+	bool right_dominate(int e);
 };
 
 #endif

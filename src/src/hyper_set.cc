@@ -467,6 +467,38 @@ bool hyper_set::right_extend(const vector<int> &s)
 	return false;
 }
 
+bool hyper_set::left_dominate(int e)
+{
+	// for each appearance of e
+	// if right is not empty then left is also not empty
+	if(e2s.find(e) == e2s.end()) return true;
+	set<int> s = e2s[e];
+	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
+	{
+		int k = (*it);
+		vector<int> &vv = edges[k];
+		assert(vv.size() >= 1);
+		if(vv.front() == e && vv.size() >= 2) return false;
+	}
+	return true;
+}
+
+bool hyper_set::right_dominate(int e)
+{
+	// for each appearance of e
+	// if left is not empty then right is also not empty
+	if(e2s.find(e) == e2s.end()) return true;
+	set<int> s = e2s[e];
+	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
+	{
+		int k = (*it);
+		vector<int> &vv = edges[k];
+		assert(vv.size() >= 1);
+		if(vv.back() == e && vv.size() >= 2) return false;
+	}
+	return true;
+}
+
 int hyper_set::print()
 {
 	//printf("PRINT HYPER_SET\n");

@@ -899,8 +899,8 @@ int scallop::classify_trivial_vertex(int x)
 	tie(it1, it2) = gr.out_edges(x);
 	int e2 = e2i[*it1];
 
-	if(d1 == 1 && hs.left_extend(e1) == false) return 1;
-	if(d2 == 1 && hs.right_extend(e2) == false) return 1;
+	if(d1 == 1 && hs.right_dominate(e1) == true) return 1;
+	if(d2 == 1 && hs.left_dominate(e2) == true) return 1;
 	return 2;
 }
 

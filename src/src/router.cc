@@ -111,13 +111,12 @@ int router::build()
 	if(type == SPLITABLE) split();
 	if(type == SINGLE || type == MULTIPLE) 
 	{
-		decompose2();
-		vector<PPID> v2 = vpi;
 		decompose1();
-		vector<PPID> v1 = vpi;
-
-		for(int k = 0; k < v1.size(); k++) printf("GUROBI vpi %d = (%d, %d): %.2lf\n", k, v1[k].first.first, v1[k].first.second, v1[k].second);
-		for(int k = 0; k < v2.size(); k++) printf("BOOST  vpi %d = (%d, %d): %.2lf\n", k, v2[k].first.first, v2[k].first.second, v2[k].second);
+		//vector<PPID> v1 = vpi;
+		//decompose2();
+		//vector<PPID> v2 = vpi;
+		//for(int k = 0; k < v1.size(); k++) printf("GUROBI vpi %d = (%d, %d): %.2lf\n", k, v1[k].first.first, v1[k].first.second, v1[k].second);
+		//for(int k = 0; k < v2.size(); k++) printf("BOOST  vpi %d = (%d, %d): %.2lf\n", k, v2[k].first.first, v2[k].first.second, v2[k].second);
 	}
 	return 0;
 }
