@@ -71,16 +71,16 @@ int scallop::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_trivial_vertex(2);
-		//if(b == true) print();
-		if(b == true) continue;
-
 		b = resolve_hyper_edge1();
 		if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_hyper_edge0();
 		if(b == true) print();
+		if(b == true) continue;
+
+		b = resolve_trivial_vertex(2);
+		//if(b == true) print();
 		if(b == true) continue;
 
 		break;
