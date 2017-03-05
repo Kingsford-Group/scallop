@@ -67,16 +67,12 @@ int scallop::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_trivial_vertex(2);
-		//if(b == true) print();
-		if(b == true) continue;
-
-		b = resolve_trivial_vertex(3);
-		//if(b == true) print();
-		if(b == true) continue;
-
 		b = resolve_splitable_vertex(999);
 		if(b == true) print();
+		if(b == true) continue;
+
+		b = resolve_trivial_vertex(2);
+		//if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_hyper_edge1();
@@ -793,6 +789,16 @@ int scallop::decompose_vertex_replace(int root, const vector<PPID> &vpi)
 	for(int i = 0; i < vpi.size(); i++) spi.insert(vpi[i].first);
 
 	MPII mpi = hs.get_routes(root, gr, e2i);
+
+	// print mpi
+	for(MPII::iterator it = mpi.begin(); it != mpi.end(); it++)
+	{
+		int e1 = it->first.first;
+		int e2 = it->first.second;
+		int c = it->second;
+		printf("hyper edges for root %d: (%d, %d), count = %d\n", root, e1, e2, c);
+	}
+
 	for(MPII::iterator it = mpi.begin(); it != mpi.end(); it++)
 	{
 		if(spi.find(it->first) != spi.end()) continue;
@@ -822,9 +828,18 @@ int scallop::decompose_vertex_replace(int root, const vector<PPID> &vpi)
 		int e = merge_adjacent_edges(e1, e2, w);
 
 		hs.replace(e1, e2, e);
+		printf("replace (%d, %d) with %d\n", e1, e2, e);
 
-		if(m[e1] == 1) hs.replace(e1, e);
-		if(m[e2] == 1) hs.replace(e2, e);
+		if(m[e1] == 1)
+		{
+			hs.replace(e1, e);
+			printf("replace %d with %d\n", e1, e);
+		}
+		if(m[e2] == 1)
+		{
+			hs.replace(e2, e);
+			printf("replace %d with %d\n", e2, e);
+		}
 	}
 
 	for(int i = 0; i < vpi.size(); i++)
@@ -833,10 +848,10 @@ int scallop::decompose_vertex_replace(int root, const vector<PPID> &vpi)
 		int e2 = vpi[i].first.second;
 		assert(hs.left_extend(e1) == false || hs.right_extend(e1) == false);
 		assert(hs.left_extend(e2) == false || hs.right_extend(e2) == false);
-		if(hs.left_extend(e1)) printf("BB: remove left extend %d\n", e1);
-		if(hs.left_extend(e2)) printf("BB: remove left extend %d\n", e2);
-		if(hs.right_extend(e1)) printf("BB: remove right extend %d\n", e1);
-		if(hs.right_extend(e2)) printf("BB: remove right extend %d\n", e2);
+		if(hs.left_extend(e1)) printf("BB1: remove left extend %d\n", e1);
+		if(hs.left_extend(e2)) printf("BB2: remove left extend %d\n", e2);
+		if(hs.right_extend(e1)) printf("BB3: remove right extend %d\n", e1);
+		if(hs.right_extend(e2)) printf("BB4: remove right extend %d\n", e2);
 		hs.remove(e1);
 		hs.remove(e2);
 	}
@@ -874,15 +889,13 @@ int scallop::classify_trivial_vertex(int x)
 	int d1 = gr.in_degree(x);
 	int d2 = gr.out_degree(x);
 	if(d1 != 1 && d2 != 1) return -1;
-	int md = (d1 > d2) ? d1 : d2;
 
-	MPII mpi = hs.get_routes(x, gr, e2i);
-	assert(mpi.size() <= md);
+	//MPII mpi = hs.get_routes(x, gr, e2i);
+	//assert(mpi.size() <= md);
 
-	if(mpi.size() == md) return 1;
-	if(d1 == 1 && hs.left_extend(x) == false) return 2;
-	if(d2 == 1 && hs.right_extend(x) == false) return 2;
-	return 3;
+	if(d1 == 1 && hs.left_extend(x) == false) return 1;
+	if(d2 == 1 && hs.right_extend(x) == false) return 1;
+	return 2;
 }
 
 int scallop::greedy_decompose(int num)
