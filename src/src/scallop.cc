@@ -446,7 +446,8 @@ bool scallop::resolve_trivial_vertex(int type)
 
 	if(root == -1) return false;
 
-	printf("resolve trivial vertex %d, ratio = %.2lf, degree = (%d, %d)\n", root, ratio, gr.in_degree(root), gr.out_degree(root));
+	printf("resolve trivial vertex %d, type = %d, ratio = %.2lf, degree = (%d, %d)\n", root, type, 
+			ratio, gr.in_degree(root), gr.out_degree(root));
 
 	decompose_trivial_vertex(root);
 	assert(gr.degree(root) == 0);
@@ -783,6 +784,7 @@ int scallop::decompose_vertex_replace(int root, const vector<PPID> &vpi)
 	{
 		int e = dve[i];
 		remove_edge(e);
+		printf("AA1: remove edge %d\n", e);
 		hs.remove(e);
 	}
 
@@ -794,6 +796,7 @@ int scallop::decompose_vertex_replace(int root, const vector<PPID> &vpi)
 	for(MPII::iterator it = mpi.begin(); it != mpi.end(); it++)
 	{
 		if(spi.find(it->first) != spi.end()) continue;
+		printf("AA2: remove hyper pair (%d, %d)\n", it->first.first, it->first.second);
 		hs.remove_pair(it->first.first, it->first.second);
 		//printf("AA: remove hyper edge pair (%d, %d)\n", it->first.first, it->first.second);
 	}
@@ -830,10 +833,10 @@ int scallop::decompose_vertex_replace(int root, const vector<PPID> &vpi)
 		int e2 = vpi[i].first.second;
 		assert(hs.left_extend(e1) == false || hs.right_extend(e1) == false);
 		assert(hs.left_extend(e2) == false || hs.right_extend(e2) == false);
-		//if(hs.left_extend(e1)) printf("BB: remove left extend %d\n", e1);
-		//if(hs.left_extend(e2)) printf("BB: remove left extend %d\n", e2);
-		//if(hs.right_extend(e1)) printf("BB: remove right extend %d\n", e1);
-		//if(hs.right_extend(e2)) printf("BB: remove right extend %d\n", e2);
+		if(hs.left_extend(e1)) printf("BB: remove left extend %d\n", e1);
+		if(hs.left_extend(e2)) printf("BB: remove left extend %d\n", e2);
+		if(hs.right_extend(e1)) printf("BB: remove right extend %d\n", e1);
+		if(hs.right_extend(e2)) printf("BB: remove right extend %d\n", e2);
 		hs.remove(e1);
 		hs.remove(e2);
 	}
