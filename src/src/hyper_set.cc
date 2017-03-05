@@ -478,7 +478,12 @@ bool hyper_set::left_dominate(int e)
 		int k = (*it);
 		vector<int> &vv = edges[k];
 		assert(vv.size() >= 1);
-		if(vv.front() == e && vv.size() >= 2) return false;
+
+		for(int i = 0; i < vv.size() - 1; i++)
+		{
+			if(vv[i] == e && vv[i + 1] != -1 && i == 0) return false; 
+			if(vv[i] == e && vv[i + 1] != -1 && i > 0 && vv[i - 1] == -1) return false; 
+		}
 	}
 	return true;
 }
@@ -494,7 +499,11 @@ bool hyper_set::right_dominate(int e)
 		int k = (*it);
 		vector<int> &vv = edges[k];
 		assert(vv.size() >= 1);
-		if(vv.back() == e && vv.size() >= 2) return false;
+		for(int i = 1; i < vv.size(); i++)
+		{
+			if(vv[i] == e && vv[i - 1] != -1 && i == vv.size() - 1) return false; 
+			if(vv[i] == e && vv[i - 1] != -1 && i < vv.size() - 1 && vv[i + 1] == -1) return false; 
+		}
 	}
 	return true;
 }
