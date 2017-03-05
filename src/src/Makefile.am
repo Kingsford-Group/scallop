@@ -32,4 +32,5 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  assembler.h assembler.cc \
 				  estimator.h estimator.cc \
 				  filter.h filter.cc \
+				  matrix.h matrix.cc \
 				  main.cc

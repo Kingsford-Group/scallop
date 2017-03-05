@@ -44,8 +44,8 @@ public:
 	int build_indices();					// build u2e and e2u
 	int build_bipartite_graph();			// build bipartite graph
 	int split();							// split
-	int decompose1();						// decompose with LP
-	int decompose2();						// decompose with ILP
+	int decompose1();						// decompose with quadratic linear programming
+	int decompose2();						// decompose with linear system
 	int complete();							// complete graph
 	PI filter_hyper_edge();					// try to filter hyper-edge
 	PI filter_small_hyper_edge();			// hyper-edge w.r.t. the smallest edge
