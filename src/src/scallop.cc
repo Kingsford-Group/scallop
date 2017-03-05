@@ -95,6 +95,13 @@ int scallop::assemble()
 	}
 
 	collect_existing_st_paths();
+
+	if(gr.num_edges() >= 1)
+	{
+		draw_splice_graph("graph.tex");
+		exit(1);
+	}
+
 	assert(gr.num_edges() == 0);
 
 	return 0;
@@ -158,11 +165,13 @@ bool scallop::resolve_splitable_vertex(int degree, bool use_threshold)
 		if(gr.out_degree(i) <= 1) continue;
 
 		MPII mpi = hs.get_routes(i, gr, e2i);
-
-		if(mpi.size() == 0) continue;
-
 		router rt(i, gr, e2i, i2e, mpi);
 		rt.classify();
+
+		//printf("checking vertex %d, degree = (%d, %d), mpi.size() = %lu, type = %d, degree = %d, given degree = %d\n", 
+		//		i, gr.in_degree(i), gr.out_degree(i), mpi.size(), rt.type, rt.degree, degree);
+
+		//if(mpi.size() == 0) continue; TODO
 
 		if(rt.type != SPLITABLE) continue;
 		if(rt.degree > degree) continue;
@@ -203,9 +212,12 @@ bool scallop::resolve_unsplittable_vertex(int type, bool use_threshold)
 		if(gr.in_degree(i) <= 1) continue;
 		if(gr.out_degree(i) <= 1) continue;
 
+
 		MPII mpi = hs.get_routes(i, gr, e2i);
 		router rt(i, gr, e2i, i2e, mpi);
 		rt.classify();
+
+		//printf("checking vertex %d, degree = (%d, %d), type = %d, given type = %d\n", i, gr.in_degree(i), gr.out_degree(i), rt.type, type);
 
 		if(rt.type != type) continue;
 
@@ -239,12 +251,16 @@ bool scallop::resolve_trivial_vertex(int type)
 	int se = -1;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
+		int c = classify_trivial_vertex(i);
+		//printf("checking vertex %d, degree = (%d, %d), type = %d, given type = %d\n", i, gr.in_degree(i), gr.out_degree(i), c, type);
+
 		if(gr.degree(i) == 0) continue;
 		if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) continue;
-		if(classify_trivial_vertex(i) != type) continue;
+		if(c != type) continue;
 
 		int e;
 		double r = compute_balance_ratio(i);
+
 		if(ratio >= 0 && ratio < r) continue;
 
 		root = i;
@@ -575,6 +591,7 @@ int scallop::decompose_vertex_replace(int root, const vector<PPID> &vpi)
 	MPII mpi = hs.get_routes(root, gr, e2i);
 
 	// print mpi
+	/*
 	for(MPII::iterator it = mpi.begin(); it != mpi.end(); it++)
 	{
 		int e1 = it->first.first;
@@ -582,6 +599,7 @@ int scallop::decompose_vertex_replace(int root, const vector<PPID> &vpi)
 		int c = it->second;
 		printf("hyper edges for root %d: (%d, %d), count = %d\n", root, e1, e2, c);
 	}
+	*/
 
 	for(MPII::iterator it = mpi.begin(); it != mpi.end(); it++)
 	{
@@ -612,17 +630,17 @@ int scallop::decompose_vertex_replace(int root, const vector<PPID> &vpi)
 		int e = merge_adjacent_edges(e1, e2, w);
 
 		hs.replace(e1, e2, e);
-		printf("replace (%d, %d) with %d\n", e1, e2, e);
+		//printf("replace (%d, %d) with %d\n", e1, e2, e);
 
 		if(m[e1] == 1)
 		{
 			hs.replace(e1, e);
-			printf("replace %d with %d\n", e1, e);
+			//printf("replace %d with %d\n", e1, e);
 		}
 		if(m[e2] == 1)
 		{
 			hs.replace(e2, e);
-			printf("replace %d with %d\n", e2, e);
+			//printf("replace %d with %d\n", e2, e);
 		}
 	}
 
@@ -1158,11 +1176,12 @@ int scallop::print()
 		if(gr.degree(i) >= 1) n++;
 	}
 
+	/*
 	int p1 = gr.compute_num_paths();
 	int p2 = gr.compute_decomp_paths();
 	printf("statistics: %lu edges, %d vertices, total %d paths, %d required\n", gr.num_edges(), n, p1, p2);
-
-	//hs.print();
+	hs.print();
+	*/
 
 	if(output_tex_files == true)
 	{

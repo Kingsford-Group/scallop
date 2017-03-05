@@ -400,7 +400,7 @@ int hyper_set::insert_between(int x, int y, int e)
 				e2s[e].insert(k);
 			}
 
-			printf("line %d: insert %d between (%d, %d) = (%d, %d, %d)\n", k, e, x, y, vv[i], vv[i + 1], vv[i + 2]);
+			//printf("line %d: insert %d between (%d, %d) = (%d, %d, %d)\n", k, e, x, y, vv[i], vv[i + 1], vv[i + 2]);
 
 			break;
 		}
