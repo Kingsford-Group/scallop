@@ -411,7 +411,7 @@ bool scallop::resolve_trivial_vertex(int type)
 
 int scallop::summarize_vertices()
 {
-	for(int i = 1; i < gr.num_vertices(); i++)
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.degree(i) <= 0) continue;
 		
