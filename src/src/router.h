@@ -58,4 +58,6 @@ public:
 	int stats();
 };
 
+bool compare_edge_weight(const PED &x, const PED &y);
+
 #endif

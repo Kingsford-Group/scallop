@@ -72,6 +72,8 @@ int router::classify()
 	build_indices();
 	build_bipartite_graph();
 
+	build_maximum_spanning_tree();
+
 	vector< set<int> > vv = ug.compute_connected_components();
 
 	if(vv.size() == 1)
@@ -687,7 +689,62 @@ int router::complete()
 }
 
 int router::build_maximum_spanning_tree()
-{}
+{
+	if(ug.num_vertices() == 0) return 0;
+	vector<PED> vew(u2w.begin(), u2w.end());
+	sort(vew.begin(), vew.end(), compare_edge_weight);
+	set<int> sv;
+	sv.insert(0);
+	SE se;
+
+	vector< set<int> > vv = ug.compute_connected_components();
+	for(int i = 0; i < vv.size(); i++)
+	{
+		set<int> &s = vv[i];
+		if(s.size() == 0) continue;
+		sv.insert(*(s.begin()));
+	}
+
+	/*
+	printf("------\n");
+	for(int i = 0; i < vew.size(); i++)
+	{
+		edge_descriptor e = vew[i].first;
+		int s = e->source();
+		int t = e->target();
+		printf("graph edge (%d, %d), weight = %.3lf\n", s, t, vew[i].second);
+	}
+	*/
+
+	while(true)
+	{
+		bool b = false;
+		for(int i = 0; i < vew.size(); i++)
+		{
+			edge_descriptor e = vew[i].first;
+			if(se.find(e) != se.end()) continue;
+			int s = e->source();
+			int t = e->target();
+			if(sv.find(s) == sv.end() && sv.find(t) == sv.end()) continue;
+			if(sv.find(s) != sv.end() && sv.find(t) != sv.end()) continue;
+			sv.insert(s);
+			sv.insert(t);
+			se.insert(e);
+			b = true;
+			//printf("add   edge (%d, %d), weight = %.3lf\n", s, t, vew[i].second);
+			break;
+		}
+		if(b == false) break;
+	}
+
+	for(SE::iterator it = se.begin(); it != se.end(); it++)
+	{
+		edge_descriptor e = (*it);
+		ug.remove_edge(e);
+		u2w.erase(e);
+	}
+	return 0;
+}
 
 int router::print() const
 {
@@ -724,4 +781,10 @@ int router::stats()
 			root, gr.in_degree(root), gr.out_degree(root), routes.size(), vv.size(), x2, x1);
 
 	return 0;
+}
+
+bool compare_edge_weight(const PED &x, const PED &y)
+{
+	if(x.second > y.second) return true;
+	else return false;
 }
