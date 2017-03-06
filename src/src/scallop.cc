@@ -722,6 +722,7 @@ int scallop::decompose_vertex_replace(int root, const vector<PPID> &vpi)
 	MPII mpi = hs.get_routes(root, gr, e2i);
 
 	// print mpi
+	/*
 	for(MPII::iterator it = mpi.begin(); it != mpi.end(); it++)
 	{
 		int e1 = it->first.first;
@@ -729,6 +730,7 @@ int scallop::decompose_vertex_replace(int root, const vector<PPID> &vpi)
 		int c = it->second;
 		printf("hyper edges for root %d: (%d, %d), count = %d\n", root, e1, e2, c);
 	}
+	*/
 
 	for(MPII::iterator it = mpi.begin(); it != mpi.end(); it++)
 	{
@@ -759,18 +761,9 @@ int scallop::decompose_vertex_replace(int root, const vector<PPID> &vpi)
 		int e = merge_adjacent_edges(e1, e2, w);
 
 		hs.replace(e1, e2, e);
-		printf("replace (%d, %d) with %d\n", e1, e2, e);
 
-		if(m[e1] == 1)
-		{
-			hs.replace(e1, e);
-			printf("replace %d with %d\n", e1, e);
-		}
-		if(m[e2] == 1)
-		{
-			hs.replace(e2, e);
-			printf("replace %d with %d\n", e2, e);
-		}
+		if(m[e1] == 1) hs.replace(e1, e);
+		if(m[e2] == 1) hs.replace(e2, e);
 	}
 
 	for(int i = 0; i < vpi.size(); i++)
