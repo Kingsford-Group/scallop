@@ -472,6 +472,9 @@ bool hyper_set::left_dominate(int e)
 	// for each appearance of e
 	// if right is not empty then left is also not empty
 	if(e2s.find(e) == e2s.end()) return true;
+
+	set<PI> x1;
+	set<PI> x2;
 	set<int> s = e2s[e];
 	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
 	{
@@ -481,9 +484,26 @@ bool hyper_set::left_dominate(int e)
 
 		for(int i = 0; i < vv.size() - 1; i++)
 		{
-			if(vv[i] == e && vv[i + 1] != -1 && i == 0) return false; 
-			if(vv[i] == e && vv[i + 1] != -1 && i > 0 && vv[i - 1] == -1) return false; 
+			if(vv[i] != e) continue;
+			if(vv[i + 1] == -1) continue;
+
+			if(i == 0 || vv[i - 1] == -1)
+			{
+				if(i + 2 < vv.size()) x1.insert(PI(vv[i + 1], vv[i + 2]));
+				else x1.insert(PI(vv[i + 1], -1));
+			}
+			else
+			{
+				x2.insert(PI(vv[i + 1], -1));
+				if(i + 2 < vv.size()) x2.insert(PI(vv[i + 1], vv[i + 2]));
+			}
 		}
+	}
+
+	for(set<PI>::iterator it = x1.begin(); it != x1.end(); it++)
+	{
+		PI p = (*it);
+		if(x2.find(p) == x2.end()) return false;
 	}
 	return true;
 }
@@ -493,6 +513,8 @@ bool hyper_set::right_dominate(int e)
 	// for each appearance of e
 	// if left is not empty then right is also not empty
 	if(e2s.find(e) == e2s.end()) return true;
+	set<PI> x1;
+	set<PI> x2;
 	set<int> s = e2s[e];
 	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
 	{
@@ -501,10 +523,28 @@ bool hyper_set::right_dominate(int e)
 		assert(vv.size() >= 1);
 		for(int i = 1; i < vv.size(); i++)
 		{
-			if(vv[i] == e && vv[i - 1] != -1 && i == vv.size() - 1) return false; 
-			if(vv[i] == e && vv[i - 1] != -1 && i < vv.size() - 1 && vv[i + 1] == -1) return false; 
+			if(vv[i] != e) continue;
+			if(vv[i - 1] == -1) continue;
+
+			if(i == vv.size() - 1 || vv[i + 1] == -1)
+			{
+				if(i - 2 >= 0) x1.insert(PI(vv[i - 1], vv[i - 2]));
+				else x1.insert(PI(vv[i - 1], -1));
+			}
+			else
+			{
+				x2.insert(PI(vv[i - 1], -1));
+				if(i - 2 >= 0) x2.insert(PI(vv[i - 1], vv[i - 2]));
+			}
 		}
 	}
+
+	for(set<PI>::iterator it = x1.begin(); it != x1.end(); it++)
+	{
+		PI p = (*it);
+		if(x2.find(p) == x2.end()) return false;
+	}
+
 	return true;
 }
 
