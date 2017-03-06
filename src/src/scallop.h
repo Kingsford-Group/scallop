@@ -83,6 +83,7 @@ private:
 	// stats, print, and draw
 	int print();
 	int stats();
+	int summarize_vertices();
 	int draw_splice_graph(const string &file);
 	vector<int> topological_sort();
 };

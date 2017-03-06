@@ -71,6 +71,8 @@ int scallop::assemble()
 		if(b == true) print();
 		if(b == true) continue;
 
+		summarize_vertices();
+
 		b = resolve_hyper_edge1();
 		if(b == true) print();
 		if(b == true) continue;
@@ -153,12 +155,10 @@ bool scallop::resolve_splitable_vertex(int degree)
 		if(gr.out_degree(i) <= 1) continue;
 
 		MPII mpi = hs.get_routes(i, gr, e2i);
-
-		if(mpi.size() == 0) continue;
-
 		router rt(i, gr, e2i, i2e, mpi);
 		rt.classify();
 
+		if(mpi.size() == 0) continue;
 		if(rt.type != SPLITABLE) continue;
 		if(rt.degree > degree) continue;
 
@@ -407,6 +407,29 @@ bool scallop::resolve_trivial_vertex(int type)
 	decompose_trivial_vertex(root);
 	assert(gr.degree(root) == 0);
 	return true;
+}
+
+int scallop::summarize_vertices()
+{
+	for(int i = 1; i < gr.num_vertices(); i++)
+	{
+		if(gr.degree(i) <= 0) continue;
+		
+		if(gr.in_degree(i) == 1 || gr.out_degree(i) == 1)
+		{
+			int c = classify_trivial_vertex(i);
+			printf("summary: trivial vertex %d, type = %d\n", i, c);
+		}
+		else
+		{
+			MPII mpi = hs.get_routes(i, gr, e2i);
+			router rt(i, gr, e2i, i2e, mpi);
+			rt.classify();
+			rt.build();
+			printf("summary: nontrivial vertex %d, type = %d, degree = %d, ratio = %.3lf\n", i, rt.type, rt.degree, rt.ratio);
+		}
+	}
+	return 0;
 }
 
 int scallop::classify()
