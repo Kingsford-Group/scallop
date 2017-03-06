@@ -46,9 +46,11 @@ int scallop::assemble()
 		if(b == true) continue;
 		*/
 
+		/*
 		b = resolve_small_edges();
 		//if(b == true) print();
 		if(b == true) continue;
+		*/
 
 		b = resolve_unsplittable_vertex(SINGLE, true);
 		if(b == true) print();
