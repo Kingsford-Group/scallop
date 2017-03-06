@@ -50,16 +50,24 @@ int scallop::assemble()
 		//if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_unsplittable_vertex(SINGLE);
-		if(b == true) print();
-		if(b == true) continue;
-
-		b = resolve_unsplittable_vertex(MULTIPLE);
-		if(b == true) print();
-		if(b == true) continue;
-
 		b = resolve_trivial_vertex(1);
 		//if(b == true) print();
+		if(b == true) continue;
+
+		b = resolve_unsplittable_vertex(SINGLE, 1);
+		if(b == true) print();
+		if(b == true) continue;
+
+		b = resolve_unsplittable_vertex(MULTIPLE, 1);
+		if(b == true) print();
+		if(b == true) continue;
+
+		b = resolve_unsplittable_vertex(SINGLE, 999);
+		if(b == true) print();
+		if(b == true) continue;
+
+		b = resolve_unsplittable_vertex(MULTIPLE, 999);
+		if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_splitable_vertex(1);
@@ -186,7 +194,7 @@ bool scallop::resolve_splitable_vertex(int degree)
 	return true;
 }
 
-bool scallop::resolve_unsplittable_vertex(int type)
+bool scallop::resolve_unsplittable_vertex(int type, int degree)
 {
 	int root = -1;
 	vector<PPID> vpi;
@@ -201,7 +209,7 @@ bool scallop::resolve_unsplittable_vertex(int type)
 		rt.classify();
 
 		if(rt.type != type) continue;
-		//if(rt.degree > degree) continue;
+		if(rt.degree > degree) continue;
 
 		rt.build();
 
