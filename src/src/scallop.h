@@ -53,7 +53,7 @@ private:
 	bool resolve_small_edges();
 	bool resolve_trivial_vertex(int type);
 	bool resolve_splitable_vertex(int degree);
-	bool resolve_unsplittable_vertex(int type, int degree);
+	bool resolve_unsplittable_vertex(int type);
 	bool resolve_hyper_edge1();
 	bool resolve_hyper_edge0();
 

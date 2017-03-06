@@ -50,11 +50,11 @@ int scallop::assemble()
 		//if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_unsplittable_vertex(SINGLE, 1);
+		b = resolve_unsplittable_vertex(SINGLE);
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_splitable_vertex(1);
+		b = resolve_unsplittable_vertex(MULTIPLE);
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -62,19 +62,12 @@ int scallop::assemble()
 		//if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_unsplittable_vertex(MULTIPLE, 1);
+		b = resolve_splitable_vertex(1);
+		if(use_hyper_edges == false) assert(b == false);
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_unsplittable_vertex(SINGLE, 9999);
-		if(b == true) print();
-		if(b == true) continue;
-
-		b = resolve_splitable_vertex(9999);
-		if(b == true) print();
-		if(b == true) continue;
-
-		b = resolve_unsplittable_vertex(MULTIPLE, 9999);
+		b = resolve_splitable_vertex(999);
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -183,8 +176,8 @@ bool scallop::resolve_splitable_vertex(int degree)
 	if(root == -1) return false;
 	if(ratio > max_split_error_ratio) return false;
 
-	printf("resolve splitable degree-%d vertex %d, ratio = %.2lf, degree = (%d, %d)\n", 
-			degree, root, ratio, gr.in_degree(root), gr.out_degree(root));
+	printf("resolve splitable vertex %d, degree = %d, ratio = %.2lf, degree = (%d, %d)\n", 
+			root, degree, ratio, gr.in_degree(root), gr.out_degree(root));
 
 	eqns[0].print(88);
 	eqns[1].print(99);
@@ -193,7 +186,7 @@ bool scallop::resolve_splitable_vertex(int degree)
 	return true;
 }
 
-bool scallop::resolve_unsplittable_vertex(int type, int degree)
+bool scallop::resolve_unsplittable_vertex(int type)
 {
 	int root = -1;
 	vector<PPID> vpi;
@@ -208,12 +201,12 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree)
 		rt.classify();
 
 		if(rt.type != type) continue;
-		if(rt.degree > degree) continue;
+		//if(rt.degree > degree) continue;
 
 		rt.build();
 
-		if(rt.degree == degree && ratio < rt.ratio) continue;
-		if(rt.ratio > max_decompose_error_ratio) continue;
+		//if(rt.degree == degree && ratio < rt.ratio) continue;
+		if(rt.ratio > max_unsplit_error_ratio) continue;
 
 		root = i;
 		ratio = rt.ratio;
@@ -286,7 +279,7 @@ bool scallop::resolve_hyper_edge0()
 	int k2 = split_edge(ee2, ww);
 	int x = merge_adjacent_equal_edges(k1, k2);
 
-	printf("resolve hyper edge (%d, %d) of vertex %d, weight = (%.2lf, %.2lf) -> (%d, %d) -> %d\n", ee1, ee2, root, ww1, ww2, k1, k2, x);
+	printf("resolve hyper edge0 (%d, %d) of vertex %d, weight = (%.2lf, %.2lf) -> (%d, %d) -> %d\n", ee1, ee2, root, ww1, ww2, k1, k2, x);
 
 	hs.replace(ee1, ee2, x);
 	if(k1 == ee1) hs.remove(ee1);
@@ -326,7 +319,7 @@ bool scallop::resolve_hyper_edge1()
 
 	if(v1.size() == 0 || v2.size() == 0) return false;
 
-	printf("resolve hyper edge ( ");
+	printf("resolve hyper edge1 ( ");
 	printv(v1);
 	printf("), ( ");
 	printv(v2);
