@@ -50,7 +50,7 @@ int scallop::assemble()
 		//if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_unsplittable_vertex(SINGLE, 1);
+		b = resolve_unsplittable_vertex(SINGLE, 1, true);
 		if(b == true) print();
 		if(b == true) continue;
 
@@ -58,29 +58,43 @@ int scallop::assemble()
 		//if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_unsplittable_vertex(MULTIPLE, 1);
+		b = resolve_unsplittable_vertex(MULTIPLE, 1, true);
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_unsplittable_vertex(SINGLE, 999);
+		b = resolve_unsplittable_vertex(SINGLE, 999, true);
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_unsplittable_vertex(MULTIPLE, 999);
+		b = resolve_unsplittable_vertex(MULTIPLE, 999, true);
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_splitable_vertex(1);
+		b = resolve_splitable_vertex(1, true);
 		if(use_hyper_edges == false) assert(b == false);
 		if(b == true) print();
 		if(b == true) continue;
 
-		b = resolve_splitable_vertex(999);
+		b = resolve_splitable_vertex(999, true);
 		if(b == true) print();
 		if(b == true) continue;
 
 		summarize_vertices();
 
+		b = resolve_unsplittable_vertex(SINGLE, 999, false);
+		if(b == true) print();
+		if(b == true) continue;
+
+		b = resolve_unsplittable_vertex(MULTIPLE, 999, false);
+		if(b == true) print();
+		if(b == true) continue;
+
+		b = resolve_splitable_vertex(999, false);
+		if(use_hyper_edges == false) assert(b == false);
+		if(b == true) print();
+		if(b == true) continue;
+
+		/*
 		b = resolve_hyper_edge1();
 		if(b == true) print();
 		if(b == true) continue;
@@ -88,6 +102,7 @@ int scallop::assemble()
 		b = resolve_hyper_edge0();
 		if(b == true) print();
 		if(b == true) continue;
+		*/
 
 		b = resolve_trivial_vertex(2);
 		//if(b == true) print();
@@ -97,10 +112,10 @@ int scallop::assemble()
 	}
 
 	collect_existing_st_paths();
+	assert(gr.num_edges() == 0);
 
-	print();
-
-	greedy_decompose(-1);
+	//print();
+	//greedy_decompose(-1);
 
 	return 0;
 }
@@ -151,7 +166,7 @@ bool scallop::resolve_small_edges()
 	return true;
 }
 
-bool scallop::resolve_splitable_vertex(int degree)
+bool scallop::resolve_splitable_vertex(int degree, bool conditional)
 {
 	int root = -1;
 	double ratio = DBL_MAX;
@@ -162,10 +177,11 @@ bool scallop::resolve_splitable_vertex(int degree)
 		if(gr.out_degree(i) <= 1) continue;
 
 		MPII mpi = hs.get_routes(i, gr, e2i);
+		if(conditional && mpi.size() == 0) continue;
+
 		router rt(i, gr, e2i, i2e, mpi);
 		rt.classify();
 
-		if(mpi.size() == 0) continue;
 		if(rt.type != SPLITABLE) continue;
 		if(rt.degree > degree) continue;
 
@@ -181,10 +197,10 @@ bool scallop::resolve_splitable_vertex(int degree)
 	}
 
 	if(root == -1) return false;
-	if(ratio > max_split_error_ratio) return false;
+	if(conditional && ratio > max_split_error_ratio) return false;
 
-	printf("resolve splitable vertex %d, degree = %d, ratio = %.2lf, degree = (%d, %d)\n", 
-			root, degree, ratio, gr.in_degree(root), gr.out_degree(root));
+	printf("resolve splitable vertex %d, degree = %d, conditional = %c, ratio = %.2lf, degree = (%d, %d)\n", 
+			root, degree, conditional ? 'T' : 'F', ratio, gr.in_degree(root), gr.out_degree(root));
 
 	eqns[0].print(88);
 	eqns[1].print(99);
@@ -193,7 +209,7 @@ bool scallop::resolve_splitable_vertex(int degree)
 	return true;
 }
 
-bool scallop::resolve_unsplittable_vertex(int type, int degree)
+bool scallop::resolve_unsplittable_vertex(int type, int degree, bool conditional)
 {
 	int root = -1;
 	vector<PPID> vpi;
@@ -212,22 +228,20 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree)
 
 		rt.build();
 
-		//if(rt.degree == degree && ratio < rt.ratio) continue;
-		if(rt.ratio > max_unsplit_error_ratio) continue;
+		if(conditional && rt.ratio > max_unsplit_error_ratio) continue;
 
 		root = i;
 		ratio = rt.ratio;
 		vpi = rt.vpi;
 
-		// jump out immediately to save time
 		break;
 	}
 
 	if(root == -1) return false;
-	if(ratio > max_unsplit_error_ratio) return false;
+	if(conditional && ratio > max_unsplit_error_ratio) return false;
 
-	printf("resolve unsplittable vertex, type = %d, vertex = %d, ratio = %.3lf, degree = (%d, %d)\n",
-			type, root, ratio, gr.in_degree(root), gr.out_degree(root));
+	printf("resolve unsplittable vertex, type = %d, degree = %d, conditional = %c, vertex = %d, ratio = %.3lf, degree = (%d, %d)\n",
+			type, degree, conditional ? 'T' : 'F', root, ratio, gr.in_degree(root), gr.out_degree(root));
 
 	decompose_vertex_extend(root, vpi);
 	assert(gr.degree(root) == 0);

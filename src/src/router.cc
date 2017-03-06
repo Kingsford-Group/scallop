@@ -146,6 +146,7 @@ int router::build_indices()
 int router::build_bipartite_graph()
 {
 	ug.clear();
+	u2w.clear();
 	for(int i = 0; i < u2e.size(); i++) ug.add_vertex();
 	for(int i = 0; i < routes.size(); i++)
 	{
@@ -158,6 +159,8 @@ int router::build_bipartite_graph()
 		assert(s >= 0 && s < gr.in_degree(root));
 		assert(t >= gr.in_degree(root) && t < gr.degree(root));
 		edge_descriptor e = ug.add_edge(s, t);
+		double w = counts[i];
+		u2w.insert(PED(e, w));
 	}
 	return 0;
 }
@@ -682,6 +685,9 @@ int router::complete()
 	}
 	return 0;
 }
+
+int router::build_maximum_spanning_tree()
+{}
 
 int router::print() const
 {

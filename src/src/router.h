@@ -29,6 +29,7 @@ public:
 
 	MI e2u;						// edge to index
 	vector<int> u2e;			// index to edge
+	MED u2w;					// weights of edges of ug
 	undirected_graph ug;		// bipartite graph
 
 	int type;					// trivial, splitable, single, or multiple 
@@ -43,10 +44,11 @@ public:
 
 	int build_indices();					// build u2e and e2u
 	int build_bipartite_graph();			// build bipartite graph
+	int build_maximum_spanning_tree();	// make ug a (maximum) spanning tree
+	int complete();							// complete graph
 	int split();							// split
 	int decompose1();						// decompose with quadratic linear programming
 	int decompose2();						// decompose with linear system
-	int complete();							// complete graph
 	PI filter_hyper_edge();					// try to filter hyper-edge
 	PI filter_small_hyper_edge();			// hyper-edge w.r.t. the smallest edge
 	PI filter_cycle_hyper_edge();			// hyper-edge w.r.t. any cycle
