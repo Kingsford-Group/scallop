@@ -46,16 +46,16 @@ int scallop::assemble()
 		if(b == true) continue;
 		*/
 
-		b = resolve_small_edges();
-		//if(b == true) print();
-		if(b == true) continue;
-
 		b = resolve_trivial_vertex(1);
 		//if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_unsplittable_vertex(SINGLE, 1);
 		if(b == true) print();
+		if(b == true) continue;
+
+		b = resolve_small_edges();
+		//if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_unsplittable_vertex(MULTIPLE, 1);
@@ -127,10 +127,10 @@ bool scallop::resolve_small_edges()
 		if(gr.out_degree(s) <= 1) continue;
 		if(gr.in_degree(t) <= 1) continue;
 
-		if(hs.right_extend(e) || hs.left_extend(e)) continue;
-		//if(hs.right_extend(e) && hs.left_extend(e)) continue; TODO
-		//if(i2e[e]->target() == i && hs.right_extend(e)) continue;
-		//if(i2e[e]->source() == i && hs.left_extend(e)) continue;
+		if(hs.right_extend(e) && hs.left_extend(e)) continue;
+		if(i2e[e]->target() == i && hs.right_extend(e)) continue;
+		if(i2e[e]->source() == i && hs.left_extend(e)) continue;
+		//if(hs.right_extend(e) || hs.left_extend(e)) continue; TODO
 
 		ratio = r;
 		se = e;
