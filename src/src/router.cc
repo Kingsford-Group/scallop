@@ -111,8 +111,9 @@ int router::build()
 	if(type == SPLITABLE) split();
 	if(type == SINGLE || type == MULTIPLE) 
 	{
-		decompose2();
+		decompose1();
 		/*
+		decompose2();
 		vector<PPID> v2 = vpi;
 		decompose1();
 		vector<PPID> v1 = vpi;

@@ -55,13 +55,13 @@ int scallop::assemble()
 		b = resolve_unsplittable_vertex(MULTIPLE, 1, true);
 		if(b == true) continue;
 
+		b = resolve_splitable_vertex(1, true);
+		if(b == true) continue;
+
 		b = resolve_unsplittable_vertex(SINGLE, 999, true);
 		if(b == true) continue;
 
 		b = resolve_unsplittable_vertex(MULTIPLE, 999, true);
-		if(b == true) continue;
-
-		b = resolve_splitable_vertex(1, true);
 		if(b == true) continue;
 
 		b = resolve_splitable_vertex(999, true);
