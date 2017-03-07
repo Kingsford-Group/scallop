@@ -107,10 +107,18 @@ int router::classify()
 
 int router::build()
 {
-	if(type == SPLITTABLE_SIMPLE) split();
-	if(type == SPLITTABLE_HYPER) split();
-	if(type == UNSPLITTABLE_SINGLE) decompose1();
-	if(type == UNSPLITTABLE_MULTIPLE) decompose1();
+	if(type == SPLITTABLE_SIMPLE || type == SPLITTABLE_HYPER) 
+	{
+		split();
+	}
+	if(type == UNSPLITTABLE_SINGLE || type == UNSPLITTABLE_MULTIPLE) 
+	{
+		extend_bipartite_graph();
+		double error = decompose0();
+
+		if(error <= 1.0) decompose1();
+		else ratio = 9999;
+	}
 	return 0;
 }
 
@@ -154,6 +162,92 @@ int router::build_bipartite_graph()
 		edge_descriptor e = ug.add_edge(s, t);
 		double w = counts[i];
 		u2w.insert(PED(e, w));
+	}
+	return 0;
+}
+
+int router::extend_bipartite_graph()
+{
+	edge_descriptor e1 = gr.max_in_edge(root);
+	edge_descriptor e2 = gr.max_out_edge(root);
+	
+	int k1 = -1, k2 = -1;
+	for(int i = 0; i < u2e.size(); i++)
+	{
+		if(u2e[i] == e2i[e1]) k1 = i;
+		if(u2e[i] == e2i[e2]) k2 = i;
+	}
+	assert(k1 != -1 && k2 != -1);
+
+	for(int i = 0; i < gr.in_degree(root); i++)
+	{
+		if(ug.degree(i) >= 1) continue;
+		ug.add_edge(i, k2);
+	}
+	for(int i = 0; i < gr.out_degree(root); i++)
+	{
+		int j = i + gr.in_degree(root);
+		if(ug.degree(j) >= 1) continue;
+		ug.add_edge(k1, j);
+	}
+	return 0;
+}
+
+int router::build_maximum_spanning_tree()
+{
+	if(ug.num_vertices() == 0) return 0;
+	vector<PED> vew(u2w.begin(), u2w.end());
+	sort(vew.begin(), vew.end(), compare_edge_weight);
+	set<int> sv;
+	sv.insert(0);
+	SE se;
+
+	vector< set<int> > vv = ug.compute_connected_components();
+	for(int i = 0; i < vv.size(); i++)
+	{
+		set<int> &s = vv[i];
+		if(s.size() == 0) continue;
+		sv.insert(*(s.begin()));
+	}
+
+	/*
+	printf("------\n");
+	for(int i = 0; i < vew.size(); i++)
+	{
+		edge_descriptor e = vew[i].first;
+		int s = e->source();
+		int t = e->target();
+		printf("graph edge (%d, %d), weight = %.3lf\n", s, t, vew[i].second);
+	}
+	*/
+
+	while(true)
+	{
+		bool b = false;
+		for(int i = 0; i < vew.size(); i++)
+		{
+			edge_descriptor e = vew[i].first;
+			if(se.find(e) != se.end()) continue;
+			int s = e->source();
+			int t = e->target();
+			if(sv.find(s) == sv.end() && sv.find(t) == sv.end()) continue;
+			if(sv.find(s) != sv.end() && sv.find(t) != sv.end()) continue;
+			sv.insert(s);
+			sv.insert(t);
+			se.insert(e);
+			b = true;
+			//printf("add   edge (%d, %d), weight = %.3lf\n", s, t, vew[i].second);
+			break;
+		}
+		if(b == false) break;
+	}
+
+	for(int i = 0; i < vew.size(); i++)
+	{
+		edge_descriptor e = vew[i].first;
+		if(se.find(e) != se.end()) continue;
+		ug.remove_edge(e);
+		u2w.erase(e);
 	}
 	return 0;
 }
@@ -426,12 +520,8 @@ int router::split()
 	return 0;
 }
 
-int router::decompose3()
+vector<double> router::compute_balanced_weights()
 {
-	complete();
-	build_maximum_spanning_tree();
-
-	// locally balance weights
 	vector<double> vw;
 	double sum1 = 0, sum2 = 0;
 	for(int i = 0; i < u2e.size(); i++)
@@ -447,6 +537,17 @@ int router::decompose3()
 	double r2 = sqrt(sum1 / sum2);
 	for(int i = 0; i < gr.in_degree(root); i++) vw[i] *= r1;
 	for(int i = gr.in_degree(root); i < gr.degree(root); i++) vw[i] *= r2;
+	
+	return vw;
+}
+
+int router::decompose3()
+{
+	extend_bipartite_graph();
+	build_maximum_spanning_tree();
+
+	// locally balance weights
+	vector<double> vw = compute_balanced_weights();
 
 	// edge list of ug
 	VE ve;
@@ -528,7 +629,7 @@ int router::decompose3()
 	}
 
 	// compute ratio
-	sum1 = sum2 = 0;
+	double sum1 = 0, sum2 = 0;
 	assert(vw.size() == vw2.size());
 	for(int i = 0; i < vw.size(); i++)
 	{
@@ -540,25 +641,117 @@ int router::decompose3()
 	return 0;
 }
 
+double router::decompose0()
+{
+	// locally balance weights
+	vector<double> vw = compute_balanced_weights();
+
+	try
+	{
+		GRBEnv *env = new GRBEnv();
+		GRBModel *model = new GRBModel(*env);
+
+		// edge list of ug
+		VE ve;
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = ug.edges(); it1 != it2; it1++)
+		{
+			edge_descriptor e = (*it1);
+			ve.push_back(e);
+		}
+
+		// routes weight variables
+		vector<GRBVar> rvars;
+		for(int i = 0; i < ve.size(); i++)
+		{
+			GRBVar rvar = model->addVar(1.0, GRB_INFINITY, 0, GRB_CONTINUOUS); // TODO, [0.5, ]
+			rvars.push_back(rvar);
+		}
+
+		// new weights variables
+		vector<GRBVar> wvars;
+		for(int i = 0; i < u2e.size(); i++)
+		{
+			GRBVar wvar = model->addVar(0.0, GRB_INFINITY, 0, GRB_CONTINUOUS);
+			wvars.push_back(wvar);
+		}
+		model->update();
+
+		// error variables
+		vector<GRBVar> evars;
+		for(int i = 0; i < u2e.size(); i++)
+		{
+			GRBVar evar = model->addVar(0.0, GRB_INFINITY, 0, GRB_CONTINUOUS);
+			evars.push_back(evar);
+		}
+		model->update();
+
+		// expression for each edge
+		vector<GRBLinExpr> exprs(u2e.size());
+		for(int i = 0; i < ve.size(); i++)
+		{
+			edge_descriptor e = ve[i];
+			int u1 = e->source();
+			int u2 = e->target();
+			exprs[u1] += rvars[i];
+			exprs[u2] += rvars[i];
+		}
+		for(int i = 0; i < u2e.size(); i++)
+		{
+			model->addConstr(exprs[i], GRB_EQUAL, wvars[i]);
+		}
+
+		// error constraints
+		for(int i = 0; i < u2e.size(); i++)
+		{
+			model->addConstr(wvars[i] - vw[i], GRB_LESS_EQUAL, evars[i]);
+			model->addConstr(vw[i] - wvars[i], GRB_LESS_EQUAL, evars[i]);
+		}
+
+		// objective 
+		GRBQuadExpr obj;
+		for(int i = 0; i < u2e.size(); i++)
+		{
+			//double w = vw[i];
+			//obj += (wvars[i] - w) * (wvars[i] - w);
+			obj += evars[i];
+		}
+
+		model->setObjective(obj, GRB_MINIMIZE);
+		model->getEnv().set(GRB_IntParam_OutputFlag, 0);
+		model->update();
+
+		model->optimize();
+
+		int f = model->get(GRB_IntAttr_Status);
+		assert(f == GRB_OPTIMAL);
+
+		double error = model->get(GRB_DoubleAttr_ObjVal);
+
+		delete model;
+		delete env;
+
+		return error;
+	}
+	catch(GRBException e)
+	{
+		printf("GRB error code: %d\n", e.getErrorCode());
+		printf("GRB error message: %s\n", e.getMessage().c_str());
+		exit(-1);
+	}
+	catch(...)
+	{
+		printf("GRB exception\n");
+		exit(-1);
+	}
+
+	return 0;
+}
+
 int router::decompose1()
 {
 	// locally balance weights
-	vector<double> vw;
-	double sum1 = 0, sum2 = 0;
-	for(int i = 0; i < u2e.size(); i++)
-	{
-		edge_descriptor e = i2e[u2e[i]];
-		assert(e != null_edge);
-		double w = gr.get_edge_weight(e);
-		if(i < gr.in_degree(root)) sum1 += w;
-		else sum2 += w;
-		vw.push_back(w);
-	}
-
-	double r1 = sqrt(sum2 / sum1);
-	double r2 = sqrt(sum1 / sum2);
-	for(int i = 0; i < gr.in_degree(root); i++) vw[i] *= r1;
-	for(int i = gr.in_degree(root); i < gr.degree(root); i++) vw[i] *= r2;
+	vector<double> vw = compute_balanced_weights();
 
 	try
 	{
@@ -566,7 +759,7 @@ int router::decompose1()
 		GRBEnv *env = new GRBEnv();
 		GRBModel *model = new GRBModel(*env);
 
-		complete();
+		extend_bipartite_graph();
 
 		// edge list of ug
 		VE ve;
@@ -688,22 +881,7 @@ int router::decompose2()
 	assert(type == UNSPLITTABLE_MULTIPLE);
 
 	// locally balance weights
-	vector<double> vw;
-	double sum1 = 0, sum2 = 0;
-	for(int i = 0; i < u2e.size(); i++)
-	{
-		edge_descriptor e = i2e[u2e[i]];
-		assert(e != null_edge);
-		double w = gr.get_edge_weight(e);
-		if(i < gr.in_degree(root)) sum1 += w;
-		else sum2 += w;
-		vw.push_back(w);
-	}
-
-	double r1 = sqrt(sum2 / sum1);
-	double r2 = sqrt(sum1 / sum2);
-	for(int i = 0; i < gr.in_degree(root); i++) vw[i] *= r1;
-	for(int i = gr.in_degree(root); i < gr.degree(root); i++) vw[i] *= r2;
+	vector<double> vw = compute_balanced_weights();
 
 	// collect vertices of ug that are degree of 0
 	set<int> s0;
@@ -835,92 +1013,6 @@ int router::decompose2()
 		exit(-1);
 	}
 
-	return 0;
-}
-
-int router::complete()
-{
-	edge_descriptor e1 = gr.max_in_edge(root);
-	edge_descriptor e2 = gr.max_out_edge(root);
-	
-	int k1 = -1, k2 = -1;
-	for(int i = 0; i < u2e.size(); i++)
-	{
-		if(u2e[i] == e2i[e1]) k1 = i;
-		if(u2e[i] == e2i[e2]) k2 = i;
-	}
-	assert(k1 != -1 && k2 != -1);
-
-	for(int i = 0; i < gr.in_degree(root); i++)
-	{
-		if(ug.degree(i) >= 1) continue;
-		ug.add_edge(i, k2);
-	}
-	for(int i = 0; i < gr.out_degree(root); i++)
-	{
-		int j = i + gr.in_degree(root);
-		if(ug.degree(j) >= 1) continue;
-		ug.add_edge(k1, j);
-	}
-	return 0;
-}
-
-int router::build_maximum_spanning_tree()
-{
-	if(ug.num_vertices() == 0) return 0;
-	vector<PED> vew(u2w.begin(), u2w.end());
-	sort(vew.begin(), vew.end(), compare_edge_weight);
-	set<int> sv;
-	sv.insert(0);
-	SE se;
-
-	vector< set<int> > vv = ug.compute_connected_components();
-	for(int i = 0; i < vv.size(); i++)
-	{
-		set<int> &s = vv[i];
-		if(s.size() == 0) continue;
-		sv.insert(*(s.begin()));
-	}
-
-	/*
-	printf("------\n");
-	for(int i = 0; i < vew.size(); i++)
-	{
-		edge_descriptor e = vew[i].first;
-		int s = e->source();
-		int t = e->target();
-		printf("graph edge (%d, %d), weight = %.3lf\n", s, t, vew[i].second);
-	}
-	*/
-
-	while(true)
-	{
-		bool b = false;
-		for(int i = 0; i < vew.size(); i++)
-		{
-			edge_descriptor e = vew[i].first;
-			if(se.find(e) != se.end()) continue;
-			int s = e->source();
-			int t = e->target();
-			if(sv.find(s) == sv.end() && sv.find(t) == sv.end()) continue;
-			if(sv.find(s) != sv.end() && sv.find(t) != sv.end()) continue;
-			sv.insert(s);
-			sv.insert(t);
-			se.insert(e);
-			b = true;
-			//printf("add   edge (%d, %d), weight = %.3lf\n", s, t, vew[i].second);
-			break;
-		}
-		if(b == false) break;
-	}
-
-	for(int i = 0; i < vew.size(); i++)
-	{
-		edge_descriptor e = vew[i].first;
-		if(se.find(e) != se.end()) continue;
-		ug.remove_edge(e);
-		u2w.erase(e);
-	}
 	return 0;
 }
 
