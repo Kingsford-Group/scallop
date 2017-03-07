@@ -47,8 +47,9 @@ public:
 	int build_maximum_spanning_tree();	// make ug a (maximum) spanning tree
 	int complete();							// complete graph
 	int split();							// split
-	int decompose1();						// decompose with quadratic linear programming
-	int decompose2();						// decompose with linear system
+	int decompose1();						// decompose with gurobi, with complete
+	int decompose2();						// decompose with gurobi, without complete
+	int decompose3();						// decompose with ublas,
 	PI filter_hyper_edge();					// try to filter hyper-edge
 	PI filter_small_hyper_edge();			// hyper-edge w.r.t. the smallest edge
 	PI filter_cycle_hyper_edge();			// hyper-edge w.r.t. any cycle

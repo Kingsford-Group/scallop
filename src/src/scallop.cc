@@ -108,8 +108,8 @@ bool scallop::resolve_small_edges()
 {
 	int se = -1;
 	int root = -1;
-	//double ratio = max_small_error_ratio;
-	double ratio = DBL_MAX;
+	//double ratio = DBL_MAX;
+	double ratio = max_small_error_ratio;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.in_degree(i) <= 1) continue;
@@ -146,7 +146,7 @@ bool scallop::resolve_small_edges()
 	double sw = gr.get_edge_weight(i2e[se]);
 	int s = i2e[se]->source();
 	int t = i2e[se]->target();
-	printf("remove small edge1 %d, weight = %.2lf, ratio = %.2lf, vertex = (%d, %d), degree = (%d, %d)\n", 
+	printf("resolve small edge, edge = %d, weight = %.2lf, ratio = %.2lf, vertex = (%d, %d), degree = (%d, %d)\n", 
 			se, sw, ratio, s, t, gr.out_degree(s), gr.in_degree(t));
 
 	remove_edge(se);
