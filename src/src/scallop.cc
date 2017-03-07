@@ -89,8 +89,8 @@ int scallop::assemble()
 		b = resolve_trivial_vertex(2);
 		if(b == true) continue;
 
-		b = resolve_splittable_vertex(SPLITTABLE_SIMPLE, 999);
-		if(b == true) continue;
+		//b = resolve_splittable_vertex(SPLITTABLE_SIMPLE, 999);
+		//if(b == true) continue;
 
 		break;
 	}
@@ -108,7 +108,8 @@ bool scallop::resolve_small_edges()
 {
 	int se = -1;
 	int root = -1;
-	double ratio = max_small_error_ratio;
+	//double ratio = max_small_error_ratio;
+	double ratio = DBL_MAX;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.in_degree(i) <= 1) continue;
@@ -126,10 +127,14 @@ bool scallop::resolve_small_edges()
 		if(gr.out_degree(s) <= 1) continue;
 		if(gr.in_degree(t) <= 1) continue;
 
-		if(hs.right_extend(e) && hs.left_extend(e)) continue;
-		if(i2e[e]->target() == i && hs.right_extend(e)) continue;
-		if(i2e[e]->source() == i && hs.left_extend(e)) continue;
 		//if(hs.right_extend(e) || hs.left_extend(e)) continue; TODO
+		if(hs.right_extend(e) && hs.left_extend(e)) continue;
+		if(t == i && hs.right_extend(e)) continue;
+		if(s == i && hs.left_extend(e)) continue;
+
+		// consider further conditions
+		if(t == i && hs.left_extend(e) && gr.out_degree(s) >= 2) continue;
+		if(s == i && hs.right_extend(e) && gr.in_degree(t) >= 2) continue;
 
 		ratio = r;
 		se = e;
