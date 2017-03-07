@@ -62,17 +62,16 @@ int router::classify()
 		return 0;
 	}
 
+	build_indices();
+	build_bipartite_graph();
+	vector< set<int> > vv = ug.compute_connected_components();
+
 	if(routes.size() == 0)
 	{
 		type = SPLITTABLE_SIMPLE;
 		degree = gr.degree(root) - 1;
 		return 0;
 	}
-
-	build_indices();
-	build_bipartite_graph();
-
-	vector< set<int> > vv = ug.compute_connected_components();
 
 	if(vv.size() == 1)
 	{
@@ -268,6 +267,9 @@ int router::split()
 	double sum = (sum1 > sum2) ? sum1 : sum2;
 	double r1 = (sum1 > sum2) ? 1.0 : sum2 / sum1;
 	double r2 = (sum1 < sum2) ? 1.0 : sum1 / sum2;
+	
+	//printf("in-degree = %d, out-degree = %d, vw.size() = %lu\n", gr.in_degree(root), gr.out_degree(root), vw.size());
+	//for(int i = 0; i < vw.size(); i++) printf("debug vw[%d] = %.2lf\n", i, vw[i]);
 
 	for(int i = 0; i < gr.in_degree(root); i++) vw[i] *= r1;
 	for(int i = gr.in_degree(root); i < gr.degree(root); i++) vw[i] *= r2;
