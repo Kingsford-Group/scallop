@@ -67,9 +67,6 @@ int scallop::assemble()
 		b = resolve_splittable_vertex(SPLITTABLE_HYPER, 999);
 		if(b == true) continue;
 
-		b = resolve_splittable_vertex(SPLITTABLE_SIMPLE, 999);
-		if(b == true) continue;
-
 		summarize_vertices();
 
 		/*
@@ -90,6 +87,9 @@ int scallop::assemble()
 		if(b == true) continue;
 
 		b = resolve_trivial_vertex(2);
+		if(b == true) continue;
+
+		b = resolve_splittable_vertex(SPLITTABLE_SIMPLE, 999);
 		if(b == true) continue;
 
 		break;
