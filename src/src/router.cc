@@ -55,17 +55,17 @@ int router::classify()
 	assert(gr.in_degree(root) >= 1);
 	assert(gr.out_degree(root) >= 1);
 
-	if(gr.num_edges() == 0)
-	{
-		type = NOHYPER;
-		degree = -1;
-		return 0;
-	}
-
 	if(gr.in_degree(root) == 1 || gr.out_degree(root) == 1)
 	{
 		type = TRIVIAL;
 		degree = gr.degree(root);
+		return 0;
+	}
+
+	if(routes.size() == 0)
+	{
+		type = SPLITTABLE_SIMPLE;
+		degree = gr.degree(root) - 1;
 		return 0;
 	}
 
@@ -76,7 +76,7 @@ int router::classify()
 
 	if(vv.size() == 1)
 	{
-		type = SINGLE;
+		type = UNSPLITTABLE_SINGLE;
 		degree = ug.num_edges() - ug.num_vertices() + vv.size() + vv.size();
 		return 0;
 	}
@@ -96,32 +96,22 @@ int router::classify()
 	
 	if(b1 == true || b2 == true)
 	{
-		type = MULTIPLE;
+		type = UNSPLITTABLE_MULTIPLE;
 		degree = ug.num_edges() - ug.num_vertices() + vv.size() + vv.size();
 		return 0;
 	}
 
-	type = SPLITABLE;
+	type = SPLITTABLE_HYPER;
 	degree = vv.size() - 1;
 	return 0;
 }
 
 int router::build()
 {
-	if(type == SPLITABLE) split();
-	if(type == SINGLE || type == MULTIPLE) 
-	{
-		decompose1();
-		/*
-		decompose2();
-		vector<PPID> v2 = vpi;
-		decompose1();
-		vector<PPID> v1 = vpi;
-		for(int k = 0; k < v1.size(); k++) printf("GUROBI vpi %d = (%d, %d): %.2lf\n", k, v1[k].first.first, v1[k].first.second, v1[k].second);
-		for(int k = 0; k < v2.size(); k++) printf("BOOST  vpi %d = (%d, %d): %.2lf\n", k, v2[k].first.first, v2[k].first.second, v2[k].second);
-		printf("\n");
-		*/
-	}
+	if(type == SPLITTABLE_SIMPLE) split();
+	if(type == SPLITTABLE_HYPER) split();
+	if(type == UNSPLITTABLE_SINGLE) decompose1();
+	if(type == UNSPLITTABLE_MULTIPLE) decompose1();
 	return 0;
 }
 
@@ -260,7 +250,6 @@ PI router::filter_cycle_hyper_edge()
 
 int router::split()
 {
-	assert(type == SPLITABLE);
 	eqns.clear();
 
 	// locally smooth weights
@@ -437,8 +426,6 @@ int router::split()
 
 int router::decompose2()
 {
-	assert(type == SINGLE || type == MULTIPLE);
-
 	complete();
 	build_maximum_spanning_tree();
 
@@ -553,7 +540,6 @@ int router::decompose2()
 
 int router::decompose1()
 {
-	assert(type == SINGLE || type == MULTIPLE);
 	// locally balance weights
 	vector<double> vw;
 	double sum1 = 0, sum2 = 0;

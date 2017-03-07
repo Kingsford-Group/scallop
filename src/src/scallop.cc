@@ -46,37 +46,40 @@ int scallop::assemble()
 		b = resolve_trivial_vertex(1);
 		if(b == true) continue;
 
-		b = resolve_unsplittable_vertex(SINGLE, 1, true);
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 1);
 		if(b == true) continue;
 
 		b = resolve_small_edges();
 		if(b == true) continue;
 
-		b = resolve_unsplittable_vertex(MULTIPLE, 1, true);
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 1);
 		if(b == true) continue;
 
-		b = resolve_splitable_vertex(1, true);
+		b = resolve_splittable_vertex(SPLITTABLE_HYPER, 1);
 		if(b == true) continue;
 
-		b = resolve_unsplittable_vertex(SINGLE, 999, true);
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 999);
 		if(b == true) continue;
 
-		b = resolve_unsplittable_vertex(MULTIPLE, 999, true);
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 999);
 		if(b == true) continue;
 
-		b = resolve_splitable_vertex(999, true);
+		b = resolve_splittable_vertex(SPLITTABLE_HYPER, 999);
+		if(b == true) continue;
+
+		b = resolve_splittable_vertex(SPLITTABLE_SIMPLE, 999);
 		if(b == true) continue;
 
 		summarize_vertices();
 
 		/*
-		b = resolve_unsplittable_vertex(SINGLE, 999, false);
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 999, false);
 		if(b == true) continue;
 
-		b = resolve_unsplittable_vertex(MULTIPLE, 999, false);
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 999, false);
 		if(b == true) continue;
 
-		b = resolve_splitable_vertex(999, false);
+		b = resolve_splittable_vertex(999, false);
 		if(b == true) continue;
 		*/
 
@@ -147,7 +150,7 @@ bool scallop::resolve_small_edges()
 	return true;
 }
 
-bool scallop::resolve_splitable_vertex(int degree, bool conditional)
+bool scallop::resolve_splittable_vertex(int type, int degree)
 {
 	int root = -1;
 	double ratio = DBL_MAX;
@@ -158,12 +161,10 @@ bool scallop::resolve_splitable_vertex(int degree, bool conditional)
 		if(gr.out_degree(i) <= 1) continue;
 
 		MPII mpi = hs.get_routes(i, gr, e2i);
-		if(conditional && mpi.size() == 0) continue;
-
 		router rt(i, gr, e2i, i2e, mpi);
 		rt.classify();
 
-		if(rt.type != SPLITABLE) continue;
+		if(rt.type != type) continue;
 		if(rt.degree > degree) continue;
 
 		rt.build();
@@ -178,10 +179,10 @@ bool scallop::resolve_splitable_vertex(int degree, bool conditional)
 	}
 
 	if(root == -1) return false;
-	if(conditional && ratio > max_split_error_ratio) return false;
+	if(ratio > max_decompose_error_ratio[type]) return false;
 
-	printf("resolve splitable vertex %d, degree = %d, conditional = %c, ratio = %.2lf, degree = (%d, %d)\n", 
-			root, degree, conditional ? 'T' : 'F', ratio, gr.in_degree(root), gr.out_degree(root));
+	printf("resolve splittable vertex, type = %d, degree = %d, vertex = %d, ratio = %.2lf, degree = (%d, %d)\n", 
+			type, degree, root, ratio, gr.in_degree(root), gr.out_degree(root));
 
 	split_vertex(root, eqns[0].s, eqns[0].t);
 
@@ -190,7 +191,7 @@ bool scallop::resolve_splitable_vertex(int degree, bool conditional)
 	return true;
 }
 
-bool scallop::resolve_unsplittable_vertex(int type, int degree, bool conditional)
+bool scallop::resolve_unsplittable_vertex(int type, int degree)
 {
 	int root = -1;
 	vector<PPID> vpi;
@@ -209,7 +210,7 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree, bool conditional
 
 		rt.build();
 
-		if(conditional && rt.ratio > max_unsplit_error_ratio) continue;
+		if(rt.ratio > max_decompose_error_ratio[type]) continue;
 
 		root = i;
 		ratio = rt.ratio;
@@ -219,10 +220,9 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree, bool conditional
 	}
 
 	if(root == -1) return false;
-	if(conditional && ratio > max_unsplit_error_ratio) return false;
 
-	printf("resolve unsplittable vertex, type = %d, degree = %d, conditional = %c, vertex = %d, ratio = %.3lf, degree = (%d, %d)\n",
-			type, degree, conditional ? 'T' : 'F', root, ratio, gr.in_degree(root), gr.out_degree(root));
+	printf("resolve unsplittable vertex, type = %d, degree = %d, vertex = %d, ratio = %.3lf, degree = (%d, %d)\n",
+			type, degree, root, ratio, gr.in_degree(root), gr.out_degree(root));
 
 	decompose_vertex_extend(root, vpi);
 	assert(gr.degree(root) == 0);
@@ -1092,12 +1092,6 @@ int scallop::balance_vertex(int v)
 
 	// use sqrt-meature
 	double ww = sqrt(w1 * w2);
-
-	// use linear combination
-	//double ww = w1 * 0.5 + w2 * 0.5;
-	//double ww1 = w1 * weight_balance_ratio + w2 * (1 - weight_balance_ratio);
-	//double ww2 = w2 * weight_balance_ratio + w1 * (1 - weight_balance_ratio);
-	//double ww = (w1 > w2) ? ww1 : ww2;
 
 	// use convex combination
 	//double ww = sqrt(0.5 * w1 * w1 + 0.5 * w2 * w2);

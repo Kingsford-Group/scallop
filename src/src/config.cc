@@ -28,11 +28,7 @@ int32_t min_subregion_length = 15;
 double max_intron_contamination_coverage = 2.0;
 double min_surviving_edge_weight = 1.5;
 double max_small_error_ratio = 0.33;
-double max_split_error_ratio = 0.25;
-double max_unsplit_error_ratio = 0.01;
-double max_decompose_error_ratio = 0.01;
-double weight_balance_ratio = 0.5;
-bool use_hyper_edges = true;
+double max_decompose_error_ratio[5] = {1.00, 0.10, 0.25, 0.01, 0.01};
 
 // for selecting paths
 double min_transcript_coverage = 1.01;
@@ -89,10 +85,6 @@ int print_parameters()
 	printf("min_transcript_length = %d\n", min_transcript_length);
 	printf("min_exon_length = %d\n", min_exon_length);
 	printf("max_small_error_ratio = %.2lf\n", max_small_error_ratio);
-	printf("max_split_error_ratio = %.2lf\n", max_split_error_ratio);
-	printf("max_decompose_error_ratio = %.2lf\n", max_decompose_error_ratio);
-	printf("weight_balance_ratio = %.2lf\n", weight_balance_ratio);
-	printf("use_hyper_edges = %c\n", use_hyper_edges ? 'T' : 'F');
 
 	// for subsetsum and router
 	printf("max_dp_table_size = %d\n", max_dp_table_size);
@@ -259,24 +251,9 @@ int parse_arguments(int argc, const char ** argv)
 			min_exon_length = atoi(argv[i + 1]);
 			i++;
 		}
-		else if(string(argv[i]) == "--max_split_error_ratio")
-		{
-			max_split_error_ratio = atof(argv[i + 1]);
-			i++;
-		}
 		else if(string(argv[i]) == "--max_small_error_ratio")
 		{
 			max_small_error_ratio = atof(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--max_decompose_error_ratio")
-		{
-			max_decompose_error_ratio = atof(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--weight_balance_ratio")
-		{
-			weight_balance_ratio = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--max_dp_table_size")
@@ -302,13 +279,6 @@ int parse_arguments(int argc, const char ** argv)
 			string s(argv[i + 1]);
 			if(s == "true") use_second_alignment = true;
 			else use_second_alignment = false;
-			i++;
-		}
-		else if(string(argv[i]) == "--use_hyper_edges")
-		{
-			string s(argv[i + 1]);
-			if(s == "true") use_hyper_edges = true;
-			else use_hyper_edges = false;
 			i++;
 		}
 		else if(string(argv[i]) == "--uniquely_mapped_only")

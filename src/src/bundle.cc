@@ -48,7 +48,7 @@ int bundle::build()
 
 	remove_intron_contamination();
 
-	if(use_hyper_edges == true) build_hyper_edges2();
+	build_hyper_edges2();
 
 	return 0;
 }

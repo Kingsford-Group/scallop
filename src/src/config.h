@@ -9,6 +9,8 @@
 using namespace std;
 
 //// constants
+#define MAX_NUM_CIGAR 7
+
 #define START_BOUNDARY 1
 #define END_BOUNDARY 2
 #define LEFT_SPLICE 3
@@ -16,15 +18,13 @@ using namespace std;
 #define LEFT_RIGHT_SPLICE 5
 #define MIDDLE_CUT 6
 
-#define NOHYPER -1
 #define TRIVIAL 0
 #define NORMAL 1
 
-#define MAX_NUM_CIGAR 7
-
-#define SPLITABLE 1
-#define SINGLE 2
-#define MULTIPLE 3
+#define SPLITTABLE_SIMPLE 1
+#define SPLITTABLE_HYPER 2
+#define UNSPLITTABLE_SINGLE 3
+#define UNSPLITTABLE_MULTIPLE 4
 
 #define UNSTRANDED 0
 #define FR_FIRST 1
@@ -54,16 +54,12 @@ extern int min_router_count;
 extern double max_intron_contamination_coverage;
 extern double min_surviving_edge_weight;
 extern double max_small_error_ratio;
-extern double max_split_error_ratio;
-extern double max_unsplit_error_ratio;
-extern double max_decompose_error_ratio;
+extern double max_decompose_error_ratio[5];
 extern double min_transcript_numreads;
 extern double min_transcript_coverage;
 extern double min_single_exon_coverage;
-extern double weight_balance_ratio;
 extern int min_transcript_length;
 extern int min_exon_length;
-extern bool use_hyper_edges;
 
 // for simulation
 extern int simulation_num_vertices;
