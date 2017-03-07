@@ -72,8 +72,6 @@ int router::classify()
 	build_indices();
 	build_bipartite_graph();
 
-	build_maximum_spanning_tree();
-
 	vector< set<int> > vv = ug.compute_connected_components();
 
 	if(vv.size() == 1)
@@ -113,12 +111,15 @@ int router::build()
 	if(type == SPLITABLE) split();
 	if(type == SINGLE || type == MULTIPLE) 
 	{
+		decompose2();
+		/*
+		vector<PPID> v2 = vpi;
 		decompose1();
-		//vector<PPID> v1 = vpi;
-		//decompose2();
-		//vector<PPID> v2 = vpi;
-		//for(int k = 0; k < v1.size(); k++) printf("GUROBI vpi %d = (%d, %d): %.2lf\n", k, v1[k].first.first, v1[k].first.second, v1[k].second);
-		//for(int k = 0; k < v2.size(); k++) printf("BOOST  vpi %d = (%d, %d): %.2lf\n", k, v2[k].first.first, v2[k].first.second, v2[k].second);
+		vector<PPID> v1 = vpi;
+		for(int k = 0; k < v1.size(); k++) printf("GUROBI vpi %d = (%d, %d): %.2lf\n", k, v1[k].first.first, v1[k].first.second, v1[k].second);
+		for(int k = 0; k < v2.size(); k++) printf("BOOST  vpi %d = (%d, %d): %.2lf\n", k, v2[k].first.first, v2[k].first.second, v2[k].second);
+		printf("\n");
+		*/
 	}
 	return 0;
 }
@@ -437,6 +438,9 @@ int router::decompose2()
 {
 	assert(type == SINGLE || type == MULTIPLE);
 
+	complete();
+	build_maximum_spanning_tree();
+
 	// locally balance weights
 	vector<double> vw;
 	double sum1 = 0, sum2 = 0;
@@ -496,12 +500,25 @@ int router::decompose2()
 		B.push_back(b);
 	}
 
+	/*
+	printf("matrix A:\n");
+	for(int i = 0; i < A.size(); i++)
+	{
+		for(int j = 0; j < A[i].size(); j++) printf("%.0lf ", A[i][j]);
+		printf("\n");
+	}
+	printf("vector B:\n");
+	for(int i = 0; i < B.size(); i++) printf("%.2lf ", B[i]);
+	printf("\n");
+	*/
+
 	// solve linear sysmtem AX = B
 	vector<double> X = solve_linear_system(A, B);
 	assert(X.size() == A.size());
 	assert(X.size() == B.size());
 
 	vpi.clear();
+	vector<double> vw2(ug.num_vertices(), 0);
 	for(int i = 0; i < ve.size(); i++)
 	{
 		edge_descriptor e = ve[i];
@@ -509,10 +526,26 @@ int router::decompose2()
 		int t = e->target();
 		int es = u2e[s];
 		int et = u2e[t];
+		double w = X[i];
+		if(w < 1.0) w = 1.0;
+
 		PI p(es, et);
 		if(s > t) p = PI(et, es);
-		vpi.push_back(PPID(p, X[i]));
+		vpi.push_back(PPID(p, 1.0));
+
+		vw2[s] += w;
+		vw2[t] += w;
 	}
+
+	// compute ratio
+	sum1 = sum2 = 0;
+	assert(vw.size() == vw2.size());
+	for(int i = 0; i < vw.size(); i++)
+	{
+		sum1 += vw[i];
+		sum2 += fabs(vw[i] - vw2[i]);
+	}
+	ratio = sum2 / sum1;
 
 	return 0;
 }
@@ -737,9 +770,10 @@ int router::build_maximum_spanning_tree()
 		if(b == false) break;
 	}
 
-	for(SE::iterator it = se.begin(); it != se.end(); it++)
+	for(int i = 0; i < vew.size(); i++)
 	{
-		edge_descriptor e = (*it);
+		edge_descriptor e = vew[i].first;
+		if(se.find(e) != se.end()) continue;
 		ug.remove_edge(e);
 		u2w.erase(e);
 	}

@@ -16,15 +16,11 @@ scallop::scallop(const string &s, const splice_graph &g, const hyper_set &h)
 	round = 0;
 	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
 	gr.get_edge_indices(i2e, e2i);
-
 	//add_pseudo_hyper_edges();
 	hs.build(gr, e2i);
-	if(use_hyper_edges == false) assert(hs.nodes.size() == 0);
-
 	init_super_edges();
 	init_vertex_map();
 	init_inner_weights();
-	print();
 }
 
 scallop::~scallop()
@@ -33,7 +29,8 @@ scallop::~scallop()
 
 int scallop::assemble()
 {
-	classify();
+	int c = classify();
+	printf("\nprocess bundle %s type = %d, vertices = %lu, edges = %lu\n", name.c_str(), c, gr.num_vertices(), gr.num_edges());
 
 	while(true)
 	{
@@ -47,76 +44,60 @@ int scallop::assemble()
 		*/
 
 		b = resolve_trivial_vertex(1);
-		//if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_unsplittable_vertex(SINGLE, 1, true);
-		if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_small_edges();
-		//if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_unsplittable_vertex(MULTIPLE, 1, true);
-		if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_unsplittable_vertex(SINGLE, 999, true);
-		if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_unsplittable_vertex(MULTIPLE, 999, true);
-		if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_splitable_vertex(1, true);
-		if(use_hyper_edges == false) assert(b == false);
-		if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_splitable_vertex(999, true);
-		if(b == true) print();
 		if(b == true) continue;
 
 		summarize_vertices();
 
+		/*
 		b = resolve_unsplittable_vertex(SINGLE, 999, false);
-		if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_unsplittable_vertex(MULTIPLE, 999, false);
-		if(b == true) print();
 		if(b == true) continue;
 
 		b = resolve_splitable_vertex(999, false);
-		if(use_hyper_edges == false) assert(b == false);
-		if(b == true) print();
-		if(b == true) continue;
-
-		/*
-		b = resolve_hyper_edge1();
-		if(b == true) print();
-		if(b == true) continue;
-
-		b = resolve_hyper_edge0();
-		if(b == true) print();
 		if(b == true) continue;
 		*/
 
+		b = resolve_hyper_edge1();
+		if(b == true) continue;
+
+		b = resolve_hyper_edge0();
+		if(b == true) continue;
+
 		b = resolve_trivial_vertex(2);
-		//if(b == true) print();
 		if(b == true) continue;
 
 		break;
 	}
 
 	collect_existing_st_paths();
-	assert(gr.num_edges() == 0);
 
-	//print();
-	//greedy_decompose(-1);
+	greedy_decompose(-1);
+	//assert(gr.num_edges() == 0);
 
+	printf("finish assemble bundle %s\n\n", name.c_str());
 	return 0;
 }
 
@@ -202,10 +183,10 @@ bool scallop::resolve_splitable_vertex(int degree, bool conditional)
 	printf("resolve splitable vertex %d, degree = %d, conditional = %c, ratio = %.2lf, degree = (%d, %d)\n", 
 			root, degree, conditional ? 'T' : 'F', ratio, gr.in_degree(root), gr.out_degree(root));
 
-	eqns[0].print(88);
-	eqns[1].print(99);
-
 	split_vertex(root, eqns[0].s, eqns[0].t);
+
+	//eqns[0].print(88);
+	//eqns[1].print(99);
 	return true;
 }
 
@@ -467,13 +448,8 @@ int scallop::classify()
 		if(gr.degree(i) == 0) p1++;
 	}
 
-	printf("vertices = %lu, edges = %lu, p0 = %ld, p1 = %ld\n", gr.num_vertices(), gr.num_edges(), p0, p1);
-
 	//assert(p0 >= p1);
-
 	bool b = (p0 <= p1) ? true : false;
-
-	printf("\nprocess %s %s\n", name.c_str(), b ? "TRIVIAL" : "NORMAL");
 
 	if(p0 == p1) return TRIVIAL;
 	else return NORMAL;
@@ -619,6 +595,18 @@ bool scallop::filter_hyper_edges()
 
 int scallop::decompose_vertex_extend(int root, const vector<PPID> &vpi)
 {
+	// remove hyper-edges pairs that are not covered by vpi
+	set<PI> ss;
+	for(int i = 0; i < vpi.size(); i++) ss.insert(vpi[i].first);
+
+	MPII mpi = hs.get_routes(root, gr, e2i);
+	for(MPII::iterator it = mpi.begin(); it != mpi.end(); it++)
+	{
+		PI p = (*it).first;
+		if(ss.find(p) != ss.end()) continue;
+		hs.remove_pair(p.first, p.second);
+	}
+
 	// add edge-vertex for each adjacent edge of root
 	int m = gr.num_vertices() - 1;
 	for(int i = 0; i < gr.degree(root); i++)
@@ -717,7 +705,7 @@ int scallop::decompose_vertex_extend(int root, const vector<PPID> &vpi)
 
 int scallop::decompose_vertex_replace(int root, const vector<PPID> &vpi)
 {
-	// remove edges that are not covered
+	// reassign weights
 	MID md;
 	for(int i = 0; i < vpi.size(); i++)
 	{
@@ -729,7 +717,6 @@ int scallop::decompose_vertex_replace(int root, const vector<PPID> &vpi)
 		if(md.find(e2) == md.end()) md.insert(PID(e2, w));
 		else md[e2] += w;
 	}
-
 	for(MID::iterator it = md.begin(); it != md.end(); it++)
 	{
 		edge_descriptor e = i2e[it->first];
@@ -737,32 +724,22 @@ int scallop::decompose_vertex_replace(int root, const vector<PPID> &vpi)
 		gr.set_edge_weight(e, w);
 	}
 
-	vector<int> dve;
+	// assert that all edges are covered
 	edge_iterator it1, it2;
 	for(tie(it1, it2) = gr.in_edges(root); it1 != it2; it1++)
 	{
 		int e = e2i[*it1];
-		if(md.find(e) != md.end()) continue;
-		dve.push_back(e);
+		assert(md.find(e) != md.end());
 	}
 	for(tie(it1, it2) = gr.out_edges(root); it1 != it2; it1++)
 	{
 		int e = e2i[*it1];
-		if(md.find(e) != md.end()) continue;
-		dve.push_back(e);
-	}
-	for(int i = 0; i < dve.size(); i++)
-	{
-		int e = dve[i];
-		remove_edge(e);
-		printf("AA1: remove edge %d\n", e);
-		hs.remove(e);
+		assert(md.find(e) != md.end());
 	}
 
 	// remove hyper-edges that are not covered
 	set<PI> spi;
 	for(int i = 0; i < vpi.size(); i++) spi.insert(vpi[i].first);
-
 	MPII mpi = hs.get_routes(root, gr, e2i);
 
 	// print mpi
@@ -779,9 +756,8 @@ int scallop::decompose_vertex_replace(int root, const vector<PPID> &vpi)
 	for(MPII::iterator it = mpi.begin(); it != mpi.end(); it++)
 	{
 		if(spi.find(it->first) != spi.end()) continue;
-		printf("AA2: remove hyper pair (%d, %d)\n", it->first.first, it->first.second);
 		hs.remove_pair(it->first.first, it->first.second);
-		//printf("AA: remove hyper edge pair (%d, %d)\n", it->first.first, it->first.second);
+		//printf("AA2: remove hyper pair (%d, %d)\n", it->first.first, it->first.second);
 	}
 
 	map<int, int> m;
@@ -816,10 +792,12 @@ int scallop::decompose_vertex_replace(int root, const vector<PPID> &vpi)
 		int e2 = vpi[i].first.second;
 		assert(hs.left_extend(e1) == false || hs.right_extend(e1) == false);
 		assert(hs.left_extend(e2) == false || hs.right_extend(e2) == false);
+		/*
 		if(hs.left_extend(e1)) printf("BB1: remove left extend %d\n", e1);
 		if(hs.left_extend(e2)) printf("BB2: remove left extend %d\n", e2);
 		if(hs.right_extend(e1)) printf("BB3: remove right extend %d\n", e1);
 		if(hs.right_extend(e2)) printf("BB4: remove right extend %d\n", e2);
+		*/
 		hs.remove(e1);
 		hs.remove(e2);
 	}

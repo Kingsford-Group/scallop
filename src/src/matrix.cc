@@ -9,7 +9,7 @@ vector<double> solve_linear_system(const vector< vector<double> > &A, const vect
 		assert(A[i].size() == n);
 		for(int j = 0; j < n; j++)
 		{
-			AA(i, j) == A[i][j];
+			AA(i, j) = A[i][j];
 		}
 	}
 
