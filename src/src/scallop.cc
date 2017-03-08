@@ -64,6 +64,11 @@ int scallop::assemble()
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 999);
 		if(b == true) continue;
 
+
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 999, 0.05);
+		if(b == true) continue;
+
+
 		b = resolve_hyper_edge1();
 		if(b == true) continue;
 
@@ -73,9 +78,6 @@ int scallop::assemble()
 		summarize_vertices();
 
 		/*
-		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 999, 0.1);
-		if(b == true) continue;
-
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 999, 0.1);
 		if(b == true) continue;
 		*/
@@ -370,12 +372,12 @@ bool scallop::resolve_hyper_edge1()
 		{
 			double w = (w1[i] < w2[j]) ? w1[i] : w2[j];
 
-			double t1 = gr.get_edge_weight(i2e[v1[i]]);
-			double t2 = gr.get_edge_weight(i2e[v2[j]]);
 			int k1 = split_edge(v1[i], w);
 			int k2 = split_edge(v2[j], w);
 			int x = merge_adjacent_equal_edges(k1, k2);
 
+			//double t1 = gr.get_edge_weight(i2e[v1[i]]);
+			//double t2 = gr.get_edge_weight(i2e[v2[j]]);
 			//printf(" split (%d, %d), w = %.2lf, weight = (%.2lf, %.2lf), (%.2lf, %.2lf) -> (%d, %d) -> %d\n", v1[i], v2[j], w, w1[i], w2[j], t1, t2, k1, k2, x);
 
 			hs.replace(v1[i], v2[j], x);

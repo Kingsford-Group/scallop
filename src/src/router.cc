@@ -125,9 +125,9 @@ int router::build()
 		else
 		{
 			ratio = 9999;
-			//build_bipartite_graph();
-			//extend_bipartite_graph_all();
-			//decompose2();
+			build_bipartite_graph();
+			extend_bipartite_graph_all();
+			decompose2();
 		}
 	}
 	return 0;
@@ -829,7 +829,8 @@ int router::decompose1()
 int router::decompose2()
 {
 	// TODO
-	//if(type != UNSPLITTABLE_SINGLE) return 0;
+	if(type != UNSPLITTABLE_SINGLE) return 0;
+
 	vector<double> vw = compute_balanced_weights();
 
 	// normalize routes
