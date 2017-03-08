@@ -8,7 +8,10 @@
 #include "undirected_graph.h"
 #include "hyper_set.h"
 
+typedef pair<int, double> PID;
+typedef map<int, double> MID;
 typedef pair<PI, double> PPID;
+typedef map<PI, double> MPID;
 
 using namespace std;
 
@@ -36,25 +39,26 @@ public:
 	int degree;					// level
 	double ratio;				// worst ratio
 	vector<equation> eqns;		// split results
-	vector<PPID> vpi;			// decompose resutls
+	MPID pe2w;					// decompose results (for pairs of edges)
+	MID se2w;					// decompose results (for single edges)
 
 public:
-	int classify();									// compute status
-	int build();									// give solution
+	int classify();												// compute status
+	int build();												// give solution
 
-	int build_indices();							// build u2e and e2u
-	int build_bipartite_graph();					// build bipartite graph
-	int extend_bipartite_graph();					// extended graph
-	int build_maximum_spanning_tree();				// make ug a (maximum) spanning tree
-	int split();									// split
-	int decompose0();								// check whether error can be 0
-	int decompose1();								// decompose with gurobi, for error = 0
-	int decompose2();								// decompose with gurobi, for error > 0
-	int decompose3();								// decompose with ublas,
-	vector<double> compute_balanced_weights();		// balanced weights
-	PI filter_hyper_edge();							// try to filter hyper-edge
-	PI filter_small_hyper_edge();					// hyper-edge w.r.t. the smallest edge
-	PI filter_cycle_hyper_edge();					// hyper-edge w.r.t. any cycle
+	int build_indices();										// build u2e and e2u
+	int build_bipartite_graph();								// build bipartite graph
+	int extend_bipartite_graph_max();							// extended graph
+	int extend_bipartite_graph_all();							// extended graph
+	int build_maximum_spanning_tree();							// make ug a (maximum) spanning tree
+	int split();												// split
+	int decompose0();										// check whether error can be 0
+	int decompose1();											// decompose with gurobi, for error = 0
+	int decompose2();											// decompose with gurobi, for error > 0
+	vector<double> compute_balanced_weights();					// balanced weights
+	PI filter_hyper_edge();										// try to filter hyper-edge
+	PI filter_small_hyper_edge();								// hyper-edge w.r.t. the smallest edge
+	PI filter_cycle_hyper_edge();								// hyper-edge w.r.t. any cycle
 
 	// print and stats
 	int print() const;

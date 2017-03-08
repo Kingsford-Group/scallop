@@ -14,8 +14,6 @@ typedef pair<PEE, int> PPEEI;
 typedef map<PEE, int> MPEEI;
 typedef pair<int, int> PI;
 typedef map<int, int> MI;
-typedef pair<int, double> PID;
-typedef map<int, double> MID;
 
 // for noisy splice graph
 class scallop
@@ -53,7 +51,7 @@ private:
 	bool resolve_small_edges();
 	bool resolve_trivial_vertex(int type);
 	bool resolve_splittable_vertex(int type, int degree);
-	bool resolve_unsplittable_vertex(int type, int degree);
+	bool resolve_unsplittable_vertex(int type, int degree, double max_ratio = -0.5);
 	bool resolve_hyper_edge1();
 	bool resolve_hyper_edge0();
 
@@ -64,8 +62,9 @@ private:
 	// decomposing subroutines
 	int compute_smallest_edge(int x, double &ratio);
 	int decompose_trivial_vertex(int v);
-	int decompose_vertex_extend(int v, const vector<PPID> &vpi);
-	int decompose_vertex_replace(int v, const vector<PPID> &vpi);
+	//int decompose_vertex_extend(int v, const MPID &pe2w, const MID &se2w);
+	int decompose_vertex_extend(int v, MPID &pe2w);
+	int decompose_vertex_replace(int v, MPID &pe2w);
 	int classify_trivial_vertex(int v);
 	int split_vertex(int x, const vector<int> &xe, const vector<int> &ye);
 	int split_edge(int exi, double w);

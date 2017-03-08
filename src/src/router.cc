@@ -45,7 +45,8 @@ router& router::operator=(const router &rt)
 	degree = rt.degree;
 	ratio = rt.ratio;
 	eqns = rt.eqns;
-	vpi = rt.vpi;
+	pe2w = rt.pe2w;
+	se2w = rt.se2w;
 
 	return (*this);
 }
@@ -113,11 +114,20 @@ int router::build()
 	}
 	if(type == UNSPLITTABLE_SINGLE || type == UNSPLITTABLE_MULTIPLE) 
 	{
-		extend_bipartite_graph();
+		extend_bipartite_graph_max();
 		decompose0();
 
-		if(ratio <= 1.0) decompose1();
-		else ratio = 9999;
+		if(ratio <= 1.0)
+		{
+			decompose1();
+			ratio = -1;
+		}
+		else
+		{
+			build_bipartite_graph();
+			extend_bipartite_graph_all();
+			decompose2();
+		}
 	}
 	return 0;
 }
@@ -166,7 +176,7 @@ int router::build_bipartite_graph()
 	return 0;
 }
 
-int router::extend_bipartite_graph()
+int router::extend_bipartite_graph_max()
 {
 	edge_descriptor e1 = gr.max_in_edge(root);
 	edge_descriptor e2 = gr.max_out_edge(root);
@@ -189,6 +199,30 @@ int router::extend_bipartite_graph()
 		int j = i + gr.in_degree(root);
 		if(ug.degree(j) >= 1) continue;
 		ug.add_edge(k1, j);
+	}
+	return 0;
+}
+
+int router::extend_bipartite_graph_all()
+{
+	edge_iterator it1, it2;
+	for(int i = 0; i < gr.in_degree(root); i++)
+	{
+		if(ug.degree(i) >= 1) continue;
+		for(int k = 0; k < gr.out_degree(root); k++)
+		{
+			int v = gr.in_degree(root) + k;
+			ug.add_edge(i, v);
+		}
+	}
+	for(int i = 0; i < gr.out_degree(root); i++)
+	{
+		int j = i + gr.in_degree(root);
+		if(ug.degree(j) >= 1) continue;
+		for(int k = 0; k < gr.in_degree(root); k++)
+		{
+			ug.add_edge(k, j);
+		}
 	}
 	return 0;
 }
@@ -541,106 +575,6 @@ vector<double> router::compute_balanced_weights()
 	return vw;
 }
 
-int router::decompose3()
-{
-	extend_bipartite_graph();
-	build_maximum_spanning_tree();
-
-	// locally balance weights
-	vector<double> vw = compute_balanced_weights();
-
-	// edge list of ug
-	VE ve;
-	MEI ev;
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = ug.edges(); it1 != it2; it1++)
-	{
-		edge_descriptor e = (*it1);
-		ev.insert(PEI(e, ve.size()));
-		ve.push_back(e);
-	}
-
-	vector< vector<double> > A;
-	vector<double> B;
-	for(int i = 0; i < ve.size(); i++)
-	{
-		edge_descriptor e = ve[i];
-		int s = e->source();
-		int t = e->target();
-		double b = vw[s] + vw[t];
-
-		vector<double> a(ve.size(), 0);
-		for(tie(it1, it2) = ug.out_edges(s); it1 != it2; it1++)
-		{
-			edge_descriptor ee = (*it1);
-			assert(ee->source() == s);
-			assert(ev.find(ee) != ev.end());
-			int k = ev[ee];
-			a[k] += 1.0;
-		}
-		for(tie(it1, it2) = ug.out_edges(t); it1 != it2; it1++)
-		{
-			edge_descriptor ee = (*it1);
-			assert(ee->source() == t);
-			assert(ev.find(ee) != ev.end());
-			int k = ev[ee];
-			a[k] += 1.0;
-		}
-
-		A.push_back(a);
-		B.push_back(b);
-	}
-
-	/*
-	printf("matrix A:\n");
-	for(int i = 0; i < A.size(); i++)
-	{
-		for(int j = 0; j < A[i].size(); j++) printf("%.0lf ", A[i][j]);
-		printf("\n");
-	}
-	printf("vector B:\n");
-	for(int i = 0; i < B.size(); i++) printf("%.2lf ", B[i]);
-	printf("\n");
-	*/
-
-	// solve linear sysmtem AX = B
-	vector<double> X = solve_linear_system(A, B);
-	assert(X.size() == A.size());
-	assert(X.size() == B.size());
-
-	vpi.clear();
-	vector<double> vw2(ug.num_vertices(), 0);
-	for(int i = 0; i < ve.size(); i++)
-	{
-		edge_descriptor e = ve[i];
-		int s = e->source();
-		int t = e->target();
-		int es = u2e[s];
-		int et = u2e[t];
-		double w = X[i];
-		if(w < 1.0) w = 1.0;
-
-		PI p(es, et);
-		if(s > t) p = PI(et, es);
-		vpi.push_back(PPID(p, 1.0));
-
-		vw2[s] += w;
-		vw2[t] += w;
-	}
-
-	// compute ratio
-	double sum1 = 0, sum2 = 0;
-	assert(vw.size() == vw2.size());
-	for(int i = 0; i < vw.size(); i++)
-	{
-		sum1 += vw[i];
-		sum2 += fabs(vw[i] - vw2[i]);
-	}
-	ratio = sum2 / sum1;
-
-	return 0;
-}
-
 int router::decompose0()
 {
 	// locally balance weights
@@ -752,7 +686,7 @@ int router::decompose1()
 	// locally balance weights
 	vector<double> vw = compute_balanced_weights();
 
-	// normalize routes count
+	// normalize routes
 	double wsum = 0;
 	for(int i = 0; i < vw.size(); i++) wsum += vw[i];
 	wsum = wsum * 0.5;
@@ -763,7 +697,6 @@ int router::decompose1()
 		double w = it->second;
 		rsum += w;
 	}
-
 	MED md;
 	for(MED::iterator it = u2w.begin(); it != u2w.end(); it++)
 	{
@@ -858,7 +791,8 @@ int router::decompose1()
 		ratio = w2 / w1;
 		*/
 
-		vpi.clear();
+		pe2w.clear();
+		se2w.clear();
 		for(int i = 0; i < ve.size(); i++)
 		{
 			edge_descriptor e = ve[i];
@@ -869,7 +803,7 @@ int router::decompose1()
 			PI p(es, et);
 			if(s > t) p = PI(et, es);
 			double w = rvars[i].get(GRB_DoubleAttr_X);
-			vpi.push_back(PPID(p, w));
+			pe2w.insert(PPID(p, w));
 		}
 
 		delete model;
@@ -893,26 +827,46 @@ int router::decompose1()
 
 int router::decompose2()
 {
-	assert(type == UNSPLITTABLE_MULTIPLE);
-
-	// locally balance weights
 	vector<double> vw = compute_balanced_weights();
 
-	// collect vertices of ug that are degree of 0
-	set<int> s0;
-	double wsum = 0;
-	double wsum0 = 0;
-	for(int i = 0; i < u2e.size(); i++)
+	// normalize routes
+	set<int> cs;
+	double rsum = 0;
+	for(MED::iterator it = u2w.begin(); it != u2w.end(); it++)
 	{
-		wsum += vw[i];
-		if(ug.degree(i) >= 1) continue;
-		s0.insert(i);
-		wsum0 += vw[i];
+		edge_descriptor e = it->first;
+		double w = it->second;
+		int s = e->source();
+		int t = e->target();
+		cs.insert(s);
+		cs.insert(t);
+		rsum += w;
+	}
+	double wsum1 = 0, wsum2 = 0;
+	for(int i = 0; i < gr.in_degree(root); i++)
+	{
+		if(cs.find(i) == cs.end()) continue;
+		wsum1 += vw[i];
+	}
+	for(int i = 0; i < gr.out_degree(root); i++)
+	{
+		int j = i + gr.in_degree(root);
+		if(cs.find(j) == cs.end()) continue;
+		wsum2 += vw[j];
+	}
+	double wsum = (wsum1 < wsum2) ? wsum1 : wsum2;
+
+	MED md;
+	for(MED::iterator it = u2w.begin(); it != u2w.end(); it++)
+	{
+		edge_descriptor e = it->first;
+		double w = it->second;
+		double ww = w / rsum * wsum;
+		md.insert(PED(e, ww));
 	}
 
 	try
 	{
-		// run quadratic programming
 		GRBEnv *env = new GRBEnv();
 		GRBModel *model = new GRBModel(*env);
 
@@ -933,16 +887,33 @@ int router::decompose2()
 			rvars.push_back(rvar);
 		}
 
-		// new weights variables
+		// routes error variables
+		vector<GRBVar> pvars;
+		for(int i = 0; i < ve.size(); i++)
+		{
+			GRBVar pvar = model->addVar(0.0, GRB_INFINITY, 1.0, GRB_CONTINUOUS); // TODO, [0.5, ]
+			pvars.push_back(pvar);
+		}
+
+		// variables for vertices
 		vector<GRBVar> wvars;
 		for(int i = 0; i < u2e.size(); i++)
 		{
 			GRBVar wvar = model->addVar(0.0, GRB_INFINITY, 0, GRB_CONTINUOUS);
 			wvars.push_back(wvar);
 		}
+
+		// error terms for vertices 
+		vector<GRBVar> evars;
+		for(int i = 0; i < u2e.size(); i++)
+		{
+			GRBVar evar = model->addVar(0.0, GRB_INFINITY, 10.0, GRB_CONTINUOUS);
+			evars.push_back(evar);
+		}
 		model->update();
 
-		// expression for each edge
+		// constraints for vertices
+		GRBLinExpr rsum;
 		vector<GRBLinExpr> exprs(u2e.size());
 		for(int i = 0; i < ve.size(); i++)
 		{
@@ -951,21 +922,30 @@ int router::decompose2()
 			int u2 = e->target();
 			exprs[u1] += rvars[i];
 			exprs[u2] += rvars[i];
+			rsum += rvars[i];
 		}
 
+		double msum = (wsum1 > wsum2) ? wsum1 : wsum2;
+		model->addConstr(rsum, GRB_EQUAL, msum);
 		for(int i = 0; i < u2e.size(); i++)
 		{
 			model->addConstr(exprs[i], GRB_EQUAL, wvars[i]);
 		}
 
+		// constraints for routes
+		for(int i = 0; i < ve.size(); i++)
+		{
+			edge_descriptor e = ve[i];
+			if(md.find(e) == md.end()) continue;
+			double w = md[e];
+			model->addConstr(rvars[i] - w, GRB_LESS_EQUAL, pvars[i]);
+			model->addConstr(w - rvars[i], GRB_LESS_EQUAL, pvars[i]);
+		}
+
 		// objective 
 		GRBQuadExpr obj;
-		for(int i = 0; i < u2e.size(); i++)
-		{
-			//double w = gr.get_edge_weight(i2e[u2e[i]]);
-			double w = vw[i];
-			obj += (wvars[i] - w) * (wvars[i] - w);
-		}
+		for(int i = 0; i < u2e.size(); i++) obj += 10.0 * evars[i];
+		for(int i = 0; i < ve.size(); i++) obj += pvars[i];
 
 		model->setObjective(obj, GRB_MINIMIZE);
 		model->getEnv().set(GRB_IntParam_OutputFlag, 0);
@@ -977,18 +957,10 @@ int router::decompose2()
 
 		assert(f == GRB_OPTIMAL);
 
-		if(f != GRB_OPTIMAL)
-		{
-			delete model;
-			delete env;
-			return -1;
-		}
-
 		double ww1 = 0;
 		double ww2 = 0;
 		for(int i = 0; i < wvars.size(); i++)
 		{
-			//double w1 = gr.get_edge_weight(i2e[u2e[i]]);
 			double w1 = vw[i];
 			double w2 = wvars[i].get(GRB_DoubleAttr_X);
 			ww1 += w1;
@@ -997,7 +969,8 @@ int router::decompose2()
 
 		ratio = ww2 / ww1;
 
-		vpi.clear();
+		pe2w.clear();
+		se2w.clear();
 		for(int i = 0; i < ve.size(); i++)
 		{
 			edge_descriptor e = ve[i];
@@ -1005,16 +978,25 @@ int router::decompose2()
 			int t = e->target();
 			int es = u2e[s];
 			int et = u2e[t];
-			PI p(es, et);
-			if(s > t) p = PI(et, es);
 			double w = rvars[i].get(GRB_DoubleAttr_X);
-			//if(w <= 0.5) continue;
-			vpi.push_back(PPID(p, w));
+			if(u2w.find(e) != u2w.end())
+			{
+				PI p(es, et);
+				if(s > t) p = PI(et, es);
+				assert(pe2w.find(p) == pe2w.end());
+				pe2w.insert(PPID(p, w));
+			}
+			else
+			{
+				if(se2w.find(es) == se2w.end()) se2w.insert(PID(es, w));
+				else se2w[es] += w;
+				if(se2w.find(et) == se2w.end()) se2w.insert(PID(et, w));
+				else se2w[et] += w;
+			}
 		}
 
 		delete model;
 		delete env;
-
 	}
 	catch(GRBException e)
 	{

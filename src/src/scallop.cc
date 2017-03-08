@@ -196,11 +196,11 @@ bool scallop::resolve_splittable_vertex(int type, int degree)
 	return true;
 }
 
-bool scallop::resolve_unsplittable_vertex(int type, int degree)
+bool scallop::resolve_unsplittable_vertex(int type, int degree, double max_ratio)
 {
 	int root = -1;
-	vector<PPID> vpi;
-	double ratio = DBL_MAX;
+	MPID pe2w;
+	double ratio = max_ratio;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.in_degree(i) <= 1) continue;
@@ -215,13 +215,13 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree)
 
 		rt.build();
 
-		if(rt.ratio > 1.0) continue;
+		if(rt.ratio > ratio) continue;
 
 		root = i;
 		ratio = rt.ratio;
-		vpi = rt.vpi;
+		pe2w = rt.pe2w;
 
-		break;
+		if(ratio < -0.5) break;
 	}
 
 	if(root == -1) return false;
@@ -229,7 +229,7 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree)
 	printf("resolve unsplittable vertex, type = %d, degree = %d, vertex = %d, ratio = %.3lf, degree = (%d, %d)\n",
 			type, degree, root, ratio, gr.in_degree(root), gr.out_degree(root));
 
-	decompose_vertex_extend(root, vpi);
+	decompose_vertex_extend(root, pe2w);
 	assert(gr.degree(root) == 0);
 
 	return true;
@@ -598,17 +598,14 @@ bool scallop::filter_hyper_edges()
 	return flag;
 }
 
-int scallop::decompose_vertex_extend(int root, const vector<PPID> &vpi)
+int scallop::decompose_vertex_extend(int root, MPID &pe2w)
 {
-	// remove hyper-edges pairs that are not covered by vpi
-	set<PI> ss;
-	for(int i = 0; i < vpi.size(); i++) ss.insert(vpi[i].first);
-
+	// remove hyper-edges pairs that are not covered by pe2w
 	MPII mpi = hs.get_routes(root, gr, e2i);
 	for(MPII::iterator it = mpi.begin(); it != mpi.end(); it++)
 	{
 		PI p = (*it).first;
-		if(ss.find(p) != ss.end()) continue;
+		if(pe2w.find(p) != pe2w.end()) continue;
 		hs.remove_pair(p.first, p.second);
 	}
 
@@ -678,12 +675,12 @@ int scallop::decompose_vertex_extend(int root, const vector<PPID> &vpi)
 		v2v[k] = -2;
 	}
 
-	// connecting edges according to vpi
-	for(int i = 0; i < vpi.size(); i++)
+	// connecting edges according to pe2w
+	for(MPID::iterator it = pe2w.begin(); it != pe2w.end(); it++)
 	{
-		int e1 = vpi[i].first.first;
-		int e2 = vpi[i].first.second;
-		double w = vpi[i].second;
+		int e1 = it->first.first;
+		int e2 = it->first.second;
+		double w = it->second;
 
 		assert(ev1.find(e1) != ev1.end());
 		assert(ev2.find(e2) != ev2.end());
@@ -708,15 +705,15 @@ int scallop::decompose_vertex_extend(int root, const vector<PPID> &vpi)
 	return 0;
 }
 
-int scallop::decompose_vertex_replace(int root, const vector<PPID> &vpi)
+int scallop::decompose_vertex_replace(int root, MPID &pe2w)
 {
 	// reassign weights
 	MID md;
-	for(int i = 0; i < vpi.size(); i++)
+	for(MPID::iterator it = pe2w.begin(); it != pe2w.end(); it++)
 	{
-		int e1 = vpi[i].first.first;
-		int e2 = vpi[i].first.second;
-		double w = vpi[i].second;
+		int e1 = it->first.first;
+		int e2 = it->first.second;
+		double w = it->second;
 		if(md.find(e1) == md.end()) md.insert(PID(e1, w));
 		else md[e1] += w;
 		if(md.find(e2) == md.end()) md.insert(PID(e2, w));
@@ -743,44 +740,29 @@ int scallop::decompose_vertex_replace(int root, const vector<PPID> &vpi)
 	}
 
 	// remove hyper-edges that are not covered
-	set<PI> spi;
-	for(int i = 0; i < vpi.size(); i++) spi.insert(vpi[i].first);
 	MPII mpi = hs.get_routes(root, gr, e2i);
-
-	// print mpi
-	/*
 	for(MPII::iterator it = mpi.begin(); it != mpi.end(); it++)
 	{
-		int e1 = it->first.first;
-		int e2 = it->first.second;
-		int c = it->second;
-		printf("hyper edges for root %d: (%d, %d), count = %d\n", root, e1, e2, c);
-	}
-	*/
-
-	for(MPII::iterator it = mpi.begin(); it != mpi.end(); it++)
-	{
-		if(spi.find(it->first) != spi.end()) continue;
+		if(pe2w.find(it->first) != pe2w.end()) continue;
 		hs.remove_pair(it->first.first, it->first.second);
 		//printf("AA2: remove hyper pair (%d, %d)\n", it->first.first, it->first.second);
 	}
 
 	map<int, int> m;
-	for(int i = 0; i < vpi.size(); i++)
+	for(MPID::iterator it = pe2w.begin(); it != pe2w.end(); it++)
 	{
-		int e1 = vpi[i].first.first;
-		int e2 = vpi[i].first.second;
+		int e1 = it->first.first;
+		int e2 = it->first.second;
 		if(m.find(e1) == m.end()) m.insert(PI(e1, 1));
 		else m[e1]++;
 		if(m.find(e2) == m.end()) m.insert(PI(e2, 1));
 		else m[e2]++;
 	}
-
-	for(int i = 0; i < vpi.size(); i++)
+	for(MPID::iterator it = pe2w.begin(); it != pe2w.end(); it++)
 	{
-		int e1 = vpi[i].first.first;
-		int e2 = vpi[i].first.second;
-		double w = vpi[i].second;
+		int e1 = it->first.first;
+		int e2 = it->first.second;
+		double w = it->second;
 
 		//printf("merge adjacent edges (%d, %d) -> %.4lf\n", e1, e2, w);
 		int e = merge_adjacent_edges(e1, e2, w);
@@ -791,10 +773,10 @@ int scallop::decompose_vertex_replace(int root, const vector<PPID> &vpi)
 		if(m[e2] == 1) hs.replace(e2, e);
 	}
 
-	for(int i = 0; i < vpi.size(); i++)
+	for(MPID::iterator it = pe2w.begin(); it != pe2w.end(); it++)
 	{
-		int e1 = vpi[i].first.first;
-		int e2 = vpi[i].first.second;
+		int e1 = it->first.first;
+		int e2 = it->first.second;
 		assert(hs.left_extend(e1) == false || hs.right_extend(e1) == false);
 		assert(hs.left_extend(e2) == false || hs.right_extend(e2) == false);
 		/*
@@ -814,7 +796,7 @@ int scallop::decompose_trivial_vertex(int x)
 {
 	balance_vertex(x);
 
-	vector<PPID> vpi;
+	MPID pe2w;
 	edge_iterator it1, it2;
 	edge_iterator ot1, ot2;
 	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
@@ -827,11 +809,10 @@ int scallop::decompose_trivial_vertex(int x)
 			double w2 = gr.get_edge_weight(*ot1);
 			double w = w1 <= w2 ? w1 : w2;
 
-			vpi.push_back(PPID(PI(e1, e2), w));
+			pe2w.insert(PPID(PI(e1, e2), w));
 		}
 	}
-
-	decompose_vertex_replace(x, vpi);
+	decompose_vertex_replace(x, pe2w);
 	return 0;
 }
 
