@@ -183,7 +183,7 @@ bool scallop::resolve_splittable_vertex(int type, int degree)
 		root = i;
 		ratio = rt.ratio;
 		eqns = rt.eqns;
-		degree = rt.degree;
+		//degree = rt.degree;
 	}
 
 	if(root == -1) return false;
