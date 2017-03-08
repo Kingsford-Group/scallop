@@ -828,6 +828,8 @@ int router::decompose1()
 
 int router::decompose2()
 {
+	// TODO
+	//if(type != UNSPLITTABLE_SINGLE) return 0;
 	vector<double> vw = compute_balanced_weights();
 
 	// normalize routes

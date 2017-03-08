@@ -307,7 +307,8 @@ bool scallop::resolve_hyper_edge1()
 
 		MI s;
 		s = hs.get_successors(e);
-		if(s.size() >= 2 && hs.right_extend(get_keys(s)) == false && (hs.left_extend(e) == false || gr.out_degree(vs) == 1))
+		//if(s.size() >= 2 && hs.right_extend(get_keys(s)) == false && (hs.left_extend(e) == false || gr.out_degree(vs) == 1))
+		if(s.size() >= 2 && (hs.left_extend(e) == false || gr.out_degree(vs) == 1))
 		{
 			v1.push_back(e);
 			v2 = get_keys(s);
@@ -316,8 +317,8 @@ bool scallop::resolve_hyper_edge1()
 		}
 
 		s = hs.get_predecessors(e);
-		if(s.size() >= 2 && hs.left_extend(get_keys(s)) == false && (hs.right_extend(e) == false || gr.in_degree(vt) == 1))
-		if(s.size() >= 2 && hs.left_extend(get_keys(s)) == false)
+		//if(s.size() >= 2 && hs.left_extend(get_keys(s)) == false && (hs.right_extend(e) == false || gr.in_degree(vt) == 1))
+		if(s.size() >= 2 && (hs.right_extend(e) == false || gr.in_degree(vt) == 1))
 		{
 			v1 = get_keys(s);
 			v2.push_back(e);
