@@ -55,6 +55,9 @@ int scallop::assemble()
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 1);
 		if(b == true) continue;
 
+		b = resolve_splittable_vertex(SPLITTABLE_HYPER, 1);
+		if(b == true) continue;
+
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 999);
 		if(b == true) continue;
 
@@ -62,9 +65,6 @@ int scallop::assemble()
 		if(b == true) continue;
 
 		b = resolve_hyper_edge1();
-		if(b == true) continue;
-
-		b = resolve_splittable_vertex(SPLITTABLE_HYPER, 1);
 		if(b == true) continue;
 
 		b = resolve_splittable_vertex(SPLITTABLE_HYPER, 999);
@@ -78,10 +78,10 @@ int scallop::assemble()
 
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 999, 0.1);
 		if(b == true) continue;
-		*/
 
 		b = resolve_hyper_edge0();
 		if(b == true) continue;
+		*/
 
 		b = resolve_trivial_vertex(2);
 		if(b == true) continue;
