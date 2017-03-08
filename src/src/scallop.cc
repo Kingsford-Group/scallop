@@ -133,8 +133,8 @@ bool scallop::resolve_small_edges()
 		if(s == i && hs.left_extend(e)) continue;
 
 		// consider further conditions
-		if(t == i && hs.left_extend(e) && gr.out_degree(s) >= 2) continue;
-		if(s == i && hs.right_extend(e) && gr.in_degree(t) >= 2) continue;
+		//if(t == i && hs.left_extend(e) && gr.out_degree(s) >= 2) continue;
+		//if(s == i && hs.right_extend(e) && gr.in_degree(t) >= 2) continue;
 
 		ratio = r;
 		se = e;
@@ -215,7 +215,7 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree)
 
 		rt.build();
 
-		if(rt.ratio > max_decompose_error_ratio[type]) continue;
+		if(rt.ratio > 1.0) continue;
 
 		root = i;
 		ratio = rt.ratio;

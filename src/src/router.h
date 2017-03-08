@@ -47,10 +47,10 @@ public:
 	int extend_bipartite_graph();					// extended graph
 	int build_maximum_spanning_tree();				// make ug a (maximum) spanning tree
 	int split();									// split
+	int decompose0();								// check whether error can be 0
 	int decompose1();								// decompose with gurobi, for error = 0
 	int decompose2();								// decompose with gurobi, for error > 0
 	int decompose3();								// decompose with ublas,
-	double decompose0();							// check whether error can be 0
 	vector<double> compute_balanced_weights();		// balanced weights
 	PI filter_hyper_edge();							// try to filter hyper-edge
 	PI filter_small_hyper_edge();					// hyper-edge w.r.t. the smallest edge
