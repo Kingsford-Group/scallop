@@ -70,7 +70,7 @@ int scallop::assemble()
 		b = resolve_splittable_vertex(SPLITTABLE_HYPER, 999);
 		if(b == true) continue;
 
-		//summarize_vertices();
+		summarize_vertices();
 
 		/*
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 999, 0.1);
@@ -432,10 +432,19 @@ int scallop::summarize_vertices()
 		else
 		{
 			MPII mpi = hs.get_routes(i, gr, e2i);
+			set<int> s1;
+			set<int> s2;
+			for(MPII::iterator it = mpi.begin(); it != mpi.end(); it++)
+			{
+				PI p = it->first;
+				s1.insert(p.first);
+				s2.insert(p.second);
+			}
 			router rt(i, gr, e2i, i2e, mpi);
 			rt.classify();
 			rt.build();
-			printf("summary: nontrivial vertex %d, type = %d, degree = %d, ratio = %.3lf\n", i, rt.type, rt.degree, rt.ratio);
+			printf("summary: nontrivial vertex %d, degree = (%d, %d), hyper edges = %lu, graph degree = (%lu, %lu), type = %d, degree = %d, ratio = %.3lf\n", 
+					i, gr.in_degree(i), gr.out_degree(i), mpi.size(), s1.size(), s2.size(), rt.type, rt.degree, rt.ratio);
 		}
 	}
 	return 0;
