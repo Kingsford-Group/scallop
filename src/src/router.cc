@@ -124,9 +124,10 @@ int router::build()
 		}
 		else
 		{
-			build_bipartite_graph();
-			extend_bipartite_graph_all();
-			decompose2();
+			ratio = 9999;
+			//build_bipartite_graph();
+			//extend_bipartite_graph_all();
+			//decompose2();
 		}
 	}
 	return 0;
