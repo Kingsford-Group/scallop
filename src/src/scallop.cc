@@ -69,22 +69,19 @@ int scallop::assemble()
 
 		summarize_vertices();
 
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 999, 0.1);
+		if(b == true) continue;
+
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 999, 0.1);
+		if(b == true) continue;
+
 		/*
-		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 999, false);
-		if(b == true) continue;
-
-		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 999, false);
-		if(b == true) continue;
-
-		b = resolve_splittable_vertex(999, false);
-		if(b == true) continue;
-		*/
-
 		b = resolve_hyper_edge1();
 		if(b == true) continue;
 
 		b = resolve_hyper_edge0();
 		if(b == true) continue;
+		*/
 
 		b = resolve_trivial_vertex(2);
 		if(b == true) continue;
@@ -200,6 +197,7 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree, double max_ratio
 {
 	int root = -1;
 	MPID pe2w;
+	MID se2w;
 	double ratio = max_ratio;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
@@ -220,6 +218,7 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree, double max_ratio
 		root = i;
 		ratio = rt.ratio;
 		pe2w = rt.pe2w;
+		se2w = rt.se2w;
 
 		if(ratio < -0.5) break;
 	}
@@ -229,8 +228,8 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree, double max_ratio
 	printf("resolve unsplittable vertex, type = %d, degree = %d, vertex = %d, ratio = %.3lf, degree = (%d, %d)\n",
 			type, degree, root, ratio, gr.in_degree(root), gr.out_degree(root));
 
-	decompose_vertex_extend(root, pe2w);
-	assert(gr.degree(root) == 0);
+	decompose_vertex_extend(root, pe2w, se2w);
+	if(se2w.size() == 0) assert(gr.degree(root) == 0);
 
 	return true;
 }
@@ -598,7 +597,7 @@ bool scallop::filter_hyper_edges()
 	return flag;
 }
 
-int scallop::decompose_vertex_extend(int root, MPID &pe2w)
+int scallop::decompose_vertex_extend(int root, MPID &pe2w, MID &se2w)
 {
 	// remove hyper-edges pairs that are not covered by pe2w
 	MPII mpi = hs.get_routes(root, gr, e2i);
@@ -702,6 +701,40 @@ int scallop::decompose_vertex_extend(int root, MPID &pe2w)
 
 		hs.insert_between(e1, e2, z);
 	}
+
+	// connecting edges according to se2w
+	for(MID::iterator it = se2w.begin(); it != se2w.end(); it++)
+	{
+		int e = it->first;
+		double w = it->second;
+
+		edge_descriptor p = null_edge;
+		if(ev1.find(e) != ev1.end())
+		{
+			int k = ev1[e];
+			p = gr.add_edge(k, root);
+		}
+		else if(ev2.find(e) != ev2.end())
+		{
+			int k = ev2[e];
+			p = gr.add_edge(root, k);
+		}
+		else assert(false);
+
+		assert(p != null_edge);
+		
+		int z = i2e.size();
+		i2e.push_back(p);
+		e2i.insert(PEI(p, z));
+
+		gr.set_edge_weight(p, w);
+		gr.set_edge_info(p, edge_info());
+
+		vector<int> v0;
+		if(mev.find(p) != mev.end()) mev[p] = v0;
+		else mev.insert(PEV(p, v0));
+	}
+
 	return 0;
 }
 

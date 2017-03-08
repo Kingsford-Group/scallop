@@ -926,7 +926,7 @@ int router::decompose2()
 		}
 
 		double msum = (wsum1 > wsum2) ? wsum1 : wsum2;
-		model->addConstr(rsum, GRB_EQUAL, msum);
+		// model->addConstr(rsum, GRB_EQUAL, msum); TODO
 		for(int i = 0; i < u2e.size(); i++)
 		{
 			model->addConstr(exprs[i], GRB_EQUAL, wvars[i]);
