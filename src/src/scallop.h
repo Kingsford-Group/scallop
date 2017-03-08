@@ -48,7 +48,7 @@ private:
 
 	// resolve iteratively
 	bool filter_hyper_edges();
-	bool resolve_small_edges();
+	bool resolve_small_edges(double max_ratio);
 	bool resolve_trivial_vertex(int type);
 	bool resolve_splittable_vertex(int type, int degree);
 	bool resolve_unsplittable_vertex(int type, int degree, double max_ratio = -0.5);

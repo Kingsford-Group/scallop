@@ -49,7 +49,7 @@ int scallop::assemble()
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 1);
 		if(b == true) continue;
 
-		b = resolve_small_edges();
+		b = resolve_small_edges(max_small_error_ratio);
 		if(b == true) continue;
 
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 1);
@@ -64,7 +64,6 @@ int scallop::assemble()
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 999);
 		if(b == true) continue;
 
-
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 999, 0.30);
 		if(b == true) continue;
 
@@ -74,19 +73,21 @@ int scallop::assemble()
 		b = resolve_hyper_edge(1);
 		if(b == true) continue;
 
-		b = resolve_splittable_vertex(SPLITTABLE_HYPER, 999);
-		if(b == true) continue;
-
-		b = resolve_splittable_vertex(SPLITTABLE_SIMPLE, 999);
+		b = resolve_small_edges(DBL_MAX);
 		if(b == true) continue;
 
 		summarize_vertices();
 
 		/*
-		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 999, 0.1);
+		b = resolve_splittable_vertex(SPLITTABLE_HYPER, 999);
 		if(b == true) continue;
 
-		b = resolve_hyper_edge0();
+		b = resolve_splittable_vertex(SPLITTABLE_SIMPLE, 999);
+		if(b == true) continue;
+		*/
+
+		/*
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 999, 0.1);
 		if(b == true) continue;
 		*/
 
@@ -108,12 +109,11 @@ int scallop::assemble()
 	return 0;
 }
 
-bool scallop::resolve_small_edges()
+bool scallop::resolve_small_edges(double max_ratio)
 {
 	int se = -1;
 	int root = -1;
-	//double ratio = DBL_MAX;
-	double ratio = max_small_error_ratio;
+	double ratio = max_ratio;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.in_degree(i) <= 1) continue;
