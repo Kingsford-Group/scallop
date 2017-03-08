@@ -80,10 +80,10 @@ int scallop::assemble()
 		/*
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 999, 0.1);
 		if(b == true) continue;
-		*/
 
 		b = resolve_hyper_edge0();
 		if(b == true) continue;
+		*/
 
 		b = resolve_trivial_vertex(2);
 		if(b == true) continue;
