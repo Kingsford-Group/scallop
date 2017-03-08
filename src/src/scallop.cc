@@ -68,8 +68,10 @@ int scallop::assemble()
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 999, 0.30);
 		if(b == true) continue;
 
+		b = resolve_hyper_edge(2);
+		if(b == true) continue;
 
-		b = resolve_hyper_edge1();
+		b = resolve_hyper_edge(1);
 		if(b == true) continue;
 
 		b = resolve_splittable_vertex(SPLITTABLE_HYPER, 999);
@@ -240,67 +242,7 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree, double max_ratio
 	return true;
 }
 
-bool scallop::resolve_hyper_edge0()
-{
-	int ee1 = -1, ee2 = -1, root = -1;
-	for(int i = 1; i < gr.num_vertices(); i++)
-	{
-		ee1 = ee2 = root = -1;
-		double ww = 0;
-		edge_iterator it1, it2;
-		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
-		{
-			int e1 = e2i[*it1];
-			int e2 = -1;
-			double w1 = gr.get_edge_weight(*it1);
-			double w2 = 0;
-			MI s = hs.get_successors(e1);
-			if(s.size() <= 0) continue;
-			for(MI::iterator it = s.begin(); it != s.end(); it++)
-			{
-				double w = gr.get_edge_weight(i2e[it->first]);
-				if(hs.left_extend(e1)) continue;
-				if(hs.right_extend(it->first)) continue;
-				if(w <= w2) continue;
-				w2 = w;
-				e2 = it->first;
-			}
-			if(e1 == -1 || e2 == -1) continue;
-			if(w1 <= ww || w2 <= ww) continue;
-			ee1 = e1;
-			ee2 = e2;
-			ww = (w1 < w2) ? w1 : w2;
-		}
-		if(ee1 == -1 || ee2 == -1) continue;
-		root = i;
-		break;
-	}
-
-	if(root == -1) return false;
-
-	balance_vertex(root);
-
-	double ww1 = gr.get_edge_weight(i2e[ee1]);
-	double ww2 = gr.get_edge_weight(i2e[ee2]);
-	double ww = (ww1 <= ww2) ? ww1 : ww2;
-
-	if(ww1 <= ww2) assert(hs.left_extend(ee1) == false);
-	if(ww2 <= ww1) assert(hs.right_extend(ee2) == false);
-
-	int k1 = split_edge(ee1, ww);
-	int k2 = split_edge(ee2, ww);
-	int x = merge_adjacent_equal_edges(k1, k2);
-
-	printf("resolve hyper edge0 (%d, %d) of vertex %d, weight = (%.2lf, %.2lf) -> (%d, %d) -> %d\n", ee1, ee2, root, ww1, ww2, k1, k2, x);
-
-	hs.replace(ee1, ee2, x);
-	if(k1 == ee1) hs.remove(ee1);
-	if(k2 == ee2) hs.remove(ee2);
-
-	return true;
-}
-
-bool scallop::resolve_hyper_edge1()
+bool scallop::resolve_hyper_edge(int fsize)
 {
 	edge_iterator it1, it2;
 	vector<int> v1, v2;
@@ -314,7 +256,7 @@ bool scallop::resolve_hyper_edge1()
 		MI s;
 		s = hs.get_successors(e);
 		//if(s.size() >= 2 && hs.right_extend(get_keys(s)) == false && (hs.left_extend(e) == false || gr.out_degree(vs) == 1))
-		if(s.size() >= 2 && (hs.left_extend(e) == false || gr.out_degree(vs) == 1))
+		if(s.size() >= fsize && (hs.left_extend(e) == false || gr.out_degree(vs) == 1))
 		{
 			v1.push_back(e);
 			v2 = get_keys(s);
@@ -324,7 +266,7 @@ bool scallop::resolve_hyper_edge1()
 
 		s = hs.get_predecessors(e);
 		//if(s.size() >= 2 && hs.left_extend(get_keys(s)) == false && (hs.right_extend(e) == false || gr.in_degree(vt) == 1))
-		if(s.size() >= 2 && (hs.right_extend(e) == false || gr.in_degree(vt) == 1))
+		if(s.size() >= fsize && (hs.right_extend(e) == false || gr.in_degree(vt) == 1))
 		{
 			v1 = get_keys(s);
 			v2.push_back(e);
@@ -334,14 +276,10 @@ bool scallop::resolve_hyper_edge1()
 	}
 
 	if(v1.size() == 0 || v2.size() == 0) return false;
-
-	printf("resolve hyper edge1 ( ");
-	printv(v1);
-	printf("), ( ");
-	printv(v2);
-	printf(")\n");
-
 	assert(v1.size() == 1 || v2.size() == 1);
+
+	printf("resolve hyper edge, fsize = %d, vertex = %d, degree = (%d, %d), hyper edge = (%lu, %lu)\n",
+			fsize, root, gr.in_degree(root), gr.out_degree(root), v1.size(), v2.size());
 
 	balance_vertex(root);
 
