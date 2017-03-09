@@ -120,7 +120,6 @@ int router::build()
 	if(type == UNSPLITTABLE_SINGLE || type == UNSPLITTABLE_MULTIPLE) 
 	{
 		extend_bipartite_graph_max();
-
 		decompose0_clp();
 
 		if(ratio <= 1.0)
@@ -133,7 +132,7 @@ int router::build()
 			ratio = DBL_MAX;
 			build_bipartite_graph();
 			extend_bipartite_graph_all();
-			decompose2();
+			decompose2_clp();
 		}
 	}
 	return 0;
@@ -928,6 +927,7 @@ int router::decompose1_clp()
 
 		// objective 
 		model.addRows(cb);
+		model.setLogLevel(0);
 		model.dual();
 
 		assert(model.isProvenOptimal() == true);
@@ -1107,7 +1107,7 @@ int router::decompose1()
 	return 0;
 }
 
-int router::decompose2()
+int router::decompose2_clp()
 {
 	// TODO
 	if(type != UNSPLITTABLE_SINGLE) return 0;
@@ -1150,108 +1150,147 @@ int router::decompose2()
 		md.insert(PED(e, ww));
 	}
 
+	// edge list of ug
+	VE ve;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = ug.edges(); it1 != it2; it1++)
+	{
+		edge_descriptor e = (*it1);
+		ve.push_back(e);
+	}
+
 	try
 	{
-		GRBEnv *env = new GRBEnv();
-		GRBModel *model = new GRBModel(*env);
+		ClpSimplex model;
+		CoinBuild cb;
 
-		// edge list of ug
-		VE ve;
-		edge_iterator it1, it2;
-		for(tie(it1, it2) = ug.edges(); it1 != it2; it1++)
-		{
-			edge_descriptor e = (*it1);
-			ve.push_back(e);
-		}
+		// variables (columns)
+		// 1. rvars: for hyper edges [0, ve.size()): weight for each route
+		// 2. pvars: for hyper edges [0, ve.size()): error for each route
+		// 3. wvars: for vertices [0, u2e.size()): weights for each vertex
+		// 4. evars: for vertices [0, u2e.size()): error for each vertex
+		int offset1 = 0;
+		int offset2 = offset1 + ve.size();
+		int offset3 = offset2 + ve.size();
+		int offset4 = offset3 + u2e.size();
 
-		// routes weight variables
-		vector<GRBVar> rvars;
+		// for all variables
+		model.resize(0, offset4 + u2e.size());
+
+		// objective coefficients
 		for(int i = 0; i < ve.size(); i++)
 		{
-			GRBVar rvar = model->addVar(1.0, GRB_INFINITY, 0, GRB_CONTINUOUS); // TODO, [0.5, ]
-			rvars.push_back(rvar);
+			model.setObjectiveCoefficient(offset1 + i, 0);
+			model.setObjectiveCoefficient(offset2 + i, 1.0);
+		}
+		for(int i = 0; i < u2e.size(); i++) 
+		{
+			model.setObjectiveCoefficient(offset3 + i, 0);
+			model.setObjectiveCoefficient(offset4 + i, 10.0);
 		}
 
-		// routes error variables
-		vector<GRBVar> pvars;
+		// set bounds for variables
 		for(int i = 0; i < ve.size(); i++)
 		{
-			GRBVar pvar = model->addVar(0.0, GRB_INFINITY, 1.0, GRB_CONTINUOUS); // TODO, [0.5, ]
-			pvars.push_back(pvar);
+			model.setColumnLower(offset1 + i, 1.0);
+			model.setColumnUpper(offset1 + i, COIN_DBL_MAX);
+			model.setColumnLower(offset2 + i, 0.0);
+			model.setColumnUpper(offset2 + i, COIN_DBL_MAX);
 		}
-
-		// variables for vertices
-		vector<GRBVar> wvars;
 		for(int i = 0; i < u2e.size(); i++)
 		{
-			GRBVar wvar = model->addVar(0.0, GRB_INFINITY, 0, GRB_CONTINUOUS);
-			wvars.push_back(wvar);
+			model.setColumnLower(offset3 + i, 0.0);
+			model.setColumnUpper(offset3 + i, COIN_DBL_MAX);
+			model.setColumnLower(offset4 + i, 0.0);
+			model.setColumnUpper(offset4 + i, COIN_DBL_MAX);
 		}
 
-		// error terms for vertices 
-		vector<GRBVar> evars;
-		for(int i = 0; i < u2e.size(); i++)
-		{
-			GRBVar evar = model->addVar(0.0, GRB_INFINITY, 10.0, GRB_CONTINUOUS);
-			evars.push_back(evar);
-		}
-		model->update();
-
-		// constraints for vertices
-		GRBLinExpr rsum;
-		vector<GRBLinExpr> exprs(u2e.size());
+		// 1. constraints for vertices
+		vector< vector<int> > index1(u2e.size());
+		vector< vector<double> > value1(u2e.size());
 		for(int i = 0; i < ve.size(); i++)
 		{
 			edge_descriptor e = ve[i];
 			int u1 = e->source();
 			int u2 = e->target();
-			exprs[u1] += rvars[i];
-			exprs[u2] += rvars[i];
-			rsum += rvars[i];
+			index1[u1].push_back(i);
+			index1[u2].push_back(i);
+			value1[u1].push_back(1);
+			value1[u2].push_back(1);
 		}
-
-		double msum = (wsum1 > wsum2) ? wsum1 : wsum2;
-		// model->addConstr(rsum, GRB_EQUAL, msum); TODO
 		for(int i = 0; i < u2e.size(); i++)
 		{
-			model->addConstr(exprs[i], GRB_EQUAL, wvars[i]);
+			index1[i].push_back(offset3 + i);
+			value1[i].push_back(-1);
+			cb.addRow(index1[i].size(), index1[i].data(), value1[i].data(), 0, 0);
 		}
 
-		// constraints for routes
+		// 2. constraints for routes
 		for(int i = 0; i < ve.size(); i++)
 		{
 			edge_descriptor e = ve[i];
 			if(md.find(e) == md.end()) continue;
 			double w = md[e];
-			model->addConstr(rvars[i] - w, GRB_LESS_EQUAL, pvars[i]);
-			model->addConstr(w - rvars[i], GRB_LESS_EQUAL, pvars[i]);
+			vector<int> index2;
+			vector<double> value2;
+			index2.push_back(offset1 + i);
+			index2.push_back(offset2 + i);
+			value2.push_back(1);
+			value2.push_back(-1);
+			cb.addRow(2, index2.data(), value2.data(), -COIN_DBL_MAX, w);
+		}
+		for(int i = 0; i < ve.size(); i++)
+		{
+			edge_descriptor e = ve[i];
+			if(md.find(e) == md.end()) continue;
+			double w = md[e];
+			vector<int> index2;
+			vector<double> value2;
+			index2.push_back(offset1 + i);
+			index2.push_back(offset2 + i);
+			value2.push_back(1);
+			value2.push_back(1);
+			cb.addRow(2, index2.data(), value2.data(), w, COIN_DBL_MAX);
 		}
 
-		// objective 
-		GRBQuadExpr obj;
-		for(int i = 0; i < u2e.size(); i++) obj += 10.0 * evars[i];
-		for(int i = 0; i < ve.size(); i++) obj += pvars[i];
+		// 3. constraints for vertices
+		for(int i = 0; i < u2e.size(); i++)
+		{
+			vector<int> index3;
+			vector<double> value3;
+			index3.push_back(i + offset3);
+			index3.push_back(i + offset4);
+			value3.push_back(1);
+			value3.push_back(-1);
+			cb.addRow(2, index3.data(), value3.data(), -COIN_DBL_MAX, vw[i]);
+		}
+		for(int i = 0; i < u2e.size(); i++)
+		{
+			vector<int> index3;
+			vector<double> value3;
+			index3.push_back(i + offset3);
+			index3.push_back(i + offset4);
+			value3.push_back(1);
+			value3.push_back(1);
+			cb.addRow(2, index3.data(), value3.data(), vw[i], COIN_DBL_MAX);
+		}
 
-		model->setObjective(obj, GRB_MINIMIZE);
-		model->getEnv().set(GRB_IntParam_OutputFlag, 0);
-		model->update();
+		model.addRows(cb);
+		model.setLogLevel(0);
+		model.dual();
 
-		model->optimize();
-
-		int f = model->get(GRB_IntAttr_Status);
-
-		assert(f == GRB_OPTIMAL);
+		assert(model.isProvenOptimal() == true);
+		double* opt = model.primalColumnSolution();
 
 		double ww1 = 0;
 		double ww2 = 0;
-		for(int i = 0; i < wvars.size(); i++)
+		for(int i = 0; i < u2e.size(); i++)
 		{
 			double w1 = vw[i];
-			double w2 = wvars[i].get(GRB_DoubleAttr_X);
+			double w2 = opt[offset3 + i];
 			ww1 += w1;
 			ww2 += fabs(w1 - w2);
 		}
-
 		ratio = ww2 / ww1;
 
 		pe2w.clear();
@@ -1263,7 +1302,7 @@ int router::decompose2()
 			int t = e->target();
 			int es = u2e[s];
 			int et = u2e[t];
-			double w = rvars[i].get(GRB_DoubleAttr_X);
+			double w = opt[offset1 + i];
 			if(u2w.find(e) != u2w.end())
 			{
 				PI p(es, et);
@@ -1279,19 +1318,15 @@ int router::decompose2()
 				else se2w[et] += w;
 			}
 		}
-
-		delete model;
-		delete env;
 	}
-	catch(GRBException e)
+	catch(CoinError e)
 	{
-		printf("GRB error code: %d\n", e.getErrorCode());
-		printf("GRB error message: %s\n", e.getMessage().c_str());
+		e.print();
 		exit(-1);
 	}
 	catch(...)
 	{
-		printf("GRB exception\n");
+		printf("CLP exception\n");
 		exit(-1);
 	}
 
