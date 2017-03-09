@@ -15,7 +15,7 @@ Download htslib [(license)](https://github.com/samtools/htslib/blob/develop/LICE
 from (http://www.htslib.org/) with version 1.2 or higher.
 Compile it to generate the htslib file `libhts.a`. 
 Set environment variable `HTSLIB` to indicate the directory of `libhts.a`.
-For example, for Unix platforms, add the following statement to the file `~/.bash_profile`:
+For example, for Unix platforms, do the following:
 ```
 export HTSLIB="/directory/to/your/htslib/htslib-1.2.1"
 ```
@@ -25,7 +25,7 @@ Download Boost [(license)](http://www.boost.org/LICENSE_1_0.txt)
 from (http://www.boost.org).
 Uncompress it somewhere (compiling and installing are not necessary).
 Set environment variable `BOOST_HOME` to indicate the directory of Boost.
-For example, for Unix platforms, add the following statement to the file `~/.bash_profile`:
+For example, for Unix platforms, do the following:
 ```
 export BOOST_HOME="/directory/to/your/boost/boost_1_60_0"
 ```
