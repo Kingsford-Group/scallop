@@ -532,7 +532,8 @@ int splice_graph::bfs_w(int s, double w, vector<int> &v, VE &b)
 		{
 			int y = (*it1)->target();
 			double ww = get_edge_weight(*it1);
-			if(ww < w - SMIN) continue;
+			//if(ww < w - SMIN) continue;
+			if(ww < w) continue;
 			if(v[y] == -1) 
 			{
 				v[y] = 1 + v[x];

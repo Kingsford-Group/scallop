@@ -283,6 +283,9 @@ bool scallop::resolve_hyper_edge(int fsize)
 	for(int i = 0; i < w1.size(); i++) w1[i] *= r1;
 	for(int i = 0; i < w2.size(); i++) w2[i] *= r2;
 
+	for(int i = 0; i < v1.size(); i++) gr.set_edge_weight(i2e[v1[i]], w1[i]);
+	for(int i = 0; i < v2.size(); i++) gr.set_edge_weight(i2e[v2[i]], w2[i]);
+
 	set<int> ss;
 	for(int i = 0; i < w1.size(); i++)
 	{
@@ -840,7 +843,7 @@ int scallop::merge_adjacent_equal_edges(int x, int y)
 	int lxt = gr.get_vertex_info(xt).length;
 	int lxy = lx1 + ly1 + lxt;
 
-	gr.set_edge_weight(p, wx0);
+	gr.set_edge_weight(p, wx0 * 0.5 + wy0 * 0.5);
 	gr.set_edge_info(p, edge_info(lxy));
 
 	vector<int> v = mev[xx];
@@ -851,13 +854,6 @@ int scallop::merge_adjacent_equal_edges(int x, int y)
 
 	double sum1 = gr.get_in_weights(xt);
 	double sum2 = gr.get_out_weights(xt);
-
-	//printf("vertex = %d, sum1 = %.2lf, sum2 = %.2lf\n", xt, sum1, sum2);
-
-	// TODO: do not assert here???!!!
-	if(fabs(sum1 - sum2) >= SMIN) printf("sum1 = %.6lf, sum2 = %.6lf\n", sum1, sum2);
-	assert(fabs(sum1 - sum2) <= SMIN);
-
 	double sum = (sum1 + sum2) * 0.5;
 	double r1 = gr.get_vertex_weight(xt) * (wx0 + wy0) * 0.5 / sum;
 	double r2 = gr.get_vertex_weight(xt) - r1;
