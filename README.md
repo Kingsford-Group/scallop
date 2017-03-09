@@ -6,8 +6,8 @@ algorithm that unifies multiple objectives into a single optimization
 framework.
 
 # Installation
-To install Scallop, you need to first download/compile a few software packages
-(htslib, Boost, and GUROBI), setup the corresponding environmental variables,
+To install Scallop, you need to first download/compile 
+htslib and Boost, setup the corresponding environmental variables,
 and then compile the source code of Scallop.
 
 ## Install htslib
@@ -30,18 +30,6 @@ For example, for Unix platforms, add the following statement to the file `~/.bas
 export BOOST_HOME="/directory/to/your/boost/boost_1_60_0"
 ```
 
-## Install GUROBI
-Download GUROBI from (http://www.gurobi.com/) and uncompress the package
-somewhere (compiling and installing are not required).  You need to apply an
-academic license to use the full features of GUROBI (Please refer to the GUROBI
-documentation for more information.) After that, set two environment
-variables, `GUROBI_HOME` and `GRB_LICENSE_FILE`, which indicates the directory
-of GUROBI, and the location of your license file, respectively.  For example,
-for Unix platforms, add the following two statements to the file `~/.bash_profile`:
-```
-export GUROBI_HOME="/directory/to/your/gurobi/linux64"
-export GRB_LICENSE_FILE="/location/of/your/license/gurobi.lic"
-```
 ## Compile Scallop
 Run the script `build.sh`, which will generate the executable file `src/src/scallop`.
 
