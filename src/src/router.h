@@ -52,7 +52,8 @@ public:
 	int extend_bipartite_graph_all();							// extended graph
 	int build_maximum_spanning_tree();							// make ug a (maximum) spanning tree
 	int split();												// split
-	int decompose0();										// check whether error can be 0
+	int decompose0_clp();										// solve LP with CLP
+	int decompose0();											// check whether error can be 0 with GUROBI
 	int decompose1();											// decompose with gurobi, for error = 0
 	int decompose2();											// decompose with gurobi, for error > 0
 	vector<double> compute_balanced_weights();					// balanced weights

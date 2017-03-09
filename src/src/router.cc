@@ -2,9 +2,14 @@
 #include "config.h"
 #include "util.h"
 #include "gurobi_c++.h"
-#include "smoother.h"
 #include "subsetsum.h"
 #include "matrix.h"
+
+#include "ClpSimplex.hpp"
+#include "CoinHelperFunctions.hpp"
+#include "CoinBuild.hpp"
+#include <iomanip>
+#include <cassert>
 
 #include <cstdio>
 #include <algorithm>
@@ -115,7 +120,13 @@ int router::build()
 	if(type == UNSPLITTABLE_SINGLE || type == UNSPLITTABLE_MULTIPLE) 
 	{
 		extend_bipartite_graph_max();
+
+		decompose0_clp();
+		double x1 = ratio;
 		decompose0();
+		double x2 = ratio;
+
+		assert(fabs(x1 - x2) <= 0.001);
 
 		if(ratio <= 1.0)
 		{
@@ -575,6 +586,131 @@ vector<double> router::compute_balanced_weights()
 	
 	return vw;
 }
+
+int router::decompose0_clp()
+{
+	// locally balance weights
+	vector<double> vw = compute_balanced_weights();
+
+	try
+	{
+		// edge list of ug
+		VE ve;
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = ug.edges(); it1 != it2; it1++)
+		{
+			edge_descriptor e = (*it1);
+			ve.push_back(e);
+		}
+
+		ClpSimplex model;
+		CoinBuild cb;
+
+		// variables (columns)
+		// 1. rvars: for hyper edges [0, ve.size()): weight for each routes
+		// 2. wvars: for vertices [0, u2e.size()): weights for each vertex
+		// 3. evars: for vertices [0, u2e.size()): error for each vertex
+		int offset1 = 0;
+		int offset2 = offset1 + ve.size();
+		int offset3 = offset2 + u2e.size();
+
+		// for all variables
+		model.resize(0, offset3 + u2e.size());
+
+		// objective coefficients
+		for(int i = 0; i < ve.size(); i++)
+		{
+			model.setObjectiveCoefficient(offset1 + i, 0);
+		}
+		for(int i = 0; i < u2e.size(); i++) 
+		{
+			model.setObjectiveCoefficient(offset2 + i, 0);
+			model.setObjectiveCoefficient(offset3 + i, 1);
+		}
+
+		// set bounds for variables
+		for(int i = 0; i < ve.size(); i++)
+		{
+			model.setColumnLower(offset1 + i, 1.0);
+			model.setColumnUpper(offset1 + i, COIN_DBL_MAX);
+		}
+		for(int i = 0; i < u2e.size(); i++)
+		{
+			model.setColumnLower(offset2 + i, 0.0);
+			model.setColumnUpper(offset2 + i, COIN_DBL_MAX);
+		}
+		for(int i = 0; i < u2e.size(); i++)
+		{
+			model.setColumnLower(offset3 + i, 0.0);
+			model.setColumnUpper(offset3 + i, COIN_DBL_MAX);
+		}
+
+		// 1. constraints for linking edges and vertices
+		vector< vector<int> > index1(u2e.size());
+		vector< vector<double> > value1(u2e.size());
+		for(int i = 0; i < ve.size(); i++)
+		{
+			edge_descriptor e = ve[i];
+			int u1 = e->source();
+			int u2 = e->target();
+			index1[u1].push_back(i);
+			index1[u2].push_back(i);
+			value1[u1].push_back(1);
+			value1[u2].push_back(1);
+		}
+		for(int i = 0; i < u2e.size(); i++)
+		{
+			index1[i].push_back(offset2 + i);
+			value1[i].push_back(-1);
+			cb.addRow(index1[i].size(), index1[i].data(), value1[i].data(), 0, 0);
+		}
+
+		// 2. constraints for errors
+		for(int i = 0; i < u2e.size(); i++)
+		{
+			vector<int> index2;
+			vector<double> value2;
+			index2.push_back(i + offset2);
+			index2.push_back(i + offset3);
+			value2.push_back(1);
+			value2.push_back(-1);
+			cb.addRow(2, index2.data(), value2.data(), -COIN_DBL_MAX, vw[i]);
+		}
+		for(int i = 0; i < u2e.size(); i++)
+		{
+			vector<int> index2;
+			vector<double> value2;
+			index2.push_back(i + offset2);
+			index2.push_back(i + offset3);
+			value2.push_back(1);
+			value2.push_back(1);
+			cb.addRow(2, index2.data(), value2.data(), vw[i], COIN_DBL_MAX);
+		}
+
+		model.addRows(cb);
+		model.dual();
+
+		assert(model.isProvenOptimal() == true);
+
+		ratio = 0;
+		double* opt = model.primalColumnSolution();
+		for(int i = 0; i < u2e.size(); i++) ratio += opt[i + offset3];
+		return 0;
+	}
+	catch(CoinError e)
+	{
+		e.print();
+		exit(-1);
+	}
+	catch(...)
+	{
+		printf("COIN exception\n");
+		exit(-1);
+	}
+
+	return 0;
+}
+
 
 int router::decompose0()
 {
