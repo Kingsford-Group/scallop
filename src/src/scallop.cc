@@ -275,18 +275,11 @@ bool scallop::resolve_hyper_edge(int fsize)
 		sum2 += w;
 	}
 
-	/*
-	double sum = 0.5 * (gr.get_in_weights(root) + gr.get_out_weights(root));
-
 	double r1 = (sum1 < sum2) ? 1.0 : sum2 / sum1;
 	double r2 = (sum1 > sum2) ? 1.0 : sum1 / sum2;
 
 	for(int i = 0; i < w1.size(); i++) w1[i] *= r1;
 	for(int i = 0; i < w2.size(); i++) w2[i] *= r2;
-
-	for(int i = 0; i < v1.size(); i++) gr.set_edge_weight(i2e[v1[i]], w1[i]);
-	for(int i = 0; i < v2.size(); i++) gr.set_edge_weight(i2e[v2[i]], w2[i]);
-	*/
 
 	set<int> ss;
 	for(int i = 0; i < w1.size(); i++)
@@ -294,6 +287,7 @@ bool scallop::resolve_hyper_edge(int fsize)
 		for(int j = 0; j < w2.size(); j++)
 		{
 			double w = (w1[i] < w2[j]) ? w1[i] : w2[j];
+			if(w < 1.0) continue;
 
 			int k1 = split_edge(v1[i], w);
 			int k2 = split_edge(v2[j], w);
