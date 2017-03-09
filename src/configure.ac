@@ -15,6 +15,7 @@ AC_PROG_CC
 AS_IF([test "s$HTSLIB" = "s"],[AC_MSG_ERROR([*** Please set environment variable HTSLIB ***])]) 
 AS_IF([test "s$BOOST_HOME" = "s"],[AC_MSG_ERROR([*** Please set environment variable BOOST_HOME ***])]) 
 AS_IF([test "s$GUROBI_HOME" = "s"],[AC_MSG_ERROR([*** Please set environment variable GUROBI_HOME ***])]) 
+AS_IF([test "s$CLP_HOME" = "s"],[AC_MSG_ERROR([*** Please set environment variable CLP_HOME ***])]) 
 #AS_IF([test "s$GRB_LICENSE_FILE" = "s"],[AC_MSG_ERROR([*** Please set environment variable GRB_LICENSE_FILE ***])]) 
 
 #AC_ARG_WITH(samtools, [--with-samtools prefix for samtools], SAMTOOLS=$withval, SAMTOOLS=)
