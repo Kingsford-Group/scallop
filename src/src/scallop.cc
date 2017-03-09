@@ -166,7 +166,6 @@ bool scallop::resolve_splittable_vertex(int type, int degree, double max_ratio)
 	}
 
 	if(root == -1) return false;
-	if(ratio > max_decompose_error_ratio[type]) return false;
 
 	printf("resolve splittable vertex, type = %d, degree = %d, vertex = %d, ratio = %.2lf, degree = (%d, %d)\n", 
 			type, degree, root, ratio, gr.in_degree(root), gr.out_degree(root));
