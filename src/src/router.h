@@ -55,9 +55,6 @@ public:
 	int decompose0_clp();										// solve LP with CLP
 	int decompose1_clp();										// solve LP with CLP
 	int decompose2_clp();										// solve LP with CLP
-	int decompose0();											// check whether error can be 0 with GUROBI
-	int decompose1();											// decompose with gurobi, for error = 0
-	int decompose2();											// decompose with gurobi, for error > 0
 	vector<double> compute_balanced_weights();					// balanced weights
 	PI filter_hyper_edge();										// try to filter hyper-edge
 	PI filter_small_hyper_edge();								// hyper-edge w.r.t. the smallest edge

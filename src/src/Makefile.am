@@ -4,21 +4,21 @@ GTFDIR = ../../lib/gtf/src
 UTILDIR = ../../lib/util/src
 GRAPHDIR = ../../lib/graph/src
 
-scallop_CPPFLAGS = -pg -std=c++11 -I$(HTSLIB) -I$(GUROBI_HOME)/include -I$(BOOST_HOME) \
-				   -I$(GTFDIR) -I$(GRAPHDIR) -I$(UTILDIR) -I$(CLP_HOME)/include/coin
+scallop_CPPFLAGS = -pg -std=c++11 -I$(GTFDIR) -I$(GRAPHDIR) -I$(UTILDIR) \
+				   -I$(HTSLIB) -I$(BOOST_HOME) -I$(CLP_HOME)/include/coin
 
 # dynamic link
-scallop_LDFLAGS = -pg -L$(HTSLIB) -L$(GUROBI_HOME)/lib -L$(GTFDIR) -L$(GRAPHDIR) -L$(UTILDIR) -L$(CLP_HOME)/lib \
-				  -pthread -Wl,-rpath,$(GUROBI_HOME)/lib  -Wl,-rpath,$(CLP_HOME)/lib
+scallop_LDFLAGS = -pg -pthread -L$(GTFDIR) -L$(GRAPHDIR) -L$(UTILDIR) \
+				  -L$(HTSLIB) -L$(CLP_HOME)/lib -Wl,-rpath,$(CLP_HOME)/lib
 
-scallop_LDADD = -lClp -lCoinUtils -lhts -lgtf -lgraph -lutil -lgurobi_c++ -lgurobi65 -lz
+scallop_LDADD = -lClp -lCoinUtils -lhts -lgtf -lgraph -lutil -lz
 
 ## static link
-#scallop_LDFLAGS = -pg -L$(HTSLIB) -L$(GUROBI_HOME)/lib -L$(GTFDIR) -L$(GRAPHDIR) -L$(UTILDIR) \
-#			  -pthread -Wl,-rpath,$(GUROBI_HOME)/lib 
-#
-#scallop_LDADD = $(CLP_HOME)/lib/libClp.a $(CLP_HOME)/lib/libCoinUtils.a -lbz2 -lz -lblas -llapack \
-#				-lhts -lgtf -lgraph -lutil -lgurobi_c++ -lgurobi65
+#scallop_LDFLAGS = -pg -pthread -L$(GTFDIR) -L$(GRAPHDIR) -L$(UTILDIR) \
+#				  -L$(HTSLIB)  
+
+#scallop_LDADD = $(CLP_HOME)/lib/libClp.a $(CLP_HOME)/lib/libCoinUtils.a \
+#				-lhts -lgtf -lgraph -lutil -lbz2 -lz -lblas -llapack 
 
 scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  super_graph.h super_graph.cc \
@@ -44,5 +44,4 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  estimator.h estimator.cc \
 				  filter.h filter.cc \
 				  matrix.h matrix.cc \
-				  clp.h clp.cc \
 				  main.cc
