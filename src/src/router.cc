@@ -1003,6 +1003,7 @@ int router::decompose2_clp()
 		}
 
 		// 3. constraints for vertices
+		/* TODO, do not use group3 variables
 		for(int i = 0; i < u2e.size(); i++)
 		{
 			vector<int> index3;
@@ -1023,6 +1024,7 @@ int router::decompose2_clp()
 			value3.push_back(1);
 			cb.addRow(2, index3.data(), value3.data(), vw[i], COIN_DBL_MAX);
 		}
+		*/
 
 		model.addRows(cb);
 		model.setLogLevel(0);
