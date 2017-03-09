@@ -855,7 +855,7 @@ int scallop::merge_adjacent_equal_edges(int x, int y)
 	//printf("vertex = %d, sum1 = %.2lf, sum2 = %.2lf\n", xt, sum1, sum2);
 
 	// TODO: do not assert here???!!!
-	if(fabs(sum1 - sum2) > SMIN) printf("sum1 = %.6lf, sum2 = %.6lf\n", sum1, sum2);
+	if(fabs(sum1 - sum2) >= SMIN) printf("sum1 = %.6lf, sum2 = %.6lf\n", sum1, sum2);
 	assert(fabs(sum1 - sum2) <= SMIN);
 
 	double sum = (sum1 + sum2) * 0.5;
