@@ -74,6 +74,7 @@ private:
 	int collect_existing_st_paths();
 	int collect_path(int e);
 	int compute_length(const path &p);
+	int greedy_decompose();
 
 	// stats, print, and draw
 	int print();

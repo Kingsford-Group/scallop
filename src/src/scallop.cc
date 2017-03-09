@@ -3,6 +3,7 @@
 
 #include <cstdio>
 #include <iostream>
+#include <climits>
 #include <cfloat>
 #include <algorithm>
 
@@ -52,13 +53,13 @@ int scallop::assemble()
 		b = resolve_splittable_vertex(SPLITTABLE_HYPER, 1, max_decompose_error_ratio[SPLITTABLE_HYPER]);
 		if(b == true) continue;
 
-		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, DBL_MAX, -0.5);
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, INT_MAX, -0.5);
 		if(b == true) continue;
 
-		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, DBL_MAX, -0.5);
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, INT_MAX, -0.5);
 		if(b == true) continue;
 
-		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, DBL_MAX, max_decompose_error_ratio[UNSPLITTABLE_SINGLE]);
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, INT_MAX, max_decompose_error_ratio[UNSPLITTABLE_SINGLE]);
 		if(b == true) continue;
 
 		b = resolve_hyper_edge(2);
@@ -79,6 +80,7 @@ int scallop::assemble()
 	}
 
 	collect_existing_st_paths();
+	greedy_decompose();
 
 	printf("finish assemble bundle %s\n\n", name.c_str());
 	return 0;
@@ -1182,6 +1184,30 @@ int scallop::collect_path(int e)
 	e2i.erase(i2e[e]);
 	i2e[e] = null_edge;
 
+	return 0;
+}
+
+int scallop::greedy_decompose()
+{
+	if(gr.num_edges() == 0) return 0;
+
+	for(int i = 1; i < gr.num_vertices() - 1; i++) balance_vertex(i);
+	for(int i = 1; i < gr.num_vertices() - 1; i++) balance_vertex(i);
+
+	int cnt = 0;
+	int n1 = paths.size();
+	while(true)
+	{
+		VE v;
+		double w = gr.compute_maximum_path_w(v);
+		if(w <= min_transcript_coverage) break;
+
+		int e = split_merge_path(v, w);
+		collect_path(e);
+		cnt++;
+	}
+	int n2 = paths.size();
+	printf("greedy decomposing produces %d / %d paths\n", n2 - n1, n2);
 	return 0;
 }
 
