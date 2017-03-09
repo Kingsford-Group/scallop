@@ -122,20 +122,15 @@ int router::build()
 		extend_bipartite_graph_max();
 
 		decompose0_clp();
-		double x1 = ratio;
-		decompose0();
-		double x2 = ratio;
-
-		assert(fabs(x1 - x2) <= 0.001);
 
 		if(ratio <= 1.0)
 		{
-			decompose1();
+			decompose1_clp();
 			ratio = -1;
 		}
 		else
 		{
-			ratio = 9999;
+			ratio = DBL_MAX;
 			build_bipartite_graph();
 			extend_bipartite_graph_all();
 			decompose2();
@@ -592,16 +587,17 @@ int router::decompose0_clp()
 	// locally balance weights
 	vector<double> vw = compute_balanced_weights();
 
+	// edge list of ug
+	VE ve;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = ug.edges(); it1 != it2; it1++)
+	{
+		edge_descriptor e = (*it1);
+		ve.push_back(e);
+	}
+
 	try
 	{
-		// edge list of ug
-		VE ve;
-		edge_iterator it1, it2;
-		for(tie(it1, it2) = ug.edges(); it1 != it2; it1++)
-		{
-			edge_descriptor e = (*it1);
-			ve.push_back(e);
-		}
 
 		ClpSimplex model;
 		CoinBuild cb;
@@ -688,6 +684,8 @@ int router::decompose0_clp()
 		}
 
 		model.addRows(cb);
+
+		model.setLogLevel(0);
 		model.dual();
 
 		assert(model.isProvenOptimal() == true);
@@ -695,6 +693,7 @@ int router::decompose0_clp()
 		ratio = 0;
 		double* opt = model.primalColumnSolution();
 		for(int i = 0; i < u2e.size(); i++) ratio += opt[i + offset3];
+
 		return 0;
 	}
 	catch(CoinError e)
@@ -710,7 +709,6 @@ int router::decompose0_clp()
 
 	return 0;
 }
-
 
 int router::decompose0()
 {
@@ -812,6 +810,153 @@ int router::decompose0()
 	catch(...)
 	{
 		printf("GRB exception\n");
+		exit(-1);
+	}
+
+	return 0;
+}
+
+int router::decompose1_clp()
+{
+	// locally balance weights
+	vector<double> vw = compute_balanced_weights();
+
+	// normalize routes
+	double wsum = 0;
+	for(int i = 0; i < vw.size(); i++) wsum += vw[i];
+	wsum = wsum * 0.5;
+
+	double rsum = 0;
+	for(MED::iterator it = u2w.begin(); it != u2w.end(); it++)
+	{
+		double w = it->second;
+		rsum += w;
+	}
+	MED md;
+	for(MED::iterator it = u2w.begin(); it != u2w.end(); it++)
+	{
+		edge_descriptor e = it->first;
+		double w = it->second;
+		double ww = w / rsum * wsum;
+		md.insert(PED(e, ww));
+	}
+
+	// edge list of ug
+	VE ve;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = ug.edges(); it1 != it2; it1++)
+	{
+		edge_descriptor e = (*it1);
+		ve.push_back(e);
+	}
+
+	try
+	{
+		ClpSimplex model;
+		CoinBuild cb;
+
+		// variables (columns)
+		// 1. rvars: for hyper edges [0, ve.size()): weight for each route
+		// 2. evars: for hyper edges [0, ve.size()): error for each route
+		int offset1 = 0;
+		int offset2 = offset1 + ve.size();
+
+		model.resize(0, offset2 + ve.size());
+
+		// objective function
+		for(int i = 0; i < ve.size(); i++)
+		{
+			model.setObjectiveCoefficient(offset1 + i, 0);
+			model.setObjectiveCoefficient(offset2 + i, 1);
+		}
+
+		// bounds for variables
+		for(int i = 0; i < ve.size(); i++)
+		{
+			model.setColumnLower(offset1 + i, 1.0);
+			model.setColumnUpper(offset1 + i, COIN_DBL_MAX);
+			model.setColumnLower(offset2 + i, 0.0);
+			model.setColumnUpper(offset2 + i, COIN_DBL_MAX);
+		}
+
+		// 1. constraints for vertices
+		vector< vector<int> > index1(u2e.size());
+		vector< vector<double> > value1(u2e.size());
+		for(int i = 0; i < ve.size(); i++)
+		{
+			edge_descriptor e = ve[i];
+			int u1 = e->source();
+			int u2 = e->target();
+			index1[u1].push_back(i);
+			index1[u2].push_back(i);
+			value1[u1].push_back(1);
+			value1[u2].push_back(1);
+		}
+		for(int i = 0; i < u2e.size(); i++)
+		{
+			cb.addRow(index1[i].size(), index1[i].data(), value1[i].data(), -COIN_DBL_MAX, vw[i] + 1.0);
+			cb.addRow(index1[i].size(), index1[i].data(), value1[i].data(), vw[i] - 1.0, COIN_DBL_MAX);
+		}
+
+		// 2. constraints for routes
+		for(int i = 0; i < ve.size(); i++)
+		{
+			edge_descriptor e = ve[i];
+			if(md.find(e) == md.end()) continue;
+			double w = md[e];
+			vector<int> index2;
+			vector<double> value2;
+			index2.push_back(offset1 + i);
+			index2.push_back(offset2 + i);
+			value2.push_back(1);
+			value2.push_back(-1);
+			cb.addRow(2, index2.data(), value2.data(), -COIN_DBL_MAX, w);
+		}
+		for(int i = 0; i < ve.size(); i++)
+		{
+			edge_descriptor e = ve[i];
+			if(md.find(e) == md.end()) continue;
+			double w = md[e];
+			vector<int> index2;
+			vector<double> value2;
+			index2.push_back(offset1 + i);
+			index2.push_back(offset2 + i);
+			value2.push_back(1);
+			value2.push_back(1);
+			cb.addRow(2, index2.data(), value2.data(), w, COIN_DBL_MAX);
+		}
+
+		// objective 
+		model.addRows(cb);
+		model.dual();
+
+		assert(model.isProvenOptimal() == true);
+
+		double* opt = model.primalColumnSolution();
+
+		pe2w.clear();
+		se2w.clear();
+		for(int i = 0; i < ve.size(); i++)
+		{
+			edge_descriptor e = ve[i];
+			int s = e->source();
+			int t = e->target();
+			int es = u2e[s];
+			int et = u2e[t];
+			PI p(es, et);
+			if(s > t) p = PI(et, es);
+			double w = opt[i + offset1];
+			pe2w.insert(PPID(p, w));
+		}
+	}
+	catch(CoinError e)
+	{
+		e.print();
+		exit(-1);
+	}
+	catch(...)
+	{
+		printf("CLP exception\n");
 		exit(-1);
 	}
 
