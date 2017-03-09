@@ -21,6 +21,8 @@ using namespace std;
 #define TRIVIAL 0
 #define NORMAL 1
 
+// five types for decomposition
+#define SMALL_EDGE 0
 #define SPLITTABLE_SIMPLE 1
 #define SPLITTABLE_HYPER 2
 #define UNSPLITTABLE_SINGLE 3
@@ -53,7 +55,6 @@ extern int min_router_count;
 // for splice graph
 extern double max_intron_contamination_coverage;
 extern double min_surviving_edge_weight;
-extern double max_small_error_ratio;
 extern double max_decompose_error_ratio[5];
 extern double min_transcript_numreads;
 extern double min_transcript_coverage;

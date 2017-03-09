@@ -1,6 +1,5 @@
 #include "scallop.h"
 #include "config.h"
-#include "smoother.h"
 
 #include <cstdio>
 #include <iostream>
@@ -38,35 +37,28 @@ int scallop::assemble()
 
 		//refine_splice_graph();
 
-		/*
-		b = filter_hyper_edges();
-		if(b == true) continue;
-		*/
-
 		b = resolve_trivial_vertex(1);
 		if(b == true) continue;
 
-		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 1);
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 1, -0.5);
 		if(b == true) continue;
 
-		b = resolve_small_edges(max_small_error_ratio);
+		b = resolve_small_edges(max_decompose_error_ratio[SMALL_EDGE]);
 		if(b == true) continue;
 
-		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 1);
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 1, -0.5);
 		if(b == true) continue;
 
-		/*
-		b = resolve_splittable_vertex(SPLITTABLE_HYPER, 1);
-		if(b == true) continue;
-		*/
-
-		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 999);
+		b = resolve_splittable_vertex(SPLITTABLE_HYPER, 1, max_decompose_error_ratio[SPLITTABLE_HYPER]);
 		if(b == true) continue;
 
-		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 999);
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, DBL_MAX, -0.5);
 		if(b == true) continue;
 
-		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 999, 0.30);
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, DBL_MAX, -0.5);
+		if(b == true) continue;
+
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, DBL_MAX, max_decompose_error_ratio[UNSPLITTABLE_SINGLE]);
 		if(b == true) continue;
 
 		b = resolve_hyper_edge(2);
@@ -78,34 +70,15 @@ int scallop::assemble()
 		b = resolve_small_edges(DBL_MAX);
 		if(b == true) continue;
 
-		summarize_vertices();
-
-		/*
-		b = resolve_splittable_vertex(SPLITTABLE_HYPER, 999);
-		if(b == true) continue;
-
-		b = resolve_splittable_vertex(SPLITTABLE_SIMPLE, 999);
-		if(b == true) continue;
-		*/
-
-		/*
-		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 999, 0.1);
-		if(b == true) continue;
-		*/
+		//summarize_vertices();
 
 		b = resolve_trivial_vertex(2);
 		if(b == true) continue;
-
-		//b = resolve_splittable_vertex(SPLITTABLE_SIMPLE, 999);
-		//if(b == true) continue;
 
 		break;
 	}
 
 	collect_existing_st_paths();
-
-	greedy_decompose(-1);
-	//assert(gr.num_edges() == 0);
 
 	printf("finish assemble bundle %s\n\n", name.c_str());
 	return 0;
@@ -161,10 +134,10 @@ bool scallop::resolve_small_edges(double max_ratio)
 	return true;
 }
 
-bool scallop::resolve_splittable_vertex(int type, int degree)
+bool scallop::resolve_splittable_vertex(int type, int degree, double max_ratio)
 {
 	int root = -1;
-	double ratio = DBL_MAX;
+	double ratio = max_ratio;
 	vector<equation> eqns;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
@@ -524,38 +497,6 @@ int scallop::refine_splice_graph()
 	return 0;
 }
 
-bool scallop::filter_hyper_edges()
-{
-	bool flag = false;
-	for(int i = 1; i < gr.num_vertices() - 1; i++)
-	{
-		if(gr.in_degree(i) <= 1) continue;
-		if(gr.out_degree(i) <= 1) continue;
-
-		MPII mpi = hs.get_routes(i, gr, e2i);
-
-		if(mpi.size() == 0) continue;
-
-		router rt(i, gr, e2i, i2e, mpi);
-		rt.classify();
-
-		//if(rt.type == 1) continue;
-		//if(rt.type == 2 && rt.degree == 1) continue;
-
-		PI p = rt.filter_hyper_edge();
-
-		if(p.first == -1 || p.second == -1) continue;
-
-		flag = true;
-
-		printf("filter hyper edge: type %d degree %d vertex %d indegree %d outdegree %d hedges %lu\n", 
-					rt.type, rt.degree, i, gr.in_degree(i), gr.out_degree(i), mpi.size());
-
-		hs.remove_pair(p.first, p.second);
-	}
-	return flag;
-}
-
 int scallop::decompose_vertex_extend(int root, MPID &pe2w, MID &se2w)
 {
 	// remove hyper-edges pairs that are not covered by pe2w
@@ -840,36 +781,6 @@ int scallop::classify_trivial_vertex(int x)
 	return 2;
 }
 
-int scallop::greedy_decompose(int num)
-{
-	if(gr.num_edges() == 0) return 0;
-
-	for(int i = 1; i < gr.num_vertices() - 1; i++) balance_vertex(i);
-	for(int i = 1; i < gr.num_vertices() - 1; i++) balance_vertex(i);
-
-	smoother sm(gr);
-	sm.smooth();
-
-	int cnt = 0;
-	int n1 = paths.size();
-	while(true)
-	{
-		if(num != -1 && cnt >= num) break;
-
-		VE v;
-		double w = gr.compute_maximum_path_w(v);
-
-		if(w <= 0.5) break;
-
-		int e = split_merge_path(v, w);
-		collect_path(e);
-		cnt++;
-	}
-	int n2 = paths.size();
-	printf("greedy decomposing produces %d / %d paths\n", n2 - n1, n2);
-	return 0;
-}
-
 int scallop::split_merge_path(const VE &p, double wx)
 {
 	vector<int> v;
@@ -942,6 +853,7 @@ int scallop::merge_adjacent_equal_edges(int x, int y)
 
 	//printf("vertex = %d, sum1 = %.2lf, sum2 = %.2lf\n", xt, sum1, sum2);
 
+	// TODO: do not assert here???!!!
 	assert(fabs(sum1 - sum2) <= SMIN);
 
 	double sum = (sum1 + sum2) * 0.5;
@@ -1311,19 +1223,6 @@ int scallop::compute_smallest_edge(int x, double &ratio)
 	}
 	assert(e >= 0);
 	return e;
-}
-
-int scallop::compute_length(const path &p)
-{
-	int s = 0;
-	for(int i = 0; i < p.v.size(); i++)
-	{
-		int v = p.v[i];
-		if(v == 0) continue;
-		if(v == gr.num_vertices() - 1) continue;
-		s += gr.get_vertex_info(v).length;
-	}
-	return s;
 }
 
 int scallop::print()

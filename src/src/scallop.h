@@ -47,11 +47,10 @@ private:
 	int refine_splice_graph();
 
 	// resolve iteratively
-	bool filter_hyper_edges();
-	bool resolve_small_edges(double max_ratio);
 	bool resolve_trivial_vertex(int type);
-	bool resolve_splittable_vertex(int type, int degree);
-	bool resolve_unsplittable_vertex(int type, int degree, double max_ratio = -0.5);
+	bool resolve_small_edges(double max_ratio);
+	bool resolve_splittable_vertex(int type, int degree, double max_ratio);
+	bool resolve_unsplittable_vertex(int type, int degree, double max_ratio);
 	bool resolve_hyper_edge(int fsize);
 
 	// smooth vertex
@@ -72,7 +71,6 @@ private:
 	int remove_edge(int e);
 	int split_merge_path(const VE &p, double w);
 	int split_merge_path(const vector<int> &p, double w);
-	int greedy_decompose(int num);
 	int collect_existing_st_paths();
 	int collect_path(int e);
 	int compute_length(const path &p);

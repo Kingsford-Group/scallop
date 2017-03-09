@@ -27,8 +27,7 @@ int32_t min_subregion_length = 15;
 // for revising/decomposing splice graph
 double max_intron_contamination_coverage = 2.0;
 double min_surviving_edge_weight = 1.5;
-double max_small_error_ratio = 0.33;
-double max_decompose_error_ratio[5] = {1.00, 0.05, 0.25, 0.01, 0.01};
+double max_decompose_error_ratio[5] = {0.33, 0.0, 0.25, 0.30, 0.0};
 
 // for selecting paths
 double min_transcript_coverage = 1.01;
@@ -84,7 +83,6 @@ int print_parameters()
 	printf("min_transcript_numreads = %.2lf\n", min_transcript_numreads);
 	printf("min_transcript_length = %d\n", min_transcript_length);
 	printf("min_exon_length = %d\n", min_exon_length);
-	printf("max_small_error_ratio = %.2lf\n", max_small_error_ratio);
 
 	// for subsetsum and router
 	printf("max_dp_table_size = %d\n", max_dp_table_size);
@@ -249,11 +247,6 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--min_exon_length")
 		{
 			min_exon_length = atoi(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--max_small_error_ratio")
-		{
-			max_small_error_ratio = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--max_dp_table_size")
