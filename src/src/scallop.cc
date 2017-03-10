@@ -327,6 +327,8 @@ bool scallop::resolve_trivial_vertex(int type)
 		root = i;
 		ratio = r;
 		se = e;
+
+		if(ratio < 1.1) break;
 	}
 
 	if(root == -1) return false;
@@ -767,16 +769,16 @@ int scallop::classify_trivial_vertex(int x)
 
 	if(d1 == 1)
 	{
-		if(hs.right_dominate(e1) == true) return 1;
 		int s = i2e[e1]->source();
 		if(gr.out_degree(s) == 1) return 1;
+		if(hs.right_dominate(e1) == true) return 1;
 	}
 	
 	if(d2 == 1)
 	{
-		if(hs.left_dominate(e2) == true) return 1;
 		int t = i2e[e2]->target();
 		if(gr.in_degree(t) == 1) return 1;
+		if(hs.left_dominate(e2) == true) return 1;
 	}
 
 	return 2;
