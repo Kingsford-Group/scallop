@@ -282,6 +282,7 @@ bool scallop::resolve_hyper_edge(int fsize)
 	for(int i = 0; i < w2.size(); i++) w2[i] *= r2;
 
 	set<int> ss;
+	bool flag = false;
 	for(int i = 0; i < w1.size(); i++)
 	{
 		for(int j = 0; j < w2.size(); j++)
@@ -289,6 +290,7 @@ bool scallop::resolve_hyper_edge(int fsize)
 			double w = (w1[i] < w2[j]) ? w1[i] : w2[j];
 			if(w < 1.0) continue;
 
+			flag = true;
 			int k1 = split_edge(v1[i], w);
 			int k2 = split_edge(v2[j], w);
 			int x = merge_adjacent_equal_edges(k1, k2);
@@ -304,8 +306,7 @@ bool scallop::resolve_hyper_edge(int fsize)
 			//if(k2 == v2[j]) hs.replace(v2[j], x);
 		}
 	}
-
-	return true;
+	return flag;
 }
 
 bool scallop::resolve_trivial_vertex(int type)
