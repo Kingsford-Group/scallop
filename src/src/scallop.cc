@@ -37,8 +37,8 @@ int scallop::assemble()
 	{
 		bool b = false;
 
-		b = resolve_trivial_vertex_fast(max_decompose_error_ratio[TRIVIAL_VERTEX]);
-		if(b == true) continue;
+		//b = resolve_trivial_vertex_fast(max_decompose_error_ratio[TRIVIAL_VERTEX]);
+		//if(b == true) continue;
 
 		print();
 
@@ -47,10 +47,10 @@ int scallop::assemble()
 
 		print();
 
-		while(resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 1, -0.5))
-		{
-			print();
-		}
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 1, -0.5);
+		if(b == true) continue;
+
+		print();
 
 		b = resolve_small_edges(max_decompose_error_ratio[SMALL_EDGE]);
 		if(b == true) continue;
@@ -146,7 +146,7 @@ bool scallop::resolve_small_edges(double max_ratio)
 		if(t == i && hs.right_extend(e)) continue;
 		if(s == i && hs.left_extend(e)) continue;
 
-		if(r < 0.02)
+		if(r < 0.01)
 		{
 			double w = gr.get_edge_weight(i2e[e]);
 			printf("resolve small edge, edge = %d, weight = %.2lf, ratio = %.2lf, vertex = (%d, %d), degree = (%d, %d)\n", 
@@ -352,10 +352,7 @@ bool scallop::resolve_hyper_edge(int fsize)
 			int k2 = split_edge(v2[j], w);
 			int x = merge_adjacent_equal_edges(k1, k2);
 
-			double t1 = gr.get_edge_weight(i2e[v1[i]]);
-			double t2 = gr.get_edge_weight(i2e[v2[j]]);
-			printf(" split (%d, %d), w = %.2lf, weight = (%.2lf, %.2lf), (%.2lf, %.2lf) -> (%d, %d) -> %d\n", 
-					v1[i], v2[j], w, w1[i], w2[j], t1, t2, k1, k2, x);
+			//printf(" split (%d, %d), w = %.2lf, weight = (%.2lf, %.2lf), merge (%d, %d) -> %d\n", v1[i], v2[j], w, w1[i], w2[j], k1, k2, x);
 
 			hs.replace(v1[i], v2[j], x);
 			if(k1 == v1[i]) hs.remove(v1[i]);
@@ -370,7 +367,7 @@ bool scallop::resolve_hyper_edge(int fsize)
 bool scallop::resolve_trivial_vertex(int type, double jump_ratio)
 {
 	int root = -1;
-	double ratio = -1;
+	double ratio = DBL_MAX;
 	int se = -1;
 	//for(set<int>::iterator it = nonzeroset.begin(); it != nonzeroset.end(); it++)
 	vector<int> vv(nonzeroset.begin(), nonzeroset.end());
@@ -385,7 +382,7 @@ bool scallop::resolve_trivial_vertex(int type, double jump_ratio)
 
 		int e;
 		double r = compute_balance_ratio(i);
-		if(ratio >= 0 && ratio < r) continue;
+		if(ratio < r) continue;
 
 		root = i;
 		ratio = r;
@@ -714,6 +711,7 @@ int scallop::decompose_vertex_extend(int root, MPID &pe2w)
 	assert(gr.degree(root) == 0);
 	nonzeroset.erase(root);
 
+	/*
 	for(map<int, int>::iterator it = ev1.begin(); it != ev1.end(); it++)
 	{
 		int k = it->second;
@@ -724,6 +722,7 @@ int scallop::decompose_vertex_extend(int root, MPID &pe2w)
 		int k = it->second;
 		resolve_single_trivial_vertex_fast(k, max_decompose_error_ratio[TRIVIAL_VERTEX]);
 	}
+	*/
 
 	return 0;
 }
@@ -778,7 +777,6 @@ int scallop::decompose_vertex_replace(int root, MPID &pe2w)
 		int e2 = it->first.second;
 		double w = it->second;
 
-		//printf("merge adjacent edges (%d, %d) -> %.4lf\n", e1, e2, w);
 		int e = merge_adjacent_edges(e1, e2, w);
 
 		hs.replace(e1, e2, e);
@@ -793,12 +791,6 @@ int scallop::decompose_vertex_replace(int root, MPID &pe2w)
 		int e2 = it->first.second;
 		assert(hs.left_extend(e1) == false || hs.right_extend(e1) == false);
 		assert(hs.left_extend(e2) == false || hs.right_extend(e2) == false);
-		/*
-		if(hs.left_extend(e1)) printf("BB1: remove left extend %d\n", e1);
-		if(hs.left_extend(e2)) printf("BB2: remove left extend %d\n", e2);
-		if(hs.right_extend(e1)) printf("BB3: remove right extend %d\n", e1);
-		if(hs.right_extend(e2)) printf("BB4: remove right extend %d\n", e2);
-		*/
 		hs.remove(e1);
 		hs.remove(e2);
 	}
@@ -887,6 +879,7 @@ int scallop::split_merge_path(const VE &p, double wx)
 		assert(p[i] != null_edge);
 		assert(e2i.find(p[i]) != e2i.end());
 		v.push_back(e2i[p[i]]);
+		double w = gr.get_edge_weight(p[i]);
 	}
 	return split_merge_path(v, wx);
 }
@@ -961,9 +954,8 @@ int scallop::merge_adjacent_equal_edges(int x, int y)
 	remove_edge(x);
 	remove_edge(y);
 
-	if(gr.in_degree(xt) == 0 || gr.out_degree(xt) == 0)
+	if(gr.in_degree(xt) == 0 && gr.out_degree(xt) == 0)
 	{
-		printf("xt = %d, degree = (%d, %d, %d)\n", xt, gr.in_degree(xt), gr.out_degree(xt), gr.degree(xt));
 		assert(gr.degree(xt) == 0);
 		nonzeroset.erase(xt);
 	}
