@@ -34,7 +34,8 @@ public:
 	MEV mev;							// super edges
 	vector<int> v2v;					// vertex map
 	hyper_set hs;						// hyper edges
-	int round;							// round in iteration
+	int round;							// iteration
+	set<int> nonzeroset;				// vertices with degree >= 1
 	vector<path> paths;					// predicted transcripts
 
 private:
@@ -43,11 +44,14 @@ private:
 	int init_vertex_map();
 	int init_super_edges();
 	int init_inner_weights();
+	int init_nonzeroset();
 	int add_pseudo_hyper_edges();
 	int refine_splice_graph();
 
 	// resolve iteratively
 	bool resolve_trivial_vertex(int type, double jump_ratio);
+	bool resolve_trivial_vertex_fast(double jump_ratio);
+	bool resolve_single_trivial_vertex_fast(int i, double jump_ratio);
 	bool resolve_small_edges(double max_ratio);
 	bool resolve_splittable_vertex(int type, int degree, double max_ratio);
 	bool resolve_unsplittable_vertex(int type, int degree, double max_ratio);
@@ -62,7 +66,7 @@ private:
 	int decompose_trivial_vertex(int v);
 	int decompose_vertex_extend(int v, MPID &pe2w);
 	int decompose_vertex_replace(int v, MPID &pe2w);
-	int classify_trivial_vertex(int v);
+	int classify_trivial_vertex(int v, bool fast);
 	int exchange_sink(int old_sink, int new_sink);
 	int split_vertex(int x, const vector<int> &xe, const vector<int> &ye);
 	int split_edge(int exi, double w);
