@@ -323,8 +323,6 @@ bool scallop::resolve_trivial_vertex(int type)
 		root = i;
 		ratio = r;
 		se = e;
-
-		if(ratio < 1.1) break;
 	}
 
 	if(root == -1) return false;
@@ -546,7 +544,12 @@ int scallop::decompose_vertex_extend(int root, MPID &pe2w)
 		if(mdegree[ei] >= 2) ev2.insert(PI(ei, n++));
 	}
 
-	// exchange sink
+	// add vertices  and exchange sink
+	for(int i = m; i < n; i++) 
+	{
+		gr.add_vertex();
+		v2v.push_back(-1);
+	}
 	v2v[n] = v2v[m];
 	exchange_sink(m, n);
 
@@ -1096,20 +1099,8 @@ int scallop::split_vertex(int x, const vector<int> &xe, const vector<int> &ye)
 	v2v.push_back(v2v[n - 1]);
 	v2v[n - 1] = v2v[x];
 
-	VE ve;
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.in_edges(n - 1); it1 != it2; it1++) ve.push_back(*it1);
-
 	// use vertex-n instead of vertex-(n-1) as sink vertex
-	for(int i = 0; i < ve.size(); i++)
-	{
-		edge_descriptor e = ve[i];
-		int s = e->source(); 
-		int t = e->target();
-		assert(t == n - 1);
-		gr.move_edge(e, s, n);
-	}
-	assert(gr.degree(n - 1) == 0);
+	exchange_sink(n - 1, n);
 
 	// attach edges in xe and ye to vertex-(n-1)
 	for(int i = 0; i < xe.size(); i++)
