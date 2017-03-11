@@ -60,9 +60,10 @@ private:
 	// decomposing subroutines
 	int compute_smallest_edge(int x, double &ratio);
 	int decompose_trivial_vertex(int v);
-	int decompose_vertex_extend(int v, MPID &pe2w, MID &se2w);
+	int decompose_vertex_extend(int v, MPID &pe2w);
 	int decompose_vertex_replace(int v, MPID &pe2w);
 	int classify_trivial_vertex(int v);
+	int exchange_sink(int old_sink, int new_sink);
 	int split_vertex(int x, const vector<int> &xe, const vector<int> &ye);
 	int split_edge(int exi, double w);
 	int merge_adjacent_edges(int x, int y);

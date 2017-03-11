@@ -181,7 +181,6 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree, double max_ratio
 {
 	int root = -1;
 	MPID pe2w;
-	MID se2w;
 	double ratio = max_ratio;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
@@ -202,7 +201,6 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree, double max_ratio
 		root = i;
 		ratio = rt.ratio;
 		pe2w = rt.pe2w;
-		se2w = rt.se2w;
 
 		if(ratio < -0.5) break;
 	}
@@ -212,9 +210,7 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree, double max_ratio
 	printf("resolve unsplittable vertex, type = %d, degree = %d, vertex = %d, ratio = %.3lf, degree = (%d, %d)\n",
 			type, degree, root, ratio, gr.in_degree(root), gr.out_degree(root));
 
-	decompose_vertex_extend(root, pe2w, se2w);
-	if(se2w.size() == 0) assert(gr.degree(root) == 0);
-
+	decompose_vertex_extend(root, pe2w);
 	return true;
 }
 
@@ -500,7 +496,7 @@ int scallop::refine_splice_graph()
 	return 0;
 }
 
-int scallop::decompose_vertex_extend(int root, MPID &pe2w, MID &se2w)
+int scallop::decompose_vertex_extend(int root, MPID &pe2w)
 {
 	// remove hyper-edges pairs that are not covered by pe2w
 	MPII mpi = hs.get_routes(root, gr, e2i);
@@ -508,48 +504,51 @@ int scallop::decompose_vertex_extend(int root, MPID &pe2w, MID &se2w)
 	{
 		PI p = (*it).first;
 		if(pe2w.find(p) != pe2w.end()) continue;
+		assert(false); // TODO
 		hs.remove_pair(p.first, p.second);
+	}
+	
+	// compute degree of each edge
+	map<int, int> mdegree;
+	for(MPID::iterator it = pe2w.begin(); it != pe2w.end(); it++)
+	{
+		PI p = it->first;
+		if(mdegree.find(p.first) == mdegree.end()) mdegree.insert(PI(p.first, 1));
+		else mdegree[p.first]++;
+		if(mdegree.find(p.second) == mdegree.end()) mdegree.insert(PI(p.second, 1));
+		else mdegree[p.second]++;
 	}
 
 	// add edge-vertex for each adjacent edge of root
-	int m = gr.num_vertices() - 1;
-	for(int i = 0; i < gr.degree(root); i++)
-	{
-		gr.add_vertex();
-		v2v.push_back(-1);
-	}
-	int n = gr.num_vertices() - 1;
-	v2v[n] = v2v[m];
-
-	// use vertex-n instead of vertex-m as sink vertex
-	VE ve;
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.in_edges(m); it1 != it2; it1++) ve.push_back(*it1);
-
-	for(int i = 0; i < ve.size(); i++)
-	{
-		edge_descriptor e = ve[i];
-		int s = e->source(); 
-		int t = e->target();
-		assert(t == m);
-		gr.move_edge(e, s, n);
-	}
-	assert(gr.degree(m) == 0);
-
 	// map adjacent edges of root to vertices [m, n)
-	int k = m;
+	int m = gr.num_vertices() - 1;
+	int n = m;
 	map<int, int> ev1, ev2;
+	edge_iterator it1, it2;
 	for(tie(it1, it2) = gr.in_edges(root); it1 != it2; it1++)
 	{
-		int e = e2i[*it1];
-		ev1.insert(PI(e, k++));
+		edge_descriptor e = (*it1);
+		int ei = e2i[e];
+		int s = e->source();
+		int t = e->target();
+		assert(t == root);
+		assert(mdegree.find(ei) != mdegree.end());
+		if(mdegree[ei] >= 2) ev1.insert(PI(ei, n++));
 	}
 	for(tie(it1, it2) = gr.out_edges(root); it1 != it2; it1++)
 	{
-		int e = e2i[*it1];
-		ev2.insert(PI(e, k++));
+		edge_descriptor e = (*it1);
+		int ei = e2i[e];
+		int s = e->source();
+		int t = e->target();
+		assert(s == root);
+		assert(mdegree.find(ei) != mdegree.end());
+		if(mdegree[ei] >= 2) ev2.insert(PI(ei, n++));
 	}
-	assert(ev1.size() + ev2.size() == n - m);
+
+	// exchange sink
+	v2v[n] = v2v[m];
+	exchange_sink(m, n);
 
 	// set vertex info for new vertices
 	// detach edge from root to new vertex
@@ -584,60 +583,56 @@ int scallop::decompose_vertex_extend(int root, MPID &pe2w, MID &se2w)
 		int e2 = it->first.second;
 		double w = it->second;
 
-		assert(ev1.find(e1) != ev1.end());
-		assert(ev2.find(e2) != ev2.end());
-		int v1 = ev1[e1];
-		int v2 = ev2[e2];
+		if(mdegree[e1] == 1)
+		{
+			assert(mdegree[e2] >= 2);
+			assert(ev1.find(e1) == ev1.end());
+			assert(ev2.find(e2) != ev2.end());
+			edge_descriptor p = i2e[e1];
+			int v1 = p->source();
+			int v2 = ev2[e2];
+			gr.move_edge(p, v1, v2);
+			gr.set_edge_weight(p, w);
+		}
+		else if(mdegree[e2] == 1)
+		{
+			assert(mdegree[e1] >= 2);
+			assert(ev1.find(e1) != ev1.end());
+			assert(ev2.find(e2) == ev2.end());
+			edge_descriptor p = i2e[e2];
+			int v1 = ev1[e1];
+			int v2 = p->target();
+			gr.move_edge(p, v1, v2);
+			gr.set_edge_weight(p, w);
+		}
+		else
+		{
+			assert(mdegree[e1] >= 2);
+			assert(mdegree[e2] >= 2);
 
-		edge_descriptor p = gr.add_edge(v1, v2);
+			assert(ev1.find(e1) != ev1.end());
+			assert(ev2.find(e2) != ev2.end());
+			int v1 = ev1[e1];
+			int v2 = ev2[e2];
+
+			edge_descriptor p = gr.add_edge(v1, v2);
 		
-		int z = i2e.size();
-		i2e.push_back(p);
-		e2i.insert(PEI(p, z));
+			int z = i2e.size();
+			i2e.push_back(p);
+			e2i.insert(PEI(p, z));
 
-		gr.set_edge_weight(p, w);
-		gr.set_edge_info(p, edge_info());
+			gr.set_edge_weight(p, w);
+			gr.set_edge_info(p, edge_info());
 
-		vector<int> v0;
-		if(mev.find(p) != mev.end()) mev[p] = v0;
-		else mev.insert(PEV(p, v0));
+			vector<int> v0;
+			if(mev.find(p) != mev.end()) mev[p] = v0;
+			else mev.insert(PEV(p, v0));
 
-		hs.insert_between(e1, e2, z);
+			hs.insert_between(e1, e2, z);
+		}
 	}
 
-	// connecting edges according to se2w
-	for(MID::iterator it = se2w.begin(); it != se2w.end(); it++)
-	{
-		int e = it->first;
-		double w = it->second;
-
-		edge_descriptor p = null_edge;
-		if(ev1.find(e) != ev1.end())
-		{
-			int k = ev1[e];
-			p = gr.add_edge(k, root);
-		}
-		else if(ev2.find(e) != ev2.end())
-		{
-			int k = ev2[e];
-			p = gr.add_edge(root, k);
-		}
-		else assert(false);
-
-		assert(p != null_edge);
-		
-		int z = i2e.size();
-		i2e.push_back(p);
-		e2i.insert(PEI(p, z));
-
-		gr.set_edge_weight(p, w);
-		gr.set_edge_info(p, edge_info());
-
-		vector<int> v0;
-		if(mev.find(p) != mev.end()) mev[p] = v0;
-		else mev.insert(PEV(p, v0));
-	}
-
+	assert(gr.degree(root) == 0);
 	return 0;
 }
 
@@ -782,6 +777,24 @@ int scallop::classify_trivial_vertex(int x)
 	}
 
 	return 2;
+}
+
+int scallop::exchange_sink(int old_sink, int new_sink)
+{
+	VE ve;
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.in_edges(old_sink); it1 != it2; it1++) ve.push_back(*it1);
+
+	for(int i = 0; i < ve.size(); i++)
+	{
+		edge_descriptor e = ve[i];
+		int s = e->source(); 
+		int t = e->target();
+		assert(t == old_sink);
+		gr.move_edge(e, s, new_sink);
+	}
+	assert(gr.degree(old_sink) == 0);
+	return 0;
 }
 
 int scallop::split_merge_path(const VE &p, double wx)
