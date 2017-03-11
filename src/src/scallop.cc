@@ -193,6 +193,9 @@ bool scallop::resolve_splittable_vertex(int type, int degree, double max_ratio)
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		//int i = vv[k];
+		if(gr.in_degree(i) <= 1) continue;
+		if(gr.out_degree(i) <= 1) continue;
+
 		assert(gr.in_degree(i) >= 1);
 		assert(gr.out_degree(i) >= 1);
 
@@ -239,8 +242,8 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree, double max_ratio
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		//int i = vv[k];
-		if(gr.in_degree(i) <= 0) continue;
-		if(gr.out_degree(i) <= 0) continue;
+		if(gr.in_degree(i) <= 1) continue;
+		if(gr.out_degree(i) <= 1) continue;
 
 		assert(gr.in_degree(i) >= 1);
 		assert(gr.out_degree(i) >= 1);
@@ -390,7 +393,7 @@ bool scallop::resolve_trivial_vertex(int type, double jump_ratio)
 		assert(gr.out_degree(i) >= 1);
 
 		if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) continue;
-		if(classify_trivial_vertex(i, false) != type) continue;
+		if(classify_trivial_vertex(i, true) != type) continue;
 
 		int e;
 		double r = compute_balance_ratio(i);
@@ -771,6 +774,14 @@ int scallop::decompose_vertex_replace(int root, MPID &pe2w)
 	{
 		int e = e2i[*it1];
 		assert(md.find(e) != md.end());
+	}
+
+	// remove hyper-edges that are not covered
+	MPII mpi = hs.get_routes(root, gr, e2i);
+	for(MPII::iterator it = mpi.begin(); it != mpi.end(); it++)
+	{
+		if(pe2w.find(it->first) != pe2w.end()) continue;
+		hs.remove_pair(it->first.first, it->first.second);
 	}
 
 	map<int, int> m;
