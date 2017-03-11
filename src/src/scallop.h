@@ -47,7 +47,7 @@ private:
 	int refine_splice_graph();
 
 	// resolve iteratively
-	bool resolve_trivial_vertex(int type);
+	bool resolve_trivial_vertex(int type, double jump_ratio);
 	bool resolve_small_edges(double max_ratio);
 	bool resolve_splittable_vertex(int type, int degree, double max_ratio);
 	bool resolve_unsplittable_vertex(int type, int degree, double max_ratio);

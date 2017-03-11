@@ -38,7 +38,7 @@ int scallop::assemble()
 
 		//refine_splice_graph();
 
-		b = resolve_trivial_vertex(1);
+		b = resolve_trivial_vertex(1, max_decompose_error_ratio[TRIVIAL_VERTEX]);
 		if(b == true) continue;
 
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 1, -0.5);
@@ -73,7 +73,7 @@ int scallop::assemble()
 
 		//summarize_vertices();
 
-		b = resolve_trivial_vertex(2);
+		b = resolve_trivial_vertex(2, max_decompose_error_ratio[TRIVIAL_VERTEX]);
 		if(b == true) continue;
 
 		break;
@@ -305,7 +305,7 @@ bool scallop::resolve_hyper_edge(int fsize)
 	return flag;
 }
 
-bool scallop::resolve_trivial_vertex(int type)
+bool scallop::resolve_trivial_vertex(int type, double jump_ratio)
 {
 	int root = -1;
 	double ratio = -1;
@@ -323,6 +323,8 @@ bool scallop::resolve_trivial_vertex(int type)
 		root = i;
 		ratio = r;
 		se = e;
+
+		if(ratio < jump_ratio) break;
 	}
 
 	if(root == -1) return false;

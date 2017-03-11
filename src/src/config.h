@@ -27,6 +27,7 @@ using namespace std;
 #define SPLITTABLE_HYPER 2
 #define UNSPLITTABLE_SINGLE 3
 #define UNSPLITTABLE_MULTIPLE 4
+#define TRIVIAL_VERTEX 5
 
 #define UNSTRANDED 0
 #define FR_FIRST 1
@@ -55,7 +56,7 @@ extern int min_router_count;
 // for splice graph
 extern double max_intron_contamination_coverage;
 extern double min_surviving_edge_weight;
-extern double max_decompose_error_ratio[5];
+extern double max_decompose_error_ratio[6];
 extern double min_transcript_numreads;
 extern double min_transcript_coverage;
 extern double min_single_exon_coverage;
