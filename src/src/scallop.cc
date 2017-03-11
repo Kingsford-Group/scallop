@@ -236,7 +236,7 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree, double max_ratio
 	//for(set<int>::iterator it = nonzeroset.begin(); it != nonzeroset.end(); it++)
 	//vector<int> vv(nonzeroset.begin(), nonzeroset.end());
 	//for(int k = 0; k < vv.size(); k++)
-	/or(int i = 1; i < gr.num_vertices() - 1; i++)
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		//int i = vv[k];
 		if(gr.in_degree(i) <= 0) continue;
