@@ -120,13 +120,13 @@ bool scallop::resolve_small_edges(double max_ratio)
 	int root = -1;
 	double ratio = max_ratio;
 	bool flag = false;
-	//for(int i = 1; i < gr.num_vertices() - 1; i++)
 	//for(set<int>::iterator it = nonzeroset.begin(); it != nonzeroset.end(); it++)
-	vector<int> vv(nonzeroset.begin(), nonzeroset.end());
-	for(int k = 0; k < vv.size(); k++)
+	//vector<int> vv(nonzeroset.begin(), nonzeroset.end());
+	//for(int k = 0; k < vv.size(); k++)
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
-		int i = vv[k];
-		assert(gr.degree(i) >= 1);
+		//int i = vv[k];
+		//assert(gr.degree(i) >= 1);
 		if(gr.in_degree(i) <= 1) continue;
 		if(gr.out_degree(i) <= 1) continue;
 
@@ -187,12 +187,12 @@ bool scallop::resolve_splittable_vertex(int type, int degree, double max_ratio)
 	int root = -1;
 	double ratio = max_ratio;
 	vector<equation> eqns;
-	//for(int i = 1; i < gr.num_vertices() - 1; i++)
 	//for(set<int>::iterator it = nonzeroset.begin(); it != nonzeroset.end(); it++)
-	vector<int> vv(nonzeroset.begin(), nonzeroset.end());
-	for(int k = 0; k < vv.size(); k++)
+	//vector<int> vv(nonzeroset.begin(), nonzeroset.end());
+	//for(int k = 0; k < vv.size(); k++)
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
-		int i = vv[k];
+		//int i = vv[k];
 		assert(gr.in_degree(i) >= 1);
 		assert(gr.out_degree(i) >= 1);
 
@@ -233,12 +233,15 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree, double max_ratio
 	MPID pe2w;
 	double ratio = max_ratio;
 	bool flag = false;
-	//for(int i = 1; i < gr.num_vertices() - 1; i++)
 	//for(set<int>::iterator it = nonzeroset.begin(); it != nonzeroset.end(); it++)
-	vector<int> vv(nonzeroset.begin(), nonzeroset.end());
-	for(int k = 0; k < vv.size(); k++)
+	//vector<int> vv(nonzeroset.begin(), nonzeroset.end());
+	//for(int k = 0; k < vv.size(); k++)
+	/or(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
-		int i = vv[k];
+		//int i = vv[k];
+		if(gr.in_degree(i) <= 0) continue;
+		if(gr.out_degree(i) <= 0) continue;
+
 		assert(gr.in_degree(i) >= 1);
 		assert(gr.out_degree(i) >= 1);
 
@@ -376,10 +379,13 @@ bool scallop::resolve_trivial_vertex(int type, double jump_ratio)
 	double ratio = DBL_MAX;
 	int se = -1;
 	//for(set<int>::iterator it = nonzeroset.begin(); it != nonzeroset.end(); it++)
-	vector<int> vv(nonzeroset.begin(), nonzeroset.end());
-	for(int k = 0; k < vv.size(); k++)
+	//vector<int> vv(nonzeroset.begin(), nonzeroset.end());
+	//for(int k = 0; k < vv.size(); k++)
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
-		int i = vv[k];
+		//int i = vv[k];
+		if(gr.in_degree(i) <= 0) continue;
+		if(gr.out_degree(i) <= 0) continue;
 		assert(gr.in_degree(i) >= 1);
 		assert(gr.out_degree(i) >= 1);
 
