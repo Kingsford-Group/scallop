@@ -146,6 +146,7 @@ bool scallop::resolve_small_edges(double max_ratio)
 		if(t == i && hs.right_extend(e)) continue;
 		if(s == i && hs.left_extend(e)) continue;
 
+		/*
 		if(r < 0.01)
 		{
 			double w = gr.get_edge_weight(i2e[e]);
@@ -157,6 +158,7 @@ bool scallop::resolve_small_edges(double max_ratio)
 			flag = true;
 			continue;
 		}
+		*/
 
 		if(ratio < r) continue;
 
@@ -249,6 +251,7 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree, double max_ratio
 
 		rt.build();
 
+		/*
 		if(rt.ratio < -0.5)
 		{
 			printf("resolve unsplittable vertex, type = %d, degree = %d, vertex = %d, ratio = %.3lf, degree = (%d, %d)\n",
@@ -257,12 +260,15 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree, double max_ratio
 			flag = true;
 			continue;
 		}
+		*/
 
 		if(rt.ratio > ratio) continue;
 
 		root = i;
 		ratio = rt.ratio;
 		pe2w = rt.pe2w;
+
+		if(ratio < -0.5) break;
 	}
 
 	if(flag == true) return true;
