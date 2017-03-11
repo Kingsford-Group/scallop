@@ -597,7 +597,7 @@ int scallop::decompose_vertex_extend(int root, MPID &pe2w)
 			int v1 = p->source();
 			int v2 = ev2[e2];
 			gr.move_edge(p, v1, v2);
-			gr.set_edge_weight(p, w);
+			//gr.set_edge_weight(p, w);
 		}
 		else if(mdegree[e2] == 1)
 		{
@@ -608,7 +608,7 @@ int scallop::decompose_vertex_extend(int root, MPID &pe2w)
 			int v1 = ev1[e1];
 			int v2 = p->target();
 			gr.move_edge(p, v1, v2);
-			gr.set_edge_weight(p, w);
+			//gr.set_edge_weight(p, w);
 		}
 		else
 		{
