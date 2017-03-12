@@ -34,6 +34,7 @@ public:
 	int build(directed_graph &gr, MEI &e2i);
 	int build_edges(directed_graph &gr, MEI &e2i);
 	int build_index();
+	int update_index();
 	set<int> get_intersection(const vector<int> &v);
 	MI get_successors(int e);
 	MI get_predecessors(int e);
@@ -49,6 +50,7 @@ public:
 	int remove(const set<int> &x);
 	int remove_pair(int x, int y);
 	int insert_between(int x, int y, int e);
+	bool useful(const vector<int> &v, int k1, int k2);
 	bool extend(int e);
 	bool left_extend(int e);
 	bool left_extend(const vector<int> &s);

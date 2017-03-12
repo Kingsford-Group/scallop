@@ -116,6 +116,34 @@ int hyper_set::build_index()
 	return 0;
 }
 
+int hyper_set::update_index()
+{
+	vector<int> fb1;
+	for(MISI::iterator p = e2s.begin(); p != e2s.end(); p++)
+	{
+		int e = p->first;
+		set<int> &ss = p->second;
+		vector<int> fb2;
+		for(set<int>::iterator it = ss.begin(); it != ss.end(); it++)
+		{
+			vector<int> &v = edges[*it];
+			for(int i = 0; i < v.size(); i++)
+			{
+				if(v[i] != e) continue;
+				bool b1 = false, b2 = false;
+				if(i == 0 || v[i - 1] == -1) b1 = true;
+				if(i == v.size() - 1 || v[i + 1] == -1) b2 = true;
+				if(b1 == true && b2 == true) fb2.push_back(*it);
+				break;
+			}
+		}
+		for(int i = 0; i < fb2.size(); i++) ss.erase(fb2[i]);
+		if(ss.size() == 0) fb1.push_back(e);
+	}
+	for(int i = 0; i < fb1.size(); i++) e2s.erase(fb1[i]);
+	return 0;
+}
+
 set<int> hyper_set::get_intersection(const vector<int> &v)
 {
 	set<int> ss;
@@ -353,7 +381,8 @@ int hyper_set::remove(int e)
 int hyper_set::remove_pair(int x, int y)
 {
 	if(e2s.find(x) == e2s.end()) return 0;
-	set<int> s = e2s[x];
+	set<int> &s = e2s[x];
+	vector<int> fb;
 	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
 	{
 		int k = (*it);
@@ -365,11 +394,30 @@ int hyper_set::remove_pair(int x, int y)
 			if(i == vv.size() - 1) continue;
 			if(vv[i] != x) continue;
 			if(vv[i + 1] != y) continue;
-			vv.insert(vv.begin() + i + 1, -1);
+
+			bool b1 = useful(vv, 0, i);
+			bool b2 = (b1 == true) ? true : useful(vv, i + 1, vv.size() - 1);
+
+			if(b1 == false && b2 == false) fb.push_back(k);
+			else vv.insert(vv.begin() + i + 1, -1);
+
 			break;
 		}
 	}
+
+	for(int i = 0; i < fb.size(); i++) s.erase(fb[i]);
+	if(s.size() == 0) e2s.erase(x);
+
 	return 0;
+}
+
+bool hyper_set::useful(const vector<int> &v, int k1, int k2)
+{
+	for(int i = k1; i < k2; i++)
+	{
+		if(v[i] >= 0 && v[i + 1] >= 0) return true;
+	}
+	return false;
 }
 
 int hyper_set::insert_between(int x, int y, int e)
