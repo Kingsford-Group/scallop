@@ -295,22 +295,15 @@ int hyper_set::replace(const vector<int> &v, int e)
 
 		sort(bv.begin(), bv.end());
 
+		// TODO
+		assert(bv.size() == 1);
+
 		for(int j = bv.size() - 1; j >= 0; j--)
 		{
 			int b = bv[j];
 			vv[b] = e;
 			vv.erase(vv.begin() + b + 1, vv.begin() + b + v.size());
 		}
-
-		/* TODO
-		for(int i = 0; i < v.size(); i++) 
-		{
-			int x = v[i];
-			assert(e2s.find(x) != e2s.end());
-			assert(e2s[x].find(k) != e2s[x].end());
-			e2s[x].erase(k);
-		}
-		*/
 
 		if(e2s.find(e) == e2s.end())
 		{
