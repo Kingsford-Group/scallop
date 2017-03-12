@@ -33,4 +33,4 @@ gtf=`pwd`/$1/expression.gtf
 
 id=`echo $1 | cut -f 1 -d "."`
 quantfile=/home/mingfus/data/transcriptomics/SRA/"$id".all/salmon/salmon.quant/quant.sf
-./gtfcuff acc-quant $dir/gffmul.scallop.gtf.tmap $quantfile 0.1 > $dir/gffmul.quant.acc
+./gtfcuff acc-quant $dir/gffmul.scallop.gtf.tmap $quantfile 0.1 > $dir/gffmul.quant

@@ -1,13 +1,12 @@
 #!/bin/bash
 
-if [ "$#" != "2" ]
+if [ "$#" != "1" ]
 then
-	echo "run.sh tag abd"
+	echo "run.sh abd"
 	exit
 fi
 
-tag=$1
-abd=$2
+abd=$1
 
 #list="SRR534307.hisat"
 list="GSM981256.tophat \
@@ -57,10 +56,28 @@ list="GSM981256.tophat \
 	  SRR315334.hisat \
 	  SRR534307.hisat"
 
+tag="B668"
 for x in `echo $list`
 do
 	id=`echo $x | cut -f 1 -d "."`
 	align=`echo $x | cut -f 2 -d "."`
 	echo $id $align
 	nohup ./run.scallop.sh $x $align $tag.$abd "--library_type first --min_transcript_coverage $abd" &
+done
+
+tag="1.3.2d"
+for x in `echo $list`
+do
+	id=`echo $x | cut -f 1 -d "."`
+	align=`echo $x | cut -f 2 -d "."`
+	echo $id $align
+	nohup ./run.stringtie.sh $x $align $tag.$abd "TODO" &
+done
+
+for x in `echo $list`
+do
+	id=`echo $x | cut -f 1 -d "."`
+	align=`echo $x | cut -f 2 -d "."`
+	echo $id $align
+	nohup ./run.transcomb.sh $x $align $abd "TODO" &
 done
