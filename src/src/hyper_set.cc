@@ -285,6 +285,7 @@ int hyper_set::replace(const vector<int> &v, int e)
 	if(v.size() == 0) return 0;
 	set<int> s = get_intersection(v);
 	
+	vector<int> fb;
 	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
 	{
 		int k = (*it);
@@ -292,18 +293,21 @@ int hyper_set::replace(const vector<int> &v, int e)
 		vector<int> bv = consecutive_subset(vv, v);
 
 		if(bv.size() <= 0) continue;
-
-		sort(bv.begin(), bv.end());
-
-		// TODO
 		assert(bv.size() == 1);
 
-		for(int j = bv.size() - 1; j >= 0; j--)
+		int b = bv[0];
+		vv[b] = e;
+
+		bool b1 = useful(vv, 0, b);
+		bool b2 = useful(vv, b + v.size() - 1, vv.size() - 1);
+
+		if(b1 == false && b2 == false)
 		{
-			int b = bv[j];
-			vv[b] = e;
-			vv.erase(vv.begin() + b + 1, vv.begin() + b + v.size());
+			fb.push_back(k);
+			continue;
 		}
+
+		vv.erase(vv.begin() + b + 1, vv.begin() + b + v.size());
 
 		if(e2s.find(e) == e2s.end())
 		{
@@ -317,6 +321,13 @@ int hyper_set::replace(const vector<int> &v, int e)
 		}
 	}
 
+	for(int i = 0; i < v.size(); i++)
+	{
+		int u = v[i];
+		if(e2s.find(u) == e2s.end()) continue;
+		for(int k = 0; k < fb.size(); k++) e2s[u].erase(fb[k]);
+		if(e2s[u].size() == 0) e2s.erase(u);
+	}
 	return 0;
 }
 
@@ -334,7 +345,8 @@ int hyper_set::remove(const vector<int> &v)
 int hyper_set::remove(int e)
 {
 	if(e2s.find(e) == e2s.end()) return 0;
-	set<int> s = e2s[e];
+	set<int> &s = e2s[e];
+	vector<int> fb;
 	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
 	{
 		int k = (*it);
@@ -343,31 +355,20 @@ int hyper_set::remove(int e)
 
 		for(int i = 0; i < vv.size(); i++)
 		{
-			if(vv[i] == e) vv[i] = -1;
-		}
+			if(vv[i] != e) continue;
 
-		/*
-		if(vv[0] == e) vv.erase(vv.begin());
-		else if(vv[vv.size() - 1] == e) vv.pop_back();
-		else assert(false);
-		*/
+			vv[i] = -1;
+
+			bool b1 = useful(vv, 0, i - 1);
+			bool b2 = useful(vv, i + 1, vv.size() - 1);
+			if(b1 == false && b2 == false) fb.push_back(k);
+			 
+			break;
+		}
 	}
+
+	for(int i = 0; i < fb.size(); i++) s.erase(fb[i]);
 	e2s.erase(e);
-	return 0;
-
-	for(int i = 0; i < edges.size(); i++)
-	{
-		for(int k = 0; k < edges[i].size(); k++)
-		{
-			if(edges[i][k] == e)
-			{
-				printf("WITH %d: ", e);
-				printv(edges[i]);
-				printf("\n");
-			}
-			assert(edges[i][k] != e);
-		}
-	}
 	return 0;
 }
 
