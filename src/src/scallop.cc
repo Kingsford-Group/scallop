@@ -378,6 +378,7 @@ bool scallop::resolve_trivial_vertex(int type, double jump_ratio)
 	int root = -1;
 	double ratio = DBL_MAX;
 	int se = -1;
+	bool flag = false;
 	//for(int i = 1; i < gr.num_vertices() - 1; i++)
 	//for(set<int>::iterator it = nonzeroset.begin(); it != nonzeroset.end(); it++)
 	vector<int> vv(nonzeroset.begin(), nonzeroset.end());
@@ -395,6 +396,17 @@ bool scallop::resolve_trivial_vertex(int type, double jump_ratio)
 
 		int e;
 		double r = compute_balance_ratio(i);
+
+		if(r < 1.02)
+		{
+			printf("resolve trivial vertex %d, type = %d, ratio = %.2lf, degree = (%d, %d)\n", i, type, 
+					r, gr.in_degree(i), gr.out_degree(i));
+
+			decompose_trivial_vertex(i);
+			flag = true;
+			continue;
+		}
+
 		if(ratio < r) continue;
 
 		root = i;
@@ -404,6 +416,7 @@ bool scallop::resolve_trivial_vertex(int type, double jump_ratio)
 		if(ratio < jump_ratio) break;
 	}
 
+	if(flag == true) return true;
 	if(root == -1) return false;
 
 	printf("resolve trivial vertex %d, type = %d, ratio = %.2lf, degree = (%d, %d)\n", root, type, 
