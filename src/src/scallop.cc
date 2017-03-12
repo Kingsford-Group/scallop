@@ -37,8 +37,8 @@ int scallop::assemble()
 	{
 		bool b = false;
 
-		//b = resolve_trivial_vertex_fast(max_decompose_error_ratio[TRIVIAL_VERTEX]);
-		//if(b == true) continue;
+		b = resolve_trivial_vertex_fast(max_decompose_error_ratio[TRIVIAL_VERTEX]);
+		if(b == true) continue;
 
 		print();
 
@@ -440,7 +440,7 @@ bool scallop::resolve_single_trivial_vertex_fast(int i, double jump_ratio)
 {
 	if(gr.degree(i) == 0) return false;
 	if(gr.in_degree(i) >= 2 && gr.out_degree(i) >= 2) return false;
-	if(classify_trivial_vertex(i, true) != 1) return false;
+	if(classify_trivial_vertex(i, false) != 1) return false;
 
 	double r = compute_balance_ratio(i);
 	if(r >= jump_ratio) return false;
@@ -730,7 +730,6 @@ int scallop::decompose_vertex_extend(int root, MPID &pe2w)
 	assert(gr.degree(root) == 0);
 	nonzeroset.erase(root);
 
-	/*
 	for(map<int, int>::iterator it = ev1.begin(); it != ev1.end(); it++)
 	{
 		int k = it->second;
@@ -741,7 +740,6 @@ int scallop::decompose_vertex_extend(int root, MPID &pe2w)
 		int k = it->second;
 		resolve_single_trivial_vertex_fast(k, max_decompose_error_ratio[TRIVIAL_VERTEX]);
 	}
-	*/
 
 	return 0;
 }
