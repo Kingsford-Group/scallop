@@ -62,6 +62,7 @@ extern double min_transcript_coverage;
 extern double min_single_exon_coverage;
 extern int min_transcript_length;
 extern int min_exon_length;
+extern int max_num_exons;
 
 // for simulation
 extern int simulation_num_vertices;

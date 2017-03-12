@@ -34,75 +34,50 @@ int scallop::assemble()
 	printf("\nprocess bundle %s type = %d, vertices = %lu, edges = %lu\n", name.c_str(), c, gr.num_vertices(), gr.num_edges());
 
 	while(true)
-	{
-		bool b = false;
+	{	
+		if(gr.num_vertices() > max_num_exons) break;
 
+		bool b = false;
 		b = resolve_trivial_vertex_fast(max_decompose_error_ratio[TRIVIAL_VERTEX]);
 		if(b == true) continue;
-
-		print();
 
 		b = resolve_trivial_vertex(1, max_decompose_error_ratio[TRIVIAL_VERTEX]);
 		if(b == true) continue;
 
-		print();
-
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 1, -0.5);
 		if(b == true) continue;
-
-		print();
 
 		b = resolve_small_edges(max_decompose_error_ratio[SMALL_EDGE]);
 		if(b == true) continue;
 
-		print();
-
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 1, -0.5);
 		if(b == true) continue;
-
-		print();
 
 		b = resolve_splittable_vertex(SPLITTABLE_HYPER, 1, max_decompose_error_ratio[SPLITTABLE_HYPER]);
 		if(b == true) continue;
 
-		print();
-
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, INT_MAX, -0.5);
 		if(b == true) continue;
-
-		print();
 
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, INT_MAX, -0.5);
 		if(b == true) continue;
 
-		print();
-
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, INT_MAX, max_decompose_error_ratio[UNSPLITTABLE_SINGLE]);
 		if(b == true) continue;
-
-		print();
 
 		b = resolve_hyper_edge(2);
 		if(b == true) continue;
 
-		print();
-
 		b = resolve_hyper_edge(1);
 		if(b == true) continue;
 
-		print();
-
 		b = resolve_small_edges(DBL_MAX);
 		if(b == true) continue;
-
-		print();
 
 		//summarize_vertices();
 
 		b = resolve_trivial_vertex(2, max_decompose_error_ratio[TRIVIAL_VERTEX]);
 		if(b == true) continue;
-
-		print();
 
 		break;
 	}

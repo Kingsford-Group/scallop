@@ -35,6 +35,7 @@ double min_single_exon_coverage = 20;
 double min_transcript_numreads = 20;
 int min_transcript_length = 250;
 int min_exon_length = 50;
+int max_num_exons = 1000;
 
 // for subsetsum and router
 int max_dp_table_size = 10000;
@@ -83,6 +84,7 @@ int print_parameters()
 	printf("min_transcript_numreads = %.2lf\n", min_transcript_numreads);
 	printf("min_transcript_length = %d\n", min_transcript_length);
 	printf("min_exon_length = %d\n", min_exon_length);
+	printf("max_num_exons = %d\n", max_num_exons);
 
 	// for subsetsum and router
 	printf("max_dp_table_size = %d\n", max_dp_table_size);
@@ -247,6 +249,11 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--min_exon_length")
 		{
 			min_exon_length = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--max_num_exons")
+		{
+			max_num_exons = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--max_dp_table_size")
