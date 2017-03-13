@@ -23,7 +23,7 @@ do
 		x2=`cat ../$id.$aa/$scallop.$abd/gffmul.roc | head -n 1 | cut -f 16  -d " "`
 		cc="$cc$x1 $x2 "
 	done
-	echo scallop $aa $cc
+	echo $cc
 done
 
 # stringtie
@@ -36,7 +36,7 @@ do
 		x2=`cat ../$id.$aa/$stringtie.$abd/gffmul.roc | head -n 1 | cut -f 16  -d " "`
 		cc="$cc$x1 $x2 "
 	done
-	echo stringtie $aa $cc
+	echo $cc
 done
 
 # transcomb
@@ -49,5 +49,5 @@ do
 		x2=`cat ../$id.$aa/$transcomb.$abd/gffmul.roc | head -n 1 | cut -f 16  -d " "`
 		cc="$cc$x1 $x2 "
 	done
-	echo transcomb $aa $cc
+	echo $cc
 done

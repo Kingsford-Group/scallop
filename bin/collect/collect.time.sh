@@ -41,10 +41,12 @@ do
 			y1=`echo $t1 | cut -f 2 -d "m" | cut -f 1 -d "s"`
 
 			t2=`cat $file | grep "sys" | awk '{print $2}'`
-			x2=`echo $t1 | cut -f 1 -d "m"`
-			y2=`echo $t1 | cut -f 2 -d "m" | cut -f 1 -d "s"`
+			x2=`echo $t2 | cut -f 1 -d "m"`
+			y2=`echo $t2 | cut -f 2 -d "m" | cut -f 1 -d "s"`
 
 			tt=`echo "$x1 $x2 $y1 $y2" | awk '{print $1 * 60 + $2 * 60 + $3 + $4}'`
+			
+#echo $id stringtie $aa $abd $x1 $x2 $y1 $y2 $tt
 			cc="$cc$tt "
 		done
 		echo $id $stringtie $aa $cc

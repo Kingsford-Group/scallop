@@ -42,5 +42,5 @@ do
 		cc="$cc$x1 $x2 "
 	done
 
-	echo $level $id $cc
+	echo $id $cc
 done
