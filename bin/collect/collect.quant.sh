@@ -21,8 +21,8 @@ do
 	# scallop
 	for aa in `echo "tophat star hisat"`
 	do
-		x1=`cat ../$id.$aa/$scallop.$abd/gffmul.quant.acc | head -n $level | tail -n 1 | cut -f 13 -d " "`
-		x2=`cat ../$id.$aa/$scallop.$abd/gffmul.quant.acc | head -n $level | tail -n 1 | cut -f 16 -d " "`
+		x1=`cat ../$id.$aa/$scallop.$abd/gffmul.quant | head -n $level | tail -n 1 | cut -f 13 -d " "`
+		x2=`cat ../$id.$aa/$scallop.$abd/gffmul.quant | head -n $level | tail -n 1 | cut -f 16 -d " "`
 		cc="$cc$x1 $x2 "
 	done
 
@@ -37,8 +37,8 @@ do
 	# transcomb
 	for aa in `echo "tophat star"`
 	do
-		x1=`cat ../$id.$aa/$transcomb.$abd/gffmul.quant.acc | head -n $level | tail -n 1 | cut -f 13 -d " "`
-		x2=`cat ../$id.$aa/$transcomb.$abd/gffmul.quant.acc | head -n $level | tail -n 1 | cut -f 16 -d " "`
+		x1=`cat ../$id.$aa/$transcomb.$abd/gffmul.quant | head -n $level | tail -n 1 | cut -f 13 -d " "`
+		x2=`cat ../$id.$aa/$transcomb.$abd/gffmul.quant | head -n $level | tail -n 1 | cut -f 16 -d " "`
 		cc="$cc$x1 $x2 "
 	done
 
