@@ -230,6 +230,7 @@ int parse_arguments(int argc, const char ** argv)
 		{
 			min_transcript_coverage = atof(argv[i + 1]);
 			i++;
+			if(fabs(min_transcript_coverage - 1.0) < 0.01) min_transcript_coverage = 1.01;
 		}
 		else if(string(argv[i]) == "--min_single_exon_coverage")
 		{
