@@ -56,7 +56,7 @@ list="GSM981256.tophat \
 	  SRR315334.hisat \
 	  SRR534307.hisat"
 
-tag="B505"
+tag="B668"
 for x in `echo $list`
 do
 	id=`echo $x | cut -f 1 -d "."`
