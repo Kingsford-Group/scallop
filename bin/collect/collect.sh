@@ -13,8 +13,6 @@ do
 	cat ../$i.$tag/algo.summary >> $dir/venn.algo
 done
 
-exit
-
 for i in `cat ../list10`
 do
 	echo $i
@@ -27,5 +25,3 @@ done
 
 ./collect.class.sh > $dir/class.0.01
 ./collect.time.sh > $dir/time10
-
-
