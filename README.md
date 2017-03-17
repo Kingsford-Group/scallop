@@ -2,8 +2,11 @@
 Scallop is an accurate reference-based transcript assembler. Scallop features
 its high accuracy in assembling multi-exon transcripts as well as lowly
 expressed transcripts. Scallop achieves this improvement through a novel
-algorithm that unifies multiple objectives into a single optimization
-framework.
+algorithm that can be proved preserving all phasing paths from paired-end reads,
+while also achieves both transcripts parsimony and coverage deviation minimization.
+
+# Release
+Latest release, including both binary and source code, is [(here)](https://github.com/shaomingfu/scallop/releases).
 
 # Installation
 To install Scallop, you need to first download/compile 
