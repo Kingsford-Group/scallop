@@ -6,7 +6,7 @@ algorithm that can be proved preserving all phasing paths from paired-end reads,
 while also achieves both transcripts parsimony and coverage deviation minimization.
 
 # Release
-Latest release, including both binary and source code, is [(here)](https://github.com/shaomingfu/scallop/releases).
+Latest release, including both binary and source code, is [here](https://github.com/shaomingfu/scallop/releases).
 
 # Installation
 To install Scallop, you need to first download/compile 
