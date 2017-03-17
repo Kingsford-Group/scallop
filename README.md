@@ -9,8 +9,8 @@ while also achieves both transcripts parsimony and coverage deviation minimizati
 Latest release, including both binary and source code, is [here](https://github.com/shaomingfu/scallop/releases/tag/v0.9.1).
 
 # Installation
-To install Scallop, you need to first download/compile 
-htslib and Boost, setup the corresponding environmental variables,
+To install Scallop from the source code, you need to first download/compile 
+htslib, Boost and Clp, setup the corresponding environmental variables,
 and then compile the source code of Scallop.
 
 ## Install htslib
@@ -31,6 +31,15 @@ Set environment variable `BOOST_HOME` to indicate the directory of Boost.
 For example, for Unix platforms, do the following:
 ```
 export BOOST_HOME="/directory/to/your/boost/boost_1_60_0"
+```
+
+## Install Clp
+Download Clp [(license)](https://opensource.org/licenses/eclipse-1.0)
+from (https://projects.coin-or.org/Clp), compile and install it.
+Set environment variable `CLP_HOME` to indicate the installed directory.
+For example, for Unix platforms, do the following:
+```
+export CLP_HOME="/directory/to/your/clp/install"
 ```
 
 ## Compile Scallop
