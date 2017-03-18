@@ -14,7 +14,7 @@ scallop_LDFLAGS = -pthread -L$(GTFDIR) -L$(GRAPHDIR) -L$(UTILDIR) \
 scallop_LDADD = -lClp -lCoinUtils -lhts -lgtf -lgraph -lutil -lz
 
 ## static link
-#scallop_LDFLAGS = -pg -pthread -L$(GTFDIR) -L$(GRAPHDIR) -L$(UTILDIR) \
+#scallop_LDFLAGS = -pthread -L$(GTFDIR) -L$(GRAPHDIR) -L$(UTILDIR) \
 #				  -L$(HTSLIB)  
 
 #scallop_LDADD = $(CLP_HOME)/lib/libClp.a $(CLP_HOME)/lib/libCoinUtils.a \
