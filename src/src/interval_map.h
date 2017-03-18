@@ -4,6 +4,9 @@
 // boost::interval map
 #include "boost/icl/interval_map.hpp"
 #include "boost/icl/split_interval_map.hpp"
+
+#include <vector>
+
 using namespace boost;
 using namespace std;
 

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cfloat>
 #include <algorithm>
+#include <cmath>
 
 estimator::estimator(const splice_graph &g, const vector<path> &p)
 	: gr(g), paths(p)
