@@ -1,3 +1,9 @@
+/*
+Part of Scallop Transcript Assembler
+(c) 2017 by  Mingfu Shao, Carl Kingsford, and Carnegie Mellon University.
+See LICENSE for licensing.
+*/
+
 #include "matrix.h"
 
 vector<double> solve_linear_system(const vector< vector<double> > &A, const vector<double> &B)

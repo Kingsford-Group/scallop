@@ -1,3 +1,9 @@
+/*
+Part of Scallop Transcript Assembler
+(c) 2017 by  Mingfu Shao, Carl Kingsford, and Carnegie Mellon University.
+See LICENSE for licensing.
+*/
+
 #ifndef __ESTIMATOR_H__
 #define __ESTIMATOR_H__
 

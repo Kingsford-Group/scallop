@@ -1,3 +1,9 @@
+/*
+Part of Scallop Transcript Assembler
+(c) 2017 by  Mingfu Shao, Carl Kingsford, and Carnegie Mellon University.
+See LICENSE for licensing.
+*/
+
 #ifndef __INTERVAL_MAP_H__
 #define __INTERVAL_MAP_H__
 
