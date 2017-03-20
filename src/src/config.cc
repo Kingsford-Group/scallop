@@ -65,74 +65,7 @@ bool output_tex_files = false;
 string fixed_gene_name = "";
 int batch_bundle_size = 1000;
 bool verbose = false;
-
-int print_parameters()
-{
-	printf("parameters:\n");
-
-	// for bam file and reads
-	printf("min_flank_length = %d\n", min_flank_length);
-	printf("min_bundle_gap = %d\n", min_bundle_gap);
-	printf("min_num_hits_in_bundle = %d\n", min_num_hits_in_bundle);
-	printf("min_mapping_quality = %d\n", min_mapping_quality);
-	printf("min_splice_boundary_hits = %d\n", min_splice_boundary_hits);
-
-	// for identifying subgraphs
-	printf("min_subregion_gap = %d\n", min_subregion_gap);
-	printf("min_subregion_length = %d\n", min_subregion_length);
-	printf("min_subregion_overlap = %.2lf\n", min_subregion_overlap);
-
-	// for splice graph
-	printf("max_intron_contamination_coverage = %.2lf\n", max_intron_contamination_coverage);
-	printf("min_surviving_edge_weight = %.2lf\n", min_surviving_edge_weight);
-	printf("min_transcript_coverage = %.2lf\n", min_transcript_coverage);
-	printf("min_single_exon_coverage = %.2lf\n", min_single_exon_coverage);
-	printf("min_transcript_numreads = %.2lf\n", min_transcript_numreads);
-	printf("min_transcript_length = %d\n", min_transcript_length);
-	printf("min_exon_length = %d\n", min_exon_length);
-	printf("max_num_exons = %d\n", max_num_exons);
-
-	// for subsetsum and router
-	printf("max_dp_table_size = %d\n", max_dp_table_size);
-	printf("min_router_count = %d\n", min_router_count);
-
-	// for simulation
-	printf("simulation_num_vertices = %d\n", simulation_num_vertices);
-	printf("simulation_num_edges = %d\n", simulation_num_edges);
-	printf("simulation_max_edge_weight = %d\n", simulation_max_edge_weight);
-
-	// for input and output
-	printf("algo = %s\n", algo.c_str());
-	printf("input_file = %s\n", input_file.c_str());
-	printf("ref_file = %s\n", ref_file.c_str());
-	printf("ref_file1 = %s\n", ref_file1.c_str());
-	printf("ref_file2 = %s\n", ref_file2.c_str());
-	printf("output_file = %s\n", output_file.c_str());
-
-	// for controling
-	printf("library_type = %d\n", library_type);
-	printf("output_tex_files = %c\n", output_tex_files ? 'T' : 'F');
-	printf("fixed_gene_name = %s\n", fixed_gene_name.c_str());
-	printf("use_second_alignment = %c\n", use_second_alignment ? 'T' : 'F');
-	printf("uniquely_mapped_only = %c\n", uniquely_mapped_only ? 'T' : 'F');
-	printf("verbose = %c\n", verbose ? 'T' : 'F');
-	printf("batch_bundle_size = %d\n", batch_bundle_size);
-
-	printf("\n");
-
-	return 0;
-}
-
-int print_command_line(int argc, const char ** argv)
-{
-	printf("command line: ");
-	for(int i = 0; i < argc; i++)
-	{
-		printf("%s ", argv[i]);
-	}
-	printf("\n");
-	return 0;
-}
+string version = "v0.9.3";
 
 int parse_arguments(int argc, const char ** argv)
 {
@@ -182,6 +115,19 @@ int parse_arguments(int argc, const char ** argv)
 		}
 
 		// user specified
+		else if(string(argv[i]) == "--version")
+		{
+			printf("%s\n", version.c_str());
+			exit(0);
+		}
+		else if(string(argv[i]) == "--help")
+		{
+			print_copyright();
+			print_help();
+			printf("\n");
+			print_logo();
+			exit(0);
+		}
 		else if(string(argv[i]) == "--min_flank_length")
 		{
 			min_flank_length = atoi(argv[i + 1]);
@@ -316,6 +262,75 @@ int parse_arguments(int argc, const char ** argv)
 	return 0;
 }
 
+int print_parameters()
+{
+	printf("parameters:\n");
+
+	// for bam file and reads
+	printf("min_flank_length = %d\n", min_flank_length);
+	printf("min_bundle_gap = %d\n", min_bundle_gap);
+	printf("min_num_hits_in_bundle = %d\n", min_num_hits_in_bundle);
+	printf("min_mapping_quality = %d\n", min_mapping_quality);
+	printf("min_splice_boundary_hits = %d\n", min_splice_boundary_hits);
+
+	// for identifying subgraphs
+	printf("min_subregion_gap = %d\n", min_subregion_gap);
+	printf("min_subregion_length = %d\n", min_subregion_length);
+	printf("min_subregion_overlap = %.2lf\n", min_subregion_overlap);
+
+	// for splice graph
+	printf("max_intron_contamination_coverage = %.2lf\n", max_intron_contamination_coverage);
+	printf("min_surviving_edge_weight = %.2lf\n", min_surviving_edge_weight);
+	printf("min_transcript_coverage = %.2lf\n", min_transcript_coverage);
+	printf("min_single_exon_coverage = %.2lf\n", min_single_exon_coverage);
+	printf("min_transcript_numreads = %.2lf\n", min_transcript_numreads);
+	printf("min_transcript_length = %d\n", min_transcript_length);
+	printf("min_exon_length = %d\n", min_exon_length);
+	printf("max_num_exons = %d\n", max_num_exons);
+
+	// for subsetsum and router
+	printf("max_dp_table_size = %d\n", max_dp_table_size);
+	printf("min_router_count = %d\n", min_router_count);
+
+	// for simulation
+	printf("simulation_num_vertices = %d\n", simulation_num_vertices);
+	printf("simulation_num_edges = %d\n", simulation_num_edges);
+	printf("simulation_max_edge_weight = %d\n", simulation_max_edge_weight);
+
+	// for input and output
+	printf("algo = %s\n", algo.c_str());
+	printf("input_file = %s\n", input_file.c_str());
+	printf("ref_file = %s\n", ref_file.c_str());
+	printf("ref_file1 = %s\n", ref_file1.c_str());
+	printf("ref_file2 = %s\n", ref_file2.c_str());
+	printf("output_file = %s\n", output_file.c_str());
+
+	// for controling
+	printf("library_type = %d\n", library_type);
+	printf("output_tex_files = %c\n", output_tex_files ? 'T' : 'F');
+	printf("fixed_gene_name = %s\n", fixed_gene_name.c_str());
+	printf("use_second_alignment = %c\n", use_second_alignment ? 'T' : 'F');
+	printf("uniquely_mapped_only = %c\n", uniquely_mapped_only ? 'T' : 'F');
+	printf("verbose = %c\n", verbose ? 'T' : 'F');
+	printf("batch_bundle_size = %d\n", batch_bundle_size);
+
+	printf("\n");
+
+	return 0;
+}
+
+int print_command_line(int argc, const char ** argv)
+{
+	printf("command line: ");
+	for(int i = 0; i < argc; i++)
+	{
+		printf("%s ", argv[i]);
+	}
+	printf("\n");
+	return 0;
+}
+
+
 int print_logo()
 {
 	printf("      ___           ___           ___                                       ___           ___    \n");
@@ -340,16 +355,24 @@ int print_help()
 	printf("Usage: scallop -i <bam-file> -o <gtf-file> [options]\n");
 	printf("\n");
 	printf("Options:\n");
+	printf(" %-27s  %s\n", "--help",  "print usage of Scallop and exit");
+	printf(" %-27s  %s\n", "--version",  "print version of Scallop and exit");
 	printf(" %-27s  %s\n", "--library_type",  "{first, second, unstranded}, default: unstranded");
-	printf(" %-27s  %s\n", "--min_transcript_coverage",  "the minimum coverage required to output a multi-exon transcript, default: 1.01");
-	printf(" %-27s  %s\n", "--min_single_exon_coverage",  "the minimum coverage required to output a single-exon transcript, default: 20");
+	printf(" %-27s  %s\n", "--min_transcript_coverage",  "minimum coverage required to output a multi-exon transcript, default: 1.01");
+	printf(" %-27s  %s\n", "--min_single_exon_coverage",  "minimum coverage required to output a single-exon transcript, default: 20");
 	printf(" %-27s  %s\n", "--min_exon_length",  "default: 50");
-	printf(" %-27s  %s\n", "--min_transcript_length",  "default: 250, the minimum length of a transcript would be");
+	printf(" %-27s  %s\n", "--min_transcript_length",  "default: 250, minimum length of a transcript would be");
 	printf(" %-27s  %s\n", "",  "--min_transcript_length + --min_exon_length * num-of-exons-in-this-transcript");
 	printf(" %-27s  %s\n", "--min_mapping_quality",  "ignore reads with mapping quality less than this value, default: 1");
-	printf(" %-27s  %s\n", "--min_bundle_gap",  "the minimum distances required to start a new bundle, default: 50");
-	printf(" %-27s  %s\n", "--min_num_hits_in_bundle",  "the minimum number of reads required in a bundle, default: 20");
-	printf(" %-27s  %s\n", "--min_flank_length",  "the minimum match length required in each side for a spliced read, default: 3");
-	printf(" %-27s  %s\n", "--min_splice_bundary_hits",  "the minimum number of spliced reads required to support a junction, default: 1");
+	printf(" %-27s  %s\n", "--min_bundle_gap",  "minimum distances required to start a new bundle, default: 50");
+	printf(" %-27s  %s\n", "--min_num_hits_in_bundle",  "minimum number of reads required in a bundle, default: 20");
+	printf(" %-27s  %s\n", "--min_flank_length",  "minimum match length required in each side for a spliced read, default: 3");
+	printf(" %-27s  %s\n", "--min_splice_bundary_hits",  "minimum number of spliced reads required to support a junction, default: 1");
+	return 0;
+}
+
+int print_copyright()
+{
+	printf("Scallop %s (c) 2017 Mingfu Shao, Carl Kingsford, and Carnegie Mellon University\n", version.c_str());
 	return 0;
 }

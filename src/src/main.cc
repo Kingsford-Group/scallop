@@ -25,20 +25,17 @@ int main(int argc, const char **argv)
 
 	if(argc == 1)
 	{
+		print_copyright();
 		print_help();
 		printf("\n");
 		print_logo();
 		return 0;
 	}
 
-	print_command_line(argc, argv);
 	parse_arguments(argc, argv);
-	print_parameters();
 
 	if(input_file == "") return 0;
-
-	string s = input_file.substr(input_file.size() - 3, 3);
-	if(s != "bam") return 0;
+	if(output_file == "") return 0;
 
 	assembler asmb;
 	asmb.assemble();
