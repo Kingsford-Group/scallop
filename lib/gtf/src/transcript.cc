@@ -193,8 +193,8 @@ int transcript::write(ostream &fout) const
 	fout<<"gene_id \""<<gene_id.c_str()<<"\"; ";
 	fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
 	fout<<"RPKM \""<<RPKM<<"\"; ";
-	fout<<"FPKM \""<<FPKM<<"\"; ";
-	fout<<"TPM \""<<TPM<<"\"; ";
+	//fout<<"FPKM \""<<FPKM<<"\"; ";
+	//fout<<"TPM \""<<TPM<<"\"; ";
 	fout<<"cov \""<<coverage<<"\";"<<endl;
 
 	for(int k = 0; k < exons.size(); k++)
@@ -209,11 +209,11 @@ int transcript::write(ostream &fout) const
 		fout<<".\t";						// frame
 		fout<<"gene_id \""<<gene_id.c_str()<<"\"; ";
 		fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
-		fout<<"exon \""<<k + 1<<"\"; ";
-		fout<<"RPKM \""<<RPKM<<"\"; ";
-		fout<<"FPKM \""<<FPKM<<"\"; ";
-		fout<<"TPM \""<<TPM<<"\"; ";
-		fout<<"cov \""<<coverage<<"\";"<<endl;
+		fout<<"exon \""<<k + 1<<"\"; "<<endl;
+		//fout<<"RPKM \""<<RPKM<<"\"; ";
+		//fout<<"FPKM \""<<FPKM<<"\"; ";
+		//fout<<"TPM \""<<TPM<<"\"; ";
+		//fout<<"cov \""<<coverage<<"\";"<<endl;
 	}
 	return 0;
 }
