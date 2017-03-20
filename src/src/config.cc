@@ -243,10 +243,7 @@ int parse_arguments(int argc, const char ** argv)
 		}
 		else if(string(argv[i]) == "--verbose")
 		{
-			string s(argv[i + 1]);
-			if(s == "true") verbose = true;
-			else verbose = false;
-			i++;
+			verbose = true;
 		}
 		else if(string(argv[i]) == "--batch_bundle_size")
 		{
@@ -355,19 +352,20 @@ int print_help()
 	printf("Usage: scallop -i <bam-file> -o <gtf-file> [options]\n");
 	printf("\n");
 	printf("Options:\n");
-	printf(" %-27s  %s\n", "--help",  "print usage of Scallop and exit");
-	printf(" %-27s  %s\n", "--version",  "print version of Scallop and exit");
-	printf(" %-27s  %s\n", "--library_type",  "{first, second, unstranded}, default: unstranded");
-	printf(" %-27s  %s\n", "--min_transcript_coverage",  "minimum coverage required to output a multi-exon transcript, default: 1.01");
-	printf(" %-27s  %s\n", "--min_single_exon_coverage",  "minimum coverage required to output a single-exon transcript, default: 20");
-	printf(" %-27s  %s\n", "--min_exon_length",  "default: 50");
-	printf(" %-27s  %s\n", "--min_transcript_length",  "default: 250, minimum length of a transcript would be");
-	printf(" %-27s  %s\n", "",  "--min_transcript_length + --min_exon_length * num-of-exons-in-this-transcript");
-	printf(" %-27s  %s\n", "--min_mapping_quality",  "ignore reads with mapping quality less than this value, default: 1");
-	printf(" %-27s  %s\n", "--min_bundle_gap",  "minimum distances required to start a new bundle, default: 50");
-	printf(" %-27s  %s\n", "--min_num_hits_in_bundle",  "minimum number of reads required in a bundle, default: 20");
-	printf(" %-27s  %s\n", "--min_flank_length",  "minimum match length required in each side for a spliced read, default: 3");
-	printf(" %-27s  %s\n", "--min_splice_bundary_hits",  "minimum number of spliced reads required to support a junction, default: 1");
+	printf(" %-42s  %s\n", "--help",  "print usage of Scallop and exit");
+	printf(" %-42s  %s\n", "--version",  "print current version of Scallop and exit");
+	printf(" %-42s  %s\n", "--verbose",  "switch to output log information, default: do not print");
+	printf(" %-42s  %s\n", "--library_type <first, second, unstranded>",  "library type of the sample, default: unstranded");
+	printf(" %-42s  %s\n", "--min_transcript_coverage <float>",  "minimum coverage required for a multi-exon transcript, default: 1.01");
+	printf(" %-42s  %s\n", "--min_single_exon_coverage <float>",  "minimum coverage required for a single-exon transcript, default: 20");
+	printf(" %-42s  %s\n", "--min_exon_length <integer>",  "default: 50");
+	printf(" %-42s  %s\n", "--min_transcript_length <integer>",  "default: 250, minimum length of a transcript would be");
+	printf(" %-42s  %s\n", "",  "--min_transcript_length + --min_exon_length * num-of-exons");
+	printf(" %-42s  %s\n", "--min_mapping_quality <integer>",  "ignore reads with mapping quality less than this value, default: 1");
+	printf(" %-42s  %s\n", "--min_bundle_gap <integer>",  "minimum distances required to start a new bundle, default: 50");
+	printf(" %-42s  %s\n", "--min_num_hits_in_bundle <integer>",  "minimum number of reads required in a bundle, default: 20");
+	printf(" %-42s  %s\n", "--min_flank_length <integer>",  "minimum match length in each side for a spliced read, default: 3");
+	printf(" %-42s  %s\n", "--min_splice_bundary_hits <integer>",  "minimum number of spliced reads required for a junction, default: 1");
 	return 0;
 }
 

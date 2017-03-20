@@ -178,8 +178,8 @@ int assembler::assemble(const bundle_base &bb)
 		string gid = "bundle." + tostring(index) + "." + tostring(k);
 		if(fixed_gene_name != "" && gid != fixed_gene_name) continue;
 
-		if(k == 0 || fixed_gene_name != "") bd.print(index);
-		if(k == 0 || fixed_gene_name != "") sg.print();
+		if(verbose && (k == 0 || fixed_gene_name != "")) bd.print(index);
+		if(verbose && (k == 0 || fixed_gene_name != "")) sg.print();
 
 		if(algo == "empty") continue;
 

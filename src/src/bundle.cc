@@ -625,7 +625,7 @@ int bundle::extend_isolated_end_boundaries()
 		gr.set_edge_weight(e, w);
 		gr.set_edge_info(e, edge_info());
 		
-		printf("extend isolated end boundary: (%d, %.2lf) -- (%.2lf) -- (%d, %.2lf)\n", s, gr.get_vertex_weight(s),
+		if(verbose) printf("extend isolated end boundary: (%d, %.2lf) -- (%.2lf) -- (%d, %.2lf)\n", s, gr.get_vertex_weight(s),
 				gr.get_edge_weight(e1), i, gr.get_vertex_weight(i));
 
 	}
@@ -662,7 +662,7 @@ int bundle::extend_isolated_start_boundaries()
 		gr.set_edge_weight(e, w);
 		gr.set_edge_info(e, edge_info());
 		
-		printf("extend isolated start boundary: (%d, %.2lf) -- (%.2lf) -- (%d, %.2lf)\n", i, gr.get_vertex_weight(i),
+		if(verbose) printf("extend isolated start boundary: (%d, %.2lf) -- (%.2lf) -- (%d, %.2lf)\n", i, gr.get_vertex_weight(i),
 				gr.get_edge_weight(e2), t, gr.get_vertex_weight(t));
 
 		gr.remove_edge(e1);
@@ -844,7 +844,7 @@ int bundle::keep_surviving_edges()
 
 	for(int i = 0; i < ve.size(); i++)
 	{
-		printf("remove edge (%d, %d), weight = %.2lf\n", ve[i]->source(), ve[i]->target(), gr.get_edge_weight(ve[i]));
+		if(verbose) printf("remove edge (%d, %d), weight = %.2lf\n", ve[i]->source(), ve[i]->target(), gr.get_edge_weight(ve[i]));
 		gr.remove_edge(ve[i]);
 	}
 
@@ -884,7 +884,7 @@ int bundle::remove_inner_start_boundaries()
 
 		if(b1 == false && b2 == false) continue;
 
-		printf("remove inner start boundary: vertex = %d, weight = %.2lf, length = %d, pos = %d-%d, t = %d, t.left = %d\n",
+		if(verbose) printf("remove inner start boundary: vertex = %d, weight = %.2lf, length = %d, pos = %d-%d, t = %d, t.left = %d\n",
 				i, wv, vi.length, vi.lpos, vi.rpos, t, gr.get_vertex_info(t).lpos);
 
 		gr.clear_vertex(i);
@@ -927,7 +927,7 @@ int bundle::remove_inner_end_boundaries()
 
 		if(b1 == false && b2 == false) continue;
 
-		printf("remove inner end boundary: vertex = %d, weight = %.2lf, length = %d, pos = %d-%d, s = %d, s.right = %d\n",
+		if(verbose) printf("remove inner end boundary: vertex = %d, weight = %.2lf, length = %d, pos = %d-%d, s = %d, s.right = %d\n",
 				i, wv, vi.length, vi.lpos, vi.rpos, s, gr.get_vertex_info(s).rpos);
 
 
@@ -967,7 +967,7 @@ int bundle::remove_intron_contamination()
 		if(wv > we) continue;
 		if(wv > max_intron_contamination_coverage) continue;
 
-		printf("clear intron contamination %d, weight = %.2lf, length = %d, edge weight = %.2lf\n", i, wv, vi.length, we);
+		if(verbose) printf("clear intron contamination %d, weight = %.2lf, length = %d, edge weight = %.2lf\n", i, wv, vi.length, we);
 
 		gr.clear_vertex(i);
 	}
