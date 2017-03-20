@@ -70,6 +70,9 @@ Scallop support the following parameters:
 
 Parameters | Default Value | Description
 ------------ | ------------- | ----------
+ --help  |  | print usage of Scallop and exit
+ --version | | print version of Scallop and exit
+ --verbose | | switch to output log information, default: do not print log
  --library_type               | unstranded | chosen from {first, second, unstranded}
  --min_transcript_coverage    | 1.01 | the minimum coverage required to output a multi-exon transcript
   --min_single_exon_coverage   | 20 | the minimum coverage required to output a single-exon transcript
