@@ -72,7 +72,7 @@ Parameters | Default Value | Description
 ------------ | ------------- | ----------
  --help  |  | print usage of Scallop and exit
  --version | | print version of Scallop and exit
- --verbose | 1 | chosen from {0, 1, }; 0: no log; 1: one line for each splice graph; 2: details of graph decomposition
+ --verbose | 1 | chosen from {0, 1, 2}; 0: quiet; 1: one line for each splice graph; 2: details of graph decomposition
  --library_type               | unstranded | chosen from {first, second, unstranded}
  --min_transcript_coverage    | 1.01 | the minimum coverage required to output a multi-exon transcript
   --min_single_exon_coverage   | 20 | the minimum coverage required to output a single-exon transcript
