@@ -6,7 +6,7 @@ algorithm that can be proved preserving all phasing paths from paired-end reads,
 while also achieves both transcripts parsimony and coverage deviation minimization.
 
 # Release
-Latest release, including both binary and source code, is [here](https://github.com/Kingsford-Group/scallop/releases/tag/v0.9.5).
+Latest release, including both binary and source code, is [here](https://github.com/Kingsford-Group/scallop/releases/tag/v0.9.6).
 
 # Installation
 To install Scallop from the source code, you need to first download/compile 
@@ -72,7 +72,7 @@ Parameters | Default Value | Description
 ------------ | ------------- | ----------
  --help  |  | print usage of Scallop and exit
  --version | | print version of Scallop and exit
- --verbose | | switch to output log information, default: do not print log
+ --verbose | 1 | chosen from {0, 1, }; 0: no log; 1: one line for each splice graph; 2: details of graph decomposition
  --library_type               | unstranded | chosen from {first, second, unstranded}
  --min_transcript_coverage    | 1.01 | the minimum coverage required to output a multi-exon transcript
   --min_single_exon_coverage   | 20 | the minimum coverage required to output a single-exon transcript
