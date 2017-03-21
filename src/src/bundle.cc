@@ -26,7 +26,7 @@ bundle::~bundle()
 
 int bundle::build()
 {
-	if(library_type == UNSTRANDED) compute_strand();
+	compute_strand();
 
 	check_left_ascending();
 
@@ -61,6 +61,8 @@ int bundle::build()
 
 int bundle::compute_strand()
 {
+	if(library_type != UNSTRANDED && strand != '.') return 0;
+
 	int n0 = 0, np = 0, nq = 0;
 	for(int i = 0; i < hits.size(); i++)
 	{
@@ -70,7 +72,8 @@ int bundle::compute_strand()
 	}
 
 	if(np > nq) strand = '+';
-	if(np < nq) strand = '-';
+	else if(np < nq) strand = '-';
+	else strand = '.';
 
 	return 0;
 }
@@ -103,8 +106,7 @@ int bundle::build_junctions()
 	map< int64_t, vector<int> > m;
 	for(int i = 0; i < hits.size(); i++)
 	{
-		vector<int64_t> v;
-		hits[i].get_splice_positions(v);
+		vector<int64_t> v = hits[i].spos;
 		if(v.size() == 0) continue;
 
 		//hits[i].print();

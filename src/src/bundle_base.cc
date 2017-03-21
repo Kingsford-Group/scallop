@@ -36,7 +36,7 @@ int bundle_base::add_hit(const hit &ht)
 	assert(tid == ht.tid);
 
 	// set strand
-	if(strand == '.') strand = ht.strand;
+	if(hits.size() <= 1) strand = ht.strand;
 	assert(strand == ht.strand);
 
 	// add intervals

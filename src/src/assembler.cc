@@ -52,7 +52,7 @@ int assembler::assemble()
 
 		hit ht(b1t);
 
-		if(ht.strand == '.') continue;	// TODO
+		//if(ht.strand == '.') continue;
 		if(uniquely_mapped_only == true && ht.nh != 1) continue;
 
 		qlen += ht.qlen;
@@ -82,9 +82,8 @@ int assembler::add_hit(const hit &ht)
 	{
 		bundle_base &bb = vbb[i];
 		assert(bb.hits.size() >= 1);
-		assert(bb.strand != '.');
+		//assert(bb.strand != '.');
 
-		//if(bb.overlap(ht) == false) continue;
 		if(ht.strand != bb.strand) continue;
 		if(ht.tid != bb.tid) continue;
 		if(ht.pos > bb.rpos + min_bundle_gap) continue;

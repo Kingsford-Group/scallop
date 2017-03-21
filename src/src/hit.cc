@@ -29,6 +29,7 @@ hit::hit(const hit &h)
 	qlen = h.qlen;
 	qname = h.qname;
 	strand = h.strand;
+	spos = h.spos;
 	xs = h.xs;
 	hi = h.hi;
 	memcpy(cigar, h.cigar, sizeof cigar);
@@ -54,10 +55,6 @@ hit::hit(bam1_t *b)
 	memcpy(cigar, bam_get_cigar(b), 4 * n_cigar);
 
 	// get strandness
-	/*
-	if(bam_is_rev(b) == true) strand = '-';
-	else strand = '+';
-	*/
 	bool concordant = false;
 	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) concordant = true;		// F1R2
 	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) concordant = true;		// R1F2
@@ -85,14 +82,29 @@ hit::hit(bam1_t *b)
 	uint8_t *p1 = bam_aux_get(b, "XS");
 	if(p1 && (*p1) == 'A') xs = bam_aux2A(p1);
 
-	//if(xs == '-' || xs == '+') strand = xs;
+	// build splice positions 
+	spos.clear();
+	int32_t p = pos;
+	int32_t q = 0;
+	//uint8_t *seq = bam_get_seq(b);
+    for(int k = 0; k < n_cigar; k++)
+	{
+		if (bam_cigar_type(bam_cigar_op(cigar[k]))&2)
+			p += bam_cigar_oplen(cigar[k]);
 
-	/*
-	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '-';
-	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '-';
-	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '+';
-	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '+';
-	*/
+		if (bam_cigar_type(bam_cigar_op(cigar[k]))&1)
+			q += bam_cigar_oplen(cigar[k]);
+
+		if(k == 0 || k == n_cigar - 1) continue;
+		if(bam_cigar_op(cigar[k]) != BAM_CREF_SKIP) continue;
+		if(bam_cigar_op(cigar[k-1]) != BAM_CMATCH) continue;
+		if(bam_cigar_op(cigar[k+1]) != BAM_CMATCH) continue;
+		if(bam_cigar_oplen(cigar[k-1]) < min_flank_length) continue;
+		if(bam_cigar_oplen(cigar[k+1]) < min_flank_length) continue;
+
+		int32_t s = p - bam_cigar_oplen(cigar[k]);
+		spos.push_back(pack(s, p));
+	}
 }
 
 bool hit::operator<(const hit &h) const
@@ -119,28 +131,6 @@ int hit::print() const
 			qname.c_str(), pos, rpos, mpos, sstr.str().c_str(), flag, qual, strand, isize, qlen, hi);
 
 	return 0;
-}
-
-int hit::get_splice_positions(vector<int64_t> &v) const
-{
-	v.clear();
-	int32_t p = pos;
-    for(int k = 0; k < n_cigar; k++)
-	{
-		if (bam_cigar_type(bam_cigar_op(cigar[k]))&2)
-			p += bam_cigar_oplen(cigar[k]);
-
-		if(k == 0 || k == n_cigar - 1) continue;
-		if(bam_cigar_op(cigar[k]) != BAM_CREF_SKIP) continue;
-		if(bam_cigar_op(cigar[k-1]) != BAM_CMATCH) continue;
-		if(bam_cigar_op(cigar[k+1]) != BAM_CMATCH) continue;
-		if(bam_cigar_oplen(cigar[k-1]) < min_flank_length) continue;
-		if(bam_cigar_oplen(cigar[k+1]) < min_flank_length) continue;
-
-		int32_t s = p - bam_cigar_oplen(cigar[k]);
-		v.push_back(pack(s, p));
-	}
-    return 0;
 }
 
 int hit::get_mid_intervals(vector<int64_t> &vm, vector<int64_t> &vi, vector<int64_t> &vd) const
