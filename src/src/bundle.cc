@@ -1001,6 +1001,8 @@ int bundle::print(int index)
 	printf("tid = %d, #hits = %lu, #partial-exons = %lu, range = %s:%d-%d, orient = %c (%d, %d, %d)\n",
 			tid, hits.size(), pexons.size(), chrm.c_str(), lpos, rpos, strand, n0, np, nq);
 
+	if(verbose <= 1) return 0;
+
 	// print hits
 	//for(int i = 0; i < hits.size(); i++) hits[i].print();
 
@@ -1021,6 +1023,8 @@ int bundle::print(int index)
 	{
 		pexons[i].print(i);
 	}
+
+	printf("\n");
 
 	// print hyper-edges
 	//hs.print();

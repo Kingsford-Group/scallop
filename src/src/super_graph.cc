@@ -471,5 +471,6 @@ int super_graph::print()
 		printf("subgraph %d, #edges = %lu, #vertices = %lu / %lu, #starting = %d, #ending = %d, range = [%d, %d)\n", 
 				i, gr.num_edges(), gr.num_vertices() - 2, root.num_vertices() - 2, d0, dn, lpos, rpos);
 	}
+	printf("\n");
 	return 0;
 }

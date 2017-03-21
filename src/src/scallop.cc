@@ -37,7 +37,7 @@ scallop::~scallop()
 int scallop::assemble()
 {
 	int c = classify();
-	if(verbose >= 1) printf("\nprocess bundle %s type = %d, vertices = %lu, edges = %lu\n", name.c_str(), c, gr.num_vertices(), gr.num_edges());
+	if(verbose >= 1) printf("process splice graph %s type = %d, vertices = %lu, edges = %lu\n", name.c_str(), c, gr.num_vertices(), gr.num_edges());
 
 	while(true)
 	{	

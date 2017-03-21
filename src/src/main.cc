@@ -43,7 +43,7 @@ int main(int argc, const char **argv)
 		printf("\n");
 		print_command_line(argc, argv);
 		printf("\n");
-		print_parameters();
+		//print_parameters();
 	}
 
 	assembler asmb;
