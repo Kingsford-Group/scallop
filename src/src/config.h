@@ -90,7 +90,7 @@ extern int max_num_bundles;
 extern int library_type;
 extern int min_gtf_transcripts_num;
 extern int batch_bundle_size;
-extern bool verbose;
+extern int verbose;
 extern string version;
 
 // parse arguments

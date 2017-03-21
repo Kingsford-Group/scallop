@@ -37,7 +37,7 @@ scallop::~scallop()
 int scallop::assemble()
 {
 	int c = classify();
-	if(verbose) printf("\nprocess bundle %s type = %d, vertices = %lu, edges = %lu\n", name.c_str(), c, gr.num_vertices(), gr.num_edges());
+	if(verbose >= 1) printf("\nprocess bundle %s type = %d, vertices = %lu, edges = %lu\n", name.c_str(), c, gr.num_vertices(), gr.num_edges());
 
 	while(true)
 	{	
@@ -91,7 +91,7 @@ int scallop::assemble()
 	collect_existing_st_paths();
 	greedy_decompose();
 
-	if(verbose) printf("finish assemble bundle %s\n\n", name.c_str());
+	if(verbose >= 2) printf("finish assemble bundle %s\n\n", name.c_str());
 	return 0;
 }
 
@@ -131,7 +131,7 @@ bool scallop::resolve_small_edges(double max_ratio)
 		if(r < 0.01)
 		{
 			double w = gr.get_edge_weight(i2e[e]);
-			if(verbose) printf("resolve small edge, edge = %d, weight = %.2lf, ratio = %.2lf, vertex = (%d, %d), degree = (%d, %d)\n", 
+			if(verbose >= 2) printf("resolve small edge, edge = %d, weight = %.2lf, ratio = %.2lf, vertex = (%d, %d), degree = (%d, %d)\n", 
 					e, w, r, s, t, gr.out_degree(s), gr.in_degree(t));
 
 			remove_edge(e);
@@ -153,7 +153,7 @@ bool scallop::resolve_small_edges(double max_ratio)
 	double sw = gr.get_edge_weight(i2e[se]);
 	int s = i2e[se]->source();
 	int t = i2e[se]->target();
-	if(verbose) printf("resolve small edge, edge = %d, weight = %.2lf, ratio = %.2lf, vertex = (%d, %d), degree = (%d, %d)\n", 
+	if(verbose >= 2) printf("resolve small edge, edge = %d, weight = %.2lf, ratio = %.2lf, vertex = (%d, %d), degree = (%d, %d)\n", 
 			se, sw, ratio, s, t, gr.out_degree(s), gr.in_degree(t));
 
 	remove_edge(se);
@@ -201,7 +201,7 @@ bool scallop::resolve_splittable_vertex(int type, int degree, double max_ratio)
 
 	if(root == -1) return false;
 
-	if(verbose) printf("resolve splittable vertex, type = %d, degree = %d, vertex = %d, ratio = %.2lf, degree = (%d, %d)\n", 
+	if(verbose >= 2) printf("resolve splittable vertex, type = %d, degree = %d, vertex = %d, ratio = %.2lf, degree = (%d, %d)\n", 
 			type, degree, root, ratio, gr.in_degree(root), gr.out_degree(root));
 
 	split_vertex(root, eqns[0].s, eqns[0].t);
@@ -239,7 +239,7 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree, double max_ratio
 
 		if(rt.ratio < -0.5)
 		{
-			if(verbose) printf("resolve unsplittable vertex, type = %d, degree = %d, vertex = %d, ratio = %.3lf, degree = (%d, %d)\n",
+			if(verbose >= 2) printf("resolve unsplittable vertex, type = %d, degree = %d, vertex = %d, ratio = %.3lf, degree = (%d, %d)\n",
 					type, degree, i, rt.ratio, gr.in_degree(i), gr.out_degree(i));
 			decompose_vertex_extend(i, rt.pe2w);
 			flag = true;
@@ -256,7 +256,7 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree, double max_ratio
 	if(flag == true) return true;
 	if(root == -1) return false;
 
-	if(verbose) printf("resolve unsplittable vertex, type = %d, degree = %d, vertex = %d, ratio = %.3lf, degree = (%d, %d)\n",
+	if(verbose >= 2) printf("resolve unsplittable vertex, type = %d, degree = %d, vertex = %d, ratio = %.3lf, degree = (%d, %d)\n",
 			type, degree, root, ratio, gr.in_degree(root), gr.out_degree(root));
 
 	decompose_vertex_extend(root, pe2w);
@@ -299,7 +299,7 @@ bool scallop::resolve_hyper_edge(int fsize)
 	if(v1.size() == 0 || v2.size() == 0) return false;
 	assert(v1.size() == 1 || v2.size() == 1);
 
-	if(verbose) printf("resolve hyper edge, fsize = %d, vertex = %d, degree = (%d, %d), hyper edge = (%lu, %lu)\n",
+	if(verbose >= 2) printf("resolve hyper edge, fsize = %d, vertex = %d, degree = (%d, %d), hyper edge = (%lu, %lu)\n",
 			fsize, root, gr.in_degree(root), gr.out_degree(root), v1.size(), v2.size());
 
 	balance_vertex(root);
@@ -378,7 +378,7 @@ bool scallop::resolve_trivial_vertex(int type, double jump_ratio)
 
 		if(r < 1.02)
 		{
-			if(verbose) printf("resolve trivial vertex %d, type = %d, ratio = %.2lf, degree = (%d, %d)\n", i, type, 
+			if(verbose >= 2) printf("resolve trivial vertex %d, type = %d, ratio = %.2lf, degree = (%d, %d)\n", i, type, 
 					r, gr.in_degree(i), gr.out_degree(i));
 
 			decompose_trivial_vertex(i);
@@ -398,7 +398,7 @@ bool scallop::resolve_trivial_vertex(int type, double jump_ratio)
 	if(flag == true) return true;
 	if(root == -1) return false;
 
-	if(verbose) printf("resolve trivial vertex %d, type = %d, ratio = %.2lf, degree = (%d, %d)\n", root, type, 
+	if(verbose >= 2) printf("resolve trivial vertex %d, type = %d, ratio = %.2lf, degree = (%d, %d)\n", root, type, 
 			ratio, gr.in_degree(root), gr.out_degree(root));
 
 	decompose_trivial_vertex(root);
@@ -431,7 +431,7 @@ bool scallop::resolve_single_trivial_vertex_fast(int i, double jump_ratio)
 	double r = compute_balance_ratio(i);
 	if(r >= jump_ratio) return false;
 
-	if(verbose) printf("resolve trivial vertex fast, vertex = %d, ratio = %.2lf, degree = (%d, %d)\n",
+	if(verbose >= 2) printf("resolve trivial vertex fast, vertex = %d, ratio = %.2lf, degree = (%d, %d)\n",
 			i, r, gr.in_degree(i), gr.out_degree(i));
 
 	decompose_trivial_vertex(i);
@@ -1297,7 +1297,7 @@ int scallop::greedy_decompose()
 		cnt++;
 	}
 	int n2 = paths.size();
-	if(verbose) printf("greedy decomposing produces %d / %d paths\n", n2 - n1, n2);
+	if(verbose >= 2) printf("greedy decomposing produces %d / %d paths\n", n2 - n1, n2);
 	return 0;
 }
 

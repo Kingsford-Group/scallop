@@ -37,12 +37,13 @@ int main(int argc, const char **argv)
 	if(input_file == "") return 0;
 	if(output_file == "") return 0;
 
-	if(verbose)
+	if(verbose >= 1)
 	{
 		print_copyright();
 		printf("\n");
 		print_command_line(argc, argv);
 		printf("\n");
+		print_parameters();
 	}
 
 	assembler asmb;

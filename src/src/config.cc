@@ -64,7 +64,7 @@ string output_file;
 bool output_tex_files = false;
 string fixed_gene_name = "";
 int batch_bundle_size = 1000;
-bool verbose = false;
+int verbose = 1;
 string version = "v0.9.5";
 
 int parse_arguments(int argc, const char ** argv)
@@ -243,7 +243,8 @@ int parse_arguments(int argc, const char ** argv)
 		}
 		else if(string(argv[i]) == "--verbose")
 		{
-			verbose = true;
+			verbose = atoi(argv[i + 1]);
+			i++;
 		}
 		else if(string(argv[i]) == "--batch_bundle_size")
 		{
@@ -308,7 +309,7 @@ int print_parameters()
 	printf("fixed_gene_name = %s\n", fixed_gene_name.c_str());
 	printf("use_second_alignment = %c\n", use_second_alignment ? 'T' : 'F');
 	printf("uniquely_mapped_only = %c\n", uniquely_mapped_only ? 'T' : 'F');
-	printf("verbose = %c\n", verbose ? 'T' : 'F');
+	printf("verbose = %d\n", verbose);
 	printf("batch_bundle_size = %d\n", batch_bundle_size);
 
 	printf("\n");
@@ -354,7 +355,7 @@ int print_help()
 	printf("Options:\n");
 	printf(" %-42s  %s\n", "--help",  "print usage of Scallop and exit");
 	printf(" %-42s  %s\n", "--version",  "print current version of Scallop and exit");
-	printf(" %-42s  %s\n", "--verbose",  "switch to output log information, default: do not print");
+	printf(" %-42s  %s\n", "--verbose <0, 1, 2>",  "0: no log; 1: one line for each graph; 2: detail for decomposition");
 	printf(" %-42s  %s\n", "--library_type <first, second, unstranded>",  "library type of the sample, default: unstranded");
 	printf(" %-42s  %s\n", "--min_transcript_coverage <float>",  "minimum coverage required for a multi-exon transcript, default: 1.01");
 	printf(" %-42s  %s\n", "--min_single_exon_coverage <float>",  "minimum coverage required for a single-exon transcript, default: 20");
