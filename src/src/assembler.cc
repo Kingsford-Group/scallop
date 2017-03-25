@@ -8,8 +8,8 @@ See LICENSE for licensing.
 #include <cassert>
 #include <sstream>
 
-#include "genome.h"
 #include "gtf.h"
+#include "genome1.h"
 #include "config.h"
 #include "assembler.h"
 #include "scallop.h"
@@ -66,12 +66,9 @@ int assembler::assemble()
 	process(0);
 	for(int i = 0; i < vbb.size(); i++) assemble(vbb[i]);
 
-	if(output_file == "") return 0;
-
-	double factor = 1e9 / qlen;
-	gm.assign_RPKM(factor);
-	gm.write(output_file);
-
+	merge_multi_exon_transcripts();
+	assign_RPKM();
+	
 	return 0;
 }
 
@@ -185,9 +182,11 @@ int assembler::assemble(const bundle_base &bb)
 		splice_graph &gr = sg.subs[k];
 		hyper_set &hs = sg.hss[k];
 
+		/*
 		if(ref_file != "") compare(gr, ref_file, "compare.tex");
 		if(ref_file1 != "" && bd.strand == '+') compare(gr, ref_file1, "compare1.tex");
 		if(ref_file2 != "" && bd.strand == '-') compare(gr, ref_file2, "compare2.tex");
+		*/
 
 		//if(gr.num_vertices() <= 3 && sg.subs.size() >= 2) continue;
 		//if(gr.num_vertices() <= 3 && bd.junctions.size() >= 1) continue;
@@ -210,15 +209,13 @@ int assembler::assemble(const bundle_base &bb)
 			pp.push_back(p);
 		}
 
-		gene gn;
-		bd.output_transcripts(gn, pp, gid);
+		vector<transcript> vv;
+		bd.output_transcripts(vv, pp, gid);
 
-		filter ft(gn.transcripts);
+		filter ft(vv);
 		ft.join();
 		ft.select();
-		gn.assign(ft.trs);
-
-		if(gn.transcripts.size() >= 1) gm.add_gene(gn);
+		if(ft.trs.size() >= 1) trsts.insert(trsts.end(), ft.trs.begin(), ft.trs.end());
 
 		if(fixed_gene_name != "" && gid == fixed_gene_name) terminate = true;
 		if(terminate == true) return 0;
@@ -227,29 +224,49 @@ int assembler::assemble(const bundle_base &bb)
 	return 0;
 }
 
-int assembler::filter_transcripts(gene &gn)
+int assembler::assign_RPKM()
 {
-	vector<transcript> v = gn.transcripts;
-	if(v.size() == 0) return 0;
-
-	transcript trst;
-	trst.transcript_id = "shaomingfu";
-	trst.coverage = 0.0;
-	for(int i = 0; i < v.size(); i++)
+	double factor = 1e9 / qlen;
+	for(int i = 0; i < trsts.size(); i++)
 	{
-		if(v[i].exons.size() != 1) continue;
-		if(v[i].coverage < trst.coverage) continue;
-		trst = v[i];
+		trsts[i].assign_RPKM(factor);
 	}
-	if(trst.transcript_id == "shaomingfu") return 0;
+	return 0;
+}
 
-	gn.clear();
-	gn.add_transcript(trst);
-	for(int i = 0; i < v.size(); i++)
+int assembler::merge_multi_exon_transcripts()
+{
+	vector<transcript> v1;
+	vector<transcript> v2;
+	for(int i = 0; i < trsts.size(); i++)
 	{
-		if(v[i].exons.size() == 1) continue;
-		gn.add_transcript(v[i]);
+		if(trsts[i].exons.size() <= 1) v1.push_back(trsts[i]);
+		else v2.push_back(trsts[i]);
 	}
+
+	genome1 gm;
+	gm.build(v2);
+	gm.merge();
+
+	for(int i = 0; i < gm.transcripts.size(); i++)
+	{
+		v1.push_back(gm.transcripts[i]);
+	}
+
+	trsts = v1;
+	return 0;
+}
+
+int assembler::write()
+{
+	ofstream fout(output_file.c_str());
+	if(fout.fail()) return 0;
+	for(int i = 0; i < trsts.size(); i++)
+	{
+		transcript &t = trsts[i];
+		t.write(fout);
+	}
+	fout.close();
 	return 0;
 }
 

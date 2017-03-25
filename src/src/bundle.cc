@@ -1099,6 +1099,19 @@ int bundle::output_transcript(ofstream &fout, const path &p, const string &gid, 
 	return 0;
 }
 
+int bundle::output_transcripts(vector<transcript> &trsts, const vector<path> &p, const string &gid) const
+{
+	trsts.clear();
+	for(int i = 0; i < p.size(); i++)
+	{
+		string tid = gid + "." + tostring(i);
+		transcript trst;
+		output_transcript(trst, p[i], gid, tid);
+		trsts.push_back(trst);
+	}
+	return 0;
+}
+
 int bundle::output_transcripts(gene &gn, const vector<path> &p, const string &gid) const
 {
 	for(int i = 0; i < p.size(); i++)

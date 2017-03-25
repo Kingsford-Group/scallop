@@ -11,7 +11,7 @@ See LICENSE for licensing.
 #include <string>
 #include "bundle_base.h"
 #include "bundle.h"
-#include "genome.h"
+#include "transcript.h"
 
 using namespace std;
 
@@ -31,9 +31,9 @@ private:
 	int index;
 	bool terminate;
 
-	genome gm;
 	int qcnt;
 	double qlen;
+	vector<transcript> trsts;
 
 public:
 	int assemble();
@@ -43,7 +43,9 @@ private:
 	int add_hit(const hit &ht);
 	int truncate(const hit &ht);
 	int assemble(const bundle_base &bb);
-	int filter_transcripts(gene &gn);
+	int merge_multi_exon_transcripts();
+	int assign_RPKM();
+	int write();
 	int compare(splice_graph &gr, const string &ref, const string &tex = "");
 };
 

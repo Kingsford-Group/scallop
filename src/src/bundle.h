@@ -37,8 +37,9 @@ public:
 public:
 	virtual int build();
 	int output_transcripts(ofstream &fout, const vector<path> &p, const string &gid) const;	
-	int output_transcript(ofstream &fout, const path &p, const string &gid, const string &tid) const;	
 	int output_transcripts(gene &gn, const vector<path> &p, const string &gid) const;	
+	int output_transcripts(vector<transcript> &trsts, const vector<path> &p, const string &gid) const;	
+	int output_transcript(ofstream &fout, const path &p, const string &gid, const string &tid) const;	
 	int output_transcript(transcript &trst, const path &p, const string &gid, const string &tid) const;	
 	int count_junctions() const;
 	int print(int index);
