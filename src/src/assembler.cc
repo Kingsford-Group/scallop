@@ -68,6 +68,7 @@ int assembler::assemble()
 
 	merge_multi_exon_transcripts();
 	assign_RPKM();
+	write();
 	
 	return 0;
 }
