@@ -61,7 +61,8 @@ int bundle::build()
 
 int bundle::compute_strand()
 {
-	if(library_type != UNSTRANDED && strand != '.') return 0;
+	if(library_type != UNSTRANDED) assert(strand != '.');
+	if(library_type != UNSTRANDED) return 0;
 
 	int n0 = 0, np = 0, nq = 0;
 	for(int i = 0; i < hits.size(); i++)
