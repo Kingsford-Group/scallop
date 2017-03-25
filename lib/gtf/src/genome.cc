@@ -202,12 +202,12 @@ int genome::filter_low_coverage_transcripts(double min_coverage)
 	return 0;
 }
 
-vector<transcript> genome::collect_transcripts()
+vector<transcript> genome::collect_transcripts() const
 {
 	vector<transcript> vv;
 	for(int i = 0; i < genes.size(); i++)
 	{
-		vector<transcript> &v = genes[i].transcripts;
+		const vector<transcript> &v = genes[i].transcripts;
 		vv.insert(vv.end(), v.begin(), v.end());
 	}
 	return vv;

@@ -44,7 +44,7 @@ public:
 	// fetch information
 	const gene* get_gene(string name) const;
 	const gene* locate_gene(const string &chr, const PI32 &p) const;
-	vector<transcript> collect_transcripts();
+	vector<transcript> collect_transcripts() const;
 };
 
 #endif
