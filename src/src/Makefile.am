@@ -34,6 +34,7 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  junction.h junction.cc \
 				  bundle_base.h bundle_base.cc \
 				  bundle.h bundle.cc \
+				  sstrand.h sstrand.cc \
 				  path.h path.cc \
 				  equation.h equation.cc \
 				  gtf.h gtf.cc \

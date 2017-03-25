@@ -8,6 +8,9 @@ See LICENSE for licensing.
 #define __BRIDGE_H__
 
 #include <stdint.h>
+#include <string>
+
+using namespace std;
 
 class junction
 {
@@ -24,12 +27,15 @@ public:
 	int32_t rpos;		// right position
 	int count;			// number of hits having this splice junction
 	char strand;		// strandness of this junction
+	int nm;				// total mismatch
 
 	int lexon;			// region index corresponds to lpos
 	int rexon;			// region index corresponds to rpos
 
 public:
-	int print(int index) const;
+	int print(const string &chrm, int index) const;
 };
+
+bool junction_cmp_length(const junction &x, const junction &y);
 
 #endif

@@ -19,6 +19,7 @@ hit::hit(int32_t p)
 	xs = '.';
 	hi = -1;
 	nh = -1;
+	nm = 0;
 	qlen = 0;
 }
 
@@ -32,6 +33,7 @@ hit::hit(const hit &h)
 	spos = h.spos;
 	xs = h.xs;
 	hi = h.hi;
+	nm = h.nm;
 	memcpy(cigar, h.cigar, sizeof cigar);
 	//for(int i = 0; i < MAX_NUM_CIGAR; i++) cigar[i] = h.cigar[i];
 }
@@ -78,6 +80,10 @@ hit::hit(bam1_t *b)
 		if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '+';		// R2F1
 	}
 
+	xs = '.';
+	uint8_t *p1 = bam_aux_get(b, "XS");
+	if(p1 && (*p1) == 'A') xs = bam_aux2A(p1);
+
 	hi = -1;
 	uint8_t *p2 = bam_aux_get(b, "HI");
 	if(p2 && (*p2) == 'C') hi = bam_aux2i(p2);
@@ -86,9 +92,9 @@ hit::hit(bam1_t *b)
 	uint8_t *p3 = bam_aux_get(b, "NH");
 	if(p3 && (*p3) == 'C') nh = bam_aux2i(p3);
 
-	xs = '.';
-	uint8_t *p1 = bam_aux_get(b, "XS");
-	if(p1 && (*p1) == 'A') xs = bam_aux2A(p1);
+	nm = 0;
+	uint8_t *p4 = bam_aux_get(b, "NM");
+	if(p4 && (*p4) == 'C') nm = bam_aux2i(p4);
 
 	// build splice positions 
 	spos.clear();

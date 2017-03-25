@@ -19,6 +19,8 @@ vertex_info::vertex_info()
 	lpos = 0;
 	rpos = 0;
 	pos = 0;
+	lstrand = '.';
+	rstrand = '.';
 }
 
 vertex_info::vertex_info(int l)
@@ -34,6 +36,8 @@ vertex_info::vertex_info(int l)
 	lpos = 0;
 	rpos = 0;
 	pos = 0;
+	lstrand = '.';
+	rstrand = '.';
 }
 
 vertex_info::vertex_info(const vertex_info &vi)
@@ -49,4 +53,6 @@ vertex_info::vertex_info(const vertex_info &vi)
 	lpos = vi.lpos;
 	rpos = vi.rpos;
 	pos = vi.pos;
+	lstrand = vi.lstrand;
+	rstrand = vi.rstrand;
 }

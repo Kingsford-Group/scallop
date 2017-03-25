@@ -52,6 +52,7 @@ private:
 
 	// splice graph
 	int build_junctions();
+	int correct_junctions();
 	int build_regions();
 	int build_partial_exons();
 	int link_partial_exons();
@@ -70,10 +71,6 @@ private:
 	int remove_inner_start_boundaries();
 	int remove_inner_end_boundaries();
 	int remove_intron_contamination();
-
-	// modify splice graph w.r.t. strands
-	int analysis_strand();
-	bool remove_inconsistent_strands();
 
 	// super edges
 	int build_hyper_edges1();			// single end

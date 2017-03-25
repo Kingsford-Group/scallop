@@ -28,6 +28,8 @@ public:
 	bool infer;			// whether this vertex has been inferred
 	int type;			// for various usage
 	bool adjust;		// whether the coverage of this region has been adjusted 
+	char lstrand;		// left side strand
+	char rstrand;		// right side strand	
 };
 
 #endif
