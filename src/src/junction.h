@@ -23,6 +23,7 @@ public:
 	int32_t lpos;		// left position [left, right)
 	int32_t rpos;		// right position
 	int count;			// number of hits having this splice junction
+	char strand;		// strandness of this junction
 
 	int lexon;			// region index corresponds to lpos
 	int rexon;			// region index corresponds to rpos

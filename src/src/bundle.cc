@@ -39,6 +39,13 @@ int bundle::build()
 	link_partial_exons();
 	build_splice_graph();
 
+	/*
+	while(remove_inconsistent_strands());
+	refine_splice_graph();
+	analysis_strand();
+	return 0;
+	*/
+
 	// revise splice graph
 	//remove_small_edges();
 	//refine_splice_graph();
@@ -134,12 +141,30 @@ int bundle::build_junctions()
 		vector<int> &v = it->second;
 		if(v.size() < min_splice_boundary_hits) continue;
 
-		/*
 		int32_t p1 = high32(it->first);
 		int32_t p2 = low32(it->first);
-		if(p2 - p1 > 100000 && v.size() < 10) continue;
-		*/
 
+		int s0 = 0;
+		int s1 = 0;
+		int s2 = 0;
+		for(int k = 0; k < v.size(); k++)
+		{
+			hit &h = hits[v[k]];
+			if(h.xs == '.') s0++;
+			if(h.xs == '+') s1++;
+			if(h.xs == '-') s2++;
+		}
+
+		//printf("junction: %s:%d-%d (%d, %d, %d) %d\n", chrm.c_str(), p1, p2, s0, s1, s2, s1 < s2 ? s1 : s2);
+
+		junction jc(it->first, v.size());
+		if(s1 == 0 && s2 == 0) jc.strand = '.';
+		else if(s1 >= 1 && s2 >= 1) jc.strand = '.';
+		else if(s1 > s2) jc.strand = '+';
+		else jc.strand = '-';
+		junctions.push_back(jc);
+
+		/*
 		uint32_t max_qual = 0;
 		for(int k = 0; k < v.size(); k++)
 		{
@@ -147,7 +172,7 @@ int bundle::build_junctions()
 			if(h.qual > max_qual) max_qual = h.qual;
 		}
 		assert(max_qual >= min_max_boundary_quality);
-		junctions.push_back(junction(it->first, v.size()));
+		*/
 	}
 	return 0;
 }
@@ -533,6 +558,7 @@ int bundle::build_splice_graph()
 		assert(b.count >= 1);
 		edge_info ei;
 		ei.weight = b.count;
+		ei.strand = b.strand;
 		gr.set_edge_info(p, ei);
 		gr.set_edge_weight(p, b.count);
 	}
@@ -986,6 +1012,164 @@ int bundle::count_junctions() const
 		x += junctions[i].count;
 	}
 	return x;
+}
+
+bool bundle::remove_inconsistent_strands()
+{
+	bool flag = false;
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		edge_iterator it1, it2;
+		int icnt1 = 0;
+		int icnt2 = 0;
+		double iwrt1 = 0;
+		double iwrt2 = 0;
+		VE ive1;
+		VE ive2;
+		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
+		{
+			edge_descriptor e = (*it1);
+			int s = e->source();
+			int t = e->target();
+			assert(t == i);
+			if(s == 0) continue;
+			if(gr.get_vertex_info(s).rpos == gr.get_vertex_info(t).lpos) continue;
+			edge_info ei = gr.get_edge_info(e);
+			double w = gr.get_edge_weight(e);
+			if(ei.strand == '+') icnt1++;
+			if(ei.strand == '-') icnt2++;
+			if(ei.strand == '+') iwrt1 += w;
+			if(ei.strand == '-') iwrt2 += w;
+			if(ei.strand == '+') ive1.push_back(e);
+			if(ei.strand == '-') ive2.push_back(e);
+		}
+
+		int ocnt1 = 0;
+		int ocnt2 = 0;
+		double owrt1 = 0;
+		double owrt2 = 0;
+		VE ove1;
+		VE ove2;
+		for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
+		{
+			edge_descriptor e = (*it1);
+			int s = e->source();
+			int t = e->target();
+			assert(s == i);
+			if(t == gr.num_vertices() - 1) continue;
+			if(gr.get_vertex_info(s).rpos == gr.get_vertex_info(t).lpos) continue;
+			edge_info ei = gr.get_edge_info(e);
+			double w = gr.get_edge_weight(e);
+			if(ei.strand == '+') ocnt1++;
+			if(ei.strand == '-') ocnt2++;
+			if(ei.strand == '+') owrt1 += w;
+			if(ei.strand == '-') owrt2 += w;
+			if(ei.strand == '+') ove1.push_back(e);
+			if(ei.strand == '-') ove2.push_back(e);
+		}
+
+		if((icnt1 == 0 || icnt2 == 0) && (ocnt1 == 0 || ocnt2 == 0)) continue;
+
+		if(icnt1 >= 1 && iwrt1 < iwrt2 && owrt1 <= owrt2 && ocnt1 == 0)
+		{
+			// remove edges in ive1
+			assert(ive1.size() >= 1);
+			flag = true;
+			for(int k = 0; k < ive1.size(); k++) gr.remove_edge(ive1[k]);
+			printf("remove strands with %lu edges\n", ive1.size());
+		}
+		else if(icnt2 >= 1 && iwrt2 < iwrt1 && owrt2 <= owrt1 && owrt2 == 0)
+		{
+			// remove edges in ive2
+			assert(ive2.size() >= 1);
+			flag = true;
+			for(int k = 0; k < ive2.size(); k++) gr.remove_edge(ive2[k]);
+			printf("remove strands with %lu edges\n", ive2.size());
+		}
+		else if(ocnt1 >= 1 && owrt1 < owrt2 && iwrt1 <= iwrt2 && icnt1 == 0)
+		{
+			// remove edges in ove1
+			assert(ove1.size() >= 1);
+			flag = true;
+			for(int k = 0; k < ove1.size(); k++) gr.remove_edge(ove1[k]);
+			printf("remove strands with %lu edges\n", ove1.size());
+		}
+		else if(ocnt2 >= 1 && owrt2 < owrt1 && iwrt2 <= iwrt1 && iwrt2 == 0)
+		{
+			// remove edges in ive2
+			assert(ove2.size() >= 1);
+			flag = true;
+			for(int k = 0; k < ove2.size(); k++) gr.remove_edge(ove2[k]);
+			printf("remove strands with %lu edges\n", ove2.size());
+		}
+	}
+	return flag;
+}
+
+
+int bundle::analysis_strand()
+{
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		edge_iterator it1, it2;
+		int icnt0 = 0;
+		int icnt1 = 0;
+		int icnt2 = 0;
+		double iwrt0 = 0;
+		double iwrt1 = 0;
+		double iwrt2 = 0;
+		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
+		{
+			edge_descriptor e = (*it1);
+			int s = e->source();
+			int t = e->target();
+			assert(t == i);
+			if(s == 0) continue;
+			if(gr.get_vertex_info(s).rpos == gr.get_vertex_info(t).lpos) continue;
+			edge_info ei = gr.get_edge_info(e);
+			double w = gr.get_edge_weight(e);
+			if(ei.strand == '.') icnt0++;
+			if(ei.strand == '+') icnt1++;
+			if(ei.strand == '-') icnt2++;
+			if(ei.strand == '.') iwrt0 += w;
+			if(ei.strand == '+') iwrt1 += w;
+			if(ei.strand == '-') iwrt2 += w;
+		}
+
+		int ocnt0 = 0;
+		int ocnt1 = 0;
+		int ocnt2 = 0;
+		double owrt0 = 0;
+		double owrt1 = 0;
+		double owrt2 = 0;
+		for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
+		{
+			edge_descriptor e = (*it1);
+			int s = e->source();
+			int t = e->target();
+			assert(s == i);
+			if(t == gr.num_vertices() - 1) continue;
+			if(gr.get_vertex_info(s).rpos == gr.get_vertex_info(t).lpos) continue;
+			edge_info ei = gr.get_edge_info(e);
+			double w = gr.get_edge_weight(e);
+			if(ei.strand == '.') ocnt0++;
+			if(ei.strand == '+') ocnt1++;
+			if(ei.strand == '-') ocnt2++;
+			if(ei.strand == '.') owrt0 += w;
+			if(ei.strand == '+') owrt1 += w;
+			if(ei.strand == '-') owrt2 += w;
+		}
+		double xi = iwrt1 < iwrt2 ? iwrt1 : iwrt2;
+		double xo = owrt1 < owrt2 ? owrt1 : owrt2;
+		if(xi <= 0.0 && xo <= 0.1) continue;
+
+		printf("%s:%d-%d icnt = %d %d %d iwrt = %.0lf %.0lf %.0lf %.0lf ocnt = %d %d %d owrt = %.0lf %.0lf %.0lf %.0lf\n", 
+				chrm.c_str(), gr.get_vertex_info(i).lpos, gr.get_vertex_info(i).rpos, 
+				icnt0, icnt1, icnt2, iwrt0, iwrt1, iwrt2, xi,
+				ocnt0, ocnt1, ocnt2, owrt0, owrt1, owrt2, xo);
+	}
+
+	return 0;
 }
 
 int bundle::print(int index)

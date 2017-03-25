@@ -53,6 +53,8 @@ int assembler::assemble()
 		hit ht(b1t);
 
 		if(library_type != UNSTRANDED && ht.strand == '.') continue;
+		if(library_type != UNSTRANDED && ht.strand == '+' && ht.xs == '-') continue;
+		if(library_type != UNSTRANDED && ht.strand == '-' && ht.xs == '+') continue;
 		if(uniquely_mapped_only == true && ht.nh != 1) continue;
 
 		qlen += ht.qlen;

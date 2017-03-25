@@ -16,6 +16,7 @@ junction::junction(int64_t _p)
 	lpos = high32(_p);
 	rpos = low32(_p);
 	count = 0;
+	strand = '.';
 	lexon = -1;
 	rexon = -1;
 }
@@ -25,6 +26,7 @@ junction::junction(int64_t _p, int _c)
 	lpos = high32(_p);
 	rpos = low32(_p);
 	count = _c;
+	strand = '.';
 	lexon = -1;
 	rexon = -1;
 }
@@ -36,6 +38,7 @@ junction::junction(const junction &sp)
 	count = sp.count;
 	lexon = sp.lexon;
 	rexon = sp.rexon;
+	strand = sp.strand;
 }
 
 bool junction::operator<(const junction &x) const
@@ -46,7 +49,7 @@ bool junction::operator<(const junction &x) const
 
 int junction::print(int index) const
 {
-	printf("junction %d: region = [%d, %d), %d -> %d, length = %d, count = %d\n", 
-			index, lpos, rpos, lexon, rexon, rpos - lpos, count);
+	printf("junction %d: region = [%d, %d), %d -> %d, length = %d, count = %d, strand = %c\n", 
+			index, lpos, rpos, lexon, rexon, rpos - lpos, count, strand);
 	return 0;
 }

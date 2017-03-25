@@ -21,6 +21,7 @@ public:
 	int type;
 	int jid;		// junction id
 	double weight;	// new weight from hyper-edges
+	char strand;	// strandness
 };
 
 #endif

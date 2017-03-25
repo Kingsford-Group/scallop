@@ -60,11 +60,6 @@ private:
 	int locate_left_partial_exon(int32_t x);
 	int locate_right_partial_exon(int32_t x);
 
-	// super edges
-	int build_hyper_edges1();			// single end
-	int build_hyper_edges2();			// paired end
-	bool bridge_read(int x, int y, vector<int> &s);
-
 	// update splice graph
 	VE compute_maximal_edges();
 	int refine_splice_graph();
@@ -75,6 +70,16 @@ private:
 	int remove_inner_start_boundaries();
 	int remove_inner_end_boundaries();
 	int remove_intron_contamination();
+
+	// modify splice graph w.r.t. strands
+	int analysis_strand();
+	bool remove_inconsistent_strands();
+
+	// super edges
+	int build_hyper_edges1();			// single end
+	int build_hyper_edges2();			// paired end
+	bool bridge_read(int x, int y, vector<int> &s);
+
 };
 
 #endif
