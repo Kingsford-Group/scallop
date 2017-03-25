@@ -66,7 +66,7 @@ int assembler::assemble()
 	process(0);
 	for(int i = 0; i < vbb.size(); i++) assemble(vbb[i]);
 
-	merge_multi_exon_transcripts();
+	//merge_multi_exon_transcripts();
 	assign_RPKM();
 	write();
 	
