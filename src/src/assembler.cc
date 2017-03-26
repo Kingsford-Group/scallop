@@ -51,10 +51,6 @@ int assembler::assemble()
 		if(p.n_cigar < 1) continue;												// should never happen
 
 		hit ht(b1t);
-
-		if(uniquely_mapped_only == true && ht.nh != 1) continue;
-		if(library_type != UNSTRANDED && ht.strand == '.') continue;
-
 		qlen += ht.qlen;
 		qcnt += 1;
 
@@ -74,6 +70,10 @@ int assembler::assemble()
 		process(batch_bundle_size);
 
 		// add hit
+		if(uniquely_mapped_only == true && ht.nh != 1) continue;
+		if(library_type != UNSTRANDED && ht.strand == '.') continue;
+		if(library_type != UNSTRANDED && ht.strand == '+' && ht.xs == '-') continue;
+		if(library_type != UNSTRANDED && ht.strand == '-' && ht.xs == '+') continue;
 		if(library_type != UNSTRANDED && ht.strand == '+') bb1.add_hit(ht);
 		if(library_type != UNSTRANDED && ht.strand == '-') bb2.add_hit(ht);
 		if(library_type == UNSTRANDED && ht.xs == '.') bb1.add_hit(ht);
