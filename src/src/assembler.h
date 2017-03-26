@@ -25,7 +25,8 @@ private:
 	samFile *sfn;
 	bam_hdr_t *hdr;
 	bam1_t *b1t;
-	vector<bundle_base> vbb;
+	bundle_base bb1;		// +
+	bundle_base bb2;		// -
 	vector<bundle_base> pool;
 
 	int index;
@@ -40,8 +41,6 @@ public:
 
 private:
 	int process(int n);
-	int add_hit(const hit &ht);
-	int truncate(const hit &ht);
 	int assemble(const bundle_base &bb);
 	int merge_multi_exon_transcripts();
 	int assign_RPKM();

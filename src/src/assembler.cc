@@ -52,68 +52,43 @@ int assembler::assemble()
 
 		hit ht(b1t);
 
-		if(library_type != UNSTRANDED && ht.strand == '.') continue;
-		if(library_type != UNSTRANDED && ht.strand == '+' && ht.xs == '-') continue;
-		if(library_type != UNSTRANDED && ht.strand == '-' && ht.xs == '+') continue;
-		if(uniquely_mapped_only == true && ht.nh != 1) continue;
-
 		qlen += ht.qlen;
 		qcnt += 1;
 
-		truncate(ht);
-		process(batch_bundle_size);
-		add_hit(ht);
-    }
+		// truncate
+		if(ht.tid != bb1.tid || ht.pos > bb1.rpos + min_bundle_gap)
+		{
+			pool.push_back(bb1);
+			bb1.clear();
+		}
+		if(ht.tid != bb2.tid || ht.pos > bb2.rpos + min_bundle_gap)
+		{
+			pool.push_back(bb2);
+			bb2.clear();
+		}
 
+		// process
+		process(batch_bundle_size);
+
+		// add hit
+		if(uniquely_mapped_only == true && ht.nh != 1) continue;
+		if(library_type != UNSTRANDED && ht.strand == '.') continue;
+		if(library_type != UNSTRANDED && ht.strand == '+') bb1.add_hit(ht);
+		if(library_type != UNSTRANDED && ht.strand == '-') bb2.add_hit(ht);
+		if(library_type == UNSTRANDED && ht.xs == '.') bb1.add_hit(ht);
+		if(library_type == UNSTRANDED && ht.xs == '.') bb2.add_hit(ht);
+		if(library_type == UNSTRANDED && ht.xs == '+') bb1.add_hit(ht);
+		if(library_type == UNSTRANDED && ht.xs == '-') bb2.add_hit(ht);
+	}
+
+	pool.push_back(bb1);
+	pool.push_back(bb2);
 	process(0);
-	for(int i = 0; i < vbb.size(); i++) assemble(vbb[i]);
 
 	//merge_multi_exon_transcripts();
 	assign_RPKM();
 	write();
 	
-	return 0;
-}
-
-int assembler::add_hit(const hit &ht)
-{
-	bool b = false;
-	for(int i = 0; i < vbb.size(); i++)
-	{
-		bundle_base &bb = vbb[i];
-		assert(bb.hits.size() >= 1);
-		//assert(bb.strand != '.');
-
-		if(ht.strand != bb.strand) continue;
-		if(ht.tid != bb.tid) continue;
-		if(ht.pos > bb.rpos + min_bundle_gap) continue;
-
-		bb.add_hit(ht);
-		b = true;
-		break;
-	}
-
-	if(b == true) return 0;
-
-	bundle_base bb;
-	bb.add_hit(ht);
-
-	vbb.push_back(bb);
-
-	return 0;
-}
-
-int assembler::truncate(const hit &ht)
-{
-	for(int i = 0; i < vbb.size(); i++)
-	{
-		bundle_base &bb = vbb[i];
-		if(ht.pos <= bb.rpos + min_bundle_gap && ht.tid == bb.tid) continue;
-
-		pool.push_back(bb);
-		vbb.erase(vbb.begin() + i);
-		truncate(ht);
-	}
 	return 0;
 }
 

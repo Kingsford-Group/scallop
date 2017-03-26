@@ -29,6 +29,8 @@ public:
 
 private:
 	int build_segments();
+	int remove_inconsistent_edges();
+	bool remove_inconsistent_edges(int k1, int k2);
 	int analysis_segments();
 	int analysis_segment(int k1, int k2);
 	bool assign_vertex_strands();

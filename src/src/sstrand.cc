@@ -23,6 +23,7 @@ sstrand::~sstrand()
 int sstrand::build()
 {
 	build_segments();
+	remove_inconsistent_edges();
 	analysis_segments();
 	return 0;
 
@@ -52,6 +53,21 @@ int sstrand::build_segments()
 	return 0;
 }
 
+int sstrand::remove_inconsistent_edges()
+{
+	while(true)
+	{
+		bool flag = false;
+		for(int i = 0; i < segments.size(); i++)
+		{
+			bool b = remove_inconsistent_edges(segments[i].first, segments[i].second);
+			if(b == true) flag = true;
+		}
+		if(flag == false) break;
+	}
+	return 0;
+}
+
 int sstrand::analysis_segments()
 {
 	for(int i = 0; i < segments.size(); i++)
@@ -61,12 +77,14 @@ int sstrand::analysis_segments()
 	return 0;
 }
 
-int sstrand::analysis_segment(int k1, int k2)
+bool sstrand::remove_inconsistent_edges(int k1, int k2)
 {
 	int cnt1 = 0;
 	int cnt2 = 0;
 	double wrt1 = 0;
 	double wrt2 = 0;
+	VE ve1;
+	VE ve2;
 	for(int k = k1; k <= k2; k++)
 	{
 		edge_iterator it1, it2;
@@ -81,6 +99,8 @@ int sstrand::analysis_segment(int k1, int k2)
 			if(ei.strand == '-') cnt2++;
 			if(ei.strand == '+') wrt1 += w;
 			if(ei.strand == '-') wrt2 += w;
+			if(ei.strand == '+') ve1.push_back(e);
+			if(ei.strand == '-') ve2.push_back(e);
 		}
 		for(tie(it1, it2) = gr.out_edges(k); it1 != it2; it1++)
 		{
@@ -94,6 +114,67 @@ int sstrand::analysis_segment(int k1, int k2)
 			if(ei.strand == '-') cnt2++;
 			if(ei.strand == '+') wrt1 += w;
 			if(ei.strand == '-') wrt2 += w;
+			if(ei.strand == '+') ve1.push_back(e);
+			if(ei.strand == '-') ve2.push_back(e);
+		}
+	}
+
+	if(cnt1 == 0 || cnt2 == 0) return false;
+
+	bool b = false;
+	if(wrt1 <= 10 && wrt1 / (wrt1 + wrt2) <= 0.1)
+	{
+		b = true;
+		for(int i = 0; i < ve1.size(); i++) gr.remove_edge(ve1[i]);
+	}
+	if(wrt2 <= 10 && wrt2 / (wrt1 + wrt2) <= 0.1)
+	{
+		b = true;
+		for(int i = 0; i < ve2.size(); i++) gr.remove_edge(ve2[i]);
+	}
+
+	return b;
+}
+
+int sstrand::analysis_segment(int k1, int k2)
+{
+	int cnt1 = 0;
+	int cnt2 = 0;
+	double wrt1 = 0;
+	double wrt2 = 0;
+	VE ve1;
+	VE ve2;
+	for(int k = k1; k <= k2; k++)
+	{
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = gr.in_edges(k); it1 != it2; it1++)
+		{
+			edge_descriptor e = (*it1);
+			int s = e->source();
+			int t = e->target();
+			edge_info ei = gr.get_edge_info(e);
+			double w = gr.get_edge_weight(e);
+			if(ei.strand == '+') cnt1++;
+			if(ei.strand == '-') cnt2++;
+			if(ei.strand == '+') wrt1 += w;
+			if(ei.strand == '-') wrt2 += w;
+			if(ei.strand == '+') ve1.push_back(e);
+			if(ei.strand == '-') ve2.push_back(e);
+		}
+		for(tie(it1, it2) = gr.out_edges(k); it1 != it2; it1++)
+		{
+			edge_descriptor e = (*it1);
+			int s = e->source();
+			int t = e->target();
+			if(t <= k2) continue;
+			edge_info ei = gr.get_edge_info(e);
+			double w = gr.get_edge_weight(e);
+			if(ei.strand == '+') cnt1++;
+			if(ei.strand == '-') cnt2++;
+			if(ei.strand == '+') wrt1 += w;
+			if(ei.strand == '-') wrt2 += w;
+			if(ei.strand == '+') ve1.push_back(e);
+			if(ei.strand == '-') ve2.push_back(e);
 		}
 	}
 
@@ -107,6 +188,15 @@ int sstrand::analysis_segment(int k1, int k2)
 	double r = min / wrt;
 
 	printf("segment %s:%d-%d cnt %d %d wrt %.0lf %.0lf ratio %.0lf %.0lf %.3lf\n", chrm.c_str(), p1, p2, cnt1, cnt2, wrt1, wrt2, min, wrt, r);
+
+	if(wrt1 <= 10 && wrt1 / (wrt1 + wrt2) <= 0.1)
+	{
+		for(int i = 0; i < ve1.size(); i++) gr.remove_edge(ve1[i]);
+	}
+	if(wrt2 <= 10 && wrt2 / (wrt1 + wrt2) <= 0.1)
+	{
+		for(int i = 0; i < ve2.size(); i++) gr.remove_edge(ve2[i]);
+	}
 
 	return 0;
 }

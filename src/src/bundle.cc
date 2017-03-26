@@ -14,7 +14,6 @@ See LICENSE for licensing.
 #include "region.h"
 #include "config.h"
 #include "util.h"
-#include "sstrand.h"
 #include "undirected_graph.h"
 
 bundle::bundle(const bundle_base &bb)
@@ -32,7 +31,7 @@ int bundle::build()
 	check_left_ascending();
 
 	build_junctions();
-	correct_junctions();
+	//correct_junctions();
 
 	build_regions();
 	build_partial_exons();
@@ -40,11 +39,6 @@ int bundle::build()
 	build_partial_exon_map();
 	link_partial_exons();
 	build_splice_graph();
-
-	/*
-	sstrand sd(chrm, gr);
-	sd.build();
-	*/
 
 	// revise splice graph
 	//remove_small_edges();
