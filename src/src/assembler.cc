@@ -109,9 +109,9 @@ int assembler::assemble(const bundle_base &bb)
 	//printf("hits.size = %lu, min-num = %d\n", bb.hits.size(), min_num_hits_in_bundle);
 
 	if(bb.hits.size() < min_num_hits_in_bundle) return 0;
+	if(bb.tid < 0) return 0;
 
 	char buf[1024];
-	assert(bb.tid >= 0);
 	strcpy(buf, hdr->target_name[bb.tid]);
 
 	bundle bd(bb);
