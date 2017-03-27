@@ -30,8 +30,4 @@ mv $dir/scallop.gtf $dir/scallop0.gtf
 
 cd $dir
 gffcompare -o gffmul -r $gtf $dir/scallop.gtf -M -N
-gtfcompare $gtf $dir/scallop.gtf > $dir/gtfcmp
 cd -
-
-#refmulsize=`cat $dir/gffmul.stats | grep Reference | grep mRNA | awk '{print $9}' | sed 's/(//g' `
-#./gtfcuff roc $dir/gffmul.scallop.gtf.tmap $refmulsize > $dir/gffmul.roc

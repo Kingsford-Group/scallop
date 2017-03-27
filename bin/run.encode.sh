@@ -9,7 +9,7 @@ fi
 abd=$1
 
 dir=/home/mingfus/data/repositories/scallop/bin/ENCODE/
-list=$dir/alignments.unique.rainforest.list
+list=$dir/good.list
 
 cmd=commands
 rm -rf $cmd
@@ -17,37 +17,23 @@ rm -rf $cmd
 IFS="
 "
 
-tag1="B668"
+tag1="B676"
 tag2="1.3.2d"
 for x in `cat $list`
 do
 	id=`echo $x | cut -f 1 -d " "`
-	gm=`echo $x | cut -f 5 -d " "`
-	echo $id $gm
+	ss=`echo $x | cut -f 2 -d " "`
+	gm=`echo $x | cut -f 3 -d " "`
+	echo $id $ss $gm
 
-	file1=$dir/scallop.$tag1.$abd/$id/gffmul.stats
-	file2=$dir/stringtie.$tag2.$abd/$id/gffmul.stats
-
-#echo "./run.scallop.encode.sh $id $gm $tag1.$abd '--min_transcript_coverage $abd'" >> $cmd
-#echo "./run.stringtie.encode.sh $id $gm $tag2.$abd '-c $abd'" >> $cmd
-
-	if [ ! -s $file1 ]; then 
-		nohup ./run.scallop.encode.sh $id $gm $tag1.$abd "--min_transcript_coverage $abd" &
-	else
-		ss=`cat $file1 | grep Intron | grep chain | wc -l`
-		if [ "$ss" == "0" ]; then
-			nohup ./run.scallop.encode.sh $id $gm $tag1.$abd "--min_transcript_coverage $abd" &
-		fi
+	st=""
+	if [ "$ss" == "first" ]; then
+		st="--rf"
+	elif [ "$ss" == "second" ]; then
+		st="--fr"
 	fi
 
-	if [ ! -s $file2 ]; then 
-		nohup ./run.stringtie.encode.sh $id $gm $tag2.$abd "-c $abd" &
-	else
-		ss=`cat $file2 | grep Intron | grep chain | wc -l`
-		if [ "$ss" == "0" ]; then
-			nohup ./run.stringtie.encode.sh $id $gm $tag2.$abd "-c $abd" &
-		fi
-	fi
-
-#nohup ./run.transcomb.encode.sh $id $gm $abd "-s unstranded -f $abd" &
+	nohup ./run.scallop.encode.sh $id $gm $tag1.$abd "--min_transcript_coverage $abd --library_type $ss" &
+	nohup ./run.stringtie.encode.sh $id $gm $tag2.$abd "-c $abd $st" &
+	nohup ./run.transcomb.encode.sh $id $gm $abd "-f $abd -s $ss" &
 done

@@ -31,8 +31,4 @@ mv $dir/stringtie.gtf $dir/stringtie0.gtf
 
 cd $dir
 gffcompare -o gffmul -r $gtf $dir/stringtie.gtf -M -N
-gtfcompare $gtf $dir/stringtie.gtf > $dir/gtfcmp
 cd -
-
-#refmulsize=`cat $dir/gffmul.stats | grep Reference | grep mRNA | awk '{print $9}' | sed 's/(//g' `
-#./gtfcuff roc $dir/gffmul.stringtie.gtf.tmap $refmulsize > $dir/gffmul.roc

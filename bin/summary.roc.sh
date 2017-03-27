@@ -63,22 +63,21 @@ list="GSM981256.tophat \
 	  SRR534307.hisat"
 
 
-
 for i in `echo $list`
 do
-	x1=`cat $i/$scallop/gff$roc.roc | head -n 1 | cut -f 13  -d " "`
-	x2=`cat $i/$scallop/gff$roc.roc | head -n 1 | cut -f 16 -d " "`
+	x1=`cat $i/$scallop/gffmul.stats | grep Intron | grep chain | head -n 1 | awk '{print $4}'`
+	x2=`cat $i/$scallop/gffmul.stats | grep Intron | grep chain | head -n 1 | awk '{print $6}'`
 
-	y1=`cat $i/$stringtie/gff$roc.roc | head -n 1 | cut -f 13  -d " "`
-	y2=`cat $i/$stringtie/gff$roc.roc | head -n 1 | cut -f 16 -d " "`
+	y1=`cat $i/$stringtie/gffmul.stats | grep Intron | grep chain | head -n 1 | awk '{print $4}'`
+	y2=`cat $i/$stringtie/gffmul.stats | grep Intron | grep chain | head -n 1 | awk '{print $6}'`
 
 	z1=0
 	z2=0
 	t=`echo $i | cut -f 2 -d "."`
 	if [ ! "$t" == "hisat" ]
 	then
-		z1=`cat $i/$transcomb/gff$roc.roc | head -n 1 | cut -f 13  -d " "`
-		z2=`cat $i/$transcomb/gff$roc.roc | head -n 1 | cut -f 16 -d " "`
+		z1=`cat $i/$transcomb/gffmul.stats | grep Intron | grep chain | head -n 1 | awk '{print $4}'`
+		z2=`cat $i/$transcomb/gffmul.stats | grep Intron | grep chain | head -n 1 | awk '{print $6}'`
 	fi
 
 	echo $i $x1 $y1 $z1 $x2 $y2 $z2

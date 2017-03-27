@@ -7,7 +7,7 @@ fi
 
 level=$1
 
-scallop="scallop.B668"
+scallop="scallop.B676"
 stringtie="stringtie.1.3.2d"
 transcomb="transcomb"
 

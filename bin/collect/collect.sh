@@ -1,12 +1,12 @@
 #!/bin/bash
 
-dir=B668.1.3.2d
+dir=B676.1.3.2d
 mkdir -p $dir
 
 # collect venn
 rm -rf $dir/venn.aligner
 rm -rf $dir/venn.algo
-tag="W668.1.3.2d"
+tag="W676.1.3.2d"
 for i in `cat ../list10`
 do
 	cat ../$i.$tag/aligner.summary >> $dir/venn.aligner

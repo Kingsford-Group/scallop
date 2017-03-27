@@ -6,14 +6,14 @@ then
 	exit
 fi
 
-sc="scallop.B668.0.01"
+sc="scallop.B676.0.01"
 st="stringtie.1.3.2d.0.01"
 tc="transcomb.0.01"
 
-dir=`pwd`/$1.W668.1.3.2d
+dir=`pwd`/$1.W676.1.3.2d
 mkdir -p $dir
 
-gtf=`pwd`/p2_sorted.gtf
+gtf=`pwd`/GRCh38.gtf
 roc=`pwd`/gtfcuff
 gtfmerge=`pwd`/gtfmerge
 
@@ -44,7 +44,6 @@ do
 	gffcompare -r $gtf scallop.$k.gtf -M -N
 	refsize=`cat $dir/gffcmp.stats | grep Reference | grep mRNA | awk '{print $5}'`
 	$roc split gffcmp.scallop.$k.gtf.tmap scallop.$k.gtf scallop.$k.true.gtf false.gtf
-	$roc roc gffcmp.scallop.$k.gtf.tmap $refsize > scallop.$k.roc
 	rm gffcmp.* false.gtf
 done
 
@@ -53,7 +52,6 @@ do
 	gffcompare -r $gtf stringtie.$k.gtf -M -N
 	refsize=`cat $dir/gffcmp.stats | grep Reference | grep mRNA | awk '{print $5}'`
 	$roc split gffcmp.stringtie.$k.gtf.tmap stringtie.$k.gtf stringtie.$k.true.gtf false.gtf
-	$roc roc gffcmp.stringtie.$k.gtf.tmap $refsize > stringtie.$k.roc
 	rm gffcmp.* false.gtf
 done
 
@@ -62,7 +60,6 @@ do
 	gffcompare -r $gtf transcomb.$k.gtf -M -N
 	refsize=`cat $dir/gffcmp.stats | grep Reference | grep mRNA | awk '{print $5}'`
 	$roc split gffcmp.transcomb.$k.gtf.tmap transcomb.$k.gtf transcomb.$k.true.gtf false.gtf
-	$roc roc gffcmp.transcomb.$k.gtf.tmap $refsize > transcomb.$k.roc
 	rm gffcmp.* false.gtf
 done
 

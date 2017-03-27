@@ -5,7 +5,7 @@ if [ "$#" != "0" ]; then
 	exit
 fi
 
-scallop="scallop.B668"
+scallop="scallop.B676"
 stringtie="stringtie.1.3.2d"
 transcomb="transcomb"
 

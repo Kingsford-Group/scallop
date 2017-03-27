@@ -31,8 +31,4 @@ mv $dir/TransComb.gtf $dir/transcomb0.gtf
 
 cd $dir
 gffcompare -o gffmul -r $gtf $dir/transcomb.gtf -M -N
-gtfcompare $gtf $dir/transcomb.gtf > $dir/gtfcmp
 cd -
-
-#refmulsize=`cat $dir/gffmul.stats | grep Reference | grep mRNA | awk '{print $9}' | sed 's/(//g' `
-#./gtfcuff roc $dir/gffmul.transcomb.gtf.tmap $refmulsize > $dir/gffmul.roc

@@ -56,7 +56,7 @@ list="GSM981256.tophat \
 	  SRR315334.hisat \
 	  SRR534307.hisat"
 
-tag="B668"
+tag="B676"
 for x in `echo $list`
 do
 	id=`echo $x | cut -f 1 -d "."`
@@ -65,19 +65,26 @@ do
 	nohup ./run.scallop.sh $x $align $tag.$abd "--library_type first --min_transcript_coverage $abd" &
 done
 
-#tag="1.3.2d"
-#for x in `echo $list`
-#do
-#	id=`echo $x | cut -f 1 -d "."`
-#	align=`echo $x | cut -f 2 -d "."`
-#	echo $id $align
-#	nohup ./run.stringtie.sh $x $align $tag.$abd "TODO" &
-#done
-#
-#for x in `echo $list`
-#do
-#	id=`echo $x | cut -f 1 -d "."`
-#	align=`echo $x | cut -f 2 -d "."`
-#	echo $id $align
-#	nohup ./run.transcomb.sh $x $align $abd "TODO" &
-#done
+exit
+
+tag="1.3.2d"
+for x in `echo $list`
+do
+	id=`echo $x | cut -f 1 -d "."`
+	align=`echo $x | cut -f 2 -d "."`
+	echo $id $align
+	nohup ./run.stringtie.sh $x $align $tag.$abd "TODO" &
+done
+
+for x in `echo $list`
+do
+	id=`echo $x | cut -f 1 -d "."`
+	align=`echo $x | cut -f 2 -d "."`
+
+	if [ "$align" == "hisat" ]; then
+		continue;
+	fi
+
+	echo $id $align
+	nohup ./run.transcomb.sh $x $align $abd "TODO" &
+done
