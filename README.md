@@ -36,7 +36,11 @@ export BOOST_HOME="/directory/to/your/boost/boost_1_60_0"
 ## Install Clp
 Download Clp [(license)](https://opensource.org/licenses/eclipse-1.0)
 from (https://projects.coin-or.org/Clp), compile and install it.
-Set environment variable `CLP_HOME` to indicate the installed directory.
+**NOTE** When you config, `--enable-static` option should be provided:
+```
+./configure --enable-static
+```
+After finishing installing, set environment variable `CLP_HOME` to indicate the installed directory.
 For example, for Unix platforms, do the following:
 ```
 export CLP_HOME="/directory/to/your/clp/install"
