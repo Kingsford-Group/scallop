@@ -25,8 +25,6 @@ elif [ "$2" == "mm9" ]; then
 fi
 	
 { /usr/bin/time -v ./scallop -i $bam -o $dir/scallop.gtf $4 > $dir/scallop.log; } 2> $dir/time.log
-mv $dir/scallop.gtf $dir/scallop0.gtf
-./gtfformat format $dir/scallop0.gtf $dir/scallop.gtf
 
 cd $dir
 gffcompare -o gffmul -r $gtf $dir/scallop.gtf -M -N

@@ -13,7 +13,7 @@ bam=$encode/bam/$1.bam
 
 mkdir -p $dir
 
-gtf=/home/mingfus/data/repositories/transcomb/bin
+gtf=/home/mingfus/data/repositories/scallop/bin
 
 if [ "$2" == "GRCh38" ]; then
 	gtf="$gtf"/GRCh38.gtf
@@ -25,10 +25,9 @@ elif [ "$2" == "mm9" ]; then
 	gtf="$gtf"/GRCm37.gtf
 fi
 	
-{ /usr/bin/time -v TransComb -b $bam -o $dir $4 > $dir/transcomb.log; } 2> $dir/time.log
-mv $dir/TransComb.gtf $dir/transcomb0.gtf
-./gtfformat format $dir/transcomb0.gtf $dir/transcomb.gtf
-
 cd $dir
-gffcompare -o gffmul -r $gtf $dir/transcomb.gtf -M -N
+#{ /usr/bin/time -v TransComb -b $bam -o $dir $4 > $dir/transcomb.log; } 2> $dir/time.log
+rm -rf transcomb.gtf
+gtfformat format TransComb.gtf transcomb.gtf
+gffcompare -o gffmul -r $gtf transcomb.gtf -M -N
 cd -

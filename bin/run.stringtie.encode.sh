@@ -26,8 +26,6 @@ elif [ "$2" == "mm9" ]; then
 fi
 	
 { /usr/bin/time -v stringtie $bam -o $dir/stringtie.gtf $4 > $dir/stringtie.log; } 2> $dir/time.log
-mv $dir/stringtie.gtf $dir/stringtie0.gtf
-./gtfformat format $dir/stringtie0.gtf $dir/stringtie.gtf
 
 cd $dir
 gffcompare -o gffmul -r $gtf $dir/stringtie.gtf -M -N

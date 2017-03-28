@@ -16,8 +16,8 @@ gtf=/home/mingfus/data/repositories/scallop/bin/GRCh38.gtf
 #gffcompare -o gffmul -r $gtf $dir/TransComb.gtf -M -N
 #cd -
 
-#id=`echo $1 | cut -f 1 -d "."`
-#quantfile=/home/mingfus/data/transcriptomics/SRA/"$id".all/salmon/salmon.quant/quant.sf
-#./gtfcuff acc-quant $dir/gffmul.TransComb.gtf.tmap $quantfile 0.1 > $dir/gffmul.quant
+id=`echo $1 | cut -f 1 -d "."`
+quantfile=/home/mingfus/data/transcriptomics/SRA/"$id".all/salmon/salmon.quant/quant.sf
+./gtfcuff acc-quant $dir/gffmul.TransComb.gtf.tmap $quantfile 0.1 > $dir/gffmul.quant
 
-./gtfcuff classify $dir/gffmul.TransComb.gtf.tmap $dir/TransComb.gtf > $dir/gffmul.class
+#./gtfcuff classify $dir/gffmul.TransComb.gtf.tmap $dir/TransComb.gtf > $dir/gffmul.class

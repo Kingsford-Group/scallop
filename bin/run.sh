@@ -56,16 +56,14 @@ list="GSM981256.tophat \
 	  SRR315334.hisat \
 	  SRR534307.hisat"
 
-tag="B676"
-for x in `echo $list`
-do
-	id=`echo $x | cut -f 1 -d "."`
-	align=`echo $x | cut -f 2 -d "."`
-	echo $id $align
-	nohup ./run.scallop.sh $x $align $tag.$abd "--library_type first --min_transcript_coverage $abd" &
-done
-
-exit
+#tag="B676"
+#for x in `echo $list`
+#do
+#	id=`echo $x | cut -f 1 -d "."`
+#	align=`echo $x | cut -f 2 -d "."`
+#	echo $id $align
+#	nohup ./run.scallop.sh $x $align $tag.$abd "--library_type first --min_transcript_coverage $abd" &
+#done
 
 tag="1.3.2d"
 for x in `echo $list`

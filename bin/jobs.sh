@@ -2,8 +2,9 @@
 
 tag=""
 
-#./run.sh $tag 0.01
+./run.sh $tag 0.01
 
+sleep 60
 ./run.sh $tag 1
 
 sleep 60
