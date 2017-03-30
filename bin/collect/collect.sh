@@ -3,6 +3,11 @@
 dir=B676.1.3.2d
 mkdir -p $dir
 
+./match.precision.sh > $dir/match.precision
+./match.sensitivity.sh > $dir/match.sensitivity
+
+exit
+
 # collect venn
 rm -rf $dir/venn.aligner
 rm -rf $dir/venn.algo
