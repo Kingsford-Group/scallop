@@ -2,8 +2,11 @@
 Scallop is an accurate reference-based transcript assembler. Scallop features
 its high accuracy in assembling multi-exon transcripts as well as lowly
 expressed transcripts. Scallop achieves this improvement through a novel
-algorithm that can be proved preserving all phasing paths from paired-end reads,
+algorithm that can be proved preserving all phasing paths from reads and paired-end reads,
 while also achieves both transcripts parsimony and coverage deviation minimization.
+Please refer to our [submission](http://biorxiv.org/content/early/2017/04/03/123612)
+for more details. The datasets and scripts used to compare the performance of Scallop
+and other assemblers are available at [here](https://github.com/Kingsford-Group/scalloptest).
 
 # Release
 Latest release, including both binary and source code, is [here](https://github.com/Kingsford-Group/scallop/releases/tag/v0.9.8).
