@@ -39,7 +39,7 @@ export BOOST_HOME="/directory/to/your/boost/boost_1_60_0"
 ## Install Clp
 Download Clp [(license)](https://opensource.org/licenses/eclipse-1.0)
 from (https://projects.coin-or.org/Clp), compile and install it.
-**NOTE** When you config, `--enable-static` option should be provided:
+**NOTE:** when you config, `--enable-static` option should be provided:
 ```
 ./configure --enable-static
 ```
