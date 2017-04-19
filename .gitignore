@@ -25,3 +25,4 @@ data/*
 bin/G*
 bin/S*
 bin/B*
+bin/*

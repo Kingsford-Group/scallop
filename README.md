@@ -9,9 +9,9 @@ Pre-print of Scallop is available at [bioRxiv](http://biorxiv.org/content/early/
 The datasets and scripts used in this paper to compare the performance of Scallop
 and other assemblers are available [here](https://github.com/Kingsford-Group/scalloptest).
 
-Please also checkout the [**podcast**](https://bioinformatics.chat/scallop) about Scallop
-(thanks to [Roman Cheplyaka](https://ro-che.info/)).
-It is also available on [iTunes](https://itunes.apple.com/us/podcast/the-bioinformatics-chat/id1227281398). 
+Please also checkout the **podcast** about Scallop (thanks to [Roman Cheplyaka](https://ro-che.info/)).
+It is available at both [the bioinformatics chat](https://bioinformatics.chat/scallop) and
+[iTunes](https://itunes.apple.com/us/podcast/the-bioinformatics-chat/id1227281398). 
 
 # Release
 Latest release, including both binary and source code, is [here](https://github.com/Kingsford-Group/scallop/releases/tag/v0.9.8).
