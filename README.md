@@ -9,7 +9,7 @@ while also achieves both transcripts parsimony and coverage deviation minimizati
 The datasets and scripts used in this paper to compare the performance of Scallop
 and other assemblers are available at [**scalloptest**](https://github.com/Kingsford-Group/scalloptest).
 
-Please also checkout the **podcast** about Scallop (thanks [Roman Cheplyaka](https://ro-che.info/) for the interview).
+Please also checkout the **podcast** about Scallop (thanks to [Roman Cheplyaka](https://ro-che.info/)).
 It is available at both [the bioinformatics chat](https://bioinformatics.chat/scallop) and
 [iTunes](https://itunes.apple.com/us/podcast/the-bioinformatics-chat/id1227281398). 
 
