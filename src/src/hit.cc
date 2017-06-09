@@ -8,6 +8,7 @@ See LICENSE for licensing.
 #include <cassert>
 #include <cstdio>
 #include <sstream>
+#include <cmath>
 
 #include "hit.h"
 #include "config.h"
@@ -96,7 +97,43 @@ hit::hit(bam1_t *b)
 	uint8_t *p4 = bam_aux_get(b, "NM");
 	if(p4 && (*p4) == 'C') nm = bam_aux2i(p4);
 
-	// build splice positions 
+	build_splice_positions();
+}
+
+bool hit::verify_junctions()
+{
+	int32_t p = pos;
+	int32_t q = 0;
+    for(int k = 0; k < n_cigar; k++)
+	{
+		if (bam_cigar_type(bam_cigar_op(cigar[k]))&2)
+			p += bam_cigar_oplen(cigar[k]);
+
+		if (bam_cigar_type(bam_cigar_op(cigar[k]))&1)
+			q += bam_cigar_oplen(cigar[k]);
+
+		if(k == 0 || k == n_cigar - 1) continue;
+		if(bam_cigar_op(cigar[k]) != BAM_CREF_SKIP) continue;
+		if(bam_cigar_op(cigar[k-1]) != BAM_CMATCH) continue;
+		if(bam_cigar_op(cigar[k+1]) != BAM_CMATCH) continue;
+
+		int s = bam_cigar_oplen(cigar[k]);
+		int m1 = bam_cigar_oplen(cigar[k-1]);
+		int m2 = bam_cigar_oplen(cigar[k+1]);
+		int m = (m1 < m2) ? m1 : m2;
+
+		//if(log2(s) > log2(10) + (2 * m) && nh >= 2)
+		if(log2(s) > log2(10) + (2 * m))
+		{
+			if(verbose >= 2) printf("detect super long junction %d with matches (%d, %d)\n", s, m1, m2);
+			return false;
+		}
+	}
+	return true;
+}
+
+int hit::build_splice_positions()
+{
 	spos.clear();
 	int32_t p = pos;
 	int32_t q = 0;
@@ -119,6 +156,7 @@ hit::hit(bam1_t *b)
 		int32_t s = p - bam_cigar_oplen(cigar[k]);
 		spos.push_back(pack(s, p));
 	}
+	return 0;
 }
 
 bool hit::operator<(const hit &h) const

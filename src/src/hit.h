@@ -64,6 +64,8 @@ public:
 
 public:
 	int print() const;
+	bool verify_junctions();
+	int build_splice_positions();
 	int get_mid_intervals(vector<int64_t> &vm, vector<int64_t> &vi, vector<int64_t> &vd) const;
 	int get_matched_intervals(vector<int64_t> &v) const;
 };
