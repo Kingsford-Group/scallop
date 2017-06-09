@@ -28,12 +28,13 @@ using namespace std;
 #define NORMAL 1
 
 // five types for decomposition
-#define SMALL_EDGE 0
-#define SPLITTABLE_SIMPLE 1
-#define SPLITTABLE_HYPER 2
-#define UNSPLITTABLE_SINGLE 3
-#define UNSPLITTABLE_MULTIPLE 4
-#define TRIVIAL_VERTEX 5
+#define SMALLEST_EDGE 0
+#define NEGLIGIBLE_EDGE 1
+#define SPLITTABLE_SIMPLE 2
+#define SPLITTABLE_HYPER 3
+#define UNSPLITTABLE_SINGLE 4
+#define UNSPLITTABLE_MULTIPLE 5
+#define TRIVIAL_VERTEX 6
 
 #define UNSTRANDED 0
 #define FR_FIRST 1
@@ -62,7 +63,7 @@ extern int min_router_count;
 // for splice graph
 extern double max_intron_contamination_coverage;
 extern double min_surviving_edge_weight;
-extern double max_decompose_error_ratio[6];
+extern double max_decompose_error_ratio[7];
 extern double min_transcript_numreads;
 extern double min_transcript_coverage;
 extern double min_single_exon_coverage;

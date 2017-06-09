@@ -55,6 +55,8 @@ public:
 	edge_descriptor max_in_edge(int v);
 	double get_in_weights(int v);
 	double get_out_weights(int v);
+	double get_max_in_weight(int v);
+	double get_max_out_weight(int v);
 
 	int count_junctions();
 

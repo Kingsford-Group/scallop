@@ -58,7 +58,8 @@ private:
 	bool resolve_trivial_vertex(int type, double jump_ratio);
 	bool resolve_trivial_vertex_fast(double jump_ratio);
 	bool resolve_single_trivial_vertex_fast(int i, double jump_ratio);
-	bool resolve_small_edges(double max_ratio);
+	bool resolve_smallest_edges(double max_ratio);
+	bool resolve_negligible_edges(double max_ratio);
 	bool resolve_splittable_vertex(int type, int degree, double max_ratio);
 	bool resolve_unsplittable_vertex(int type, int degree, double max_ratio);
 	bool resolve_hyper_edge(int fsize);

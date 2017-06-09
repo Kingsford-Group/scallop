@@ -171,6 +171,32 @@ double splice_graph::get_in_weights(int v)
 	return ww;
 }
 
+double splice_graph::get_max_out_weight(int v)
+{
+	edge_iterator it1, it2;
+	double ww = 0;
+	for(tie(it1, it2) = out_edges(v); it1 != it2; it1++)
+	{
+		double w = get_edge_weight(*it1);
+		if(w < ww) continue;
+		ww = w;
+	}
+	return ww;
+}
+
+double splice_graph::get_max_in_weight(int v)
+{
+	edge_iterator it1, it2;
+	double ww = 0;
+	for(tie(it1, it2) = in_edges(v); it1 != it2; it1++)
+	{
+		double w = get_edge_weight(*it1);
+		if(w < ww) continue;
+		ww = w;
+	}
+	return ww;
+}
+
 edge_descriptor splice_graph::max_out_edge(int v)
 {
 	edge_iterator it1, it2;

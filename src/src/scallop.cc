@@ -39,6 +39,8 @@ int scallop::assemble()
 	int c = classify();
 	if(verbose >= 1) printf("process splice graph %s type = %d, vertices = %lu, edges = %lu\n", name.c_str(), c, gr.num_vertices(), gr.num_edges());
 
+	resolve_negligible_edges(max_decompose_error_ratio[NEGLIGIBLE_EDGE]);
+
 	while(true)
 	{	
 		if(gr.num_vertices() > max_num_exons) break;
@@ -53,7 +55,7 @@ int scallop::assemble()
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 1, -0.5);
 		if(b == true) continue;
 
-		b = resolve_small_edges(max_decompose_error_ratio[SMALL_EDGE]);
+		b = resolve_smallest_edges(max_decompose_error_ratio[SMALLEST_EDGE]);
 		if(b == true) continue;
 
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 1, -0.5);
@@ -77,7 +79,7 @@ int scallop::assemble()
 		b = resolve_hyper_edge(1);
 		if(b == true) continue;
 
-		b = resolve_small_edges(DBL_MAX);
+		b = resolve_smallest_edges(DBL_MAX);
 		if(b == true) continue;
 
 		//summarize_vertices();
@@ -95,7 +97,7 @@ int scallop::assemble()
 	return 0;
 }
 
-bool scallop::resolve_small_edges(double max_ratio)
+bool scallop::resolve_smallest_edges(double max_ratio)
 {
 	int se = -1;
 	int root = -1;
@@ -160,6 +162,52 @@ bool scallop::resolve_small_edges(double max_ratio)
 	hs.remove(se);
 
 	return true;
+}
+
+bool scallop::resolve_negligible_edges(double max_ratio)
+{
+	bool flag = false;
+	//for(set<int>::iterator it = nonzeroset.begin(); it != nonzeroset.end(); it++)
+	//for(int i = 1; i < gr.num_vertices() - 1; i++)
+	vector<int> vv(nonzeroset.begin(), nonzeroset.end());
+	for(int k = 0; k < vv.size(); k++)
+	{
+		int i = vv[k];
+		assert(gr.in_degree(i) >= 1);
+		assert(gr.out_degree(i) >= 1);
+
+		double ww1 = gr.get_max_in_weight(i);
+		double ww2 = gr.get_max_out_weight(i);
+
+		vector<int> v;
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
+		{
+			edge_descriptor e = (*it1);
+			double w = gr.get_edge_weight(e);
+			if(w > max_ratio * ww1) continue;
+			if(gr.out_degree(e->source()) <= 1) continue;
+			v.push_back(e2i[e]);
+		}
+		for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
+		{
+			edge_descriptor e = (*it1);
+			double w = gr.get_edge_weight(e);
+			if(w > max_ratio * ww2) continue;
+			if(gr.in_degree(e->target()) <= 1) continue;
+			v.push_back(e2i[e]);
+		}
+
+		for(int k = 0; k < v.size(); k++)
+		{
+			remove_edge(v[k]);
+			hs.remove(v[k]);
+			flag = true;
+		}
+	}
+
+	if(flag == true) return true;
+	else return false;
 }
 
 bool scallop::resolve_splittable_vertex(int type, int degree, double max_ratio)
