@@ -41,8 +41,8 @@ int bundle::build()
 	build_splice_graph();
 
 	// revise splice graph
-	//remove_small_edges();
 	//refine_splice_graph();
+	remove_small_edges();
 
 	keep_surviving_edges();
 	refine_splice_graph();
