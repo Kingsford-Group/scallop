@@ -210,6 +210,7 @@ bool scallop::resolve_negligible_edges(bool extend, double max_ratio)
 			edge_descriptor e = i2e[*it];
 			if(gr.out_degree(e->source()) <= 1) continue;
 			if(gr.in_degree(e->target()) <= 1) continue;
+			if(hs.right_extend(e2i[e]) && hs.left_extend(e2i[e])) continue;
 
 			remove_edge(*it);
 			hs.remove(*it);
