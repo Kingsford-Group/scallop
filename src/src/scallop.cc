@@ -178,6 +178,8 @@ bool scallop::resolve_negligible_edges(double max_ratio)
 		int i = vv[k];
 		assert(gr.in_degree(i) >= 1);
 		assert(gr.out_degree(i) >= 1);
+		if(gr.in_degree(i) <= 1) continue;
+		if(gr.out_degree(i) <= 1) continue;
 
 		double ww1 = gr.get_max_in_weight(i);
 		double ww2 = gr.get_max_out_weight(i);
@@ -189,8 +191,7 @@ bool scallop::resolve_negligible_edges(double max_ratio)
 			edge_descriptor e = (*it1);
 			double w = gr.get_edge_weight(e);
 			if(w > max_ratio * ww1) continue;
-			if(gr.out_degree(e->source()) <= 1) continue;
-			if(hs.right_extend(e2i[e]) && hs.left_extend(e2i[e])) continue;
+			if(hs.right_extend(e2i[e])) continue;
 			if(verbose >= 2) printf("resolve in-negligible edge, degree = (%d, %d), vertex = %d, weight = %.3lf / %.3lf\n", gr.in_degree(i), gr.out_degree(i), i, w, ww1);
 			s.insert(e2i[e]);
 		}
@@ -199,14 +200,17 @@ bool scallop::resolve_negligible_edges(double max_ratio)
 			edge_descriptor e = (*it1);
 			double w = gr.get_edge_weight(e);
 			if(w > max_ratio * ww2) continue;
-			if(gr.in_degree(e->target()) <= 1) continue;
-			if(hs.right_extend(e2i[e]) && hs.left_extend(e2i[e])) continue;
+			if(hs.left_extend(e2i[e])) continue;
 			if(verbose >= 2) printf("resolve out-negligible edge, degree = (%d, %d), vertex = %d, weight = %.3lf / %.3lf\n", gr.in_degree(i), gr.out_degree(i), i, w, ww1);
 			s.insert(e2i[e]);
 		}
 
 		for(set<int>::iterator it = s.begin(); it != s.end(); it++)
 		{
+			edge_descriptor e = i2e[*it];
+			if(gr.out_degree(e->source()) <= 1) continue;
+			if(gr.in_degree(e->target()) <= 1) continue;
+
 			remove_edge(*it);
 			hs.remove(*it);
 			flag = true;
