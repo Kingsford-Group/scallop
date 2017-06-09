@@ -39,7 +39,7 @@ int scallop::assemble()
 	int c = classify();
 	if(verbose >= 1) printf("process splice graph %s type = %d, vertices = %lu, edges = %lu\n", name.c_str(), c, gr.num_vertices(), gr.num_edges());
 
-	//resolve_negligible_edges(max_decompose_error_ratio[NEGLIGIBLE_EDGE]);
+	resolve_negligible_edges(false, max_decompose_error_ratio[NEGLIGIBLE_EDGE]);
 
 	while(true)
 	{	
@@ -58,7 +58,7 @@ int scallop::assemble()
 		b = resolve_smallest_edges(max_decompose_error_ratio[SMALLEST_EDGE]);
 		if(b == true) continue;
 
-		b = resolve_negligible_edges(max_decompose_error_ratio[NEGLIGIBLE_EDGE]);
+		b = resolve_negligible_edges(true, max_decompose_error_ratio[NEGLIGIBLE_EDGE]);
 		if(b == true) continue;
 
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 1, -0.5);
@@ -167,7 +167,7 @@ bool scallop::resolve_smallest_edges(double max_ratio)
 	return true;
 }
 
-bool scallop::resolve_negligible_edges(double max_ratio)
+bool scallop::resolve_negligible_edges(bool extend, double max_ratio)
 {
 	bool flag = false;
 	//for(set<int>::iterator it = nonzeroset.begin(); it != nonzeroset.end(); it++)
@@ -191,7 +191,7 @@ bool scallop::resolve_negligible_edges(double max_ratio)
 			edge_descriptor e = (*it1);
 			double w = gr.get_edge_weight(e);
 			if(w > max_ratio * ww1) continue;
-			if(hs.right_extend(e2i[e])) continue;
+			if(extend && hs.right_extend(e2i[e])) continue;
 			if(verbose >= 2) printf("resolve in-negligible edge, degree = (%d, %d), vertex = %d, weight = %.3lf / %.3lf\n", gr.in_degree(i), gr.out_degree(i), i, w, ww1);
 			s.insert(e2i[e]);
 		}
@@ -200,7 +200,7 @@ bool scallop::resolve_negligible_edges(double max_ratio)
 			edge_descriptor e = (*it1);
 			double w = gr.get_edge_weight(e);
 			if(w > max_ratio * ww2) continue;
-			if(hs.left_extend(e2i[e])) continue;
+			if(extend && hs.left_extend(e2i[e])) continue;
 			if(verbose >= 2) printf("resolve out-negligible edge, degree = (%d, %d), vertex = %d, weight = %.3lf / %.3lf\n", gr.in_degree(i), gr.out_degree(i), i, w, ww1);
 			s.insert(e2i[e]);
 		}
