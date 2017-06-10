@@ -39,7 +39,7 @@ int scallop::assemble()
 	int c = classify();
 	if(verbose >= 1) printf("process splice graph %s type = %d, vertices = %lu, edges = %lu\n", name.c_str(), c, gr.num_vertices(), gr.num_edges());
 
-	resolve_negligible_edges(false, max_decompose_error_ratio[NEGLIGIBLE_EDGE]);
+	//resolve_negligible_edges(false, max_decompose_error_ratio[NEGLIGIBLE_EDGE]);
 
 	while(true)
 	{	
