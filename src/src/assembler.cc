@@ -51,7 +51,7 @@ int assembler::assemble()
 		if(p.n_cigar < 1) continue;												// should never happen
 
 		hit ht(b1t);
-		if(ht.nm > max_edit_distance) continue;
+		//if(ht.nm > max_edit_distance) continue;
 		//if(ht.verify_junctions() == false) continue;
 
 		qlen += ht.qlen;

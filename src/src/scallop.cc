@@ -96,7 +96,7 @@ int scallop::assemble()
 	collect_existing_st_paths();
 	greedy_decompose();
 
-	filter_transcripts();
+	//filter_transcripts();
 
 	if(verbose >= 2) printf("finish assemble bundle %s\n\n", name.c_str());
 	return 0;
