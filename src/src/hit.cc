@@ -97,9 +97,8 @@ hit::hit(bam1_t *b)
 	uint8_t *p4 = bam_aux_get(b, "nM");
 	if(p4 && (*p4) == 'C') nm = bam_aux2i(p4);
 
-	nm = 0;
 	uint8_t *p5 = bam_aux_get(b, "NM");
-	if(p5 && (*p5) == 'C') nm = bam_aux2i(p4);
+	if(p5 && (*p5) == 'C') nm = bam_aux2i(p5);
 
 	build_splice_positions();
 }
