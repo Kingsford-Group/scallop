@@ -115,7 +115,17 @@ int bundle::build_junctions()
 		for(int k = 0; k < v.size(); k++)
 		{
 			int64_t p = v[k];
-			//printf(" %d-%d\n", low32(p), high32(p));
+
+			// DEBUG
+			/*
+			int32_t x1 = low32(p);
+			int32_t x2 = high32(p);
+			if(fabs(x1 - 9364768) <= 2 || fabs(x2 - 9364768) <=2)
+			{
+				printf("HIT ");
+				hits[i].print();
+			}
+			*/
 			if(m.find(p) == m.end())
 			{
 				vector<int> hv;

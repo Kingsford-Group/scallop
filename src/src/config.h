@@ -43,6 +43,7 @@ using namespace std;
 //// parameters
 // for bam file and reads
 extern int min_flank_length;
+extern int max_edit_distance;
 extern int32_t min_bundle_gap;
 extern int min_num_hits_in_bundle;
 extern uint32_t min_mapping_quality;
