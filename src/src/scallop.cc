@@ -47,9 +47,6 @@ int scallop::assemble()
 
 		bool b = false;
 
-		b = resolve_negligible_edges(true, max_decompose_error_ratio[NEGLIGIBLE_EDGE]);
-		if(b == true) continue;
-
 		b = resolve_trivial_vertex_fast(max_decompose_error_ratio[TRIVIAL_VERTEX]);
 		if(b == true) continue;
 
@@ -60,6 +57,9 @@ int scallop::assemble()
 		if(b == true) continue;
 
 		b = resolve_smallest_edges(max_decompose_error_ratio[SMALLEST_EDGE]);
+		if(b == true) continue;
+
+		b = resolve_negligible_edges(true, max_decompose_error_ratio[NEGLIGIBLE_EDGE]);
 		if(b == true) continue;
 
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 1, -0.5);
@@ -181,8 +181,8 @@ bool scallop::resolve_negligible_edges(bool extend, double max_ratio)
 		int i = vv[k];
 		assert(gr.in_degree(i) >= 1);
 		assert(gr.out_degree(i) >= 1);
-		//if(gr.in_degree(i) <= 1) continue;
-		//if(gr.out_degree(i) <= 1) continue;
+		if(gr.in_degree(i) <= 1) continue;
+		if(gr.out_degree(i) <= 1) continue;
 
 		double ww1 = gr.get_max_in_weight(i);
 		double ww2 = gr.get_max_out_weight(i);
