@@ -15,7 +15,7 @@ See LICENSE for licensing.
 using namespace std;
 
 //// constants
-#define MAX_NUM_CIGAR 5
+#define MAX_NUM_CIGAR 7
 
 #define START_BOUNDARY 1
 #define END_BOUNDARY 2
