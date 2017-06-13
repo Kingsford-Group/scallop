@@ -49,15 +49,11 @@ int filter::remove_nested_transcripts()
 				PI32 pq = trs[j].get_bounds();
 				double w2 = trs[j].coverage;
 
-				printf("compare intron %d (%d-%d) of transcript %d with transcript %d (%d-%d): ", k, p, q, i, j, pq.first, pq.second);
-				
 				if(w2 >= w1 && pq.first > p && pq.second < q)
 				{
-					printf("TRUE\n");
 					b = true;
 					break;
 				}
-				else printf("FALSE\n");
 			}
 			if(b == true) break;
 		}
