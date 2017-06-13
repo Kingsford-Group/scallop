@@ -51,6 +51,7 @@ int assembler::assemble()
 		if(p.n_cigar < 1) continue;												// should never happen
 
 		hit ht(b1t);
+		if(ht.nh >= 2 && p.qual < min_mapping_quality) continue;
 		//if(ht.nm > max_edit_distance) continue;
 		//if(ht.verify_junctions() == false) continue;
 
