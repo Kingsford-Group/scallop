@@ -13,7 +13,7 @@ filter::filter(const vector<transcript> &v)
 	:trs(v)
 {}
 
-int filter::select()
+int filter::filter_length_coverage()
 {
 	vector<transcript> v;
 	for(int i = 0; i < trs.size(); i++)
@@ -29,7 +29,53 @@ int filter::select()
 	return 0;
 }
 
-int filter::join()
+int filter::remove_nested_transcripts()
+{
+	set<int> s;
+	for(int i = 0; i < trs.size(); i++)
+	{
+		vector<PI32> v = trs[i].exons;
+		if(v.size() <= 1) continue;
+		double w1 = trs[i].coverage;
+		bool b = false;
+		for(int k = 1; k < v.size(); k++)
+		{
+			int32_t p = v[k - 1].second;
+			int32_t q = v[k - 0].first;
+
+			for(int j = 0; j < trs.size(); j++)
+			{
+				if(trs[j].exons.size() <= 1) continue;
+				PI32 pq = trs[j].get_bounds();
+				double w2 = trs[j].coverage;
+				
+				if(w2 >= w1 && pq.first > p && pq.second < q)
+				{
+					b = true;
+					break;
+				}
+			}
+			if(b == true) break;
+		}
+		if(b == true)
+		{
+			s.insert(i);
+			break;
+		}
+	}
+
+	vector<transcript> v;
+	for(int i = 0; i < trs.size(); i++)
+	{
+		if(s.find(i) != s.end()) continue;
+		v.push_back(trs[i]);
+	}
+
+	trs = v;
+	return 0;
+}
+
+int filter::join_single_exon_transcripts()
 {
 	while(true)
 	{

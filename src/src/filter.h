@@ -18,8 +18,9 @@ public:
 	vector<transcript> trs;
 
 public:
-	int join();
-	int select();
+	int join_single_exon_transcripts();
+	int filter_length_coverage();
+	int remove_nested_transcripts();
 	int print();
 
 private:

@@ -150,6 +150,7 @@ int assembler::assemble(const bundle_base &bb)
 	if(ref_file2 != "" && bd.strand == '-') compare(bd.gr, ref_file2, "compare2.tex");
 	*/
 
+	vector<transcript> gv;
 	for(int k = 0; k < sg.subs.size(); k++)
 	{
 		//if(k != maxk) continue;
@@ -196,13 +197,17 @@ int assembler::assemble(const bundle_base &bb)
 		bd.output_transcripts(vv, pp, gid);
 
 		filter ft(vv);
-		ft.join();
-		ft.select();
-		if(ft.trs.size() >= 1) trsts.insert(trsts.end(), ft.trs.begin(), ft.trs.end());
+		ft.join_single_exon_transcripts();
+		ft.filter_length_coverage();
+		if(ft.trs.size() >= 1) gv.insert(gv.end(), ft.trs.begin(), ft.trs.end());
 
 		if(fixed_gene_name != "" && gid == fixed_gene_name) terminate = true;
 		if(terminate == true) return 0;
 	}
+
+	filter ft(gv);
+	ft.remove_nested_transcripts();
+	if(ft.trs.size() >= 1) trsts.insert(trsts.end(), ft.trs.begin(), ft.trs.end());
 
 	return 0;
 }
