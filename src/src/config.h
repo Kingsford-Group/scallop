@@ -68,6 +68,7 @@ extern double max_decompose_error_ratio[7];
 extern double min_transcript_numreads;
 extern double min_transcript_coverage;
 extern double min_single_exon_coverage;
+extern double min_transcript_coverage_ratio; 
 extern int min_transcript_length;
 extern int min_exon_length;
 extern int max_num_exons;

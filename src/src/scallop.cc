@@ -96,6 +96,8 @@ int scallop::assemble()
 	collect_existing_st_paths();
 	greedy_decompose();
 
+	filter_transcripts();
+
 	if(verbose >= 2) printf("finish assemble bundle %s\n\n", name.c_str());
 	return 0;
 }
@@ -1357,6 +1359,26 @@ int scallop::greedy_decompose()
 	}
 	int n2 = paths.size();
 	if(verbose >= 2) printf("greedy decomposing produces %d / %d paths\n", n2 - n1, n2);
+	return 0;
+}
+
+int scallop::filter_transcripts()
+{
+	double max_abd = 0;
+	for(int i = 0; i < paths.size(); i++)
+	{
+		if(paths[i].abd < max_abd) continue;
+		max_abd = paths[i].abd;
+	}
+
+	vector<path> v;
+	for(int i = 0; i < paths.size(); i++)
+	{
+		if(paths[i].abd < min_transcript_coverage_ratio * max_abd) continue;
+		v.push_back(paths[i]);
+	}
+
+	paths = v;
 	return 0;
 }
 

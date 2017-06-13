@@ -88,6 +88,9 @@ private:
 	int compute_length(const path &p);
 	int greedy_decompose();
 
+	// filter
+	int filter_transcripts();
+
 	// stats, print, and draw
 	int print();
 	int stats();

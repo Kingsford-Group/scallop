@@ -17,7 +17,7 @@ using namespace std;
 //// parameters
 // for bam file and reads
 int min_flank_length = 3;
-int max_edit_distance = 6;
+int max_edit_distance = 10;
 int32_t min_bundle_gap = 50;
 int min_num_hits_in_bundle = 20;
 uint32_t min_mapping_quality = 1;
@@ -38,6 +38,7 @@ double max_decompose_error_ratio[7] = {0.33, 0.05, 0.0, 0.25, 0.30, 0.0, 1.1};
 
 // for selecting paths
 double min_transcript_coverage = 1.01;
+double min_transcript_coverage_ratio = 0.005;
 double min_single_exon_coverage = 20;
 double min_transcript_numreads = 20;
 int min_transcript_length = 250;
@@ -190,6 +191,11 @@ int parse_arguments(int argc, const char ** argv)
 			i++;
 			if(fabs(min_transcript_coverage - 1.0) < 0.01) min_transcript_coverage = 1.01;
 		}
+		else if(string(argv[i]) == "--min_transcript_coverage_ratio")
+		{
+			min_transcript_coverage_ratio = atof(argv[i + 1]);
+			i++;
+		}
 		else if(string(argv[i]) == "--min_single_exon_coverage")
 		{
 			min_single_exon_coverage = atof(argv[i + 1]);
@@ -287,6 +293,7 @@ int print_parameters()
 	printf("max_intron_contamination_coverage = %.2lf\n", max_intron_contamination_coverage);
 	printf("min_surviving_edge_weight = %.2lf\n", min_surviving_edge_weight);
 	printf("min_transcript_coverage = %.2lf\n", min_transcript_coverage);
+	printf("min_transcript_coverage_ratio = %.2lf\n", min_transcript_coverage_ratio);
 	printf("min_single_exon_coverage = %.2lf\n", min_single_exon_coverage);
 	printf("min_transcript_numreads = %.2lf\n", min_transcript_numreads);
 	printf("min_transcript_length = %d\n", min_transcript_length);
