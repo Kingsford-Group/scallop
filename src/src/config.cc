@@ -41,7 +41,7 @@ double min_transcript_coverage = 1.01;
 double min_transcript_coverage_ratio = 0.005;
 double min_single_exon_coverage = 20;
 double min_transcript_numreads = 20;
-int min_transcript_length = 250;
+int min_transcript_length = 150;
 int min_exon_length = 50;
 int max_num_exons = 1000;
 

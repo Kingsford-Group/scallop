@@ -708,19 +708,19 @@ int bundle::extend_isolated_end_boundaries()
 		edge_descriptor e2 = (*it1);
 		int s = e1->source();
 		int t = e2->target();
+		double w1 = gr.get_edge_weight(e1);
+		double w2 = gr.get_edge_weight(e2);
+		double wv = gr.get_vertex_weight(s);
+		int32_t p = gr.get_vertex_info(t).lpos - gr.get_vertex_info(i).rpos;
 
 		if(gr.out_degree(s) != 1) continue;
 		if(t != gr.num_vertices() - 1) continue;
-		if(gr.get_edge_weight(e1) >= 2.5) continue;
-		if(gr.get_edge_weight(e2) >= 5.0) continue;
-		double w1 = gr.get_edge_weight(e1);
-		double wv = gr.get_vertex_weight(s);
+		if(w1 >= 2.5) continue;
+		if(w2 >= 5.0) continue;
 		if(wv < w1 * w1 + 5) continue;
+		if(p <= 0) continue;
 
-		//if(gr.get_vertex_weight(s) <= 5.0) continue;
-		if(gr.get_vertex_info(s).rpos == gr.get_vertex_info(i).lpos) continue;
-
-		double w = gr.get_vertex_weight(s) - gr.get_edge_weight(e1);
+		double w = wv - w1;
 		edge_descriptor e = gr.add_edge(s, t);
 		gr.set_edge_weight(e, w);
 		gr.set_edge_info(e, edge_info());
@@ -746,18 +746,19 @@ int bundle::extend_isolated_start_boundaries()
 		edge_descriptor e2 = (*it1);
 		int s = e1->source();
 		int t = e2->target();
+		double w1 = gr.get_edge_weight(e1);
+		double w2 = gr.get_edge_weight(e2);
+		double wv = gr.get_vertex_weight(t);
+		int32_t p = gr.get_vertex_info(t).lpos - gr.get_vertex_info(i).rpos;
 
 		if(s != 0) continue;
 		if(gr.in_degree(t) != 1) continue;
-		if(gr.get_edge_weight(e2) >= 2.5) continue;
-		if(gr.get_edge_weight(e1) >= 5.0) continue;
-		double w2 = gr.get_edge_weight(e2);
-		double wv = gr.get_vertex_weight(t);
+		if(w1 >= 5.0 || w2 >= 2.5) continue;
+		//if((w1 >= 5.0 || w2 >= 2.5) && p < 100000) continue;
 		if(wv < w2 * w2 + 5) continue;
+		if(p <= 0) continue;
 
-		if(gr.get_vertex_info(i).rpos == gr.get_vertex_info(t).lpos) continue;
-
-		double w = gr.get_vertex_weight(t) - gr.get_edge_weight(e2);
+		double w = wv - w2;
 		edge_descriptor e = gr.add_edge(s, t);
 		gr.set_edge_weight(e, w);
 		gr.set_edge_info(e, edge_info());
