@@ -196,10 +196,22 @@ int assembler::assemble(const bundle_base &bb)
 		vector<transcript> vv;
 		bd.output_transcripts(vv, pp, gid);
 
+		if(verbose >= 2)
+		{
+			printf("transcripts:\n");
+			for(int i = 0; i < vv.size(); i++) vv[i].write(cout);
+		}
+
 		filter ft(vv);
 		ft.join_single_exon_transcripts();
 		ft.filter_length_coverage();
 		if(ft.trs.size() >= 1) gv.insert(gv.end(), ft.trs.begin(), ft.trs.end());
+
+		if(verbose >= 2)
+		{
+			printf("transcripts after filtering:\n");
+			for(int i = 0; i < ft.trs.size(); i++) ft.trs[i].write(cout);
+		}
 
 		if(fixed_gene_name != "" && gid == fixed_gene_name) terminate = true;
 		if(terminate == true) return 0;

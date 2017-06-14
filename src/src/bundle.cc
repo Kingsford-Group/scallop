@@ -715,10 +715,10 @@ int bundle::extend_isolated_end_boundaries()
 
 		if(gr.out_degree(s) != 1) continue;
 		if(t != gr.num_vertices() - 1) continue;
-		if(w1 >= 2.5) continue;
-		if(w2 >= 5.0) continue;
-		if(wv < w1 * w1 + 5) continue;
+		if(wv < w1 * w1 + 100) continue;
+		if(p < 100000) continue;
 		if(p <= 0) continue;
+		//if(w1 >= 2.5 || w2 >= 5.0) continue;
 
 		double w = wv - w1;
 		edge_descriptor e = gr.add_edge(s, t);
@@ -753,9 +753,9 @@ int bundle::extend_isolated_start_boundaries()
 
 		if(s != 0) continue;
 		if(gr.in_degree(t) != 1) continue;
-		if(w1 >= 5.0 || w2 >= 2.5) continue;
-		//if((w1 >= 5.0 || w2 >= 2.5) && p < 100000) continue;
-		if(wv < w2 * w2 + 5) continue;
+		//if(w1 >= 5.0 || w2 >= 2.5) continue;
+		if(wv < w2 * w2 + 100) continue;
+		if(p < 100000) continue;
 		if(p <= 0) continue;
 
 		double w = wv - w2;

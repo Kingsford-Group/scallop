@@ -99,7 +99,12 @@ int scallop::assemble()
 
 	//filter_transcripts();
 
-	if(verbose >= 2) printf("finish assemble bundle %s\n\n", name.c_str());
+	if(verbose >= 2) 
+	{
+		for(int i = 0; i < paths.size(); i++) paths[i].print(i);
+		printf("finish assemble bundle %s\n\n", name.c_str());
+	}
+
 	return 0;
 }
 
