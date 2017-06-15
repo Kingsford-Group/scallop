@@ -56,6 +56,8 @@ int bundle::build()
 	remove_inner_start_boundaries();
 	remove_inner_end_boundaries();
 
+	remove_small_edges();
+
 	remove_intron_contamination();
 
 	build_hyper_edges2();
@@ -998,6 +1000,41 @@ int bundle::keep_surviving_edges()
 		gr.remove_edge(ve[i]);
 	}
 
+	return 0;
+}
+
+int bundle::remove_small_exons()
+{
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		bool b = true;
+		edge_iterator it1, it2;
+		int32_t p1 = gr.get_vertex_info(i).lpos;
+		int32_t p2 = gr.get_vertex_info(i).rpos;
+
+		if(p2 - p1 >= min_exon_length) continue;
+
+		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
+		{
+			edge_descriptor e = (*it1);
+			int s = e->source();
+			if(gr.out_degree(s) <= 1) b = false;
+			if(gr.get_vertex_info(s).rpos == p1) b = false;
+			if(b == false) break;
+		}
+		for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
+		{
+			edge_descriptor e = (*it1);
+			int t = e->target();
+			if(gr.in_degree(t) <= 1) b = false;
+			if(gr.get_vertex_info(t).lpos == p2) b = false;
+			if(b == false) break;
+		}
+
+		if(b == false) continue;
+
+		gr.clear_vertex(i);
+	}
 	return 0;
 }
 
