@@ -908,6 +908,8 @@ bool bundle::remove_small_exons()
 		int32_t p2 = gr.get_vertex_info(i).rpos;
 
 		if(p2 - p1 >= min_exon_length) continue;
+		if(gr.in_degree(i) <= 0) continue;
+		if(gr.out_degree(i) <= 0) continue;
 
 		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
 		{
