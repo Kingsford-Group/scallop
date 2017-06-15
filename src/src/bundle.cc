@@ -40,26 +40,7 @@ int bundle::build()
 	link_partial_exons();
 	build_splice_graph();
 
-	// revise splice graph
-	//remove_small_edges();
-	//refine_splice_graph();
-
-	keep_surviving_edges();
-	refine_splice_graph();
-
-	while(extend_boundaries());
-	refine_splice_graph();
-
-	//extend_isolated_start_boundaries();
-	//extend_isolated_end_boundaries();
-
-	remove_inner_start_boundaries();
-	remove_inner_end_boundaries();
-
-	remove_small_exons();
-	refine_splice_graph();
-
-	remove_intron_contamination();
+	revise_splice_graph();
 
 	build_hyper_edges2();
 
@@ -700,6 +681,53 @@ int bundle::build_splice_graph()
 	return 0;
 }
 
+int bundle::revise_splice_graph()
+{
+	while(true)
+	{
+		bool b = false;
+
+		b = extend_boundaries();
+		if(b == true) continue;
+
+		b = remove_inner_boundaries();
+		if(b == true) continue;
+
+		b = remove_small_exons();
+		if(b == true) continue;
+
+		b = keep_surviving_edges();
+		if(b == true) refine_splice_graph();
+		if(b == true) continue;
+
+		b = remove_intron_contamination();
+		if(b == true) continue;
+
+		break;
+	}
+
+	refine_splice_graph();
+
+	return 0;
+}
+
+int bundle::refine_splice_graph()
+{
+	while(true)
+	{
+		bool b = false;
+		for(int i = 1; i < gr.num_vertices() - 1; i++)
+		{
+			if(gr.degree(i) == 0) continue;
+			if(gr.in_degree(i) >= 1 && gr.out_degree(i) >= 1) continue;
+			gr.clear_vertex(i);
+			b = true;
+		}
+		if(b == false) break;
+	}
+	return 0;
+}
+
 bool bundle::extend_boundaries()
 {
 	edge_iterator it1, it2;
@@ -742,86 +770,6 @@ bool bundle::extend_boundaries()
 	}
 
 	return false;
-}
-
-int bundle::extend_isolated_end_boundaries()
-{
-	for(int i = 1; i < gr.num_vertices(); i++)
-	{
-		if(gr.in_degree(i) != 1) continue;
-		if(gr.out_degree(i) != 1) continue;
-
-		edge_iterator it1, it2;
-		tie(it1, it2) = gr.in_edges(i);
-		edge_descriptor e1 = (*it1);
-		tie(it1, it2) = gr.out_edges(i);
-		edge_descriptor e2 = (*it1);
-		int s = e1->source();
-		int t = e2->target();
-		double w1 = gr.get_edge_weight(e1);
-		double w2 = gr.get_edge_weight(e2);
-		double wv = gr.get_vertex_weight(s);
-		int32_t p = gr.get_vertex_info(t).lpos - gr.get_vertex_info(i).rpos;
-
-		if(gr.out_degree(s) != 1) continue;
-		if(t != gr.num_vertices() - 1) continue;
-		if(wv < 2.0 * w1 * w1 + 10) continue;
-		if(p <= 0) continue;
-		//if(p < 100000) continue;
-		//if(w1 >= 2.5 || w2 >= 5.0) continue;
-
-		double w = wv - w1;
-		edge_descriptor e = gr.add_edge(s, t);
-		gr.set_edge_weight(e, w);
-		gr.set_edge_info(e, edge_info());
-		
-		if(verbose >= 2) printf("extend isolated end boundary: (%d, %.2lf) -- (%.2lf) -- (%d, %.2lf)\n", s, gr.get_vertex_weight(s),
-				gr.get_edge_weight(e1), i, gr.get_vertex_weight(i));
-
-		gr.remove_edge(e1);
-		gr.remove_edge(e2);
-	}
-	return 0;
-}
-
-int bundle::extend_isolated_start_boundaries()
-{
-	for(int i = 1; i < gr.num_vertices(); i++)
-	{
-		if(gr.in_degree(i) != 1) continue;
-		if(gr.out_degree(i) != 1) continue;
-
-		edge_iterator it1, it2;
-		tie(it1, it2) = gr.in_edges(i);
-		edge_descriptor e1 = (*it1);
-		tie(it1, it2) = gr.out_edges(i);
-		edge_descriptor e2 = (*it1);
-		int s = e1->source();
-		int t = e2->target();
-		double w1 = gr.get_edge_weight(e1);
-		double w2 = gr.get_edge_weight(e2);
-		double wv = gr.get_vertex_weight(t);
-		int32_t p = gr.get_vertex_info(t).lpos - gr.get_vertex_info(i).rpos;
-
-		if(s != 0) continue;
-		if(gr.in_degree(t) != 1) continue;
-		//if(w1 >= 5.0 || w2 >= 2.5) continue;
-		if(wv < 2.0 * w2 * w2 + 10) continue;
-		if(p <= 0) continue;
-		//if(p < 100000) continue;
-
-		double w = wv - w2;
-		edge_descriptor e = gr.add_edge(s, t);
-		gr.set_edge_weight(e, w);
-		gr.set_edge_info(e, edge_info());
-		
-		if(verbose >= 2) printf("extend isolated start boundary: (%d, %.2lf) -- (%.2lf) -- (%d, %.2lf)\n", i, gr.get_vertex_weight(i),
-				gr.get_edge_weight(e2), t, gr.get_vertex_weight(t));
-
-		gr.remove_edge(e1);
-		gr.remove_edge(e2);
-	}
-	return 0;
 }
 
 VE bundle::compute_maximal_edges()
@@ -871,63 +819,7 @@ VE bundle::compute_maximal_edges()
 	return x;
 }
 
-int bundle::refine_splice_graph()
-{
-	while(true)
-	{
-		bool b = false;
-		for(int i = 1; i < gr.num_vertices() - 1; i++)
-		{
-			if(gr.degree(i) == 0) continue;
-			if(gr.in_degree(i) >= 1 && gr.out_degree(i) >= 1) continue;
-			gr.clear_vertex(i);
-			b = true;
-		}
-		if(b == false) break;
-	}
-	return 0;
-}
-
-int bundle::remove_small_edges()
-{
-	vector<double> max1(gr.num_vertices(), 0);
-	vector<double> max2(gr.num_vertices(), 0);
-	for(int i = 0; i < gr.num_vertices(); i++)
-	{
-		edge_descriptor e1 = gr.max_in_edge(i);
-		edge_descriptor e2 = gr.max_out_edge(i);
-		if(e1 != null_edge) max1[i] = gr.get_edge_weight(e1);
-		if(e2 != null_edge) max2[i] = gr.get_edge_weight(e2);
-	}
-
-	SE se;
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
-	{
-		int s = (*it1)->source();
-		int t = (*it1)->target();
-		int32_t p1 = gr.get_vertex_info(s).rpos;
-		int32_t p2 = gr.get_vertex_info(t).lpos;
-		if(p1 == p2) continue;
-
-		double w = gr.get_edge_weight(*it1);
-		if(w >= 10.0) continue;
-
-		double r1 = w / max2[s];
-		double r2 = w / max1[t];
-		if(r1 > 0.01 && r2 > 0.01) continue;
-
-		se.insert(*it1);
-	}
-	
-	for(SE::iterator it = se.begin(); it != se.end(); it++)
-	{
-		gr.remove_edge(*it);
-	}
-	return 0;
-}
-
-int bundle::keep_surviving_edges()
+bool bundle::keep_surviving_edges()
 {
 	set<int> sv1;
 	set<int> sv2;
@@ -1001,11 +893,13 @@ int bundle::keep_surviving_edges()
 		gr.remove_edge(ve[i]);
 	}
 
-	return 0;
+	if(ve.size() >= 1) return true;
+	else return false;
 }
 
-int bundle::remove_small_exons()
+bool bundle::remove_small_exons()
 {
+	bool flag = false;
 	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		bool b = true;
@@ -1035,13 +929,15 @@ int bundle::remove_small_exons()
 		if(b == false) continue;
 
 		gr.clear_vertex(i);
+		flag = true;
 	}
-	return 0;
+	return flag;
 }
 
-int bundle::remove_inner_start_boundaries()
+bool bundle::remove_inner_boundaries()
 {
-	for(int i = 1; i < gr.num_vertices(); i++)
+	bool flag = false;
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
 	{
 		if(gr.in_degree(i) != 1) continue;
 		if(gr.out_degree(i) != 1) continue;
@@ -1051,81 +947,28 @@ int bundle::remove_inner_start_boundaries()
 		edge_descriptor e1 = (*it1);
 		tie(it1, it2) = gr.out_edges(i);
 		edge_descriptor e2 = (*it1);
+		vertex_info vi = gr.get_vertex_info(i);
 		int s = e1->source();
 		int t = e2->target();
-		vertex_info vi = gr.get_vertex_info(i);
-		double wv = gr.get_vertex_weight(i);
-		double ww = gr.get_vertex_weight(t);
 
-		if(s != 0) continue;
+		if(s != 0 && t != gr.num_vertices() - 1) continue;
+		if(gr.out_degree(s) == 1) continue;
 		if(gr.in_degree(t) == 1) continue;
 
-		bool b1 = true;
-		if(vi.stddev >= 0.01) b1 = false;
+		if(vi.stddev >= 0.01) continue;
 
-		bool b2 = true;
-		if(vi.rpos == gr.get_vertex_info(t).lpos) b2 = false;
-		if(vi.length > min_exon_length) b2 = false;
-		//if(1.5 * wv > ww) b2 = false;
-		//if(vi.length > 50 && wv > 2.0) b2 = false;
-		//if(wv > 10.0) b2 = false;
-
-		if(b1 == false && b2 == false) continue;
-
-		if(verbose >= 2) printf("remove inner start boundary: vertex = %d, weight = %.2lf, length = %d, pos = %d-%d, t = %d, t.left = %d\n",
-				i, wv, vi.length, vi.lpos, vi.rpos, t, gr.get_vertex_info(t).lpos);
+		if(verbose >= 2) printf("remove inner boundary: vertex = %d, weight = %.2lf, length = %d, pos = %d-%d\n",
+				i, gr.get_vertex_weight(i), vi.length, vi.lpos, vi.rpos);
 
 		gr.clear_vertex(i);
+		flag = true;
 	}
-	return 0;
+	return flag;
 }
 
-int bundle::remove_inner_end_boundaries()
+bool bundle::remove_intron_contamination()
 {
-	for(int i = 1; i < gr.num_vertices(); i++)
-	{
-		if(gr.in_degree(i) != 1) continue;
-		if(gr.out_degree(i) != 1) continue;
-
-		edge_iterator it1, it2;
-		tie(it1, it2) = gr.in_edges(i);
-		edge_descriptor e1 = (*it1);
-		tie(it1, it2) = gr.out_edges(i);
-		edge_descriptor e2 = (*it1);
-		int s = e1->source();
-		int t = e2->target();
-		vertex_info vi = gr.get_vertex_info(i);
-		double wv = gr.get_vertex_weight(i);
-		double ww = gr.get_vertex_weight(s);
-
-		if(t != gr.num_vertices() - 1) continue;
-		if(gr.out_degree(s) == 1) continue;
-
-		//if(ww < 1.5 * wv) continue;
-	
-		bool b1 = true;
-		if(vi.stddev >= 0.01) b1 = false;
-
-		bool b2 = true;
-		if(vi.lpos == gr.get_vertex_info(s).rpos) b2 = false;
-		if(vi.length > min_exon_length) b2 = false;
-		//if(1.5 * wv > ww) b2 = false;
-		//if(vi.length > 50 && wv > 2.0) b2 = false;
-		//if(wv > 10.0) b2 = false;
-
-		if(b1 == false && b2 == false) continue;
-
-		if(verbose >= 2) printf("remove inner end boundary: vertex = %d, weight = %.2lf, length = %d, pos = %d-%d, s = %d, s.right = %d\n",
-				i, wv, vi.length, vi.lpos, vi.rpos, s, gr.get_vertex_info(s).rpos);
-
-
-		gr.clear_vertex(i);
-	}
-	return 0;
-}
-
-int bundle::remove_intron_contamination()
-{
+	bool flag = false;
 	for(int i = 1; i < gr.num_vertices(); i++)
 	{
 		if(gr.in_degree(i) != 1) continue;
@@ -1158,8 +1001,9 @@ int bundle::remove_intron_contamination()
 		if(verbose >= 2) printf("clear intron contamination %d, weight = %.2lf, length = %d, edge weight = %.2lf\n", i, wv, vi.length, we);
 
 		gr.clear_vertex(i);
+		flag = true;
 	}
-	return 0;
+	return flag;
 }
 
 

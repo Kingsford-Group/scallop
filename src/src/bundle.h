@@ -61,18 +61,15 @@ private:
 	int locate_left_partial_exon(int32_t x);
 	int locate_right_partial_exon(int32_t x);
 
-	// update splice graph
+	// revise splice graph
 	VE compute_maximal_edges();
+	int revise_splice_graph();
 	int refine_splice_graph();
-	int remove_small_edges();
-	int keep_surviving_edges();
+	bool keep_surviving_edges();
 	bool extend_boundaries();
-	int remove_small_exons();
-	int extend_isolated_start_boundaries();
-	int extend_isolated_end_boundaries();
-	int remove_inner_start_boundaries();
-	int remove_inner_end_boundaries();
-	int remove_intron_contamination();
+	bool remove_small_exons();
+	bool remove_inner_boundaries();
+	bool remove_intron_contamination();
 
 	// super edges
 	int build_hyper_edges1();			// single end
