@@ -20,7 +20,8 @@ scallop::scallop(const string &s, const splice_graph &g, const hyper_set &h)
 	: name(s), gr(g), hs(h)
 {
 	round = 0;
-	//if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
+	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
+
 	gr.get_edge_indices(i2e, e2i);
 	//add_pseudo_hyper_edges();
 	hs.build(gr, e2i);
@@ -1449,12 +1450,12 @@ int scallop::print()
 
 	//hs.print();
 
-	if(output_tex_files == true)
-	{
-		draw_splice_graph(name + "." + tostring(round) + ".tex");
-		//nested_graph nt(gr);
-		//nt.draw(name + "." + tostring(round) + ".nt.tex");
-	}
+	//if(output_tex_files == true)
+	//{
+	//	draw_splice_graph(name + "." + tostring(round) + ".tex");
+	//	nested_graph nt(gr);
+	//	nt.draw(name + "." + tostring(round) + ".nt.tex");
+	//}
 
 	//printf("finish round %d\n\n", round);
 	//round++;

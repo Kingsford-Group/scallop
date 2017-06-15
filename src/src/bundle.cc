@@ -47,8 +47,11 @@ int bundle::build()
 	keep_surviving_edges();
 	refine_splice_graph();
 
-	extend_isolated_start_boundaries();
-	extend_isolated_end_boundaries();
+	while(extend_boundaries());
+	refine_splice_graph();
+
+	//extend_isolated_start_boundaries();
+	//extend_isolated_end_boundaries();
 
 	remove_inner_start_boundaries();
 	remove_inner_end_boundaries();
@@ -692,6 +695,47 @@ int bundle::build_splice_graph()
 	}
 
 	return 0;
+}
+
+bool bundle::extend_boundaries()
+{
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	{
+		edge_descriptor e = (*it1);
+		int s = e->source();
+		int t = e->target();
+		int32_t p = gr.get_vertex_info(t).lpos - gr.get_vertex_info(s).rpos;
+		double we = gr.get_edge_weight(e);
+		double ws = gr.get_vertex_weight(s);
+		double wt = gr.get_vertex_weight(t);
+
+		if(p <= 0) continue;
+		if(s == 0) continue;
+		if(t == gr.num_vertices() - 1) continue;
+
+		bool b = false;
+		if(gr.out_degree(s) == 1 && ws >= 10.0 * we * we + 10.0) b = true;
+		if(gr.in_degree(t) == 1 && wt >= 10.0 * we * we + 10.0) b = true;
+
+		if(b == false) continue;
+
+		if(gr.out_degree(s) == 1)
+		{
+			edge_descriptor ee = gr.add_edge(s, gr.num_vertices() - 1);
+			gr.set_edge_weight(ee, ws);
+			gr.set_edge_info(ee, edge_info());
+		}
+		if(gr.in_degree(t) == 1)
+		{
+			edge_descriptor ee = gr.add_edge(0, t);
+			gr.set_edge_weight(ee, wt);
+			gr.set_edge_info(ee, edge_info());
+		}
+		return true;
+	}
+
+	return false;
 }
 
 int bundle::extend_isolated_end_boundaries()
