@@ -930,6 +930,9 @@ bool bundle::remove_small_exons()
 
 		if(b == false) continue;
 
+		// only consider boundary small exons
+		if(gr.edge(0, i).second == false && gr.edge(i, gr.num_vertices() - 1).second == false) continue;
+
 		gr.clear_vertex(i);
 		flag = true;
 	}
