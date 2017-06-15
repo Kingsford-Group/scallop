@@ -43,7 +43,7 @@ double min_single_exon_coverage = 20;
 double min_transcript_numreads = 20;
 int min_transcript_length_base = 150;
 int min_transcript_length_increase = 50;
-int min_exon_length = 25;
+int min_exon_length = 15;
 int max_num_exons = 1000;
 
 // for subsetsum and router
