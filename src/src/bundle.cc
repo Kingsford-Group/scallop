@@ -693,9 +693,11 @@ int bundle::revise_splice_graph()
 		b = remove_inner_boundaries();
 		if(b == true) continue;
 
+		/*
 		b = remove_small_exons();
 		if(b == true) refine_splice_graph();
 		if(b == true) continue;
+		*/
 
 		b = keep_surviving_edges();
 		if(b == true) refine_splice_graph();
