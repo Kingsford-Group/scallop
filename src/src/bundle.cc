@@ -746,8 +746,8 @@ bool bundle::extend_boundaries()
 		if(t == gr.num_vertices() - 1) continue;
 
 		bool b = false;
-		if(gr.out_degree(s) == 1 && ws >= 2.0 * we * we + 20.0) b = true;
-		if(gr.in_degree(t) == 1 && wt >= 2.0 * we * we + 20.0) b = true;
+		if(gr.out_degree(s) == 1 && ws >= 10.0 * we * we + 10.0) b = true;
+		if(gr.in_degree(t) == 1 && wt >= 10.0 * we * we + 10.0) b = true;
 
 		if(b == false) continue;
 
