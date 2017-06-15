@@ -694,6 +694,7 @@ int bundle::revise_splice_graph()
 		if(b == true) continue;
 
 		b = remove_small_exons();
+		if(b == true) refine_splice_graph();
 		if(b == true) continue;
 
 		b = keep_surviving_edges();
@@ -908,14 +909,13 @@ bool bundle::remove_small_exons()
 		int32_t p2 = gr.get_vertex_info(i).rpos;
 
 		if(p2 - p1 >= min_exon_length) continue;
-		if(gr.in_degree(i) <= 0) continue;
-		if(gr.out_degree(i) <= 0) continue;
+		if(gr.degree(i) <= 0) continue;
 
 		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
 		{
 			edge_descriptor e = (*it1);
 			int s = e->source();
-			if(gr.out_degree(s) <= 1) b = false;
+			//if(gr.out_degree(s) <= 1) b = false;
 			if(gr.get_vertex_info(s).rpos == p1) b = false;
 			if(b == false) break;
 		}
@@ -923,7 +923,7 @@ bool bundle::remove_small_exons()
 		{
 			edge_descriptor e = (*it1);
 			int t = e->target();
-			if(gr.in_degree(t) <= 1) b = false;
+			//if(gr.in_degree(t) <= 1) b = false;
 			if(gr.get_vertex_info(t).lpos == p2) b = false;
 			if(b == false) break;
 		}
@@ -931,7 +931,7 @@ bool bundle::remove_small_exons()
 		if(b == false) continue;
 
 		// only consider boundary small exons
-		if(gr.edge(0, i).second == false && gr.edge(i, gr.num_vertices() - 1).second == false) continue;
+		// if(gr.edge(0, i).second == false && gr.edge(i, gr.num_vertices() - 1).second == false) continue;
 
 		gr.clear_vertex(i);
 		flag = true;
