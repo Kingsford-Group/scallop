@@ -53,8 +53,8 @@ int bundle::build()
 	//extend_isolated_start_boundaries();
 	//extend_isolated_end_boundaries();
 
-	remove_inner_start_boundaries();
-	remove_inner_end_boundaries();
+	//remove_inner_start_boundaries();
+	//remove_inner_end_boundaries();
 
 	remove_intron_contamination();
 
