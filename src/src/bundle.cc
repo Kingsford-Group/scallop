@@ -56,7 +56,8 @@ int bundle::build()
 	remove_inner_start_boundaries();
 	remove_inner_end_boundaries();
 
-	remove_small_edges();
+	remove_small_exons();
+	refine_splice_graph();
 
 	remove_intron_contamination();
 
