@@ -732,6 +732,9 @@ bool bundle::extend_boundaries()
 			gr.set_edge_weight(ee, wt);
 			gr.set_edge_info(ee, edge_info());
 		}
+
+		gr.remove_edge(e);
+
 		return true;
 	}
 
@@ -772,6 +775,8 @@ int bundle::extend_isolated_end_boundaries()
 		if(verbose >= 2) printf("extend isolated end boundary: (%d, %.2lf) -- (%.2lf) -- (%d, %.2lf)\n", s, gr.get_vertex_weight(s),
 				gr.get_edge_weight(e1), i, gr.get_vertex_weight(i));
 
+		gr.remove_edge(e1);
+		gr.remove_edge(e2);
 	}
 	return 0;
 }
@@ -1022,7 +1027,7 @@ int bundle::remove_inner_start_boundaries()
 
 		bool b2 = true;
 		if(vi.rpos == gr.get_vertex_info(t).lpos) b2 = false;
-		if(vi.length > min_boundary_exon_length) b2 = false;
+		if(vi.length > min_exon_length) b2 = false;
 		//if(1.5 * wv > ww) b2 = false;
 		//if(vi.length > 50 && wv > 2.0) b2 = false;
 		//if(wv > 10.0) b2 = false;
@@ -1065,7 +1070,7 @@ int bundle::remove_inner_end_boundaries()
 
 		bool b2 = true;
 		if(vi.lpos == gr.get_vertex_info(s).rpos) b2 = false;
-		if(vi.length > min_boundary_exon_length) b2 = false;
+		if(vi.length > min_exon_length) b2 = false;
 		//if(1.5 * wv > ww) b2 = false;
 		//if(vi.length > 50 && wv > 2.0) b2 = false;
 		//if(wv > 10.0) b2 = false;

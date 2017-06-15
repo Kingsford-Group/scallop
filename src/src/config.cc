@@ -41,9 +41,9 @@ double min_transcript_coverage = 1.01;
 double min_transcript_coverage_ratio = 0.005;
 double min_single_exon_coverage = 20;
 double min_transcript_numreads = 20;
-int min_transcript_length = 150;
-int min_exon_length = 50;
-int min_boundary_exon_length = 20;
+int min_transcript_length_base = 150;
+int min_transcript_length_increase = 50;
+int min_exon_length = 20;
 int max_num_exons = 1000;
 
 // for subsetsum and router
@@ -207,19 +207,19 @@ int parse_arguments(int argc, const char ** argv)
 			min_transcript_numreads = atof(argv[i + 1]);
 			i++;
 		}
-		else if(string(argv[i]) == "--min_transcript_length")
+		else if(string(argv[i]) == "--min_transcript_length_base")
 		{
-			min_transcript_length = atoi(argv[i + 1]);
+			min_transcript_length_base = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_transcript_length_increase")
+		{
+			min_transcript_length_increase = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_exon_length")
 		{
 			min_exon_length = atoi(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--min_boundary_exon_length")
-		{
-			min_boundary_exon_length = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--max_num_exons")
@@ -302,8 +302,8 @@ int print_parameters()
 	printf("min_transcript_coverage_ratio = %.2lf\n", min_transcript_coverage_ratio);
 	printf("min_single_exon_coverage = %.2lf\n", min_single_exon_coverage);
 	printf("min_transcript_numreads = %.2lf\n", min_transcript_numreads);
-	printf("min_transcript_length = %d\n", min_transcript_length);
-	printf("min_exon_length = %d\n", min_exon_length);
+	printf("min_transcript_length_base = %d\n", min_transcript_length_base);
+	printf("min_transcript_length_increase = %d\n", min_transcript_length_increase);
 	printf("max_num_exons = %d\n", max_num_exons);
 
 	// for subsetsum and router
@@ -379,9 +379,9 @@ int print_help()
 	printf(" %-42s  %s\n", "--library_type <first, second, unstranded>",  "library type of the sample, default: unstranded");
 	printf(" %-42s  %s\n", "--min_transcript_coverage <float>",  "minimum coverage required for a multi-exon transcript, default: 1.01");
 	printf(" %-42s  %s\n", "--min_single_exon_coverage <float>",  "minimum coverage required for a single-exon transcript, default: 20");
-	printf(" %-42s  %s\n", "--min_exon_length <integer>",  "default: 50");
-	printf(" %-42s  %s\n", "--min_transcript_length <integer>",  "default: 250, minimum length of a transcript would be");
-	printf(" %-42s  %s\n", "",  "--min_transcript_length + --min_exon_length * num-of-exons");
+	printf(" %-42s  %s\n", "--min_transcript_length_increase <integer>",  "default: 50");
+	printf(" %-42s  %s\n", "--min_transcript_length_base <integer>",  "default: 250, minimum length of a transcript would be");
+	printf(" %-42s  %s\n", "",  "--min_transcript_length_base + --min_transcript_length_increase * num-of-exons");
 	printf(" %-42s  %s\n", "--min_mapping_quality <integer>",  "ignore reads with mapping quality less than this value, default: 1");
 	printf(" %-42s  %s\n", "--min_bundle_gap <integer>",  "minimum distances required to start a new bundle, default: 50");
 	printf(" %-42s  %s\n", "--min_num_hits_in_bundle <integer>",  "minimum number of reads required in a bundle, default: 20");

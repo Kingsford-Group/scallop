@@ -67,6 +67,7 @@ private:
 	int remove_small_edges();
 	int keep_surviving_edges();
 	bool extend_boundaries();
+	int remove_small_exons();
 	int extend_isolated_start_boundaries();
 	int extend_isolated_end_boundaries();
 	int remove_inner_start_boundaries();

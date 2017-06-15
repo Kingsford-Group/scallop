@@ -19,7 +19,7 @@ int filter::filter_length_coverage()
 	for(int i = 0; i < trs.size(); i++)
 	{
 		int e = trs[i].exons.size();
-		int minl = min_transcript_length + e * min_exon_length;
+		int minl = min_transcript_length_base + e * min_transcript_length_increase;
 		if(trs[i].length() < minl) continue;
 		if(e == 1 && trs[i].coverage < min_single_exon_coverage) continue;
 		if(e >= 2 && trs[i].coverage < min_transcript_coverage) continue;
