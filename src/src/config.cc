@@ -43,6 +43,7 @@ double min_single_exon_coverage = 20;
 double min_transcript_numreads = 20;
 int min_transcript_length = 150;
 int min_exon_length = 50;
+int min_boundary_exon_length = 20;
 int max_num_exons = 1000;
 
 // for subsetsum and router
@@ -214,6 +215,11 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--min_exon_length")
 		{
 			min_exon_length = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_boundary_exon_length")
+		{
+			min_boundary_exon_length = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--max_num_exons")
