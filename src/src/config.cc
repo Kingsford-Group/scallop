@@ -33,7 +33,7 @@ int32_t min_subregion_length = 15;
 
 // for revising/decomposing splice graph
 double max_intron_contamination_coverage = 2.0;
-double min_surviving_edge_weight = 2.01;
+double min_surviving_edge_weight = 1.5;
 double max_decompose_error_ratio[7] = {0.33, 0.05, 0.0, 0.25, 0.30, 0.0, 1.1};
 
 // for selecting paths
@@ -271,9 +271,9 @@ int parse_arguments(int argc, const char ** argv)
 		}
 	}
 
-	if(min_surviving_edge_weight < 1.01 + min_transcript_coverage) 
+	if(min_surviving_edge_weight < 0.5 + min_transcript_coverage) 
 	{
-		min_surviving_edge_weight = 1.01 + min_transcript_coverage;
+		min_surviving_edge_weight = 0.5 + min_transcript_coverage;
 	}
 	return 0;
 }
