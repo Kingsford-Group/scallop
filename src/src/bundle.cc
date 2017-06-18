@@ -916,7 +916,7 @@ bool bundle::remove_small_exons()
 			edge_descriptor e = (*it1);
 			int s = e->source();
 			//if(gr.out_degree(s) <= 1) b = false;
-			if(gr.get_vertex_info(s).rpos == p1) b = false;
+			if(s != 0 && gr.get_vertex_info(s).rpos == p1) b = false;
 			if(b == false) break;
 		}
 		for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
@@ -924,7 +924,7 @@ bool bundle::remove_small_exons()
 			edge_descriptor e = (*it1);
 			int t = e->target();
 			//if(gr.in_degree(t) <= 1) b = false;
-			if(gr.get_vertex_info(t).lpos == p2) b = false;
+			if(t != gr.num_vertices() - 1 && gr.get_vertex_info(t).lpos == p2) b = false;
 			if(b == false) break;
 		}
 
