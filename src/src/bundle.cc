@@ -977,8 +977,9 @@ bool bundle::remove_small_junctions()
 			double w = gr.get_edge_weight(e);
 			if(s == 0) continue;
 			if(gr.get_vertex_info(s).rpos == p1) continue;
-			if(ws < 1.0 * w * w + 10.0) continue;
-			if(wi < 1.0 * w * w + 10.0) continue;
+			if(ws < 2.0 * w * w + 18.0) continue;
+			if(wi < 2.0 * w * w + 18.0) continue;
+
 			se.insert(e);
 		}
 
@@ -1003,8 +1004,9 @@ bool bundle::remove_small_junctions()
 			int t = e->target();
 			if(t == gr.num_vertices() - 1) continue;
 			if(gr.get_vertex_info(t).lpos == p2) continue;
-			if(wt < 1.0 * w * w + 10.0) continue;
-			if(wi < 1.0 * w * w + 10.0) continue;
+			if(ws < 2.0 * w * w + 18.0) continue;
+			if(wi < 2.0 * w * w + 18.0) continue;
+
 			se.insert(e);
 		}
 
