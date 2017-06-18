@@ -57,15 +57,16 @@ hit::hit(bam1_t *b)
 	assert(n_cigar >= 1);
 	memcpy(cigar, bam_get_cigar(b), 4 * n_cigar);
 
-	// get strandness
+	// get concordance
 	bool concordant = false;
 	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) concordant = true;		// F1R2
 	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) concordant = true;		// R1F2
 	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) concordant = true;		// F2R1
 	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) concordant = true;		// R2F1
 
+	// get strandness
 	strand = '.';
-	if(library_type == FR_FIRST)
+	if(library_type == FR_FIRST && ((flag & 0x8) <= 0))
 	{
 		if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '-';		// F1R2
 		if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '+';		// R1F2
@@ -73,7 +74,7 @@ hit::hit(bam1_t *b)
 		if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '-';		// R2F1
 	}
 
-	if(library_type == FR_SECOND)
+	if(library_type == FR_SECOND && ((flag & 0x8) <= 0))
 	{
 		if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '+';		// F1R2
 		if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '-';		// R1F2
@@ -85,6 +86,10 @@ hit::hit(bam1_t *b)
 	uint8_t *p1 = bam_aux_get(b, "XS");
 	if(p1 && (*p1) == 'A') xs = bam_aux2A(p1);
 
+	// if mate pair is unmapped, trust XS
+	if((flag & 0x8) >= 1) strand = xs;
+
+	// fetch tags
 	hi = -1;
 	uint8_t *p2 = bam_aux_get(b, "HI");
 	if(p2 && (*p2) == 'C') hi = bam_aux2i(p2);
