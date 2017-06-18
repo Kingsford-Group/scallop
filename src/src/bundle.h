@@ -67,6 +67,7 @@ private:
 	int refine_splice_graph();
 	bool keep_surviving_edges();
 	bool extend_boundaries();
+	bool remove_small_junctions();
 	bool remove_small_exons();
 	bool remove_inner_boundaries();
 	bool remove_intron_contamination();

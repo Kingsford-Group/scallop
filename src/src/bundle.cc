@@ -697,6 +697,10 @@ int bundle::revise_splice_graph()
 		if(b == true) refine_splice_graph();
 		if(b == true) continue;
 
+		b = remove_small_junctions();
+		if(b == true) refine_splice_graph();
+		if(b == true) continue;
+
 		b = keep_surviving_edges();
 		if(b == true) refine_splice_graph();
 		if(b == true) continue;
@@ -937,6 +941,84 @@ bool bundle::remove_small_exons()
 		flag = true;
 	}
 	return flag;
+}
+
+bool bundle::remove_small_junctions()
+{
+	SE se;
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		if(gr.degree(i) <= 0) continue;
+
+		bool b = true;
+		edge_iterator it1, it2;
+		int32_t p1 = gr.get_vertex_info(i).lpos;
+		int32_t p2 = gr.get_vertex_info(i).rpos;
+		double wi = gr.get_vertex_weight(i);
+
+		// compute max in-adjacent edge
+		double ws = 0;
+		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
+		{
+			edge_descriptor e = (*it1);
+			int s = e->source();
+			double w = gr.get_vertex_weight(s);
+			if(s == 0) continue;
+			if(gr.get_vertex_info(s).rpos != p1) continue;
+			if(w < ws) continue;
+			ws = w;
+		}
+
+		// remove small in-junction
+		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
+		{
+			edge_descriptor e = (*it1);
+			int s = e->source();
+			double w = gr.get_edge_weight(e);
+			if(s == 0) continue;
+			if(gr.get_vertex_info(s).rpos == p1) continue;
+			if(ws < 10.0 * w * w + 10.0) continue;
+			if(wi < 10.0 * w * w + 10.0) continue;
+			se.insert(e);
+		}
+
+		// compute max out-adjacent edge
+		double wt = 0;
+		for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
+		{
+			edge_descriptor e = (*it1);
+			int t = e->target();
+			double w = gr.get_vertex_weight(t);
+			if(t == gr.num_vertices() - 1) continue;
+			if(gr.get_vertex_info(t).lpos != p2) continue;
+			if(w < wt) continue;
+			wt = w;
+		}
+
+		// remove small in-junction
+		for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
+		{
+			edge_descriptor e = (*it1);
+			double w = gr.get_edge_weight(e);
+			int t = e->target();
+			if(t == gr.num_vertices() - 1) continue;
+			if(gr.get_vertex_info(t).lpos == p2) continue;
+			if(wt < 10.0 * w * w + 10.0) continue;
+			if(wi < 10.0 * w * w + 10.0) continue;
+			se.insert(e);
+		}
+
+	}
+
+	if(se.size() <= 0) return false;
+
+	for(SE::iterator it = se.begin(); it != se.end(); it++)
+	{
+		edge_descriptor e = (*it);
+		gr.remove_edge(e);
+	}
+
+	return true;
 }
 
 bool bundle::remove_inner_boundaries()
