@@ -694,6 +694,7 @@ int bundle::revise_splice_graph()
 		if(b == true) continue;
 
 		b = remove_small_exons();
+		if(b == true) refine_splice_graph();
 		if(b == true) continue;
 
 		b = keep_surviving_edges();
@@ -914,7 +915,7 @@ bool bundle::remove_small_exons()
 		{
 			edge_descriptor e = (*it1);
 			int s = e->source();
-			if(gr.out_degree(s) <= 1) b = false;
+			//if(gr.out_degree(s) <= 1) b = false;
 			if(gr.get_vertex_info(s).rpos == p1) b = false;
 			if(b == false) break;
 		}
@@ -922,7 +923,7 @@ bool bundle::remove_small_exons()
 		{
 			edge_descriptor e = (*it1);
 			int t = e->target();
-			if(gr.in_degree(t) <= 1) b = false;
+			//if(gr.in_degree(t) <= 1) b = false;
 			if(gr.get_vertex_info(t).lpos == p2) b = false;
 			if(b == false) break;
 		}
