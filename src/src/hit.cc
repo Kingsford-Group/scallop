@@ -87,7 +87,8 @@ hit::hit(bam1_t *b)
 	if(p1 && (*p1) == 'A') xs = bam_aux2A(p1);
 
 	// if mate pair is unmapped, trust XS
-	if((flag & 0x8) >= 1) strand = xs;
+	if(library_type == FR_FIRST && (flag & 0x8) >= 1) strand = xs;
+	if(library_type == FR_SECOND && (flag & 0x8) >= 1) strand = xs;
 
 	// fetch tags
 	hi = -1;

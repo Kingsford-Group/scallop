@@ -39,6 +39,14 @@ int bundle_base::add_hit(const hit &ht)
 	if(hits.size() <= 1) strand = ht.strand;
 	assert(strand == ht.strand);
 
+	// DEBUG
+	/*
+	if(strand != ht.strand)
+	{
+		printf("strand = %c, ht.strand = %c, ht.xs = %c,\n", strand, ht.strand, ht.xs);
+	}
+	*/
+
 	// add intervals
 	vector<int64_t> vm;
 	vector<int64_t> vi;
