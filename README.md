@@ -55,9 +55,10 @@ export CLP_HOME="/directory/to/your/clp/install"
 ```
 
 ## Compile Scallop
-The compilation of `scallop` requires `automake` package.
-If `automake` has not been installed, on linux platform, do the following:
+The compilation of `scallop` requires `automake` and `autoconf` packages.
+If they have not been installed, on linux platform, do the following:
 ```
+sudo apt-get install autoconf
 sudo apt-get install automake
 ```
 Then run the script `build.sh`, which will generate the executable file `src/src/scallop`.
