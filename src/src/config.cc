@@ -275,6 +275,20 @@ int parse_arguments(int argc, const char ** argv)
 	{
 		min_surviving_edge_weight = 0.1 + min_transcript_coverage;
 	}
+
+	// verify arguments
+	if(input_file == "")
+	{
+		printf("Error: input-file is missing.\n");
+		exit(0);
+	}
+
+	if(output_file == "")
+	{
+		printf("Error: output-file is missing.\n");
+		exit(0);
+	}
+
 	return 0;
 }
 
