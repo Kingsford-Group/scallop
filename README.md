@@ -43,16 +43,28 @@ export BOOST_HOME="/directory/to/your/boost/boost_1_60_0"
 
 ## Install Clp
 Download Clp [(license)](https://opensource.org/licenses/eclipse-1.0)
-from (https://projects.coin-or.org/Clp), compile and install it.
-**NOTE:** when you config, `--enable-static` option should be provided:
-```
-./configure --enable-static
-```
-After finishing installing, set environment variable `CLP_HOME` to indicate the installed directory.
+from (https://projects.coin-or.org/Clp). 
+Choose a directory for installation and set the environment variable `CLP_HOME` for that:
 For example, for Unix platforms, do the following:
 ```
 export CLP_HOME="/directory/to/your/clp/install"
 ```
+We recommend compile `libClp` and `libCoinUtils` separately.
+Use the following to compile `libCoinUtils`:
+```
+cd CoinUtils
+./configure --enable-static --disable-bzlib --disable-zlib --prefix=$CLP_HOME
+make
+make install
+```
+Use the following to compile `libClp`:
+```
+cd Clp
+./configure --enable-static --prefix=$CLP_HOME
+make
+make install
+```
+
 
 ## Compile Scallop
 The compilation of `scallop` requires `automake` and `autoconf` packages.
