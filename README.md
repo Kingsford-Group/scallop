@@ -62,7 +62,7 @@ sudo apt-get install autoconf
 sudo apt-get install automake
 ```
 
-The installation also requires other libraries, `libbz2, libllzma, libcurl,
+The installation also requires other libraries, `libbz2, liblzma, libcurl,
 libcrypto, libblas, liblapack`, which are pre dependencies of `libhts` and
 `libClp`. Install them if you encounter errors when compiling.
 
