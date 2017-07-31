@@ -42,7 +42,7 @@ export HTSLIB="/directory/to/your/htslib/htslib-1.5"
 ```
 Use the following to build `libhts.a`:
 ```
-./configure --disable-bz2 --disable-lzma --disable-s3
+./configure --disable-bz2 --disable-lzma --disable-gcs --disable-s3 --enable-libcurl=no
 make
 ```
 
@@ -80,7 +80,7 @@ sudo apt-get install autoconf
 sudo apt-get install automake
 ```
 
-The installation also requires other libraries, `libz, libcurl, libblas, liblapack`, 
+The installation also requires other libraries, `libz, libblas, liblapack`, 
 which are dependencies of `libhts` and
 `libClp`. Install them if you encounter errors when compiling.
 
