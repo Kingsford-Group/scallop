@@ -63,7 +63,7 @@ sudo apt-get install automake
 ```
 
 The installation also requires other libraries, `libbz2, liblzma, libcurl,
-libcrypto, libblas, liblapack`, which are pre dependencies of `libhts` and
+libcrypto, libblas, liblapack`, which are dependencies of `libhts` and
 `libClp`. Install them if you encounter errors when compiling.
 
 After that run the script `build.sh`, which will generate the executable file `src/src/scallop`.
