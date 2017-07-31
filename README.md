@@ -18,18 +18,8 @@ Latest release, including both binary and source code, is [here](https://github.
 
 # Installation
 To install Scallop from the source code, you need to first download/compile 
-htslib, Boost and Clp, setup the corresponding environmental variables,
+Boost, htslib and Clp, setup the corresponding environmental variables,
 and then compile the source code of Scallop.
-
-## Install htslib
-Download htslib [(license)](https://github.com/samtools/htslib/blob/develop/LICENSE)
-from (http://www.htslib.org/) with version 1.2 or higher.
-Compile it to generate the htslib file `libhts.a`. 
-Set environment variable `HTSLIB` to indicate the directory of `libhts.a`.
-For example, for Unix platforms, do the following:
-```
-export HTSLIB="/directory/to/your/htslib/htslib-1.2.1"
-```
 
 ## Install Boost
 Download Boost [(license)](http://www.boost.org/LICENSE_1_0.txt)
@@ -41,10 +31,26 @@ For example, for Unix platforms, do the following:
 export BOOST_HOME="/directory/to/your/boost/boost_1_60_0"
 ```
 
+
+## Install htslib
+Download htslib [(license)](https://github.com/samtools/htslib/blob/develop/LICENSE)
+from (http://www.htslib.org/) with version 1.5 or higher.
+Set environment variable `HTSLIB` to indicate the corresponding directory.
+For example, for Unix platforms, do the following:
+```
+export HTSLIB="/directory/to/your/htslib/htslib-1.5"
+```
+Use the following to build `libhts.a`:
+```
+./configure --disable-bz2 --disable-lzma --disable-s3
+make
+```
+
+
 ## Install Clp
 Download Clp [(license)](https://opensource.org/licenses/eclipse-1.0)
 from (https://projects.coin-or.org/Clp). 
-Choose a directory for installation and set the environment variable `CLP_HOME` for that:
+Choose a directory for installation and set the environment variable `CLP_HOME` for that.
 For example, for Unix platforms, do the following:
 ```
 export CLP_HOME="/directory/to/your/clp/install"
@@ -74,8 +80,8 @@ sudo apt-get install autoconf
 sudo apt-get install automake
 ```
 
-The installation also requires other libraries, `libbz2, liblzma, libcurl,
-libcrypto, libblas, liblapack`, which are dependencies of `libhts` and
+The installation also requires other libraries, `libz, libcurl, libblas, liblapack`, 
+which are dependencies of `libhts` and
 `libClp`. Install them if you encounter errors when compiling.
 
 After that run the script `build.sh`, which will generate the executable file `src/src/scallop`.
