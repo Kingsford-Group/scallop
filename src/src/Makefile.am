@@ -16,13 +16,7 @@ scallop_CPPFLAGS = -std=c++11 -I$(GTFDIR) -I$(GRAPHDIR) -I$(UTILDIR) \
 scallop_LDFLAGS = -pthread
 scallop_LDADD = $(CLP_HOME)/lib/libClp.a $(CLP_HOME)/lib/libCoinUtils.a $(HTSLIB)/libhts.a \
 				$(GTFDIR)/libgtf.a $(GRAPHDIR)/libgraph.a $(UTILDIR)/libutil.a \
-<<<<<<< HEAD
 				-lbz2 -lz -llzma -lcurl -lcrypto -lblas -llapack
-=======
-				-lbz2 -lz -lblas -llapack
-#				/home/shao/tools/bzip2/bzip2-1.0.6/libbz2.a -lz -lblas -llapack
-
->>>>>>> 25611a870bac23c111b38e59a1b719960c634829
 
 scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  super_graph.h super_graph.cc \

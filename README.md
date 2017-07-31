@@ -14,7 +14,7 @@ It is available at both [the bioinformatics chat](https://bioinformatics.chat/sc
 [iTunes](https://itunes.apple.com/us/podcast/the-bioinformatics-chat/id1227281398). 
 
 # Release
-Latest release, including both binary and source code, is [here](https://github.com/Kingsford-Group/scallop/releases/tag/v0.9.9).
+Latest release, including both binary and source code, is [here](https://github.com/Kingsford-Group/scallop/releases/tag/v0.9.10).
 
 # Installation
 To install Scallop from the source code, you need to first download/compile 
@@ -62,8 +62,9 @@ sudo apt-get install autoconf
 sudo apt-get install automake
 ```
 
-Scallop might also requires other libraries, such as `libbz`, depending on
-your system. Install them if you encounter errors when compiling.
+The installation also requires other libraries, `libbz2, libllzma, libcurl,
+libcrypto, libblas, liblapack`, which are pre dependencies of `libhts` and
+`libClp`. Install them if you encounter errors when compiling.
 
 After that run the script `build.sh`, which will generate the executable file `src/src/scallop`.
 
