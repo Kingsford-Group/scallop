@@ -167,6 +167,107 @@ int filter::locate_next_transcript(int t)
 	return -1;
 }
 
+int filter::merge_single_exon_transcripts(vector<transcript> &trs0)
+{
+	typedef pair<PI32, int> PPI;
+	vector<PPI> vv;
+	for(int i = 0; i < trs0.size(); i++)
+	{
+		vector<PI32> v = trs0[i].exons;
+		for(int k = 0; k < v.size(); k++)
+		{
+			vv.push_back(PPI(v[k], i));
+		}
+	}
+
+	sort(vv.begin(), vv.end());
+
+	set<int> fb;
+	for(int i = 0; i < vv.size(); i++)
+	{
+		int32_t p1 = vv[i].first.first;
+		int32_t q1 = vv[i].first.second;
+		int k1 = vv[i].second;
+		transcript &t1 = trs0[k1];
+		if(t1.exons.size() != 1) continue;
+		if(t1.strand != '.') continue;
+
+		bool b = false;
+		for(int k = i - 1; k >= 0 && k >= i - 10; k--)
+		{
+			int32_t p2 = vv[k].first.first;
+			int32_t q2 = vv[k].first.second;
+			int k2 = vv[k].second;
+			transcript &t2 = trs0[k2];
+
+			assert(p1 >= p2);
+			if(q2 < q1) continue;
+			b = true;
+			break;
+		}
+
+		if(b == true) fb.insert(k1);
+		if(b == true) continue;
+
+		for(int k = i + 1; k < vv.size(); k++)
+		{
+			int32_t p2 = vv[k].first.first;
+			int32_t q2 = vv[k].first.second;
+			int k2 = vv[k].second;
+			transcript &t2 = trs0[k2];
+
+			if(p2 > p1) break;
+			assert(p2 == p1);
+			if(q2 < p1) continue;
+			b = true;
+			break;
+		}
+		if(b == true) fb.insert(k1);
+	}
+
+	vector<transcript> v;
+	for(int i = 0; i < trs0.size(); i++)
+	{
+		if(fb.find(i) != fb.end()) continue;
+		v.push_back(trs0[i]);
+	}
+	trs0 = v;
+	return 0;
+}
+
+int filter::merge_single_exon_transcripts()
+{
+	typedef vector<transcript> VT;
+	typedef pair<string, VT> PSVT;
+	typedef map<string, VT> MSVT;
+
+	MSVT msvt;
+	for(int i = 0; i < trs.size(); i++)
+	{
+		transcript &t = trs[i];
+		string s = t.seqname;
+		if(msvt.find(s) == msvt.end())
+		{
+			VT v;
+			v.push_back(t);
+			msvt.insert(PSVT(s, v));
+		}
+		else
+		{
+			msvt[s].push_back(t);
+		}
+	}
+
+	trs.clear();
+	for(MSVT::iterator it = msvt.begin(); it != msvt.end(); it++)
+	{
+		merge_single_exon_transcripts(it->second);
+		trs.insert(trs.end(), it->second.begin(), it->second.end());
+	}
+
+	return 0;
+}
+
 int filter::print()
 {
 	for(int i = 0; i < trs.size(); i++)

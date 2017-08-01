@@ -94,6 +94,11 @@ int assembler::assemble()
 
 	//merge_multi_exon_transcripts();
 	assign_RPKM();
+
+	filter ft(trsts);
+	ft.merge_single_exon_transcripts();
+	trsts = ft.trs;
+
 	write();
 	
 	return 0;
