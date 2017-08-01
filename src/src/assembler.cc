@@ -16,7 +16,6 @@ See LICENSE for licensing.
 #include "sgraph_compare.h"
 #include "super_graph.h"
 #include "filter.h"
-#include "estimator.h"
 
 assembler::assembler()
 {
@@ -51,6 +50,9 @@ int assembler::assemble()
 		if(p.n_cigar < 1) continue;												// should never happen
 
 		hit ht(b1t);
+
+		//ht.print();
+
 		//if(ht.nh >= 2 && p.qual < min_mapping_quality) continue;
 		//if(ht.nm > max_edit_distance) continue;
 		//if(ht.verify_junctions() == false) continue;
@@ -177,11 +179,6 @@ int assembler::assemble(const bundle_base &bb)
 
 		scallop sc(gid, gr, hs);
 		sc.assemble();
-
-		/*
-		estimator est(gr, sc.paths);
-		est.estimate();
-		*/
 
 		vector<path> pp;
 		for(int i = 0; i < sc.paths.size(); i++)

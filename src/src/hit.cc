@@ -44,9 +44,13 @@ hit::hit(bam1_t *b)
 {
 	// fetch query name
 	char buf[1024];
-	memcpy(buf, bam_get_qname(b), l_qname);
-	buf[l_qname] = '\0';
+	char *q = bam_get_qname(b);
+	int l = strlen(q);
+	memcpy(buf, q, l);
+	buf[l] = '\0';
 	qname = string(buf);
+
+	//printf("l_qname = %d, l = %d, |%s|\n", l_qname, l, qname.c_str());
 
 	// compute rpos
 	rpos = pos + (int32_t)bam_cigar2rlen(n_cigar, bam_get_cigar(b));

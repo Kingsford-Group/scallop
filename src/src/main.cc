@@ -15,7 +15,6 @@ See LICENSE for licensing.
 
 #include "config.h"
 #include "assembler.h"
-#include "matrix.h"
 
 using namespace std;
 

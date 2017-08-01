@@ -9,6 +9,9 @@ See LICENSE for licensing.
 
 #include "gene.h"
 
+typedef vector<transcript> VT;
+typedef map<string, VT> MSVT;
+
 class filter
 {
 public:
@@ -26,6 +29,7 @@ public:
 private:
 	bool join_transcripts();
 	int locate_next_transcript(int t);
+	int split_chromosomes(MSVT &msvt);
 };
 
 bool transcript_cmp(const transcript &x, const transcript &y);

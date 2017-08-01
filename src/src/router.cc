@@ -8,7 +8,6 @@ See LICENSE for licensing.
 #include "config.h"
 #include "util.h"
 #include "subsetsum.h"
-#include "matrix.h"
 
 #include "ClpSimplex.hpp"
 #include "CoinHelperFunctions.hpp"
