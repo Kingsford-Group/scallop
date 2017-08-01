@@ -35,17 +35,18 @@ export BOOST_HOME="/directory/to/your/boost/boost_1_60_0"
 ## Install htslib
 Download htslib [(license)](https://github.com/samtools/htslib/blob/develop/LICENSE)
 from (http://www.htslib.org/) with version 1.5 or higher.
-Set environment variable `HTSLIB` to indicate the corresponding directory.
+Choose a directory for installation and set the environment variable `HTSLIB` for that.
 For example, for Unix platforms, do the following:
 ```
-export HTSLIB="/directory/to/your/htslib/htslib-1.5"
+export HTSLIB="/directory/to/your/htslib/install"
 ```
 Use the following to build `libhts.a`:
 ```
 autoheader
 autoconf
-./configure --disable-bz2 --disable-lzma --disable-gcs --disable-s3 --enable-libcurl=no
+./configure --disable-bz2 --disable-lzma --disable-gcs --disable-s3 --enable-libcurl=no --prefix=$HTSLIB
 make
+make install
 ```
 
 
