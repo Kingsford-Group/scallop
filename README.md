@@ -42,6 +42,8 @@ export HTSLIB="/directory/to/your/htslib/htslib-1.5"
 ```
 Use the following to build `libhts.a`:
 ```
+autoheader
+autoconf
 ./configure --disable-bz2 --disable-lzma --disable-gcs --disable-s3 --enable-libcurl=no
 make
 ```
@@ -55,18 +57,9 @@ For example, for Unix platforms, do the following:
 ```
 export CLP_HOME="/directory/to/your/clp/install"
 ```
-We recommend compile `libClp` and `libCoinUtils` separately.
-Use the following to compile `libCoinUtils`:
+Use the following to build libraries:
 ```
-cd CoinUtils
 ./configure --enable-static --disable-bzlib --disable-zlib --prefix=$CLP_HOME
-make
-make install
-```
-Use the following to compile `libClp`:
-```
-cd Clp
-./configure --enable-static --prefix=$CLP_HOME
 make
 make install
 ```
