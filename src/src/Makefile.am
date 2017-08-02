@@ -4,7 +4,7 @@ GTFDIR = ../../lib/gtf/src
 UTILDIR = ../../lib/util/src
 GRAPHDIR = ../../lib/graph/src
 
-scallop_CPPFLAGS = -pg -std=c++11 -I$(GTFDIR) -I$(GRAPHDIR) -I$(UTILDIR) \
+scallop_CPPFLAGS = -std=c++11 -I$(GTFDIR) -I$(GRAPHDIR) -I$(UTILDIR) \
 				   -I$(HTSLIB)/include -I$(BOOST_HOME) -I$(CLP_HOME)/include/coin
 
 # dynamic link
@@ -13,7 +13,7 @@ scallop_CPPFLAGS = -pg -std=c++11 -I$(GTFDIR) -I$(GRAPHDIR) -I$(UTILDIR) \
 #scallop_LDADD = -lClp -lCoinUtils -lhts -lgtf -lgraph -lutil -lz
 
 # static link
-scallop_LDFLAGS = -pg -pthread
+scallop_LDFLAGS = -pthread
 scallop_LDADD = $(CLP_HOME)/lib/libClp.a $(CLP_HOME)/lib/libCoinUtils.a $(HTSLIB)/lib/libhts.a \
 				$(GTFDIR)/libgtf.a $(GRAPHDIR)/libgraph.a $(UTILDIR)/libutil.a \
 				-lz -lblas -llapack
