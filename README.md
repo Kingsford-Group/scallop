@@ -14,7 +14,7 @@ It is available at both [the bioinformatics chat](https://bioinformatics.chat/sc
 [iTunes](https://itunes.apple.com/us/podcast/the-bioinformatics-chat/id1227281398). 
 
 # Release
-Latest release, including both binary and source code, is [here](https://github.com/Kingsford-Group/scallop/releases/tag/v0.9.10).
+Latest release, including both binary and source code, is [here](https://github.com/Kingsford-Group/scallop/releases/tag/v0.9.11).
 
 # Installation
 To install Scallop from the source code, you need to first download/compile 

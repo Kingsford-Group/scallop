@@ -68,7 +68,7 @@ bool output_tex_files = false;
 string fixed_gene_name = "";
 int batch_bundle_size = 100;
 int verbose = 1;
-string version = "v0.9.10";
+string version = "v0.9.11";
 
 int parse_arguments(int argc, const char ** argv)
 {
