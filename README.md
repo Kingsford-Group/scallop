@@ -105,9 +105,9 @@ Parameters | Default Value | Description
  --verbose | 1 | chosen from {0, 1, 2}; 0: quiet; 1: one line for each splice graph; 2: details of graph decomposition
  --library_type               | unstranded | chosen from {first, second, unstranded}
  --min_transcript_coverage    | 1.01 | the minimum coverage required to output a multi-exon transcript
-  --min_single_exon_coverage   | 20 | the minimum coverage required to output a single-exon transcript
- --min_exon_length            | 50 | the minimum length of a transcript is: --min_transcript_length <br> + --min_exon_length * num-of-exons
- --min_transcript_length      |150 | the minimum length of a transcript is: --min_transcript_length <br> + --min_exon_length * num-of-exons
+ --min_single_exon_coverage   | 20 | the minimum coverage required to output a single-exon transcript
+ --min_transcript_length_increase  | 50 | the minimum length of a transcript is: --min_transcript_length_base <br> + --min_transcript_length_increase * num-of-exons
+ --min_transcript_length_base      |150 | the minimum length of a transcript is: --min_transcript_length_base <br> + --min_transcript_length_increase * num-of-exons
  --min_mapping_quality        | 1 | ignore reads with mapping quality less than this value
  --min_bundle_gap             |50 | the minimum distances required to start a new bundle
  --min_num_hits_in_bundle     | 20 | the minimum number of reads required in a bundle
