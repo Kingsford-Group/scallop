@@ -26,3 +26,8 @@ bin/G*
 bin/S*
 bin/B*
 bin/*
+lib/graph/config.h
+lib/gtf/config.h
+lib/util/config.h
+src/config.h
+release/
