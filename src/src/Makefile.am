@@ -38,6 +38,7 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  equation.h equation.cc \
 				  gtf.h gtf.cc \
 				  scallop.h scallop.cc \
+				  previewer.h previewer.cc \
 				  assembler.h assembler.cc \
 				  filter.h filter.cc \
 				  main.cc
