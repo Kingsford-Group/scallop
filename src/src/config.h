@@ -57,6 +57,7 @@ extern bool preview_only;
 extern int max_preview_reads;
 extern int max_preview_spliced_reads;
 extern int min_preview_spliced_reads;
+extern double preview_infer_ratio;
 
 // for identifying subgraphs
 extern int32_t min_subregion_gap;

@@ -28,27 +28,18 @@ previewer::~previewer()
 int previewer::preview()
 {
 	int total = 0;
-	int splice = 0;
 	int single = 0;
 	int paired = 0;
 
-	int pstrand1a = 0;
-	int pstrand1b = 0;
-	int pstrand2a = 0;
-	int pstrand2b = 0;
-
-	int qstrand1a = 0;
-	int qstrand1b = 0;
-	int qstrand2a = 0;
-	int qstrand2b = 0;
-
 	int first = 0;
 	int second = 0;
+	vector<int> sp1;
+	vector<int> sp2;
 
     while(sam_read1(sfn, hdr, b1t) >= 0)
 	{
 		if(total >= max_preview_reads) break;
-		if(splice >= max_preview_spliced_reads) break;
+		if(sp1.size() >= max_preview_spliced_reads && sp2.size() >= max_preview_spliced_reads) break;
 
 		bam1_core_t &p = b1t->core;
 
@@ -67,21 +58,8 @@ int previewer::preview()
 		if((ht.flag & 0x1) <= 0) single ++;
 
 		if(ht.xs == '.') continue;
-
-		splice++;
-
-		// assume that library-type = first, what strand should be
-		if((ht.flag & 0x1) >= 1 && (ht.flag & 0x10) <= 0 && (ht.flag & 0x20) >= 1 && (ht.flag & 0x40) >= 1 && (ht.flag & 0x80) <= 0) pstrand1a++;
-		if((ht.flag & 0x1) >= 1 && (ht.flag & 0x10) <= 0 && (ht.flag & 0x20) <= 0 && (ht.flag & 0x40) >= 1 && (ht.flag & 0x80) <= 0) pstrand1b++;
-
-		if((ht.flag & 0x1) >= 1 && (ht.flag & 0x10) >= 1 && (ht.flag & 0x20) <= 0 && (ht.flag & 0x40) <= 0 && (ht.flag & 0x80) >= 1) pstrand2a++;
-		if((ht.flag & 0x1) >= 1 && (ht.flag & 0x10) >= 1 && (ht.flag & 0x20) >= 1 && (ht.flag & 0x40) <= 0 && (ht.flag & 0x80) >= 1) pstrand2b++;
-
-		if((ht.flag & 0x1) >= 1 && (ht.flag & 0x10) >= 1 && (ht.flag & 0x20) <= 0 && (ht.flag & 0x40) >= 1 && (ht.flag & 0x80) <= 0) qstrand1a++;
-		if((ht.flag & 0x1) >= 1 && (ht.flag & 0x10) >= 1 && (ht.flag & 0x20) >= 1 && (ht.flag & 0x40) >= 1 && (ht.flag & 0x80) <= 0) qstrand1b++;
-
-		if((ht.flag & 0x1) >= 1 && (ht.flag & 0x10) <= 0 && (ht.flag & 0x20) >= 1 && (ht.flag & 0x40) <= 0 && (ht.flag & 0x80) >= 1) qstrand2a++;
-		if((ht.flag & 0x1) >= 1 && (ht.flag & 0x10) <= 0 && (ht.flag & 0x20) <= 0 && (ht.flag & 0x40) <= 0 && (ht.flag & 0x80) >= 1) qstrand2b++;
+		if(ht.xs == '+' && sp1.size() >= max_preview_spliced_reads) continue;
+		if(ht.xs == '-' && sp2.size() >= max_preview_spliced_reads) continue;
 
 		// predicted strand
 		char xs = '.';
@@ -96,8 +74,20 @@ int previewer::preview()
 		if((ht.flag & 0x1) <= 0 && (ht.flag & 0x10) <= 0) xs = '-';
 		if((ht.flag & 0x1) <= 0 && (ht.flag & 0x10) >= 1) xs = '+';
 
-		if(xs != '.' && xs == ht.xs) first++;
-		if(xs != '.' && xs != ht.xs) second++;
+		if(xs == '+' && xs == ht.xs) sp1.push_back(1);
+		if(xs == '-' && xs == ht.xs) sp2.push_back(1);
+		if(xs == '+' && xs != ht.xs) sp1.push_back(2);
+		if(xs == '-' && xs != ht.xs) sp2.push_back(2);
+	}
+
+	int sp = sp1.size() < sp2.size() ? sp1.size() : sp2.size();
+
+	for(int k = 0; k < sp; k++)
+	{
+		if(sp1[k] == 1) first++;
+		if(sp2[k] == 1) first++;
+		if(sp1[k] == 2) second++;
+		if(sp2[k] == 2) second++;
 	}
 
 	vector<string> vv;
@@ -106,12 +96,12 @@ int previewer::preview()
 	vv.push_back("first");
 	vv.push_back("second");
 
-	int s1 = 0;
-	if(splice > min_preview_spliced_reads && first > 0.8 * splice) s1 = 1;
-	if(splice > min_preview_spliced_reads && second > 0.8 * splice) s1 = 2;
+	int s1 = UNSTRANDED;
+	if(sp >= min_preview_spliced_reads && first > preview_infer_ratio * 2.0 * sp) s1 = FR_FIRST;
+	if(sp >= min_preview_spliced_reads && second > preview_infer_ratio * 2.0 * sp) s1 = FR_SECOND;
 
 	printf("preview: reads = %d, single = %d, paired = %d, spliced reads = %d, first = %d, second = %d, inferred library_type = %s, given library_type = %s\n",
-			total, single, paired, splice, first, second, vv[s1 + 1].c_str(), vv[library_type + 1].c_str());
+			total, single, paired, sp, first, second, vv[s1 + 1].c_str(), vv[library_type + 1].c_str());
 
 	//printf("preview: reads = %d, spliced reads = %d, pstrand = (%d, %d, %d, %d), qstrand = (%d, %d, %d, %d)\n",
 	//		total, splice, pstrand1a, pstrand1b, pstrand2a, pstrand2b, qstrand1a, qstrand1b, qstrand2a, qstrand2b);

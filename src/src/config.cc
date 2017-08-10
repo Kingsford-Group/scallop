@@ -28,8 +28,9 @@ int library_type = EMPTY;
 
 // for preview
 int max_preview_reads = 2000000;
-int max_preview_spliced_reads = 100000;
-int min_preview_spliced_reads = 2000;
+int max_preview_spliced_reads = 50000;
+int min_preview_spliced_reads = 10000;
+double preview_infer_ratio = 0.95;
 bool preview_only = false;
 
 // for identifying subgraphs
@@ -186,6 +187,11 @@ int parse_arguments(int argc, const char ** argv)
 			max_preview_reads = atoi(argv[i + 1]);
 			i++;
 		}
+		else if(string(argv[i]) == "--preview_infer_ratio")
+		{
+			preview_infer_ratio = atof(argv[i + 1]);
+			i++;
+		}
 		else if(string(argv[i]) == "--min_subregion_gap")
 		{
 			min_subregion_gap = atoi(argv[i + 1]);
@@ -335,6 +341,7 @@ int print_parameters()
 	printf("max_preview_reads = %d\n", max_preview_reads);
 	printf("max_preview_spliced_reads = %d\n", max_preview_spliced_reads);
 	printf("min_preview_spliced_reads = %d\n", min_preview_spliced_reads);
+	printf("preview_infer_ratio = %.3lf\n", preview_infer_ratio);
 
 	// for identifying subgraphs
 	printf("min_subregion_gap = %d\n", min_subregion_gap);
