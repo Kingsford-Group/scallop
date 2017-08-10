@@ -101,10 +101,10 @@ to the additional explanation below the table.
 
  Parameters | Default Value | Description
  ------------------------- | ------------- | ----------
- --help  |  | print usage of Scallop and exit
+ --help  | | print usage of Scallop and exit
  --version | | print version of Scallop and exit
  --preview | | show the inferred `library_type` by sampling reads
- --verbose | 1 | chosen from {0, 1, 2}; 0: quiet; 1: one line for each splice graph; 2: details of graph decomposition
+ --verbose | 1 | chosen from {0, 1, 2}
  --library_type               | empty | chosen from {empty, unstranded, first, second}
  --min_transcript_coverage    | 1 | the minimum coverage required to output a multi-exon transcript
  --min_single_exon_coverage   | 20 | the minimum coverage required to output a single-exon transcript
@@ -116,18 +116,20 @@ to the additional explanation below the table.
  --min_flank_length           | 3 | the minimum match length required in each side for a spliced read
  --min_splice_bundary_hits    | 1 | the minimum number of spliced reads required to support a junction
 
-1. `--library_type` is highly recommended to provide. The `unstranded`, `first`, and `second`
+1. For `--verbose`, 0: quiet; 1: one line for each splice graph; 2: details of graph decomposition.
+
+2. `--library_type` is highly recommended to provide. The `unstranded`, `first`, and `second`
 correspond to `fr-unstranded`, `fr-firststrand`, and `fr-secondstrand` used in standard Illumina
-sequencing libraries. If none of them is given, i.e., it is `empty` by default, then `scallop`
+sequencing libraries. If none of them is given, i.e., it is `empty` by default, then Scallop
 will try to infer the `library_type` by itself (see `--preview`). Notice that such inference is based
 on the `XS` tag stored in the input `bam` file. If the input `bam` file do not contain `XS` tag,
-then it is essential to provide the `library_type` to `scallop`. You can try `--preview` to see
-the inferred `library_type` by `scallop`.
+then it is essential to provide the `library_type` to Scallop. You can try `--preview` to see
+the inferred `library_type`.
 
-2. `--min_transcript_coverage` is used to filter lowly expressed transcripts: `scallop` will filter
+3. `--min_transcript_coverage` is used to filter lowly expressed transcripts: Scallop will filter
 out transcripts whose (predicted) raw counts (number of moleculars) is less than this number.
 
-3. `--min_transcript_length_base` and `--min_transcript_length_increase` is combined to filter
+4. `--min_transcript_length_base` and `--min_transcript_length_increase` is combined to filter
 short transcripts: the minimum length of a transcript is given by `--min_transcript_length_base`
 + `--min_transcript_length_increase` * num-of-exons-in-this-transcript. Transcripts that are less
 than this number will be filtered out.
