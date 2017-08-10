@@ -100,7 +100,7 @@ Scallop support the following parameters. Please also refer
 to the additional explanation below the table.
 
 Parameters | Default Value | Description
------------- | ------------- | ----------
+-------------------------- | ------------- | ----------
  --help  |  | print usage of Scallop and exit
  --version | | print version of Scallop and exit
  --preview | | show the inferred `library_type` by sampling reads
