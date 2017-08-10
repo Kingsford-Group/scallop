@@ -131,5 +131,5 @@ out transcripts whose (predicted) raw counts (number of moleculars) is less than
 
 4. `--min_transcript_length_base` and `--min_transcript_length_increase` is combined to filter
 short transcripts: the minimum length of a transcript is given by `--min_transcript_length_base`
-+ `--min_transcript_length_increase` * num-of-exons-in-this-transcript. Transcripts that are less
+\+ `--min_transcript_length_increase` * num-of-exons-in-this-transcript. Transcripts that are less
 than this number will be filtered out.
