@@ -24,7 +24,13 @@ uint32_t min_mapping_quality = 1;
 int32_t min_splice_boundary_hits = 1;
 bool use_second_alignment = false;
 bool uniquely_mapped_only = false;
-int library_type = UNSTRANDED;
+int library_type = EMPTY;
+
+// for preview
+int max_preview_reads = 2000000;
+int max_preview_spliced_reads = 100000;
+int min_preview_spliced_reads = 2000;
+bool preview_only = false;
 
 // for identifying subgraphs
 int32_t min_subregion_gap = 3;
@@ -161,6 +167,25 @@ int parse_arguments(int argc, const char ** argv)
 			min_splice_boundary_hits = atoi(argv[i + 1]);
 			i++;
 		}
+		else if(string(argv[i]) == "--max_preview_spliced_reads")
+		{
+			max_preview_spliced_reads = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_preview_spliced_reads")
+		{
+			min_preview_spliced_reads = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--preview")
+		{
+			preview_only = true;
+		}
+		else if(string(argv[i]) == "--max_preview_reads")
+		{
+			max_preview_reads = atoi(argv[i + 1]);
+			i++;
+		}
 		else if(string(argv[i]) == "--min_subregion_gap")
 		{
 			min_subregion_gap = atoi(argv[i + 1]);
@@ -240,6 +265,7 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--library_type")
 		{
 			string s(argv[i + 1]);
+			if(s == "empty") library_type = EMPTY;
 			if(s == "unstranded") library_type = UNSTRANDED;
 			if(s == "first") library_type = FR_FIRST;
 			if(s == "second") library_type = FR_SECOND;
@@ -279,13 +305,13 @@ int parse_arguments(int argc, const char ** argv)
 	// verify arguments
 	if(input_file == "")
 	{
-		printf("Error: input-file is missing.\n");
+		printf("error: input-file is missing.\n");
 		exit(0);
 	}
 
-	if(output_file == "")
+	if(output_file == "" && preview_only == false)
 	{
-		printf("Error: output-file is missing.\n");
+		printf("error: output-file is missing.\n");
 		exit(0);
 	}
 
@@ -303,6 +329,12 @@ int print_parameters()
 	printf("min_num_hits_in_bundle = %d\n", min_num_hits_in_bundle);
 	printf("min_mapping_quality = %d\n", min_mapping_quality);
 	printf("min_splice_boundary_hits = %d\n", min_splice_boundary_hits);
+
+	// for preview
+	printf("preview_only = %c\n", preview_only ? 'T' : 'F');
+	printf("max_preview_reads = %d\n", max_preview_reads);
+	printf("max_preview_spliced_reads = %d\n", max_preview_spliced_reads);
+	printf("min_preview_spliced_reads = %d\n", min_preview_spliced_reads);
 
 	// for identifying subgraphs
 	printf("min_subregion_gap = %d\n", min_subregion_gap);

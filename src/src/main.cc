@@ -14,6 +14,7 @@ See LICENSE for licensing.
 #include <sstream>
 
 #include "config.h"
+#include "previewer.h"
 #include "assembler.h"
 
 using namespace std;
@@ -33,9 +34,6 @@ int main(int argc, const char **argv)
 
 	parse_arguments(argc, argv);
 
-	if(input_file == "") return 0;
-	if(output_file == "") return 0;
-
 	if(verbose >= 1)
 	{
 		print_copyright();
@@ -44,6 +42,11 @@ int main(int argc, const char **argv)
 		printf("\n");
 		//print_parameters();
 	}
+
+	previewer pv;
+	pv.preview();
+
+	if(preview_only == true) return 0;
 
 	assembler asmb;
 	asmb.assemble();

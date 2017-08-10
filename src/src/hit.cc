@@ -36,7 +36,6 @@ hit::hit(const hit &h)
 	hi = h.hi;
 	nm = h.nm;
 	memcpy(cigar, h.cigar, sizeof cigar);
-	//for(int i = 0; i < MAX_NUM_CIGAR; i++) cigar[i] = h.cigar[i];
 }
 
 hit::hit(bam1_t *b)
@@ -50,8 +49,6 @@ hit::hit(bam1_t *b)
 	buf[l] = '\0';
 	qname = string(buf);
 
-	//printf("l_qname = %d, l = %d, |%s|\n", l_qname, l, qname.c_str());
-
 	// compute rpos
 	rpos = pos + (int32_t)bam_cigar2rlen(n_cigar, bam_get_cigar(b));
 	qlen = (int32_t)bam_cigar2qlen(n_cigar, bam_get_cigar(b));
@@ -60,15 +57,44 @@ hit::hit(bam1_t *b)
 	assert(n_cigar <= MAX_NUM_CIGAR);
 	assert(n_cigar >= 1);
 	memcpy(cigar, bam_get_cigar(b), 4 * n_cigar);
+}
 
-	// get concordance
+int hit::set_tags(bam1_t *b)
+{
+	xs = '.';
+	uint8_t *p1 = bam_aux_get(b, "XS");
+	if(p1 && (*p1) == 'A') xs = bam_aux2A(p1);
+
+	hi = -1;
+	uint8_t *p2 = bam_aux_get(b, "HI");
+	if(p2 && (*p2) == 'C') hi = bam_aux2i(p2);
+
+	nh = -1;
+	uint8_t *p3 = bam_aux_get(b, "NH");
+	if(p3 && (*p3) == 'C') nh = bam_aux2i(p3);
+
+	nm = 0;
+	uint8_t *p4 = bam_aux_get(b, "nM");
+	if(p4 && (*p4) == 'C') nm = bam_aux2i(p4);
+
+	uint8_t *p5 = bam_aux_get(b, "NM");
+	if(p5 && (*p5) == 'C') nm = bam_aux2i(p5);
+
+	return 0;
+}
+
+int hit::set_concordance()
+{
 	bool concordant = false;
 	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) concordant = true;		// F1R2
 	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) concordant = true;		// R1F2
 	if((flag & 0x10) <= 0 && (flag & 0x20) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) concordant = true;		// F2R1
 	if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) concordant = true;		// R2F1
+	return 0;
+}
 
-	// get strandness
+int hit::set_strand()
+{
 	strand = '.';
 	if(library_type == FR_FIRST && ((flag & 0x8) <= 0))
 	{
@@ -86,31 +112,38 @@ hit::hit(bam1_t *b)
 		if((flag & 0x10) >= 1 && (flag & 0x20) <= 0 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '+';		// R2F1
 	}
 
-	xs = '.';
-	uint8_t *p1 = bam_aux_get(b, "XS");
-	if(p1 && (*p1) == 'A') xs = bam_aux2A(p1);
-
 	// if mate pair is unmapped, trust XS
 	if(library_type == FR_FIRST && (flag & 0x8) >= 1) strand = xs;
 	if(library_type == FR_SECOND && (flag & 0x8) >= 1) strand = xs;
 
-	// fetch tags
-	hi = -1;
-	uint8_t *p2 = bam_aux_get(b, "HI");
-	if(p2 && (*p2) == 'C') hi = bam_aux2i(p2);
+	return 0;
+}
 
-	nh = -1;
-	uint8_t *p3 = bam_aux_get(b, "NH");
-	if(p3 && (*p3) == 'C') nh = bam_aux2i(p3);
+int hit::build_splice_positions()
+{
+	spos.clear();
+	int32_t p = pos;
+	int32_t q = 0;
+	//uint8_t *seq = bam_get_seq(b);
+    for(int k = 0; k < n_cigar; k++)
+	{
+		if (bam_cigar_type(bam_cigar_op(cigar[k]))&2)
+			p += bam_cigar_oplen(cigar[k]);
 
-	nm = 0;
-	uint8_t *p4 = bam_aux_get(b, "nM");
-	if(p4 && (*p4) == 'C') nm = bam_aux2i(p4);
+		if (bam_cigar_type(bam_cigar_op(cigar[k]))&1)
+			q += bam_cigar_oplen(cigar[k]);
 
-	uint8_t *p5 = bam_aux_get(b, "NM");
-	if(p5 && (*p5) == 'C') nm = bam_aux2i(p5);
+		if(k == 0 || k == n_cigar - 1) continue;
+		if(bam_cigar_op(cigar[k]) != BAM_CREF_SKIP) continue;
+		if(bam_cigar_op(cigar[k-1]) != BAM_CMATCH) continue;
+		if(bam_cigar_op(cigar[k+1]) != BAM_CMATCH) continue;
+		if(bam_cigar_oplen(cigar[k-1]) < min_flank_length) continue;
+		if(bam_cigar_oplen(cigar[k+1]) < min_flank_length) continue;
 
-	build_splice_positions();
+		int32_t s = p - bam_cigar_oplen(cigar[k]);
+		spos.push_back(pack(s, p));
+	}
+	return 0;
 }
 
 bool hit::verify_junctions()
@@ -143,33 +176,6 @@ bool hit::verify_junctions()
 		}
 	}
 	return true;
-}
-
-int hit::build_splice_positions()
-{
-	spos.clear();
-	int32_t p = pos;
-	int32_t q = 0;
-	//uint8_t *seq = bam_get_seq(b);
-    for(int k = 0; k < n_cigar; k++)
-	{
-		if (bam_cigar_type(bam_cigar_op(cigar[k]))&2)
-			p += bam_cigar_oplen(cigar[k]);
-
-		if (bam_cigar_type(bam_cigar_op(cigar[k]))&1)
-			q += bam_cigar_oplen(cigar[k]);
-
-		if(k == 0 || k == n_cigar - 1) continue;
-		if(bam_cigar_op(cigar[k]) != BAM_CREF_SKIP) continue;
-		if(bam_cigar_op(cigar[k-1]) != BAM_CMATCH) continue;
-		if(bam_cigar_op(cigar[k+1]) != BAM_CMATCH) continue;
-		if(bam_cigar_oplen(cigar[k-1]) < min_flank_length) continue;
-		if(bam_cigar_oplen(cigar[k+1]) < min_flank_length) continue;
-
-		int32_t s = p - bam_cigar_oplen(cigar[k]);
-		spos.push_back(pack(s, p));
-	}
-	return 0;
 }
 
 bool hit::operator<(const hit &h) const

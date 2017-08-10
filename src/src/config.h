@@ -36,6 +36,7 @@ using namespace std;
 #define UNSPLITTABLE_MULTIPLE 5
 #define TRIVIAL_VERTEX 6
 
+#define EMPTY -1
 #define UNSTRANDED 0
 #define FR_FIRST 1
 #define FR_SECOND 2
@@ -50,6 +51,12 @@ extern uint32_t min_mapping_quality;
 extern int32_t min_splice_boundary_hits;
 extern bool uniquely_mapped_only;
 extern bool use_second_alignment;
+
+// for preview
+extern bool preview_only;
+extern int max_preview_reads;
+extern int max_preview_spliced_reads;
+extern int min_preview_spliced_reads;
 
 // for identifying subgraphs
 extern int32_t min_subregion_gap;

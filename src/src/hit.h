@@ -63,11 +63,14 @@ public:
 	vector<int64_t> spos;					// splice positions
 
 public:
-	int print() const;
-	bool verify_junctions();
+	int set_tags(bam1_t *b);
+	int set_strand();
+	int set_concordance();
 	int build_splice_positions();
+	bool verify_junctions();
 	int get_mid_intervals(vector<int64_t> &vm, vector<int64_t> &vi, vector<int64_t> &vd) const;
 	int get_matched_intervals(vector<int64_t> &v) const;
+	int print() const;
 };
 
 //inline bool hit_compare_by_name(const hit &x, const hit &y);
