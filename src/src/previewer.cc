@@ -100,11 +100,11 @@ int previewer::preview()
 	if(sp >= min_preview_spliced_reads && first > preview_infer_ratio * 2.0 * sp) s1 = FR_FIRST;
 	if(sp >= min_preview_spliced_reads && second > preview_infer_ratio * 2.0 * sp) s1 = FR_SECOND;
 
-	printf("preview: reads = %d, single = %d, paired = %d, spliced reads = %d, first = %d, second = %d, inferred library_type = %s, given library_type = %s\n",
+	if(verbose >= 1)
+	{
+		printf("preview: reads = %d, single = %d, paired = %d, spliced reads = %d, first = %d, second = %d, inferred library_type = %s, given library_type = %s\n",
 			total, single, paired, sp, first, second, vv[s1 + 1].c_str(), vv[library_type + 1].c_str());
-
-	//printf("preview: reads = %d, spliced reads = %d, pstrand = (%d, %d, %d, %d), qstrand = (%d, %d, %d, %d)\n",
-	//		total, splice, pstrand1a, pstrand1b, pstrand2a, pstrand2b, qstrand1a, qstrand1b, qstrand2a, qstrand2b);
+	}
 
 	if(library_type == EMPTY) library_type = s1;
 
