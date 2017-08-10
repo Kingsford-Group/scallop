@@ -43,8 +43,11 @@ int main(int argc, const char **argv)
 		//print_parameters();
 	}
 
-	previewer pv;
-	pv.preview();
+	if(library_type == EMPTY || preview_only == true)
+	{
+		previewer pv;
+		pv.preview();
+	}
 
 	if(preview_only == true) return 0;
 
