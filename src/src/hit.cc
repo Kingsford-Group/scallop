@@ -125,10 +125,6 @@ int hit::set_strand()
 		if((flag & 0x10) >= 1) strand = '-';
 	}
 
-	// if mate pair is unmapped, trust XS
-	//if(library_type == FR_FIRST && (flag & 0x8) >= 1) strand = xs;
-	//if(library_type == FR_SECOND && (flag & 0x8) >= 1) strand = xs;
-
 	return 0;
 }
 
