@@ -14,7 +14,7 @@ It is available at both [the bioinformatics chat](https://bioinformatics.chat/sc
 [iTunes](https://itunes.apple.com/us/podcast/the-bioinformatics-chat/id1227281398). 
 
 # Release
-Latest release, including both binary and source code, is [here](https://github.com/Kingsford-Group/scallop/releases/tag/v0.9.11).
+Latest release, including both binary and source code, is [here](https://github.com/Kingsford-Group/scallop/releases/tag/v0.10.1).
 
 # Installation
 To install Scallop from the source code, you need to first download/compile 
@@ -96,20 +96,38 @@ samtools sort input.bam > input.sort.bam
 
 The reconstructed transcripts shall be written as gtf format into `output.gtf`.
 
-Scallop support the following parameters:
+Scallop support the following parameters. Please also refer
+to the additional explanation below the table.
 
 Parameters | Default Value | Description
 ------------ | ------------- | ----------
  --help  |  | print usage of Scallop and exit
  --version | | print version of Scallop and exit
+ --preview | | infer library_type by sampling reads
  --verbose | 1 | chosen from {0, 1, 2}; 0: quiet; 1: one line for each splice graph; 2: details of graph decomposition
- --library_type               | unstranded | chosen from {first, second, unstranded}
- --min_transcript_coverage    | 1.01 | the minimum coverage required to output a multi-exon transcript
+ --library_type               | empty | chosen from {empty, unstranded, first, second}
+ --min_transcript_coverage    | 1 | the minimum coverage required to output a multi-exon transcript
  --min_single_exon_coverage   | 20 | the minimum coverage required to output a single-exon transcript
- --min_transcript_length_increase  | 50 | the minimum length of a transcript is: --min_transcript_length_base <br> + --min_transcript_length_increase * num-of-exons
- --min_transcript_length_base      |150 | the minimum length of a transcript is: --min_transcript_length_base <br> + --min_transcript_length_increase * num-of-exons
+ --min_transcript_length_base      |150 | the minimum base length of a transcript
+ --min_transcript_length_increase  | 50 | the minimum increased length of a transcript with each additional exon
  --min_mapping_quality        | 1 | ignore reads with mapping quality less than this value
- --min_bundle_gap             |50 | the minimum distances required to start a new bundle
+ --min_bundle_gap             | 50 | the minimum distances required to start a new bundle
  --min_num_hits_in_bundle     | 20 | the minimum number of reads required in a bundle
  --min_flank_length           | 3 | the minimum match length required in each side for a spliced read
  --min_splice_bundary_hits    | 1 | the minimum number of spliced reads required to support a junction
+
+1. `--library_type` is highly recommended to provide. The `unstranded`, `first`, and `second`
+correspond to `fr-unstranded`, `fr-firststrand`, and `fr-secondstrand` used in standard Illumina
+sequencing libraries. If none of them is given, i.e., it is `empty` by default, then `scallop`
+will try to infer the `library_type` by itself (see `--preview`). Notice that such inference is based
+on the `XS` tag stored in the input `bam` file. If the input `bam` file do not contain `XS` tag,
+then it is essential to provide the `library_type` to `scallop`. You can try `--preview` to see
+the inferred `library_type` by `scallop`.
+
+2. `--min_transcript_coverage` is used to filter lowly expressed transcripts: `scallop` will filter
+out transcripts whose (predicted) raw counts (number of moleculars) is less than this number.
+
+3. `--min_transcript_length_base` and `--min_transcript_length_increase` is combined to filter
+short transcripts: the minimum length of a transcript is given by `--min_transcript_length_base`
++ `--min_transcript_length_increase` * num-of-exons-in-this-transcript. Transcripts that are less
+than this number will be filtered out.
