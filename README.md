@@ -103,7 +103,7 @@ Parameters | Default Value | Description
 ------------ | ------------- | ----------
  --help  |  | print usage of Scallop and exit
  --version | | print version of Scallop and exit
- --preview | | infer library_type by sampling reads
+ --preview | | show the inferred `library_type` by sampling reads
  --verbose | 1 | chosen from {0, 1, 2}; 0: quiet; 1: one line for each splice graph; 2: details of graph decomposition
  --library_type               | empty | chosen from {empty, unstranded, first, second}
  --min_transcript_coverage    | 1 | the minimum coverage required to output a multi-exon transcript
