@@ -29,6 +29,8 @@ public:
 	string feature;
 	string gene_id;
 	string transcript_id;
+	string transcript_type;
+	string gene_type;
 	int32_t start;
 	int32_t end;
 	double score;

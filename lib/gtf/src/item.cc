@@ -60,6 +60,8 @@ int item::parse(const string &s)
 		//printf("|%s|%s|\n", buf, v.c_str());
 
 		if(string(buf) == "transcript_id") transcript_id = v;
+		else if(string(buf) == "transcript_type") transcript_type = v;
+		else if(string(buf) == "gene_type") gene_type = v;
 		else if(string(buf) == "gene_id") gene_id = v;
 		else if(string(buf) == "cov") coverage = atof(v.c_str());
 		else if(string(buf) == "coverage") coverage = atof(v.c_str());

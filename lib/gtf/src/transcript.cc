@@ -34,6 +34,8 @@ int transcript::assign(const item &e)
 	feature = e.feature;
 	gene_id = e.gene_id;
 	transcript_id = e.transcript_id;
+	transcript_type = e.transcript_type;
+	gene_type = e.gene_type;
 	start = e.start;
 	end = e.end;
 	strand = e.strand;
@@ -64,6 +66,8 @@ int transcript::clear()
 	feature = "";
 	gene_id = "";
 	transcript_id = "";
+	transcript_type = "";
+	gene_type = "";
 	start = 0;
 	end = 0;
 	strand = '.';
@@ -192,9 +196,9 @@ int transcript::write(ostream &fout) const
 	fout<<".\t";								// frame
 	fout<<"gene_id \""<<gene_id.c_str()<<"\"; ";
 	fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
+	if(gene_type != "") fout<<"gene_type \""<<gene_type.c_str()<<"\"; ";
+	if(transcript_type != "") fout<<"transcript_type \""<<transcript_type.c_str()<<"\"; ";
 	fout<<"RPKM \""<<RPKM<<"\"; ";
-	//fout<<"FPKM \""<<FPKM<<"\"; ";
-	//fout<<"TPM \""<<TPM<<"\"; ";
 	fout<<"cov \""<<coverage<<"\";"<<endl;
 
 	for(int k = 0; k < exons.size(); k++)
@@ -210,10 +214,6 @@ int transcript::write(ostream &fout) const
 		fout<<"gene_id \""<<gene_id.c_str()<<"\"; ";
 		fout<<"transcript_id \""<<transcript_id.c_str()<<"\"; ";
 		fout<<"exon \""<<k + 1<<"\"; "<<endl;
-		//fout<<"RPKM \""<<RPKM<<"\"; ";
-		//fout<<"FPKM \""<<FPKM<<"\"; ";
-		//fout<<"TPM \""<<TPM<<"\"; ";
-		//fout<<"cov \""<<coverage<<"\";"<<endl;
 	}
 	return 0;
 }
