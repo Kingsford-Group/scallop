@@ -154,6 +154,21 @@ PI32 transcript::get_first_intron() const
 	return PI32(p, q);
 }
 
+vector<PI32> transcript::get_intron_chain() const
+{
+	vector<PI32> v;
+	if(exons.size() <= 1) return v;
+
+	int32_t p = exons[0].second;
+	for(int k = 1; k < exons.size(); k++)
+	{
+		int32_t q = exons[k].first;
+		v.push_back(PI32(p, q));
+		int32_t p = exons[k].second;
+	}
+	return v;
+}
+
 bool transcript::intron_chain_match(const transcript &t) const
 {
 	if(exons.size() != t.exons.size()) return false;
