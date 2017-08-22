@@ -8,9 +8,9 @@ See LICENSE for licensing.
 #include <cassert>
 #include <sstream>
 
-#include "gtf.h"
-#include "genome1.h"
 #include "config.h"
+#include "gtf.h"
+#include "genome.h"
 #include "assembler.h"
 #include "scallop.h"
 #include "sgraph_compare.h"
@@ -95,7 +95,6 @@ int assembler::assemble()
 	pool.push_back(bb2);
 	process(0);
 
-	//merge_multi_exon_transcripts();
 	assign_RPKM();
 
 	filter ft(trsts);
@@ -236,29 +235,6 @@ int assembler::assign_RPKM()
 	{
 		trsts[i].assign_RPKM(factor);
 	}
-	return 0;
-}
-
-int assembler::merge_multi_exon_transcripts()
-{
-	vector<transcript> v1;
-	vector<transcript> v2;
-	for(int i = 0; i < trsts.size(); i++)
-	{
-		if(trsts[i].exons.size() <= 1) v1.push_back(trsts[i]);
-		else v2.push_back(trsts[i]);
-	}
-
-	genome1 gm;
-	gm.build(v2);
-	gm.merge();
-
-	for(int i = 0; i < gm.transcripts.size(); i++)
-	{
-		v1.push_back(gm.transcripts[i]);
-	}
-
-	trsts = v1;
 	return 0;
 }
 

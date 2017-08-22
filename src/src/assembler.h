@@ -42,7 +42,6 @@ public:
 private:
 	int process(int n);
 	int assemble(const bundle_base &bb);
-	int merge_multi_exon_transcripts();
 	int assign_RPKM();
 	int write();
 	int compare(splice_graph &gr, const string &ref, const string &tex = "");
