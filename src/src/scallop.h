@@ -26,14 +26,13 @@ class scallop
 {
 public:
 	scallop();
-	scallop(const string &name, const splice_graph &gr, const hyper_set &hs);
+	scallop(const splice_graph &gr, const hyper_set &hs);
 	virtual ~scallop();
 
 public:
 	int assemble();
 
 public:
-	string name;						// name for this gene
 	splice_graph gr;					// splice graph
 	MEI e2i;							// edge map, from edge to index
 	VE i2e;								// edge map, from index to edge

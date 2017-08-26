@@ -677,6 +677,8 @@ int bundle::build_splice_graph()
 		gr.set_edge_info(p, ei);
 	}
 
+	gr.strand = strand;
+	gr.chrm = chrm;
 	return 0;
 }
 

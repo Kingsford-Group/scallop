@@ -12,6 +12,7 @@ See LICENSE for licensing.
 #include "bundle_base.h"
 #include "bundle.h"
 #include "transcript.h"
+#include "splice_graph.h"
 
 using namespace std;
 
@@ -29,7 +30,9 @@ private:
 	bundle_base bb2;		// -
 	vector<bundle_base> pool;
 
-	int index;
+	vector<splice_graph> grlist;
+	vector<hyper_set> hslist;
+
 	bool terminate;
 
 	int qcnt;
@@ -41,7 +44,7 @@ public:
 
 private:
 	int process(int n);
-	int assemble(const bundle_base &bb);
+	int assemble(int k);
 	int assign_RPKM();
 	int write();
 	int compare(splice_graph &gr, const string &ref, const string &tex = "");

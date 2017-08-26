@@ -23,7 +23,6 @@ assembler::assembler()
     hdr = sam_hdr_read(sfn);
     b1t = bam_init1();
 	terminate = false;
-	index = -1;
 	qlen = 0;
 	qcnt = 0;
 }
@@ -95,6 +94,8 @@ int assembler::assemble()
 	pool.push_back(bb2);
 	process(0);
 
+	for(int k = 0; k < grlist.size(); k++) assemble(k);
+
 	assign_RPKM();
 
 	filter ft(trsts);
@@ -111,109 +112,54 @@ int assembler::process(int n)
 	if(pool.size() < n) return 0;
 	for(int i = 0; i < pool.size(); i++)
 	{
-		assemble(pool[i]);
+		bundle_base &bb = pool[i];
+		if(bb.hits.size() < min_num_hits_in_bundle) return 0;
+		if(bb.tid < 0) return 0;
+
+		char buf[1024];
+		strcpy(buf, hdr->target_name[bb.tid]);
+
+		bundle bd(bb);
+
+		bd.chrm = string(buf);
+		bd.build();
+
+		grlist.push_back(bd.gr);
+		hslist.push_back(bd.hs);
+
+		if(verbose >= 1) bd.print(i);
 	}
 	pool.clear();
 	return 0;
 }
 
-int assembler::assemble(const bundle_base &bb)
+int assembler::assemble(int index)
 {
-	//printf("hits.size = %lu, min-num = %d\n", bb.hits.size(), min_num_hits_in_bundle);
+	assert(index >= 0 && index < grlist.size());
+	assert(index >= 0 && index < hslist.size());
 
-	if(bb.hits.size() < min_num_hits_in_bundle) return 0;
-	if(bb.tid < 0) return 0;
-
-	char buf[1024];
-	strcpy(buf, hdr->target_name[bb.tid]);
-
-	bundle bd(bb);
-
-	bd.chrm = string(buf);
-	bd.build();
-
-	index++;
-
-	/*
-	bd.print(index);
-	if(ref_file != "") compare(bd.gr, ref_file, "compare.tex");
-	if(ref_file1 != "" && bd.strand == '+') compare(bd.gr, ref_file1, "compare1.tex");
-	if(ref_file2 != "" && bd.strand == '-') compare(bd.gr, ref_file2, "compare2.tex");
-	*/
-
-	super_graph sg(bd.gr, bd.hs);
+	super_graph sg(grlist[index], hslist[index]);
 	sg.build();
-
-	int maxk = -1;
-	int maxv = 0;
-	for(int k = 0; k < sg.subs.size(); k++)
-	{
-		if(sg.subs[k].num_vertices() < maxv) continue;
-		maxk = k;
-		maxv = sg.subs[k].num_vertices();
-	}
-
-	/*
-	if(ref_file != "") compare(bd.gr, ref_file, "compare.tex");
-	if(ref_file1 != "" && bd.strand == '+') compare(bd.gr, ref_file1, "compare1.tex");
-	if(ref_file2 != "" && bd.strand == '-') compare(bd.gr, ref_file2, "compare2.tex");
-	*/
 
 	vector<transcript> gv;
 	for(int k = 0; k < sg.subs.size(); k++)
 	{
-		//if(k != maxk) continue;
-
-		string gid = "bundle." + tostring(index) + "." + tostring(k);
+		string gid = "gene." + tostring(index) + "." + tostring(k);
 		if(fixed_gene_name != "" && gid != fixed_gene_name) continue;
 
-		if(verbose >= 1 && (k == 0 || fixed_gene_name != "")) bd.print(index);
 		if(verbose >= 2 && (k == 0 || fixed_gene_name != "")) sg.print();
-
-		if(algo == "empty") continue;
 
 		splice_graph &gr = sg.subs[k];
 		hyper_set &hs = sg.hss[k];
 
 		gr.gid = gid;
-		gr.chrm = bd.chrm;
-		gr.strand = bd.strand;
-
-		/*
-		if(ref_file != "") compare(gr, ref_file, "compare.tex");
-		if(ref_file1 != "" && bd.strand == '+') compare(gr, ref_file1, "compare1.tex");
-		if(ref_file2 != "" && bd.strand == '-') compare(gr, ref_file2, "compare2.tex");
-		*/
-
-		//if(gr.num_vertices() <= 3 && sg.subs.size() >= 2) continue;
-		//if(gr.num_vertices() <= 3 && bd.junctions.size() >= 1) continue;
-
-		scallop sc(gid, gr, hs);
+		scallop sc(gr, hs);
 		sc.assemble();
 
 		if(verbose >= 2)
 		{
-			printf("in-transcripts:\n");
-			for(int i = 0; i < sc.trsts.size(); i++) sc.trsts[i].write(cout);
-		}
-
-		vector<path> pp;
-		for(int i = 0; i < sc.paths.size(); i++)
-		{
-			path p;
-			p.v = sg.get_root_vertices(k, sc.paths[i].v);
-			p.abd = sc.paths[i].abd;
-			p.reads = sc.paths[i].reads;
-			pp.push_back(p);
-		}
-
-		vector<transcript> vv;
-		bd.output_transcripts(vv, pp, gid);
-
-		if(verbose >= 2)
-		{
 			printf("transcripts:\n");
-			for(int i = 0; i < vv.size(); i++) vv[i].write(cout);
+			for(int i = 0; i < sc.trsts.size(); i++) sc.trsts[i].write(cout);
 		}
 
 		filter ft(sc.trsts);

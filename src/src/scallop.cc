@@ -16,11 +16,11 @@ See LICENSE for licensing.
 scallop::scallop()
 {}
 
-scallop::scallop(const string &s, const splice_graph &g, const hyper_set &h)
-	: name(s), gr(g), hs(h)
+scallop::scallop(const splice_graph &g, const hyper_set &h)
+	: gr(g), hs(h)
 {
 	round = 0;
-	if(output_tex_files == true) gr.draw(name + "." + tostring(round++) + ".tex");
+	if(output_tex_files == true) gr.draw(gr.gid + "." + tostring(round++) + ".tex");
 
 	gr.get_edge_indices(i2e, e2i);
 	//add_pseudo_hyper_edges();
@@ -38,7 +38,7 @@ scallop::~scallop()
 int scallop::assemble()
 {
 	int c = classify();
-	if(verbose >= 1) printf("process splice graph %s type = %d, vertices = %lu, edges = %lu\n", name.c_str(), c, gr.num_vertices(), gr.num_edges());
+	if(verbose >= 1) printf("process splice graph %s type = %d, vertices = %lu, edges = %lu\n", gr.gid.c_str(), c, gr.num_vertices(), gr.num_edges());
 
 	//resolve_negligible_edges(false, max_decompose_error_ratio[NEGLIGIBLE_EDGE]);
 
@@ -104,7 +104,7 @@ int scallop::assemble()
 	if(verbose >= 2) 
 	{
 		for(int i = 0; i < paths.size(); i++) paths[i].print(i);
-		printf("finish assemble bundle %s\n\n", name.c_str());
+		printf("finish assemble bundle %s\n\n", gr.gid.c_str());
 	}
 
 	return 0;
@@ -1430,13 +1430,6 @@ int scallop::print()
 	//printf("statistics: %lu edges, %d vertices, total %d paths, %d required\n", gr.num_edges(), n, p1, p2);
 
 	//hs.print();
-
-	//if(output_tex_files == true)
-	//{
-	//	draw_splice_graph(name + "." + tostring(round) + ".tex");
-	//	nested_graph nt(gr);
-	//	nt.draw(name + "." + tostring(round) + ".nt.tex");
-	//}
 
 	//printf("finish round %d\n\n", round);
 	//round++;
