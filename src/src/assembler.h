@@ -34,7 +34,6 @@ private:
 	vector<hyper_set> hslist;
 
 	bool terminate;
-
 	int qcnt;
 	double qlen;
 	vector<transcript> trsts;

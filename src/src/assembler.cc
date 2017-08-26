@@ -110,11 +110,12 @@ int assembler::assemble()
 int assembler::process(int n)
 {
 	if(pool.size() < n) return 0;
+
 	for(int i = 0; i < pool.size(); i++)
 	{
 		bundle_base &bb = pool[i];
-		if(bb.hits.size() < min_num_hits_in_bundle) return 0;
-		if(bb.tid < 0) return 0;
+		if(bb.hits.size() < min_num_hits_in_bundle) continue;
+		if(bb.tid < 0) continue;
 
 		char buf[1024];
 		strcpy(buf, hdr->target_name[bb.tid]);
@@ -127,7 +128,7 @@ int assembler::process(int n)
 		grlist.push_back(bd.gr);
 		hslist.push_back(bd.hs);
 
-		if(verbose >= 1) bd.print(i);
+		if(verbose >= 1) bd.print(grlist.size() - 1);
 	}
 	pool.clear();
 	return 0;
