@@ -30,9 +30,7 @@ private:
 	bundle_base bb2;		// -
 	vector<bundle_base> pool;
 
-	vector<splice_graph> grlist;
-	vector<hyper_set> hslist;
-
+	int index;
 	bool terminate;
 	int qcnt;
 	double qlen;
@@ -43,7 +41,7 @@ public:
 
 private:
 	int process(int n);
-	int assemble(int k);
+	int assemble(const splice_graph &gr, const hyper_set &hs);
 	int assign_RPKM();
 	int write();
 	int compare(splice_graph &gr, const string &ref, const string &tex = "");

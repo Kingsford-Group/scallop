@@ -22,6 +22,7 @@ assembler::assembler()
     sfn = sam_open(input_file.c_str(), "r");
     hdr = sam_hdr_read(sfn);
     b1t = bam_init1();
+	index = 0;
 	terminate = false;
 	qlen = 0;
 	qcnt = 0;
@@ -94,8 +95,6 @@ int assembler::assemble()
 	pool.push_back(bb2);
 	process(0);
 
-	for(int k = 0; k < grlist.size(); k++) assemble(k);
-
 	assign_RPKM();
 
 	filter ft(trsts);
@@ -124,22 +123,18 @@ int assembler::process(int n)
 
 		bd.chrm = string(buf);
 		bd.build();
+		if(verbose >= 1) bd.print(index);
 
-		grlist.push_back(bd.gr);
-		hslist.push_back(bd.hs);
-
-		if(verbose >= 1) bd.print(grlist.size() - 1);
+		assemble(bd.gr, bd.hs);
+		index++;
 	}
 	pool.clear();
 	return 0;
 }
 
-int assembler::assemble(int index)
+int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0)
 {
-	assert(index >= 0 && index < grlist.size());
-	assert(index >= 0 && index < hslist.size());
-
-	super_graph sg(grlist[index], hslist[index]);
+	super_graph sg(gr0, hs0);
 	sg.build();
 
 	vector<transcript> gv;
