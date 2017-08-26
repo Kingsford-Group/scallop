@@ -17,7 +17,6 @@ public:
 public:
 	double stddev;
 	int length;
-	bool infer;
 	int type;
 	int jid;		// junction id
 	double weight;	// new weight from hyper-edges

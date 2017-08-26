@@ -42,7 +42,8 @@ public:
 	hyper_set hs;						// hyper edges
 	int round;							// iteration
 	set<int> nonzeroset;				// vertices with degree >= 1
-	vector<path> paths;					// predicted transcripts
+	vector<path> paths;					// predicted paths
+	vector<transcript> trsts;			// predicted transcripts
 
 private:
 	// init
@@ -87,9 +88,6 @@ private:
 	int collect_path(int e);
 	int compute_length(const path &p);
 	int greedy_decompose();
-
-	// filter
-	int filter_transcripts();
 
 	// stats, print, and draw
 	int print();

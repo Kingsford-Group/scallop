@@ -591,7 +591,6 @@ int bundle::build_splice_graph()
 		vi.rpos = r.rpos;
 		vi.length = length;
 		vi.stddev = r.dev;// < 1.0 ? 1.0 : r.dev;
-		//vi.adjust = r.adjust;
 		gr.set_vertex_info(i + 1, vi);
 	}
 

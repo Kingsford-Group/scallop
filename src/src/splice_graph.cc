@@ -7,6 +7,7 @@ See LICENSE for licensing.
 #include "splice_graph.h"
 #include "util.h"
 #include "config.h"
+#include "interval_map.h"
 #include <sstream>
 #include <fstream>
 #include <cfloat>
@@ -21,6 +22,10 @@ splice_graph::splice_graph()
 
 splice_graph::splice_graph(const splice_graph &gr)
 {
+	chrm = gr.chrm;
+	gid = gr.gid;
+	strand = gr.strand;
+
 	MEE x2y;
 	MEE y2x;
 	copy(gr, x2y, y2x);
@@ -1027,6 +1032,109 @@ int splice_graph::print_weights()
 		double w1 = get_edge_weight(e);
 		double w2 = get_edge_info(e).weight;
 		printf("edge (%d, %d) pos = %d-%d length = %d weight = (%.2lf, %.2lf)\n", s, t, p1, p2, p2 - p1 + 1, w1, w2);
+	}
+	return 0;
+}
+
+int splice_graph::output_transcripts(ofstream &fout, const vector<path> &p) const
+{
+	for(int i = 0; i < p.size(); i++)
+	{
+		string tid = gid + "." + tostring(i);
+		output_transcript(fout, p[i], tid);
+	}
+	return 0;
+}
+
+int splice_graph::output_transcript(ofstream &fout, const path &p, const string &tid) const
+{
+	fout.precision(2);
+	fout<<fixed;
+
+	const vector<int> &v = p.v;
+	double coverage = p.abd;		// number of molecular
+
+	assert(v[0] == 0);
+	assert(v[v.size() - 1] == num_vertices() - 1);
+	if(v.size() < 2) return 0;
+
+	int ss = v[1];
+	int tt = v[v.size() - 2];
+	int32_t ll = get_vertex_info(ss).lpos;
+	int32_t rr = get_vertex_info(tt).rpos;
+
+	fout<<chrm.c_str()<<"\t";		// chromosome name
+	fout<<"scallop"<<"\t";			// source
+	fout<<"transcript\t";			// feature
+	fout<<ll + 1<<"\t";				// left position
+	fout<<rr<<"\t";					// right position
+	fout<<1000<<"\t";				// score, now as abundance
+	fout<<strand<<"\t";				// strand
+	fout<<".\t";					// frame
+	fout<<"gene_id \""<<gid.c_str()<<"\"; ";
+	fout<<"transcript_id \""<<tid.c_str()<<"\"; ";
+	fout<<"coverage \""<<coverage<<"\";"<<endl;
+
+	join_interval_map jmap;
+	for(int k = 1; k < v.size() - 1; k++)
+	{
+		int32_t p1 = get_vertex_info(v[k]).lpos;
+		int32_t p2 = get_vertex_info(v[k]).rpos;
+		jmap += make_pair(ROI(p1, p2), 1);
+	}
+
+	int cnt = 0;
+	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
+	{
+		fout<<chrm.c_str()<<"\t";			// chromosome name
+		fout<<"scallop"<<"\t";				// source
+		fout<<"exon\t";						// feature
+		fout<<lower(it->first) + 1<<"\t";	// left position
+		fout<<upper(it->first)<<"\t";		// right position
+		fout<<1000<<"\t";					// score
+		fout<<strand<<"\t";					// strand
+		fout<<".\t";						// frame
+		fout<<"gene_id \""<<gid.c_str()<<"\"; ";
+		fout<<"transcript_id \""<<tid.c_str()<<"\"; ";
+		fout<<"exon_number \""<<++cnt<<"\"; ";
+		fout<<"coverage \""<<coverage<<"\";"<<endl;
+	}
+	return 0;
+}
+
+int splice_graph::output_transcripts(vector<transcript> &v, const vector<path> &p) const
+{
+	for(int i = 0; i < p.size(); i++)
+	{
+		string tid = gid + "." + tostring(i);
+		transcript trst;
+		output_transcript(trst, p[i], tid);
+		v.push_back(trst);
+	}
+	return 0;
+}
+
+int splice_graph::output_transcript(transcript &trst, const path &p, const string &tid) const
+{
+	trst.seqname = chrm;
+	trst.source = "scallop";
+	trst.gene_id = gid;
+	trst.transcript_id = tid;
+	trst.coverage = p.abd;
+	trst.strand = strand;
+
+	const vector<int> &v = p.v;
+	join_interval_map jmap;
+	for(int k = 1; k < v.size() - 1; k++)
+	{
+		int32_t p1 = get_vertex_info(v[k]).lpos;
+		int32_t p2 = get_vertex_info(v[k]).rpos;
+		jmap += make_pair(ROI(p1, p2), 1);
+	}
+
+	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
+	{
+		trst.add_exon(lower(it->first), upper(it->first));
 	}
 	return 0;
 }

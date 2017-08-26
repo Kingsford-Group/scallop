@@ -10,6 +10,8 @@ See LICENSE for licensing.
 #include "directed_graph.h"
 #include "vertex_info.h"
 #include "edge_info.h"
+#include "path.h"
+#include "gene.h"
 
 #include <map>
 #include <cassert>
@@ -28,7 +30,11 @@ public:
 	splice_graph(const splice_graph &gr);
 	virtual ~splice_graph();
 
-private:
+public:
+	string chrm;
+	string gid;
+	char strand;
+
 	vector<double> vwrt;
 	vector<vertex_info> vinf;
 	MED ewrt;
@@ -105,6 +111,12 @@ public:
 	int print_nontrivial_vertices();
 	int print_weights();
 	int print();
+
+	// output transcripts
+	int output_transcripts(ofstream &fout, const vector<path> &p) const;
+	int output_transcripts(vector<transcript> &v, const vector<path> &p) const;
+	int output_transcript(ofstream &fout, const path &p, const string &tid) const;
+	int output_transcript(transcript &trst, const path &p, const string &tid) const;
 };
 
 #endif

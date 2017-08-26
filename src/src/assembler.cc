@@ -175,6 +175,10 @@ int assembler::assemble(const bundle_base &bb)
 		splice_graph &gr = sg.subs[k];
 		hyper_set &hs = sg.hss[k];
 
+		gr.gid = gid;
+		gr.chrm = bd.chrm;
+		gr.strand = bd.strand;
+
 		/*
 		if(ref_file != "") compare(gr, ref_file, "compare.tex");
 		if(ref_file1 != "" && bd.strand == '+') compare(gr, ref_file1, "compare1.tex");
@@ -186,6 +190,12 @@ int assembler::assemble(const bundle_base &bb)
 
 		scallop sc(gid, gr, hs);
 		sc.assemble();
+
+		if(verbose >= 2)
+		{
+			printf("in-transcripts:\n");
+			for(int i = 0; i < sc.trsts.size(); i++) sc.trsts[i].write(cout);
+		}
 
 		vector<path> pp;
 		for(int i = 0; i < sc.paths.size(); i++)
@@ -206,7 +216,7 @@ int assembler::assemble(const bundle_base &bb)
 			for(int i = 0; i < vv.size(); i++) vv[i].write(cout);
 		}
 
-		filter ft(vv);
+		filter ft(sc.trsts);
 		ft.join_single_exon_transcripts();
 		ft.filter_length_coverage();
 		if(ft.trs.size() >= 1) gv.insert(gv.end(), ft.trs.begin(), ft.trs.end());

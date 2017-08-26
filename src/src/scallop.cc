@@ -98,7 +98,8 @@ int scallop::assemble()
 	collect_existing_st_paths();
 	greedy_decompose();
 
-	//filter_transcripts();
+	trsts.clear();
+	gr.output_transcripts(trsts, paths);
 
 	if(verbose >= 2) 
 	{
@@ -1369,26 +1370,6 @@ int scallop::greedy_decompose()
 	return 0;
 }
 
-int scallop::filter_transcripts()
-{
-	double max_abd = 0;
-	for(int i = 0; i < paths.size(); i++)
-	{
-		if(paths[i].abd < max_abd) continue;
-		max_abd = paths[i].abd;
-	}
-
-	vector<path> v;
-	for(int i = 0; i < paths.size(); i++)
-	{
-		if(paths[i].abd < min_transcript_coverage_ratio * max_abd) continue;
-		v.push_back(paths[i]);
-	}
-
-	paths = v;
-	return 0;
-}
-
 int scallop::compute_smallest_edge(int x, double &ratio)
 {
 	int e = -1;
@@ -1472,11 +1453,8 @@ int scallop::draw_splice_graph(const string &file)
 		vertex_info vi = gr.get_vertex_info(i);
 		double w = gr.get_vertex_weight(i);
 		int l = vi.length;
-		double d = vi.reliability;
-		char b = vi.infer ? 'T' : 'F';
 		//string s = gr.get_vertex_string(i);
 		//sprintf(buf, "%d:%.0lf:%s", i, w, s.c_str());
-		//sprintf(buf, "%d:%.1lf:%d:%.2lf:%c", i, w, l, d, b);
 		sprintf(buf, "%d:%.0lf:%d", i, w, l);
 		mis.insert(PIS(i, buf));
 	}
@@ -1488,8 +1466,6 @@ int scallop::draw_splice_graph(const string &file)
 		double w = gr.get_edge_weight(i2e[i]);
 		edge_info ei = gr.get_edge_info(i2e[i]);
 		int l = ei.length;
-		char b = ei.infer ? 'T' : 'F';
-		//sprintf(buf, "%d:%.1lf:%d:%c", i, w, l, b);
 		sprintf(buf, "%d:%.0lf", i, w);
 		mes.insert(PES(i2e[i], buf));
 	}
