@@ -1,5 +1,6 @@
 #include "metaassembler.h"
 #include "previewer.h"
+#include "sgraph_compare.h"
 
 int metaassembler::preassemble()
 {
@@ -32,11 +33,58 @@ int metaassembler::preassemble()
 
 int metaassembler::assemble()
 {
+	compare_boundaries();
 	return 0;
 }
 
 int metaassembler::postassemble()
 {
+	return 0;
+}
+
+int metaassembler::compare_boundaries()
+{
+	vector< set<int32_t> > brlist1;
+	vector< set<int32_t> > brlist2;
+
+	for(int k = 0; k < grlist1.size(); k++)
+	{
+		set<int32_t> s = grlist1[k].get_boundaries();
+		brlist1.push_back(s);
+	}
+
+	for(int k = 0; k < grlist2.size(); k++)
+	{
+		set<int32_t> s = grlist2[k].get_boundaries();
+		brlist2.push_back(s);
+	}
+
+	for(int i = 0; i < brlist1.size(); i++)
+	{
+		int index = -1;
+		int maxbr = -1;
+		set<int32_t> &s1 = brlist1[i];
+		vector<int32_t> v(s1.size());
+		for(int j = 0; j < brlist2.size(); j++)
+		{
+			set<int32_t> &s2 = brlist2[j];	
+			vector<int32_t>::iterator it = set_intersection(s1.begin(), s1.end(), s2.begin(), s2.end(), v.begin());
+			int m = it - v.begin();
+
+			if(m > maxbr)
+			{
+				maxbr = m;
+				index = j;
+			}
+		}
+
+		printf("intersection between graph %d (%lu boundaries) and graph %d (%lu boundaries) = %d boundaries\n", 
+				i, s1.size(), index, brlist2[index].size(), maxbr);
+	}
+
+	sgraph_compare sc(grlist1[593], grlist2[638]);
+	sc.compare("meta.593.639.tex");
+
 	return 0;
 }
 

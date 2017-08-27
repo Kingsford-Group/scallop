@@ -232,6 +232,20 @@ edge_descriptor splice_graph::max_in_edge(int v)
 	return ee;
 }
 
+set<int32_t> splice_graph::get_boundaries()
+{
+	set<int32_t> s;
+	int n = num_vertices() - 1;
+	s.insert(get_vertex_info(0).rpos);
+	s.insert(get_vertex_info(n).lpos);
+	for(int i = 1; i < n; i++)
+	{
+		s.insert(get_vertex_info(i).lpos);
+		s.insert(get_vertex_info(i).rpos);
+	}
+	return s;
+}
+
 int splice_graph::count_junctions()
 {
 	int cnt = 0;

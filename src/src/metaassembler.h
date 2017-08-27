@@ -21,8 +21,10 @@ public:
 	int preassemble();
 	int assemble();
 	int postassemble();
-
 	int print();
+
+private:
+	int compare_boundaries();
 };
 
 #endif

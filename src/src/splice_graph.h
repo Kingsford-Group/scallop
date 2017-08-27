@@ -66,6 +66,8 @@ public:
 
 	int count_junctions();
 
+	set<int32_t> get_boundaries();
+
 	// modify the splice_graph
 	int clear();
 	int copy(const splice_graph &gr, MEE &x2y, MEE &y2x);
