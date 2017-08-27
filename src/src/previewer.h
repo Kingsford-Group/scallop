@@ -17,7 +17,7 @@ using namespace std;
 class previewer
 {
 public:
-	previewer();
+	previewer(const string &file);
 	~previewer();
 
 private:

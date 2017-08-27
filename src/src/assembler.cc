@@ -34,7 +34,7 @@ assembler::~assembler()
     sam_close(sfn);
 }
 
-int assembler::assemble()
+int assembler::preassemble()
 {
     while(sam_read1(sfn, hdr, b1t) >= 0)
 	{
@@ -53,11 +53,9 @@ int assembler::assemble()
 		ht.set_strand();
 		ht.build_splice_positions();
 
-		//ht.print();
+		if(ht.tid != 0) return 0;		// DEBUG
 
-		//if(ht.nh >= 2 && p.qual < min_mapping_quality) continue;
-		//if(ht.nm > max_edit_distance) continue;
-		//if(ht.verify_junctions() == false) continue;
+		//ht.print();
 
 		qlen += ht.qlen;
 		qcnt += 1;
@@ -94,8 +92,21 @@ int assembler::assemble()
 	pool.push_back(bb2);
 	process(0);
 
-	for(int k = 0; k < grlist.size(); k++) assemble(k);
+	return 0;
 
+}
+
+int assembler::assemble()
+{
+	for(int k = 0; k < grlist.size(); k++) 
+	{
+		assemble(k);
+	}
+	return 0;
+}
+
+int assembler::postassemble()
+{
 	assign_RPKM();
 
 	filter ft(trsts);

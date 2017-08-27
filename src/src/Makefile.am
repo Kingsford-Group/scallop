@@ -40,5 +40,6 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  scallop.h scallop.cc \
 				  previewer.h previewer.cc \
 				  assembler.h assembler.cc \
+				  metaassembler.h metaassembler.cc \
 				  filter.h filter.cc \
 				  main.cc

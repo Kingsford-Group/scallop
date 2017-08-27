@@ -65,6 +65,8 @@ int simulation_max_edge_weight = 0;
 // input and output
 string algo = "scallop";
 string input_file;
+string input_file1;
+string input_file2;
 string ref_file;
 string ref_file1;
 string ref_file2;
@@ -85,6 +87,16 @@ int parse_arguments(int argc, const char ** argv)
 		if(string(argv[i]) == "-i")
 		{
 			input_file = string(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "-i1")
+		{
+			input_file1 = string(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "-i2")
+		{
+			input_file2 = string(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "-o")
@@ -309,9 +321,9 @@ int parse_arguments(int argc, const char ** argv)
 	}
 
 	// verify arguments
-	if(input_file == "")
+	if(input_file == "" && (input_file1 == "" || input_file2 == ""))
 	{
-		printf("error: input-file is missing.\n");
+		printf("error: input-file(s) is missing.\n");
 		exit(0);
 	}
 
@@ -371,6 +383,8 @@ int print_parameters()
 	// for input and output
 	printf("algo = %s\n", algo.c_str());
 	printf("input_file = %s\n", input_file.c_str());
+	printf("input_file1 = %s\n", input_file1.c_str());
+	printf("input_file2 = %s\n", input_file2.c_str());
 	printf("ref_file = %s\n", ref_file.c_str());
 	printf("ref_file1 = %s\n", ref_file1.c_str());
 	printf("ref_file2 = %s\n", ref_file2.c_str());

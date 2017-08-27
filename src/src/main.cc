@@ -16,6 +16,7 @@ See LICENSE for licensing.
 #include "config.h"
 #include "previewer.h"
 #include "assembler.h"
+#include "metaassembler.h"
 
 using namespace std;
 
@@ -43,16 +44,28 @@ int main(int argc, const char **argv)
 		//print_parameters();
 	}
 
-	if(library_type == EMPTY || preview_only == true)
+	if(input_file != "")
 	{
-		previewer pv;
-		pv.preview();
+		if(library_type == EMPTY || preview_only == true)
+		{
+			previewer pv(input_file);
+			pv.preview();
+		}
+
+		if(preview_only == true) return 0;
+
+		assembler asmb;
+		asmb.preassemble();
+		asmb.assemble();
+		asmb.postassemble();
 	}
-
-	if(preview_only == true) return 0;
-
-	assembler asmb;
-	asmb.assemble();
+	else if(input_file1 != "" && input_file2 != "")
+	{
+		metaassembler mb;
+		mb.preassemble();
+		mb.assemble();
+		mb.postassemble();
+	}
 
 	return 0;
 }

@@ -22,7 +22,7 @@ public:
 	assembler();
 	~assembler();
 
-private:
+public:
 	samFile *sfn;
 	bam_hdr_t *hdr;
 	bam1_t *b1t;
@@ -39,7 +39,9 @@ private:
 	vector<transcript> trsts;
 
 public:
+	int preassemble();
 	int assemble();
+	int postassemble();
 
 private:
 	int process(int n);
