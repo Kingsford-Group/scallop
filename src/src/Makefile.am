@@ -21,6 +21,7 @@ scallop_LDADD = $(CLP_HOME)/lib/libClp.a $(CLP_HOME)/lib/libCoinUtils.a $(HTSLIB
 scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  super_graph.h super_graph.cc \
 				  sgraph_compare.h sgraph_compare.cc \
+				  sgraph_merge.h sgraph_merge.cc \
 				  vertex_info.h vertex_info.cc \
 				  edge_info.h edge_info.cc \
 				  interval_map.h interval_map.cc \
