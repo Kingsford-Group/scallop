@@ -1,7 +1,0 @@
-*.o
-*.Po
-*.swp
-Makefile.in
-Makefile
-scallop
-rename.sh
