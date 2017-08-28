@@ -1,6 +1,6 @@
-lib_LIBRARIES=libgtf.a
+lib_LIBRARIES = libgtf.a
 
-UTILDIR = ../../util/src
+UTILDIR = ../util
 
 libgtf_a_CPPFLAGS = -I$(UTILDIR)
 

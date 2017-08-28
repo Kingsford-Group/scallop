@@ -10,6 +10,8 @@ AC_CONFIG_HEADERS([config.h])
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
+AC_PROG_RANLIB
+
 
 ### require environment variables BOOST_HOME GUROBI_HOME GUROBI_LICENCE_FILE HTSLIB
 AS_IF([test "s$HTSLIB" = "s"],[AC_MSG_ERROR([*** Please set environment variable HTSLIB ***])]) 
@@ -40,5 +42,9 @@ AC_TYPE_UINT32_T
 # Checks for library functions.
 
 AC_CONFIG_FILES([Makefile
+				 lib/Makefile
+				 lib/util/Makefile
+				 lib/gtf/Makefile
+				 lib/graph/Makefile
                  src/Makefile])
 AC_OUTPUT

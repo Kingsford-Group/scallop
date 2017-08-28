@@ -161,7 +161,7 @@ int gtf::output_gtf(ofstream &fout, const vector<path> &paths, const string &pre
 		for(int k = 1; k < v.size() - 1; k++)
 		{
 			SIMI it = imap.begin();
-			advance(it, v[k] - 1);
+			std::advance(it, v[k] - 1);
 			jmap += make_pair(ROI(lower(it->first), upper(it->first)), 1);
 		}
 

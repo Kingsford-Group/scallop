@@ -1,8 +1,8 @@
-bin_PROGRAMS=scallop
+bin_PROGRAMS = scallop
 
-GTFDIR = ../../lib/gtf/src
-UTILDIR = ../../lib/util/src
-GRAPHDIR = ../../lib/graph/src
+GTFDIR = ../lib/gtf
+UTILDIR = ../lib/util
+GRAPHDIR = ../lib/graph
 
 scallop_CPPFLAGS = -std=c++11 -I$(GTFDIR) -I$(GRAPHDIR) -I$(UTILDIR) \
 				   -I$(HTSLIB)/include -I$(BOOST_HOME) -I$(CLP_HOME)/include/coin

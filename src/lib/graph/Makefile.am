@@ -1,6 +1,6 @@
-lib_LIBRARIES=libgraph.a
+lib_LIBRARIES = libgraph.a
 
-libgraph_a_CPPFLAGS = -pg -std=c++11
+libgraph_a_CPPFLAGS = -std=c++11
 
 libgraph_a_SOURCES = directed_graph.cc directed_graph.h \
 					 edge_base.cc edge_base.h \
