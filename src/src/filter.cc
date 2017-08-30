@@ -198,10 +198,15 @@ int filter::merge_single_exon_transcripts(vector<transcript> &trs0)
 			int32_t p2 = vv[k].first.first;
 			int32_t q2 = vv[k].first.second;
 			int k2 = vv[k].second;
+			if(fb.find(k2) != fb.end()) continue;
 			transcript &t2 = trs0[k2];
+			if(t2.seqname != t1.seqname) continue;
 
 			assert(p1 >= p2);
 			if(q2 < q1) continue;
+
+			//if(b == true) printf("AAA insert k1 = %d (%d, %d) to fb with k2 = %d (%d, %d)\n", k1, p1, q1, k2, p2, q2);
+
 			b = true;
 			break;
 		}
@@ -214,12 +219,17 @@ int filter::merge_single_exon_transcripts(vector<transcript> &trs0)
 			int32_t p2 = vv[k].first.first;
 			int32_t q2 = vv[k].first.second;
 			int k2 = vv[k].second;
+			if(fb.find(k2) != fb.end()) continue;
 			transcript &t2 = trs0[k2];
+			if(t2.seqname != t1.seqname) continue;
 
 			if(p2 > p1) break;
 			assert(p2 == p1);
-			if(q2 < p1) continue;
+			if(q2 < q1) continue;
 			b = true;
+
+			//if(b == true) printf("BBB insert k1 = %d (%d, %d) to fb with k2 = %d (%d, %d)\n", k1, p1, q1, k2, p2, q2);
+
 			break;
 		}
 		if(b == true) fb.insert(k1);
