@@ -8,12 +8,6 @@ scallop_CPPFLAGS = -std=c++11 -I$(GTFDIR) -I$(GRAPHDIR) -I$(UTILDIR)
 scallop_LDFLAGS = -pthread -L$(GTFDIR) -L$(GRAPHDIR) -L$(UTILDIR)
 scallop_LDADD = -lgtf -lgraph -lutil
 
-# static link
-#scallop_LDFLAGS = -pthread
-#scallop_LDADD = $(CLP_HOME)/lib/libClp.a $(CLP_HOME)/lib/libCoinUtils.a $(HTSLIB)/lib/libhts.a \
-#				$(GTFDIR)/libgtf.a $(GRAPHDIR)/libgraph.a $(UTILDIR)/libutil.a \
-#				-lz -lblas -llapack
-
 scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  super_graph.h super_graph.cc \
 				  sgraph_compare.h sgraph_compare.cc \
