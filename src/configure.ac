@@ -12,22 +12,43 @@ AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_RANLIB
 
+# Check environmental variables
+#AS_IF([test "s$HTSLIB" = "s"],[AC_MSG_ERROR([*** Please set environment variable HTSLIB ***])]) 
+#AS_IF([test "s$CLP_HOME" = "s"],[AC_MSG_ERROR([*** Please set environment variable CLP_HOME ***])]) 
+#AS_IF([test "s$BOOST_HOME" = "s"],[AC_MSG_ERROR([*** Please set environment variable BOOST_HOME ***])]) 
 
-### require environment variables BOOST_HOME GUROBI_HOME GUROBI_LICENCE_FILE HTSLIB
-AS_IF([test "s$HTSLIB" = "s"],[AC_MSG_ERROR([*** Please set environment variable HTSLIB ***])]) 
-AS_IF([test "s$CLP_HOME" = "s"],[AC_MSG_ERROR([*** Please set environment variable CLP_HOME ***])]) 
-AS_IF([test "s$BOOST_HOME" = "s"],[AC_MSG_ERROR([*** Please set environment variable BOOST_HOME ***])]) 
+# Check home directories for external libraries
+AC_ARG_WITH(clp, AS_HELP_STRING([--with-clp], [home directory for clp]), CLP_HOME=$withval, CLP_HOME=)
+AC_ARG_WITH(boost, AS_HELP_STRING([--with-boost], [home directory for boost]), BOOST_HOME=$withval, BOOST_HOME=)
+AC_ARG_WITH(htslib, AS_HELP_STRING([--with-htslib], [home directory for htslib]), HTSLIB_HOME=$withval, HTSLIB_HOME=)
+AC_ARG_WITH(zlib, AS_HELP_STRING([--with-zlib], [home directory for zlib]), ZLIB_HOME=$withval, ZLIB_HOME=)
+AC_ARG_WITH(lapack, AS_HELP_STRING([--with-lapack], [home directory for lapack]), LAPACK_HOME=$withval, LAPACK_HOME=)
 
-#AC_ARG_WITH(samtools, [--with-samtools prefix for samtools], SAMTOOLS=$withval, SAMTOOLS=)
-#AC_SUBST(SAMTOOLS)
-#AS_IF([test "x$SAMTOOLS" = "x"],[AC_MSG_ERROR([*** Please use the --with-samtools to setup the prefix path for samtools ***])]) 
+# Assign CXXFLAGS
+AS_IF([test "x$CLP_HOME" != "x"], [AC_SUBST([CXXFLAGS], ["-I$CLP_HOME/include/coin $CXXFLAGS"])], [])
+AS_IF([test "x$BOOST_HOME" != "x"], [AC_SUBST([CXXFLAGS], ["-I$BOOST_HOME $CXXFLAGS"])], [])
+AS_IF([test "x$HTSLIB_HOME" != "x"], [AC_SUBST([CXXFLAGS], ["-I$HTSLIB_HOME/include $CXXFLAGS"])], [])
 
+# Check whether static is enabled
+AC_ARG_ENABLE([static], [AS_HELP_STRING([--enable-static], [enable static linking])])
 
-# Checks for libraries.
-# FIXME: Replace `main' with a function in `-lbam':
-#AC_CHECK_LIB([bam], [main])
-# FIXME: Replace `main' with a function in `-lhts':
-#AC_CHECK_LIB([hts], [main])
+# If statis is enabled, directly assign .a files to LIBS
+AS_IF([test "x$enable_static" = xyes], [AC_SUBST([LIBS], ["-lgfortran $LIBS"])])
+AS_IF([test "x$enable_static" = xyes], AS_IF([test "x$ZLIB_HOME" != "x"], [AC_SUBST([LIBS], ["$ZLIB_HOME/libz.a $LIBS"])]))
+AS_IF([test "x$enable_static" = xyes], AS_IF([test "x$HTSLIB_HOME" != "x"], [AC_SUBST([LIBS], ["$HTSLIB_HOME/lib/libhts.a $LIBS"])]))
+AS_IF([test "x$enable_static" = xyes], AS_IF([test "x$LAPACK_HOME" != "x"], [AC_SUBST([LIBS], ["$LAPACK_HOME/libtmglib.a $LIBS"])]))
+AS_IF([test "x$enable_static" = xyes], AS_IF([test "x$LAPACK_HOME" != "x"], [AC_SUBST([LIBS], ["$LAPACK_HOME/librefblas.a $LIBS"])]))
+AS_IF([test "x$enable_static" = xyes], AS_IF([test "x$LAPACK_HOME" != "x"], [AC_SUBST([LIBS], ["$LAPACK_HOME/liblapack.a $LIBS"])]))
+AS_IF([test "x$enable_static" = xyes], AS_IF([test "x$CLP_HOME" != "x"], [AC_SUBST([LIBS], ["$CLP_HOME/lib/libCoinUtils.a $LIBS"])]))
+AS_IF([test "x$enable_static" = xyes], AS_IF([test "x$CLP_HOME" != "x"], [AC_SUBST([LIBS], ["$CLP_HOME/lib/libClp.a $LIBS"])]))
+
+# If static is NOT enabled, assign LDFLAGS and LIBS
+AS_IF([test "x$enable_static" != xyes], AS_IF([test "x$CLP_HOME" != "x"], [AC_SUBST([LDFLAGS], ["-L$CLP_HOME/lib $LDFLAGS"])]))
+AS_IF([test "x$enable_static" != xyes], AS_IF([test "x$HTSLIB_HOME" != "x"], [AC_SUBST([LDFLAGS], ["-L$HTSLIB_HOME/lib $LDFLAGS"])]))
+AS_IF([test "x$enable_static" != xyes], AC_CHECK_LIB([hts], [hts_open], [], [AC_MSG_ERROR([could not find htslib])]))
+AS_IF([test "x$enable_static" != xyes], AC_CHECK_LIB([Clp], [Clp_dual], [], [AC_MSG_ERROR([could not find libClp])]))
+AS_IF([test "x$enable_static" != xyes], AC_CHECK_LIB([CoinUtils], [_Z9CoinIsnand], [], [AC_MSG_ERROR([could not find libCoinUtils])]))
+
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdint.h])
