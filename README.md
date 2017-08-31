@@ -14,7 +14,7 @@ It is available at both [the bioinformatics chat](https://bioinformatics.chat/sc
 [iTunes](https://itunes.apple.com/us/podcast/the-bioinformatics-chat/id1227281398). 
 
 # Release
-Latest release, including both binary and source code, is [here](https://github.com/Kingsford-Group/scallop/releases/tag/v0.10.1).
+Latest release, including both binary and source code, is [here](https://github.com/Kingsford-Group/scallop/releases/tag/v0.10.2).
 
 # Installation
 Scallop uses additional libraries of 
@@ -100,6 +100,7 @@ Use the following to compile Scallop:
 ```
 cd src
 autoconf
+automake -a
 ./configure
 make
 ```
