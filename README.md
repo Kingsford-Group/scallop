@@ -23,8 +23,8 @@ If they have not been installed in your system, you first
 need to download and install them.  You can either install
 them to the default system directories (for example, `/usr/local`),
 or you can install them to your home directories, in which case you need to
-specify `--prefix=/path/to/your/home/directory` when you run `configure`
-for each of the libraries.
+specify `--prefix=/path/to/your/home/directory` when you run `configure`,
+and also export the runtime library path through to `LD_LIBRARY_PATH`.
 After install these dependencies, you then compile the source code of Scallop.
 If some of the dependencies are installed to your home directories, then
 their corresponding installing paths should be specified when run `configure` of Scallop.
@@ -54,14 +54,22 @@ Use the following commands to install zlib:
 make
 make install
 ```
-After installing zlib, use the following commands to build htslib
-(provide `--prefix=/path/to/your/local/directory` to `./configure`
-if you want to install htslib to your home directory.):
+After installing zlib, use the following commands to build htslib:
 ```
 autoconf
 ./configure --disable-bz2 --disable-lzma --disable-gcs --disable-s3 --enable-libcurl=no
 make
 make install
+```
+If you would install htslib to a different location, replace the above `configure` line with
+the following:
+```
+./configure --disable-bz2 --disable-lzma --disable-gcs --disable-s3 --enable-libcurl=no --prefix=/path/to/your/htslib
+```
+In this case, you also need to export the runtime library path (note that there
+is an additional `lib` following the installation path):
+```
+export LD_LIBRARY_PATH=/path/to/your/htslib/lib:$LD_LIBRARY_PATH
 ```
 
 ## Install Clp
@@ -69,12 +77,21 @@ If Clp has not been installed in your system,
 download Clp [(license)](https://opensource.org/licenses/eclipse-1.0)
 from (https://projects.coin-or.org/Clp). 
 Use the following to install Clp
-(provide `--prefix=/path/to/your/local/directory` to `./configure`
-if you want to install Clp to your home directory):
 ```
 ./configure --disable-bzlib --disable-zlib
 make
 make install
+```
+If you would install Clp to a different location, replace the above `configure` line with
+the following:
+```
+./configure --disable-bzlib --disable-zlib --prefix=/path/to/your/Clp
+```
+Notice that the default installation of Clp is not to `/usr/local` but to the 
+downloading location. Thus, in either case you need to export the runtime library path (note that there
+is an additional `lib` following the installation path):
+```
+export LD_LIBRARY_PATH=/path/to/your/Clp/lib:$LD_LIBRARY_PATH
 ```
 
 ## Compile Scallop
@@ -86,7 +103,7 @@ autoconf
 ./configure
 make
 ```
-Notice that if htslib and/or Clp are installed to your home directories,
+Notice that if Clp and/or htslib are installed to your home directories,
 you need to provide the corresponding paths to `configure` through:
 ```
 ./configure --with-clp=/path/to/your/Clp/path --with-htslib=/path/to/your/htslib/path`
