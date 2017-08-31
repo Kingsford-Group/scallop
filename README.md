@@ -82,6 +82,7 @@ make install
 Use the following to compile Scallop:
 ```
 cd src
+autoconf
 ./configure
 make
 ```
