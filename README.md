@@ -87,7 +87,7 @@ autoconf
 make
 ```
 Notice that if htslib and/or Clp are installed to your home directories,
-you need to provide additional arguments to `configure`:
+you need to provide the corresponding paths to `configure` through:
 ```
 ./configure --with-clp=/path/to/your/Clp/path --with-htslib=/path/to/your/htslib/path`
 ```
