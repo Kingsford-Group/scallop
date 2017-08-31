@@ -28,7 +28,7 @@ specify `--prefix=/path/to/your/home/directory` when you run `configure`
 for each of the library.
 After install these dependencies, you then compile the source code of Scallop.
 If some of the dependencies are installed to your home directories, then
-they are required to be specified when run `configure` of Scallop.
+their corresponding installing paths should be specified when run `configure` of Scallop.
 
 The compilation process of both dependencies and Scallop requires `automake` and `autoconf` packages.
 If they have not been installed, on linux platform, do the following:
