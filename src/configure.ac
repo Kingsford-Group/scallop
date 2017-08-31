@@ -33,7 +33,7 @@ AS_IF([test "x$HTSLIB_HOME" != "x"], [AC_SUBST([CXXFLAGS], ["-I$HTSLIB_HOME/incl
 AC_ARG_ENABLE([static], [AS_HELP_STRING([--enable-static], [enable static linking])])
 
 # If statis is enabled, directly assign .a files to LIBS
-AS_IF([test "x$enable_static" = xyes], [AC_SUBST([LIBS], ["-lgfortran $LIBS"])])
+AS_IF([test "x$enable_static" = xyes], [AC_SUBST([LIBS], ["/usr/lib/gcc/x86_64-linux-gnu/4.8/libgfortran.a $LIBS"])])
 AS_IF([test "x$enable_static" = xyes], AS_IF([test "x$ZLIB_HOME" != "x"], [AC_SUBST([LIBS], ["$ZLIB_HOME/libz.a $LIBS"])]))
 AS_IF([test "x$enable_static" = xyes], AS_IF([test "x$HTSLIB_HOME" != "x"], [AC_SUBST([LIBS], ["$HTSLIB_HOME/lib/libhts.a $LIBS"])]))
 AS_IF([test "x$enable_static" = xyes], AS_IF([test "x$LAPACK_HOME" != "x"], [AC_SUBST([LIBS], ["$LAPACK_HOME/libtmglib.a $LIBS"])]))
