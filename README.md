@@ -99,15 +99,17 @@ export LD_LIBRARY_PATH=/path/to/your/Clp/lib:$LD_LIBRARY_PATH
 Use the following to compile Scallop:
 ```
 cd src
+aclocal
 autoconf
+autoheader
 automake -a
 ./configure
 make
 ```
-Notice that if Clp and/or htslib are installed to your home directories,
+Notice that if Boost, Clp or htslib are installed to your home directories,
 you need to provide the corresponding paths to `configure` through:
 ```
-./configure --with-clp=/path/to/your/Clp/path --with-htslib=/path/to/your/htslib/path`
+./configure --with-clp=/path/to/your/Clp/path --with-htslib=/path/to/your/htslib/path --with-boost=/path/to/your/boost/path`
 ```
 The executable file `scallop` will appear at `src/src/scallop`.
 
