@@ -49,7 +49,6 @@ AS_IF([test "x$enable_static" != xyes], AC_CHECK_LIB([hts], [hts_open], [], [AC_
 AS_IF([test "x$enable_static" != xyes], AC_CHECK_LIB([Clp], [Clp_dual], [], [AC_MSG_ERROR([could not find libClp])]))
 AS_IF([test "x$enable_static" != xyes], AC_CHECK_LIB([CoinUtils], [_Z9CoinIsnand], [], [AC_MSG_ERROR([could not find libCoinUtils])]))
 
-
 # Checks for header files.
 AC_CHECK_HEADERS([stdint.h])
 
