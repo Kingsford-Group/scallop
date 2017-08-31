@@ -17,8 +17,10 @@ It is available at both [the bioinformatics chat](https://bioinformatics.chat/sc
 Latest release, including both binary and source code, is [here](https://github.com/Kingsford-Group/scallop/releases/tag/v0.10.1).
 
 # Installation
-To install Scallop from the source code, you need to first download/compile
-Boost, htslib and Clp. When you install htslib and Clp, you can either install
+Scallop uses additional libraries of 
+Boost, htslib and Clp. 
+If they have not been installed in your system, you first
+need to download and install them.  You can either install
 them to the default system directories (for example, `/usr/local`),
 in which case you need to use `sudo` to install,
 or you can install them to your home directories, in which case you need to
