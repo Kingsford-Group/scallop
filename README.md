@@ -17,68 +17,78 @@ It is available at both [the bioinformatics chat](https://bioinformatics.chat/sc
 Latest release, including both binary and source code, is [here](https://github.com/Kingsford-Group/scallop/releases/tag/v0.10.1).
 
 # Installation
-To install Scallop from the source code, you need to first download/compile 
-Boost, htslib and Clp, setup the corresponding environmental variables,
-and then compile the source code of Scallop.
+To install Scallop from the source code, you need to first download/compile
+Boost, htslib and Clp. When you install htslib and Clp, you can either install
+them to the default system directories (for example, `/usr/local`),
+in which case you need to use `sudo` to install,
+or you can install them to your home directories, in which case you need to
+specify `--prefix=/path/to/your/home/directory` when you run `configure`.
+After install these dependencies, you then compile the source code of Scallop.
+If some of the dependencies are installed to your home directories, then
+they are required to be specified when run `configure` of Scallop.
 
-## Install Boost
-Download Boost [(license)](http://www.boost.org/LICENSE_1_0.txt)
-from (http://www.boost.org).
-Uncompress it somewhere (compiling and installing are not necessary).
-Set environment variable `BOOST_HOME` to indicate the directory of Boost.
-For example, for Unix platforms, do the following:
-```
-export BOOST_HOME="/directory/to/your/boost/boost_1_60_0"
-```
-
-
-## Install htslib
-Download htslib [(license)](https://github.com/samtools/htslib/blob/develop/LICENSE)
-from (http://www.htslib.org/) with version 1.5 or higher.
-Choose a directory for installation and set the environment variable `HTSLIB` for that.
-For example, for Unix platforms, do the following:
-```
-export HTSLIB="/directory/to/your/htslib/install"
-```
-Use the following to build `libhts.a`:
-```
-autoheader
-autoconf
-./configure --disable-bz2 --disable-lzma --disable-gcs --disable-s3 --enable-libcurl=no --prefix=$HTSLIB
-make
-make install
-```
-
-
-## Install Clp
-Download Clp [(license)](https://opensource.org/licenses/eclipse-1.0)
-from (https://projects.coin-or.org/Clp). 
-Choose a directory for installation and set the environment variable `CLP_HOME` for that.
-For example, for Unix platforms, do the following:
-```
-export CLP_HOME="/directory/to/your/clp/install"
-```
-Use the following to build libraries:
-```
-./configure --enable-static --disable-bzlib --disable-zlib --prefix=$CLP_HOME
-make
-make install
-```
-
-
-## Compile Scallop
-The compilation of `scallop` requires `automake` and `autoconf` packages.
+The compilation process of both dependencies and Scallop requires `automake` and `autoconf` packages.
 If they have not been installed, on linux platform, do the following:
 ```
 sudo apt-get install autoconf
 sudo apt-get install automake
 ```
 
-The installation also requires other libraries, `libz, libblas, liblapack`, 
-which are dependencies of `libhts` and
-`libClp`. Install them if you encounter errors when compiling.
+## Download Boost
+If Boost has not been downloaded/installed, download Boost
+[(license)](http://www.boost.org/LICENSE_1_0.txt) from (http://www.boost.org).
+Uncompress it somewhere (compiling and installing are not necessary).
 
-After that run the script `build.sh`, which will generate the executable file `src/src/scallop`.
+## Install htslib
+If htslib has not been installed, download htslib 
+[(license)](https://github.com/samtools/htslib/blob/develop/LICENSE)
+from (http://www.htslib.org/) with version 1.5 or higher.
+Note that htslib relies on zlib. So if zlib has not been installed in your system,
+you need to install zlib first. To do so, download zlib
+[(license)](https://zlib.net/zlib_license.html) at (https://zlib.net/)
+Use the following commands to install zlib:
+```
+./configure
+make
+make install
+```
+After installing zlib, use the following commands to build htslib
+(provide `--prefix=/path/to/your/local/directory` to `./configure`
+if you want to install htslib to your home directory.):
+```
+autoconf
+./configure --disable-bz2 --disable-lzma --disable-gcs --disable-s3 --enable-libcurl=no
+make
+make install
+```
+
+## Install Clp
+If Clp has not been installed in your system, 
+download Clp [(license)](https://opensource.org/licenses/eclipse-1.0)
+from (https://projects.coin-or.org/Clp). 
+Use the following to install Clp
+(provide `--prefix=/path/to/your/local/directory` to `./configure`
+if you want to install Clp to your home directory):
+```
+./configure --disable-bzlib --disable-zlib
+make
+make install
+```
+
+## Compile Scallop
+
+Use the following to compile Scallop:
+```
+cd src
+./configure
+make
+```
+Notice that if htslib and/or Clp are installed to your home directories,
+you need to provide additional arguments to `configure`:
+```
+./configure --with-clp=/path/to/your/Clp/path --with-htslib=/path/to/your/htslib/path`
+```
+The executable file `scallop` will appear at `src/src/scallop`.
 
 
 # Usage
