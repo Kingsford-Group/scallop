@@ -24,7 +24,8 @@ need to download and install them.  You can either install
 them to the default system directories (for example, `/usr/local`),
 in which case you need to use `sudo` to install,
 or you can install them to your home directories, in which case you need to
-specify `--prefix=/path/to/your/home/directory` when you run `configure`.
+specify `--prefix=/path/to/your/home/directory` when you run `configure`
+for each of the library.
 After install these dependencies, you then compile the source code of Scallop.
 If some of the dependencies are installed to your home directories, then
 they are required to be specified when run `configure` of Scallop.
