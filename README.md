@@ -48,7 +48,7 @@ If htslib has not been installed, download htslib
 from (http://www.htslib.org/) with version 1.5 or higher.
 Note that htslib relies on zlib. So if zlib has not been installed in your system,
 you need to install zlib first. To do so, download zlib
-[(license)](https://zlib.net/zlib_license.html) at (https://zlib.net/)
+[(license)](https://zlib.net/zlib_license.html) at (https://zlib.net/).
 Use the following commands to install zlib:
 ```
 ./configure
