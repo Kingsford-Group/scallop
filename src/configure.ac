@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT(scallop, v0.10.2, mingfu.shao@cs.cmu.edu)
+AC_INIT(scallop, 0.10.2, mingfu.shao@cs.cmu.edu)
 AM_INIT_AUTOMAKE()
 AC_CONFIG_SRCDIR([src/main.cc])
 AC_CONFIG_HEADERS([config.h])
