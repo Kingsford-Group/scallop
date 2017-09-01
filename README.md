@@ -14,9 +14,9 @@ It is available at both [the bioinformatics chat](https://bioinformatics.chat/sc
 [iTunes](https://itunes.apple.com/us/podcast/the-bioinformatics-chat/id1227281398). 
 
 # Release
-Latest release, including binary for 
-[linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2_linux_x86_64.tar.gz)
-and [mac](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2_macOS_10.10.tar.gz) 
+Latest release, including binary 
+([linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2_linux_x86_64.tar.gz)
+and [mac](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2_macOS_10.10.tar.gz))
 and [source code](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2.tar.gz),
 is [here](https://github.com/Kingsford-Group/scallop/releases/tag/v0.10.2).
 
