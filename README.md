@@ -14,13 +14,15 @@ It is available at both [the bioinformatics chat](https://bioinformatics.chat/sc
 [iTunes](https://itunes.apple.com/us/podcast/the-bioinformatics-chat/id1227281398). 
 
 # Release
-Latest release, including binary 
-([linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2_linux_x86_64.tar.gz)
+Latest release of Scallop is [v0.10.2](https://github.com/Kingsford-Group/scallop/releases/tag/v0.10.2),
+including binary 
+(for both [linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2_linux_x86_64.tar.gz)
 and [mac](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2_macOS_10.10.tar.gz))
-and [source code](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2.tar.gz),
-is [here](https://github.com/Kingsford-Group/scallop/releases/tag/v0.10.2).
+and [source code](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2.tar.gz).
 
 # Installation
+Download the source code of Scallop from
+[here](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2.tar.gz).
 Scallop uses additional libraries of Boost, htslib and Clp. 
 If they have not been installed in your system, you first
 need to download and install them. You might also need to
@@ -93,7 +95,7 @@ export LD_LIBRARY_PATH=/path/to/your/Clp/lib:$LD_LIBRARY_PATH
 
 Use the following to compile Scallop:
 ```
-./configure --with-clp=/path/to/your/Clp --with-htslib=/path/to/your/htslib --with-boost=/path/to/your/boost`
+./configure --with-clp=/path/to/your/Clp --with-htslib=/path/to/your/htslib --with-boost=/path/to/your/boost
 make
 ```
 If some of the dependencies are installed in the default system directory (for example, `/usr/lib`),
