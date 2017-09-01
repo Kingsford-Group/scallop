@@ -100,7 +100,7 @@ make
 ```
 If some of the dependencies are installed in the default system directory (for example, `/usr/lib`),
 then the corresponding `--with-` option might not be necessary.
-The executable file `scallop` will appear at `src/src/scallop`.
+The executable file `scallop` will appear at `src/scallop`.
 
 
 # Usage
