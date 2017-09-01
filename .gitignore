@@ -2,8 +2,8 @@
 *.o
 *.Po
 *.swp
-Makefile.in
 Makefile
+Makefile.in
 .DS_Store
 .RData
 ._.DS_Store
@@ -12,11 +12,10 @@ Makefile
 *.log
 aclocal.m4
 autom4te.cache/
+configure
 compile
-config.h.in
 config.log
 config.status
-configure
 depcomp
 install-sh
 missing
