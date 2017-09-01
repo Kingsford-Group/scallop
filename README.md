@@ -27,13 +27,6 @@ If some of the above dependencies are not installed to the default system
 directories (for example, `/usr/local`, for most linux distributions),
 their corresponding installing paths should be specified to `configure` of Scallop.
 
-The compilation process requires `automake` and `autoconf` packages.
-If they have not been installed, on linux platform, do the following:
-```
-sudo apt-get install autoconf
-sudo apt-get install automake
-```
-
 ## Download Boost
 If Boost has not been downloaded/installed, download Boost
 [(license)](http://www.boost.org/LICENSE_1_0.txt) from (http://www.boost.org).
@@ -96,11 +89,6 @@ export LD_LIBRARY_PATH=/path/to/your/Clp/lib:$LD_LIBRARY_PATH
 
 Use the following to compile Scallop:
 ```
-cd src
-aclocal
-autoconf
-autoheader
-automake -a
 ./configure --with-clp=/path/to/your/Clp --with-htslib=/path/to/your/htslib --with-boost=/path/to/your/boost`
 make
 ```
