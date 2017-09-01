@@ -17,19 +17,17 @@ It is available at both [the bioinformatics chat](https://bioinformatics.chat/sc
 Latest release, including both binary and source code, is [here](https://github.com/Kingsford-Group/scallop/releases/tag/v0.10.2).
 
 # Installation
-Scallop uses additional libraries of 
-Boost, htslib and Clp. 
+Scallop uses additional libraries of Boost, htslib and Clp. 
 If they have not been installed in your system, you first
-need to download and install them.  You can either install
-them to the default system directories (for example, `/usr/local`),
-or you can install them to your home directories, in which case you need to
-specify `--prefix=/path/to/your/home/directory` when you run `configure`,
-and also export the runtime library path through to `LD_LIBRARY_PATH`.
+need to download and install them. You might also need to
+export the runtime library path to certain environmental
+variable (for example, `LD_LIBRARY_PATH`, for most linux distributions).
 After install these dependencies, you then compile the source code of Scallop.
-If some of the dependencies are installed to your home directories, then
-their corresponding installing paths should be specified when run `configure` of Scallop.
+If some of the above dependencies are not installed to the default system 
+directories (for example, `/usr/local`, for most linux distributions),
+their corresponding installing paths should be specified to `configure` of Scallop.
 
-The compilation process of both dependencies and Scallop requires `automake` and `autoconf` packages.
+The compilation process requires `automake` and `autoconf` packages.
 If they have not been installed, on linux platform, do the following:
 ```
 sudo apt-get install autoconf
@@ -56,13 +54,13 @@ make install
 ```
 After installing zlib, use the following commands to build htslib:
 ```
-autoconf
 ./configure --disable-bz2 --disable-lzma --disable-gcs --disable-s3 --enable-libcurl=no
 make
 make install
 ```
-If you would install htslib to a different location, replace the above `configure` line with
-the following:
+The default installation location of htslib is `/usr/lib`.
+If you would install it to a different location, replace the above `configure` line with
+the following (by adding `--prefix=/path/to/your/htslib` to the end):
 ```
 ./configure --disable-bz2 --disable-lzma --disable-gcs --disable-s3 --enable-libcurl=no --prefix=/path/to/your/htslib
 ```
@@ -82,13 +80,13 @@ Use the following to install Clp
 make
 make install
 ```
-If you would install Clp to a different location, replace the above `configure` line with
-the following:
+The default installation of Clp is the current directory, rather than `/usr/lib`.
+If you would install it to a different location, replace the above `configure` line with
+the following (by adding `--prefix=/path/to/your/Clp` to the end):
 ```
 ./configure --disable-bzlib --disable-zlib --prefix=/path/to/your/Clp
 ```
-Notice that the default installation of Clp is not to `/usr/local` but to the 
-downloading location. Thus, in either case you need to export the runtime library path (note that there
+You need to export the runtime library path (note that there
 is an additional `lib` following the installation path):
 ```
 export LD_LIBRARY_PATH=/path/to/your/Clp/lib:$LD_LIBRARY_PATH
@@ -103,14 +101,11 @@ aclocal
 autoconf
 autoheader
 automake -a
-./configure
+./configure --with-clp=/path/to/your/Clp --with-htslib=/path/to/your/htslib --with-boost=/path/to/your/boost`
 make
 ```
-Notice that if Boost, Clp or htslib are installed to your home directories,
-you need to provide the corresponding paths to `configure` through:
-```
-./configure --with-clp=/path/to/your/Clp/path --with-htslib=/path/to/your/htslib/path --with-boost=/path/to/your/boost/path`
-```
+If some of the dependencies are installed in the default system directory (for example, `/usr/lib`),
+then the corresponding `--with-` option might not be necessary.
 The executable file `scallop` will appear at `src/src/scallop`.
 
 
