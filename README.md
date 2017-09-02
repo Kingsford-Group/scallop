@@ -20,18 +20,19 @@ including binary
 and [mac](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2_macOS_10.10.tar.gz))
 and [source code](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2.tar.gz).
 
-Following we list the systems that have been tested whether the binary can run or not.
+Following we list the systems that have been tested whether the Scallop binary can run or not.
 
- Operation System | Version  | Binary
- ---------------- | -------- | ----------
- Ubuntu | 14.04 | [linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2_linux_x86_64.tar.gz)
- Ubuntu | 16.04 | [linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2_linux_x86_64.tar.gz)
- CentOS | 6.9   | N/A
- CentOS | 7     | [linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2_linux_x86_64.tar.gz)
- Fedora | 24    | [linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2_linux_x86_64.tar.gz)
- Mac OS | 10.10 | [mac](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2_macOS_10.10.tar.gz)
- Mac OS | 10.11 | [mac](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2_macOS_10.10.tar.gz)
- Mac OS | 10.12 | [mac](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2_macOS_10.10.tar.gz)
+ Operation System | Version | Code Name | Scallop
+ ---------------- | ------- | --------- | ----------
+ Debian | 9		| Stretch | [linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2_linux_x86_64.tar.gz)
+ Ubuntu | 14.04 | Trusty Tahr | [linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2_linux_x86_64.tar.gz)
+ Ubuntu | 16.04 | Xenial Xerus | [linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2_linux_x86_64.tar.gz)
+ CentOS | 6.9   | | N/A
+ CentOS | 7     | | [linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2_linux_x86_64.tar.gz)
+ Fedora | 24    | | [linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2_linux_x86_64.tar.gz)
+ Mac OS | 10.10 | Yosemite | [mac](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2_macOS_10.10.tar.gz)
+ Mac OS | 10.11 | El Capitan | [mac](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2_macOS_10.10.tar.gz)
+ Mac OS | 10.12 | Sierra | [mac](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.2/scallop-0.10.2_macOS_10.10.tar.gz)
 
 
 
