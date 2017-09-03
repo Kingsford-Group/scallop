@@ -21,11 +21,11 @@ install-sh
 config.h.in
 missing
 stamp-h1
-src/lib/graph/config.h
-src/lib/gtf/config.h
-src/lib/util/config.h
-src/config.h
-src/src/scallop
+lib/graph/config.h
+lib/gtf/config.h
+lib/util/config.h
+config.h
+src/scallop
 release/
 experiments/
 bin/
