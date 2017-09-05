@@ -198,7 +198,7 @@ gffcompare -o gffall -r reference.gtf scallop.gtf
 where `reference.gtf` is the reference annotation file
 (for example, [ensembl annotation](https://goo.gl/cifLXe)).
 This command will generate a file `gffall.scallop.gtf.map` defining which transcripts in `scallop.gtf`
-can be found in the `ensembl.gtf`.
+can be found in the `reference.gtf`.
 
 **Step 4:** Union the assembled transcripts with the reference transcriptome. Specifically,
 First, use our tool
