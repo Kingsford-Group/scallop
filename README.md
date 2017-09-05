@@ -171,3 +171,67 @@ out transcripts whose (predicted) raw counts (number of moleculars) is less than
 short transcripts: the minimum length of a transcript is given by `--min_transcript_length_base`
 \+ `--min_transcript_length_increase` * num-of-exons-in-this-transcript. Transcripts that are less
 than this number will be filtered out.
+
+
+# Quantification by Combining Scallop and Salmon
+
+We recommend users to perform RNA-seq quantification using the combination of Scallop and Salmon.
+This pipeline involves the following steps:
+
+**Step 1:** Align the reads to a reference genome (for example, with
+[TopHat2](https://ccb.jhu.edu/software/tophat/index.shtml),
+[STAR](https://github.com/alexdobin/STAR), or
+[HISAT2](https://ccb.jhu.edu/software/hisat2/index.shtml))
+to obtain the reads alignment.
+
+**Step 2:** Assemble the expressed transcripts with [Scallop](https://github.com/Kingsford-Group/scallop)
+```
+scallop -i sort.bam -o scallop.gtf
+```
+The assembled transcripts will be written to `scallop.gtf`.
+
+**Step 3:** Use [gffcompare](http://ccb.jhu.edu/software/stringtie/gff.shtml) to
+evaluate the assembled transcripts with respect to a reference annotation:
+```
+gffcompare -o gffall -r ensembl.gtf scallop.gtf
+```
+where `ensembl.gtf` is the 
+[ensembl annotation](https://goo.gl/cifLXe).
+This command will generate a file `gffall.scallop.gtf.map` defining which transcripts in `scallop.gtf`
+can be found in the `ensembl.gtf`.
+
+**Step 4:** Union the assembled transcripts with the reference transcriptome. Specifically,
+First, Use our tool
+[gtfcuff](https://github.com/Kingsford-Group/rnaseqtools) to fetch the transcripts that
+are only in `scallop.gtf`:
+```
+gtfcuff puniq gffall.scallop.gtf.tmap scallop.gtf unique.gtf
+```
+The uniquely expressed transcripts will be written to `unique.gtf`.
+Second, extract the cDNAs of these transcripts in `unique.gtf` using tool
+[gffread](http://ccb.jhu.edu/software/stringtie/gff.shtml):
+```
+gffread unique.gtf -g genome -w unique.fa
+```
+where `genome` is the reference genome sequences, for example 
+[ensembl genome](https://goo.gl/V1V3B1).
+The cDNA sequences of the uniquely assembled transcripts will be written to `unique.fa`.
+Finally, merge `unique.fa` and the reference transcriptome: 
+```
+cat unique.fa reference.fa > union.fa
+```
+where reference.fa is the reference transcriptome, for example,
+[ensembl cDNA](https://goo.gl/rJdrEX).
+The unioned transcriptome will be written to `union.fa`.
+
+
+**Step 5:**  Run Salmon to quantify with respect to the above extended transcriptome.
+First, create Salmon index:
+```
+salmon index -t union.fa -i salmon.index -p 4
+```
+After that we can quantify:
+```
+salmon quant -i salmon.index -1 fastq-file1 -2 fastq-file2 -p 4
+````
+
