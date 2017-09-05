@@ -207,7 +207,7 @@ are only in `scallop.gtf`:
 ```
 gtfcuff puniq gffall.scallop.gtf.tmap scallop.gtf unique.gtf
 ```
-The uniquely expressed transcripts (i.e., those are in `scallop.gtf` but not in `ensembl.gtf`)
+The uniquely expressed transcripts (i.e., those are in `scallop.gtf` but not in `reference.gtf`)
 will be written to `unique.gtf`.
 Second, extract the cDNA sequences of the transcripts in `unique.gtf` 
 from a reference genome using tool
@@ -216,18 +216,21 @@ from a reference genome using tool
 gffread unique.gtf -g genome -w unique.fa
 ```
 where `genome` is the reference genome, for example 
-[ensembl genome](https://goo.gl/V1V3B1).
-The cDNA sequences of the uniquely assembled transcripts will be written to `unique.fa`.
+[ensembl reference genome](https://goo.gl/V1V3B1).
+The cDNA sequences of the uniquely assembled transcripts (i.e., those in `unique.gtf`)
+will be written to `unique.fa`.
 Finally, merge `unique.fa` and the reference transcriptome to obtained the extended transcriptome: 
 ```
 cat unique.fa reference.fa > union.fa
 ```
-where `reference.fa` is the reference transcriptome, for example,
+where `reference.fa` is the reference transcriptome (i.e., the cDNA sequences of the
+transcripts in `reference.gtf`), for example,
 [ensembl cDNA sequences](https://goo.gl/rJdrEX).
 The extended transcriptome will be written to `union.fa`.
 
 
-**Step 5:**  Run Salmon to quantify with respect to the above extended transcriptome.
+**Step 5:**  Run [Salmon](https://combine-lab.github.io/salmon/)
+to quantify with respect to the above extended transcriptome.
 First, create Salmon index:
 ```
 salmon index -t union.fa -i salmon.index -p 4
@@ -237,3 +240,5 @@ After that we can quantify:
 salmon quant -i salmon.index -1 fastq-file1 -2 fastq-file2 -p 4
 ```
 The main quantification file will appear as `salmon.quant/quant.sf`.
+Please refer to [Salmon](https://combine-lab.github.io/salmon/) documentation
+for more advanced usage.
