@@ -182,7 +182,7 @@ This pipeline involves the following steps:
 [TopHat2](https://ccb.jhu.edu/software/tophat/index.shtml),
 [STAR](https://github.com/alexdobin/STAR), or
 [HISAT2](https://ccb.jhu.edu/software/hisat2/index.shtml))
-to obtain the reads alignment.
+to obtain the (sorted) reads alignment file `sort.bam`.
 
 **Step 2:** Assemble the expressed transcripts with [Scallop](https://github.com/Kingsford-Group/scallop)
 ```
