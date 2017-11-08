@@ -456,16 +456,17 @@ int bundle::build_hyper_edges2()
 		vector<int> sp3;
 		bool c = bridge_read(x1, x2, sp3);
 
-		//printf("=========\n");
-
 		if(c == false)
 		{
+			//printf("bridge false %lu %lu %lu\n", sp1.size(), sp2.size(), sp3.size());
 			set<int> s(sp1.begin(), sp1.end());
 			if(s.size() >= 2) hs.add_node_list(s);
 			sp1 = sp2;
 		}
 		else
 		{
+			//if(x1 >= x2) printf("bridge true1 %lu %lu %lu\n", sp1.size(), sp2.size(), sp3.size());
+			//else printf("bridge true2 %lu %lu %lu\n", sp1.size(), sp2.size(), sp3.size());
 			sp1.insert(sp1.end(), sp2.begin(), sp2.end());
 			sp1.insert(sp1.end(), sp3.begin(), sp3.end());
 		}
