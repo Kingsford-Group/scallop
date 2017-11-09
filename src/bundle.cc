@@ -454,14 +454,24 @@ int bundle::build_hyper_edges2()
 		int x1 = sp1[max_element(sp1)];
 		int x2 = sp2[min_element(sp2)];
 		bridge = bridge_read_dp(x1, x2, sp3);
+
+		vector<int> xv;
+		vector<int> yv;
+		bool b = bridge_read_bfs(x1, x2, xv, yv);
+		assert(b == bridge);
+
+		if(bridge == true)
+		{
+			assert(xv.size() == sp3.size());
+			assert(xv == sp3);
+		}
 	}
 
 	return 0;
 }
 
-bool bundle::bridge_read_bfs(int x, int y, vector<int> &xv, vector<int> &yv, vector<int> &xy)
+bool bundle::bridge_read_bfs(int x, int y, vector<int> &xv, vector<int> &yv)
 {
-	xy.clear();
 	xv.clear();
 	yv.clear();
 	if(x >= y) return true;
@@ -478,7 +488,7 @@ bool bundle::bridge_read_bfs(int x, int y, vector<int> &xv, vector<int> &yv, vec
 	set<int> sx;
 	vector<int> qx;
 	qx.push_back(x);
-	sx.push_back(x);
+	sx.insert(x);
 	while(k >= 0 && k < qx.size())
 	{
 		int v = qx[k] + 1;
@@ -517,53 +527,64 @@ bool bundle::bridge_read_bfs(int x, int y, vector<int> &xv, vector<int> &yv, vec
 		k++;
 	}
 
-	// CONTINUE
-
-	long max = 9999999999;
-	vector<long> table;
-	vector<int> trace;
-	int n = y - x + 1;
-	table.resize(n, 0);
-	trace.resize(n, -1);
-	table[0] = 1;
-	trace[0] = -1;
-	for(int i = x + 1; i <= y; i++)
+	// extend x
+	int p = x + 1;
+	while(true)
 	{
-		edge_iterator it1, it2;
-		for(tie(it1, it2) = gr.in_edges(i + 1); it1 != it2; it1++)
+		int cnt = 0;
+		int q = -1;
+		for(tie(it1, it2) = gr.out_edges(p); it1 != it2; it1++)
 		{
-			int s = (*it1)->source() - 1;
-			int t = (*it1)->target() - 1;
-			assert(t == i);
-			if(s < x) continue;
-			if(table[s - x] <= 0) continue;
-			table[t - x] += table[s - x];
-			trace[t - x] = s - x;
-			if(table[t - x] >= max) return false;
+			int s = (*it1)->source();
+			int t = (*it1)->target();
+			assert(s == p);
+			if(sx.find(t - 1) == sx.end()) continue;
+			if(sy.find(t - 1) == sy.end()) continue;
+			cnt++;
+			q = t;	
 		}
+		if(cnt != 1) continue;
+		xv.push_back(q - 1);
+		p = q;
 	}
 
-	//printf("x = %d, y = %d, num-paths = %ld\n", x, y, table[n - 1]);
-	if(table[n - 1] != 1) return false;
-
-	//printf("path = ");
-
-	v.clear();
-	int p = n - 1;
-	while(p >= 0)
+	// extend y
+	p = y + 1;
+	while(true)
 	{
-		p = trace[p];
-		if(p <= 0) break;
-		v.push_back(p + x);
-		//printf("%d ", p + x);
+		int cnt = 0;
+		int q = -1;
+		for(tie(it1, it2) = gr.in_edges(p); it1 != it2; it1++)
+		{
+			int s = (*it1)->source();
+			int t = (*it1)->target();
+			assert(t == p);
+			if(sx.find(s - 1) == sx.end()) continue;
+			if(sy.find(s - 1) == sy.end()) continue;
+			cnt++;
+			q = s;
+		}
+		if(cnt != 1) continue;
+		yv.push_back(q - 1);
+		p = q;
 	}
-	//printf("\n");
-	//assert(v.size() >= 1);
 
-	return true;
+	if(xv.back() == y)
+	{
+		assert(xv.size() == yv.size());
+		assert(yv.front() == x);
+		return true;
+	}
+
+	if(yv.front() == x)
+	{
+		assert(xv.size() == yv.size());
+		assert(xv.back() == y);
+		return true;
+	}
+
+	return false;
 }
-
-
 
 bool bundle::bridge_read_dp(int x, int y, vector<int> &v)
 {

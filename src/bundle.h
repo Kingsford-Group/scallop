@@ -76,7 +76,7 @@ private:
 	int build_hyper_edges1();			// single end
 	int build_hyper_edges2();			// paired end
 	bool bridge_read_dp(int x, int y, vector<int> &s);
-	bool bridge_read_bfs(int x, int y, vector<int> &sx, vector<int> &sy, vector<int> &s);
+	bool bridge_read_bfs(int x, int y, vector<int> &xv, vector<int> &yv);
 };
 
 #endif
