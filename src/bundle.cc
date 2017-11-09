@@ -453,13 +453,119 @@ int bundle::build_hyper_edges2()
 
 		int x1 = sp1[max_element(sp1)];
 		int x2 = sp2[min_element(sp2)];
-		bridge = bridge_read(x1, x2, sp3);
+		bridge = bridge_read_dp(x1, x2, sp3);
 	}
 
 	return 0;
 }
 
-bool bundle::bridge_read(int x, int y, vector<int> &v)
+bool bundle::bridge_read_bfs(int x, int y, vector<int> &xv, vector<int> &yv, vector<int> &xy)
+{
+	xy.clear();
+	xv.clear();
+	yv.clear();
+	if(x >= y) return true;
+
+	// TODO
+	PEB e = gr.edge(x + 1, y + 1);
+	if(e.second == true) return true;
+
+	if(y - x >= 20) return false;
+
+	// compute vertices that can be reached from x
+	int k = 0;
+	edge_iterator it1, it2;
+	set<int> sx;
+	vector<int> qx;
+	qx.push_back(x);
+	sx.push_back(x);
+	while(k >= 0 && k < qx.size())
+	{
+		int v = qx[k] + 1;
+		for(tie(it1, it2) = gr.out_edges(v); it1 != it2; it1++)
+		{
+			int s = (*it1)->source() - 1;
+			int t = (*it1)->target() - 1;
+			assert(s == v - 1);
+			if(sx.find(t) != sx.end()) continue;
+			if(t > y) continue;
+			sx.insert(t);
+			qx.push_back(t);
+		}
+		k++;
+	}
+
+	// compute vertices that can reach to y
+	set<int> sy;
+	vector<int> qy;
+	qy.push_back(y);
+	sy.insert(y);
+	k = 0;
+	while(k >= 0 && k < qy.size())
+	{
+		int v = qy[k] + 1;	
+		for(tie(it1, it2) = gr.in_edges(v); it1 != it2; it1++)
+		{
+			int s = (*it1)->source() - 1;
+			int t = (*it1)->target() - 1;
+			assert(t == v - 1);
+			if(sy.find(s) != sy.end()) continue;
+			if(s < x) continue;
+			sy.insert(s);
+			qy.push_back(s);
+		}
+		k++;
+	}
+
+	// CONTINUE
+
+	long max = 9999999999;
+	vector<long> table;
+	vector<int> trace;
+	int n = y - x + 1;
+	table.resize(n, 0);
+	trace.resize(n, -1);
+	table[0] = 1;
+	trace[0] = -1;
+	for(int i = x + 1; i <= y; i++)
+	{
+		edge_iterator it1, it2;
+		for(tie(it1, it2) = gr.in_edges(i + 1); it1 != it2; it1++)
+		{
+			int s = (*it1)->source() - 1;
+			int t = (*it1)->target() - 1;
+			assert(t == i);
+			if(s < x) continue;
+			if(table[s - x] <= 0) continue;
+			table[t - x] += table[s - x];
+			trace[t - x] = s - x;
+			if(table[t - x] >= max) return false;
+		}
+	}
+
+	//printf("x = %d, y = %d, num-paths = %ld\n", x, y, table[n - 1]);
+	if(table[n - 1] != 1) return false;
+
+	//printf("path = ");
+
+	v.clear();
+	int p = n - 1;
+	while(p >= 0)
+	{
+		p = trace[p];
+		if(p <= 0) break;
+		v.push_back(p + x);
+		//printf("%d ", p + x);
+	}
+	//printf("\n");
+	//assert(v.size() >= 1);
+
+	return true;
+}
+
+
+
+bool bundle::bridge_read_dp(int x, int y, vector<int> &v)
 {
 	v.clear();
 	if(x >= y) return true;
