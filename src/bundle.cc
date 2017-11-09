@@ -442,7 +442,7 @@ int bundle::build_hyper_edges2()
 		if(h.isize < 0) sp1 = sp;
 		else sp2 = sp;
 
-		if(sp1.size() <= 0 && sp2.size() <= 0)
+		if(sp1.size() <= 0 || sp2.size() <= 0)
 		{
 			bridge = false;
 			continue;
