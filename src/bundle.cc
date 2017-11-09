@@ -453,17 +453,18 @@ int bundle::build_hyper_edges2()
 
 		int x1 = sp1[max_element(sp1)];
 		int x2 = sp2[min_element(sp2)];
-		bridge = bridge_read_dp(x1, x2, sp3);
-
 		vector<int> xv;
 		vector<int> yv;
-		bool b = bridge_read_bfs(x1, x2, xv, yv);
-		assert(b == bridge);
+		bridge = bridge_read_bfs(x1, x2, xv, yv);
 
 		if(bridge == true)
 		{
-			assert(xv.size() == sp3.size());
-			assert(xv == sp3);
+			sp3 = xv;
+		}
+		else
+		{
+			if(xv.size() >= 1) sp1.insert(sp1.end(), xv.begin(), xv.end());
+			if(yv.size() >= 1) sp2.insert(sp2.begin(), yv.begin(), yv.end());
 		}
 	}
 
@@ -543,7 +544,7 @@ bool bundle::bridge_read_bfs(int x, int y, vector<int> &xv, vector<int> &yv)
 			cnt++;
 			q = t;	
 		}
-		if(cnt != 1) continue;
+		if(cnt != 1) break;
 		xv.push_back(q - 1);
 		p = q;
 	}
@@ -564,26 +565,32 @@ bool bundle::bridge_read_bfs(int x, int y, vector<int> &xv, vector<int> &yv)
 			cnt++;
 			q = s;
 		}
-		if(cnt != 1) continue;
+		if(cnt != 1) break;
 		yv.push_back(q - 1);
 		p = q;
 	}
 
-	if(xv.back() == y)
+	bool b = false;
+	if(xv.size() >= 1 && xv.back() == y)
 	{
 		assert(xv.size() == yv.size());
-		assert(yv.front() == x);
-		return true;
+		assert(yv.back() == x);
+		xv.pop_back();
+		yv.pop_back();
+		b = true;
 	}
 
-	if(yv.front() == x)
+	if(yv.size() >= 1 && yv.back() == x)
 	{
 		assert(xv.size() == yv.size());
 		assert(xv.back() == y);
-		return true;
+		xv.pop_back();
+		yv.pop_back();
+		b = true;
 	}
 
-	return false;
+	reverse(yv.begin(), yv.end());
+	return b;
 }
 
 bool bundle::bridge_read_dp(int x, int y, vector<int> &v)
@@ -622,10 +629,7 @@ bool bundle::bridge_read_dp(int x, int y, vector<int> &v)
 		}
 	}
 
-	//printf("x = %d, y = %d, num-paths = %ld\n", x, y, table[n - 1]);
 	if(table[n - 1] != 1) return false;
-
-	//printf("path = ");
 
 	v.clear();
 	int p = n - 1;
@@ -634,11 +638,9 @@ bool bundle::bridge_read_dp(int x, int y, vector<int> &v)
 		p = trace[p];
 		if(p <= 0) break;
 		v.push_back(p + x);
-		//printf("%d ", p + x);
 	}
-	//printf("\n");
-	//assert(v.size() >= 1);
 
+	reverse(v.begin(), v.end());
 	return true;
 }
 
