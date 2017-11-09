@@ -41,6 +41,8 @@ using namespace std;
 #define FR_FIRST 1
 #define FR_SECOND 2
 
+#define BRIDGE -18
+
 //// parameters
 // for bam file and reads
 extern int min_flank_length;

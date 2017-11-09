@@ -35,12 +35,14 @@ public:
 public:
 	int clear();
 	int add_node_list(const set<int> &s);
+	int add_node_list(const set<int> &s1, const set<int> &s2);
 	int add_node_list(const set<int> &s, int c);
-	int add_node_list(const vector<int> &s, int c);
+	int add_node_list(const set<int> &s1, const set<int> &s2, int c);
+	int add_node_list(const vector<int> &v, int c);
+	int add_node_list(const vector<int> &v1, const vector<int> &v2, int c);
 	int build(directed_graph &gr, MEI &e2i);
 	int build_edges(directed_graph &gr, MEI &e2i);
 	int build_index();
-	int update_index();
 	set<int> get_intersection(const vector<int> &v);
 	MI get_successors(int e);
 	MI get_predecessors(int e);
