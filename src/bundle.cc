@@ -451,7 +451,7 @@ int bundle::build_hyper_edges2()
 		int x1 = sp1[max_element(sp1)];
 		int x2 = sp2[min_element(sp2)];
 
-		vector<int> sp3;
+		sp3.clear();
 		bridge = bridge_read(x1, x2, sp3);
 	}
 
