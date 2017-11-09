@@ -316,10 +316,9 @@ int bundle::locate_left_partial_exon(int32_t x)
 	int k = it->second - 1;
 	int32_t p1 = lower(it->first);
 	int32_t p2 = upper(it->first);
-	assert(p1 <= x);
 	assert(p2 >= x);
+	assert(p1 <= x);
 
-	// TODO, move pointer here?
 	if(x - p1 > min_flank_length && p2 - x < min_flank_length) k++;
 
 	if(k >= pexons.size()) return -1;
@@ -339,7 +338,6 @@ int bundle::locate_right_partial_exon(int32_t x)
 	assert(p1 < x);
 	assert(p2 >= x);
 
-	// TODO, move pointer here?
 	if(p2 - x > min_flank_length && x - p1 <= min_flank_length) k--;
 	return k;
 }
@@ -378,43 +376,36 @@ int bundle::build_hyper_edges1()
 
 int bundle::build_hyper_edges2()
 {
-	hs.clear();
-
 	//sort(hits.begin(), hits.end(), hit_compare_by_name);
 	sort(hits.begin(), hits.end());
 
+	/*
+	printf("----------------------\n");
+	for(int k = 9; k < hits.size(); k++) hits[k].print();
+	printf("======================\n");
+	*/
+
+	hs.clear();
+
 	string qname;
 	int hi = -2;
-
-	bool bridge = false;
 	vector<int> sp1;
-	vector<int> sp2;
-	vector<int> sp3;
 	for(int i = 0; i < hits.size(); i++)
 	{
 		hit &h = hits[i];
+		
+		/*
+		printf("sp1 = ( ");
+		printv(sp1);
+		printf(")\n");
+		h.print();
+		*/
 
 		if(h.qname != qname || h.hi != hi)
 		{
-			if(bridge == false)
-			{
-				set<int> ss1(sp1.begin(), sp1.end());
-				set<int> ss2(sp2.begin(), sp2.end());
-				if(ss1.size() >= 2) hs.add_node_list(ss1, 1);
-				if(ss2.size() >= 2) hs.add_node_list(ss2, 1);
-			}
-			else
-			{
-				set<int> ss;
-				ss.insert(sp1.begin(), sp1.end());
-				ss.insert(sp3.begin(), sp3.end());
-				ss.insert(sp2.begin(), sp2.end());
-				if(ss.size() >= 2) hs.add_node_list(ss, 1);
-			}
+			set<int> s(sp1.begin(), sp1.end());
+			if(s.size() >= 2) hs.add_node_list(s);
 			sp1.clear();
-			sp2.clear();
-			sp3.clear();
-			bridge = false;
 		}
 
 		qname = h.qname;
@@ -425,7 +416,7 @@ int bundle::build_hyper_edges2()
 		vector<int64_t> v;
 		h.get_matched_intervals(v);
 
-		vector<int> sp;
+		vector<int> sp2;
 		for(int k = 0; k < v.size(); k++)
 		{
 			int32_t p1 = high32(v[k]);
@@ -433,26 +424,51 @@ int bundle::build_hyper_edges2()
 
 			int k1 = locate_left_partial_exon(p1);
 			int k2 = locate_right_partial_exon(p2);
-
-			// TODO, check whether exons from k1 to k2 are continuous
 			if(k1 < 0 || k2 < 0) continue;
-			for(int j = k1; j <= k2; j++) sp.push_back(j);
-		}
 
-		if(h.isize < 0) sp1 = sp;
-		else sp2 = sp;
+			for(int j = k1; j <= k2; j++) sp2.push_back(j);
+		}
 
 		if(sp1.size() <= 0 || sp2.size() <= 0)
 		{
-			bridge = false;
+			sp1.insert(sp1.end(), sp2.begin(), sp2.end());
 			continue;
 		}
 
-		int x1 = sp1[max_element(sp1)];
-		int x2 = sp2[min_element(sp2)];
+		/*
+		printf("sp2 = ( ");
+		printv(sp2);
+		printf(")\n");
+		*/
 
-		sp3.clear();
-		bridge = bridge_read(x1, x2, sp3);
+		int x1 = -1, x2 = -1;
+		if(h.isize < 0) 
+		{
+			x1 = sp1[max_element(sp1)];
+			x2 = sp2[min_element(sp2)];
+		}
+		else
+		{
+			x1 = sp2[max_element(sp2)];
+			x2 = sp1[min_element(sp1)];
+		}
+
+		vector<int> sp3;
+		bool c = bridge_read(x1, x2, sp3);
+
+		//printf("=========\n");
+
+		if(c == false)
+		{
+			set<int> s(sp1.begin(), sp1.end());
+			if(s.size() >= 2) hs.add_node_list(s);
+			sp1 = sp2;
+		}
+		else
+		{
+			sp1.insert(sp1.end(), sp2.begin(), sp2.end());
+			sp1.insert(sp1.end(), sp3.begin(), sp3.end());
+		}
 	}
 
 	return 0;
