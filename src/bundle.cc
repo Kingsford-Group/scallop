@@ -463,6 +463,8 @@ int bundle::build_hyper_edges2()
 		}
 		else
 		{
+			printf("extend sp1 %lu elelments)", xv.size());
+			printf("extend sp2 %lu elelments)", yv.size());
 			if(xv.size() >= 1) sp1.insert(sp1.end(), xv.begin(), xv.end());
 			if(yv.size() >= 1) sp2.insert(sp2.begin(), yv.begin(), yv.end());
 		}

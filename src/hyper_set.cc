@@ -30,12 +30,6 @@ int hyper_set::add_node_list(const set<int> &s, int c)
 
 int hyper_set::add_node_list(const vector<int> &s, int c)
 {
-	/*
-	printf("add node list (count = %d): ", c);
-	for(int k = 0; k < s.size(); k++) printf("%d ", s[k]);
-	printf("\n");
-	*/
-
 	vector<int> v = s;
 	sort(v.begin(), v.end());
 	for(int i = 0; i < v.size(); i++) v[i]++;
