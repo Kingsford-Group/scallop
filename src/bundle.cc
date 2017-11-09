@@ -464,11 +464,12 @@ bool bundle::bridge_read(int x, int y, vector<int> &v)
 	v.clear();
 	if(x >= y) return true;
 
+	// TODO
 	PEB e = gr.edge(x + 1, y + 1);
 	if(e.second == true) return true;
 	//else return false;
 
-	if(y - x >= 6) return false;
+	if(y - x >= 20) return false;
 
 	long max = 9999999999;
 	vector<long> table;
