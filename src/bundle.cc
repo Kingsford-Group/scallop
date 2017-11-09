@@ -409,6 +409,9 @@ int bundle::build_hyper_edges2()
 				ss.insert(sp1.begin(), sp1.end());
 				ss.insert(sp3.begin(), sp3.end());
 				ss.insert(sp2.begin(), sp2.end());
+				//printf("sp1: "); for(int k = 0; k < sp1.size(); k++) printf("%d ", sp1[k]); printf("\n");
+				//printf("sp2: "); for(int k = 0; k < sp2.size(); k++) printf("%d ", sp2[k]); printf("\n");
+				//printf("sp3: "); for(int k = 0; k < sp3.size(); k++) printf("%d ", sp3[k]); printf("\n");
 				if(ss.size() >= 2) hs.add_node_list(ss, 1);
 			}
 			sp1.clear();
@@ -439,7 +442,7 @@ int bundle::build_hyper_edges2()
 			for(int j = k1; j <= k2; j++) sp.push_back(j);
 		}
 
-		if(h.isize < 0) sp1 = sp;
+		if(h.isize > 0) sp1 = sp;
 		else sp2 = sp;
 
 		if(sp1.size() <= 0 || sp2.size() <= 0)
