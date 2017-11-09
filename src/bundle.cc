@@ -393,6 +393,9 @@ int bundle::build_hyper_edges2()
 	for(int i = 0; i < hits.size(); i++)
 	{
 		hit &h = hits[i];
+
+		printf("hit %d: ", i);
+		h.print();
 		
 		/*
 		printf("sp1 = ( ");
