@@ -246,7 +246,7 @@ int hyper_set::replace(const vector<int> &v, int e)
 	if(v.size() == 0) return 0;
 	set<int> s = get_intersection(v);
 	
-	vector<int> fb;
+	//vector<int> fb;
 	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
 	{
 		int k = (*it);
@@ -259,8 +259,7 @@ int hyper_set::replace(const vector<int> &v, int e)
 		int b = bv[0];
 		vv[b] = e;
 
-		fb.push_back(k);
-
+		//fb.push_back(k);
 		bool b1 = useful(vv, 0, b);
 		bool b2 = useful(vv, b + v.size() - 1, vv.size() - 1);
 		if(b1 == false && b2 == false) continue;
@@ -279,6 +278,7 @@ int hyper_set::replace(const vector<int> &v, int e)
 		}
 	}
 
+	/* do not remove to speedup
 	for(int i = 0; i < v.size(); i++)
 	{
 		int u = v[i];
@@ -286,6 +286,7 @@ int hyper_set::replace(const vector<int> &v, int e)
 		for(int k = 0; k < fb.size(); k++) e2s[u].erase(fb[k]);
 		if(e2s[u].size() == 0) e2s.erase(u);
 	}
+	*/
 	return 0;
 }
 
@@ -304,7 +305,7 @@ int hyper_set::remove(int e)
 {
 	if(e2s.find(e) == e2s.end()) return 0;
 	set<int> &s = e2s[e];
-	vector<int> fb;
+	//vector<int> fb;
 	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
 	{
 		int k = (*it);
@@ -317,15 +318,18 @@ int hyper_set::remove(int e)
 
 			vv[i] = -1;
 
+			/*
 			bool b1 = useful(vv, 0, i - 1);
 			bool b2 = useful(vv, i + 1, vv.size() - 1);
 			if(b1 == false && b2 == false) fb.push_back(k);
+			*/
 			 
 			break;
 		}
 	}
 
-	for(int i = 0; i < fb.size(); i++) s.erase(fb[i]);
+	// do not remove to speedup
+	//for(int i = 0; i < fb.size(); i++) s.erase(fb[i]);
 	e2s.erase(e);
 	return 0;
 }
