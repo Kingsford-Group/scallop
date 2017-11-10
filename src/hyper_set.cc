@@ -307,7 +307,7 @@ int hyper_set::remove(int e)
 {
 	if(e2s.find(e) == e2s.end()) return 0;
 	set<int> &s = e2s[e];
-	vector<int> fb;
+	//vector<int> fb;
 	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
 	{
 		int k = (*it);
@@ -320,16 +320,18 @@ int hyper_set::remove(int e)
 
 			vv[i] = -1;
 
+			/*
 			bool b1 = useful(vv, 0, i - 1);
 			bool b2 = useful(vv, i + 1, vv.size() - 1);
 			if(b1 == false && b2 == false) fb.push_back(k);
+			*/
 			 
 			break;
 		}
 	}
 
 	// do not remove to speedup
-	for(int i = 0; i < fb.size(); i++) s.erase(fb[i]);
+	//for(int i = 0; i < fb.size(); i++) s.erase(fb[i]);
 	e2s.erase(e);
 	return 0;
 }
@@ -403,8 +405,6 @@ int hyper_set::insert_between(int x, int y, int e)
 			{
 				e2s[e].insert(k);
 			}
-
-			//printf("line %d: insert %d between (%d, %d) = (%d, %d, %d)\n", k, e, x, y, vv[i], vv[i + 1], vv[i + 2]);
 
 			break;
 		}

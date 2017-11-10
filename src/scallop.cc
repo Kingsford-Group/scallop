@@ -397,6 +397,7 @@ bool scallop::resolve_hyper_edge(int fsize)
 
 	set<int> ss;
 	bool flag = false;
+	set<int> ffs;		// record whether this edge has already been decomposed
 	for(int i = 0; i < w1.size(); i++)
 	{
 		for(int j = 0; j < w2.size(); j++)
@@ -412,10 +413,12 @@ bool scallop::resolve_hyper_edge(int fsize)
 			//printf(" split (%d, %d), w = %.2lf, weight = (%.2lf, %.2lf), merge (%d, %d) -> %d\n", v1[i], v2[j], w, w1[i], w2[j], k1, k2, x);
 
 			hs.replace(v1[i], v2[j], x);
-			if(k1 == v1[i]) hs.remove(v1[i]);
-			if(k2 == v2[j]) hs.remove(v2[j]);
-			//if(k1 == v1[i]) hs.replace(v1[i], x);
-			//if(k2 == v2[j]) hs.replace(v2[j], x);
+			if(k1 == v1[i] && ffs.find(v1[i]) == ffs.end()) hs.replace(v1[i], x);
+			if(k2 == v2[j] && ffs.find(v2[j]) == ffs.end()) hs.replace(v2[j], x);
+			if(k1 == v1[i] && ffs.find(v1[i]) != ffs.end()) hs.remove(v1[i]);
+			if(k2 == v2[j] && ffs.find(v2[j]) != ffs.end()) hs.remove(v2[j]);
+			ffs.insert(v1[i]);
+			ffs.insert(v2[j]);
 		}
 	}
 	return flag;
