@@ -124,6 +124,7 @@ int hyper_set::build_index()
 		{
 			int e = v[j];
 			if(e == -1) continue;
+			if(e == BRIDGE) continue;
 			if(e2s.find(e) == e2s.end())
 			{
 				set<int> s;
@@ -220,6 +221,8 @@ MPII hyper_set::get_routes(int x, directed_graph &gr, MEI &e2i)
 		for(MI::iterator it = s.begin(); it != s.end(); it++)
 		{
 			PI p(e, it->first);
+			assert(e >= 0);
+			assert(it->first >= 0);
 			mpi.insert(PPII(p, it->second));
 		}
 	}
@@ -246,6 +249,7 @@ int hyper_set::replace(int x, int y, int e, const set<int> &s1, const set<int> &
 int hyper_set::replace(const vector<int> &v, int e, const set<int> &s1, const set<int> &s2)
 {
 	if(v.size() == 0) return 0;
+
 	set<int> s = get_intersection(v);
 	
 	vector<int> fb;
@@ -256,7 +260,16 @@ int hyper_set::replace(const vector<int> &v, int e, const set<int> &s1, const se
 		vector<int> bv = consecutive_subset(vv, v);
 
 		if(bv.size() <= 0) continue;
-		assert(bv.size() == 1);
+
+		if(bv.size() != 1)
+		{
+			printf("with bridge: (\n");
+			printv(vv);
+			printf(") for ");
+			printv(v);
+			printf("\n");
+		}
+		//assert(bv.size() == 1);
 
 		int b = bv[0];
 		vv[b] = e;
@@ -288,14 +301,16 @@ int hyper_set::replace(const vector<int> &v, int e, const set<int> &s1, const se
 
 		if(b + 2 < vv.size() && vv[b + 1] == BRIDGE && s2.find(vv[b + 2]) != s2.end())
 		{
-			printf("catch bridge phasing path @ %d\n", b);
+			//printv(vv); printf("\n");
 			vv.erase(vv.begin() + b + 1);
+			//printf("A: catch bridge phasing path @ %d %d\n", vv[b], vv[b + 1]);
 		}
 
 		if(b >= 2 && vv[b - 1] == BRIDGE && s1.find(vv[b - 2]) != s1.end())
 		{
-			printf("catch bridge phasing path @ %d\n", b);
+			//printv(vv); printf("\n");
 			vv.erase(vv.begin() + b - 1);
+			//printf("B: catch bridge phasing path @ %d %d\n", vv[b - 2], vv[b - 1]);
 		}
 	}
 
@@ -506,9 +521,9 @@ bool hyper_set::left_dominate(int e)
 		for(int i = 0; i < vv.size() - 1; i++)
 		{
 			if(vv[i] != e) continue;
-			if(vv[i + 1] == -1) continue;
+			if(vv[i + 1] < 0) continue;
 
-			if(i == 0 || vv[i - 1] == -1)
+			if(i == 0 || vv[i - 1] < 0)
 			{
 				if(i + 2 < vv.size()) x1.insert(PI(vv[i + 1], vv[i + 2]));
 				else x1.insert(PI(vv[i + 1], -1));
@@ -545,9 +560,9 @@ bool hyper_set::right_dominate(int e)
 		for(int i = 1; i < vv.size(); i++)
 		{
 			if(vv[i] != e) continue;
-			if(vv[i - 1] == -1) continue;
+			if(vv[i - 1] < 0) continue;
 
-			if(i == vv.size() - 1 || vv[i + 1] == -1)
+			if(i == vv.size() - 1 || vv[i + 1] < 0)
 			{
 				if(i - 2 >= 0) x1.insert(PI(vv[i - 1], vv[i - 2]));
 				else x1.insert(PI(vv[i - 1], -1));
@@ -571,9 +586,6 @@ bool hyper_set::right_dominate(int e)
 
 int hyper_set::print()
 {
-	printf("node list = %lu, edge list = %lu\n", nodes.size(), edges.size());
-	return 0;
-
 	//printf("PRINT HYPER_SET\n");
 	/*
 	for(MVII::iterator it = nodes.begin(); it != nodes.end(); it++)
