@@ -224,24 +224,24 @@ MPII hyper_set::get_routes(int x, directed_graph &gr, MEI &e2i)
 	return mpi;
 }
 
-int hyper_set::replace(int x, int e)
+int hyper_set::replace(int x, int e, const set<int> &s1, const set<int> & s2)
 {
 	vector<int> v;
 	v.push_back(x);
-	replace(v, e);
+	replace(v, e, s1, s2);
 	return 0;
 }
 
-int hyper_set::replace(int x, int y, int e)
+int hyper_set::replace(int x, int y, int e, const set<int> &s1, const set<int> &s2)
 {
 	vector<int> v;
 	v.push_back(x);
 	v.push_back(y);
-	replace(v, e);
+	replace(v, e, s1, s2);
 	return 0;
 }
 
-int hyper_set::replace(const vector<int> &v, int e)
+int hyper_set::replace(const vector<int> &v, int e, const set<int> &s1, const set<int> &s2)
 {
 	if(v.size() == 0) return 0;
 	set<int> s = get_intersection(v);
@@ -259,6 +259,9 @@ int hyper_set::replace(const vector<int> &v, int e)
 		int b = bv[0];
 		vv[b] = e;
 
+		fb.push_back(k);
+
+		/*
 		bool b1 = useful(vv, 0, b);
 		bool b2 = useful(vv, b + v.size() - 1, vv.size() - 1);
 		if(b1 == false && b2 == false) 
@@ -266,6 +269,7 @@ int hyper_set::replace(const vector<int> &v, int e)
 			fb.push_back(k);
 			continue;
 		}
+		*/
 
 		vv.erase(vv.begin() + b + 1, vv.begin() + b + v.size());
 
@@ -279,6 +283,16 @@ int hyper_set::replace(const vector<int> &v, int e)
 		{
 			e2s[e].insert(k);
 		}
+
+		if(b + 2 < vv.size() && vv[b + 1] == BRIDGE && s2.find(vv[b + 2]) != s2.end())
+		{
+			vv.erase(vv.begin() + b + 1);
+		}
+
+		if(b >= 2 && vv[b - 1] == BRIDGE && s1.find(vv[b - 2]) != s1.end())
+		{
+			vv.erase(vv.begin() + b - 1);
+		}
 	}
 
 	for(int i = 0; i < v.size(); i++)
@@ -287,7 +301,6 @@ int hyper_set::replace(const vector<int> &v, int e)
 		if(e2s.find(u) == e2s.end()) continue;
 		for(int k = 0; k < fb.size(); k++) e2s[u].erase(fb[k]);
 		if(e2s[u].size() == 0) e2s.erase(u);
-		// do not remove to speedup
 	}
 	return 0;
 }

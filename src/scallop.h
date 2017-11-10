@@ -88,6 +88,10 @@ private:
 	int compute_length(const path &p);
 	int greedy_decompose();
 
+	// utils
+	set<int> get_in_edges(int ei);
+	set<int> get_out_edges(int ei);
+
 	// stats, print, and draw
 	int print();
 	int stats();

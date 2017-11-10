@@ -50,9 +50,9 @@ public:
 	int print();
 
 public:
-	int replace(int x, int e);
-	int replace(int x, int y, int e);
-	int replace(const vector<int> &x, int e);
+	int replace(int x, int e, const set<int> &s1, const set<int> &s2);
+	int replace(int x, int y, int e, const set<int> &s1, const set<int> &s2);
+	int replace(const vector<int> &x, int e, const set<int> &s1, const set<int> &s2);
 	int remove(int e);
 	int remove(const vector<int> &x);
 	int remove(const set<int> &x);

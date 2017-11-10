@@ -400,8 +400,9 @@ int bundle::build_hyper_edges2()
 			{
 				set<int> ss1(sp1.begin(), sp1.end());
 				set<int> ss2(sp2.begin(), sp2.end());
-				if(ss1.size() >= 2) hs.add_node_list(ss1, 1);
-				if(ss2.size() >= 2) hs.add_node_list(ss2, 1);
+				if(ss1.size() >= 2 && ss1.size() <= 1) hs.add_node_list(ss1, 1);
+				else if(ss2.size() >= 2 && ss1.size() <= 1) hs.add_node_list(ss2, 1);
+				else if(ss1.size() >= 2 && ss2.size() >= 2) hs.add_node_list(ss1, ss2, 1);
 			}
 			else
 			{
