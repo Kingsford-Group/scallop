@@ -80,12 +80,13 @@ int hyper_set::build(directed_graph &gr, MEI& e2i)
 int hyper_set::build_edges(directed_graph &gr, MEI& e2i)
 {
 	edges.clear();
+
 	for(MVII::iterator it = nodes.begin(); it != nodes.end(); it++)
 	{
 		int c = it->second;
+		const vector<int> &vv = it->first;
 		if(c < min_router_count) continue;
 
-		const vector<int> &vv = it->first;
 		vector<int> ve;
 		bool b = true;
 		for(int k = 0; k < vv.size() - 1; k++)
@@ -173,6 +174,7 @@ MI hyper_set::get_successors(int e)
 			if(i >= v.size() - 1) continue;
 			int k = v[i + 1];
 			// TODO k could be BRIDGE
+			if(k == BRIDGE) continue;
 			if(k == -1) continue;
 			if(s.find(k) == s.end()) s.insert(PI(k, c));
 			else s[k] += c;
@@ -196,6 +198,7 @@ MI hyper_set::get_predecessors(int e)
 			if(i == 0) continue;
 			int k = v[i - 1];
 			// TODO k could be BRIDGE
+			if(k == BRIDGE) continue;
 			if(k == -1) continue;
 			if(s.find(k) == s.end()) s.insert(PI(k, c));
 			else s[k] += c;
@@ -216,7 +219,6 @@ MPII hyper_set::get_routes(int x, directed_graph &gr, MEI &e2i)
 		MI s = get_successors(e);
 		for(MI::iterator it = s.begin(); it != s.end(); it++)
 		{
-			// TODO it->first could be BRIDGE
 			PI p(e, it->first);
 			mpi.insert(PPII(p, it->second));
 		}
@@ -286,11 +288,13 @@ int hyper_set::replace(const vector<int> &v, int e, const set<int> &s1, const se
 
 		if(b + 2 < vv.size() && vv[b + 1] == BRIDGE && s2.find(vv[b + 2]) != s2.end())
 		{
+			printf("catch bridge phasing path @ %d\n", b);
 			vv.erase(vv.begin() + b + 1);
 		}
 
 		if(b >= 2 && vv[b - 1] == BRIDGE && s1.find(vv[b - 2]) != s1.end())
 		{
+			printf("catch bridge phasing path @ %d\n", b);
 			vv.erase(vv.begin() + b - 1);
 		}
 	}
@@ -442,7 +446,7 @@ bool hyper_set::left_extend(int e)
 
 		for(int i = 1; i < vv.size(); i++)
 		{
-			if(vv[i] == e && vv[i - 1] != -1) return true; 
+			if(vv[i] == e && vv[i - 1] != -1 && vv[i - 1] != BRIDGE) return true; 
 		}
 	}
 	return false;
@@ -460,7 +464,7 @@ bool hyper_set::right_extend(int e)
 
 		for(int i = 0; i < vv.size() - 1; i++)
 		{
-			if(vv[i] == e && vv[i + 1] != -1) return true; 
+			if(vv[i] == e && vv[i + 1] != -1 && vv[i + 1] != BRIDGE) return true; 
 		}
 	}
 	return false;
@@ -567,6 +571,9 @@ bool hyper_set::right_dominate(int e)
 
 int hyper_set::print()
 {
+	printf("node list = %lu, edge list = %lu\n", nodes.size(), edges.size());
+	return 0;
+
 	//printf("PRINT HYPER_SET\n");
 	/*
 	for(MVII::iterator it = nodes.begin(); it != nodes.end(); it++)

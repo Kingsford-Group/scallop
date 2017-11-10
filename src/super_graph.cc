@@ -156,21 +156,31 @@ int super_graph::split_single_splice_graph(splice_graph &gr, hyper_set &hs, cons
 		int c = it->second;
 
 		bool b = true;
-		vector<int> vv;
+		vector<int> vv1;
+		vector<int> vv2;
+		bool bridge = false;
 		for(int k = 0; k < v.size(); k++)
 		{
+			if(v[k] == BRIDGE) bridge = true;
+			if(v[k] == BRIDGE) continue;
+
 			if(ss.find(v[k]) == ss.end()) b = false;
 			if(b == false) break;
 			assert(a2b.find(v[k]) != a2b.end());
 			assert(a2b[v[k]].first == index);
 			int x = a2b[v[k]].second;
-			vv.push_back(x);
+
+			if(bridge == false) vv1.push_back(x);
+			else vv2.push_back(x);
 		}
 
 		if(b == false) continue;
 
-		for(int i = 0; i < vv.size(); i++) vv[i]--;
-		hs.add_node_list(vv, c);
+		for(int i = 0; i < vv1.size(); i++) vv1[i]--;
+		for(int i = 0; i < vv2.size(); i++) vv2[i]--;
+
+		if(bridge == true) hs.add_node_list(vv1, vv2, c);
+		else hs.add_node_list(vv1, c);
 	}
 
 	return 0;
