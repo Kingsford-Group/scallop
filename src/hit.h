@@ -44,12 +44,13 @@ typedef struct {
 class hit: public bam1_core_t
 {
 public:
-	hit(int32_t p);
-	hit(bam1_t *b);
+	hit(int32_t p, config* c);
+	hit(bam1_t *b, config* c);
 	hit(const hit &h);
 	bool operator<(const hit &h) const;
 
 public:
+	config* cfg;
 	int32_t rpos;							// right position mapped to reference [pos, rpos)
 	int32_t qlen;							// read length
 	string qname;							// query name

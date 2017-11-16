@@ -13,8 +13,9 @@ See LICENSE for licensing.
 #include "hit.h"
 #include "config.h"
 
-hit::hit(int32_t p)
+hit::hit(int32_t p, config* c)
 {
+	cfg = c;
 	bam1_core_t::pos = p;
 	strand = '.';
 	xs = '.';
@@ -24,9 +25,10 @@ hit::hit(int32_t p)
 	qlen = 0;
 }
 
-hit::hit(const hit &h)
+hit::hit(const hit &h, )
 	:bam1_core_t(h)
 {
+	cfg = h.cfg;
 	rpos = h.rpos;
 	qlen = h.qlen;
 	qname = h.qname;
@@ -38,9 +40,10 @@ hit::hit(const hit &h)
 	memcpy(cigar, h.cigar, sizeof cigar);
 }
 
-hit::hit(bam1_t *b)
+hit::hit(bam1_t *b, config* c)
 	:bam1_core_t(b->core)
 {
+	cfg = c;
 	// fetch query name
 	char buf[1024];
 	char *q = bam_get_qname(b);
@@ -96,7 +99,7 @@ int hit::set_concordance()
 int hit::set_strand()
 {
 	strand = '.';
-	
+
 	if(library_type == FR_FIRST && ((flag & 0x1) >= 1))
 	{
 		if((flag & 0x10) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '-';
@@ -146,8 +149,8 @@ int hit::build_splice_positions()
 		if(bam_cigar_op(cigar[k]) != BAM_CREF_SKIP) continue;
 		if(bam_cigar_op(cigar[k-1]) != BAM_CMATCH) continue;
 		if(bam_cigar_op(cigar[k+1]) != BAM_CMATCH) continue;
-		if(bam_cigar_oplen(cigar[k-1]) < min_flank_length) continue;
-		if(bam_cigar_oplen(cigar[k+1]) < min_flank_length) continue;
+		if(bam_cigar_oplen(cigar[k-1]) < cfg->min_flank_length) continue;
+		if(bam_cigar_oplen(cigar[k+1]) < cfg->min_flank_length) continue;
 
 		int32_t s = p - bam_cigar_oplen(cigar[k]);
 		spos.push_back(pack(s, p));
@@ -207,7 +210,7 @@ int hit::print() const
 	}
 
 	// print basic information
-	printf("Hit %s: [%d-%d), mpos = %d, cigar = %s, flag = %d, quality = %d, strand = %c, isize = %d, qlen = %d, hi = %d\n", 
+	printf("Hit %s: [%d-%d), mpos = %d, cigar = %s, flag = %d, quality = %d, strand = %c, isize = %d, qlen = %d, hi = %d\n",
 			qname.c_str(), pos, rpos, mpos, sstr.str().c_str(), flag, qual, strand, isize, qlen, hi);
 
 	return 0;

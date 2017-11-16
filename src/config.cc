@@ -14,70 +14,73 @@ See LICENSE for licensing.
 
 using namespace std;
 
-//// parameters
-// for bam file and reads
-int min_flank_length = 3;
-int max_edit_distance = 10;
-int32_t min_bundle_gap = 50;
-int min_num_hits_in_bundle = 20;
-uint32_t min_mapping_quality = 1;
-int32_t min_splice_boundary_hits = 1;
-bool use_second_alignment = false;
-bool uniquely_mapped_only = false;
-int library_type = EMPTY;
 
-// for preview
-int max_preview_reads = 2000000;
-int max_preview_spliced_reads = 50000;
-int min_preview_spliced_reads = 10000;
-double preview_infer_ratio = 0.95;
-bool preview_only = false;
+config::config(){
+	//// parameters
+	// for bam file and reads
+	min_flank_length = 3;
+	max_edit_distance = 10;
+	min_bundle_gap = 50;
+	min_num_hits_in_bundle = 20;
+	min_mapping_quality = 1;
+	min_splice_boundary_hits = 1;
+	use_second_alignment = false;
+	uniquely_mapped_only = false;
+	library_type = EMPTY;
 
-// for identifying subgraphs
-int32_t min_subregion_gap = 3;
-double min_subregion_overlap = 1.5;
-int32_t min_subregion_length = 15;
+	// for preview
+	max_preview_reads = 2000000;
+	max_preview_spliced_reads = 50000;
+	min_preview_spliced_reads = 10000;
+	preview_infer_ratio = 0.95;
+	preview_only = false;
 
-// for revising/decomposing splice graph
-double max_intron_contamination_coverage = 2.0;
-double min_surviving_edge_weight = 1.5;
-double max_decompose_error_ratio[7] = {0.33, 0.05, 0.0, 0.25, 0.30, 0.0, 1.1};
+	// for identifying subgraphs
+	min_subregion_gap = 3;
+	min_subregion_overlap = 1.5;
+	min_subregion_length = 15;
 
-// for selecting paths
-double min_transcript_coverage = 1.01;
-double min_transcript_coverage_ratio = 0.005;
-double min_single_exon_coverage = 20;
-double min_transcript_numreads = 20;
-int min_transcript_length_base = 150;
-int min_transcript_length_increase = 50;
-int min_exon_length = 20;
-int max_num_exons = 1000;
+	// for revising/decomposing splice graph
+	max_intron_contamination_coverage = 2.0;
+	min_surviving_edge_weight = 1.5;
+	max_decompose_error_ratio[7] = {0.33, 0.05, 0.0, 0.25, 0.30, 0.0, 1.1};
 
-// for subsetsum and router
-int max_dp_table_size = 10000;
-int min_router_count = 1;
+	// for selecting paths
+	min_transcript_coverage = 1.01;
+	min_transcript_coverage_ratio = 0.005;
+	min_single_exon_coverage = 20;
+	min_transcript_numreads = 20;
+	min_transcript_length_base = 150;
+	min_transcript_length_increase = 50;
+	min_exon_length = 20;
+	max_num_exons = 1000;
 
-// for simulation
-int simulation_num_vertices = 0;
-int simulation_num_edges = 0;
-int simulation_max_edge_weight = 0;
+	// for subsetsum and router
+	max_dp_table_size = 10000;
+	min_router_count = 1;
 
-// input and output
-string algo = "scallop";
-string input_file;
-string ref_file;
-string ref_file1;
-string ref_file2;
-string output_file;
+	// for simulation
+	simulation_num_vertices = 0;
+	simulation_num_edges = 0;
+	simulation_max_edge_weight = 0;
 
-// for controling
-bool output_tex_files = false;
-string fixed_gene_name = "";
-int batch_bundle_size = 100;
-int verbose = 1;
-string version = "v1.0.20";
+	// input and output
+	algo = "scallop";
+	input_file;
+	ref_file;
+	ref_file1;
+	ref_file2;
+	output_file;
 
-int parse_arguments(int argc, const char ** argv)
+	// for controling
+	output_tex_files = false;
+	fixed_gene_name = "";
+	batch_bundle_size = 100;
+	verbose = 1;
+	version = "v1.0.20";
+}
+
+int config::parse_arguments(int argc, const char ** argv)
 {
 	for(int i = 1; i < argc; i++)
 	{
@@ -280,15 +283,27 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--use_second_alignment")
 		{
 			string s(argv[i + 1]);
-			if(s == "true") use_second_alignment = true;
-			else use_second_alignment = false;
+			std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+
+			if(s == "true" or s == "1") use_second_alignment = true;
+			else if(s == "false" or s == "0") use_second_alignment = false;
+			else{
+				std::cerr << "'" << s << "' not recognzed as a boolean for use_second_alignment" << std::endl;
+				exit(64);
+			}
 			i++;
 		}
 		else if(string(argv[i]) == "--uniquely_mapped_only")
 		{
 			string s(argv[i + 1]);
-			if(s == "true") uniquely_mapped_only = true;
-			else uniquely_mapped_only = false;
+			std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+
+			if(s == "true" or s == "1") uniquely_mapped_only = true;
+			else if(s == "false" or s == "0") uniquely_mapped_only = false;
+			else{
+				std::cerr << "'" << s << "' not recognzed as a boolean for uniquely_mapped_only" << std::endl;
+				exit(64);
+			}
 			i++;
 		}
 		else if(string(argv[i]) == "--verbose")
@@ -303,7 +318,7 @@ int parse_arguments(int argc, const char ** argv)
 		}
 	}
 
-	if(min_surviving_edge_weight < 0.1 + min_transcript_coverage) 
+	if(min_surviving_edge_weight < 0.1 + min_transcript_coverage)
 	{
 		min_surviving_edge_weight = 0.1 + min_transcript_coverage;
 	}
@@ -324,7 +339,7 @@ int parse_arguments(int argc, const char ** argv)
 	return 0;
 }
 
-int print_parameters()
+int config::print_parameters()
 {
 	printf("parameters:\n");
 
@@ -390,7 +405,7 @@ int print_parameters()
 	return 0;
 }
 
-int print_command_line(int argc, const char ** argv)
+int config::print_command_line(int argc, const char ** argv)
 {
 	printf("command line: ");
 	for(int i = 0; i < argc; i++)

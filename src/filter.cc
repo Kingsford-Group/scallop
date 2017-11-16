@@ -9,9 +9,9 @@ See LICENSE for licensing.
 #include <cassert>
 #include <algorithm>
 
-filter::filter(const vector<transcript> &v)
+filter::filter(const vector<transcript> &v, config* c)
 	:trs(v)
-{}
+{cfg = c}
 
 int filter::filter_length_coverage()
 {
@@ -19,10 +19,10 @@ int filter::filter_length_coverage()
 	for(int i = 0; i < trs.size(); i++)
 	{
 		int e = trs[i].exons.size();
-		int minl = min_transcript_length_base + e * min_transcript_length_increase;
+		int minl = cfg->min_transcript_length_base + e * cfg->min_transcript_length_increase;
 		if(trs[i].length() < minl) continue;
-		if(e == 1 && trs[i].coverage < min_single_exon_coverage) continue;
-		if(e >= 2 && trs[i].coverage < min_transcript_coverage) continue;
+		if(e == 1 && trs[i].coverage < cfg->min_single_exon_coverage) continue;
+		if(e >= 2 && trs[i].coverage < cfg->min_transcript_coverage) continue;
 		v.push_back(trs[i]);
 	}
 	trs = v;
@@ -86,7 +86,7 @@ bool filter::join_transcripts()
 	sort(trs.begin(), trs.end(), transcript_cmp);
 	//print();
 
-	int32_t mind = min_bundle_gap;
+	int32_t mind = cfg->min_bundle_gap;
 	int ki = -1, kj = -1;
 	for(int i = 0; i < trs.size(); i++)
 	{
@@ -100,7 +100,7 @@ bool filter::join_transcripts()
 		kj = j;
 	}
 	if(ki == -1 || kj == -1) return false;
-	if(mind > min_bundle_gap - 1) return false;
+	if(mind > cfg->min_bundle_gap - 1) return false;
 
 	//printf("join transcript %d and %d\n", ki, kj);
 

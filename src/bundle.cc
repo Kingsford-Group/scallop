@@ -19,6 +19,7 @@ See LICENSE for licensing.
 bundle::bundle(const bundle_base &bb)
 	: bundle_base(bb)
 {
+	cfg = bb.cfg;
 }
 
 bundle::~bundle()
@@ -49,8 +50,8 @@ int bundle::build()
 
 int bundle::compute_strand()
 {
-	if(library_type != UNSTRANDED) assert(strand != '.');
-	if(library_type != UNSTRANDED) return 0;
+	if(cfg->library_type != UNSTRANDED) assert(strand != '.');
+	if(cfg->library_type != UNSTRANDED) return 0;
 
 	int n0 = 0, np = 0, nq = 0;
 	for(int i = 0; i < hits.size(); i++)
@@ -91,7 +92,7 @@ int bundle::check_right_ascending()
 
 int bundle::build_junctions()
 {
-	int min_max_boundary_quality = min_mapping_quality;
+	int min_max_boundary_quality = cfg->min_mapping_quality;
 	map< int64_t, vector<int> > m;
 	for(int i = 0; i < hits.size(); i++)
 	{
@@ -130,7 +131,7 @@ int bundle::build_junctions()
 	for(it = m.begin(); it != m.end(); it++)
 	{
 		vector<int> &v = it->second;
-		if(v.size() < min_splice_boundary_hits) continue;
+		if(v.size() < cfg->min_splice_boundary_hits) continue;
 
 		int32_t p1 = high32(it->first);
 		int32_t p2 = low32(it->first);
@@ -272,8 +273,8 @@ int bundle::build_regions()
 	{
 		int32_t l = v[k].first;
 		int32_t r = v[k + 1].first;
-		int ltype = v[k].second; 
-		int rtype = v[k + 1].second; 
+		int ltype = v[k].second;
+		int rtype = v[k + 1].second;
 
 		if(ltype == LEFT_RIGHT_SPLICE) ltype = RIGHT_SPLICE;
 		if(rtype == LEFT_RIGHT_SPLICE) rtype = LEFT_SPLICE;
@@ -320,7 +321,7 @@ int bundle::locate_left_partial_exon(int32_t x)
 	assert(p2 >= x);
 
 	// TODO, move pointer here?
-	if(x - p1 > min_flank_length && p2 - x < min_flank_length) k++;
+	if(x - p1 > cfg->min_flank_length && p2 - x < cfg->min_flank_length) k++;
 
 	if(k >= pexons.size()) return -1;
 	return k;
@@ -340,7 +341,7 @@ int bundle::locate_right_partial_exon(int32_t x)
 	assert(p2 >= x);
 
 	// TODO, move pointer here?
-	if(p2 - x > min_flank_length && x - p1 <= min_flank_length) k--;
+	if(p2 - x > cfg->min_flank_length && x - p1 <= cfg->min_flank_length) k--;
 	return k;
 }
 
@@ -516,7 +517,7 @@ bool bundle::bridge_read_bfs(int x, int y, vector<int> &xv, vector<int> &yv)
 	k = 0;
 	while(k >= 0 && k < qy.size())
 	{
-		int v = qy[k] + 1;	
+		int v = qy[k] + 1;
 		for(tie(it1, it2) = gr.in_edges(v); it1 != it2; it1++)
 		{
 			int s = (*it1)->source() - 1;
@@ -544,7 +545,7 @@ bool bundle::bridge_read_bfs(int x, int y, vector<int> &xv, vector<int> &yv)
 			if(sx.find(t - 1) == sx.end()) continue;
 			if(sy.find(t - 1) == sy.end()) continue;
 			cnt++;
-			q = t;	
+			q = t;
 		}
 		if(cnt != 1) break;
 		xv.push_back(q - 1);
@@ -756,7 +757,7 @@ int bundle::build_splice_graph()
 			gr.set_edge_info(p, ei);
 		}
 
-		if(r.rtype == END_BOUNDARY) 
+		if(r.rtype == END_BOUNDARY)
 		{
 			edge_descriptor p = gr.add_edge(i + 1, tt);
 			double w = r.ave;
@@ -778,7 +779,7 @@ int bundle::build_splice_graph()
 		if(x.rpos != y.lpos) continue;
 
 		assert(x.rpos == y.lpos);
-		
+
 		int xd = gr.out_degree(i + 1);
 		int yd = gr.in_degree(i + 2);
 		double wt = (xd < yd) ? x.ave : y.ave;
@@ -976,7 +977,7 @@ bool bundle::keep_surviving_edges()
 		for(SE::iterator it = se.begin(); it != se.end(); it++)
 		{
 			edge_descriptor e = (*it);
-			int s = e->source(); 
+			int s = e->source();
 			int t = e->target();
 			if(sv1.find(s) == sv1.end() && s != 0)
 			{
@@ -1252,7 +1253,7 @@ int bundle::print(int index)
 		regions[i].print(i);
 	}
 
-	// print junctions 
+	// print junctions
 	for(int i = 0; i < junctions.size(); i++)
 	{
 		junctions[i].print(chrm, i);

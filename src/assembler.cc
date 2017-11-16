@@ -17,8 +17,9 @@ See LICENSE for licensing.
 #include "super_graph.h"
 #include "filter.h"
 
-assembler::assembler()
+assembler::assembler(config* c)
 {
+  cfg = c;
     sfn = sam_open(input_file.c_str(), "r");
     hdr = sam_hdr_read(sfn);
     b1t = bam_init1();
@@ -64,12 +65,12 @@ int assembler::assemble()
 		qcnt += 1;
 
 		// truncate
-		if(ht.tid != bb1.tid || ht.pos > bb1.rpos + min_bundle_gap)
+		if(ht.tid != bb1.tid || ht.pos > bb1.rpos + cfg->min_bundle_gap)
 		{
 			pool.push_back(bb1);
 			bb1.clear();
 		}
-		if(ht.tid != bb2.tid || ht.pos > bb2.rpos + min_bundle_gap)
+		if(ht.tid != bb2.tid || ht.pos > bb2.rpos + cfg->min_bundle_gap)
 		{
 			pool.push_back(bb2);
 			bb2.clear();
@@ -79,16 +80,16 @@ int assembler::assemble()
 		process(batch_bundle_size);
 
 		// add hit
-		if(uniquely_mapped_only == true && ht.nh != 1) continue;
-		if(library_type != UNSTRANDED && ht.strand == '+' && ht.xs == '-') continue;
-		if(library_type != UNSTRANDED && ht.strand == '-' && ht.xs == '+') continue;
-		if(library_type != UNSTRANDED && ht.strand == '.' && ht.xs != '.') ht.strand = ht.xs;
-		if(library_type != UNSTRANDED && ht.strand == '+') bb1.add_hit(ht);
-		if(library_type != UNSTRANDED && ht.strand == '-') bb2.add_hit(ht);
-		if(library_type == UNSTRANDED && ht.xs == '.') bb1.add_hit(ht);
-		if(library_type == UNSTRANDED && ht.xs == '.') bb2.add_hit(ht);
-		if(library_type == UNSTRANDED && ht.xs == '+') bb1.add_hit(ht);
-		if(library_type == UNSTRANDED && ht.xs == '-') bb2.add_hit(ht);
+		if(cfg->uniquely_mapped_only == true && ht.nh != 1) continue;
+		if(cfg->library_type != UNSTRANDED && ht.strand == '+' && ht.xs == '-') continue;
+		if(cfg->library_type != UNSTRANDED && ht.strand == '-' && ht.xs == '+') continue;
+		if(cfg->library_type != UNSTRANDED && ht.strand == '.' && ht.xs != '.') ht.strand = ht.xs;
+		if(cfg->library_type != UNSTRANDED && ht.strand == '+') bb1.add_hit(ht);
+		if(cfg->library_type != UNSTRANDED && ht.strand == '-') bb2.add_hit(ht);
+		if(cfg->library_type == UNSTRANDED && ht.xs == '.') bb1.add_hit(ht);
+		if(cfg->library_type == UNSTRANDED && ht.xs == '.') bb2.add_hit(ht);
+		if(cfg->library_type == UNSTRANDED && ht.xs == '+') bb1.add_hit(ht);
+		if(cfg->library_type == UNSTRANDED && ht.xs == '-') bb2.add_hit(ht);
 	}
 
 	pool.push_back(bb1);
@@ -102,7 +103,7 @@ int assembler::assemble()
 	trsts = ft.trs;
 
 	write();
-	
+
 	return 0;
 }
 
@@ -113,7 +114,7 @@ int assembler::process(int n)
 	for(int i = 0; i < pool.size(); i++)
 	{
 		bundle_base &bb = pool[i];
-		if(bb.hits.size() < min_num_hits_in_bundle) continue;
+		if(bb.hits.size() < cfg->min_num_hits_in_bundle) continue;
 		if(bb.tid < 0) continue;
 
 		char buf[1024];
@@ -123,7 +124,7 @@ int assembler::process(int n)
 
 		bd.chrm = string(buf);
 		bd.build();
-		if(verbose >= 1) bd.print(index);
+		if(cfg->verbose >= 1) bd.print(index);
 
 		assemble(bd.gr, bd.hs);
 		index++;
@@ -141,18 +142,18 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0)
 	for(int k = 0; k < sg.subs.size(); k++)
 	{
 		string gid = "gene." + tostring(index) + "." + tostring(k);
-		if(fixed_gene_name != "" && gid != fixed_gene_name) continue;
+		if(cfg->fixed_gene_name != "" && gid != cfg->fixed_gene_name) continue;
 
-		if(verbose >= 2 && (k == 0 || fixed_gene_name != "")) sg.print();
+		if(verbose >= 2 && (k == 0 || cfg->fixed_gene_name != "")) sg.print();
 
 		splice_graph &gr = sg.subs[k];
 		hyper_set &hs = sg.hss[k];
 
 		gr.gid = gid;
-		scallop sc(gr, hs);
+		scallop sc(gr, hs, cfg);
 		sc.assemble();
 
-		if(verbose >= 2)
+		if(cfg->verbose >= 2)
 		{
 			printf("transcripts:\n");
 			for(int i = 0; i < sc.trsts.size(); i++) sc.trsts[i].write(cout);
@@ -163,13 +164,13 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0)
 		ft.filter_length_coverage();
 		if(ft.trs.size() >= 1) gv.insert(gv.end(), ft.trs.begin(), ft.trs.end());
 
-		if(verbose >= 2)
+		if(cfg->verbose >= 2)
 		{
 			printf("transcripts after filtering:\n");
 			for(int i = 0; i < ft.trs.size(); i++) ft.trs[i].write(cout);
 		}
 
-		if(fixed_gene_name != "" && gid == fixed_gene_name) terminate = true;
+		if(cfg->fixed_gene_name != "" && gid == cfg->fixed_gene_name) terminate = true;
 		if(terminate == true) return 0;
 	}
 
@@ -192,7 +193,7 @@ int assembler::assign_RPKM()
 
 int assembler::write()
 {
-	ofstream fout(output_file.c_str());
+	ofstream fout(cfg->output_file.c_str());
 	if(fout.fail()) return 0;
 	for(int i = 0; i < trsts.size(); i++)
 	{

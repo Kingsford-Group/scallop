@@ -31,14 +31,14 @@ int main(int argc, const char **argv)
 		print_logo();
 		return 0;
 	}
-
-	parse_arguments(argc, argv);
+	config cfg();
+	cfg.parse_arguments(argc, argv);
 
 	if(verbose >= 1)
 	{
 		print_copyright();
 		printf("\n");
-		print_command_line(argc, argv);
+		cfg.print_command_line(argc, argv);
 		printf("\n");
 		//print_parameters();
 	}
@@ -51,7 +51,7 @@ int main(int argc, const char **argv)
 
 	if(preview_only == true) return 0;
 
-	assembler asmb;
+	assembler asmb(*cfg);
 	asmb.assemble();
 
 	return 0;
