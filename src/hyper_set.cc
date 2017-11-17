@@ -8,6 +8,10 @@ See LICENSE for licensing.
 #include "config.h"
 #include <algorithm>
 
+hyper_set::hyper_set(const config &c)
+	: cfg(c)
+{}
+
 int hyper_set::clear()
 {
 	nodes.clear();
@@ -85,7 +89,7 @@ int hyper_set::build_edges(directed_graph &gr, MEI& e2i)
 	{
 		int c = it->second;
 		const vector<int> &vv = it->first;
-		if(c < cfg->min_router_count) continue;
+		if(c < cfg.min_router_count) continue;
 
 		vector<int> ve;
 		bool b = true;

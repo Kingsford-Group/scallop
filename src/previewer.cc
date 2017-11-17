@@ -14,7 +14,7 @@ See LICENSE for licensing.
 previewer::previewer(const config &c)
   : cfg(c)
 {
-    sfn = sam_open(cfg->input_file.c_str(), "r");
+    sfn = sam_open(cfg.input_file.c_str(), "r");
     hdr = sam_hdr_read(sfn);
     b1t = bam_init1();
 }
@@ -39,15 +39,15 @@ int previewer::preview()
 
     while(sam_read1(sfn, hdr, b1t) >= 0)
 	{
-		if(total >= cfg->max_preview_reads) break;
-		if(sp1.size() >= cfg->max_preview_spliced_reads && sp2.size() >= cfg->max_preview_spliced_reads) break;
+		if(total >= cfg.max_preview_reads) break;
+		if(sp1.size() >= cfg.max_preview_spliced_reads && sp2.size() >= cfg.max_preview_spliced_reads) break;
 
 		bam1_core_t &p = b1t->core;
 
 		if((p.flag & 0x4) >= 1) continue;										// read is not mapped
-		if((p.flag & 0x100) >= 1 && cfg->use_second_alignment == false) continue;	// qstrandary alignment
+		if((p.flag & 0x100) >= 1 && cfg.use_second_alignment == false) continue;	// qstrandary alignment
 		if(p.n_cigar > MAX_NUM_CIGAR) continue;									// ignore hits with more than 7 cigar types
-		if(p.qual < cfg->min_mapping_quality) continue;								// ignore hits with small quality
+		if(p.qual < cfg.min_mapping_quality) continue;								// ignore hits with small quality
 		if(p.n_cigar < 1) continue;												// should never happen
 
 		total++;
@@ -59,8 +59,8 @@ int previewer::preview()
 		if((ht.flag & 0x1) <= 0) single ++;
 
 		if(ht.xs == '.') continue;
-		if(ht.xs == '+' && sp1.size() >= cfg->max_preview_spliced_reads) continue;
-		if(ht.xs == '-' && sp2.size() >= cfg->max_preview_spliced_reads) continue;
+		if(ht.xs == '+' && sp1.size() >= cfg.max_preview_spliced_reads) continue;
+		if(ht.xs == '-' && sp2.size() >= cfg.max_preview_spliced_reads) continue;
 
 		// predicted strand
 		char xs = '.';
@@ -98,16 +98,16 @@ int previewer::preview()
 	vv.push_back("second");
 
 	int s1 = UNSTRANDED;
-	if(sp >= cfg->min_preview_spliced_reads && first > cfg->preview_infer_ratio * 2.0 * sp) s1 = FR_FIRST;
-	if(sp >= cfg->min_preview_spliced_reads && second > cfg->preview_infer_ratio * 2.0 * sp) s1 = FR_SECOND;
+	if(sp >= cfg.min_preview_spliced_reads && first > cfg.preview_infer_ratio * 2.0 * sp) s1 = FR_FIRST;
+	if(sp >= cfg.min_preview_spliced_reads && second > cfg.preview_infer_ratio * 2.0 * sp) s1 = FR_SECOND;
 
-	if(cfg->verbose >= 1)
+	if(cfg.verbose >= 1)
 	{
 		printf("preview: reads = %d, single = %d, paired = %d, spliced reads = %d, first = %d, second = %d, inferred library_type = %s, given library_type = %s\n",
-			total, single, paired, sp, first, second, vv[s1 + 1].c_str(), vv[cfg->library_type + 1].c_str());
+			total, single, paired, sp, first, second, vv[s1 + 1].c_str(), vv[cfg.library_type + 1].c_str());
 	}
 
-	if(cfg->library_type == EMPTY) cfg->library_type = s1;
+	if(cfg.library_type == EMPTY) cfg.library_type = s1;
 
 	return 0;
 }

@@ -24,7 +24,7 @@ private:
 	samFile *sfn;
 	bam_hdr_t *hdr;
 	bam1_t *b1t;
-	const config cfg;
+	config cfg;
 
 public:
 	int preview();

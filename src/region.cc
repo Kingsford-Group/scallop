@@ -104,7 +104,7 @@ int region::split_join_interval_map()
 
 int region::smooth_join_interval_map()
 {
-	int32_t gap = cfg->min_subregion_gap;
+	int32_t gap = cfg.min_subregion_gap;
 	vector<PI32> v;
 	int32_t p = lpos;
 	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
@@ -137,7 +137,7 @@ bool region::empty_subregion(int32_t p1, int32_t p2)
 	assert(p1 >= lpos && p2 <= rpos);
 
 	//printf(" region = [%d, %d), subregion [%d, %d), length = %d\n", lpos, rpos, p1, p2, p2 - p1);
-	if(p2 - p1 < cfg->min_subregion_length) return true;
+	if(p2 - p1 < cfg.min_subregion_length) return true;
 
 	SIMI it1, it2;
 	tie(it1, it2) = locate_boundary_iterators(*mmap, p1, p2);
@@ -147,7 +147,7 @@ bool region::empty_subregion(int32_t p1, int32_t p2)
 	double ratio = sum * 1.0 / (p2 - p1);
 	//printf(" region = [%d, %d), subregion [%d, %d), overlap = %.2lf\n", lpos, rpos, p1, p2, ratio);
 	//if(ratio < min_subregion_overlap + max_intron_contamination_coverage) return true;
-	if(ratio < cfg->min_subregion_overlap) return true;
+	if(ratio < cfg.min_subregion_overlap) return true;
 
 	return false;
 }

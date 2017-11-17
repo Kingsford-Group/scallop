@@ -35,6 +35,7 @@ public:
 	const config cfg;
 
 public:
+	hyper_set(const config &c);
 	int clear();
 	int add_node_list(const set<int> &s);
 	int add_node_list(const set<int> &s1, const set<int> &s2);
