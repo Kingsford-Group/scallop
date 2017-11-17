@@ -17,9 +17,9 @@ See LICENSE for licensing.
 #include "super_graph.h"
 #include "filter.h"
 
-assembler::assembler(config* c)
+assembler::assembler(const config &c)
+  : cfg(c)
 {
-  cfg = c;
     sfn = sam_open(cfg->input_file.c_str(), "r");
     hdr = sam_hdr_read(sfn);
     b1t = bam_init1();

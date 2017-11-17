@@ -9,11 +9,9 @@ See LICENSE for licensing.
 #include <algorithm>
 #include <cfloat>
 
-super_graph::super_graph(const splice_graph &gr, const hyper_set &hs, config* c)
-	:root(gr), hyper(hs)
-{
-	cfg = c;
-}
+super_graph::super_graph(const splice_graph &gr, const hyper_set &hs, const config& c)
+	:root(gr), hyper(hs), cfg(c)
+{}
 
 super_graph::~super_graph()
 {}

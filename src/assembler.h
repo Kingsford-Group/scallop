@@ -19,7 +19,7 @@ using namespace std;
 class assembler
 {
 public:
-	assembler(config* c);
+	assembler(const config &c);
 	~assembler();
 
 private:
@@ -35,7 +35,7 @@ private:
 	int qcnt;
 	double qlen;
 	vector<transcript> trsts;
-	config* cfg;
+	const config cfg;
 
 public:
 	int assemble();

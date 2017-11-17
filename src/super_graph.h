@@ -21,7 +21,7 @@ using namespace std;
 class super_graph
 {
 public:
-	super_graph(const splice_graph &gr, const hyper_set &hs, config* cfg);
+	super_graph(const splice_graph &gr, const hyper_set &hs, const config &c);
 	virtual ~super_graph();
 
 public:
@@ -31,7 +31,7 @@ public:
 	vector<hyper_set> hss;		// sub-hyper-set
 
 private:
-	config* cfg;
+	const config cfg;
 	undirected_graph ug;		// graph without edges to s and t
 	map<int, PI> a2b;			// vertex map from gr to subgraphs
 	map<PI, int> b2a;			// vertex map from subgraphs to gr

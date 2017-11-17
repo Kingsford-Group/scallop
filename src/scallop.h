@@ -25,8 +25,8 @@ typedef map<int, int> MI;
 class scallop
 {
 public:
-	scallop(config* c);
-	scallop(const splice_graph &gr, const hyper_set &hs, config* c);
+	scallop(const config &c);
+	scallop(const splice_graph &gr, const hyper_set &hs, const config &c);
 	virtual ~scallop();
 
 public:
@@ -43,7 +43,7 @@ public:
 	set<int> nonzeroset;				// vertices with degree >= 1
 	vector<path> paths;					// predicted paths
 	vector<transcript> trsts;			// predicted transcripts
-	config* cfg;
+	const config cfg;
 
 private:
 	// init

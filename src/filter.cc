@@ -9,9 +9,9 @@ See LICENSE for licensing.
 #include <cassert>
 #include <algorithm>
 
-filter::filter(const vector<transcript> &v, config* c)
-	:trs(v)
-{cfg = c;}
+filter::filter(const vector<transcript> &v, const config &c)
+	:trs(v), cfg(c)
+{}
 
 int filter::filter_length_coverage()
 {

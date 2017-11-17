@@ -32,7 +32,7 @@ public:
 	VVI edges;			// hyper-edges using list-of-edges
 	vector<int> ecnts;	// counts for edges
 	MISI e2s;			// index: from edge to hyper-edges
-	config* cfg;
+	const config cfg;
 
 public:
 	int clear();

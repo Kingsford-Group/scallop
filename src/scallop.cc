@@ -13,15 +13,14 @@ See LICENSE for licensing.
 #include <cfloat>
 #include <algorithm>
 
-scallop::scallop(config* c)
+scallop::scallop(config &c):
+	: cfg(c)
 {
-	cfg = c;
 }
 
-scallop::scallop(const splice_graph &g, const hyper_set &h, config* c)
-	: gr(g), hs(h)
+scallop::scallop(const splice_graph &g, const hyper_set &h, config &c)
+	: gr(g), hs(h), cfg(c)
 {
-	cfg = c;
 	round = 0;
 	if(cfg->output_tex_files == true) gr.draw(gr.gid + "." + tostring(round++) + ".tex");
 

@@ -11,9 +11,9 @@ See LICENSE for licensing.
 #include "previewer.h"
 #include "config.h"
 
-previewer::previewer(config* c)
+previewer::previewer(const config &c)
+  : cfg(c)
 {
-  cfg = c;
     sfn = sam_open(cfg->input_file.c_str(), "r");
     hdr = sam_hdr_read(sfn);
     b1t = bam_init1();

@@ -16,11 +16,9 @@ See LICENSE for licensing.
 #include "util.h"
 #include "undirected_graph.h"
 
-bundle::bundle(const bundle_base &bb, config* c)
-	: bundle_base(bb)
-{
-	cfg = c;
-}
+bundle::bundle(const bundle_base &bb, const config &c)
+	: bundle_base(bb), cfg(c)
+{}
 
 bundle::~bundle()
 {}

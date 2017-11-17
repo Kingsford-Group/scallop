@@ -45,13 +45,13 @@ int main(int argc, const char **argv)
 
 	if(cfg.library_type == EMPTY || cfg.preview_only == true)
 	{
-		previewer pv(&cfg);
+		previewer pv(cfg);
 		pv.preview();
 	}
 
 	if(cfg.preview_only == true) return 0;
 
-	assembler asmb(&cfg);
+	assembler asmb(cfg);
 	asmb.assemble();
 
 	return 0;

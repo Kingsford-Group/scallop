@@ -13,9 +13,8 @@ See LICENSE for licensing.
 #include "hit.h"
 #include "config.h"
 
-hit::hit(int32_t p, config* c)
+hit::hit(int32_t p, const config &c)
 {
-	cfg = c;
 	bam1_core_t::pos = p;
 	strand = '.';
 	xs = '.';
@@ -26,9 +25,8 @@ hit::hit(int32_t p, config* c)
 }
 
 hit::hit(const hit &h )
-	:bam1_core_t(h)
+	:bam1_core_t(h), cfg(h.cfg)
 {
-	cfg = h.cfg;
 	rpos = h.rpos;
 	qlen = h.qlen;
 	qname = h.qname;
@@ -40,10 +38,9 @@ hit::hit(const hit &h )
 	memcpy(cigar, h.cigar, sizeof cigar);
 }
 
-hit::hit(bam1_t *b, config* c)
-	:bam1_core_t(b->core)
+hit::hit(bam1_t *b, const config &c)
+	:bam1_core_t(b->core), cfg(c)
 {
-	cfg = c;
 	// fetch query name
 	char buf[1024];
 	char *q = bam_get_qname(b);

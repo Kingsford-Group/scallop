@@ -13,11 +13,11 @@ See LICENSE for licensing.
 class filter
 {
 public:
-	filter(const vector<transcript> &v, config* c);
+	filter(const vector<transcript> &v, const config &c);
 
 public:
 	vector<transcript> trs;
-	config* cfg;
+	const config cfg;
 
 public:
 	int join_single_exon_transcripts();

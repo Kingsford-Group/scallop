@@ -23,7 +23,7 @@ using namespace std;
 class bundle : public bundle_base
 {
 public:
-	bundle(const bundle_base &bb, config* c);
+	bundle(const bundle_base &bb, const config &c);
 	virtual ~bundle();
 
 public:
@@ -45,7 +45,7 @@ public:
 	int print(int index);
 
 private:
-	config* cfg;
+	const config cfg;
 
 	// check and init
 	int check_left_ascending();
