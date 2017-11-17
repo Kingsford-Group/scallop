@@ -14,6 +14,7 @@ See LICENSE for licensing.
 #include "config.h"
 
 hit::hit(int32_t p, const config &c)
+	: cfg(c)
 {
 	bam1_core_t::pos = p;
 	strand = '.';

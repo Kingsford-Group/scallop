@@ -126,7 +126,8 @@ int assembler::process(int n)
 		bd.build();
 		if(cfg.verbose >= 1) bd.print(index);
 
-		assemble(bd.gr, bd.hs);
+    parameter_advising<bundle, transcript_set, config_list>(bd, cfg.gene_config_list);
+    assemble(bd.gr, bd.hs);
 		index++;
 	}
 	pool.clear();

@@ -18,7 +18,8 @@ See LICENSE for licensing.
 
 bundle::bundle(const bundle_base &bb, const config &c)
 	: bundle_base(bb), cfg(c), hs(c)
-{}
+{
+}
 
 bundle::~bundle()
 {}

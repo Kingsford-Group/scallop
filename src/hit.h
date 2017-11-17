@@ -50,7 +50,7 @@ public:
 	bool operator<(const hit &h) const;
 
 public:
-	const config cfg;
+	config cfg;
 	int32_t rpos;							// right position mapped to reference [pos, rpos)
 	int32_t qlen;							// read length
 	string qname;							// query name
