@@ -25,33 +25,33 @@ int main(int argc, const char **argv)
 
 	if(argc == 1)
 	{
-		print_copyright();
+		(new config())->print_copyright();
 		print_help();
 		printf("\n");
 		print_logo();
 		return 0;
 	}
-	config cfg();
+	config cfg;
 	cfg.parse_arguments(argc, argv);
 
-	if(verbose >= 1)
+	if(cfg.verbose >= 1)
 	{
-		print_copyright();
+		cfg.print_copyright();
 		printf("\n");
 		cfg.print_command_line(argc, argv);
 		printf("\n");
 		//print_parameters();
 	}
 
-	if(library_type == EMPTY || preview_only == true)
+	if(cfg.library_type == EMPTY || cfg.preview_only == true)
 	{
-		previewer pv;
+		previewer pv(&cfg);
 		pv.preview();
 	}
 
-	if(preview_only == true) return 0;
+	if(cfg.preview_only == true) return 0;
 
-	assembler asmb(*cfg);
+	assembler asmb(&cfg);
 	asmb.assemble();
 
 	return 0;

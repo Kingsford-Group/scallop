@@ -25,7 +25,7 @@ hit::hit(int32_t p, config* c)
 	qlen = 0;
 }
 
-hit::hit(const hit &h, )
+hit::hit(const hit &h )
 	:bam1_core_t(h)
 {
 	cfg = h.cfg;
@@ -100,7 +100,7 @@ int hit::set_strand()
 {
 	strand = '.';
 
-	if(library_type == FR_FIRST && ((flag & 0x1) >= 1))
+	if(cfg->library_type == FR_FIRST && ((flag & 0x1) >= 1))
 	{
 		if((flag & 0x10) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '-';
 		if((flag & 0x10) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '+';
@@ -108,7 +108,7 @@ int hit::set_strand()
 		if((flag & 0x10) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '-';
 	}
 
-	if(library_type == FR_SECOND && ((flag & 0x1) >= 1))
+	if(cfg->library_type == FR_SECOND && ((flag & 0x1) >= 1))
 	{
 		if((flag & 0x10) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '+';
 		if((flag & 0x10) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '-';
@@ -116,13 +116,13 @@ int hit::set_strand()
 		if((flag & 0x10) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '+';
 	}
 
-	if(library_type == FR_FIRST && ((flag & 0x1) <= 0))
+	if(cfg->library_type == FR_FIRST && ((flag & 0x1) <= 0))
 	{
 		if((flag & 0x10) <= 0) strand = '-';
 		if((flag & 0x10) >= 1) strand = '+';
 	}
 
-	if(library_type == FR_SECOND && ((flag & 0x1) <= 0))
+	if(cfg->library_type == FR_SECOND && ((flag & 0x1) <= 0))
 	{
 		if((flag & 0x10) <= 0) strand = '+';
 		if((flag & 0x10) >= 1) strand = '-';
@@ -183,7 +183,7 @@ bool hit::verify_junctions()
 		//if(log2(s) > log2(10) + (2 * m) && nh >= 2)
 		if(log2(s) > log2(10) + (2 * m))
 		{
-			if(verbose >= 2) printf("detect super long junction %d with matches (%d, %d)\n", s, m1, m2);
+			if(cfg->verbose >= 2) printf("detect super long junction %d with matches (%d, %d)\n", s, m1, m2);
 			return false;
 		}
 	}

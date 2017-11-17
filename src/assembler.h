@@ -19,7 +19,7 @@ using namespace std;
 class assembler
 {
 public:
-	assembler(config c);
+	assembler(config* c);
 	~assembler();
 
 private:

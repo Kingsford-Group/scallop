@@ -9,9 +9,11 @@ See LICENSE for licensing.
 #include <algorithm>
 #include <cfloat>
 
-super_graph::super_graph(const splice_graph &gr, const hyper_set &hs)
+super_graph::super_graph(const splice_graph &gr, const hyper_set &hs, config* c)
 	:root(gr), hyper(hs)
-{}
+{
+	cfg = c;
+}
 
 super_graph::~super_graph()
 {}
@@ -63,6 +65,7 @@ int super_graph::split_splice_graph()
 		if(s.size() == 1 && *(s.begin()) == root.num_vertices() - 1) continue;
 		splice_graph gr;
 		hyper_set hs;
+		hs.cfg = cfg;
 		split_single_splice_graph(gr, hs, s, index);
 		gr.chrm = root.chrm;
 		gr.strand = root.strand;
@@ -276,7 +279,7 @@ bool super_graph::cut_single_splice_graph(splice_graph &gr, int index)
 				if(tte.find(e) != tte.end()) continue;
 				v.push_back(e);
 				cnt1++;
-				sum1 += gr.get_edge_weight(e);	
+				sum1 += gr.get_edge_weight(e);
 			}
 			for(SE::iterator it = tte.begin(); it != tte.end(); it++)
 			{
@@ -380,7 +383,7 @@ int super_graph::build_maximum_path_graph(splice_graph &gr, undirected_graph &mg
 	{
 		int x = u2v[i];
 		int y = -1;
-		if(i < gr.out_degree(0)) 
+		if(i < gr.out_degree(0))
 		{
 			compute_maximum_path1(gr, x, y);
 			int j = v2u[y];
@@ -480,7 +483,7 @@ int super_graph::print()
 		double vv = gr.compute_average_vertex_weight();
 		double ee = gr.compute_average_edge_weight();
 
-		printf("subgraph %d, #edges = %lu, #vertices = %lu / %lu, #starting = %d, #ending = %d, range = [%d, %d)\n", 
+		printf("subgraph %d, #edges = %lu, #vertices = %lu / %lu, #starting = %d, #ending = %d, range = [%d, %d)\n",
 				i, gr.num_edges(), gr.num_vertices() - 2, root.num_vertices() - 2, d0, dn, lpos, rpos);
 	}
 	printf("\n");

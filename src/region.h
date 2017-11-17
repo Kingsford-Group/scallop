@@ -11,6 +11,7 @@ See LICENSE for licensing.
 #include <vector>
 #include "interval_map.h"
 #include "partial_exon.h"
+#include "config.h"
 
 using namespace std;
 
@@ -19,7 +20,7 @@ typedef pair<int, int> PI;
 class region
 {
 public:
-	region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_mmap, const split_interval_map *_imap);
+	region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_mmap, const split_interval_map *_imap, config* c);
 	~region();
 
 public:
@@ -39,6 +40,7 @@ public:
 	bool right_inclusive();
 
 private:
+	config* cfg;
 	int build_join_interval_map();
 	int smooth_join_interval_map();
 	int split_join_interval_map();

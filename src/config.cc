@@ -11,9 +11,11 @@ See LICENSE for licensing.
 #include <fstream>
 #include <sstream>
 #include <cstring>
+#include <algorithm>
 
 using namespace std;
 
+config::~config(){}
 
 config::config(){
 	//// parameters
@@ -43,7 +45,13 @@ config::config(){
 	// for revising/decomposing splice graph
 	max_intron_contamination_coverage = 2.0;
 	min_surviving_edge_weight = 1.5;
-	max_decompose_error_ratio[7] = {0.33, 0.05, 0.0, 0.25, 0.30, 0.0, 1.1};
+	max_decompose_error_ratio[0] = 0.33;
+	max_decompose_error_ratio[1] = 0.05;
+	max_decompose_error_ratio[2] = 0.0;
+	max_decompose_error_ratio[3] = 0.25;
+	max_decompose_error_ratio[4] = 0.30;
+	max_decompose_error_ratio[5] = 0.0;
+	max_decompose_error_ratio[6] = 1.1;
 
 	// for selecting paths
 	min_transcript_coverage = 1.01;
@@ -458,7 +466,7 @@ int print_help()
 	return 0;
 }
 
-int print_copyright()
+int config::print_copyright()
 {
 	printf("Scallop %s (c) 2017 Mingfu Shao, Carl Kingsford, and Carnegie Mellon University\n", version.c_str());
 	return 0;

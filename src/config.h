@@ -44,6 +44,10 @@ using namespace std;
 #define BRIDGE -18
 
 class config{
+public:
+  config();
+  ~config();
+
   //// parameters
   // for bam file and reads
   int min_flank_length;
@@ -112,9 +116,9 @@ class config{
   int print_command_line(int argc, const char ** argv);
   int parse_arguments(int argc, const char ** argv);
   int print_parameters();
-}
+  int print_copyright();
+};
 
-int print_copyright();
 int print_logo();
 int print_help();
 

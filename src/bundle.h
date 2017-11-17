@@ -23,7 +23,7 @@ using namespace std;
 class bundle : public bundle_base
 {
 public:
-	bundle(const bundle_base &bb);
+	bundle(const bundle_base &bb, config* c);
 	virtual ~bundle();
 
 public:

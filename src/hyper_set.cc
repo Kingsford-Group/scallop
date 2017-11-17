@@ -85,7 +85,7 @@ int hyper_set::build_edges(directed_graph &gr, MEI& e2i)
 	{
 		int c = it->second;
 		const vector<int> &vv = it->first;
-		if(c < min_router_count) continue;
+		if(c < cfg->min_router_count) continue;
 
 		vector<int> ve;
 		bool b = true;
@@ -251,7 +251,7 @@ int hyper_set::replace(const vector<int> &v, int e, const set<int> &s1, const se
 	if(v.size() == 0) return 0;
 
 	set<int> s = get_intersection(v);
-	
+
 	vector<int> fb;
 	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
 	{
@@ -279,7 +279,7 @@ int hyper_set::replace(const vector<int> &v, int e, const set<int> &s1, const se
 		/*
 		bool b1 = useful(vv, 0, b);
 		bool b2 = useful(vv, b + v.size() - 1, vv.size() - 1);
-		if(b1 == false && b2 == false) 
+		if(b1 == false && b2 == false)
 		{
 			fb.push_back(k);
 			continue;
@@ -357,7 +357,7 @@ int hyper_set::remove(int e)
 			bool b2 = useful(vv, i + 1, vv.size() - 1);
 			if(b1 == false && b2 == false) fb.push_back(k);
 			*/
-			 
+
 			break;
 		}
 	}
@@ -461,7 +461,7 @@ bool hyper_set::left_extend(int e)
 
 		for(int i = 1; i < vv.size(); i++)
 		{
-			if(vv[i] == e && vv[i - 1] != -1 && vv[i - 1] != BRIDGE) return true; 
+			if(vv[i] == e && vv[i - 1] != -1 && vv[i - 1] != BRIDGE) return true;
 		}
 	}
 	return false;
@@ -479,7 +479,7 @@ bool hyper_set::right_extend(int e)
 
 		for(int i = 0; i < vv.size() - 1; i++)
 		{
-			if(vv[i] == e && vv[i + 1] != -1 && vv[i + 1] != BRIDGE) return true; 
+			if(vv[i] == e && vv[i + 1] != -1 && vv[i + 1] != BRIDGE) return true;
 		}
 	}
 	return false;
@@ -592,7 +592,7 @@ int hyper_set::print()
 	{
 		const vector<int> &v = it->first;
 		int c = it->second;
-		printf("hyper-edge (nodes), counts = %d, list = ( ", c); 
+		printf("hyper-edge (nodes), counts = %d, list = ( ", c);
 		printv(v);
 		printf(")\n");
 	}

@@ -13,6 +13,7 @@ See LICENSE for licensing.
 
 #include "util.h"
 #include "directed_graph.h"
+#include "config.h"
 
 using namespace std;
 
@@ -31,6 +32,7 @@ public:
 	VVI edges;			// hyper-edges using list-of-edges
 	vector<int> ecnts;	// counts for edges
 	MISI e2s;			// index: from edge to hyper-edges
+	config* cfg;
 
 public:
 	int clear();

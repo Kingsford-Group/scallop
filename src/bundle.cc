@@ -16,10 +16,10 @@ See LICENSE for licensing.
 #include "util.h"
 #include "undirected_graph.h"
 
-bundle::bundle(const bundle_base &bb)
+bundle::bundle(const bundle_base &bb, config* c)
 	: bundle_base(bb)
 {
-	cfg = bb.cfg;
+	cfg = c;
 }
 
 bundle::~bundle()
@@ -202,7 +202,7 @@ int bundle::correct_junctions()
 			if(j1.rpos < j2.rpos) mmap += make_pair(ROI(j1.rpos, j2.rpos), 1);
 			else if(j1.rpos > j2.rpos) mmap += make_pair(ROI(j2.rpos, j1.rpos), -1);
 
-			if(verbose >= 2)
+			if(cfg->verbose >= 2)
 			{
 				j1.print(chrm, k - 1);
 				j2.print(chrm, k - 0);
@@ -218,7 +218,7 @@ int bundle::correct_junctions()
 			if(j2.rpos < j1.rpos) mmap += make_pair(ROI(j2.rpos, j1.rpos), 1);
 			else if(j2.rpos > j1.rpos) mmap += make_pair(ROI(j1.rpos, j2.rpos), -1);
 
-			if(verbose >= 2)
+			if(cfg->verbose >= 2)
 			{
 				j1.print(chrm, k - 1);
 				j2.print(chrm, k - 0);
@@ -279,7 +279,7 @@ int bundle::build_regions()
 		if(ltype == LEFT_RIGHT_SPLICE) ltype = RIGHT_SPLICE;
 		if(rtype == LEFT_RIGHT_SPLICE) rtype = LEFT_SPLICE;
 
-		regions.push_back(region(l, r, ltype, rtype, &mmap, &imap));
+		regions.push_back(region(l, r, ltype, rtype, &mmap, &imap, cfg));
 	}
 
 	return 0;
@@ -956,7 +956,7 @@ bool bundle::keep_surviving_edges()
 		double w = gr.get_edge_weight(*it1);
 		int32_t p1 = gr.get_vertex_info(s).rpos;
 		int32_t p2 = gr.get_vertex_info(t).lpos;
-		if(w < min_surviving_edge_weight) continue;
+		if(w < cfg->min_surviving_edge_weight) continue;
 		se.insert(*it1);
 		sv1.insert(t);
 		sv2.insert(s);
@@ -1013,7 +1013,7 @@ bool bundle::keep_surviving_edges()
 
 	for(int i = 0; i < ve.size(); i++)
 	{
-		if(verbose >= 2) printf("remove edge (%d, %d), weight = %.2lf\n", ve[i]->source(), ve[i]->target(), gr.get_edge_weight(ve[i]));
+		if(cfg->verbose >= 2) printf("remove edge (%d, %d), weight = %.2lf\n", ve[i]->source(), ve[i]->target(), gr.get_edge_weight(ve[i]));
 		gr.remove_edge(ve[i]);
 	}
 
@@ -1031,7 +1031,7 @@ bool bundle::remove_small_exons()
 		int32_t p1 = gr.get_vertex_info(i).lpos;
 		int32_t p2 = gr.get_vertex_info(i).rpos;
 
-		if(p2 - p1 >= min_exon_length) continue;
+		if(p2 - p1 >= cfg->min_exon_length) continue;
 		if(gr.degree(i) <= 0) continue;
 
 		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
@@ -1166,7 +1166,7 @@ bool bundle::remove_inner_boundaries()
 
 		if(vi.stddev >= 0.01) continue;
 
-		if(verbose >= 2) printf("remove inner boundary: vertex = %d, weight = %.2lf, length = %d, pos = %d-%d\n",
+		if(cfg->verbose >= 2) printf("remove inner boundary: vertex = %d, weight = %.2lf, length = %d, pos = %d-%d\n",
 				i, gr.get_vertex_weight(i), vi.length, vi.lpos, vi.rpos);
 
 		gr.clear_vertex(i);
@@ -1205,9 +1205,9 @@ bool bundle::remove_intron_contamination()
 		double we = gr.get_edge_weight(ee);
 
 		if(wv > we) continue;
-		if(wv > max_intron_contamination_coverage) continue;
+		if(wv > cfg->max_intron_contamination_coverage) continue;
 
-		if(verbose >= 2) printf("clear intron contamination %d, weight = %.2lf, length = %d, edge weight = %.2lf\n", i, wv, vi.length, we);
+		if(cfg->verbose >= 2) printf("clear intron contamination %d, weight = %.2lf, length = %d, edge weight = %.2lf\n", i, wv, vi.length, we);
 
 		gr.clear_vertex(i);
 		flag = true;
@@ -1242,7 +1242,7 @@ int bundle::print(int index)
 	printf("tid = %d, #hits = %lu, #partial-exons = %lu, range = %s:%d-%d, orient = %c (%d, %d, %d)\n",
 			tid, hits.size(), pexons.size(), chrm.c_str(), lpos, rpos, strand, n0, np, nq);
 
-	if(verbose <= 1) return 0;
+	if(cfg->verbose <= 1) return 0;
 
 	// print hits
 	//for(int i = 0; i < hits.size(); i++) hits[i].print();
@@ -1301,7 +1301,7 @@ int bundle::output_transcript(ofstream &fout, const path &p, const string &gid, 
 	int32_t rr = pexons[tt - 1].rpos;
 
 	fout<<chrm.c_str()<<"\t";		// chromosome name
-	fout<<algo.c_str()<<"\t";		// source
+	fout<<cfg->algo.c_str()<<"\t";		// source
 	fout<<"transcript\t";			// feature
 	fout<<ll + 1<<"\t";				// left position
 	fout<<rr<<"\t";					// right position
@@ -1323,7 +1323,7 @@ int bundle::output_transcript(ofstream &fout, const path &p, const string &gid, 
 	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
 	{
 		fout<<chrm.c_str()<<"\t";			// chromosome name
-		fout<<algo.c_str()<<"\t";			// source
+		fout<<cfg->algo.c_str()<<"\t";			// source
 		fout<<"exon\t";						// feature
 		fout<<lower(it->first) + 1<<"\t";	// left position
 		fout<<upper(it->first)<<"\t";		// right position
@@ -1366,7 +1366,7 @@ int bundle::output_transcripts(gene &gn, const vector<path> &p, const string &gi
 int bundle::output_transcript(transcript &trst, const path &p, const string &gid, const string &tid) const
 {
 	trst.seqname = chrm;
-	trst.source = algo;
+	trst.source = cfg->algo;
 	trst.gene_id = gid;
 	trst.transcript_id = tid;
 	trst.coverage = p.abd;

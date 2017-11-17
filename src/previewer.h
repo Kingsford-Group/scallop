@@ -17,13 +17,14 @@ using namespace std;
 class previewer
 {
 public:
-	previewer();
+	previewer(config* c);
 	~previewer();
 
 private:
 	samFile *sfn;
 	bam_hdr_t *hdr;
 	bam1_t *b1t;
+	config* cfg;
 
 public:
 	int preview();

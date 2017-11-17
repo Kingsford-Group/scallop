@@ -11,10 +11,10 @@ See LICENSE for licensing.
 
 using namespace std;
 
-region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_mmap, const split_interval_map *_imap)
+region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_mmap, const split_interval_map *_imap, config* c)
 	:lpos(_lpos), rpos(_rpos), mmap(_mmap), imap(_imap), ltype(_ltype), rtype(_rtype)
 {
-
+	cfg = c;
 	build_join_interval_map();
 	smooth_join_interval_map();
 	//split_join_interval_map();
@@ -35,7 +35,7 @@ int region::build_join_interval_map()
 	SIMI it = lit;
 	while(true)
 	{
-		//if(it->second >= 2) 
+		//if(it->second >= 2)
 		jmap += make_pair(it->first, 1);
 		if(it == rit) break;
 		it++;
@@ -90,7 +90,7 @@ int region::split_join_interval_map()
 
 		if(b == true)
 		{
-			printf("SPLIT: type = (%d, %d), pos = %d-%d, mid = %d-%d, ave = (%.3lf, %.3lf), dev = (%.3lf, %.3lf)\n", 
+			printf("SPLIT: type = (%d, %d), pos = %d-%d, mid = %d-%d, ave = (%.3lf, %.3lf), dev = (%.3lf, %.3lf)\n",
 					ltype, rtype, lpos, rpos, p, q, ave1, ave2, dev1, dev2);
 
 			jmap += make_pair(ROI(p, q), -1);
@@ -105,7 +105,7 @@ int region::split_join_interval_map()
 
 int region::smooth_join_interval_map()
 {
-	int32_t gap = min_subregion_gap;
+	int32_t gap = cfg->min_subregion_gap;
 	vector<PI32> v;
 	int32_t p = lpos;
 	for(JIMI it = jmap.begin(); it != jmap.end(); it++)
@@ -138,7 +138,7 @@ bool region::empty_subregion(int32_t p1, int32_t p2)
 	assert(p1 >= lpos && p2 <= rpos);
 
 	//printf(" region = [%d, %d), subregion [%d, %d), length = %d\n", lpos, rpos, p1, p2, p2 - p1);
-	if(p2 - p1 < min_subregion_length) return true;
+	if(p2 - p1 < cfg->min_subregion_length) return true;
 
 	SIMI it1, it2;
 	tie(it1, it2) = locate_boundary_iterators(*mmap, p1, p2);
@@ -148,7 +148,7 @@ bool region::empty_subregion(int32_t p1, int32_t p2)
 	double ratio = sum * 1.0 / (p2 - p1);
 	//printf(" region = [%d, %d), subregion [%d, %d), overlap = %.2lf\n", lpos, rpos, p1, p2, ratio);
 	//if(ratio < min_subregion_overlap + max_intron_contamination_coverage) return true;
-	if(ratio < min_subregion_overlap) return true;
+	if(ratio < cfg->min_subregion_overlap) return true;
 
 	return false;
 }
@@ -182,7 +182,7 @@ int region::build_partial_exons()
 		int32_t p1 = lower(it->first);
 		int32_t p2 = upper(it->first);
 		assert(p1 < p2);
-		
+
 		bool b = empty_subregion(p1, p2);
 
 		//printf(" subregion [%d, %d), empty = %c\n", p1, p2, b ? 'T' : 'F');
@@ -229,7 +229,7 @@ int region::print(int index) const
 {
 	int32_t lc = compute_overlap(*mmap, lpos);
 	int32_t rc = compute_overlap(*mmap, rpos - 1);
-	printf("region %d: partial-exons = %lu, type = (%d, %d), pos = [%d, %d), boundary coverage = (%d, %d)\n", 
+	printf("region %d: partial-exons = %lu, type = (%d, %d), pos = [%d, %d), boundary coverage = (%d, %d)\n",
 			index, pexons.size(), ltype, rtype, lpos, rpos, lc, rc);
 
 	/*

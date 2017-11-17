@@ -20,7 +20,7 @@ See LICENSE for licensing.
 assembler::assembler(config* c)
 {
   cfg = c;
-    sfn = sam_open(input_file.c_str(), "r");
+    sfn = sam_open(cfg->input_file.c_str(), "r");
     hdr = sam_hdr_read(sfn);
     b1t = bam_init1();
 	index = 0;
@@ -45,12 +45,12 @@ int assembler::assemble()
 		bam1_core_t &p = b1t->core;
 
 		if((p.flag & 0x4) >= 1) continue;										// read is not mapped
-		if((p.flag & 0x100) >= 1 && use_second_alignment == false) continue;	// secondary alignment
+		if((p.flag & 0x100) >= 1 && cfg->use_second_alignment == false) continue;	// secondary alignment
 		if(p.n_cigar > MAX_NUM_CIGAR) continue;									// ignore hits with more than 7 cigar types
-		if(p.qual < min_mapping_quality) continue;								// ignore hits with small quality
+		if(p.qual < cfg->min_mapping_quality) continue;								// ignore hits with small quality
 		if(p.n_cigar < 1) continue;												// should never happen
 
-		hit ht(b1t);
+		hit ht(b1t, cfg);
 		ht.set_tags(b1t);
 		ht.set_strand();
 		ht.build_splice_positions();
@@ -77,7 +77,7 @@ int assembler::assemble()
 		}
 
 		// process
-		process(batch_bundle_size);
+		process(cfg->batch_bundle_size);
 
 		// add hit
 		if(cfg->uniquely_mapped_only == true && ht.nh != 1) continue;
@@ -98,7 +98,7 @@ int assembler::assemble()
 
 	assign_RPKM();
 
-	filter ft(trsts);
+	filter ft(trsts, cfg);
 	ft.merge_single_exon_transcripts();
 	trsts = ft.trs;
 
@@ -120,7 +120,7 @@ int assembler::process(int n)
 		char buf[1024];
 		strcpy(buf, hdr->target_name[bb.tid]);
 
-		bundle bd(bb);
+		bundle bd(bb, cfg);
 
 		bd.chrm = string(buf);
 		bd.build();
@@ -135,7 +135,7 @@ int assembler::process(int n)
 
 int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0)
 {
-	super_graph sg(gr0, hs0);
+	super_graph sg(gr0, hs0, cfg);
 	sg.build();
 
 	vector<transcript> gv;
@@ -144,7 +144,7 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0)
 		string gid = "gene." + tostring(index) + "." + tostring(k);
 		if(cfg->fixed_gene_name != "" && gid != cfg->fixed_gene_name) continue;
 
-		if(verbose >= 2 && (k == 0 || cfg->fixed_gene_name != "")) sg.print();
+		if(cfg->verbose >= 2 && (k == 0 || cfg->fixed_gene_name != "")) sg.print();
 
 		splice_graph &gr = sg.subs[k];
 		hyper_set &hs = sg.hss[k];
@@ -159,7 +159,7 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0)
 			for(int i = 0; i < sc.trsts.size(); i++) sc.trsts[i].write(cout);
 		}
 
-		filter ft(sc.trsts);
+		filter ft(sc.trsts, cfg);
 		ft.join_single_exon_transcripts();
 		ft.filter_length_coverage();
 		if(ft.trs.size() >= 1) gv.insert(gv.end(), ft.trs.begin(), ft.trs.end());
@@ -174,7 +174,7 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0)
 		if(terminate == true) return 0;
 	}
 
-	filter ft(gv);
+	filter ft(gv, cfg);
 	ft.remove_nested_transcripts();
 	if(ft.trs.size() >= 1) trsts.insert(trsts.end(), ft.trs.begin(), ft.trs.end());
 

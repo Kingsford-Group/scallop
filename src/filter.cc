@@ -11,7 +11,7 @@ See LICENSE for licensing.
 
 filter::filter(const vector<transcript> &v, config* c)
 	:trs(v)
-{cfg = c}
+{cfg = c;}
 
 int filter::filter_length_coverage()
 {
