@@ -156,31 +156,21 @@ int super_graph::split_single_splice_graph(splice_graph &gr, hyper_set &hs, cons
 		int c = it->second;
 
 		bool b = true;
-		vector<int> vv1;
-		vector<int> vv2;
-		bool bridge = false;
+		vector<int> vv;
 		for(int k = 0; k < v.size(); k++)
 		{
-			if(v[k] == BRIDGE) bridge = true;
-			if(v[k] == BRIDGE) continue;
-
 			if(ss.find(v[k]) == ss.end()) b = false;
 			if(b == false) break;
 			assert(a2b.find(v[k]) != a2b.end());
 			assert(a2b[v[k]].first == index);
 			int x = a2b[v[k]].second;
-
-			if(bridge == false) vv1.push_back(x);
-			else vv2.push_back(x);
+			vv.push_back(x);
 		}
 
 		if(b == false) continue;
 
-		for(int i = 0; i < vv1.size(); i++) vv1[i]--;
-		for(int i = 0; i < vv2.size(); i++) vv2[i]--;
-
-		if(bridge == true) hs.add_node_list(vv1, vv2, c);
-		else hs.add_node_list(vv1, c);
+		for(int i = 0; i < vv.size(); i++) vv[i]--;
+		hs.add_node_list(vv, c);
 	}
 
 	return 0;
@@ -276,7 +266,7 @@ bool super_graph::cut_single_splice_graph(splice_graph &gr, int index)
 				if(tte.find(e) != tte.end()) continue;
 				v.push_back(e);
 				cnt1++;
-				sum1 += gr.get_edge_weight(e);
+				sum1 += gr.get_edge_weight(e);	
 			}
 			for(SE::iterator it = tte.begin(); it != tte.end(); it++)
 			{
@@ -380,7 +370,7 @@ int super_graph::build_maximum_path_graph(splice_graph &gr, undirected_graph &mg
 	{
 		int x = u2v[i];
 		int y = -1;
-		if(i < gr.out_degree(0))
+		if(i < gr.out_degree(0)) 
 		{
 			compute_maximum_path1(gr, x, y);
 			int j = v2u[y];
@@ -480,7 +470,7 @@ int super_graph::print()
 		double vv = gr.compute_average_vertex_weight();
 		double ee = gr.compute_average_edge_weight();
 
-		printf("subgraph %d, #edges = %lu, #vertices = %lu / %lu, #starting = %d, #ending = %d, range = [%d, %d)\n",
+		printf("subgraph %d, #edges = %lu, #vertices = %lu / %lu, #starting = %d, #ending = %d, range = [%d, %d)\n", 
 				i, gr.num_edges(), gr.num_vertices() - 2, root.num_vertices() - 2, d0, dn, lpos, rpos);
 	}
 	printf("\n");

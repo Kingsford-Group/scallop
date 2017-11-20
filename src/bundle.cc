@@ -378,47 +378,36 @@ int bundle::build_hyper_edges1()
 
 int bundle::build_hyper_edges2()
 {
-	hs.clear();
-
 	//sort(hits.begin(), hits.end(), hit_compare_by_name);
 	sort(hits.begin(), hits.end());
 
+	/*
+	printf("----------------------\n");
+	for(int k = 9; k < hits.size(); k++) hits[k].print();
+	printf("======================\n");
+	*/
+
+	hs.clear();
+
 	string qname;
 	int hi = -2;
-
-	bool bridge = false;
 	vector<int> sp1;
-	vector<int> sp2;
-	vector<int> sp3;
 	for(int i = 0; i < hits.size(); i++)
 	{
 		hit &h = hits[i];
+		
+		/*
+		printf("sp1 = ( ");
+		printv(sp1);
+		printf(")\n");
+		h.print();
+		*/
 
 		if(h.qname != qname || h.hi != hi)
 		{
-			if(bridge == false)
-			{
-				set<int> ss1(sp1.begin(), sp1.end());
-				set<int> ss2(sp2.begin(), sp2.end());
-				if(ss1.size() >= 2 && ss1.size() <= 1) hs.add_node_list(ss1, 1);
-				if(ss2.size() >= 2 && ss1.size() <= 1) hs.add_node_list(ss2, 1);
-				if(ss1.size() >= 2 && ss2.size() >= 2) hs.add_node_list(ss1, ss2, 1);
-			}
-			else
-			{
-				set<int> ss;
-				ss.insert(sp1.begin(), sp1.end());
-				ss.insert(sp3.begin(), sp3.end());
-				ss.insert(sp2.begin(), sp2.end());
-				//printf("sp1: "); for(int k = 0; k < sp1.size(); k++) printf("%d ", sp1[k]); printf("\n");
-				//printf("sp2: "); for(int k = 0; k < sp2.size(); k++) printf("%d ", sp2[k]); printf("\n");
-				//printf("sp3: "); for(int k = 0; k < sp3.size(); k++) printf("%d ", sp3[k]); printf("\n");
-				if(ss.size() >= 2) hs.add_node_list(ss, 1);
-			}
+			set<int> s(sp1.begin(), sp1.end());
+			if(s.size() >= 2) hs.add_node_list(s);
 			sp1.clear();
-			sp2.clear();
-			sp3.clear();
-			bridge = false;
 		}
 
 		qname = h.qname;
@@ -429,7 +418,7 @@ int bundle::build_hyper_edges2()
 		vector<int64_t> v;
 		h.get_matched_intervals(v);
 
-		vector<int> sp;
+		vector<int> sp2;
 		for(int k = 0; k < v.size(); k++)
 		{
 			int32_t p1 = high32(v[k]);
@@ -437,175 +426,66 @@ int bundle::build_hyper_edges2()
 
 			int k1 = locate_left_partial_exon(p1);
 			int k2 = locate_right_partial_exon(p2);
-
-			// TODO, check whether exons from k1 to k2 are continuous
 			if(k1 < 0 || k2 < 0) continue;
-			for(int j = k1; j <= k2; j++) sp.push_back(j);
-		}
 
-		if(h.isize > 0) sp1 = sp;
-		else sp2 = sp;
+			for(int j = k1; j <= k2; j++) sp2.push_back(j);
+		}
 
 		if(sp1.size() <= 0 || sp2.size() <= 0)
 		{
-			bridge = false;
+			sp1.insert(sp1.end(), sp2.begin(), sp2.end());
 			continue;
 		}
 
-		int x1 = sp1[max_element(sp1)];
-		int x2 = sp2[min_element(sp2)];
-		vector<int> xv;
-		vector<int> yv;
-		bridge = bridge_read_bfs(x1, x2, xv, yv);
+		/*
+		printf("sp2 = ( ");
+		printv(sp2);
+		printf(")\n");
+		*/
 
-		if(bridge == true)
+		int x1 = -1, x2 = -1;
+		if(h.isize < 0) 
 		{
-			sp3 = xv;
+			x1 = sp1[max_element(sp1)];
+			x2 = sp2[min_element(sp2)];
 		}
 		else
 		{
-			//printf("extend %lu %lu %lu %lu exons\n", sp1.size(), xv.size(), yv.size(), sp2.size());
-			if(xv.size() >= 1) sp1.insert(sp1.end(), xv.begin(), xv.end());
-			if(yv.size() >= 1) sp2.insert(sp2.begin(), yv.begin(), yv.end());
+			x1 = sp2[max_element(sp2)];
+			x2 = sp1[min_element(sp1)];
+		}
+
+		vector<int> sp3;
+		bool c = bridge_read(x1, x2, sp3);
+
+		//printf("=========\n");
+
+		if(c == false)
+		{
+			set<int> s(sp1.begin(), sp1.end());
+			if(s.size() >= 2) hs.add_node_list(s);
+			sp1 = sp2;
+		}
+		else
+		{
+			sp1.insert(sp1.end(), sp2.begin(), sp2.end());
+			sp1.insert(sp1.end(), sp3.begin(), sp3.end());
 		}
 	}
 
 	return 0;
 }
 
-bool bundle::bridge_read_bfs(int x, int y, vector<int> &xv, vector<int> &yv)
-{
-	xv.clear();
-	yv.clear();
-	if(x >= y) return true;
-
-	// TODO
-	PEB e = gr.edge(x + 1, y + 1);
-	if(e.second == true) return true;
-
-	if(y - x >= 20) return false;
-
-	// compute vertices that can be reached from x
-	int k = 0;
-	edge_iterator it1, it2;
-	set<int> sx;
-	vector<int> qx;
-	qx.push_back(x);
-	sx.insert(x);
-	while(k >= 0 && k < qx.size())
-	{
-		int v = qx[k] + 1;
-		for(tie(it1, it2) = gr.out_edges(v); it1 != it2; it1++)
-		{
-			int s = (*it1)->source() - 1;
-			int t = (*it1)->target() - 1;
-			assert(s == v - 1);
-			if(sx.find(t) != sx.end()) continue;
-			if(t > y) continue;
-			sx.insert(t);
-			qx.push_back(t);
-		}
-		k++;
-	}
-
-	// compute vertices that can reach to y
-	set<int> sy;
-	vector<int> qy;
-	qy.push_back(y);
-	sy.insert(y);
-	k = 0;
-	while(k >= 0 && k < qy.size())
-	{
-		int v = qy[k] + 1;
-		for(tie(it1, it2) = gr.in_edges(v); it1 != it2; it1++)
-		{
-			int s = (*it1)->source() - 1;
-			int t = (*it1)->target() - 1;
-			assert(t == v - 1);
-			if(sy.find(s) != sy.end()) continue;
-			if(s < x) continue;
-			sy.insert(s);
-			qy.push_back(s);
-		}
-		k++;
-	}
-
-	// extend x
-	int p = x + 1;
-	while(true)
-	{
-		int cnt = 0;
-		int q = -1;
-		for(tie(it1, it2) = gr.out_edges(p); it1 != it2; it1++)
-		{
-			int s = (*it1)->source();
-			int t = (*it1)->target();
-			assert(s == p);
-			if(sx.find(t - 1) == sx.end()) continue;
-			if(sy.find(t - 1) == sy.end()) continue;
-			cnt++;
-			q = t;
-		}
-		if(cnt != 1) break;
-		xv.push_back(q - 1);
-		p = q;
-	}
-
-	// extend y
-	p = y + 1;
-	while(true)
-	{
-		int cnt = 0;
-		int q = -1;
-		for(tie(it1, it2) = gr.in_edges(p); it1 != it2; it1++)
-		{
-			int s = (*it1)->source();
-			int t = (*it1)->target();
-			assert(t == p);
-			if(sx.find(s - 1) == sx.end()) continue;
-			if(sy.find(s - 1) == sy.end()) continue;
-			cnt++;
-			q = s;
-		}
-		if(cnt != 1) break;
-		yv.push_back(q - 1);
-		p = q;
-	}
-
-	bool b = false;
-	if(xv.size() >= 1 && xv.back() == y)
-	{
-		assert(xv.size() == yv.size());
-		assert(yv.back() == x);
-		xv.pop_back();
-		yv.pop_back();
-		b = true;
-	}
-
-	if(yv.size() >= 1 && yv.back() == x)
-	{
-		assert(xv.size() == yv.size());
-		assert(xv.back() == y);
-		xv.pop_back();
-		yv.pop_back();
-		b = true;
-	}
-
-	reverse(yv.begin(), yv.end());
-	return b;
-}
-
-bool bundle::bridge_read_dp(int x, int y, vector<int> &v)
+bool bundle::bridge_read(int x, int y, vector<int> &v)
 {
 	v.clear();
 	if(x >= y) return true;
 
-	// TODO
 	PEB e = gr.edge(x + 1, y + 1);
 	if(e.second == true) return true;
 	//else return false;
 
-	if(y - x >= 20) return false;
+	if(y - x >= 6) return false;
 
 	long max = 9999999999;
 	vector<long> table;
@@ -631,7 +511,10 @@ bool bundle::bridge_read_dp(int x, int y, vector<int> &v)
 		}
 	}
 
+	//printf("x = %d, y = %d, num-paths = %ld\n", x, y, table[n - 1]);
 	if(table[n - 1] != 1) return false;
+
+	//printf("path = ");
 
 	v.clear();
 	int p = n - 1;
@@ -640,9 +523,11 @@ bool bundle::bridge_read_dp(int x, int y, vector<int> &v)
 		p = trace[p];
 		if(p <= 0) break;
 		v.push_back(p + x);
+		//printf("%d ", p + x);
 	}
+	//printf("\n");
+	//assert(v.size() >= 1);
 
-	reverse(v.begin(), v.end());
 	return true;
 }
 

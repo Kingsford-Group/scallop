@@ -418,7 +418,7 @@ bool scallop::resolve_hyper_edge(int fsize)
 
 			//printf(" split (%d, %d), w = %.2lf, weight = (%.2lf, %.2lf), merge (%d, %d) -> %d\n", v1[i], v2[j], w, w1[i], w2[j], k1, k2, x);
 
-			hs.replace(v1[i], v2[j], x, get_in_edges(x), get_out_edges(x));
+			hs.replace(v1[i], v2[j], x);
 			if(k1 == v1[i]) hs.remove(v1[i]);
 			if(k2 == v2[j]) hs.remove(v2[j]);
 		}
@@ -864,10 +864,10 @@ int scallop::decompose_vertex_replace(int root, MPID &pe2w)
 
 		int e = merge_adjacent_edges(e1, e2, w);
 
-		hs.replace(e1, e2, e, get_in_edges(e), get_out_edges(e));
+		hs.replace(e1, e2, e);
 
-		if(m[e1] == 1) hs.replace(e1, e, get_in_edges(e), get_out_edges(e));
-		if(m[e2] == 1) hs.replace(e2, e, get_in_edges(e), get_out_edges(e));
+		if(m[e1] == 1) hs.replace(e1, e);
+		if(m[e2] == 1) hs.replace(e2, e);
 	}
 
 	for(MPID::iterator it = pe2w.begin(); it != pe2w.end(); it++)
@@ -1414,32 +1414,6 @@ int scallop::compute_smallest_edge(int x, double &ratio)
 	}
 	assert(e >= 0);
 	return e;
-}
-
-set<int> scallop::get_in_edges(int ei)
-{
-	int x = i2e[ei]->source();
-	set<int> s;
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
-	{
-		edge_descriptor e = (*it1);
-		s.insert(e2i[e]);
-	}
-	return s;
-}
-
-set<int> scallop::get_out_edges(int ei)
-{
-	int x = i2e[ei]->target();
-	set<int> s;
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.out_edges(x); it1 != it2; it1++)
-	{
-		edge_descriptor e = (*it1);
-		s.insert(e2i[e]);
-	}
-	return s;
 }
 
 int scallop::print()

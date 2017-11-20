@@ -83,7 +83,7 @@ config::config(){
 	fixed_gene_name = "";
 	batch_bundle_size = 100;
 	verbose = 1;
-	version = "v1.0.20";
+	version = "v0.10.2b";
 }
 
 

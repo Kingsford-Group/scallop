@@ -46,6 +46,7 @@ public:
 	int build(directed_graph &gr, MEI &e2i);
 	int build_edges(directed_graph &gr, MEI &e2i);
 	int build_index();
+	int update_index();
 	set<int> get_intersection(const vector<int> &v);
 	MI get_successors(int e);
 	MI get_predecessors(int e);
@@ -53,9 +54,9 @@ public:
 	int print();
 
 public:
-	int replace(int x, int e, const set<int> &s1, const set<int> &s2);
-	int replace(int x, int y, int e, const set<int> &s1, const set<int> &s2);
-	int replace(const vector<int> &x, int e, const set<int> &s1, const set<int> &s2);
+	int replace(int x, int e);
+	int replace(int x, int y, int e);
+	int replace(const vector<int> &x, int e);
 	int remove(int e);
 	int remove(const vector<int> &x);
 	int remove(const set<int> &x);
