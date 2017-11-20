@@ -35,7 +35,7 @@ private:
 	int qcnt;
 	double qlen;
 	vector<transcript> trsts;
-	const config cfg;
+	const config& cfg;
 
 public:
 	int assemble();

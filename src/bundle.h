@@ -45,7 +45,7 @@ public:
 	int print(int index);
 
 private:
-	const config cfg;
+	const config& cfg;
 
 	// check and init
 	int check_left_ascending();

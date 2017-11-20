@@ -89,6 +89,7 @@ int hyper_set::build_edges(directed_graph &gr, MEI& e2i)
 	{
 		int c = it->second;
 		const vector<int> &vv = it->first;
+		//cerr <<  "cfg.min_router_count; " << cfg.min_router_count << endl;
 		if(c < cfg.min_router_count) continue;
 
 		vector<int> ve;
@@ -265,9 +266,9 @@ int hyper_set::replace(const vector<int> &v, int e, const set<int> &s1, const se
 
 		if(bv.size() <= 0) continue;
 
-		if(bv.size() != 1)
+		if(bv.size() != 1 && cfg.verbose > 0)
 		{
-			printf("with bridge: (\n");
+			printf("with bridge: (");
 			printv(vv);
 			printf(") for ");
 			printv(v);

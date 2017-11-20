@@ -21,6 +21,7 @@ scallop::scallop(const splice_graph &g, const hyper_set &h,const config &c)
 	: gr(g), hs(h), cfg(c)
 {
 	round = 0;
+	//cerr <<  "cfg.output_tex_files: " << cfg.output_tex_files << endl;
 	if(cfg.output_tex_files == true) gr.draw(gr.gid + "." + tostring(round++) + ".tex");
 
 	gr.get_edge_indices(i2e, e2i);
@@ -45,10 +46,15 @@ int scallop::assemble()
 
 	while(true)
 	{
+		//cerr <<  "cfg.max_num_exons: " << cfg.max_num_exons << endl;
 		if(gr.num_vertices() > cfg.max_num_exons) break;
 
 		bool b = false;
 
+		//cerr <<  "cfg.max_decompose_error_ratio[TRIVIAL_VERTEX]: " << cfg.max_decompose_error_ratio[TRIVIAL_VERTEX] << endl;
+		//cerr <<  "cfg.max_decompose_error_ratio[SMALLEST_EDGE]: " << cfg.max_decompose_error_ratio[SMALLEST_EDGE] << endl;
+		//cerr <<  "cfg.max_decompose_error_ratio[NEGLIGIBLE_EDGE]: " << cfg.max_decompose_error_ratio[NEGLIGIBLE_EDGE] << endl;
+		//cerr <<  "cfg.max_decompose_error_ratio[SPLITTABLE_HYPER]: " << cfg.max_decompose_error_ratio[SPLITTABLE_HYPER] << endl;
 		b = resolve_trivial_vertex_fast(cfg.max_decompose_error_ratio[TRIVIAL_VERTEX]);
 		if(b == true) continue;
 
@@ -1358,6 +1364,7 @@ int scallop::greedy_decompose()
 	{
 		VE v;
 		double w = gr.compute_maximum_path_w(v);
+		//cerr <<  "cfg.min_transcript_coverage: " << cfg.min_transcript_coverage << endl;
 		if(w <= cfg.min_transcript_coverage) break;
 
 		int e = split_merge_path(v, w);

@@ -40,7 +40,7 @@ public:
 	bool right_inclusive();
 
 private:
-	const config cfg;
+	const config& cfg;
 	int build_join_interval_map();
 	int smooth_join_interval_map();
 	int split_join_interval_map();

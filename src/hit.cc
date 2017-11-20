@@ -98,6 +98,7 @@ int hit::set_strand()
 {
 	strand = '.';
 
+	//cerr << "cfg.library_type: " << cfg.library_type << endl;
 	if(cfg.library_type == FR_FIRST && ((flag & 0x1) >= 1))
 	{
 		if((flag & 0x10) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '-';
@@ -147,6 +148,7 @@ int hit::build_splice_positions()
 		if(bam_cigar_op(cigar[k]) != BAM_CREF_SKIP) continue;
 		if(bam_cigar_op(cigar[k-1]) != BAM_CMATCH) continue;
 		if(bam_cigar_op(cigar[k+1]) != BAM_CMATCH) continue;
+		//cerr << "cfg.min_flank_length: "  << cfg.min_flank_length << endl;
 		if(bam_cigar_oplen(cigar[k-1]) < cfg.min_flank_length) continue;
 		if(bam_cigar_oplen(cigar[k+1]) < cfg.min_flank_length) continue;
 

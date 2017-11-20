@@ -11,7 +11,7 @@ See LICENSE for licensing.
 #include "previewer.h"
 #include "config.h"
 
-previewer::previewer(const config &c)
+previewer::previewer(config &c)
   : cfg(c)
 {
     sfn = sam_open(cfg.input_file.c_str(), "r");

@@ -43,7 +43,7 @@ public:
 	set<int> nonzeroset;				// vertices with degree >= 1
 	vector<path> paths;					// predicted paths
 	vector<transcript> trsts;			// predicted transcripts
-	const config cfg;
+	const config& cfg;
 
 private:
 	// init

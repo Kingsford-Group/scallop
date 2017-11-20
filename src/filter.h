@@ -17,7 +17,7 @@ public:
 
 public:
 	vector<transcript> trs;
-	const config cfg;
+	const config& cfg;
 
 public:
 	int join_single_exon_transcripts();

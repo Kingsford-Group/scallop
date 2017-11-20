@@ -15,8 +15,6 @@ See LICENSE for licensing.
 
 using namespace std;
 
-config::~config(){}
-
 config::config(){
 	//// parameters
 	// for bam file and reads
@@ -86,6 +84,95 @@ config::config(){
 	batch_bundle_size = 100;
 	verbose = 1;
 	version = "v1.0.20";
+}
+
+
+void config::update_from_file(char * fname)
+{
+	ifstream f(fname);
+	if(f){
+		string arg = "";
+		while(f.peek() != EOF){
+			f >> arg;
+			if(arg == "min_flank_length"){
+				f >> min_flank_length;
+			}else if(arg == "max_edit_distance"){
+				f >> max_edit_distance;
+			}else if(arg == "min_bundle_gap"){
+				f >> min_bundle_gap;
+			}else if(arg == "min_num_hits_in_bundle"){
+				f >> min_num_hits_in_bundle;
+			}else if(arg == "min_mapping_quality"){
+				f >> min_mapping_quality;
+			}else if(arg == "min_splice_boundary_hits"){
+				f >> min_splice_boundary_hits;
+			}else if(arg == "min_subregion_gap"){
+				f >> min_subregion_gap;
+			}else if(arg == "min_subregion_length"){
+				f >> min_subregion_length;
+			}else if(arg == "min_subregion_overlap"){
+				f >> min_subregion_overlap;
+			}else if(arg == "min_surviving_edge_weight"){
+				f >> min_surviving_edge_weight;
+			}else if(arg == "max_intron_contamination_coverage"){
+				f >> max_intron_contamination_coverage;
+			}else if(arg == "min_transcript_coverage"){
+				f >> min_transcript_coverage;
+				if(fabs(min_transcript_coverage - 1.0) < 0.01) min_transcript_coverage = 1.01;
+			}else if(arg == "min_transcript_coverage_ratio"){
+				f >> min_transcript_coverage_ratio;
+			}else if(arg == "min_single_exon_coverage"){
+				f >> min_single_exon_coverage;
+			}else if(arg == "min_transcript_numreads"){
+				f >> min_transcript_numreads;
+			}else if(arg == "min_transcript_length_base"){
+				f >> min_transcript_length_base;
+			}else if(arg == "min_transcript_length_increase"){
+				f >> min_transcript_length_increase;
+			}else if(arg == "min_exon_length"){
+				f >> min_exon_length;
+			}else if(arg == "max_num_exons"){
+				f >> max_num_exons;
+			}else if(arg == "max_dp_table_size"){
+				f >> max_dp_table_size;
+			}else if(arg == "min_router_count"){
+				f >> min_router_count;
+			}else if(arg == "use_second_alignment"){
+				string s;
+				f >> s;
+				std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+
+				if(s == "true" or s == "1") use_second_alignment = true;
+				else if(s == "false" or s == "0") use_second_alignment = false;
+				else{
+					std::cerr << "'" << s << "' not recognzed as a boolean for use_second_alignment" << std::endl;
+					exit(64);
+				}
+			}else if(arg == "uniquely_mapped_only"){
+				string s;
+				f >> s;
+				std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+
+				if(s == "true" or s == "1") uniquely_mapped_only = true;
+				else if(s == "false" or s == "0") uniquely_mapped_only = false;
+				else{
+					std::cerr << "'" << s << "' not recognzed as a boolean for uniquely_mapped_only" << std::endl;
+					exit(64);
+				}
+			}else if(arg == "batch_bundle_size"){
+				f >> batch_bundle_size;
+			}else{
+				cerr << "Unknown option in configuration file" << endl;
+				cerr << "File: " << fname << endl;
+				cerr << "Argument: " << arg << endl;
+				exit(64);
+			}
+		}
+	}else{
+		cerr << "Cannot open configuration file " << fname << endl;
+		cerr << "Error code: " << strerror(errno);
+		exit(126);
+	}
 }
 
 int config::parse_arguments(int argc, const char ** argv)

@@ -46,7 +46,6 @@ using namespace std;
 class config{
 public:
   config();
-  ~config();
 
   //// parameters
   // for bam file and reads
@@ -117,6 +116,7 @@ public:
   int parse_arguments(int argc, const char ** argv);
   int print_parameters();
   int print_copyright();
+  void update_from_file(char * fname);
 };
 
 int print_logo();
