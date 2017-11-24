@@ -205,7 +205,7 @@ First, use our tool
 [gtfcuff](https://github.com/Kingsford-Group/rnaseqtools) to fetch the transcripts that
 are only in `scallop.gtf`:
 ```
-gtfcuff puniq gffall.scallop.gtf.tmap scallop.gtf unique.gtf
+gtfcuff puniq gffall.scallop.gtf.tmap scallop.gtf reference.gtf unique.gtf
 ```
 The uniquely expressed transcripts (i.e., those are in `scallop.gtf` but not in `reference.gtf`)
 will be written to `unique.gtf`.
