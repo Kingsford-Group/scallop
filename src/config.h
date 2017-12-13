@@ -47,6 +47,8 @@ class config{
 public:
   config();
 
+  bool smooth;
+
   //// parameters
   // for bam file and reads
   int min_flank_length;
@@ -59,11 +61,11 @@ public:
   bool use_second_alignment;
 
   // for preview
-  bool preview_only;
-  int max_preview_reads;
-  int max_preview_spliced_reads;
-  int min_preview_spliced_reads;
-  double preview_infer_ratio;
+  static bool preview_only;
+  static int max_preview_reads;
+  static int max_preview_spliced_reads;
+  static int min_preview_spliced_reads;
+  static double preview_infer_ratio;
 
   // for identifying subgraphs
   int32_t min_subregion_gap;
@@ -94,30 +96,31 @@ public:
   int simulation_max_edge_weight;
 
   // input and output
-  string algo;
-  string input_file;
-  string ref_file;
-  string ref_file1;
-  string ref_file2;
-  string output_file;
+  static string algo;
+  static string input_file;
+  static string ref_file;
+  static string ref_file1;
+  static string ref_file2;
+  static string output_file;
 
   // for controling
-  bool output_tex_files;
-  string fixed_gene_name;
-  int max_num_bundles;
-  int library_type;
-  int min_gtf_transcripts_num;
-  int batch_bundle_size;
-  int verbose;
-  string version;
+  static bool output_tex_files;
+  static string fixed_gene_name;
+  static int max_num_bundles;
+  static int library_type;
+  static int min_gtf_transcripts_num;
+  static int batch_bundle_size;
+  static int verbose;
+  static string version;
 
   // parse arguments
   int print_command_line(int argc, const char ** argv);
   int parse_arguments(int argc, const char ** argv);
   int print_parameters();
   int print_copyright();
-  void update_from_file(char * fname);
+  void update_from_file(const char * fname);
 };
+
 
 int print_logo();
 int print_help();

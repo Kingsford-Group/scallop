@@ -38,11 +38,11 @@ public:
 	hyper_set(const config &c);
 	int clear();
 	int add_node_list(const set<int> &s);
-	int add_node_list(const set<int> &s1, const set<int> &s2);
+	//int add_node_list(const set<int> &s1, const set<int> &s2);
 	int add_node_list(const set<int> &s, int c);
-	int add_node_list(const set<int> &s1, const set<int> &s2, int c);
+	//int add_node_list(const set<int> &s1, const set<int> &s2, int c);
 	int add_node_list(const vector<int> &v, int c);
-	int add_node_list(const vector<int> &v1, const vector<int> &v2, int c);
+	//int add_node_list(const vector<int> &v1, const vector<int> &v2, int c);
 	int build(directed_graph &gr, MEI &e2i);
 	int build_edges(directed_graph &gr, MEI &e2i);
 	int build_index();

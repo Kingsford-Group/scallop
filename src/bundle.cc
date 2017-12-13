@@ -395,7 +395,7 @@ int bundle::build_hyper_edges2()
 	for(int i = 0; i < hits.size(); i++)
 	{
 		hit &h = hits[i];
-		
+
 		/*
 		printf("sp1 = ( ");
 		printv(sp1);
@@ -444,7 +444,7 @@ int bundle::build_hyper_edges2()
 		*/
 
 		int x1 = -1, x2 = -1;
-		if(h.isize < 0) 
+		if(h.isize < 0)
 		{
 			x1 = sp1[max_element(sp1)];
 			x2 = sp2[min_element(sp2)];

@@ -39,12 +39,16 @@ private:
 
 public:
 	int assemble();
+	assembler* solve(const config &c);
+	bool operator>(const assembler &a);
+	void improve(){}
+	int write(const char* fname);
 
 private:
 	int process(int n);
 	int assemble(const splice_graph &gr, const hyper_set &hs);
 	int assign_RPKM();
-	int write();
+
 	int compare(splice_graph &gr, const string &ref, const string &tex = "");
 };
 

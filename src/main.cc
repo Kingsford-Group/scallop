@@ -16,6 +16,7 @@ See LICENSE for licensing.
 #include "config.h"
 #include "previewer.h"
 #include "assembler.h"
+#include "param_advising.h"
 
 using namespace std;
 
@@ -31,28 +32,41 @@ int main(int argc, const char **argv)
 		print_logo();
 		return 0;
 	}
-	config cfg;
-	cfg.parse_arguments(argc, argv);
+	vector<config> cfg(1);
+	cfg[0].parse_arguments(argc, argv);
 
-	if(cfg.verbose >= 1)
+	if(cfg[0].verbose >= 1)
 	{
-		cfg.print_copyright();
+		cfg[0].print_copyright();
 		printf("\n");
-		cfg.print_command_line(argc, argv);
+		cfg[0].print_command_line(argc, argv);
 		printf("\n");
 		//print_parameters();
 	}
 
-	if(cfg.library_type == EMPTY || cfg.preview_only == true)
+	if(config::library_type == EMPTY || config::preview_only == true)
 	{
-		previewer pv(cfg);
+		previewer pv(cfg[0]);
 		pv.preview();
 	}
 
-	if(cfg.preview_only == true) return 0;
+	//cfg.push_back(config(cfg[0]));
+  //cfg[1].update_from_file(string("SRR545723_tophat.config").c_str());
+  cfg[0].update_from_file(string("default.config").c_str());
+	//cfg.push_back(config(cfg[0]));
+	//cfg.push_back(config(cfg[0]));
+	//cfg.push_back(config(cfg[0]));
 
-	assembler asmb(cfg);
-	asmb.assemble();
+	if(config::preview_only == true) return 0;
+
+	assembler* asmb = new assembler(cfg[0]);
+	//assembler best = asmb.solve(cfg[0]);
+	//asmb.assemble();
+	assembler best = parameter_advising<assembler,assembler,config>(asmb,cfg);
+
+  //config::output_file = "none.gff";
+	best.write("default.gff");
+
 
 	return 0;
 }

@@ -15,7 +15,34 @@ See LICENSE for licensing.
 
 using namespace std;
 
+bool config::preview_only;
+int config::max_preview_reads;
+int config::max_preview_spliced_reads;
+int config::min_preview_spliced_reads;
+double config::preview_infer_ratio;
+
+string config::algo;
+string config::input_file;
+string config::ref_file;
+string config::ref_file1;
+string config::ref_file2;
+string config::output_file;
+
+// for controling
+bool config::output_tex_files;
+string config::fixed_gene_name;
+int config::max_num_bundles;
+int config::library_type;
+int config::min_gtf_transcripts_num;
+int config::batch_bundle_size;
+int config::verbose;
+string config::version;
+
+
 config::config(){
+
+	smooth = false;
+
 	//// parameters
 	// for bam file and reads
 	min_flank_length = 3;
@@ -87,13 +114,15 @@ config::config(){
 }
 
 
-void config::update_from_file(char * fname)
+void config::update_from_file(const char * fname)
 {
 	ifstream f(fname);
 	if(f){
 		string arg = "";
-		while(f.peek() != EOF){
+		while(!f.eof() && f.peek() != EOF){
 			f >> arg;
+      cout << "Arg: " << arg << endl;
+      if(f.eof() && f.peek() == EOF) break;
 			if(arg == "min_flank_length"){
 				f >> min_flank_length;
 			}else if(arg == "max_edit_distance"){

@@ -36,6 +36,16 @@ assembler::~assembler()
     sam_close(sfn);
 }
 
+assembler* assembler::solve(const config &c){
+  assembler* a = new assembler(c);
+  a->assemble();
+  return a;
+}
+
+bool assembler::operator>(const assembler &a){
+  return true;
+}
+
 int assembler::assemble()
 {
     while(sam_read1(sfn, hdr, b1t) >= 0)
@@ -101,8 +111,6 @@ int assembler::assemble()
 	filter ft(trsts, cfg);
 	ft.merge_single_exon_transcripts();
 	trsts = ft.trs;
-
-	write();
 
 	return 0;
 }
@@ -191,9 +199,11 @@ int assembler::assign_RPKM()
 	return 0;
 }
 
-int assembler::write()
+int assembler::write(const char* fname)
 {
-	ofstream fout(cfg.output_file.c_str());
+  cout << "Got here with output file: " << fname << endl;
+	//ofstream fout(cfg.output_file.c_str());
+	ofstream fout(fname);
 	if(fout.fail()) return 0;
 	for(int i = 0; i < trsts.size(); i++)
 	{
