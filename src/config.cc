@@ -206,6 +206,8 @@ void config::update_from_file(const char * fname)
 
 int config::parse_arguments(int argc, const char ** argv)
 {
+  bool tuning_parameter_set = false;
+  string config_file = "";
 	for(int i = 1; i < argc; i++)
 	{
 		// necessary ones
@@ -265,43 +267,55 @@ int config::parse_arguments(int argc, const char ** argv)
 			print_logo();
 			exit(0);
 		}
-		else if(string(argv[i]) == "--min_flank_length")
+    else if(string(argv[i]) == "--config_file"){
+      config_file = string(argv[i + 1]);
+      i++;
+    }
+    else if(string(argv[i]) == "--min_flank_length")
 		{
+      tuning_parameter_set = true;
 			min_flank_length = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--max_edit_distance")
 		{
+      tuning_parameter_set = true;
 			max_edit_distance = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_bundle_gap")
 		{
+      tuning_parameter_set = true;
 			min_bundle_gap = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_num_hits_in_bundle")
 		{
+      tuning_parameter_set = true;
 			min_num_hits_in_bundle = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_mapping_quality")
 		{
+      tuning_parameter_set = true;
 			min_mapping_quality = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_splice_boundary_hits")
 		{
+      tuning_parameter_set = true;
 			min_splice_boundary_hits = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--max_preview_spliced_reads")
 		{
+      tuning_parameter_set = true;
 			max_preview_spliced_reads = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_preview_spliced_reads")
 		{
+      tuning_parameter_set = true;
 			min_preview_spliced_reads = atoi(argv[i + 1]);
 			i++;
 		}
@@ -311,92 +325,110 @@ int config::parse_arguments(int argc, const char ** argv)
 		}
 		else if(string(argv[i]) == "--max_preview_reads")
 		{
+      tuning_parameter_set = true;
 			max_preview_reads = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--preview_infer_ratio")
 		{
+      tuning_parameter_set = true;
 			preview_infer_ratio = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_subregion_gap")
 		{
+      tuning_parameter_set = true;
 			min_subregion_gap = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_subregion_length")
 		{
+      tuning_parameter_set = true;
 			min_subregion_length = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_subregion_overlap")
 		{
+      tuning_parameter_set = true;
 			min_subregion_overlap = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_surviving_edge_weight")
 		{
+      tuning_parameter_set = true;
 			min_surviving_edge_weight = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--max_intron_contamination_coverage")
 		{
+      tuning_parameter_set = true;
 			max_intron_contamination_coverage = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_transcript_coverage")
 		{
+      tuning_parameter_set = true;
 			min_transcript_coverage = atof(argv[i + 1]);
 			i++;
 			if(fabs(min_transcript_coverage - 1.0) < 0.01) min_transcript_coverage = 1.01;
 		}
 		else if(string(argv[i]) == "--min_transcript_coverage_ratio")
 		{
+      tuning_parameter_set = true;
 			min_transcript_coverage_ratio = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_single_exon_coverage")
 		{
+      tuning_parameter_set = true;
 			min_single_exon_coverage = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_transcript_numreads")
 		{
+      tuning_parameter_set = true;
 			min_transcript_numreads = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_transcript_length_base")
 		{
+      tuning_parameter_set = true;
 			min_transcript_length_base = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_transcript_length_increase")
 		{
+      tuning_parameter_set = true;
 			min_transcript_length_increase = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_exon_length")
 		{
+      tuning_parameter_set = true;
 			min_exon_length = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--max_num_exons")
 		{
+      tuning_parameter_set = true;
 			max_num_exons = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--max_dp_table_size")
 		{
+      tuning_parameter_set = true;
 			max_dp_table_size = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_router_count")
 		{
+      tuning_parameter_set = true;
 			min_router_count = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--library_type")
 		{
+      tuning_parameter_set = true;
 			string s(argv[i + 1]);
 			if(s == "empty") library_type = EMPTY;
 			if(s == "unstranded") library_type = UNSTRANDED;
@@ -406,6 +438,7 @@ int config::parse_arguments(int argc, const char ** argv)
 		}
 		else if(string(argv[i]) == "--use_second_alignment")
 		{
+      tuning_parameter_set = true;
 			string s(argv[i + 1]);
 			std::transform(s.begin(), s.end(), s.begin(), ::tolower);
 
@@ -419,6 +452,7 @@ int config::parse_arguments(int argc, const char ** argv)
 		}
 		else if(string(argv[i]) == "--uniquely_mapped_only")
 		{
+      tuning_parameter_set = true;
 			string s(argv[i + 1]);
 			std::transform(s.begin(), s.end(), s.begin(), ::tolower);
 
@@ -437,6 +471,7 @@ int config::parse_arguments(int argc, const char ** argv)
 		}
 		else if(string(argv[i]) == "--batch_bundle_size")
 		{
+      tuning_parameter_set = true;
 			batch_bundle_size = atoi(argv[i + 1]);
 			i++;
 		}
@@ -446,6 +481,14 @@ int config::parse_arguments(int argc, const char ** argv)
 	{
 		min_surviving_edge_weight = 0.1 + min_transcript_coverage;
 	}
+  
+  if(config_file != ""){
+    if(tuning_parameter_set){
+      cerr << "Error: You cannot set a parameter if a configuration file is given " << tuning_parameter_set << "\n" << endl;
+      exit(10);
+    }
+    update_from_file(config_file.c_str());
+  }
 
 	// verify arguments
 	if(input_file == "")

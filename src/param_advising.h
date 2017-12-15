@@ -1,12 +1,13 @@
 template<class I, class O, class P>
 O& parameter_advising(I* instance, vector<P> parameters){
-  cout << "PA step 0 of " << parameters.size() << endl;
+  cout << "PA step 1 of " << parameters.size() << endl;
   O* best = instance->solve(parameters[0]);
   cout << "Done" << endl;
+  cout << ((*best) > (*best)) << endl;
   if(parameters[0].smooth) best->improve();
   cout << "Pre-Loop" << endl;
   for(int i=1; i<parameters.size(); i++){
-    cout << "PA step " << i << " of " << parameters.size() << endl;
+    cout << "PA step " << (i+1) << " of " << parameters.size() << endl;
     O* current = instance->solve(parameters[i]);
     if(parameters[i].smooth) current->improve();
     if((*current) > (*best)){

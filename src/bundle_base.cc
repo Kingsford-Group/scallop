@@ -96,6 +96,82 @@ int bundle_base::clear()
 	hits.clear();
 	mmap.clear();
 	imap.clear();
+	trsts.clear();
 	return 0;
 }
 
+vector<int> bundle_base::hits_on_transcripts(vector <uint32_t> &pair_mapping){
+	int mapped = 0;
+  float total_distance = 0;
+  float norm_distance = 0;
+  int mapped_pairs = 0;
+  int pairs = 0;
+  //uint64_t max_value = 0;
+  //vector<uint64_t> read_index;
+	//cout << "\n\n";
+  for(int i=0; i<hits.size(); i++){
+    //read_index.push_back(stoul(hits[i].qname.substr(hits[i].qname.find(".")+1)));
+    //if(read_index[read_index.size()-1] > max_value) max_value = read_index[read_index.size()-1];
+    //cout << read_index[read_index.size()-1] << "\t" << max_value << endl;
+
+		for(int j=0; j<trsts.size(); j++){
+			if(hits[i].maps_to_transcript(trsts[j])){
+        total_distance += hits[i].nm;
+        norm_distance += 1.0 * hits[i].nm / hits[i].qlen;
+				mapped++;
+				break;
+      }
+		}
+	}
+  //vector<uint32_t> pair_mapping(max_value,-1);
+  for(int i=0; i<hits.size(); i++){
+    uint32_t read_index = stoul(hits[i].qname.substr(hits[i].qname.find(".")+1));
+    assert(read_index < pair_mapping.size());
+    if(pair_mapping[read_index] != -1){
+      int ip = pair_mapping[read_index];
+      pairs++;
+      for(int j=0; j<trsts.size(); j++){
+        if(hits[i].maps_to_transcript(trsts[j]) && hits[ip].maps_to_transcript(trsts[j])){
+          mapped_pairs++;
+          break;          
+        }
+      }
+    }
+    pair_mapping[read_index] = i;
+  }
+
+    for(int i=0; i<hits.size(); i++){
+      uint32_t read_index = stoul(hits[i].qname.substr(hits[i].qname.find(".")+1));
+      pair_mapping[read_index] = -1;
+    }
+
+  /*for(int i=0; i<hits.size()-1; i++){
+    //for(int ip=i+1; ip<=i+1; ip++){
+    for(int ip=i+1; ip<hits.size(); ip++){
+      if(config::verbose >= 2){
+        cerr << i << ": " << hits[i].qname << "=?" << hits[ip].qname << " && " << hits[i].hi << "=?" << hits[ip].hi << endl;
+      }
+      if(hits[i].qname == hits[ip].qname){
+      //if(hits[i].qname == hits[ip].qname && hits[i].hi == hits[ip].hi){
+        pairs++;
+        if(ip != i+1){
+          //cout << "Found one thats not i+1 " << i << "," << ip <<  "!!"  << hits[i].qname <<" == " << hits[ip].qname << " " << hits[i].hi << " == " <<hits[ip].hi<< endl;
+        }
+        for(int j=0; j<trsts.size(); j++){
+          if(hits[i].maps_to_transcript(trsts[j]) && hits[ip].maps_to_transcript(trsts[j])){
+            mapped_pairs++;
+            break;
+          }
+        }
+        break;
+      }
+    }
+  }*/
+	vector<int> rtn;
+	rtn.push_back(mapped);
+  rtn.push_back(total_distance);
+  rtn.push_back(norm_distance);
+  rtn.push_back(mapped_pairs);
+  rtn.push_back(pairs);
+	return rtn;
+}

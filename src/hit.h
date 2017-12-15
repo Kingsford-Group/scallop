@@ -12,6 +12,7 @@ See LICENSE for licensing.
 
 #include "htslib/sam.h"
 #include "config.h"
+#include "transcript.h"
 
 using namespace std;
 
@@ -72,6 +73,8 @@ public:
 	int get_mid_intervals(vector<int64_t> &vm, vector<int64_t> &vi, vector<int64_t> &vd) const;
 	int get_matched_intervals(vector<int64_t> &v) const;
 	int print() const;
+
+	bool maps_to_transcript(const transcript &t);
 };
 
 //inline bool hit_compare_by_name(const hit &x, const hit &y);

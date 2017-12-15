@@ -36,6 +36,7 @@ private:
 	double qlen;
 	vector<transcript> trsts;
 	const config& cfg;
+	vector<int> mapped_counts;
 
 public:
 	int assemble();
@@ -45,8 +46,8 @@ public:
 	int write(const char* fname);
 
 private:
-	int process(int n);
-	int assemble(const splice_graph &gr, const hyper_set &hs);
+	int process(int n, vector<uint32_t> &read_mapping);
+	int assemble(const splice_graph &gr, const hyper_set &hs, vector<transcript> &trsts);
 	int assign_RPKM();
 
 	int compare(splice_graph &gr, const string &ref, const string &tex = "");

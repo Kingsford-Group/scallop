@@ -275,3 +275,38 @@ inline bool hit_compare_right(const hit &x, const hit &y)
 	return false;
 }
 */
+
+bool hit::maps_to_transcript(const transcript &t){
+	bool started = false;
+	int cur_exon = 0;
+	if(spos.size() == 0){
+		while(cur_exon < t.exons.size() && t.exons[cur_exon].first > rpos)
+			cur_exon++;
+		return ((t.exons[cur_exon].first < pos) && (t.exons[cur_exon].second > rpos));
+	}
+
+	int32_t start = pos;
+	int32_t end = high32(spos[0]);
+	while(cur_exon < t.exons.size() && t.exons[cur_exon].first > end)
+		cur_exon++;
+	if(cur_exon == t.exons.size() && t.exons[cur_exon].first > end)
+		return false;
+	if(t.exons[cur_exon].second != end)
+		return false;
+	if(cur_exon + spos.size() > t.exons.size())
+		return false;
+
+	cur_exon++;
+	for(int i=0; i<spos.size()-1; i++, cur_exon++){
+		start = high32(spos[i]);
+		end = low32(spos[i+1]);
+		if(start != t.exons[cur_exon].first || end != t.exons[cur_exon].second)
+			return false;
+	}
+	start = low32(spos[spos.size()-1]);
+	end = rpos;
+	if(start != t.exons[cur_exon].first || end > t.exons[cur_exon].second)
+		return false;
+
+	return true;
+}

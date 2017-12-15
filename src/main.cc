@@ -51,8 +51,8 @@ int main(int argc, const char **argv)
 	}
 
 	//cfg.push_back(config(cfg[0]));
-  //cfg[1].update_from_file(string("SRR545723_tophat.config").c_str());
-  cfg[0].update_from_file(string("default.config").c_str());
+  //cfg[1].update_from_file(string("testing_data/SRR387661_tophat.config").c_str());
+  //cfg[0].update_from_file(string("default.config").c_str());
 	//cfg.push_back(config(cfg[0]));
 	//cfg.push_back(config(cfg[0]));
 	//cfg.push_back(config(cfg[0]));
@@ -60,13 +60,15 @@ int main(int argc, const char **argv)
 	if(config::preview_only == true) return 0;
 
 	assembler* asmb = new assembler(cfg[0]);
+	//(asmb->solve(cfg[0]))->write("testing_data/default.gtf");
+	//(asmb->solve(cfg[1]))->write("testing_data/best.gtf");
 	//assembler best = asmb.solve(cfg[0]);
 	//asmb.assemble();
 	assembler best = parameter_advising<assembler,assembler,config>(asmb,cfg);
 
   //config::output_file = "none.gff";
-	best.write("default.gff");
-
+	//best.write("testing_data/default.gtf");
+  best.write(config::output_file.c_str());
 
 	return 0;
 }

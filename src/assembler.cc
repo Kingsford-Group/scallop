@@ -27,6 +27,11 @@ assembler::assembler(const config &c)
 	terminate = false;
 	qlen = 0;
 	qcnt = 0;
+  mapped_counts.push_back(0);
+  mapped_counts.push_back(0);
+  mapped_counts.push_back(0);
+  mapped_counts.push_back(0);
+  mapped_counts.push_back(0);
 }
 
 assembler::~assembler()
@@ -43,12 +48,17 @@ assembler* assembler::solve(const config &c){
 }
 
 bool assembler::operator>(const assembler &a){
-  return true;
+  cout << mapped_counts[0] << "\t" << a.mapped_counts[0] << endl;
+  return (mapped_counts[0] > a.mapped_counts[0]);
 }
 
 int assembler::assemble()
 {
-    while(sam_read1(sfn, hdr, b1t) >= 0)
+  uint32_t max_hit_index = 0;
+  //vector<uint32_t> hit_index;
+  //hit_index.reserve(1000000);
+  vector <uint32_t> read_mapping(max_hit_index,-1);
+  while(sam_read1(sfn, hdr, b1t) >= 0)
 	{
 		if(terminate == true) return 0;
 
@@ -64,6 +74,11 @@ int assembler::assemble()
 		ht.set_tags(b1t);
 		ht.set_strand();
 		ht.build_splice_positions();
+
+    uint32_t hit_index = stoul(ht.qname.substr(ht.qname.find(".")+1));
+    if(hit_index > max_hit_index) max_hit_index = hit_index;
+    //hit_index.push_back(stoul(ht.qname.substr(ht.qname.find(".")+1)));
+    //if(hit_index[hit_index.size()-1] > max_hit_index) max_hit_index = hit_index[hit_index.size()-1];
 
 		//ht.print();
 
@@ -87,7 +102,8 @@ int assembler::assemble()
 		}
 
 		// process
-		process(cfg.batch_bundle_size);
+    read_mapping.resize(max_hit_index+1,-1);
+		process(cfg.batch_bundle_size, read_mapping);
 
 		// add hit
 		if(cfg.uniquely_mapped_only == true && ht.nh != 1) continue;
@@ -101,10 +117,11 @@ int assembler::assemble()
 		if(cfg.library_type == UNSTRANDED && ht.xs == '+') bb1.add_hit(ht);
 		if(cfg.library_type == UNSTRANDED && ht.xs == '-') bb2.add_hit(ht);
 	}
+  
 
 	pool.push_back(bb1);
 	pool.push_back(bb2);
-	process(0);
+	process(0, read_mapping);
 
 	assign_RPKM();
 
@@ -112,12 +129,15 @@ int assembler::assemble()
 	ft.merge_single_exon_transcripts();
 	trsts = ft.trs;
 
+  cout << "Mapped counts: " << mapped_counts[0] << "\t" << mapped_counts[1] << "\t" << (1.0 * mapped_counts[1]/mapped_counts[0]) << "\t" << mapped_counts[2] << "\t" << (1.0 * mapped_counts[2]/mapped_counts[0]) << "\t" << mapped_counts[3] << "\t" << mapped_counts[4] <<  endl;
 	return 0;
 }
 
-int assembler::process(int n)
+int assembler::process(int n, vector <uint32_t> &read_mapping)
 {
-	if(pool.size() < n) return 0;
+  if(pool.size() < n) return 0;
+
+  //cout << "Read Mapping Size: " << read_mapping.size() << endl;
 
 	for(int i = 0; i < pool.size(); i++)
 	{
@@ -134,14 +154,21 @@ int assembler::process(int n)
 		bd.build();
 		if(cfg.verbose >= 1) bd.print(index);
 
-    assemble(bd.gr, bd.hs);
+    assemble(bd.gr, bd.hs, bb.trsts);
+    vector<int> counts = bb.hits_on_transcripts(read_mapping);
+
+    mapped_counts[0] += counts[0];
+    mapped_counts[1] += counts[1];
+    mapped_counts[2] += counts[2];
+    mapped_counts[3] += counts[3];
+    mapped_counts[4] += counts[4];
 		index++;
 	}
 	pool.clear();
 	return 0;
 }
 
-int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0)
+int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0, vector<transcript> &rtn)
 {
 	super_graph sg(gr0, hs0, cfg);
 	sg.build();
@@ -184,7 +211,10 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0)
 
 	filter ft(gv, cfg);
 	ft.remove_nested_transcripts();
-	if(ft.trs.size() >= 1) trsts.insert(trsts.end(), ft.trs.begin(), ft.trs.end());
+	if(ft.trs.size() >= 1){
+    trsts.insert(trsts.end(), ft.trs.begin(), ft.trs.end());
+    rtn.insert(rtn.end(), ft.trs.begin(), ft.trs.end());
+  }
 
 	return 0;
 }
