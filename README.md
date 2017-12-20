@@ -5,7 +5,7 @@ expressed transcripts. Scallop achieves this improvement through a novel
 algorithm that can be proved preserving all phasing paths from reads and paired-end reads,
 while also achieves both transcripts parsimony and coverage deviation minimization.
 
-**Pre-print** of Scallop is available at [bioRxiv](http://biorxiv.org/content/early/2017/04/03/123612).
+Scallop paper has been published at [**Nature Biotechnology**](https://www.nature.com/articles/nbt.4020).
 The datasets and scripts used in this paper to compare the performance of Scallop
 and other assemblers are available at [**scalloptest**](https://github.com/Kingsford-Group/scalloptest).
 
