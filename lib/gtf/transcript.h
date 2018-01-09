@@ -47,6 +47,7 @@ public:
 	double TPM;
 
 	vector<PI32> exons;
+  bool used;
 
 public:
 	int add_exon(int s, int t);

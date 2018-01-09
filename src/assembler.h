@@ -9,6 +9,7 @@ See LICENSE for licensing.
 
 #include <fstream>
 #include <string>
+#include <unordered_map>
 #include "bundle_base.h"
 #include "bundle.h"
 #include "transcript.h"
@@ -29,6 +30,7 @@ private:
 	bundle_base bb1;		// +
 	bundle_base bb2;		// -
 	vector<bundle_base> pool;
+ 
 
 	int index;
 	bool terminate;
@@ -36,7 +38,7 @@ private:
 	double qlen;
 	vector<transcript> trsts;
 	const config& cfg;
-	vector<int> mapped_counts;
+	vector<uint64_t> mapped_counts;
 
 public:
 	int assemble();
@@ -46,7 +48,8 @@ public:
 	int write(const char* fname);
 
 private:
-	int process(int n, vector<uint32_t> &read_mapping);
+  void count_mapped(vector<hit> hits);
+  int process(int n, unordered_map<string,int> &read_mapping);
 	int assemble(const splice_graph &gr, const hyper_set &hs, vector<transcript> &trsts);
 	int assign_RPKM();
 

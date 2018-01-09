@@ -11,6 +11,7 @@ See LICENSE for licensing.
 #include <cstring>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include "hit.h"
 #include "interval_map.h"
@@ -40,7 +41,7 @@ public:
 	int add_hit(const hit &ht);
 	bool overlap(const hit &ht) const;
 	int clear();
-	vector<int> hits_on_transcripts(vector<uint32_t> &read_mapping);
+	vector<uint64_t> hits_on_transcripts(unordered_map <string,int> &read_mapping);
 };
 
 #endif

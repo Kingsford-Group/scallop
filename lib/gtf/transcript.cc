@@ -14,12 +14,14 @@ See LICENSE for licensing.
 
 transcript::transcript()
 {
+  used = false;
 }
 
 transcript::transcript(const item &e)
 {
 	assign(e);
 	exons.clear();
+  used = false;
 }
 
 transcript::~transcript()

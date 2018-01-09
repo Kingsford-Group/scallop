@@ -32,6 +32,9 @@ assembler::assembler(const config &c)
   mapped_counts.push_back(0);
   mapped_counts.push_back(0);
   mapped_counts.push_back(0);
+  mapped_counts.push_back(0);
+  mapped_counts.push_back(0);
+  mapped_counts.push_back(0);
 }
 
 assembler::~assembler()
@@ -57,7 +60,9 @@ int assembler::assemble()
   uint32_t max_hit_index = 0;
   //vector<uint32_t> hit_index;
   //hit_index.reserve(1000000);
-  vector <uint32_t> read_mapping(max_hit_index,-1);
+  unordered_map <string, int> read_mapping; //(max_hit_index,-1);
+  read_mapping["BundleIndex"] = -1;
+  vector<hit> hits;
   while(sam_read1(sfn, hdr, b1t) >= 0)
 	{
 		if(terminate == true) return 0;
@@ -75,8 +80,8 @@ int assembler::assemble()
 		ht.set_strand();
 		ht.build_splice_positions();
 
-    uint32_t hit_index = stoul(ht.qname.substr(ht.qname.find(".")+1));
-    if(hit_index > max_hit_index) max_hit_index = hit_index;
+    //uint32_t hit_index = stoul(ht.qname.substr(ht.qname.find(".")+1));
+    //if(hit_index > max_hit_index) max_hit_index = hit_index;
     //hit_index.push_back(stoul(ht.qname.substr(ht.qname.find(".")+1)));
     //if(hit_index[hit_index.size()-1] > max_hit_index) max_hit_index = hit_index[hit_index.size()-1];
 
@@ -102,21 +107,43 @@ int assembler::assemble()
 		}
 
 		// process
-    read_mapping.resize(max_hit_index+1,-1);
+    //read_mapping.resize(max_hit_index+1,-1);
 		process(cfg.batch_bundle_size, read_mapping);
 
 		// add hit
-		if(cfg.uniquely_mapped_only == true && ht.nh != 1) continue;
+		bool add_hit = false;
+
+    if(cfg.uniquely_mapped_only == true && ht.nh != 1) continue;
 		if(cfg.library_type != UNSTRANDED && ht.strand == '+' && ht.xs == '-') continue;
 		if(cfg.library_type != UNSTRANDED && ht.strand == '-' && ht.xs == '+') continue;
 		if(cfg.library_type != UNSTRANDED && ht.strand == '.' && ht.xs != '.') ht.strand = ht.xs;
-		if(cfg.library_type != UNSTRANDED && ht.strand == '+') bb1.add_hit(ht);
-		if(cfg.library_type != UNSTRANDED && ht.strand == '-') bb2.add_hit(ht);
-		if(cfg.library_type == UNSTRANDED && ht.xs == '.') bb1.add_hit(ht);
-		if(cfg.library_type == UNSTRANDED && ht.xs == '.') bb2.add_hit(ht);
-		if(cfg.library_type == UNSTRANDED && ht.xs == '+') bb1.add_hit(ht);
-		if(cfg.library_type == UNSTRANDED && ht.xs == '-') bb2.add_hit(ht);
-	}
+		if(cfg.library_type != UNSTRANDED && ht.strand == '+'){
+      bb1.add_hit(ht);
+      add_hit = true;
+    }if(cfg.library_type != UNSTRANDED && ht.strand == '-'){
+      bb2.add_hit(ht);
+      add_hit = true;
+    }if(cfg.library_type == UNSTRANDED && ht.xs == '.'){
+      bb1.add_hit(ht);
+      add_hit = true;
+    }if(cfg.library_type == UNSTRANDED && ht.xs == '.'){
+      bb2.add_hit(ht);
+      add_hit = true;
+    }if(cfg.library_type == UNSTRANDED && ht.xs == '+'){ 
+      bb1.add_hit(ht);
+      add_hit = true;
+    }if(cfg.library_type == UNSTRANDED && ht.xs == '-'){ 
+      bb2.add_hit(ht);
+      add_hit = true;
+    }
+
+    if(add_hit){
+      //hits.push_back(ht);
+      //if(bb1.tid > 0) hits[hits.size()-1].seqname = hdr->target_name[bb1.tid];
+      //else if(bb2.tid > 0) hits[hits.size()-1].seqname = hdr->target_name[bb2.tid];
+      //cerr << hits[hits.size()-1].qname << "\thit tid: " << hits[hits.size()-1].tid << "\thit seqname: " << hits[hits.size()-1].seqname << "\tbb tid: " << bb1.tid << "," << bb2.tid << endl;
+    }
+  }
   
 
 	pool.push_back(bb1);
@@ -128,12 +155,88 @@ int assembler::assemble()
 	filter ft(trsts, cfg);
 	ft.merge_single_exon_transcripts();
 	trsts = ft.trs;
-
-  cout << "Mapped counts: " << mapped_counts[0] << "\t" << mapped_counts[1] << "\t" << (1.0 * mapped_counts[1]/mapped_counts[0]) << "\t" << mapped_counts[2] << "\t" << (1.0 * mapped_counts[2]/mapped_counts[0]) << "\t" << mapped_counts[3] << "\t" << mapped_counts[4] <<  endl;
+  for(int j=0; j<trsts.size(); j++){
+    trsts[j].used = true;
+    //trsts[j].gene_id += "-";
+    //trsts[j].gene_id += to_string(j);
+    //trsts[j].transcript_id += "-";
+    //trsts[j].transcript_id += to_string(j);
+  }
+  //count_mapped(hits);
+  cout << "\tmapped reads\total_edit_distance\tavg_edit_distance\ttotal_norm_edit_distance\tavg_norm_edit_distance\tpairs_mapped\ttotal_reads\ttotal_pairs\ttotal_variance\ttotal_bundles\n";
+  cout << "Mapped counts:\t" << mapped_counts[0] << "\t" << mapped_counts[1] << "\t" << (1.0 * mapped_counts[1]/mapped_counts[0]) << "\t" << mapped_counts[2] << "\t" << (1.0 * mapped_counts[2]/mapped_counts[0]) << "\t" << mapped_counts[3] << "\t" << mapped_counts[4] << "\t" << mapped_counts[5] << "\t" << (mapped_counts[6]/1000.0) << "\t" << mapped_counts[7] <<  endl;
 	return 0;
 }
 
-int assembler::process(int n, vector <uint32_t> &read_mapping)
+void assembler::count_mapped(vector<hit> hits){ 
+	int mapped = 0;
+  float total_distance = 0;
+  float norm_distance = 0;
+  int mapped_pairs = 0;
+  int pairs = 0;
+  int reads = 0;
+  unordered_map<string,int> hit_index;
+  unordered_map <string, int> pair_mapping; //(max_hit_index,-1);
+  pair_mapping["BundleIndex"] = -1;
+  mapped_counts[4] = hits.size();
+  for(int i=0; i<hits.size(); i++){
+    cerr << "SEQNAME: " << hits[i].seqname << "\ttid: " << hits[i].tid << endl;
+    string name = hits[i].qname;
+    name += ((hits[i].flag & 0x40)?".1":".2");
+    assert(!((hits[i].flag & 0x40) && (hits[i].flag & 0x80)));
+    assert((hits[i].flag & 0x40) || (hits[i].flag & 0x80));
+	
+    bool found = false;  
+    bool has_pair = (hit_index.find(hits[i].qname) != hit_index.end());
+    int ip = hit_index[hits[i].qname];
+
+    for(int j=0; j<trsts.size(); j++){
+      if(!trsts[j].used) continue;
+			if(hits[i].maps_to_transcript(trsts[j])){
+        cerr << name << "\t" << pair_mapping["BundleIndex"] << "\t" << trsts[j].seqname << "\t" << trsts[j].gene_id << "\t" << trsts[j].transcript_id << endl;
+        if(!found){
+          //cerr << name << "\t" << trsts[j].seqname << "\t" << trsts[j].gene_id << "\t" << trsts[j].transcript_id<< endl;
+          mapped_counts[0]++;
+          mapped_counts[1] += hits[i].nm;
+          mapped_counts[2] += 1.0 * hits[i].nm / hits[i].qlen;
+        }
+        //pair_mapping[name] = 1;
+        found = true;
+				//mapped++;
+				//break;
+
+        if(has_pair){
+          //if(pair_mapping.find(hits[i].qname) == pair_mapping.end()){
+            if(hits[ip].maps_to_transcript(trsts[j])){
+              mapped_counts[3]++;
+              //pair_mapping[hits[i].qname] = 1;
+              break;          
+            }
+          //} 
+        }
+      }
+		}
+    if(!found) cerr << name << "\t" << pair_mapping["BundleIndex"] << "\t-\t-\t-\n";
+    if(has_pair) mapped_counts[5]++;
+    /*string seen_name = "seen";
+    seen_name += name;
+    if(pair_mapping.find(seen_name) == pair_mapping.end()){
+      mapped_counts[4]++;
+      if(!found) cerr << name << "\t" << pair_mapping["BundleIndex"] << "\t-\t-\t-\n";
+    }
+    pair_mapping[seen_name] = 1;
+    if(has_pair){
+      seen_name = "seen";
+      seen_name += hits[i].qname;
+      if(pair_mapping.find(seen_name) == pair_mapping.end())
+        mapped_counts[5]++;
+      pair_mapping[seen_name] = 1;
+    }*/
+    hit_index[hits[i].qname] = i;
+  }
+}
+
+int assembler::process(int n, unordered_map <string, int> &read_mapping)
 {
   if(pool.size() < n) return 0;
 
@@ -155,13 +258,22 @@ int assembler::process(int n, vector <uint32_t> &read_mapping)
 		if(cfg.verbose >= 1) bd.print(index);
 
     assemble(bd.gr, bd.hs, bb.trsts);
-    vector<int> counts = bb.hits_on_transcripts(read_mapping);
+    read_mapping["BundleIndex"]++;
+    vector<uint64_t> counts = bb.hits_on_transcripts(read_mapping);
+    bb.trsts.clear();
 
+    cout << "Done Clear" << endl;
     mapped_counts[0] += counts[0];
     mapped_counts[1] += counts[1];
     mapped_counts[2] += counts[2];
     mapped_counts[3] += counts[3];
     mapped_counts[4] += counts[4];
+    mapped_counts[5] += counts[5];
+    if(counts[6] != 9999999999){
+      mapped_counts[6] += counts[6];
+      mapped_counts[7] += 1;
+    }
+    cout << "Done assign" << endl;
 		index++;
 	}
 	pool.clear();
