@@ -55,6 +55,7 @@ public:
 	string qname;							// query name
 	char strand;							// strandness
 	char xs;								// XS aux in sam
+	char ts;								// ts tag used in minimap2
 	int32_t nh;								// NH aux in sam
 	int32_t hi;								// HI aux in sam
 	int32_t nm;								// NM aux in sam

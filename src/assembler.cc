@@ -78,6 +78,8 @@ int assembler::assemble()
 		// process
 		process(batch_bundle_size);
 
+		//printf("read strand = %c, xs = %c, ts = %c\n", ht.strand, ht.xs, ht.ts);
+
 		// add hit
 		if(uniquely_mapped_only == true && ht.nh != 1) continue;
 		if(library_type != UNSTRANDED && ht.strand == '+' && ht.xs == '-') continue;
@@ -113,6 +115,9 @@ int assembler::process(int n)
 	for(int i = 0; i < pool.size(); i++)
 	{
 		bundle_base &bb = pool[i];
+
+		//printf("bundle %d has %lu reads\n", i, bb.hits.size());
+
 		if(bb.hits.size() < min_num_hits_in_bundle) continue;
 		if(bb.tid < 0) continue;
 

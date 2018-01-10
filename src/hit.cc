@@ -18,6 +18,7 @@ hit::hit(int32_t p)
 	bam1_core_t::pos = p;
 	strand = '.';
 	xs = '.';
+	ts = '.';
 	hi = -1;
 	nh = -1;
 	nm = 0;
@@ -33,6 +34,7 @@ hit::hit(const hit &h)
 	strand = h.strand;
 	spos = h.spos;
 	xs = h.xs;
+	ts = h.ts;
 	hi = h.hi;
 	nm = h.nm;
 	memcpy(cigar, h.cigar, sizeof cigar);
@@ -61,9 +63,22 @@ hit::hit(bam1_t *b)
 
 int hit::set_tags(bam1_t *b)
 {
+	ts = '.';
+	uint8_t *p0 = bam_aux_get(b, "ts");
+	if(p0 && (*p0) == 'A') ts = bam_aux2A(p0);
+
 	xs = '.';
 	uint8_t *p1 = bam_aux_get(b, "XS");
 	if(p1 && (*p1) == 'A') xs = bam_aux2A(p1);
+
+	if(xs == '.' && ts != '.')
+	{
+		// convert ts to xs
+		if((flag & 0x10) >= 1 && ts == '+') xs = '-';
+		if((flag & 0x10) >= 1 && ts == '-') xs = '+';
+		if((flag & 0x10) <= 0 && ts == '+') xs = '+';
+		if((flag & 0x10) <= 0 && ts == '-') xs = '-';
+	}
 
 	hi = -1;
 	uint8_t *p2 = bam_aux_get(b, "HI");
