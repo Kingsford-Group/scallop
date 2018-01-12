@@ -41,7 +41,7 @@ public:
 	int add_hit(const hit &ht);
 	bool overlap(const hit &ht) const;
 	int clear();
-	vector<uint64_t> hits_on_transcripts(unordered_map <string,int> &read_mapping);
+	vector<uint64_t> hits_on_transcripts(int bundle_index, unordered_map <string,bool> &read_mapping);
 };
 
 #endif

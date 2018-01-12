@@ -282,23 +282,20 @@ bool hit::maps_to_transcript(const transcript &t){
   assert(t.exons.size()>0);
   assert(pos < rpos);
   if(t.exons[0].first > pos || t.exons[t.exons.size()-1].second < rpos) return 0;
-	
-  
+
+
   bool started = false;
 	int cur_exon = 0;
 
-  int tolerance = 0;
+  int tolerance = 1;
 
   if(spos.size() == 0){
-    //if(qname == "SRR307903.9315832") cout << "Before Loop " << t.exons[cur_exon].second << " < " << pos << "\t" << cur_exon << "/" << t.exons.size() << "\t" << t.transcript_id<< endl;
 		while(cur_exon < t.exons.size() && t.exons[cur_exon].second < pos){
 			cur_exon++;
-      //if(qname == "SRR307903.9315832") cout << "End Loop " << t.exons[cur_exon].second << " < " << pos << "\t" << cur_exon << "/" << t.exons.size() << "\t" << t.transcript_id << endl;
     }
     if(cur_exon == t.exons.size()) return false;
-    //if(qname == "SRR307903.9315832") cout << "After Loop " << t.exons[cur_exon].first << " <= " <<pos << ","<< t.exons[cur_exon].second << " >= " << rpos << "\t" << cur_exon << "/" << t.exons.size() << "\t" << t.transcript_id << endl;
-    //if(qname == "SRR307903.9315832") cout << "Return " << qname << ((flag & 0x40)?".1":".2") << " " << ((t.exons[cur_exon].first <= pos + tolerance) && (t.exons[cur_exon].second >= rpos - tolerance)) << "\t" << (t.exons[cur_exon].first <= pos + tolerance) << "\t" << (t.exons[cur_exon].second >= rpos - tolerance) << endl;
-		return ((t.exons[cur_exon].first <= pos + tolerance) && (t.exons[cur_exon].second >= rpos - tolerance));
+		return (t.exons[cur_exon].first <= pos && t.exons[cur_exon].second >= rpos);
+		//return ((t.exons[cur_exon].first <= pos + tolerance) && (t.exons[cur_exon].second >= rpos - tolerance));
 	}
 
 	int32_t start = pos;
@@ -307,8 +304,8 @@ bool hit::maps_to_transcript(const transcript &t){
 		cur_exon++;
 	if(cur_exon == t.exons.size())
 		return false;
-	//if(t.exons[cur_exon].second != end)
-	if(t.exons[cur_exon].second < end - tolerance || t.exons[cur_exon].second > end + tolerance)
+	//if(t.exons[cur_exon].second < end - tolerance || t.exons[cur_exon].second > end + tolerance)
+	if(t.exons[cur_exon].second != end)
 		return false;
 	if(cur_exon + spos.size() > t.exons.size())
 		return false;
@@ -317,18 +314,18 @@ bool hit::maps_to_transcript(const transcript &t){
 	for(int i=0; i<spos.size()-1; i++, cur_exon++){
 		start = low32(spos[i]);
 		end = high32(spos[i+1]);
-		//if(start != t.exons[cur_exon].first || end != t.exons[cur_exon].second)
-		if((t.exons[cur_exon].first < start - tolerance || t.exons[cur_exon].first > start + tolerance) ||
-        (t.exons[cur_exon].second < end - tolerance || t.exons[cur_exon].second > end + tolerance))
+		//if((t.exons[cur_exon].first < start - tolerance || t.exons[cur_exon].first > start + tolerance) ||
+    //    (t.exons[cur_exon].second < end - tolerance || t.exons[cur_exon].second > end + tolerance))
+		if(t.exons[cur_exon].first != start || t.exons[cur_exon].second != end)
       return false;
 	}
 	start = low32(spos[spos.size()-1]);
 	end = rpos;
 	if(cur_exon == t.exons.size())
     return false;
-  //if(start != t.exons[cur_exon].first || end > t.exons[cur_exon].second)
-	if((t.exons[cur_exon].first < start - tolerance || t.exons[cur_exon].first > start + tolerance) ||
-              (t.exons[cur_exon].second < end - tolerance || t.exons[cur_exon].second > end + tolerance))
+	//if((t.exons[cur_exon].first < start - tolerance || t.exons[cur_exon].first > start + tolerance) ||
+  //            (t.exons[cur_exon].second < end - tolerance || t.exons[cur_exon].second > end + tolerance))
+	if(t.exons[cur_exon].first != start || t.exons[cur_exon].second < end )
     return false;
 
 	return true;

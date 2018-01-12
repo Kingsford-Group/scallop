@@ -30,7 +30,7 @@ private:
 	bundle_base bb1;		// +
 	bundle_base bb2;		// -
 	vector<bundle_base> pool;
- 
+
 
 	int index;
 	bool terminate;
@@ -49,7 +49,7 @@ public:
 
 private:
   void count_mapped(vector<hit> hits);
-  int process(int n, unordered_map<string,int> &read_mapping);
+  int process(int n, int bundle_index, unordered_map<string,bool> &read_mapping);
 	int assemble(const splice_graph &gr, const hyper_set &hs, vector<transcript> &trsts);
 	int assign_RPKM();
 

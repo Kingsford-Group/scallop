@@ -63,7 +63,6 @@ public:
 	bool concordant;						// whether it is concordant
 	uint32_t cigar[MAX_NUM_CIGAR];			// cigar, use samtools
 	vector<int64_t> spos;					// splice positions
-  vector<transcript> transcripts;
   string seqname;
 
 public:
