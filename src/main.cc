@@ -63,12 +63,13 @@ int main(int argc, const char **argv)
 	//(asmb->solve(cfg[0]))->write("testing_data/default.gtf");
 	//(asmb->solve(cfg[1]))->write("testing_data/best.gtf");
 	//assembler best = asmb.solve(cfg[0]);
-	//asmb.assemble();
-	assembler best = parameter_advising<assembler,assembler,config>(asmb,cfg);
+	asmb->assemble();
+	//assembler best = parameter_advising<assembler,assembler,config>(asmb,cfg);
 
   //config::output_file = "none.gff";
 	//best.write("testing_data/default.gtf");
-  best.write(config::output_file.c_str());
+  //best.write(config::output_file.c_str());
+  asmb->write(config::output_file.c_str());
 
 	return 0;
 }

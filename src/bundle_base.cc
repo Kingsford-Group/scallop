@@ -323,5 +323,7 @@ vector<uint64_t> bundle_base::hits_on_transcripts(int bundle_index, unordered_ma
   rtn.push_back((variance_count == 0)?9999999999:(int)1000 * variance_sum/variance_count);
   rtn.push_back((variance_count == 0)?9999999999:(int)1000 * variance_predicted_sum/variance_count);
       //cout << "Finished loops (" << ((variance_count == 0)?9999999999:(int)variance_sum/variance_count) << ")" << endl;
-	return rtn;
+  hit_index.clear();
+  trsts.clear();
+  return rtn;
 }
