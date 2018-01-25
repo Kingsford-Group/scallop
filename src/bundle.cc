@@ -1121,8 +1121,8 @@ int bundle::print(int index)
 		if(hits[i].xs == '-') nq++;
 	}
 
-	printf("tid = %d, #hits = %lu, #partial-exons = %lu, range = %s:%d-%d, orient = %c (%d, %d, %d)\n",
-			tid, hits.size(), pexons.size(), chrm.c_str(), lpos, rpos, strand, n0, np, nq);
+	printf("tid = %d, #hits = %lu, #partial-exons = %lu, range = %s:%d-%d, orient = %c (%d, %d, %d), num-long-reads = %d\n",
+			tid, hits.size(), pexons.size(), chrm.c_str(), lpos, rpos, strand, n0, np, nq, num_long_reads);
 
 	if(verbose <= 1) return 0;
 

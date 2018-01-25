@@ -23,6 +23,7 @@ hit::hit(int32_t p)
 	nh = -1;
 	nm = 0;
 	qlen = 0;
+	is_long_read = false;
 }
 
 hit::hit(const hit &h)
@@ -37,6 +38,7 @@ hit::hit(const hit &h)
 	ts = h.ts;
 	hi = h.hi;
 	nm = h.nm;
+	is_long_read = h.is_long_read;
 	memcpy(cigar, h.cigar, sizeof cigar);
 }
 
@@ -50,6 +52,10 @@ hit::hit(bam1_t *b)
 	memcpy(buf, q, l);
 	buf[l] = '\0';
 	qname = string(buf);
+
+	string sub = qname.substr(0, 10);
+	if(sub == "SRR1020625") is_long_read = false;
+	else is_long_read = true;
 
 	// compute rpos
 	rpos = pos + (int32_t)bam_cigar2rlen(n_cigar, bam_get_cigar(b));
@@ -222,8 +228,8 @@ int hit::print() const
 	}
 
 	// print basic information
-	printf("Hit %s: [%d-%d), mpos = %d, cigar = %s, flag = %d, quality = %d, strand = %c, isize = %d, qlen = %d, hi = %d\n", 
-			qname.c_str(), pos, rpos, mpos, sstr.str().c_str(), flag, qual, strand, isize, qlen, hi);
+	printf("Hit %s: [%d-%d), mpos = %d, cigar = %s, flag = %d, quality = %d, strand = %c, isize = %d, qlen = %d, hi = %d, is-long = %c\n", 
+			qname.c_str(), pos, rpos, mpos, sstr.str().c_str(), flag, qual, strand, isize, qlen, hi, is_long_read ? 'T' : 'F');
 
 	return 0;
 }

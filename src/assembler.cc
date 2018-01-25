@@ -128,7 +128,9 @@ int assembler::process(int n)
 
 		bd.chrm = string(buf);
 		bd.build();
-		if(verbose >= 1) bd.print(index);
+		bd.print(index);
+
+		//if(verbose >= 1) bd.print(index);
 
 		assemble(bd.gr, bd.hs);
 		index++;

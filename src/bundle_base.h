@@ -33,6 +33,8 @@ public:
 	split_interval_map mmap;		// matched interval map
 	split_interval_map imap;		// indel interval map
 
+	int num_long_reads;				// number of long reads in this bundle
+
 public:
 	int add_hit(const hit &ht);
 	bool overlap(const hit &ht) const;

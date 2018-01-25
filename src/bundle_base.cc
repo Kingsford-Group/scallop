@@ -17,6 +17,7 @@ bundle_base::bundle_base()
 	lpos = INT32_MAX;
 	rpos = 0;
 	strand = '.';
+	num_long_reads = 0;
 }
 
 bundle_base::~bundle_base()
@@ -24,6 +25,8 @@ bundle_base::~bundle_base()
 
 int bundle_base::add_hit(const hit &ht)
 {
+	if(ht.is_long_read == true) num_long_reads++;
+
 	// store new hit
 	hits.push_back(ht);
 
@@ -96,6 +99,7 @@ int bundle_base::clear()
 	hits.clear();
 	mmap.clear();
 	imap.clear();
+	num_long_reads = 0;
 	return 0;
 }
 
