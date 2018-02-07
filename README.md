@@ -242,3 +242,4 @@ salmon quant -i salmon.index -1 fastq-file1 -2 fastq-file2 -p 4
 The main quantification file will appear as `salmon.quant/quant.sf`.
 Please refer to [Salmon](https://combine-lab.github.io/salmon/) documentation
 for more advanced usage.
+
