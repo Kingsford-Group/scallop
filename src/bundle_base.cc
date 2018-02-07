@@ -117,17 +117,17 @@ vector<uint64_t> bundle_base::hits_on_transcripts(int bundle_index, unordered_ma
     assert(!((hits[i].flag & 0x40) && (hits[i].flag & 0x80)));
     assert((hits[i].flag & 0x40) || (hits[i].flag & 0x80));
     bool found = false;
-		if(pair_mapping.find(name) == pair_mapping.end()){
+		//if(pair_mapping.find(name) == pair_mapping.end()){
       reads++;
-			pair_mapping[name] = false;
-    }
+			//pair_mapping[name] = false;
+    //}
 
 		for(int j=0; j<trsts.size(); j++){
 			if(hits[i].maps_to_transcript(trsts[j])){
         //cerr << name << "\t" << bundle_index << "\t" << trsts[j].seqname << "\t" << trsts[j].gene_id << "\t" << trsts[j].transcript_id << endl;
-        found = true;
-        if(pair_mapping[name] == false){
+        if(!found){//pair_mapping[name] == false){
           mapped++;
+          found = true;
           total_distance += hits[i].nm;
           norm_distance += 1.0 * hits[i].nm / hits[i].qlen;
 					//cout << "Mapping " << name ;
@@ -142,23 +142,23 @@ vector<uint64_t> bundle_base::hits_on_transcripts(int bundle_index, unordered_ma
 					//cout << endl;
 
         }
-        pair_mapping[name] = true;
+        //pair_mapping[name] = true;
       }
 		}
 
     if(hit_index.find(hits[i].qname) != hit_index.end()){
-      if(pair_mapping.find(hits[i].qname) == pair_mapping.end()){
+      if(true){//pair_mapping.find(hits[i].qname) == pair_mapping.end()){
         pairs++;
-      	pair_mapping[hits[i].qname] = false;
+      	//pair_mapping[hits[i].qname] = false;
 			}
       int ip = hit_index[hits[i].qname];
       bool go = true;
       for(int j=0; j<trsts.size() && go; j++){
         if(hits[i].maps_to_transcript(trsts[j]) && hits[ip].maps_to_transcript(trsts[j])){
-          if(pair_mapping[hits[i].qname] == false){
+          if(true){//pair_mapping[hits[i].qname] == false){
             mapped_pairs++;
           }
-          pair_mapping[hits[i].qname] = true;
+          //pair_mapping[hits[i].qname] = true;
           go = false;
           break;
         }

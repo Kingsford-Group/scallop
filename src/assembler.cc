@@ -139,7 +139,7 @@ int assembler::assemble()
     }
 
     if(add_hit){
-      mapped_counts[4] ++;
+      //mapped_counts[4] ++;
       //hits.push_back(ht);
       //if(bb1.tid > 0) hits[hits.size()-1].seqname = hdr->target_name[bb1.tid];
       //else if(bb2.tid > 0) hits[hits.size()-1].seqname = hdr->target_name[bb2.tid];
@@ -261,7 +261,7 @@ int assembler::process(int n, int bundle_index, unordered_map <string, bool> &re
 
     assemble(bd.gr, bd.hs, bb.trsts);
     bundle_index++;
-    /*vector<uint64_t> counts = bb.hits_on_transcripts(bundle_index, read_mapping);
+    vector<uint64_t> counts = bb.hits_on_transcripts(bundle_index, read_mapping);
     bb.trsts.clear();
 
     //cout << "Done Clear" << endl;
@@ -278,7 +278,7 @@ int assembler::process(int n, int bundle_index, unordered_map <string, bool> &re
       mapped_counts[8] += 1;
     }
     //cout << "Done assign" << endl;
-    */
+    
 		index++;
 	}
 	pool.clear();
@@ -330,7 +330,7 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0, vector<tr
 	ft.remove_nested_transcripts();
 	if(ft.trs.size() >= 1){
     trsts.insert(trsts.end(), ft.trs.begin(), ft.trs.end());
-    //rtn.insert(rtn.end(), ft.trs.begin(), ft.trs.end());
+    rtn.insert(rtn.end(), ft.trs.begin(), ft.trs.end());
   }
 
 	return 0;

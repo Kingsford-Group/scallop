@@ -14,9 +14,10 @@ See LICENSE for licensing.
 #include "config.h"
 
 hit::hit(int32_t p, const config &c)
-	: cfg(c)
+//	: cfg(c)
 {
-	bam1_core_t::pos = p;
+	cfg = &c;
+  bam1_core_t::pos = p;
 	strand = '.';
 	xs = '.';
 	hi = -1;
@@ -26,8 +27,9 @@ hit::hit(int32_t p, const config &c)
 }
 
 hit::hit(const hit &h )
-	:bam1_core_t(h), cfg(h.cfg)
+	:bam1_core_t(h)//, cfg(h.cfg)
 {
+  cfg = h.cfg;
 	rpos = h.rpos;
 	qlen = h.qlen;
 	qname = h.qname;
@@ -39,9 +41,15 @@ hit::hit(const hit &h )
 	memcpy(cigar, h.cigar, sizeof cigar);
 }
 
+/*hit& hit::operator=(const hit &h) const{
+  swap(h);
+  return *this;
+}*/
+
 hit::hit(bam1_t *b, const config &c)
-	:bam1_core_t(b->core), cfg(c)
+	:bam1_core_t(b->core)//, cfg(c)
 {
+   cfg = &c;
 	// fetch query name
 	char buf[1024];
 	char *q = bam_get_qname(b);
@@ -98,8 +106,8 @@ int hit::set_strand()
 {
 	strand = '.';
 
-	//cerr << "cfg.library_type: " << cfg.library_type << endl;
-	if(cfg.library_type == FR_FIRST && ((flag & 0x1) >= 1))
+	//cerr << "cfg->library_type: " << cfg->library_type << endl;
+	if(cfg->library_type == FR_FIRST && ((flag & 0x1) >= 1))
 	{
 		if((flag & 0x10) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '-';
 		if((flag & 0x10) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '+';
@@ -107,7 +115,7 @@ int hit::set_strand()
 		if((flag & 0x10) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '-';
 	}
 
-	if(cfg.library_type == FR_SECOND && ((flag & 0x1) >= 1))
+	if(cfg->library_type == FR_SECOND && ((flag & 0x1) >= 1))
 	{
 		if((flag & 0x10) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '+';
 		if((flag & 0x10) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '-';
@@ -115,13 +123,13 @@ int hit::set_strand()
 		if((flag & 0x10) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '+';
 	}
 
-	if(cfg.library_type == FR_FIRST && ((flag & 0x1) <= 0))
+	if(cfg->library_type == FR_FIRST && ((flag & 0x1) <= 0))
 	{
 		if((flag & 0x10) <= 0) strand = '-';
 		if((flag & 0x10) >= 1) strand = '+';
 	}
 
-	if(cfg.library_type == FR_SECOND && ((flag & 0x1) <= 0))
+	if(cfg->library_type == FR_SECOND && ((flag & 0x1) <= 0))
 	{
 		if((flag & 0x10) <= 0) strand = '+';
 		if((flag & 0x10) >= 1) strand = '-';
@@ -148,9 +156,9 @@ int hit::build_splice_positions()
 		if(bam_cigar_op(cigar[k]) != BAM_CREF_SKIP) continue;
 		if(bam_cigar_op(cigar[k-1]) != BAM_CMATCH) continue;
 		if(bam_cigar_op(cigar[k+1]) != BAM_CMATCH) continue;
-		//cerr << "cfg.min_flank_length: "  << cfg.min_flank_length << endl;
-		if(bam_cigar_oplen(cigar[k-1]) < cfg.min_flank_length) continue;
-		if(bam_cigar_oplen(cigar[k+1]) < cfg.min_flank_length) continue;
+		//cerr << "cfg->min_flank_length: "  << cfg->min_flank_length << endl;
+		if(bam_cigar_oplen(cigar[k-1]) < cfg->min_flank_length) continue;
+		if(bam_cigar_oplen(cigar[k+1]) < cfg->min_flank_length) continue;
 
 		int32_t s = p - bam_cigar_oplen(cigar[k]);
 		spos.push_back(pack(s, p));
@@ -183,7 +191,7 @@ bool hit::verify_junctions()
 		//if(log2(s) > log2(10) + (2 * m) && nh >= 2)
 		if(log2(s) > log2(10) + (2 * m))
 		{
-			if(cfg.verbose >= 2) printf("detect super long junction %d with matches (%d, %d)\n", s, m1, m2);
+			if(cfg->verbose >= 2) printf("detect super long junction %d with matches (%d, %d)\n", s, m1, m2);
 			return false;
 		}
 	}
