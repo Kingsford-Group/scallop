@@ -44,10 +44,12 @@ typedef struct {
 class hit: public bam1_core_t
 {
 public:
-	hit(int32_t p);
+	//hit(int32_t p);
 	hit(bam1_t *b);
 	hit(const hit &h);
+	~hit();
 	bool operator<(const hit &h) const;
+	hit& operator=(const hit &h);
 
 public:
 	int32_t rpos;							// right position mapped to reference [pos, rpos)
@@ -60,7 +62,7 @@ public:
 	int32_t hi;								// HI aux in sam
 	int32_t nm;								// NM aux in sam
 	bool concordant;						// whether it is concordant
-	uint32_t cigar[MAX_NUM_CIGAR];			// cigar, use samtools
+	uint32_t* cigar;						// cigar, use samtools
 	vector<int64_t> spos;					// splice positions
 	bool is_long_read;						// whether this read is long read
 
@@ -69,7 +71,6 @@ public:
 	int set_strand();
 	int set_concordance();
 	int build_splice_positions();
-	bool verify_junctions();
 	int get_mid_intervals(vector<int64_t> &vm, vector<int64_t> &vi, vector<int64_t> &vd) const;
 	int get_matched_intervals(vector<int64_t> &v) const;
 	int print() const;

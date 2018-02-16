@@ -13,6 +13,7 @@ See LICENSE for licensing.
 #include "hit.h"
 #include "config.h"
 
+/*
 hit::hit(int32_t p)
 {
 	bam1_core_t::pos = p;
@@ -24,6 +25,27 @@ hit::hit(int32_t p)
 	nm = 0;
 	qlen = 0;
 	is_long_read = false;
+	cigar = NULL;
+}
+*/
+
+hit& hit::operator=(const hit &h)
+{
+	bam1_core_t::operator=(h);
+	rpos = h.rpos;
+	qlen = h.qlen;
+	qname = h.qname;
+	strand = h.strand;
+	spos = h.spos;
+	xs = h.xs;
+	ts = h.ts;
+	hi = h.hi;
+	nm = h.nm;
+	is_long_read = h.is_long_read;
+
+	cigar = new uint32_t[h.n_cigar];
+	memcpy(cigar, h.cigar, 4 * h.n_cigar);
+	return *this;
 }
 
 hit::hit(const hit &h)
@@ -39,7 +61,17 @@ hit::hit(const hit &h)
 	hi = h.hi;
 	nm = h.nm;
 	is_long_read = h.is_long_read;
-	memcpy(cigar, h.cigar, sizeof cigar);
+
+	//printf("call copy constructor\n");
+	cigar = new uint32_t[h.n_cigar];
+	memcpy(cigar, h.cigar, 4 * h.n_cigar);
+	//printf("n-cigar = %d, h.n_cigar = %d, size of cigar = %lu | %u\n", n_cigar, h.n_cigar, sizeof cigar, sizeof h.cigar);
+}
+
+hit::~hit()
+{
+	assert(cigar != NULL);
+	delete[] cigar;
 }
 
 hit::hit(bam1_t *b)
@@ -64,7 +96,12 @@ hit::hit(bam1_t *b)
 	// copy cigar
 	assert(n_cigar <= MAX_NUM_CIGAR);
 	assert(n_cigar >= 1);
+
+	// allocate memery for cigar
+	cigar = new uint32_t[n_cigar];
 	memcpy(cigar, bam_get_cigar(b), 4 * n_cigar);
+
+	//printf("call regular constructor\n");
 }
 
 int hit::set_tags(bam1_t *b)
@@ -174,38 +211,6 @@ int hit::build_splice_positions()
 		spos.push_back(pack(s, p));
 	}
 	return 0;
-}
-
-bool hit::verify_junctions()
-{
-	int32_t p = pos;
-	int32_t q = 0;
-    for(int k = 0; k < n_cigar; k++)
-	{
-		if (bam_cigar_type(bam_cigar_op(cigar[k]))&2)
-			p += bam_cigar_oplen(cigar[k]);
-
-		if (bam_cigar_type(bam_cigar_op(cigar[k]))&1)
-			q += bam_cigar_oplen(cigar[k]);
-
-		if(k == 0 || k == n_cigar - 1) continue;
-		if(bam_cigar_op(cigar[k]) != BAM_CREF_SKIP) continue;
-		if(bam_cigar_op(cigar[k-1]) != BAM_CMATCH) continue;
-		if(bam_cigar_op(cigar[k+1]) != BAM_CMATCH) continue;
-
-		int s = bam_cigar_oplen(cigar[k]);
-		int m1 = bam_cigar_oplen(cigar[k-1]);
-		int m2 = bam_cigar_oplen(cigar[k+1]);
-		int m = (m1 < m2) ? m1 : m2;
-
-		//if(log2(s) > log2(10) + (2 * m) && nh >= 2)
-		if(log2(s) > log2(10) + (2 * m))
-		{
-			if(verbose >= 2) printf("detect super long junction %d with matches (%d, %d)\n", s, m1, m2);
-			return false;
-		}
-	}
-	return true;
 }
 
 bool hit::operator<(const hit &h) const

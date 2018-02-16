@@ -58,7 +58,6 @@ int assembler::assemble()
 
 		//if(ht.nh >= 2 && p.qual < min_mapping_quality) continue;
 		//if(ht.nm > max_edit_distance) continue;
-		//if(ht.verify_junctions() == false) continue;
 
 		qlen += ht.qlen;
 		qcnt += 1;
