@@ -298,3 +298,39 @@ inline bool hit_compare_right(const hit &x, const hit &y)
 	return false;
 }
 */
+
+int hit::write_transcript(transcript &t)
+{
+	// assign attributes, and more
+	t.seqname = "xxx";
+
+	// add exons
+	if(spos.size() == 0)
+	{
+		t.add_exon(pos, rpos);
+	}
+	else
+	{
+		int32_t l = pos;
+		int64_t p = spos[0];
+		int32_t p1 = low32(p);
+		int32_t p2 = high32(p);
+		l = p2;
+
+		t.add_exon(l, p1);
+		for(int k = 1; k < spos.size(); k++)
+		{
+			p = spos[k];
+			p1 = low32(p);
+			p2 = high32(p);
+			t.add_exon(l, p1);
+			l = p2;
+		}
+
+		t.add_exon(l, rpos);
+	}
+
+	// TODO
+	t.strand = strand;
+	return 0;
+}

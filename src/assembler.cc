@@ -37,6 +37,7 @@ assembler::~assembler()
 
 int assembler::assemble()
 {
+	vector<hit> list;		// non-redundant list of hits
     while(sam_read1(sfn, hdr, b1t) >= 0)
 	{
 		if(terminate == true) return 0;
@@ -53,6 +54,23 @@ int assembler::assemble()
 		ht.set_tags(b1t);
 		ht.set_strand();
 		ht.build_splice_positions();
+
+		// check by comparing to list
+		bool flag = true;
+		for(int k = 0; k < list.size(); k++)
+		{
+			// be careful here, since we are comparing two vectors (C++)
+			if(list[k].strand == ht.strand && list[k].spos == ht.spos)
+			{
+				flag = false;
+				break;
+			}
+		}
+
+		if(flag == true)
+		{
+			list.push_back(ht);
+		}
 
 		//ht.print();
 
