@@ -85,9 +85,11 @@ hit::hit(bam1_t *b)
 	buf[l] = '\0';
 	qname = string(buf);
 
+	/*
 	string sub = qname.substr(0, 10);
 	if(sub == "SRR1020625") is_long_read = false;
 	else is_long_read = true;
+	*/
 
 	// compute rpos
 	rpos = pos + (int32_t)bam_cigar2rlen(n_cigar, bam_get_cigar(b));

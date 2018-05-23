@@ -64,19 +64,21 @@ int previewer::preview()
 		// predicted strand
 		char xs = '.';
 
-		// for paired read
+		// for paired read, for illumina
 		if((ht.flag & 0x1) >= 1 && (ht.flag & 0x10) <= 0 && (ht.flag & 0x20) >= 1 && (ht.flag & 0x40) >= 1 && (ht.flag & 0x80) <= 0) xs = '-';
 		if((ht.flag & 0x1) >= 1 && (ht.flag & 0x10) >= 1 && (ht.flag & 0x20) <= 0 && (ht.flag & 0x40) <= 0 && (ht.flag & 0x80) >= 1) xs = '-';
 		if((ht.flag & 0x1) >= 1 && (ht.flag & 0x10) >= 1 && (ht.flag & 0x20) <= 0 && (ht.flag & 0x40) >= 1 && (ht.flag & 0x80) <= 0) xs = '+';
 		if((ht.flag & 0x1) >= 1 && (ht.flag & 0x10) <= 0 && (ht.flag & 0x20) >= 1 && (ht.flag & 0x40) <= 0 && (ht.flag & 0x80) >= 1) xs = '+';
 
-		// for single read
+		// for single read, for illumina
 		if((ht.flag & 0x1) <= 0 && (ht.flag & 0x10) <= 0) xs = '-';
 		if((ht.flag & 0x1) <= 0 && (ht.flag & 0x10) >= 1) xs = '+';
 
+		printf("0x10 = %c, xs = %c, ht.xs = %c\n", ((ht.flag & 0x10) <= 0) ? '0' : '1', xs, ht.xs);
+
 		if(xs == '+' && xs == ht.xs) sp1.push_back(1);
-		if(xs == '-' && xs == ht.xs) sp2.push_back(1);
 		if(xs == '+' && xs != ht.xs) sp1.push_back(2);
+		if(xs == '-' && xs == ht.xs) sp2.push_back(1);
 		if(xs == '-' && xs != ht.xs) sp2.push_back(2);
 	}
 

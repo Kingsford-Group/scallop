@@ -94,6 +94,7 @@ extern string ref_file;
 extern string ref_file1;
 extern string ref_file2;
 extern string output_file;
+extern string ccsread_info_file;
 
 // for controling
 extern bool output_tex_files;

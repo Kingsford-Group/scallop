@@ -19,6 +19,7 @@ See LICENSE for licensing.
 
 assembler::assembler()
 {
+	load_ccsread_info();
     sfn = sam_open(input_file.c_str(), "r");
     hdr = sam_hdr_read(sfn);
     b1t = bam_init1();
@@ -242,5 +243,31 @@ int assembler::compare(splice_graph &gr, const string &file, const string &texfi
 	sgraph_compare sgc(gt, gr);
 	sgc.compare(texfile);
 
+	return 0;
+}
+
+int assembler::load_ccsread_info()
+{
+	if(ccsread_info_file == "") return 0;
+	ifstream fin(ccsread_info_file.c_str());
+	if(fin.fail()) return 0;
+
+	string s;
+	while(getline(fin, s))
+	{
+		if(s.size() == 0) continue;
+		if(s[0] != '@') continue;
+		ccsread_info cci(s);
+		if(ccs.find(cci.qname) != ccs.end()) continue;
+		ccs.insert(pair<string, ccsread_info>(cci.qname, cci));
+	}
+
+	/*
+	map<string, ccsread_info>::iterator it;
+	for(it = ccs.begin(); it != ccs.end(); it++)
+	{
+		it->second.print();
+	}
+	*/
 	return 0;
 }

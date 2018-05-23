@@ -35,4 +35,5 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  previewer.h previewer.cc \
 				  assembler.h assembler.cc \
 				  filter.h filter.cc \
+				  ccsread_info.h ccsread_info.cc \
 				  main.cc

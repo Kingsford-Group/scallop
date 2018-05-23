@@ -69,6 +69,7 @@ string ref_file;
 string ref_file1;
 string ref_file2;
 string output_file;
+string ccsread_info_file;
 
 // for controling
 bool output_tex_files = false;
@@ -125,6 +126,11 @@ int parse_arguments(int argc, const char ** argv)
 		}
 
 		// user specified
+		else if(string(argv[i]) == "--ccsread_info_file")
+		{
+			ccsread_info_file = string(argv[i + 1]);
+			i++;
+		}
 		else if(string(argv[i]) == "--version")
 		{
 			printf("%s\n", version.c_str());

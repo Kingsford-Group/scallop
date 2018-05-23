@@ -13,6 +13,7 @@ See LICENSE for licensing.
 #include "bundle.h"
 #include "transcript.h"
 #include "splice_graph.h"
+#include "ccsread_info.h"
 
 using namespace std;
 
@@ -36,6 +37,8 @@ private:
 	double qlen;
 	vector<transcript> trsts;
 
+	map<string, ccsread_info> ccs;
+
 public:
 	int assemble();
 
@@ -45,6 +48,7 @@ private:
 	int assign_RPKM();
 	int write();
 	int compare(splice_graph &gr, const string &ref, const string &tex = "");
+	int load_ccsread_info();
 };
 
 #endif
