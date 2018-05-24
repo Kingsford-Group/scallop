@@ -69,7 +69,7 @@ public:
 
 public:
 	int set_tags(bam1_t *b);
-	int set_strand();
+	int set_strand(char ccstrand);
 	int set_concordance();
 	int build_splice_positions();
 	int get_mid_intervals(vector<int64_t> &vm, vector<int64_t> &vi, vector<int64_t> &vd) const;

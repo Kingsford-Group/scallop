@@ -9,6 +9,7 @@ class ccsread_info
 {
 public:
 	ccsread_info(const string &line);
+	ccsread_info();
 
 public:
 	string qname;

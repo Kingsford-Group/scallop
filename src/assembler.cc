@@ -38,7 +38,6 @@ assembler::~assembler()
 
 int assembler::assemble()
 {
-	vector<hit> list;		// non-redundant list of hits
     while(sam_read1(sfn, hdr, b1t) >= 0)
 	{
 		if(terminate == true) return 0;
@@ -47,36 +46,25 @@ int assembler::assemble()
 
 		if((p.flag & 0x4) >= 1) continue;										// read is not mapped
 		if((p.flag & 0x100) >= 1 && use_second_alignment == false) continue;	// secondary alignment
-		if(p.n_cigar > MAX_NUM_CIGAR) continue;									// ignore hits with more than 7 cigar types
+		if(p.n_cigar > MAX_NUM_CIGAR) continue;									// ignore hits with more than MAX_NUM_CIGAR cigar types
 		if(p.qual < min_mapping_quality) continue;								// ignore hits with small quality
 		if(p.n_cigar < 1) continue;												// should never happen
 
 		hit ht(b1t);
+		if(ccs.find(ht.qname) == ccs.end()) continue;
+
+		ccsread_info cci = ccs[ht.qname];
+
 		ht.set_tags(b1t);
-		ht.set_strand();
+		ht.set_strand(cci.strand);
+
+		// TODO, check rules for generating splice positions
 		ht.build_splice_positions();
 
-		// check by comparing to list
-		bool flag = true;
-		for(int k = 0; k < list.size(); k++)
-		{
-			// be careful here, since we are comparing two vectors (C++)
-			if(list[k].strand == ht.strand && list[k].spos == ht.spos)
-			{
-				flag = false;
-				break;
-			}
-		}
-
-		if(flag == true)
-		{
-			list.push_back(ht);
-		}
-
 		//ht.print();
-
 		//if(ht.nh >= 2 && p.qual < min_mapping_quality) continue;
 		//if(ht.nm > max_edit_distance) continue;
+		//if(uniquely_mapped_only == true && ht.nh != 1) continue; // TODO
 
 		qlen += ht.qlen;
 		qcnt += 1;
@@ -99,16 +87,8 @@ int assembler::assemble()
 		//printf("read strand = %c, xs = %c, ts = %c\n", ht.strand, ht.xs, ht.ts);
 
 		// add hit
-		if(uniquely_mapped_only == true && ht.nh != 1) continue;
-		if(library_type != UNSTRANDED && ht.strand == '+' && ht.xs == '-') continue;
-		if(library_type != UNSTRANDED && ht.strand == '-' && ht.xs == '+') continue;
-		if(library_type != UNSTRANDED && ht.strand == '.' && ht.xs != '.') ht.strand = ht.xs;
-		if(library_type != UNSTRANDED && ht.strand == '+') bb1.add_hit(ht);
-		if(library_type != UNSTRANDED && ht.strand == '-') bb2.add_hit(ht);
-		if(library_type == UNSTRANDED && ht.xs == '.') bb1.add_hit(ht);
-		if(library_type == UNSTRANDED && ht.xs == '.') bb2.add_hit(ht);
-		if(library_type == UNSTRANDED && ht.xs == '+') bb1.add_hit(ht);
-		if(library_type == UNSTRANDED && ht.xs == '-') bb2.add_hit(ht);
+		if(ht.strand == '+') bb1.add_hit(ht);
+		if(ht.strand == '-') bb2.add_hit(ht);
 	}
 
 	pool.push_back(bb1);

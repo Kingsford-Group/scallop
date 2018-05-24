@@ -153,38 +153,13 @@ int hit::set_concordance()
 	return 0;
 }
 
-int hit::set_strand()
+int hit::set_strand(char ccstrand)
 {
 	strand = '.';
-	
-	if(library_type == FR_FIRST && ((flag & 0x1) >= 1))
-	{
-		if((flag & 0x10) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '-';
-		if((flag & 0x10) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '+';
-		if((flag & 0x10) <= 0 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '+';
-		if((flag & 0x10) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '-';
-	}
-
-	if(library_type == FR_SECOND && ((flag & 0x1) >= 1))
-	{
-		if((flag & 0x10) <= 0 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '+';
-		if((flag & 0x10) >= 1 && (flag & 0x40) >= 1 && (flag & 0x80) <= 0) strand = '-';
-		if((flag & 0x10) <= 0 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '-';
-		if((flag & 0x10) >= 1 && (flag & 0x40) <= 0 && (flag & 0x80) >= 1) strand = '+';
-	}
-
-	if(library_type == FR_FIRST && ((flag & 0x1) <= 0))
-	{
-		if((flag & 0x10) <= 0) strand = '-';
-		if((flag & 0x10) >= 1) strand = '+';
-	}
-
-	if(library_type == FR_SECOND && ((flag & 0x1) <= 0))
-	{
-		if((flag & 0x10) <= 0) strand = '+';
-		if((flag & 0x10) >= 1) strand = '-';
-	}
-
+	if((flag & 0x10) >= 1 && ccstrand == '+') strand = '-';
+	if((flag & 0x10) >= 1 && ccstrand == '-') strand = '+';
+	if((flag & 0x10) <= 0 && ccstrand == '+') strand = '+';
+	if((flag & 0x10) <= 0 && ccstrand == '-') strand = '-';
 	return 0;
 }
 

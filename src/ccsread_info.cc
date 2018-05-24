@@ -3,6 +3,9 @@
 #include <iostream>
 #include <sstream>
 
+ccsread_info::ccsread_info()
+{}
+
 ccsread_info::ccsread_info(const string &line)
 {
 	parse(line);
