@@ -34,8 +34,8 @@ double preview_infer_ratio = 0.95;
 bool preview_only = false;
 
 // for identifying subgraphs
-int32_t min_subregion_gap = 3;
-double min_subregion_overlap = 1.5;
+int32_t min_subregion_gap = 20;
+double min_subregion_overlap = 0.5;
 int32_t min_subregion_length = 15;
 
 // for revising/decomposing splice graph

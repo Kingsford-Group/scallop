@@ -26,13 +26,9 @@ bundle::~bundle()
 
 int bundle::build()
 {
-	compute_strand();
-
+	//compute_strand();
 	check_left_ascending();
-
 	build_junctions();
-	//correct_junctions();
-
 	build_regions();
 	build_partial_exons();
 
@@ -40,9 +36,8 @@ int bundle::build()
 	link_partial_exons();
 	build_splice_graph();
 
-	revise_splice_graph();
-
-	build_hyper_edges2();
+	//revise_splice_graph();
+	build_hyper_edges1();
 
 	return 0;
 }
@@ -91,7 +86,6 @@ int bundle::check_right_ascending()
 
 int bundle::build_junctions()
 {
-	int min_max_boundary_quality = min_mapping_quality;
 	map< int64_t, vector<int> > m;
 	for(int i = 0; i < hits.size(); i++)
 	{
@@ -102,17 +96,6 @@ int bundle::build_junctions()
 		for(int k = 0; k < v.size(); k++)
 		{
 			int64_t p = v[k];
-
-			// DEBUG
-			/*
-			int32_t x1 = low32(p);
-			int32_t x2 = high32(p);
-			if(fabs(x1 - 9364768) <= 2 || fabs(x2 - 9364768) <=2)
-			{
-				printf("HIT ");
-				hits[i].print();
-			}
-			*/
 			if(m.find(p) == m.end())
 			{
 				vector<int> hv;
@@ -157,16 +140,6 @@ int bundle::build_junctions()
 		else if(s1 > s2) jc.strand = '+';
 		else jc.strand = '-';
 		junctions.push_back(jc);
-
-		/*
-		uint32_t max_qual = 0;
-		for(int k = 0; k < v.size(); k++)
-		{
-			hit &h = hits[v[k]];
-			if(h.qual > max_qual) max_qual = h.qual;
-		}
-		assert(max_qual >= min_max_boundary_quality);
-		*/
 	}
 	return 0;
 }
@@ -237,15 +210,13 @@ int bundle::correct_junctions()
 
 int bundle::build_regions()
 {
+	// TODO, consider boundary reads
 	MPI s;
 	s.insert(PI(lpos, START_BOUNDARY));
 	s.insert(PI(rpos, END_BOUNDARY));
 	for(int i = 0; i < junctions.size(); i++)
 	{
 		junction &jc = junctions[i];
-
-		double ave, dev;
-		evaluate_rectangle(mmap, jc.lpos, jc.rpos, ave, dev);
 
 		int32_t l = jc.lpos;
 		int32_t r = jc.rpos;
@@ -255,13 +226,6 @@ int bundle::build_regions()
 
 		if(s.find(r) == s.end()) s.insert(PI(r, RIGHT_SPLICE));
 		else if(s[r] == LEFT_SPLICE) s[r] = LEFT_RIGHT_SPLICE;
-	}
-
-	for(int i = 0; i < pexons.size(); i++)
-	{
-		partial_exon &p = pexons[i];
-		if(s.find(p.lpos) != s.end()) s.insert(PI(p.lpos, p.ltype));
-		if(s.find(p.rpos) != s.end()) s.insert(PI(p.rpos, p.rtype));
 	}
 
 	vector<PPI> v(s.begin(), s.end());
@@ -1121,8 +1085,11 @@ int bundle::print(int index)
 		if(hits[i].xs == '-') nq++;
 	}
 
-	printf("tid = %d, #hits = %lu, #partial-exons = %lu, range = %s:%d-%d, orient = %c (%d, %d, %d), num-long-reads = %d\n",
-			tid, hits.size(), pexons.size(), chrm.c_str(), lpos, rpos, strand, n0, np, nq, num_long_reads);
+	printf("tid = %d, #hits = %lu, #partial-exons = %lu, range = %s:%d-%d, orient = %c (%d, %d, %d)\n",
+			tid, hits.size(), pexons.size(), chrm.c_str(), lpos, rpos, strand, n0, np, nq);
+
+	//printf("tid = %d, #hits = %lu, #partial-exons = %lu, range = %s:%d-%d, orient = %c (%d, %d, %d), num-long-reads = %d\n",
+	//		tid, hits.size(), pexons.size(), chrm.c_str(), lpos, rpos, strand, n0, np, nq, num_long_reads);
 
 	if(verbose <= 1) return 0;
 

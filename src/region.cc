@@ -14,11 +14,12 @@ using namespace std;
 region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split_interval_map *_mmap, const split_interval_map *_imap)
 	:lpos(_lpos), rpos(_rpos), mmap(_mmap), imap(_imap), ltype(_ltype), rtype(_rtype)
 {
-
+	build_single_partial_exon();
+	/*
 	build_join_interval_map();
 	smooth_join_interval_map();
-	//split_join_interval_map();
 	build_partial_exons();
+	*/
 }
 
 region::~region()
@@ -208,6 +209,25 @@ int region::build_partial_exons()
 		pexons.push_back(pe);
 	}
 
+	return 0;
+}
+
+int region::build_single_partial_exon()
+{
+	pexons.clear();
+	partial_exon pe(lpos, rpos, ltype, rtype);
+	evaluate_rectangle(*mmap, pe.lpos, pe.rpos, pe.ave, pe.dev);
+
+	bool b1 = false;
+	bool b2 = false;
+	if(ltype == RIGHT_SPLICE) b1 = true;
+	if(ltype == START_BOUNDARY) b1 = true;
+	if(rtype == LEFT_SPLICE) b2 = true;
+	if(rtype == END_BOUNDARY) b2 = true;
+	
+	if(b1 == false && b2 == false && pe.ave < 0.5) return 0;
+
+	pexons.push_back(pe);
 	return 0;
 }
 

@@ -179,10 +179,13 @@ int hit::build_splice_positions()
 
 		if(k == 0 || k == n_cigar - 1) continue;
 		if(bam_cigar_op(cigar[k]) != BAM_CREF_SKIP) continue;
+
+		/*
 		if(bam_cigar_op(cigar[k-1]) != BAM_CMATCH) continue;
 		if(bam_cigar_op(cigar[k+1]) != BAM_CMATCH) continue;
 		if(bam_cigar_oplen(cigar[k-1]) < min_flank_length) continue;
 		if(bam_cigar_oplen(cigar[k+1]) < min_flank_length) continue;
+		*/
 
 		int32_t s = p - bam_cigar_oplen(cigar[k]);
 		spos.push_back(pack(s, p));
@@ -212,6 +215,14 @@ int hit::print() const
 	// print basic information
 	printf("Hit %s: [%d-%d), mpos = %d, cigar = %s, flag = %d, quality = %d, strand = %c, isize = %d, qlen = %d, hi = %d, is-long = %c\n", 
 			qname.c_str(), pos, rpos, mpos, sstr.str().c_str(), flag, qual, strand, isize, qlen, hi, is_long_read ? 'T' : 'F');
+
+	for(int i = 0; i < spos.size(); i++)
+	{
+		int64_t p = spos[i];
+		int32_t p1 = low32(p);
+		int32_t p2 = high32(p);
+		printf(" splice position (%d - %d)\n", p1, p2);
+	}
 
 	return 0;
 }

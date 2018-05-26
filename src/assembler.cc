@@ -115,6 +115,7 @@ int assembler::process(int n)
 		bundle_base &bb = pool[i];
 
 		//printf("bundle %d has %lu reads\n", i, bb.hits.size());
+		//for(int k = 0; k < bb.hits.size(); k++) bb.hits[k].print();
 
 		if(bb.hits.size() < min_num_hits_in_bundle) continue;
 		if(bb.tid < 0) continue;
@@ -132,8 +133,12 @@ int assembler::process(int n)
 
 		assemble(bd.gr, bd.hs);
 		index++;
+
+		printf("\n");
 	}
 	pool.clear();
+
+	//exit(0);	// TODO
 	return 0;
 }
 
