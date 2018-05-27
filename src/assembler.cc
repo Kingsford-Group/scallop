@@ -51,12 +51,15 @@ int assembler::assemble()
 		if(p.n_cigar < 1) continue;												// should never happen
 
 		hit ht(b1t);
-		if(ccs.find(ht.qname) == ccs.end()) continue;
-
-		ccsread_info cci = ccs[ht.qname];
-
+		ht.set_strand();
 		ht.set_tags(b1t);
-		ht.set_strand(cci.strand);
+
+		if(ccs.find(ht.qname) == ccs.end()) continue;
+		ccsread_info cci = ccs[ht.qname];
+		ht.set_ccsread_info(cci);
+
+		//char rev = ((p.flag & 0x10) >= 1) ? '1' : '0';
+		//printf("strand: rev = %c, ts = %c, xs = %c, ccstrand = %c\n", rev, ht.ts, ht.xs, cci.strand);
 
 		// TODO, check rules for generating splice positions
 		ht.build_splice_positions();

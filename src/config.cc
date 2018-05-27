@@ -51,7 +51,7 @@ double min_transcript_numreads = 20;
 int min_transcript_length_base = 150;
 int min_transcript_length_increase = 50;
 int min_exon_length = 20;
-int max_num_exons = 1000;
+int max_num_exons = 5000;
 
 // for subsetsum and router
 int max_dp_table_size = 10000;

@@ -13,6 +13,7 @@ See LICENSE for licensing.
 #include "htslib/sam.h"
 #include "config.h"
 #include "transcript.h"
+#include "ccsread_info.h"
 
 using namespace std;
 
@@ -66,10 +67,13 @@ public:
 	uint32_t* cigar;						// cigar, use samtools
 	vector<int64_t> spos;					// splice positions
 	bool is_long_read;						// whether this read is long read
+	bool start_boundary;					// whether left end is a start boundary
+	bool end_boundary;						// whether left end is an end boundary
 
 public:
 	int set_tags(bam1_t *b);
-	int set_strand(char ccstrand);
+	int set_strand();
+	int set_ccsread_info(const ccsread_info &cci);
 	int set_concordance();
 	int build_splice_positions();
 	int get_mid_intervals(vector<int64_t> &vm, vector<int64_t> &vi, vector<int64_t> &vd) const;

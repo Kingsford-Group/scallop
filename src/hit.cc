@@ -42,6 +42,8 @@ hit& hit::operator=(const hit &h)
 	hi = h.hi;
 	nm = h.nm;
 	is_long_read = h.is_long_read;
+	start_boundary = h.start_boundary;
+	end_boundary = h.end_boundary;
 
 	cigar = new uint32_t[h.n_cigar];
 	memcpy(cigar, h.cigar, 4 * h.n_cigar);
@@ -61,6 +63,8 @@ hit::hit(const hit &h)
 	hi = h.hi;
 	nm = h.nm;
 	is_long_read = h.is_long_read;
+	start_boundary = h.start_boundary;
+	end_boundary = h.end_boundary;
 
 	//printf("call copy constructor\n");
 	cigar = new uint32_t[h.n_cigar];
@@ -153,13 +157,19 @@ int hit::set_concordance()
 	return 0;
 }
 
-int hit::set_strand(char ccstrand)
+int hit::set_strand()
 {
-	strand = '.';
-	if((flag & 0x10) >= 1 && ccstrand == '+') strand = '-';
-	if((flag & 0x10) >= 1 && ccstrand == '-') strand = '+';
-	if((flag & 0x10) <= 0 && ccstrand == '+') strand = '+';
-	if((flag & 0x10) <= 0 && ccstrand == '-') strand = '-';
+	strand = xs;
+	return 0;
+}
+
+int hit::set_ccsread_info(const ccsread_info &cci)
+{
+	start_boundary = end_boundary = false;
+	if(strand == '+' && cci.fiveseen == true) start_boundary = true;
+	if(strand == '+' && cci.threeseen == true) end_boundary = true;
+	if(strand == '-' && cci.fiveseen == true) end_boundary = true;
+	if(strand == '-' && cci.threeseen == true) start_boundary = true;
 	return 0;
 }
 
