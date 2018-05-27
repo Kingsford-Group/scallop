@@ -214,6 +214,13 @@ int bundle::build_regions()
 	MPI s;
 	s.insert(PI(lpos, START_BOUNDARY));
 	s.insert(PI(rpos, END_BOUNDARY));
+
+	for(int i = 0; i < hits.size(); i++)
+	{
+		if(hits[i].start_boundary == true && s.find(hits[i].pos) == s.end()) s.insert(PI(hits[i].pos, START_BOUNDARY));
+		if(hits[i].end_boundary == true && s.find(hits[i].rpos) == s.end()) s.insert(PI(hits[i].rpos, END_BOUNDARY));
+	}
+
 	for(int i = 0; i < junctions.size(); i++)
 	{
 		junction &jc = junctions[i];
