@@ -221,6 +221,27 @@ int bundle::build_regions()
 		if(hits[i].end_boundary == true && s.find(hits[i].rpos) == s.end()) s.insert(PI(hits[i].rpos, END_BOUNDARY));
 	}
 
+	vector<PI> vv(s.begin(), s.end());
+	sort(vv.begin(), vv.end());
+
+	int pre = -1;
+	for(int i = 0; i < vv.size(); i++)
+	{
+		if(vv[i].second != START_BOUNDARY) pre = -1;
+		if(vv[i].second != START_BOUNDARY) continue;
+		if(pre != -1 && pre + min_boundary_gap > vv[i].first) s.erase(vv[i].first);
+		pre = vv[i].first;
+	}
+
+	pre = -1;
+	for(int i = vv.size() - 1; i >= 0; i--)
+	{
+		if(vv[i].second != END_BOUNDARY) pre = -1;
+		if(vv[i].second != END_BOUNDARY) continue;
+		if(pre != -1 && vv[i].first + min_boundary_gap > pre) s.erase(vv[i].first);
+		pre = vv[i].first;
+	}
+
 	for(int i = 0; i < junctions.size(); i++)
 	{
 		junction &jc = junctions[i];

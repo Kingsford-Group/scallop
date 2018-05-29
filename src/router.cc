@@ -131,6 +131,7 @@ int router::build()
 			decompose1_clp();
 			ratio = -1;
 		}
+		/*
 		else
 		{
 			ratio = DBL_MAX;
@@ -138,6 +139,7 @@ int router::build()
 			extend_bipartite_graph_all();
 			decompose2_clp();
 		}
+		*/
 	}
 	return 0;
 }
@@ -696,6 +698,21 @@ int router::decompose0_clp()
 		ratio = 0;
 		double* opt = model.primalColumnSolution();
 		for(int i = 0; i < u2e.size(); i++) ratio += opt[i + offset3];
+
+		pe2w.clear();
+		se2w.clear();
+		for(int i = 0; i < ve.size(); i++)
+		{
+			edge_descriptor e = ve[i];
+			int s = e->source();
+			int t = e->target();
+			int es = u2e[s];
+			int et = u2e[t];
+			PI p(es, et);
+			if(s > t) p = PI(et, es);
+			double w = opt[i + offset1];
+			pe2w.insert(PPID(p, w));
+		}
 
 		return 0;
 	}

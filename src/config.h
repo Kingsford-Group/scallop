@@ -64,6 +64,7 @@ extern int32_t min_subregion_gap;
 extern double min_subregion_overlap;
 extern int32_t min_subregion_length;
 extern int min_subregion_ladders;
+extern int32_t min_boundary_gap;
 
 // for subsetsum and router
 extern int max_dp_table_size;

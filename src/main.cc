@@ -16,6 +16,7 @@ See LICENSE for licensing.
 #include "config.h"
 #include "previewer.h"
 #include "assembler.h"
+#include "subsetsum.h"
 
 using namespace std;
 

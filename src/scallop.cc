@@ -40,8 +40,6 @@ int scallop::assemble()
 	int c = classify();
 	if(verbose >= 1) printf("process splice graph %s type = %d, vertices = %lu, edges = %lu\n", gr.gid.c_str(), c, gr.num_vertices(), gr.num_edges());
 
-	//resolve_negligible_edges(false, max_decompose_error_ratio[NEGLIGIBLE_EDGE]);
-
 	while(true)
 	{	
 		if(gr.num_vertices() > max_num_exons) break;
@@ -57,11 +55,13 @@ int scallop::assemble()
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 1, -0.5);
 		if(b == true) continue;
 
+		/*
 		b = resolve_smallest_edges(max_decompose_error_ratio[SMALLEST_EDGE]);
 		if(b == true) continue;
 
 		b = resolve_negligible_edges(true, max_decompose_error_ratio[NEGLIGIBLE_EDGE]);
 		if(b == true) continue;
+		*/
 
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 1, -0.5);
 		if(b == true) continue;
@@ -78,6 +78,7 @@ int scallop::assemble()
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, INT_MAX, max_decompose_error_ratio[UNSPLITTABLE_SINGLE]);
 		if(b == true) continue;
 
+		/*
 		b = resolve_hyper_edge(2);
 		if(b == true) continue;
 
@@ -87,9 +88,47 @@ int scallop::assemble()
 		b = resolve_smallest_edges(DBL_MAX);
 		if(b == true) continue;
 
-		//summarize_vertices();
-
 		b = resolve_trivial_vertex(2, max_decompose_error_ratio[TRIVIAL_VERTEX]);
+		if(b == true) continue;
+		*/
+
+		break;
+	}
+
+	while(true)
+	{	
+		if(gr.num_vertices() > max_num_exons) break;
+
+		bool b = false;
+
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 1, DBL_MAX);
+		if(b == true) continue;
+
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 1, DBL_MAX);
+		if(b == true) continue;
+
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, INT_MAX, DBL_MAX);
+		if(b == true) continue;
+
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, INT_MAX, DBL_MAX);
+		if(b == true) continue;
+
+		b = resolve_splittable_vertex(SPLITTABLE_HYPER, 1, DBL_MAX);
+		if(b == true) continue;
+
+		b = resolve_splittable_vertex(SPLITTABLE_SIMPLE, 1, DBL_MAX);
+		if(b == true) continue;
+
+		b = resolve_splittable_vertex(SPLITTABLE_HYPER, INT_MAX, DBL_MAX);
+		if(b == true) continue;
+
+		b = resolve_splittable_vertex(SPLITTABLE_SIMPLE, INT_MAX, DBL_MAX);
+		if(b == true) continue;
+
+		b = resolve_trivial_vertex(1, DBL_MAX);
+		if(b == true) continue;
+
+		b = resolve_trivial_vertex(2, DBL_MAX);
 		if(b == true) continue;
 
 		break;

@@ -265,13 +265,13 @@ int subsetsum::test()
 	//57:4 237:5 
 
 	vector<PI> v;
-	v.push_back(PI(10, 1));
-	v.push_back(PI(20, 2));
-	v.push_back(PI(39, 3));
+	v.push_back(PI(20, 1));
+	v.push_back(PI(1, 2));
+	v.push_back(PI(30, 3));
 
 	vector<PI> t;
-	t.push_back(PI(29, 1));
-	t.push_back(PI(54, 2));
+	t.push_back(PI(10, 1));
+	t.push_back(PI(41, 2));
 
 	subsetsum sss(v, t);
 	sss.solve();
