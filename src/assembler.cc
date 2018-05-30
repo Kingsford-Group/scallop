@@ -153,7 +153,7 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0)
 	super_graph sg(gr0, hs0);
 	sg.build();
 
-	vector<transcript> gv;
+	//vector<transcript> gv;
 	for(int k = 0; k < sg.subs.size(); k++)
 	{
 		string gid = "gene." + tostring(index) + "." + tostring(k);
@@ -179,7 +179,7 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0)
 
 		filter ft(clst.cct);
 		ft.filter_length_coverage();
-		if(ft.trs.size() >= 1) gv.insert(gv.end(), ft.trs.begin(), ft.trs.end());
+		if(ft.trs.size() >= 1) trsts.insert(trsts.end(), ft.trs.begin(), ft.trs.end());
 
 		if(verbose >= 2)
 		{
