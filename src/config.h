@@ -67,6 +67,7 @@ extern int min_subregion_ladders;
 extern int32_t min_boundary_gap;
 extern int32_t max_cluster_boundary_distance;
 extern int32_t max_cluster_intron_distance;
+extern double min_cluster_single_exon_ratio;
 
 // for subsetsum and router
 extern int max_dp_table_size;

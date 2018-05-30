@@ -8,15 +8,31 @@ See LICENSE for licensing.
 #define __CLUSTER_H__
 
 #include "gene.h"
+#include "undirected_graph.h"
+
+typedef map< int, vector<int> > MIV;
+typedef pair< int, vector<int> > PIV;
 
 class cluster
 {
 public:
 	cluster(const vector<transcript> &v);
+	MIV miv;
+	undirected_graph gr;
 
 public:
-	vector<transcript> trs;
+	vector<transcript> trs;		// input transcripts
+	vector<transcript> cct;		// transcripts w.r.t. clusters
 
+public:
+	int solve();
+	int print();
+
+private:
+	int split_with_num_exons();
+	int build_graph();
+	int clustering();
+	bool verify_transcripts(int x, int y);
 };
 
 #endif

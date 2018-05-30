@@ -40,6 +40,7 @@ int32_t min_subregion_length = 15;
 int32_t min_boundary_gap = 5;
 int32_t max_cluster_boundary_distance = 50;
 int32_t max_cluster_intron_distance = 10;
+double min_cluster_single_exon_ratio = 0.8;
 
 // for revising/decomposing splice graph
 double max_intron_contamination_coverage = 2.0;
@@ -47,14 +48,14 @@ double min_surviving_edge_weight = 1.5;
 double max_decompose_error_ratio[7] = {0.33, 0.05, 0.0, 0.25, 0.30, 0.0, 1.1};
 
 // for selecting paths
-double min_transcript_coverage = 1.01;
-double min_transcript_coverage_ratio = 0.005;
-double min_single_exon_coverage = 20;
-double min_transcript_numreads = 20;
-int min_transcript_length_base = 150;
+double min_transcript_coverage = 2.5;
+double min_single_exon_coverage = 10.0;
+int min_transcript_length_base = 100;
 int min_transcript_length_increase = 50;
+int max_num_exons = 10000;
+double min_transcript_coverage_ratio = 0.005;
+double min_transcript_numreads = 1.0;
 int min_exon_length = 20;
-int max_num_exons = 5000;
 
 // for subsetsum and router
 int max_dp_table_size = 10000;
@@ -229,6 +230,11 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--max_cluster_intron_distance")
 		{
 			max_cluster_intron_distance = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_cluster_single_exon_ratio")
+		{
+			min_cluster_single_exon_ratio = atof(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_surviving_edge_weight")
