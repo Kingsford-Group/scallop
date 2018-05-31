@@ -94,6 +94,8 @@ extern string ref_file;
 extern string ref_file1;
 extern string ref_file2;
 extern string output_file;
+extern string ilpinstance_file;
+extern ofstream ilpinstance_fout;
 
 // for controling
 extern bool output_tex_files;

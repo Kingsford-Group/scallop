@@ -51,8 +51,15 @@ int main(int argc, const char **argv)
 
 	if(preview_only == true) return 0;
 
+	if(ilpinstance_file == "") return 0;
+
+	ilpinstance_fout.open(ilpinstance_file.c_str());
+	if(ilpinstance_fout.fail()) return 0;
+
 	assembler asmb;
 	asmb.assemble();
+
+	ilpinstance_fout.close();
 
 	return 0;
 }

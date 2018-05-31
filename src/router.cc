@@ -123,6 +123,23 @@ int router::build()
 	}
 	if(type == UNSPLITTABLE_SINGLE || type == UNSPLITTABLE_MULTIPLE) 
 	{
+		// for writing ilpinstances
+		int d1 = 0, d2 = 0;
+		for(int i = 0; i < gr.in_degree(root); i++)
+		{
+			if(ug.degree(i) >= 1) continue;
+			d1++;
+		}
+		for(int i = 0; i < gr.out_degree(root); i++)
+		{
+			int j = i + gr.in_degree(root);
+			if(ug.degree(j) >= 1) continue;
+			d2++;
+		}
+		if(d1 == 0 && d2 >= 1) write_ilpinstance();
+		if(d1 >= 1 && d2 == 0) write_ilpinstance();
+		// end writing ilpinstance
+
 		extend_bipartite_graph_max();
 		decompose0_clp();
 
@@ -585,6 +602,35 @@ vector<double> router::compute_balanced_weights()
 	return vw;
 }
 
+int router::write_ilpinstance()
+{
+	static int index = 0;
+
+	ilpinstance_fout << "# instance " << index++ << endl;
+
+	// number of left vertices and number of right vertices
+	ilpinstance_fout << gr.in_degree(root) << " " << gr.out_degree(root) << endl;
+
+	// locally balance weights and write
+	vector<double> vw = compute_balanced_weights();
+	for(int k = 0; k < vw.size(); k++)
+	{
+		ilpinstance_fout << fixed << setprecision(3) << vw[k] << " ";
+	}
+	ilpinstance_fout << endl;
+
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = ug.edges(); it1 != it2; it1++)
+	{
+		edge_descriptor e = (*it1);
+		int s = e->source();
+		int t = e->target();
+		ilpinstance_fout << s + 1 << " " << t + 1 << endl;
+	}
+
+	return 0;
+}
+
 int router::decompose0_clp()
 {
 	// locally balance weights
@@ -601,7 +647,6 @@ int router::decompose0_clp()
 
 	try
 	{
-
 		ClpSimplex model;
 		CoinBuild cb;
 

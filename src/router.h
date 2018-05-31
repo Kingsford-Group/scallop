@@ -56,6 +56,7 @@ public:
 	int build_bipartite_graph();								// build bipartite graph
 	int extend_bipartite_graph_max();							// extended graph
 	int extend_bipartite_graph_all();							// extended graph
+	int write_ilpinstance();									// write to ilpinstance_fout
 	int build_maximum_spanning_tree();							// make ug a (maximum) spanning tree
 	int split();												// split
 	int decompose0_clp();										// solve LP with CLP
