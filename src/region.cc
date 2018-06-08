@@ -29,7 +29,10 @@ int region::build_join_interval_map()
 
 	SIMI lit, rit;
 	tie(lit, rit) = locate_boundary_iterators(*mmap, lpos, rpos);
-	if(lit == mmap->end() || rit == mmap->end()) return 0;
+	if(lit == mmap->end() || rit == mmap->end())
+	{
+		return 0;
+	}
 
 	SIMI it = lit;
 	while(true)
@@ -184,10 +187,12 @@ int region::build_partial_exons()
 		
 		bool b = empty_subregion(p1, p2);
 
-		//printf(" subregion [%d, %d), empty = %c\n", p1, p2, b ? 'T' : 'F');
-
 		if(p1 == lpos && ltype == RIGHT_SPLICE) b = false;
+		if(p1 == lpos && ltype == START_BOUNDARY) b = false;
 		if(p2 == rpos && rtype == LEFT_SPLICE) b = false;
+		if(p2 == rpos && rtype == END_BOUNDARY) b = false;
+
+		printf(" subregion [%d, %d), empty = %c\n", p1, p2, b ? 'T' : 'F');
 
 		if(b == true) continue;
 

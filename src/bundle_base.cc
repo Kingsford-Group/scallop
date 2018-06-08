@@ -50,6 +50,18 @@ int bundle_base::add_hit(const hit &ht)
 	}
 	*/
 
+	int32_t p1 = ht.pos;
+	int32_t p2 = -1;
+	for(int i = 0; i < ht.spos.size(); i++)
+	{
+		p2 = high32(ht.spos[i]);
+		mmap += make_pair(ROI(p1, p2), 1);
+		p1 = low32(ht.spos[i]);
+	}
+	p2 = ht.rpos;
+	mmap += make_pair(ROI(p1, p2), 1);
+
+	/*
 	// add intervals
 	vector<int64_t> vm;
 	vector<int64_t> vi;
@@ -78,6 +90,7 @@ int bundle_base::add_hit(const hit &ht)
 		int32_t t = low32(vd[k]);
 		imap += make_pair(ROI(s, t), 1);
 	}
+	*/
 
 	return 0;
 }

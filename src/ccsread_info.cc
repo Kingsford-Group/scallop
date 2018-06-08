@@ -14,7 +14,7 @@ ccsread_info::ccsread_info(const string &line)
 int ccsread_info::parse(const string &line)
 {
 	if(line.size() == 0) return 0;
-	if(line[0] != '@') return 0;
+	if(line[0] != '@' && line[0] != '>') return 0;
 
 	stringstream sstr(line.substr(1, line.size() - 1));
 

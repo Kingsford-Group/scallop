@@ -56,6 +56,7 @@ int assembler::assemble()
 		ht.set_tags(b1t);
 
 		if(ccs.find(ht.qname) == ccs.end()) continue;
+
 		ccsread_info cci = ccs[ht.qname];
 		ht.set_ccsread_info(cci);
 
@@ -251,7 +252,6 @@ int assembler::load_ccsread_info()
 	while(getline(fin, s))
 	{
 		if(s.size() == 0) continue;
-		if(s[0] != '@') continue;
 		ccsread_info cci(s);
 		if(ccs.find(cci.qname) != ccs.end()) continue;
 		ccs.insert(pair<string, ccsread_info>(cci.qname, cci));

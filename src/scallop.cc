@@ -522,6 +522,14 @@ bool scallop::resolve_trivial_vertex_fast(double jump_ratio)
 	for(int k = 0; k < vv.size(); k++)
 	{
 		int i = vv[k];
+
+		// TODO TEST
+		if(gr.in_degree(i) <= 0 || gr.out_degree(i) <= 0)
+		{
+			vertex_info vi = gr.get_vertex_info(i);
+			printf("vertex %d has degree of (%d, %d), region = (%d, %d)\n", i, gr.in_degree(i), gr.out_degree(i), vi.lpos, vi.rpos);
+		}
+
 		assert(gr.in_degree(i) >= 1);
 		assert(gr.out_degree(i) >= 1);
 		bool b = resolve_single_trivial_vertex_fast(i, jump_ratio);

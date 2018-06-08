@@ -175,7 +175,7 @@ int hit::set_ccsread_info(const ccsread_info &cci)
 
 int hit::build_splice_positions()
 {
-	spos.clear();
+	vector<PI32> vv;
 	int32_t p = pos;
 	int32_t q = 0;
 	//uint8_t *seq = bam_get_seq(b);
@@ -198,8 +198,27 @@ int hit::build_splice_positions()
 		*/
 
 		int32_t s = p - bam_cigar_oplen(cigar[k]);
-		spos.push_back(pack(s, p));
+		vv.push_back(PI32(s, p));
 	}
+
+	spos.clear();
+	if(vv.size() == 0) return 0;
+
+	PI32 p1 = vv[0];
+	for(int k = 1; k < vv.size(); k++)
+	{
+		if(vv[k].first == p1.second)
+		{
+			p1.second = vv[k].second;
+		}
+		else
+		{
+			spos.push_back(pack(p1.first, p1.second));
+			p1 = vv[k];
+		}
+	}
+
+	spos.push_back(pack(p1.first, p1.second));
 	return 0;
 }
 
@@ -229,8 +248,8 @@ int hit::print() const
 	for(int i = 0; i < spos.size(); i++)
 	{
 		int64_t p = spos[i];
-		int32_t p1 = low32(p);
-		int32_t p2 = high32(p);
+		int32_t p1 = high32(p);
+		int32_t p2 = low32(p);
 		printf(" splice position (%d - %d)\n", p1, p2);
 	}
 

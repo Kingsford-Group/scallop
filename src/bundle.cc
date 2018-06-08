@@ -31,7 +31,6 @@ int bundle::build()
 	build_junctions();
 	build_regions();
 	build_partial_exons();
-
 	build_partial_exon_map();
 	link_partial_exons();
 	build_splice_graph();
@@ -324,6 +323,7 @@ int bundle::locate_right_partial_exon(int32_t x)
 	assert(it->second >= 1);
 	assert(it->second <= pexons.size());
 
+
 	int k = it->second - 1;
 	int32_t p1 = lower(it->first);
 	int32_t p2 = upper(it->first);
@@ -534,6 +534,7 @@ int bundle::link_partial_exons()
 
 		assert(lm.find(l) == lm.end());
 		assert(rm.find(r) == rm.end());
+		
 		lm.insert(PPI(l, i));
 		rm.insert(PPI(r, i));
 	}
@@ -1122,7 +1123,9 @@ int bundle::print(int index)
 	if(verbose <= 1) return 0;
 
 	// print hits
-	//for(int i = 0; i < hits.size(); i++) hits[i].print();
+	/*
+	for(int i = 0; i < hits.size(); i++) hits[i].print();
+	*/
 
 	// print regions
 	for(int i = 0; i < regions.size(); i++)
