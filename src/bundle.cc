@@ -34,7 +34,6 @@ int bundle::build()
 	build_partial_exon_map();
 	link_partial_exons();
 	build_splice_graph();
-
 	//revise_splice_graph();
 	build_hyper_edges1();
 
@@ -347,6 +346,10 @@ int bundle::build_hyper_edges1()
 		if(v.size() == 0) continue;
 
 		set<int> sp;
+
+		if(h.start_boundary == true) sp.insert(-1);
+		if(h.end_boundary == true) sp.insert(pexons.size());
+
 		for(int k = 0; k < v.size(); k++)
 		{
 			int32_t p1 = high32(v[k]);
@@ -1123,9 +1126,7 @@ int bundle::print(int index)
 	if(verbose <= 1) return 0;
 
 	// print hits
-	/*
 	for(int i = 0; i < hits.size(); i++) hits[i].print();
-	*/
 
 	// print regions
 	for(int i = 0; i < regions.size(); i++)
@@ -1148,7 +1149,7 @@ int bundle::print(int index)
 	printf("\n");
 
 	// print hyper-edges
-	//hs.print();
+	hs.print();
 
 	return 0;
 }

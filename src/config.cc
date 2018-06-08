@@ -37,8 +37,8 @@ bool preview_only = false;
 int32_t min_subregion_gap = 20;
 double min_subregion_overlap = 0.5;
 int32_t min_subregion_length = 15;
-int32_t min_boundary_gap = 5;
-int32_t max_cluster_boundary_distance = 50;
+int32_t min_boundary_gap = 10000;
+int32_t max_cluster_boundary_distance = 10000;
 int32_t max_cluster_intron_distance = 10;
 double min_cluster_single_exon_ratio = 0.8;
 

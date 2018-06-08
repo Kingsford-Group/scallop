@@ -115,4 +115,3 @@ int bundle_base::clear()
 	num_long_reads = 0;
 	return 0;
 }
-

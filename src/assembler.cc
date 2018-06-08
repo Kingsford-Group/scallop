@@ -52,8 +52,8 @@ int assembler::assemble()
 		if(p.n_cigar < 1) continue;												// should never happen
 
 		hit ht(b1t);
-		ht.set_strand();
 		ht.set_tags(b1t);
+		ht.set_strand();
 
 		if(ccs.find(ht.qname) == ccs.end()) continue;
 
