@@ -45,7 +45,8 @@ public:
 	MI get_successors(int e);
 	MI get_predecessors(int e);
 	MPII get_routes(int x, directed_graph &gr, MEI &e2i);
-	int print();
+	int print_node_list();
+	int print_edge_list();
 
 public:
 	int replace(int x, int e);

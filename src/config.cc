@@ -22,7 +22,8 @@ int32_t min_bundle_gap = 50;
 int min_num_hits_in_bundle = 1;
 int min_intron_size = 50;
 uint32_t min_mapping_quality = 1;
-int32_t min_splice_boundary_hits = 1;
+int32_t min_splice_hits = 1;
+int32_t min_boundary_hits = 2;
 bool use_second_alignment = false;
 bool uniquely_mapped_only = false;
 int library_type = EMPTY;
@@ -38,7 +39,6 @@ bool preview_only = false;
 int32_t min_subregion_gap = 20;
 double min_subregion_overlap = 0.5;
 int32_t min_subregion_length = 15;
-int32_t min_boundary_gap = 10000;
 int32_t max_cluster_boundary_distance = 10000;
 int32_t max_cluster_intron_distance = 10;
 double min_cluster_single_exon_ratio = 0.8;
@@ -179,9 +179,14 @@ int parse_arguments(int argc, const char ** argv)
 			min_mapping_quality = atoi(argv[i + 1]);
 			i++;
 		}
-		else if(string(argv[i]) == "--min_splice_boundary_hits")
+		else if(string(argv[i]) == "--min_splice_hits")
 		{
-			min_splice_boundary_hits = atoi(argv[i + 1]);
+			min_splice_hits = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min__boundary_hits")
+		{
+			min_boundary_hits = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--max_preview_spliced_reads")
@@ -221,11 +226,6 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--min_subregion_overlap")
 		{
 			min_subregion_overlap = atof(argv[i + 1]);
-			i++;
-		}
-		else if(string(argv[i]) == "--min_boundary_gap")
-		{
-			min_boundary_gap = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--max_cluster_boundary_distance")
@@ -405,7 +405,8 @@ int print_parameters()
 	printf("min_bundle_gap = %d\n", min_bundle_gap);
 	printf("min_num_hits_in_bundle = %d\n", min_num_hits_in_bundle);
 	printf("min_mapping_quality = %d\n", min_mapping_quality);
-	printf("min_splice_boundary_hits = %d\n", min_splice_boundary_hits);
+	printf("min_splice_hits = %d\n", min_splice_hits);
+	printf("min_boundary_hits = %d\n", min_boundary_hits);
 
 	// for preview
 	printf("preview_only = %c\n", preview_only ? 'T' : 'F');
@@ -418,7 +419,6 @@ int print_parameters()
 	printf("min_subregion_gap = %d\n", min_subregion_gap);
 	printf("min_subregion_length = %d\n", min_subregion_length);
 	printf("min_subregion_overlap = %.2lf\n", min_subregion_overlap);
-	printf("min_boundary_gap = %d\n", min_boundary_gap);
 
 	// for splice graph
 	printf("max_intron_contamination_coverage = %.2lf\n", max_intron_contamination_coverage);

@@ -111,7 +111,7 @@ int bundle::build_junctions()
 	for(it = m.begin(); it != m.end(); it++)
 	{
 		vector<int> &v = it->second;
-		if(v.size() < min_splice_boundary_hits) continue;
+		if(v.size() < min_splice_hits) continue;
 
 		int32_t p1 = high32(it->first);
 		int32_t p2 = low32(it->first);
@@ -208,11 +208,19 @@ int bundle::correct_junctions()
 
 int bundle::build_regions()
 {
-	// TODO, consider boundary reads
 	MPI s;
 	s.insert(PI(lpos, START_BOUNDARY));
 	s.insert(PI(rpos, END_BOUNDARY));
 
+	add_junctions(s);
+	add_boundaries(s);
+	split_regions(s);
+
+	return 0;
+}
+
+int bundle::add_junctions(MPI &s)
+{
 	for(int i = 0; i < junctions.size(); i++)
 	{
 		junction &jc = junctions[i];
@@ -227,50 +235,63 @@ int bundle::build_regions()
 		else if(s[r] == LEFT_SPLICE) s[r] = LEFT_RIGHT_SPLICE;
 	}
 
+	return 0;
+}
 
+int bundle::add_boundaries(MPI &s)
+{
+	MPI ss = s;
 	for(int i = 0; i < hits.size(); i++)
 	{
-		if(hits[i].start_boundary == true && s.find(hits[i].pos) == s.end())
+		if(hits[i].start_boundary == true && ss.find(hits[i].pos) == ss.end())
 		{
 			//printf("insert start boundary %d\n", hits[i].pos);
-			s.insert(PI(hits[i].pos, START_BOUNDARY));
+			ss.insert(PI(hits[i].pos, START_BOUNDARY));
 		}
-		if(hits[i].end_boundary == true && s.find(hits[i].rpos) == s.end()) 
+		if(hits[i].end_boundary == true && ss.find(hits[i].rpos) == ss.end()) 
 		{
 			//printf("insert end bounary %d\n", hits[i].rpos);
-			s.insert(PI(hits[i].rpos, END_BOUNDARY));
+			ss.insert(PI(hits[i].rpos, END_BOUNDARY));
 		}
 	}
 
-	vector<PI> vv(s.begin(), s.end());
+	// merge adjacent start/end boundaries
+	vector<PI> vv(ss.begin(), ss.end());
 	sort(vv.begin(), vv.end());
 
-	int pre = -1;
+	int k = -1;
 	for(int i = 0; i < vv.size(); i++)
 	{
-		if(vv[i].second != START_BOUNDARY) pre = -1;
-		if(vv[i].second != START_BOUNDARY) continue;
-		if(pre != -1 && pre + min_boundary_gap > vv[i].first)
+		if(vv[i].second != START_BOUNDARY)
 		{
-			//printf("erase start boundary %d\n", vv[i].first);
-			s.erase(vv[i].first);
+			if(k >= 0 && i - k >= min_boundary_hits && s.find(vv[k].first) == s.end()) s.insert(vv[k]);
+			k = -1;
 		}
-		pre = vv[i].first;
+		else
+		{
+			if(k == -1) k = i;
+		}
 	}
 
-	pre = -1;
+	k = -1;
 	for(int i = vv.size() - 1; i >= 0; i--)
 	{
-		if(vv[i].second != END_BOUNDARY) pre = -1;
-		if(vv[i].second != END_BOUNDARY) continue;
-		if(pre != -1 && vv[i].first + min_boundary_gap > pre)
+		if(vv[i].second != END_BOUNDARY)
 		{
-			//printf("erase end boundary %d\n", vv[i].first);
-			s.erase(vv[i].first);
+			if(k >= 0 && k - i >= min_boundary_hits && s.find(vv[k].first) == s.end()) s.insert(vv[k]);
+			k = -1;
 		}
-		pre = vv[i].first;
+		else
+		{
+			if(k == -1) k = i;
+		}
 	}
+	
+	return 0;
+}
 
+int bundle::split_regions(MPI &s)
+{
 	vector<PPI> v(s.begin(), s.end());
 	sort(v.begin(), v.end());
 
@@ -287,7 +308,6 @@ int bundle::build_regions()
 
 		regions.push_back(region(l, r, ltype, rtype, &mmap, &imap));
 	}
-
 	return 0;
 }
 
@@ -364,9 +384,8 @@ int bundle::build_hyper_edges1()
 
 		set<int> sp;
 
-		if(h.start_boundary == true) sp.insert(-1);
-		if(h.end_boundary == true) sp.insert(pexons.size());
-
+		int min = -1;
+		int max = -1;
 		for(int k = 0; k < v.size(); k++)
 		{
 			int32_t p1 = high32(v[k]);
@@ -376,8 +395,17 @@ int bundle::build_hyper_edges1()
 			int k2 = locate_right_partial_exon(p2);
 			if(k1 < 0 || k2 < 0) continue;
 
-			for(int j = k1; j <= k2; j++) sp.insert(j);
+			for(int j = k1; j <= k2; j++) 
+			{
+				sp.insert(j);
+				if(min == -1 || j < min) min = j;
+				if(max == -1 || j > max) max = j;
+			}
 		}
+
+		// extend phasing paths to boundaries
+		if(min != -1 && h.start_boundary == true && pexons[min].ltype == START_BOUNDARY) sp.insert(-1);
+		if(max != -1 && h.end_boundary == true && pexons[max].rtype == END_BOUNDARY) sp.insert(pexons.size());
 
 		if(sp.size() <= 1) continue;
 		hs.add_node_list(sp);
@@ -1164,7 +1192,7 @@ int bundle::print(int index)
 	}
 
 	// print hyper-edges
-	hs.print();
+	hs.print_node_list();
 
 	printf("\n");
 

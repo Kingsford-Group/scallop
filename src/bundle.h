@@ -58,6 +58,9 @@ private:
 	int link_partial_exons();
 	int build_splice_graph();
 	int build_partial_exon_map();
+	int add_junctions(MPI &s);
+	int add_boundaries(MPI &s);
+	int split_regions(MPI &s);
 	int locate_left_partial_exon(int32_t x);
 	int locate_right_partial_exon(int32_t x);
 

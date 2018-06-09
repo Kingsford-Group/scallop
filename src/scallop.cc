@@ -39,6 +39,7 @@ int scallop::assemble()
 {
 	int c = classify();
 	if(verbose >= 1) printf("process splice graph %s type = %d, vertices = %lu, edges = %lu, hyper-edges = %lu\n", gr.gid.c_str(), c, gr.num_vertices(), gr.num_edges(), hs.edges.size());
+	if(verbose >= 2) hs.print_edge_list();
 
 	while(true)
 	{	

@@ -69,8 +69,11 @@ int hyper_set::build_edges(directed_graph &gr, MEI& e2i)
 			edges.push_back(ve);
 			ecnts.push_back(c);
 		}
+
 		continue;
 
+		/*
+		// use pieces of phasing paths
 		vector<int> v;
 		for(int k = 0; k < ve.size(); k++)
 		{
@@ -93,6 +96,7 @@ int hyper_set::build_edges(directed_graph &gr, MEI& e2i)
 			edges.push_back(v);
 			ecnts.push_back(c);
 		}
+		*/
 	}
 	return 0;
 }
@@ -596,7 +600,7 @@ bool hyper_set::right_dominate(int e)
 	return true;
 }
 
-int hyper_set::print()
+int hyper_set::print_node_list()
 {
 	//printf("PRINT HYPER_SET\n");
 	for(MVII::iterator it = nodes.begin(); it != nodes.end(); it++)
@@ -607,14 +611,16 @@ int hyper_set::print()
 		printv(v);
 		printf(")\n");
 	}
+	return 0;
+}
 
-	/*
+int hyper_set::print_edge_list()
+{
 	for(int i = 0; i < edges.size(); i++)
 	{
 		printf("hyper-edge (edges) %d: ( ", i);
 		printv(edges[i]);
 		printf(")\n");
 	}
-	*/
 	return 0;
 }
