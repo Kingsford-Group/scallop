@@ -1,12 +1,17 @@
 bin_PROGRAMS = scallop
 
-GTFDIR = ../lib/gtf
-UTILDIR = ../lib/util
-GRAPHDIR = ../lib/graph
 
-scallop_CPPFLAGS = -std=c++11 -I$(GTFDIR) -I$(GRAPHDIR) -I$(UTILDIR)
-scallop_LDFLAGS = -pthread -L$(GTFDIR) -L$(GRAPHDIR) -L$(UTILDIR)
-scallop_LDADD = -lgtf -lgraph -lutil
+GTF_INCLUDE = $(top_srcdir)/lib/gtf
+UTIL_INCLUDE = $(top_srcdir)/lib/util
+GRAPH_INCLUDE = $(top_srcdir)/lib/graph
+
+GTF_LIB = $(top_builddir)/lib/gtf
+UTIL_LIB = $(top_builddir)/lib/util
+GRAPH_LIB = $(top_builddir)/lib/graph
+
+scallop_CPPFLAGS = -std=c++11 -I$(GTF_INCLUDE) -I$(GRAPH_INCLUDE) -I$(UTIL_INCLUDE)
+	scallop_LDFLAGS = -pthread -L$(GTF_LIB) -L$(GRAPH_LIB) -L$(UTIL_LIB)
+	scallop_LDADD = -lgtf -lgraph -lutil
 
 scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  super_graph.h super_graph.cc \
