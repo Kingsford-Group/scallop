@@ -32,6 +32,7 @@ public:
 	vector<hit> hits;				// hits
 	split_interval_map mmap;		// matched interval map
 	split_interval_map imap;		// indel interval map
+	map<int64_t> intron_counts;		// counts for each intron
 
 	int num_long_reads;				// number of long reads in this bundle
 

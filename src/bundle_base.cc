@@ -42,14 +42,7 @@ int bundle_base::add_hit(const hit &ht)
 	if(hits.size() <= 1) strand = ht.strand;
 	assert(strand == ht.strand);
 
-	// DEBUG
-	/*
-	if(strand != ht.strand)
-	{
-		printf("strand = %c, ht.strand = %c, ht.xs = %c,\n", strand, ht.strand, ht.xs);
-	}
-	*/
-
+	// add matching regions
 	int32_t p1 = ht.pos;
 	int32_t p2 = -1;
 	for(int i = 0; i < ht.spos.size(); i++)

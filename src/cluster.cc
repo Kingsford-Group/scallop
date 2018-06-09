@@ -55,9 +55,9 @@ int cluster::build_graph()
 		{
 			for(int j = 0; j < i; j++)
 			{
-				bool b = verify_transcripts(v[i], v[j]);
-				if(b == false) continue;
-				gr.add_edge(v[i], v[j]);
+				if(verify_equal(v[i], v[j])) gr.add_edge(v[i], v[j]);
+				//if(verify_subset(v[i], v[j])) gr.add_edge(v[i], v[j]);
+				//if(verify_subset(v[j], v[i])) gr.add_edge(v[i], v[j]);
 			}
 		}
 	}
@@ -72,7 +72,7 @@ int cluster::clustering()
 	{
 		set<int> &s = cc[i];
 
-		int k = -1;			// transcript index with max-capacity
+		int k = -1;			// transcript index with max-capacity (or longest)
 		int32_t lpos = -1;	// leftmost position
 		int32_t rpos = -1;	// rightmost position
 		double cov = 0;		// sum of coverage
@@ -99,7 +99,7 @@ int cluster::clustering()
 	return 0;
 }
 
-bool cluster::verify_transcripts(int x, int y)
+bool cluster::verify_equal(int x, int y)
 {
 	transcript &xx = trs[x];
 	transcript &yy = trs[y];
@@ -145,6 +145,43 @@ bool cluster::verify_transcripts(int x, int y)
 		if(f1 + f2 > max_cluster_intron_distance) return false;
 	}
 	return true;
+}
+
+bool cluster::verify_subset(int x, int y)
+{
+	transcript &xx = trs[x];
+	transcript &yy = trs[y];
+	if(xx.strand != yy.strand) return false;
+	if(xx.exons.size() >= yy.exons.size()) return false;
+	if(xx.exons.size() == 1) return false;
+	if(xx.coverage >= yy.coverage + 0.000001) return false;
+
+	PI32 px = xx.get_bounds();
+	PI32 py = yy.get_bounds();
+	vector<PI32> ix = xx.get_intron_chain();
+	vector<PI32> iy = yy.get_intron_chain();
+
+	if(px.first < py.first) return false;
+	if(px.second > py.second) return false;
+
+	int n = xx.exons.size();
+	for(int k = 0; k <= yy.exons.size() - xx.exons.size(); k++)
+	{
+		if(xx.exons[0].first < yy.exons[k].first) continue;
+		if(xx.exons[n - 1].second > yy.exons[k + n - 1].second) continue;
+
+		bool b = true;
+		for(int i = 0; i < ix.size(); i++)
+		{
+			double f1 = fabs(ix[i].first - iy[i + k].first);
+			double f2 = fabs(ix[i].second - iy[i + k].second);
+			if(f1 + f2 > max_cluster_intron_distance) b = false;
+			if(b == false) break;
+		}
+		if(b == false) continue;
+
+		return true;
+	}
 }
 
 int cluster::print()

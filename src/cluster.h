@@ -32,7 +32,8 @@ private:
 	int split_with_num_exons();
 	int build_graph();
 	int clustering();
-	bool verify_transcripts(int x, int y);
+	bool verify_equal(int x, int y);
+	bool verify_subset(int x, int y);
 };
 
 #endif

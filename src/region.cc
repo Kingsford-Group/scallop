@@ -192,7 +192,7 @@ int region::build_partial_exons()
 		if(p2 == rpos && rtype == LEFT_SPLICE) b = false;
 		if(p2 == rpos && rtype == END_BOUNDARY) b = false;
 
-		printf(" subregion [%d, %d), empty = %c\n", p1, p2, b ? 'T' : 'F');
+		//printf(" subregion [%d, %d), empty = %c\n", p1, p2, b ? 'T' : 'F');
 
 		if(b == true) continue;
 

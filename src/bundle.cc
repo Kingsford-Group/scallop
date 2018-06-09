@@ -213,33 +213,6 @@ int bundle::build_regions()
 	s.insert(PI(lpos, START_BOUNDARY));
 	s.insert(PI(rpos, END_BOUNDARY));
 
-	for(int i = 0; i < hits.size(); i++)
-	{
-		if(hits[i].start_boundary == true && s.find(hits[i].pos) == s.end()) s.insert(PI(hits[i].pos, START_BOUNDARY));
-		if(hits[i].end_boundary == true && s.find(hits[i].rpos) == s.end()) s.insert(PI(hits[i].rpos, END_BOUNDARY));
-	}
-
-	vector<PI> vv(s.begin(), s.end());
-	sort(vv.begin(), vv.end());
-
-	int pre = -1;
-	for(int i = 0; i < vv.size(); i++)
-	{
-		if(vv[i].second != START_BOUNDARY) pre = -1;
-		if(vv[i].second != START_BOUNDARY) continue;
-		if(pre != -1 && pre + min_boundary_gap > vv[i].first) s.erase(vv[i].first);
-		pre = vv[i].first;
-	}
-
-	pre = -1;
-	for(int i = vv.size() - 1; i >= 0; i--)
-	{
-		if(vv[i].second != END_BOUNDARY) pre = -1;
-		if(vv[i].second != END_BOUNDARY) continue;
-		if(pre != -1 && vv[i].first + min_boundary_gap > pre) s.erase(vv[i].first);
-		pre = vv[i].first;
-	}
-
 	for(int i = 0; i < junctions.size(); i++)
 	{
 		junction &jc = junctions[i];
@@ -252,6 +225,50 @@ int bundle::build_regions()
 
 		if(s.find(r) == s.end()) s.insert(PI(r, RIGHT_SPLICE));
 		else if(s[r] == LEFT_SPLICE) s[r] = LEFT_RIGHT_SPLICE;
+	}
+
+
+	for(int i = 0; i < hits.size(); i++)
+	{
+		if(hits[i].start_boundary == true && s.find(hits[i].pos) == s.end())
+		{
+			//printf("insert start boundary %d\n", hits[i].pos);
+			s.insert(PI(hits[i].pos, START_BOUNDARY));
+		}
+		if(hits[i].end_boundary == true && s.find(hits[i].rpos) == s.end()) 
+		{
+			//printf("insert end bounary %d\n", hits[i].rpos);
+			s.insert(PI(hits[i].rpos, END_BOUNDARY));
+		}
+	}
+
+	vector<PI> vv(s.begin(), s.end());
+	sort(vv.begin(), vv.end());
+
+	int pre = -1;
+	for(int i = 0; i < vv.size(); i++)
+	{
+		if(vv[i].second != START_BOUNDARY) pre = -1;
+		if(vv[i].second != START_BOUNDARY) continue;
+		if(pre != -1 && pre + min_boundary_gap > vv[i].first)
+		{
+			//printf("erase start boundary %d\n", vv[i].first);
+			s.erase(vv[i].first);
+		}
+		pre = vv[i].first;
+	}
+
+	pre = -1;
+	for(int i = vv.size() - 1; i >= 0; i--)
+	{
+		if(vv[i].second != END_BOUNDARY) pre = -1;
+		if(vv[i].second != END_BOUNDARY) continue;
+		if(pre != -1 && vv[i].first + min_boundary_gap > pre)
+		{
+			//printf("erase end boundary %d\n", vv[i].first);
+			s.erase(vv[i].first);
+		}
+		pre = vv[i].first;
 	}
 
 	vector<PPI> v(s.begin(), s.end());
@@ -1146,10 +1163,10 @@ int bundle::print(int index)
 		pexons[i].print(i);
 	}
 
-	printf("\n");
-
 	// print hyper-edges
 	hs.print();
+
+	printf("\n");
 
 	return 0;
 }

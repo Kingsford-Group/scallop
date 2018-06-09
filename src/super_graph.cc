@@ -159,8 +159,21 @@ int super_graph::split_single_splice_graph(splice_graph &gr, hyper_set &hs, cons
 		vector<int> vv;
 		for(int k = 0; k < v.size(); k++)
 		{
+			if(v[k] == 0) 
+			{
+				vv.push_back(0);
+				continue;
+			}
+
+			if(v[k] == root.num_vertices() - 1)
+			{
+				vv.push_back(gr.num_vertices() - 1);
+				continue;
+			}
+
 			if(ss.find(v[k]) == ss.end()) b = false;
 			if(b == false) break;
+
 			assert(a2b.find(v[k]) != a2b.end());
 			assert(a2b[v[k]].first == index);
 			int x = a2b[v[k]].second;

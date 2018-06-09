@@ -184,7 +184,7 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0)
 
 		if(verbose >= 2)
 		{
-			printf("transcripts after filtering:\n");
+			printf("transcripts after filtering (total transcripts = %lu):\n", trsts.size());
 			for(int i = 0; i < ft.trs.size(); i++) ft.trs[i].write(cout);
 		}
 
