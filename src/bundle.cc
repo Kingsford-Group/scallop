@@ -1127,7 +1127,7 @@ int bundle::print(int index)
 	if(verbose <= 1) return 0;
 
 	// print hits
-	//for(int i = 0; i < hits.size(); i++) hits[i].print();
+	for(int i = 0; i < hits.size(); i++) hits[i].print();
 
 	// print regions
 	for(int i = 0; i < regions.size(); i++)
@@ -1147,10 +1147,10 @@ int bundle::print(int index)
 		pexons[i].print(i);
 	}
 
-	printf("\n");
-
 	// print hyper-edges
-	//hs.print();
+	hs.print();
+
+	printf("\n");
 
 	return 0;
 }

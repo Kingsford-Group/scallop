@@ -233,8 +233,19 @@ int hit::print() const
 	}
 
 	// print basic information
-	printf("Hit %s: [%d-%d), mpos = %d, cigar = %s, flag = %d, quality = %d, strand = %c, isize = %d, qlen = %d, hi = %d, is-long = %c\n", 
-			qname.c_str(), pos, rpos, mpos, sstr.str().c_str(), flag, qual, strand, isize, qlen, hi, is_long_read ? 'T' : 'F');
+	printf("Hit %s: [%d-%d), mpos = %d, cigar = %s, flag = %d, quality = %d, strand = %c, xs = %c, ts = %c, isize = %d, qlen = %d, hi = %d, is-long = %c\n", 
+			qname.c_str(), pos, rpos, mpos, sstr.str().c_str(), flag, qual, strand, xs, ts, isize, qlen, hi, is_long_read ? 'T' : 'F');
+
+	printf(" start position (%d - )\n", pos);
+	for(int i = 0; i < spos.size(); i++)
+	{
+		int64_t p = spos[i];
+		int32_t p1 = high32(p);
+		int32_t p2 = low32(p);
+		printf(" splice position (%d - %d)\n", p1, p2);
+	}
+	printf(" end position (%d - )\n", rpos);
+
 
 	return 0;
 }
