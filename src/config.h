@@ -47,6 +47,7 @@ extern int min_flank_length;
 extern int max_edit_distance;
 extern int32_t min_bundle_gap;
 extern int min_num_hits_in_bundle;
+extern int min_intron_size;
 extern uint32_t min_mapping_quality;
 extern int32_t min_splice_boundary_hits;
 extern bool uniquely_mapped_only;

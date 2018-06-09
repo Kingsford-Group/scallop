@@ -15,6 +15,9 @@ See LICENSE for licensing.
 #include "hit.h"
 #include "interval_map.h"
 
+typedef pair<int64_t, int> PI64;
+typedef map<int64_t, int> MI64;
+
 using namespace std;
 
 class bundle_base
@@ -32,7 +35,8 @@ public:
 	vector<hit> hits;				// hits
 	split_interval_map mmap;		// matched interval map
 	split_interval_map imap;		// indel interval map
-	map<int64_t> intron_counts;		// counts for each intron
+	set<int64_t> iss;				// set helps ics
+	MI64 ics;						// counts for each intron
 
 	int num_long_reads;				// number of long reads in this bundle
 

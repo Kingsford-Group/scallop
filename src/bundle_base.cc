@@ -54,37 +54,25 @@ int bundle_base::add_hit(const hit &ht)
 	p2 = ht.rpos;
 	mmap += make_pair(ROI(p1, p2), 1);
 
+	// add intron counts
 	/*
-	// add intervals
-	vector<int64_t> vm;
-	vector<int64_t> vi;
-	vector<int64_t> vd;
-	ht.get_mid_intervals(vm, vi, vd);
-
-	//ht.print();
-	for(int k = 0; k < vm.size(); k++)
+	for(int i = 0; i < ht.spos.size(); i++)
 	{
-		int32_t s = high32(vm[k]);
-		int32_t t = low32(vm[k]);
-		//printf(" add interval %d-%d\n", s, t);
-		mmap += make_pair(ROI(s, t), 1);
-	}
-
-	for(int k = 0; k < vi.size(); k++)
-	{
-		int32_t s = high32(vi[k]);
-		int32_t t = low32(vi[k]);
-		imap += make_pair(ROI(s, t), 1);
-	}
-
-	for(int k = 0; k < vd.size(); k++)
-	{
-		int32_t s = high32(vd[k]);
-		int32_t t = low32(vd[k]);
-		imap += make_pair(ROI(s, t), 1);
+		int64_t p = ht.spos[i];
+		if(ics.find(p) != ics.end())
+		{
+			ics[p]++;
+		}
+		else if(iss.find(p) == iss.end())
+		{
+			iss.insert(p);
+		}
+		else
+		{
+			ics.insert(PI64(p, 2));
+		}
 	}
 	*/
-
 	return 0;
 }
 

@@ -138,7 +138,7 @@ int assembler::process(int n)
 
 		//if(verbose >= 1) bd.print(index);
 
-		assemble(bd.gr, bd.hs);
+		assemble(bd.gr, bd.hs, bd.ics);
 		index++;
 
 		printf("\n");
@@ -149,12 +149,11 @@ int assembler::process(int n)
 	return 0;
 }
 
-int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0)
+int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0, const MI64 &ics)
 {
 	super_graph sg(gr0, hs0);
 	sg.build();
 
-	//vector<transcript> gv;
 	for(int k = 0; k < sg.subs.size(); k++)
 	{
 		string gid = "gene." + tostring(index) + "." + tostring(k);
@@ -175,7 +174,7 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0)
 			for(int i = 0; i < sc.trsts.size(); i++) sc.trsts[i].write(cout);
 		}
 
-		cluster clst(sc.trsts);
+		cluster clst(sc.trsts, ics);
 		clst.solve();
 
 		filter ft(clst.cct);

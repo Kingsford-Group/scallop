@@ -197,7 +197,10 @@ int hit::build_splice_positions()
 		if(bam_cigar_oplen(cigar[k+1]) < min_flank_length) continue;
 		*/
 
-		int32_t s = p - bam_cigar_oplen(cigar[k]);
+		int32_t len = bam_cigar_oplen(cigar[k]);
+		if(len < min_intron_size) continue;
+
+		int32_t s = p - len;
 		vv.push_back(PI32(s, p));
 	}
 

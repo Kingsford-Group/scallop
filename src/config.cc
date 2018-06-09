@@ -20,6 +20,7 @@ int min_flank_length = 3;
 int max_edit_distance = 10;
 int32_t min_bundle_gap = 50;
 int min_num_hits_in_bundle = 1;
+int min_intron_size = 100;
 uint32_t min_mapping_quality = 1;
 int32_t min_splice_boundary_hits = 1;
 bool use_second_alignment = false;
@@ -166,6 +167,11 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--min_num_hits_in_bundle")
 		{
 			min_num_hits_in_bundle = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--min_intron_size")
+		{
+			min_intron_size = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--min_mapping_quality")
