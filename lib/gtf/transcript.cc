@@ -164,7 +164,7 @@ vector<PI32> transcript::get_intron_chain() const
 	{
 		int32_t q = exons[k].first;
 		v.push_back(PI32(p, q));
-		int32_t p = exons[k].second;
+		p = exons[k].second;
 	}
 	return v;
 }
