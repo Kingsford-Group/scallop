@@ -159,7 +159,20 @@ int hit::set_concordance()
 
 int hit::set_strand()
 {
-	strand = xs;
+	if(library_type == FR_FIRST && ((flag & 0x1) <= 0))
+	{
+		if((flag & 0x10) <= 0) strand = '+';
+		if((flag & 0x10) >= 1) strand = '-';
+	}
+	else if(library_type == FR_SECOND && ((flag & 0x1) <= 0))
+	{
+		if((flag & 0x10) <= 0) strand = '-';
+		if((flag & 0x10) >= 1) strand = '+';
+	}
+	else
+	{
+		strand = xs;
+	}
 	return 0;
 }
 

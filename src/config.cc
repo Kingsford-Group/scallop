@@ -32,7 +32,7 @@ int library_type = EMPTY;
 int max_preview_reads = 2000000;
 int max_preview_spliced_reads = 50000;
 int min_preview_spliced_reads = 10000;
-double preview_infer_ratio = 0.95;
+double preview_infer_ratio = 0.90;
 bool preview_only = false;
 
 // for identifying subgraphs

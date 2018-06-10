@@ -28,18 +28,12 @@ previewer::~previewer()
 int previewer::preview()
 {
 	int total = 0;
-	int single = 0;
-	int paired = 0;
-
 	int first = 0;
 	int second = 0;
-	vector<int> sp1;
-	vector<int> sp2;
 
     while(sam_read1(sfn, hdr, b1t) >= 0)
 	{
 		if(total >= max_preview_reads) break;
-		if(sp1.size() >= max_preview_spliced_reads && sp2.size() >= max_preview_spliced_reads) break;
 
 		bam1_core_t &p = b1t->core;
 
@@ -48,48 +42,24 @@ int previewer::preview()
 		if(p.n_cigar > MAX_NUM_CIGAR) continue;									// ignore hits with more than 7 cigar types
 		if(p.qual < min_mapping_quality) continue;								// ignore hits with small quality
 		if(p.n_cigar < 1) continue;												// should never happen
+		if((p.flag & 0x1) >= 1) continue;										// isoseq always single-end
 
 		total++;
 
 		hit ht(b1t);
 		ht.set_tags(b1t);
 
-		if((ht.flag & 0x1) >= 1) paired ++;
-		if((ht.flag & 0x1) <= 0) single ++;
-
 		if(ht.xs == '.') continue;
-		if(ht.xs == '+' && sp1.size() >= max_preview_spliced_reads) continue;
-		if(ht.xs == '-' && sp2.size() >= max_preview_spliced_reads) continue;
 
 		// predicted strand
 		char xs = '.';
+		if((ht.flag & 0x1) <= 0 && (ht.flag & 0x10) <= 0) xs = '+';
+		if((ht.flag & 0x1) <= 0 && (ht.flag & 0x10) >= 1) xs = '-';
 
-		// for paired read, for illumina
-		if((ht.flag & 0x1) >= 1 && (ht.flag & 0x10) <= 0 && (ht.flag & 0x20) >= 1 && (ht.flag & 0x40) >= 1 && (ht.flag & 0x80) <= 0) xs = '-';
-		if((ht.flag & 0x1) >= 1 && (ht.flag & 0x10) >= 1 && (ht.flag & 0x20) <= 0 && (ht.flag & 0x40) <= 0 && (ht.flag & 0x80) >= 1) xs = '-';
-		if((ht.flag & 0x1) >= 1 && (ht.flag & 0x10) >= 1 && (ht.flag & 0x20) <= 0 && (ht.flag & 0x40) >= 1 && (ht.flag & 0x80) <= 0) xs = '+';
-		if((ht.flag & 0x1) >= 1 && (ht.flag & 0x10) <= 0 && (ht.flag & 0x20) >= 1 && (ht.flag & 0x40) <= 0 && (ht.flag & 0x80) >= 1) xs = '+';
+		if(xs == '.') continue;
 
-		// for single read, for illumina
-		if((ht.flag & 0x1) <= 0 && (ht.flag & 0x10) <= 0) xs = '-';
-		if((ht.flag & 0x1) <= 0 && (ht.flag & 0x10) >= 1) xs = '+';
-
-		printf("0x10 = %c, xs = %c, ht.xs = %c\n", ((ht.flag & 0x10) <= 0) ? '0' : '1', xs, ht.xs);
-
-		if(xs == '+' && xs == ht.xs) sp1.push_back(1);
-		if(xs == '+' && xs != ht.xs) sp1.push_back(2);
-		if(xs == '-' && xs == ht.xs) sp2.push_back(1);
-		if(xs == '-' && xs != ht.xs) sp2.push_back(2);
-	}
-
-	int sp = sp1.size() < sp2.size() ? sp1.size() : sp2.size();
-
-	for(int k = 0; k < sp; k++)
-	{
-		if(sp1[k] == 1) first++;
-		if(sp2[k] == 1) first++;
-		if(sp1[k] == 2) second++;
-		if(sp2[k] == 2) second++;
+		if(xs == ht.xs) first++;
+		else second++;
 	}
 
 	vector<string> vv;
@@ -99,13 +69,14 @@ int previewer::preview()
 	vv.push_back("second");
 
 	int s1 = UNSTRANDED;
-	if(sp >= min_preview_spliced_reads && first > preview_infer_ratio * 2.0 * sp) s1 = FR_FIRST;
-	if(sp >= min_preview_spliced_reads && second > preview_infer_ratio * 2.0 * sp) s1 = FR_SECOND;
+	int sp = first + second;
+	if(sp >= min_preview_spliced_reads && first * 1.0 / sp > preview_infer_ratio) s1 = FR_FIRST;
+	if(sp >= min_preview_spliced_reads && second * 1.0 / sp > preview_infer_ratio) s1 = FR_FIRST;
 
 	if(verbose >= 1)
 	{
-		printf("preview: reads = %d, single = %d, paired = %d, spliced reads = %d, first = %d, second = %d, inferred library_type = %s, given library_type = %s\n",
-			total, single, paired, sp, first, second, vv[s1 + 1].c_str(), vv[library_type + 1].c_str());
+		printf("preview: reads = %d, spliced reads = %d, first = %d, second = %d, inferred library_type = %s, given library_type = %s\n",
+			total, sp, first, second, vv[s1 + 1].c_str(), vv[library_type + 1].c_str());
 	}
 
 	if(library_type == EMPTY) library_type = s1;

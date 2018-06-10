@@ -18,6 +18,7 @@ region::region(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype, const split
 	build_join_interval_map();
 	smooth_join_interval_map();
 	build_partial_exons();
+	adjust_partial_exon_coverage();
 }
 
 region::~region()
@@ -212,6 +213,15 @@ int region::build_partial_exons()
 		pexons.push_back(pe);
 	}
 
+	return 0;
+}
+
+int region::adjust_partial_exon_coverage()
+{
+	for(int i = 0; i < pexons.size(); i++)
+	{
+		pexons[i].ave += pexons[i].dev;
+	}
 	return 0;
 }
 
