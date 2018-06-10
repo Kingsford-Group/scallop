@@ -49,7 +49,7 @@ double min_surviving_edge_weight = 1.5;
 double max_decompose_error_ratio[7] = {0.33, 0.05, 0.0, 0.25, 0.30, 0.0, 1.1};
 
 // for selecting paths
-double min_transcript_coverage = 1.3;
+double min_transcript_coverage = 1.01;
 double min_single_exon_coverage = 10.0;
 int min_transcript_length_base = 100;
 int min_transcript_length_increase = 50;
