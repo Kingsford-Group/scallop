@@ -16,6 +16,7 @@ See LICENSE for licensing.
 #include "sgraph_compare.h"
 #include "super_graph.h"
 #include "filter.h"
+#include "cluster.h"
 
 assembler::assembler()
 {
@@ -164,7 +165,10 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0)
 			for(int i = 0; i < sc.trsts.size(); i++) sc.trsts[i].write(cout);
 		}
 
-		filter ft(sc.trsts);
+		cluster clst(sc.trsts, ics);
+		clst.solve();
+
+		filter ft(clst.cct);
 		ft.join_single_exon_transcripts();
 		ft.filter_length_coverage();
 		if(ft.trs.size() >= 1) gv.insert(gv.end(), ft.trs.begin(), ft.trs.end());
