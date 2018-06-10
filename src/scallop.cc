@@ -56,13 +56,11 @@ int scallop::assemble()
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 1, -0.5);
 		if(b == true) continue;
 
-		/*
 		b = resolve_smallest_edges(max_decompose_error_ratio[SMALLEST_EDGE]);
 		if(b == true) continue;
 
 		b = resolve_negligible_edges(true, max_decompose_error_ratio[NEGLIGIBLE_EDGE]);
 		if(b == true) continue;
-		*/
 
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 1, -0.5);
 		if(b == true) continue;
@@ -79,7 +77,6 @@ int scallop::assemble()
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, INT_MAX, max_decompose_error_ratio[UNSPLITTABLE_SINGLE]);
 		if(b == true) continue;
 
-		/*
 		b = resolve_hyper_edge(2);
 		if(b == true) continue;
 
@@ -91,16 +88,8 @@ int scallop::assemble()
 
 		b = resolve_trivial_vertex(2, max_decompose_error_ratio[TRIVIAL_VERTEX]);
 		if(b == true) continue;
-		*/
 
-		break;
-	}
-
-	while(true)
-	{	
-		if(gr.num_vertices() > max_num_exons) break;
-
-		bool b = false;
+		// second layer
 
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 1, DBL_MAX);
 		if(b == true) continue;
