@@ -9,8 +9,8 @@ See LICENSE for licensing.
 #include <cassert>
 #include <algorithm>
 
-cluster::cluster(const vector<transcript> &v, const MI64 &ic)
-	:trs(v), ics(ic)
+cluster::cluster(const vector<transcript> &v)
+	:trs(v)
 {
 }
 
@@ -86,31 +86,6 @@ int cluster::clustering()
 			if(lpos == -1 || p.first < lpos) lpos = p.first;
 			if(rpos == -1 || p.second > rpos) rpos = p.second;
 			if(k == -1 || t.coverage > trs[k].coverage) k = (*it);
-
-			/*
-			vector<PI32> v = t.get_intron_chain();
-			if(chain.size() == 0) 
-			{
-				chain.assign(v.size(), PI(-1, -1));
-				cnts.assign(v.size(), 0);
-			}
-			else 
-			{
-				assert(chain.size() == v.size());
-				assert(cnts.size() == v.size());
-			}
-
-			for(int j = 0; j < v.size(); j++)
-			{
-				int64_t x = pack(v[j].first, v[j].second);
-				MI64::const_iterator ix = ics.find(x);
-				if(ix == ics.end()) continue;
-				int cnt = ix->second;
-				if(cnt <= cnts[j]) continue;
-				cnts[j] = cnt;
-				chain[j] = v[j];
-			}
-			*/
 		}
 
 		if(k == -1) continue;
@@ -118,24 +93,6 @@ int cluster::clustering()
 		cc.coverage = cov;
 		cc.exons[0].first = lpos;
 		cc.exons[cc.exons.size() - 1].second = rpos;
-
-		/*
-		vector<PI32> chain0 = cc.get_intron_chain();
-		assert(chain0.size() == chain.size());
-
-		for(int j = 0; j < chain.size(); j++)
-		{
-			int64_t x = pack(chain0[j].first, chain0[j].second);
-			MI64::const_iterator ix = ics.find(x);
-			if(ix == ics.end()) continue;
-			int cnt = ix->second;
-
-			if(cnt >= cnts[j]) continue;
-
-			cc.exons[j].second = chain[j].first;
-			cc.exons[j + 1].first = chain[j].second;
-		}
-		*/
 
 		cct.push_back(cc);
 

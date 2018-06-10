@@ -17,12 +17,11 @@ typedef pair< int, vector<int> > PIV;
 class cluster
 {
 public:
-	cluster(const vector<transcript> &v, const MI64 &ic);
+	cluster(const vector<transcript> &v);
 	MIV miv;
 	undirected_graph gr;
 
 public:
-	const MI64 &ics;			// intron counts
 	vector<transcript> trs;		// input transcripts
 	vector<transcript> cct;		// transcripts w.r.t. clusters
 

@@ -44,7 +44,7 @@ public:
 
 private:
 	int process(int n);
-	int assemble(const splice_graph &gr, const hyper_set &hs, const MI64 &ics);
+	int assemble(bundle_base &bb);
 	int assign_RPKM();
 	int write();
 	int compare(splice_graph &gr, const string &ref, const string &tex = "");

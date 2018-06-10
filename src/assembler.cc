@@ -14,7 +14,6 @@ See LICENSE for licensing.
 #include "assembler.h"
 #include "scallop.h"
 #include "sgraph_compare.h"
-#include "super_graph.h"
 #include "filter.h"
 #include "cluster.h"
 
@@ -116,87 +115,55 @@ int assembler::assemble()
 int assembler::process(int n)
 {
 	if(pool.size() < n) return 0;
-
 	for(int i = 0; i < pool.size(); i++)
 	{
-		bundle_base &bb = pool[i];
-
-		//printf("bundle %d has %lu reads\n", i, bb.hits.size());
-		//for(int k = 0; k < bb.hits.size(); k++) bb.hits[k].print();
-
-		if(bb.hits.size() < min_num_hits_in_bundle) continue;
-		if(bb.tid < 0) continue;
-
-		char buf[1024];
-		strcpy(buf, hdr->target_name[bb.tid]);
-
-		bundle bd(bb);
-
-		bd.chrm = string(buf);
-		bd.build();
-		bd.print(index);
-
-		//if(verbose >= 1) bd.print(index);
-
-		assemble(bd.gr, bd.hs, bd.ics);
-		index++;
-
-		printf("\n");
+		assemble(pool[i]);
+		//exit(0);	// TODO
 	}
 	pool.clear();
-
-	//exit(0);	// TODO
 	return 0;
 }
 
-int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0, const MI64 &ics)
+int assembler::assemble(bundle_base &bb)
 {
-	super_graph sg(gr0, hs0);
-	sg.build();
+	if(bb.hits.size() < min_num_hits_in_bundle) return 0;
+	if(bb.tid < 0) return 0;
 
-	for(int k = 0; k < sg.subs.size(); k++)
+	char buf[1024];
+	strcpy(buf, hdr->target_name[bb.tid]);
+
+	bundle bd(bb);
+
+	bd.chrm = string(buf);
+	bd.gr.gid = "gene." + tostring(index++);
+	bd.build();
+
+	bd.print(index);
+
+	scallop sc(bd.gr, bd.hs);
+	sc.assemble();
+
+	if(verbose >= 2)
 	{
-		string gid = "gene." + tostring(index) + "." + tostring(k);
-		if(fixed_gene_name != "" && gid != fixed_gene_name) continue;
-
-		if(verbose >= 2 && (k == 0 || fixed_gene_name != "")) sg.print();
-
-		splice_graph &gr = sg.subs[k];
-		hyper_set &hs = sg.hss[k];
-
-		gr.gid = gid;
-		scallop sc(gr, hs);
-		sc.assemble();
-
-		if(verbose >= 2)
-		{
-			printf("transcripts:\n");
-			for(int i = 0; i < sc.trsts.size(); i++) sc.trsts[i].write(cout);
-		}
-
-		cluster clst(sc.trsts, ics);
-		clst.solve();
-
-		filter ft(clst.cct);
-		ft.filter_length_coverage();
-		if(ft.trs.size() >= 1) trsts.insert(trsts.end(), ft.trs.begin(), ft.trs.end());
-
-		if(verbose >= 2)
-		{
-			printf("transcripts after filtering (total transcripts = %lu):\n", trsts.size());
-			for(int i = 0; i < ft.trs.size(); i++) ft.trs[i].write(cout);
-		}
-
-		if(fixed_gene_name != "" && gid == fixed_gene_name) terminate = true;
-		if(terminate == true) return 0;
+		printf("transcripts:\n");
+		for(int i = 0; i < sc.trsts.size(); i++) sc.trsts[i].write(cout);
 	}
 
-	/*
-	filter ft(gv);
-	ft.remove_nested_transcripts();
-	if(ft.trs.size() >= 1) trsts.insert(trsts.end(), ft.trs.begin(), ft.trs.end());
-	*/
+	cluster clst(sc.trsts);
+	clst.solve();
 
+	filter ft(clst.cct);
+	ft.filter_length_coverage();
+	//ft.remove_nested_transcripts();
+	if(ft.trs.size() >= 1) trsts.insert(trsts.end(), ft.trs.begin(), ft.trs.end());
+
+	if(verbose >= 2)
+	{
+		printf("transcripts after filtering (total transcripts = %lu):\n", trsts.size());
+		for(int i = 0; i < ft.trs.size(); i++) ft.trs[i].write(cout);
+	}
+
+	printf("\n");
 	return 0;
 }
 
