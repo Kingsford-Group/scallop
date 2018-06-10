@@ -729,7 +729,6 @@ int bundle::revise_splice_graph()
 	{
 		bool b = false;
 
-		/*
 		b = extend_boundaries();
 		if(b == true) continue;
 
@@ -743,16 +742,13 @@ int bundle::revise_splice_graph()
 		b = remove_small_junctions();
 		if(b == true) refine_splice_graph();
 		if(b == true) continue;
-		*/
 
 		b = keep_surviving_edges();
 		if(b == true) refine_splice_graph();
 		if(b == true) continue;
 
-		/*
 		b = remove_intron_contamination();
 		if(b == true) continue;
-		*/
 
 		break;
 	}
