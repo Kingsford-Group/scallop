@@ -34,7 +34,7 @@ int bundle::build()
 	build_partial_exon_map();
 	link_partial_exons();
 	build_splice_graph();
-	//revise_splice_graph();
+	revise_splice_graph();
 	build_hyper_edges1();
 
 	return 0;
@@ -243,12 +243,12 @@ int bundle::add_boundaries(MPI &s)
 	MPI ss = s;
 	for(int i = 0; i < hits.size(); i++)
 	{
-		if(hits[i].start_boundary == true && ss.find(hits[i].pos) == ss.end())
+		if(hits[i].start_boundary == true && hits[i].spos.size() >= 1 && ss.find(hits[i].pos) == ss.end())
 		{
 			//printf("insert start boundary %d\n", hits[i].pos);
 			ss.insert(PI(hits[i].pos, START_BOUNDARY));
 		}
-		if(hits[i].end_boundary == true && ss.find(hits[i].rpos) == ss.end()) 
+		if(hits[i].end_boundary == true && hits[i].spos.size() >= 1 && ss.find(hits[i].rpos) == ss.end()) 
 		{
 			//printf("insert end bounary %d\n", hits[i].rpos);
 			ss.insert(PI(hits[i].rpos, END_BOUNDARY));
@@ -404,8 +404,8 @@ int bundle::build_hyper_edges1()
 		}
 
 		// extend phasing paths to boundaries
-		if(min != -1 && h.start_boundary == true && pexons[min].ltype == START_BOUNDARY) sp.insert(-1);
-		if(max != -1 && h.end_boundary == true && pexons[max].rtype == END_BOUNDARY) sp.insert(pexons.size());
+		if(min != -1 && h.spos.size() >= 1 && h.start_boundary == true && pexons[min].ltype == START_BOUNDARY) sp.insert(-1);
+		if(max != -1 && h.spos.size() >= 1 && h.end_boundary == true && pexons[max].rtype == END_BOUNDARY) sp.insert(pexons.size());
 
 		if(sp.size() <= 1) continue;
 		hs.add_node_list(sp);
@@ -729,6 +729,7 @@ int bundle::revise_splice_graph()
 	{
 		bool b = false;
 
+		/*
 		b = extend_boundaries();
 		if(b == true) continue;
 
@@ -742,13 +743,16 @@ int bundle::revise_splice_graph()
 		b = remove_small_junctions();
 		if(b == true) refine_splice_graph();
 		if(b == true) continue;
+		*/
 
 		b = keep_surviving_edges();
 		if(b == true) refine_splice_graph();
 		if(b == true) continue;
 
+		/*
 		b = remove_intron_contamination();
 		if(b == true) continue;
+		*/
 
 		break;
 	}
