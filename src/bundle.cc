@@ -130,7 +130,7 @@ int bundle::build_junctions()
 	for(it = m.begin(); it != m.end(); it++)
 	{
 		vector<int> &v = it->second;
-		if(v.size() < min_splice_boundary_hits) continue;
+		if(v.size() < min_splice_hits) continue;
 
 		int32_t p1 = high32(it->first);
 		int32_t p2 = low32(it->first);

@@ -47,8 +47,10 @@ extern int min_flank_length;
 extern int max_edit_distance;
 extern int32_t min_bundle_gap;
 extern int min_num_hits_in_bundle;
+extern int min_intron_size;
 extern uint32_t min_mapping_quality;
-extern int32_t min_splice_boundary_hits;
+extern int32_t min_splice_hits;
+extern int32_t min_boundary_hits;
 extern bool uniquely_mapped_only;
 extern bool use_second_alignment;
 
@@ -64,6 +66,9 @@ extern int32_t min_subregion_gap;
 extern double min_subregion_overlap;
 extern int32_t min_subregion_length;
 extern int min_subregion_ladders;
+extern int32_t max_cluster_boundary_distance;
+extern int32_t max_cluster_intron_distance;
+extern double min_cluster_single_exon_ratio;
 
 // for subsetsum and router
 extern int max_dp_table_size;
@@ -94,6 +99,7 @@ extern string ref_file;
 extern string ref_file1;
 extern string ref_file2;
 extern string output_file;
+extern string ccsread_info_file;
 
 // for controling
 extern bool output_tex_files;

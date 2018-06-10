@@ -9,8 +9,8 @@ See LICENSE for licensing.
 #include <cassert>
 #include <algorithm>
 
-cluster::cluster(const vector<transcript> &v, const MI64 &ic)
-	:trs(v), ics(ic)
+cluster::cluster(const vector<transcript> &v)
+	:trs(v)
 {
 }
 

@@ -165,7 +165,7 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0)
 			for(int i = 0; i < sc.trsts.size(); i++) sc.trsts[i].write(cout);
 		}
 
-		cluster clst(sc.trsts, ics);
+		cluster clst(sc.trsts);
 		clst.solve();
 
 		filter ft(clst.cct);
