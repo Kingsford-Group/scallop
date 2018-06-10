@@ -44,6 +44,7 @@ hit& hit::operator=(const hit &h)
 	is_long_read = h.is_long_read;
 	start_boundary = h.start_boundary;
 	end_boundary = h.end_boundary;
+	phasing = h.phasing;
 
 	cigar = new uint32_t[h.n_cigar];
 	memcpy(cigar, h.cigar, 4 * h.n_cigar);
@@ -65,6 +66,7 @@ hit::hit(const hit &h)
 	is_long_read = h.is_long_read;
 	start_boundary = h.start_boundary;
 	end_boundary = h.end_boundary;
+	phasing = h.phasing;
 
 	//printf("call copy constructor\n");
 	cigar = new uint32_t[h.n_cigar];

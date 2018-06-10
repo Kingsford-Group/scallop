@@ -182,7 +182,6 @@ int super_graph::split_single_splice_graph(splice_graph &gr, hyper_set &hs, cons
 
 		if(b == false) continue;
 
-		for(int i = 0; i < vv.size(); i++) vv[i]--;
 		hs.add_node_list(vv, c);
 	}
 

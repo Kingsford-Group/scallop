@@ -397,176 +397,21 @@ int bundle::build_hyper_edges1()
 
 			for(int j = k1; j <= k2; j++) 
 			{
-				sp.insert(j);
+				sp.insert(j + 1);
 				if(min == -1 || j < min) min = j;
 				if(max == -1 || j > max) max = j;
 			}
 		}
 
 		// extend phasing paths to boundaries
-		if(min != -1 && h.spos.size() >= 1 && h.start_boundary == true && pexons[min].ltype == START_BOUNDARY) sp.insert(-1);
-		if(max != -1 && h.spos.size() >= 1 && h.end_boundary == true && pexons[max].rtype == END_BOUNDARY) sp.insert(pexons.size());
+		if(min != -1 && h.spos.size() >= 1 && h.start_boundary == true && pexons[min].ltype == START_BOUNDARY) sp.insert(0);
+		if(max != -1 && h.spos.size() >= 1 && h.end_boundary == true && pexons[max].rtype == END_BOUNDARY) sp.insert(pexons.size() + 1);
 
-		if(sp.size() <= 1) continue;
-		hs.add_node_list(sp);
+		h.phasing = sp;
+		if(sp.size() >= 2) hs.add_node_list(sp);
 	}
 
 	return 0;
-}
-
-int bundle::build_hyper_edges2()
-{
-	//sort(hits.begin(), hits.end(), hit_compare_by_name);
-	sort(hits.begin(), hits.end());
-
-	/*
-	printf("----------------------\n");
-	for(int k = 9; k < hits.size(); k++) hits[k].print();
-	printf("======================\n");
-	*/
-
-	hs.clear();
-
-	string qname;
-	int hi = -2;
-	vector<int> sp1;
-	for(int i = 0; i < hits.size(); i++)
-	{
-		hit &h = hits[i];
-		
-		/*
-		printf("sp1 = ( ");
-		printv(sp1);
-		printf(")\n");
-		h.print();
-		*/
-
-		if(h.qname != qname || h.hi != hi)
-		{
-			set<int> s(sp1.begin(), sp1.end());
-			if(s.size() >= 2) hs.add_node_list(s);
-			sp1.clear();
-		}
-
-		qname = h.qname;
-		hi = h.hi;
-
-		if((h.flag & 0x4) >= 1) continue;
-
-		vector<int64_t> v;
-		h.get_matched_intervals(v);
-
-		vector<int> sp2;
-		for(int k = 0; k < v.size(); k++)
-		{
-			int32_t p1 = high32(v[k]);
-			int32_t p2 = low32(v[k]);
-
-			int k1 = locate_left_partial_exon(p1);
-			int k2 = locate_right_partial_exon(p2);
-			if(k1 < 0 || k2 < 0) continue;
-
-			for(int j = k1; j <= k2; j++) sp2.push_back(j);
-		}
-
-		if(sp1.size() <= 0 || sp2.size() <= 0)
-		{
-			sp1.insert(sp1.end(), sp2.begin(), sp2.end());
-			continue;
-		}
-
-		/*
-		printf("sp2 = ( ");
-		printv(sp2);
-		printf(")\n");
-		*/
-
-		int x1 = -1, x2 = -1;
-		if(h.isize < 0) 
-		{
-			x1 = sp1[max_element(sp1)];
-			x2 = sp2[min_element(sp2)];
-		}
-		else
-		{
-			x1 = sp2[max_element(sp2)];
-			x2 = sp1[min_element(sp1)];
-		}
-
-		vector<int> sp3;
-		bool c = bridge_read(x1, x2, sp3);
-
-		//printf("=========\n");
-
-		if(c == false)
-		{
-			set<int> s(sp1.begin(), sp1.end());
-			if(s.size() >= 2) hs.add_node_list(s);
-			sp1 = sp2;
-		}
-		else
-		{
-			sp1.insert(sp1.end(), sp2.begin(), sp2.end());
-			sp1.insert(sp1.end(), sp3.begin(), sp3.end());
-		}
-	}
-
-	return 0;
-}
-
-bool bundle::bridge_read(int x, int y, vector<int> &v)
-{
-	v.clear();
-	if(x >= y) return true;
-
-	PEB e = gr.edge(x + 1, y + 1);
-	if(e.second == true) return true;
-	//else return false;
-
-	if(y - x >= 6) return false;
-
-	long max = 9999999999;
-	vector<long> table;
-	vector<int> trace;
-	int n = y - x + 1;
-	table.resize(n, 0);
-	trace.resize(n, -1);
-	table[0] = 1;
-	trace[0] = -1;
-	for(int i = x + 1; i <= y; i++)
-	{
-		edge_iterator it1, it2;
-		for(tie(it1, it2) = gr.in_edges(i + 1); it1 != it2; it1++)
-		{
-			int s = (*it1)->source() - 1;
-			int t = (*it1)->target() - 1;
-			assert(t == i);
-			if(s < x) continue;
-			if(table[s - x] <= 0) continue;
-			table[t - x] += table[s - x];
-			trace[t - x] = s - x;
-			if(table[t - x] >= max) return false;
-		}
-	}
-
-	//printf("x = %d, y = %d, num-paths = %ld\n", x, y, table[n - 1]);
-	if(table[n - 1] != 1) return false;
-
-	//printf("path = ");
-
-	v.clear();
-	int p = n - 1;
-	while(p >= 0)
-	{
-		p = trace[p];
-		if(p <= 0) break;
-		v.push_back(p + x);
-		//printf("%d ", p + x);
-	}
-	//printf("\n");
-	//assert(v.size() >= 1);
-
-	return true;
 }
 
 int bundle::link_partial_exons()

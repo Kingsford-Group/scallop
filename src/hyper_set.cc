@@ -32,7 +32,6 @@ int hyper_set::add_node_list(const vector<int> &s, int c)
 {
 	vector<int> v = s;
 	sort(v.begin(), v.end());
-	for(int i = 0; i < v.size(); i++) v[i]++;
 	if(nodes.find(v) == nodes.end()) nodes.insert(PVII(v, c));
 	else nodes[v] += c;
 	return 0;

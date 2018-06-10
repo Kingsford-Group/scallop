@@ -9,6 +9,7 @@ See LICENSE for licensing.
 
 #include <string>
 #include <vector>
+#include <set>
 
 #include "htslib/sam.h"
 #include "config.h"
@@ -69,6 +70,7 @@ public:
 	bool is_long_read;						// whether this read is long read
 	bool start_boundary;					// whether left end is a start boundary
 	bool end_boundary;						// whether left end is an end boundary
+	set<int> phasing;						// phasing path in the splice graph
 
 public:
 	int set_tags(bam1_t *b);

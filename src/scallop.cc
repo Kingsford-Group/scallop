@@ -628,9 +628,9 @@ int scallop::add_pseudo_hyper_edges()
 		if(t == gr.num_vertices() - 1) continue;
 
 		vector<int> v;
-		v.push_back(s - 1);
-		v.push_back(k - 1);
-		v.push_back(t - 1);
+		v.push_back(s);
+		v.push_back(k);
+		v.push_back(t);
 		
 		hs.add_node_list(v, 1);
 	}
