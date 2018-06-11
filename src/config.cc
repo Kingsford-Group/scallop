@@ -81,7 +81,7 @@ bool output_tex_files = false;
 string fixed_gene_name = "";
 int batch_bundle_size = 100;
 int verbose = 1;
-string version = "v0.10.3";
+string version = "isoseq-v0.9.1";
 
 int parse_arguments(int argc, const char ** argv)
 {
@@ -131,7 +131,7 @@ int parse_arguments(int argc, const char ** argv)
 		}
 
 		// user specified
-		else if(string(argv[i]) == "--ccsread_info_file")
+		else if(string(argv[i]) == "-c")
 		{
 			ccsread_info_file = string(argv[i + 1]);
 			i++;
@@ -495,7 +495,7 @@ int print_logo()
 int print_help()
 {
 	printf("\n");
-	printf("Usage: scallop -i <bam-file> -o <gtf-file> [options]\n");
+	printf("Usage: scallop -i <bam-file> -o <gtf-file> -c <ccs-header-file> [options]\n");
 	printf("\n");
 	printf("Options:\n");
 	printf(" %-42s  %s\n", "--help",  "print usage of Scallop and exit");
@@ -503,20 +503,20 @@ int print_help()
 	printf(" %-42s  %s\n", "--verbose <0, 1, 2>",  "0: quiet; 1: one line for each graph; 2: with details, default: 1");
 	printf(" %-42s  %s\n", "--library_type <first, second, unstranded>",  "library type of the sample, default: unstranded");
 	printf(" %-42s  %s\n", "--min_transcript_coverage <float>",  "minimum coverage required for a multi-exon transcript, default: 1.01");
-	printf(" %-42s  %s\n", "--min_single_exon_coverage <float>",  "minimum coverage required for a single-exon transcript, default: 20");
+	printf(" %-42s  %s\n", "--min_single_exon_coverage <float>",  "minimum coverage required for a single-exon transcript, default: 10");
 	printf(" %-42s  %s\n", "--min_transcript_length_increase <integer>",  "default: 50");
-	printf(" %-42s  %s\n", "--min_transcript_length_base <integer>",  "default: 250, minimum length of a transcript would be");
+	printf(" %-42s  %s\n", "--min_transcript_length_base <integer>",  "default: 100, minimum length of a transcript would be");
 	printf(" %-42s  %s\n", "",  "--min_transcript_length_base + --min_transcript_length_increase * num-of-exons");
 	printf(" %-42s  %s\n", "--min_mapping_quality <integer>",  "ignore reads with mapping quality less than this value, default: 1");
 	printf(" %-42s  %s\n", "--min_bundle_gap <integer>",  "minimum distances required to start a new bundle, default: 50");
-	printf(" %-42s  %s\n", "--min_num_hits_in_bundle <integer>",  "minimum number of reads required in a bundle, default: 20");
-	printf(" %-42s  %s\n", "--min_flank_length <integer>",  "minimum match length in each side for a spliced read, default: 3");
-	printf(" %-42s  %s\n", "--min_splice_bundary_hits <integer>",  "minimum number of spliced reads required for a junction, default: 1");
+	printf(" %-42s  %s\n", "--min_num_hits_in_bundle <integer>",  "minimum number of reads required in a bundle, default: 1");
+	printf(" %-42s  %s\n", "--min_splice_hits <integer>",  "minimum number of spliced reads required for a junction, default: 1");
+	printf(" %-42s  %s\n", "--min_boundary_hits <integer>",  "minimum number of reads with 5'/3' primes required for a boundary, default: 3");
 	return 0;
 }
 
 int print_copyright()
 {
-	printf("Scallop %s (c) 2017 Mingfu Shao, Carl Kingsford, and Carnegie Mellon University\n", version.c_str());
+	printf("Scallop %s (c) 2018 Mingfu Shao, Carl Kingsford, and Carnegie Mellon University\n", version.c_str());
 	return 0;
 }
