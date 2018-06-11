@@ -643,6 +643,8 @@ bool bundle::extend_boundaries()
 
 		if(b == false) continue;
 
+		if(verbose >= 2) printf("extend boundary (%d, %d), weight = %.2lf\n", s, t, we);
+
 		if(gr.out_degree(s) == 1)
 		{
 			edge_descriptor ee = gr.add_edge(s, gr.num_vertices() - 1);
@@ -781,7 +783,7 @@ bool bundle::keep_surviving_edges()
 
 	for(int i = 0; i < ve.size(); i++)
 	{
-		if(verbose >= 2) printf("remove edge (%d, %d), weight = %.2lf\n", ve[i]->source(), ve[i]->target(), gr.get_edge_weight(ve[i]));
+		if(verbose >= 2) printf("keep surviving: remove edge (%d, %d), weight = %.2lf\n", ve[i]->source(), ve[i]->target(), gr.get_edge_weight(ve[i]));
 		gr.remove_edge(ve[i]);
 	}
 
@@ -823,6 +825,8 @@ bool bundle::remove_small_exons()
 
 		// only consider boundary small exons
 		if(gr.edge(0, i).second == false && gr.edge(i, gr.num_vertices() - 1).second == false) continue;
+
+		if(verbose >= 2) printf("remove small exon %d, length = %d\n", i, p2 - p1);
 
 		gr.clear_vertex(i);
 		flag = true;
@@ -904,6 +908,7 @@ bool bundle::remove_small_junctions()
 	for(SE::iterator it = se.begin(); it != se.end(); it++)
 	{
 		edge_descriptor e = (*it);
+		if(verbose >= 2) printf("remove small junction (%d, %d)\n", e->source(), e->target());
 		gr.remove_edge(e);
 	}
 

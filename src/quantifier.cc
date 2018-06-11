@@ -7,6 +7,8 @@ quantifier::quantifier(const vector<hit> &h, vector<path> &p)
 
 int quantifier::quantify()
 {
+	if(paths.size() == 0) return 0;
+
 	build_path_graph();
 	build_super_hits();
 	return 0;
@@ -82,10 +84,11 @@ bool quantifier::check_valid_phasing(const set<int> &s)
 int quantifier::print()
 {
 	int n = 0;
+	if(paths.size() == 0) return 0;
 	for(MSSH::iterator it = super_hits.begin(); it != super_hits.end(); it++)
 	{
 		n += it->second.hit_list.size();
 	}
-	printf("quantifier: total %lu hits, total %lu super-hits, total %d valid phasing\n", hits.size(), super_hits.size(), n); 
+	printf("quantifier: total %lu paths, total %lu hits, total %lu super-hits, total %d valid phasing\n", paths.size(), hits.size(), super_hits.size(), n); 
 	return 0;
 }
