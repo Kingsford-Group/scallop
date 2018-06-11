@@ -59,6 +59,8 @@ public:
 
 	edge_descriptor max_out_edge(int v);
 	edge_descriptor max_in_edge(int v);
+	VE max_out_edges(int v);
+	VE max_in_edges(int v);
 	double get_in_weights(int v);
 	double get_out_weights(int v);
 	double get_max_in_weight(int v);

@@ -232,6 +232,34 @@ edge_descriptor splice_graph::max_in_edge(int v)
 	return ee;
 }
 
+VE splice_graph::max_in_edges(int v)
+{
+	VE vv;
+	double ww = get_max_in_weight(v);
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = in_edges(v); it1 != it2; it1++)
+	{
+		double w = get_edge_weight(*it1);
+		if(fabs(w - ww) >= 0.00001) continue;
+		vv.push_back(*it1);
+	}
+	return vv;
+}
+
+VE splice_graph::max_out_edges(int v)
+{
+	VE vv;
+	double ww = get_max_out_weight(v);
+	edge_iterator it1, it2;
+	for(tie(it1, it2) = out_edges(v); it1 != it2; it1++)
+	{
+		double w = get_edge_weight(*it1);
+		if(fabs(w - ww) >= 0.00001) continue;
+		vv.push_back(*it1);
+	}
+	return vv;
+}
+
 int splice_graph::count_junctions()
 {
 	int cnt = 0;

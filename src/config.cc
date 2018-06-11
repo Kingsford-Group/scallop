@@ -23,7 +23,7 @@ int min_num_hits_in_bundle = 1;
 int min_intron_size = 50;
 uint32_t min_mapping_quality = 1;
 int32_t min_splice_hits = 1;
-int32_t min_boundary_hits = 2;
+int32_t min_boundary_hits = 3;
 bool use_second_alignment = false;
 bool uniquely_mapped_only = false;
 int library_type = EMPTY;
@@ -184,7 +184,7 @@ int parse_arguments(int argc, const char ** argv)
 			min_splice_hits = atoi(argv[i + 1]);
 			i++;
 		}
-		else if(string(argv[i]) == "--min__boundary_hits")
+		else if(string(argv[i]) == "--min_boundary_hits")
 		{
 			min_boundary_hits = atoi(argv[i + 1]);
 			i++;

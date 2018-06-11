@@ -71,7 +71,6 @@ int hyper_set::build_edges(directed_graph &gr, MEI& e2i)
 
 		continue;
 
-		/*
 		// use pieces of phasing paths
 		vector<int> v;
 		for(int k = 0; k < ve.size(); k++)
@@ -95,7 +94,6 @@ int hyper_set::build_edges(directed_graph &gr, MEI& e2i)
 			edges.push_back(v);
 			ecnts.push_back(c);
 		}
-		*/
 	}
 	return 0;
 }

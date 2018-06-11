@@ -741,6 +741,39 @@ bool bundle::keep_surviving_edges()
 		sv2.insert(ee->source());
 	}
 
+	// add vertex with maximum weight
+	double maxw = min_surviving_edge_weight;
+	int maxv = -1;
+	for(int j = 1; j < gr.num_vertices() - 1; j++)
+	{
+		double w = gr.get_vertex_weight(j);
+		if(w < maxw) continue;
+		maxv = j;
+		maxw = w;
+	}
+
+	if(maxv != -1)
+	{
+		VE vv1 = gr.max_in_edges(maxv);
+		for(int k = 0; k < vv1.size(); k++)
+		{
+			edge_descriptor ee = vv1[k];
+			assert(ee != null_edge);
+			se.insert(ee);
+			sv1.insert(maxv);
+			sv2.insert(ee->source());
+		}
+		VE vv2 = gr.max_out_edges(maxv);
+		for(int k = 0; k < vv2.size(); k++)
+		{
+			edge_descriptor ee = vv2[k];
+			assert(ee != null_edge);
+			se.insert(ee);
+			sv1.insert(ee->target());
+			sv2.insert(maxv);
+		}
+	}
+
 	while(true)
 	{
 		bool b = false;
@@ -751,22 +784,30 @@ bool bundle::keep_surviving_edges()
 			int t = e->target();
 			if(sv1.find(s) == sv1.end() && s != 0)
 			{
-				edge_descriptor ee = gr.max_in_edge(s);
-				assert(ee != null_edge);
-				assert(se.find(ee) == se.end());
-				se.insert(ee);
-				sv1.insert(s);
-				sv2.insert(ee->source());
+				VE vv = gr.max_in_edges(s);
+				for(int k = 0; k < vv.size(); k++)
+				{
+					edge_descriptor ee = vv[k];
+					assert(ee != null_edge);
+					assert(se.find(ee) == se.end());
+					se.insert(ee);
+					sv1.insert(s);
+					sv2.insert(ee->source());
+				}
 				b = true;
 			}
 			if(sv2.find(t) == sv2.end() && t != gr.num_vertices() - 1)
 			{
-				edge_descriptor ee = gr.max_out_edge(t);
-				assert(ee != null_edge);
-				assert(se.find(ee) == se.end());
-				se.insert(ee);
-				sv1.insert(ee->target());
-				sv2.insert(t);
+				VE vv = gr.max_out_edges(t);
+				for(int k = 0; k < vv.size(); k++)
+				{
+					edge_descriptor ee = vv[k];
+					assert(ee != null_edge);
+					assert(se.find(ee) == se.end());
+					se.insert(ee);
+					sv1.insert(ee->target());
+					sv2.insert(t);
+				}
 				b = true;
 			}
 			if(b == true) break;

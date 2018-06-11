@@ -13,6 +13,7 @@ class super_hit
 {
 public:
 	set<int> hit_list;			// list of hits that have the same phasing path
+	vector<int> pps;			// passing paths
 
 public:
 	int add_hit(int x);

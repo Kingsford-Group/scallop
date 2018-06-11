@@ -16,6 +16,7 @@ See LICENSE for licensing.
 #include "sgraph_compare.h"
 #include "filter.h"
 #include "cluster.h"
+#include "quantifier.h"
 
 assembler::assembler()
 {
@@ -148,6 +149,12 @@ int assembler::assemble(bundle_base &bb)
 		printf("transcripts:\n");
 		for(int i = 0; i < sc.trsts.size(); i++) sc.trsts[i].write(cout);
 	}
+
+	/*
+	quantifier qt(bd.hits, sc.paths);
+	qt.quantify();
+	qt.print();
+	*/
 
 	cluster clst(sc.trsts);
 	clst.solve();
