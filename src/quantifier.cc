@@ -7,6 +7,7 @@ quantifier::quantifier(const vector<hit> &h, vector<path> &p)
 
 int quantifier::quantify()
 {
+	// TODO: use index instead of nodes
 	if(paths.size() == 0) return 0;
 
 	build_path_graph();

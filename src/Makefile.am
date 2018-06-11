@@ -37,6 +37,4 @@ scallop_SOURCES = splice_graph.h splice_graph.cc \
 				  filter.h filter.cc \
 				  ccsread_info.h ccsread_info.cc \
 				  cluster.h cluster.cc \
-				  quantifier.h quantifier.cc \
-				  super_hit.h super_hit.cc \
 				  main.cc

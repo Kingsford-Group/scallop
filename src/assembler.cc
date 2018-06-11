@@ -150,12 +150,6 @@ int assembler::assemble(bundle_base &bb)
 		for(int i = 0; i < sc.trsts.size(); i++) sc.trsts[i].write(cout);
 	}
 
-	/*
-	quantifier qt(bd.hits, sc.paths);
-	qt.quantify();
-	qt.print();
-	*/
-
 	cluster clst(sc.trsts);
 	clst.solve();
 
