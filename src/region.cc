@@ -175,7 +175,7 @@ int region::build_partial_exons()
 	if(ltype == RIGHT_SPLICE && jmap.find(ROI(lpos, lpos + 1)) == jmap.end())
 	{
 		partial_exon pe(lpos, lpos + 1, ltype, END_BOUNDARY);
-		pe.ave = 1.0;
+		pe.ave = COVERAGE_PRECISION;
 		pe.dev = 1.0;
 		pexons.push_back(pe);
 	}
@@ -208,7 +208,7 @@ int region::build_partial_exons()
 	if(rtype == LEFT_SPLICE && jmap.find(ROI(rpos - 1, rpos)) == jmap.end())
 	{
 		partial_exon pe(rpos - 1, rpos, START_BOUNDARY, rtype);
-		pe.ave = 1.0;
+		pe.ave = COVERAGE_PRECISION;
 		pe.dev = 1.0;
 		pexons.push_back(pe);
 	}

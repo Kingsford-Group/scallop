@@ -471,12 +471,12 @@ int bundle::build_splice_graph()
 		int length = r.rpos - r.lpos;
 		assert(length >= 1);
 		gr.add_vertex();
-		gr.set_vertex_weight(i + 1, r.ave < 1.0 ? 1.0 : r.ave);
+		gr.set_vertex_weight(i + 1, r.ave < COVERAGE_PRECISION ? COVERAGE_PRECISION : r.ave);
 		vertex_info vi;
 		vi.lpos = r.lpos;
 		vi.rpos = r.rpos;
 		vi.length = length;
-		vi.stddev = r.dev;// < 1.0 ? 1.0 : r.dev;
+		vi.stddev = r.dev;
 		gr.set_vertex_info(i + 1, vi);
 	}
 
@@ -518,7 +518,7 @@ int bundle::build_splice_graph()
 			edge_descriptor p = gr.add_edge(ss, i + 1);
 			double w = r.ave;
 			if(i >= 1 && pexons[i - 1].rpos == r.lpos) w -= pexons[i - 1].ave;
-			if(w < 1.0) w = 1.0;
+			if(w < COVERAGE_PRECISION) w = COVERAGE_PRECISION;
 			gr.set_edge_weight(p, w);
 			edge_info ei;
 			ei.weight = w;
@@ -530,7 +530,7 @@ int bundle::build_splice_graph()
 			edge_descriptor p = gr.add_edge(i + 1, tt);
 			double w = r.ave;
 			if(i < pexons.size() - 1 && pexons[i + 1].lpos == r.rpos) w -= pexons[i + 1].ave;
-			if(w < 1.0) w = 1.0;
+			if(w < COVERAGE_PRECISION) w = COVERAGE_PRECISION;
 			gr.set_edge_weight(p, w);
 			edge_info ei;
 			ei.weight = w;
@@ -556,7 +556,7 @@ int bundle::build_splice_graph()
 		//double wt = xr < yl ? xr : yl;
 
 		edge_descriptor p = gr.add_edge(i + 1, i + 2);
-		double w = (wt < 1.0) ? 1.0 : wt;
+		double w = (wt < COVERAGE_PRECISION) ? COVERAGE_PRECISION : wt;
 		gr.set_edge_weight(p, w);
 		edge_info ei;
 		ei.weight = w;
@@ -726,7 +726,7 @@ bool bundle::keep_surviving_edges()
 		double w = gr.get_edge_weight(*it1);
 		int32_t p1 = gr.get_vertex_info(s).rpos;
 		int32_t p2 = gr.get_vertex_info(t).lpos;
-		if(w < min_surviving_edge_weight) continue;
+		if(w < min_transcript_coverage - COVERAGE_PRECISION) continue;
 		se.insert(*it1);
 		sv1.insert(t);
 		sv2.insert(s);
@@ -742,7 +742,8 @@ bool bundle::keep_surviving_edges()
 	}
 
 	// add vertex with maximum weight
-	double maxw = min_surviving_edge_weight;
+	//double maxw = 0;
+	double maxw = min_transcript_coverage - COVERAGE_PRECISION;
 	int maxv = -1;
 	for(int j = 1; j < gr.num_vertices() - 1; j++)
 	{

@@ -623,7 +623,8 @@ int scallop::add_pseudo_hyper_edges()
 			t = (*it1)->target();
 		}
 		if(s == -1 || t == -1) continue;
-		if(w1 <= 10.0 || w2 <= 10.0) continue;
+		if(w1 <= min_transcript_coverage + 0.5) continue;
+		if(w2 <= min_transcript_coverage + 0.5) continue;
 		if(s == 0) continue;
 		if(t == gr.num_vertices() - 1) continue;
 
@@ -1202,10 +1203,10 @@ int scallop::balance_vertex(int v)
 	{
 		double wx = gr.get_edge_weight(*it1);
 		double wy = wx * r1;
-		if(wy < 1.0)
+		if(wy < COVERAGE_PRECISION)
 		{
-			m1 += (1.0 - wy);
-			wy = 1.0;
+			m1 += (COVERAGE_PRECISION - wy);
+			wy = COVERAGE_PRECISION;
 		}
 		gr.set_edge_weight(*it1, wy);
 	}
@@ -1213,10 +1214,10 @@ int scallop::balance_vertex(int v)
 	{
 		double wx = gr.get_edge_weight(*it1);
 		double wy = wx * r2;
-		if(wy < 1.0)
+		if(wy < COVERAGE_PRECISION)
 		{
-			m2 += 1.0 - wy;
-			wy = 1.0;
+			m2 += (COVERAGE_PRECISION - wy);
+			wy = COVERAGE_PRECISION;
 		}
 		gr.set_edge_weight(*it1, wy);
 	}

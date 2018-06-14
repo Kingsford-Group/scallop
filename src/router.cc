@@ -126,7 +126,7 @@ int router::build()
 		extend_bipartite_graph_max();
 		decompose0_clp();
 
-		if(ratio <= 1.0)
+		if(ratio <= COVERAGE_PRECISION)
 		{
 			decompose1_clp();
 			ratio = -1;
@@ -632,7 +632,7 @@ int router::decompose0_clp()
 		// set bounds for variables
 		for(int i = 0; i < ve.size(); i++)
 		{
-			model.setColumnLower(offset1 + i, 1.0);
+			model.setColumnLower(offset1 + i, COVERAGE_PRECISION);
 			model.setColumnUpper(offset1 + i, COIN_DBL_MAX);
 		}
 		for(int i = 0; i < u2e.size(); i++)
@@ -787,7 +787,7 @@ int router::decompose1_clp()
 		// bounds for variables
 		for(int i = 0; i < ve.size(); i++)
 		{
-			model.setColumnLower(offset1 + i, 1.0);
+			model.setColumnLower(offset1 + i, COVERAGE_PRECISION);
 			model.setColumnUpper(offset1 + i, COIN_DBL_MAX);
 			model.setColumnLower(offset2 + i, 0.0);
 			model.setColumnUpper(offset2 + i, COIN_DBL_MAX);
@@ -808,8 +808,8 @@ int router::decompose1_clp()
 		}
 		for(int i = 0; i < u2e.size(); i++)
 		{
-			cb.addRow(index1[i].size(), index1[i].data(), value1[i].data(), -COIN_DBL_MAX, vw[i] + 1.0);
-			cb.addRow(index1[i].size(), index1[i].data(), value1[i].data(), vw[i] - 1.0, COIN_DBL_MAX);
+			cb.addRow(index1[i].size(), index1[i].data(), value1[i].data(), -COIN_DBL_MAX, vw[i] + COVERAGE_PRECISION);
+			cb.addRow(index1[i].size(), index1[i].data(), value1[i].data(), vw[i] - COVERAGE_PRECISION, COIN_DBL_MAX);
 		}
 
 		// 2. constraints for routes
@@ -963,7 +963,7 @@ int router::decompose2_clp()
 		// set bounds for variables
 		for(int i = 0; i < ve.size(); i++)
 		{
-			model.setColumnLower(offset1 + i, 1.0);
+			model.setColumnLower(offset1 + i, COVERAGE_PRECISION);
 			model.setColumnUpper(offset1 + i, COIN_DBL_MAX);
 			model.setColumnLower(offset2 + i, 0.0);
 			model.setColumnUpper(offset2 + i, COIN_DBL_MAX);

@@ -27,6 +27,8 @@ using namespace std;
 #define TRIVIAL 0
 #define NORMAL 1
 
+#define COVERAGE_PRECISION 0.001
+
 // five types for decomposition
 #define SMALLEST_EDGE 0
 #define NEGLIGIBLE_EDGE 1
