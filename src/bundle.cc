@@ -496,7 +496,8 @@ bool bundle::bridge_read(int x, int y, vector<int> &v)
 	for(int i = x + 1; i <= y; i++)
 	{
 		edge_iterator it1, it2;
-		for(tie(it1, it2) = gr.in_edges(i + 1); it1 != it2; it1++)
+		PEEI pei;
+		for(pei = gr.in_edges(i + 1), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			int s = (*it1)->source() - 1;
 			int t = (*it1)->target() - 1;
@@ -737,7 +738,8 @@ int bundle::refine_splice_graph()
 bool bundle::extend_boundaries()
 {
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = gr.edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
 		int s = e->source();
@@ -785,8 +787,9 @@ VE bundle::compute_maximal_edges()
 
 	undirected_graph ug;
 	edge_iterator it1, it2;
+	PEEI pei;
 	for(int i = 0; i < gr.num_vertices(); i++) ug.add_vertex();
-	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	for(pei = gr.edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
 		double w = gr.get_edge_weight(e);
@@ -831,7 +834,8 @@ bool bundle::keep_surviving_edges()
 	set<int> sv2;
 	SE se;
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = gr.edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		int s = (*it1)->source();
 		int t = (*it1)->target();
@@ -887,7 +891,7 @@ bool bundle::keep_surviving_edges()
 	}
 
 	VE ve;
-	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	for(pei = gr.edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		if(se.find(*it1) != se.end()) continue;
 		ve.push_back(*it1);
@@ -910,13 +914,14 @@ bool bundle::remove_small_exons()
 	{
 		bool b = true;
 		edge_iterator it1, it2;
+		PEEI pei;
 		int32_t p1 = gr.get_vertex_info(i).lpos;
 		int32_t p2 = gr.get_vertex_info(i).rpos;
 
 		if(p2 - p1 >= min_exon_length) continue;
 		if(gr.degree(i) <= 0) continue;
 
-		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
+		for(pei = gr.in_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			edge_descriptor e = (*it1);
 			int s = e->source();
@@ -924,7 +929,7 @@ bool bundle::remove_small_exons()
 			if(s != 0 && gr.get_vertex_info(s).rpos == p1) b = false;
 			if(b == false) break;
 		}
-		for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
+		for(pei = gr.out_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			edge_descriptor e = (*it1);
 			int t = e->target();
@@ -953,13 +958,14 @@ bool bundle::remove_small_junctions()
 
 		bool b = true;
 		edge_iterator it1, it2;
+		PEEI pei;
 		int32_t p1 = gr.get_vertex_info(i).lpos;
 		int32_t p2 = gr.get_vertex_info(i).rpos;
 		double wi = gr.get_vertex_weight(i);
 
 		// compute max in-adjacent edge
 		double ws = 0;
-		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
+		for(pei = gr.in_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			edge_descriptor e = (*it1);
 			int s = e->source();
@@ -971,7 +977,7 @@ bool bundle::remove_small_junctions()
 		}
 
 		// remove small in-junction
-		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
+		for(pei = gr.in_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			edge_descriptor e = (*it1);
 			int s = e->source();
@@ -986,7 +992,7 @@ bool bundle::remove_small_junctions()
 
 		// compute max out-adjacent edge
 		double wt = 0;
-		for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
+		for(pei = gr.out_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			edge_descriptor e = (*it1);
 			int t = e->target();
@@ -998,7 +1004,7 @@ bool bundle::remove_small_junctions()
 		}
 
 		// remove small in-junction
-		for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
+		for(pei = gr.out_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			edge_descriptor e = (*it1);
 			double w = gr.get_edge_weight(e);
@@ -1033,10 +1039,13 @@ bool bundle::remove_inner_boundaries()
 		if(gr.in_degree(i) != 1) continue;
 		if(gr.out_degree(i) != 1) continue;
 
-		edge_iterator it1, it2;
-		tie(it1, it2) = gr.in_edges(i);
+		PEEI pei = gr.in_edges(i);
+		edge_iterator it1 = pei.first, it2 = pei.second;
 		edge_descriptor e1 = (*it1);
-		tie(it1, it2) = gr.out_edges(i);
+
+		pei = gr.out_edges(i);
+		it1 = pei.first;
+		it2 = pei.second;
 		edge_descriptor e2 = (*it1);
 		vertex_info vi = gr.get_vertex_info(i);
 		int s = e1->source();
@@ -1066,9 +1075,11 @@ bool bundle::remove_intron_contamination()
 		if(gr.out_degree(i) != 1) continue;
 
 		edge_iterator it1, it2;
-		tie(it1, it2) = gr.in_edges(i);
+		PEEI pei = gr.in_edges(i);
+		it1 = pei.first;
 		edge_descriptor e1 = (*it1);
-		tie(it1, it2) = gr.out_edges(i);
+		pei = gr.out_edges(i);
+		it1 = pei.first;
 		edge_descriptor e2 = (*it1);
 		int s = e1->source();
 		int t = e2->target();

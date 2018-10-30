@@ -28,8 +28,9 @@ int region::build_join_interval_map()
 {
 	jmap.clear();
 
-	SIMI lit, rit;
-	tie(lit, rit) = locate_boundary_iterators(*mmap, lpos, rpos);
+	PSIMI pei = locate_boundary_iterators(*mmap, lpos, rpos);
+	SIMI lit = pei.first, rit = pei.second;
+
 	if(lit == mmap->end() || rit == mmap->end()) return 0;
 
 	SIMI it = lit;
@@ -54,8 +55,8 @@ int region::split_join_interval_map()
 	if(lower(jmap.begin()->first) != lpos) return 0;
 	if(upper(jmap.begin()->first) == rpos) return 0;
 
-	SIMI lit, rit;
-	tie(lit, rit) = locate_boundary_iterators(*mmap, lpos, rpos);
+	PSIMI pei = locate_boundary_iterators(*mmap, lpos, rpos);
+	SIMI lit = pei.first, rit = pei.second;
 	if(lit == mmap->end() || rit == mmap->end()) return 0;
 
 	int32_t min_split_middle_length = 10;
@@ -140,8 +141,8 @@ bool region::empty_subregion(int32_t p1, int32_t p2)
 	//printf(" region = [%d, %d), subregion [%d, %d), length = %d\n", lpos, rpos, p1, p2, p2 - p1);
 	if(p2 - p1 < min_subregion_length) return true;
 
-	SIMI it1, it2;
-	tie(it1, it2) = locate_boundary_iterators(*mmap, p1, p2);
+	PSIMI pei = locate_boundary_iterators(*mmap, p1, p2);
+	SIMI it1 = pei.first, it2 = pei.second;
 	if(it1 == mmap->end() || it2 == mmap->end()) return true;
 
 	int32_t sum = compute_sum_overlap(*mmap, it1, it2);

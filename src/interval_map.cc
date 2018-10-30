@@ -130,8 +130,8 @@ int evaluate_rectangle(const split_interval_map &imap, int ll, int rr, double &a
 	ave = 0;
 	dev = 1.0;
 
-	SIMI lit, rit;
-	tie(lit, rit) = locate_boundary_iterators(imap, ll, rr);
+	PSIMI pei = locate_boundary_iterators(imap, ll, rr);
+	SIMI lit = pei.first, rit = pei.second;
 
 	if(lit == imap.end()) return 0;
 	if(rit == imap.end()) return 0;
@@ -159,8 +159,8 @@ int evaluate_triangle(const split_interval_map &imap, int ll, int rr, double &av
 	ave = 0;
 	dev = 1.0;
 
-	SIMI lit, rit;
-	tie(lit, rit) = locate_boundary_iterators(imap, ll, rr);
+	PSIMI pei = locate_boundary_iterators(imap, ll, rr);
+	SIMI lit = pei.first, rit = pei.second;
 
 	if(lit == imap.end()) return 0;
 	if(rit == imap.end()) return 0;

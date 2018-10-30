@@ -154,9 +154,10 @@ int splice_graph::set_vertex_weights(const vector<double> &v)
 
 double splice_graph::get_out_weights(int v)
 {
+	PEEI pei;
 	edge_iterator it1, it2;
 	double ww = 0;
-	for(tie(it1, it2) = out_edges(v); it1 != it2; it1++)
+	for(pei = out_edges(v), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		double w = get_edge_weight(*it1);
 		ww += w;
@@ -166,9 +167,10 @@ double splice_graph::get_out_weights(int v)
 
 double splice_graph::get_in_weights(int v)
 {
+	PEEI pei;
 	edge_iterator it1, it2;
 	double ww = 0;
-	for(tie(it1, it2) = in_edges(v); it1 != it2; it1++)
+	for(pei = in_edges(v), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		double w = get_edge_weight(*it1);
 		ww += w;
@@ -179,8 +181,9 @@ double splice_graph::get_in_weights(int v)
 double splice_graph::get_max_out_weight(int v)
 {
 	edge_iterator it1, it2;
+	PEEI pei;
 	double ww = 0;
-	for(tie(it1, it2) = out_edges(v); it1 != it2; it1++)
+	for(pei = out_edges(v), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		double w = get_edge_weight(*it1);
 		if(w < ww) continue;
@@ -192,8 +195,9 @@ double splice_graph::get_max_out_weight(int v)
 double splice_graph::get_max_in_weight(int v)
 {
 	edge_iterator it1, it2;
+	PEEI pei;
 	double ww = 0;
-	for(tie(it1, it2) = in_edges(v); it1 != it2; it1++)
+	for(pei = in_edges(v), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		double w = get_edge_weight(*it1);
 		if(w < ww) continue;
@@ -206,8 +210,9 @@ edge_descriptor splice_graph::max_out_edge(int v)
 {
 	edge_iterator it1, it2;
 	edge_descriptor ee = null_edge;
+	PEEI pei;
 	double ww = 0;
-	for(tie(it1, it2) = out_edges(v); it1 != it2; it1++)
+	for(pei = out_edges(v), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		double w = get_edge_weight(*it1);
 		if(w < ww) continue;
@@ -219,10 +224,11 @@ edge_descriptor splice_graph::max_out_edge(int v)
 
 edge_descriptor splice_graph::max_in_edge(int v)
 {
+	PEEI pei;
 	edge_iterator it1, it2;
 	edge_descriptor ee = null_edge;
 	double ww = 0;
-	for(tie(it1, it2) = in_edges(v); it1 != it2; it1++)
+	for(pei = in_edges(v), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		double w = get_edge_weight(*it1);
 		if(w < ww) continue;
@@ -236,7 +242,8 @@ int splice_graph::count_junctions()
 {
 	int cnt = 0;
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = edges(); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		int s = (*it1)->source();
 		int t = (*it1)->target();
@@ -256,8 +263,9 @@ edge_descriptor splice_graph::compute_maximum_edge_w()
 	edge_iterator it1, it2;
 	double max_weight = -1;
 	edge_descriptor max_edge = null_edge;
+	PEEI pei;
 
-	for(tie(it1, it2) = edges(); it1 != it2; it1++)
+	for(pei = edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		double w = get_edge_weight(*it1);
 		if(w < max_weight) continue;
@@ -339,7 +347,8 @@ int splice_graph::write(const string &file) const
 	}
 
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = edges(); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		int s = (*it1)->source(); 
 		int t = (*it1)->target();
@@ -409,15 +418,16 @@ int splice_graph::simulate(int nv, int ne, int mw)
 	}
 
 	edge_iterator it1, it2;
+	PEEI pei;
 	for(int i = 0; i < num_vertices(); i++)
 	{
 		int wx = 0;
-		for(tie(it1, it2) = in_edges(i); it1 != it2; it1++)
+		for(pei = in_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			wx += (int)(ewrt[*it1]);
 		}
 		int wy = 0;
-		for(tie(it1, it2) = out_edges(i); it1 != it2; it1++)
+		for(pei = out_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			wy += (int)(ewrt[*it1]);
 		}
@@ -466,7 +476,8 @@ long splice_graph::compute_num_paths()
 	for(int i = 1; i < n; i++)
 	{
 		edge_iterator it1, it2;
-		for(tie(it1, it2) = in_edges(i); it1 != it2; it1++)
+		PEEI pei;
+		for(pei = in_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			int s = (*it1)->source();
 			int t = (*it1)->target();
@@ -490,7 +501,8 @@ long splice_graph::compute_num_paths(int a, int b)
 	for(int i = a + 1; i <= b; i++)
 	{
 		edge_iterator it1, it2;
-		for(tie(it1, it2) = in_edges(i); it1 != it2; it1++)
+		PEEI pei;
+		for(pei = in_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			int s = (*it1)->source();
 			int t = (*it1)->target();
@@ -522,15 +534,16 @@ int splice_graph::compute_independent_subgraphs()
 {
 	int num = 0;
 	edge_iterator it1, it2;
+	PEEI pei;
 	set<int> ss;
 	ss.insert(num_vertices() - 1);
-	for(tie(it1, it2) = in_edges(num_vertices() - 1); it1 != it2; it1++)
+	for(pei = in_edges(num_vertices() - 1), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		int x = (*it1)->source();
 		ss.insert(x);
 	}
 	
-	for(tie(it1, it2) = out_edges(0); it1 != it2; it1++)
+	for(pei = out_edges(0), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		int x = (*it1)->target();
 		while(true)
@@ -565,7 +578,8 @@ int splice_graph::bfs_w(int s, double w, vector<int> &v, VE &b)
 		closed[x] = true;
 
 		edge_iterator it1, it2;
-		for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
+		PEEI pei;
+		for(pei = out_edges(x), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			int y = (*it1)->target();
 			double ww = get_edge_weight(*it1);
@@ -607,7 +621,8 @@ int splice_graph::compute_closest_path(int s, vector<double> &d, vector<int> &b)
 		double w0 = -1;
 		int b0 = -1;
 		edge_iterator it1, it2;
-		for(tie(it1, it2) = in_edges(i); it1 != it2; it1++)
+		PEEI pei;
+		for(pei = in_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			int ss = (*it1)->source();
 			if(ss < s) continue;
@@ -635,7 +650,8 @@ int splice_graph::compute_closest_path_reverse(int t, vector<double> &d, vector<
 		double w0 = -1;
 		int b0 = -1;
 		edge_iterator it1, it2;
-		for(tie(it1, it2) = out_edges(i); it1 != it2; it1++)
+		PEEI pei;
+		for(pei = out_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			int tt = (*it1)->target();
 			if(tt > t) continue;
@@ -717,7 +733,8 @@ double splice_graph::compute_maximum_st_path_w(VE &p, int ss, int tt)
 		double max_abd = 0;
 		edge_descriptor max_edge = null_edge;
 		edge_iterator it1, it2;
-		for(tie(it1, it2) = in_edges(i); it1 != it2; it1++)
+		PEEI pei;
+		for(pei = in_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			int s = (*it1)->source();
 			int t = (*it1)->target();
@@ -767,20 +784,21 @@ bool splice_graph::compute_optimal_path(VE &p)
 	assert(tp[n - 1] == n - 1);
 
 	edge_iterator it1, it2;
+	PEEI pei;
 	for(int ii = 1; ii < n; ii++)
 	{
 		int i = tp[ii];
 		if(degree(i) == 0) continue;
 
 		double sum = 0;
-		for(tie(it1, it2) = in_edges(i); it1 != it2; it1++)
+		for(pei = in_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			sum += get_edge_weight(*it1);
 		}
 
 		double req = DBL_MAX;
 		edge_descriptor ee = null_edge;
-		for(tie(it1, it2) = in_edges(i); it1 != it2; it1++)
+		for(pei = in_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			int s = (*it1)->source();
 			int t = (*it1)->target();
@@ -799,7 +817,7 @@ bool splice_graph::compute_optimal_path(VE &p)
 	}
 
 	edge_descriptor opt = null_edge;
-	for(tie(it1, it2) = in_edges(n - 1); it1 != it2; it1++)
+	for(pei = in_edges(n - 1), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		int s = (*it1)->source();
 		double w = get_edge_weight(*it1);
@@ -838,12 +856,13 @@ int splice_graph::locate(int v)
 	if(v == 0) return 1;
 	if(v == num_vertices() - 1) return 2;
 	edge_iterator it1, it2;
+	PEEI pei;
 	bool b1 = false, b2 = false;
-	for(tie(it1, it2) = in_edges(v); it1 != it2; it1++)
+	for(pei = in_edges(v), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		if((*it1)->source() == 0) b1 = true;
 	}
-	for(tie(it1, it2) = out_edges(v); it1 != it2; it1++)
+	for(pei = out_edges(v), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		if((*it1)->target() == num_vertices() - 1) b2 = true;
 	}
@@ -899,7 +918,8 @@ int splice_graph::round_weights()
 	ewrt = m;
 	vwrt.assign(num_vertices(), 0);
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = out_edges(0); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = out_edges(0), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		double w = ewrt[*it1];
 		vwrt[0] += w;
@@ -907,7 +927,7 @@ int splice_graph::round_weights()
 
 	for(int i = 1; i < num_vertices(); i++)
 	{
-		for(tie(it1, it2) = in_edges(i); it1 != it2; it1++)
+		for(pei = in_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			double w = ewrt[*it1];
 			vwrt[i] += w;
@@ -920,9 +940,10 @@ int splice_graph::round_weights()
 double splice_graph::compute_average_edge_weight()
 {
 	edge_iterator it1, it2;
+	PEEI pei;
 	int cnt = 0;
 	double sum = 0;
-	for(tie(it1, it2) = edges(); it1 != it2; it1++)
+	for(pei = edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		int s = (*it1)->source();
 		int t = (*it1)->target();
@@ -974,7 +995,8 @@ int splice_graph::draw(const string &file)
 
 	MES mes;
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = edges(); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		double w = get_edge_weight(*it1);
 		sprintf(buf, "%.1lf", w);
@@ -1003,14 +1025,15 @@ int splice_graph::print()
 		//if(degree(i) <= 1) continue;
 		vertex_info vi = get_vertex_info(i);
 		edge_iterator it1, it2;
+		PEEI pei;
 		printf("vertex %d, range = [%d, %d), length = %d\n", i, vi.lpos, vi.rpos, vi.rpos - vi.lpos);
 		printf(" in-vertices ="); 
-		for(tie(it1, it2) = in_edges(i); it1 != it2; it1++)
+		for(pei = in_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			printf(" %d, ", (*it1)->source());
 		}
 		printf("\n out-vertices = ");
-		for(tie(it1, it2) = out_edges(i); it1 != it2; it1++)
+		for(pei = out_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			printf(" %d, ", (*it1)->target());
 		}
@@ -1022,7 +1045,8 @@ int splice_graph::print()
 int splice_graph::print_weights()
 {
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = edges(); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
 		int s = e->source();

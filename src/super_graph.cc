@@ -36,7 +36,8 @@ int super_graph::build_undirected_graph()
 	}
 
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = root.edges(); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = root.edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
 		int s = e->source();
@@ -112,7 +113,8 @@ int super_graph::split_single_splice_graph(splice_graph &gr, hyper_set &hs, cons
 
 	// edges
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = root.out_edges(0); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = root.out_edges(0), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		int t = (*it1)->target();
 		if(ss.find(t) == ss.end()) continue;
@@ -134,7 +136,7 @@ int super_graph::split_single_splice_graph(splice_graph &gr, hyper_set &hs, cons
 		assert(a2b[s].first == index);
 		int x = a2b[s].second;
 
-		for(tie(it1, it2) = root.out_edges(s); it1 != it2; it1++)
+		for(pei = root.out_edges(s), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			int t = (*it1)->target();
 			assert(t == n || ss.find(t) != ss.end());
@@ -217,7 +219,8 @@ bool super_graph::cut_single_splice_graph(splice_graph &gr, int index)
 	vector<SE> cuts;
 	cuts.resize(gr.num_vertices() - 1);
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = gr.edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
 		int s = e->source();
@@ -229,12 +232,12 @@ bool super_graph::cut_single_splice_graph(splice_graph &gr, int index)
 	}
 
 	vector<int> ss, tt;
-	for(tie(it1, it2) = gr.out_edges(0); it1 != it2; it1++)
+	for(pei = gr.out_edges(0), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		int t = (*it1)->target();
 		ss.push_back(t);
 	}
-	for(tie(it1, it2) = gr.in_edges(gr.num_vertices() - 1); it1 != it2; it1++)
+	for(pei = gr.in_edges(gr.num_vertices() - 1), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		int s = (*it1)->source();
 		tt.push_back(s);
@@ -345,9 +348,10 @@ int super_graph::build_maximum_path_graph(splice_graph &gr, undirected_graph &mg
 	if(gr.in_degree(n) <= 1) return 0;
 
 	edge_iterator it1, it2;
+	PEEI pei;
 	vector<int> u2v;
 	MI v2u;
-	for(tie(it1, it2) = gr.out_edges(0); it1 != it2; it1++)
+	for(pei = gr.out_edges(0), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
 		int s = e->target();
@@ -356,7 +360,7 @@ int super_graph::build_maximum_path_graph(splice_graph &gr, undirected_graph &mg
 		u2v.push_back(s);
 		mg.add_vertex();
 	}
-	for(tie(it1, it2) = gr.in_edges(n); it1 != it2; it1++)
+	for(pei = gr.in_edges(n), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
 		int t = e->source();
@@ -397,7 +401,8 @@ double super_graph::compute_maximum_path1(splice_graph &gr, int s, int &t)
 	MED med;
 	int n = gr.num_vertices() - 1;
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.in_edges(n); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = gr.in_edges(n), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
 		double w = gr.get_edge_weight(e);
@@ -426,7 +431,8 @@ double super_graph::compute_maximum_path2(splice_graph &gr, int t, int &s)
 {
 	MED med;
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.out_edges(0); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = gr.out_edges(0), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
 		double w = gr.get_edge_weight(e);

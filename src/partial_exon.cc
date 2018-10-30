@@ -6,6 +6,7 @@ See LICENSE for licensing.
 
 #include "partial_exon.h"
 #include "util.h"
+#include <cstdio>
 
 partial_exon::partial_exon(int32_t _lpos, int32_t _rpos, int _ltype, int _rtype)
 	: lpos(_lpos), rpos(_rpos), ltype(_ltype), rtype(_rtype)

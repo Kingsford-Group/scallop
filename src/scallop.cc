@@ -196,7 +196,8 @@ bool scallop::resolve_negligible_edges(bool extend, double max_ratio)
 
 		set<int> s;
 		edge_iterator it1, it2;
-		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
+		PEEI pei;
+		for(pei = gr.in_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			edge_descriptor e = (*it1);
 			double w = gr.get_edge_weight(e);
@@ -205,7 +206,7 @@ bool scallop::resolve_negligible_edges(bool extend, double max_ratio)
 			if(verbose >= 2) printf("resolve in-negligible edge, degree = (%d, %d), vertex = %d, weight = %.3lf / %.3lf\n", gr.in_degree(i), gr.out_degree(i), i, w, ww1);
 			s.insert(e2i[e]);
 		}
-		for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
+		for(pei = gr.out_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			edge_descriptor e = (*it1);
 			double w = gr.get_edge_weight(e);
@@ -335,9 +336,10 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree, double max_ratio
 bool scallop::resolve_hyper_edge(int fsize)
 {
 	edge_iterator it1, it2;
+	PEEI pei;
 	vector<int> v1, v2;
 	int root = -1;
-	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	for(pei = gr.edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		int e = e2i[*it1];
 		int vs = (*it1)->source();
@@ -571,14 +573,15 @@ int scallop::add_pseudo_hyper_edges()
 		int s = -1, t = -1;
 		double w1 = 0, w2 = 0;
 		edge_iterator it1, it2;
-		for(tie(it1, it2) = gr.in_edges(k); it1 != it2; it1++)
+		PEEI pei;
+		for(pei = gr.in_edges(k), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			double w = gr.get_edge_weight(*it1);
 			if(w <= w1) continue;
 			w1 = w;
 			s = (*it1)->source();
 		}
-		for(tie(it1, it2) = gr.out_edges(k); it1 != it2; it1++)
+		for(pei = gr.out_edges(k), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			double w = gr.get_edge_weight(*it1);
 			if(w <= w2) continue;
@@ -604,7 +607,8 @@ int scallop::init_super_edges()
 {
 	mev.clear();
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = gr.edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		vector<int> v;
 		int s = (*it1)->source();
@@ -617,7 +621,8 @@ int scallop::init_super_edges()
 int scallop::init_inner_weights()
 {
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = gr.edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
 		double w = gr.get_edge_weight(e);
@@ -668,7 +673,8 @@ int scallop::decompose_vertex_extend(int root, MPID &pe2w)
 	int n = m;
 	map<int, int> ev1, ev2;
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.in_edges(root); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = gr.in_edges(root), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
 		int ei = e2i[e];
@@ -678,7 +684,7 @@ int scallop::decompose_vertex_extend(int root, MPID &pe2w)
 		assert(mdegree.find(ei) != mdegree.end());
 		if(mdegree[ei] >= 2) ev1.insert(PI(ei, n++));
 	}
-	for(tie(it1, it2) = gr.out_edges(root); it1 != it2; it1++)
+	for(pei = gr.out_edges(root), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
 		int ei = e2i[e];
@@ -822,12 +828,13 @@ int scallop::decompose_vertex_replace(int root, MPID &pe2w)
 
 	// assert that all edges are covered
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.in_edges(root); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = gr.in_edges(root), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		int e = e2i[*it1];
 		assert(md.find(e) != md.end());
 	}
-	for(tie(it1, it2) = gr.out_edges(root); it1 != it2; it1++)
+	for(pei = gr.out_edges(root), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		int e = e2i[*it1];
 		assert(md.find(e) != md.end());
@@ -887,11 +894,12 @@ int scallop::decompose_trivial_vertex(int x)
 	MPID pe2w;
 	edge_iterator it1, it2;
 	edge_iterator ot1, ot2;
-	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
+	PEEI pe1, pe2;
+	for(pe1 = gr.in_edges(x), it1 = pe1.first, it2 = pe1.second; it1 != it2; it1++)
 	{
 		int e1 = e2i[*it1];
 		double w1 = gr.get_edge_weight(*it1);
-		for(tie(ot1, ot2) = gr.out_edges(x); ot1 != ot2; ot1++)
+		for(pe2 = gr.out_edges(x), ot1 = pe2.first, ot2 = pe2.second; ot1 != ot2; ot1++)
 		{
 			int e2 = e2i[*ot1];
 			double w2 = gr.get_edge_weight(*ot1);
@@ -910,10 +918,9 @@ int scallop::classify_trivial_vertex(int x, bool fast)
 	int d2 = gr.out_degree(x);
 	if(d1 != 1 && d2 != 1) return -1;
 
-	edge_iterator it1, it2;
-	tie(it1, it2) = gr.in_edges(x);
+	edge_iterator it1 = gr.in_edges(x).first;
 	int e1 = e2i[*it1];
-	tie(it1, it2) = gr.out_edges(x);
+	it1 = gr.out_edges(x).first;
 	int e2 = e2i[*it1];
 
 	if(d1 == 1)
@@ -937,7 +944,8 @@ int scallop::exchange_sink(int old_sink, int new_sink)
 {
 	VE ve;
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.in_edges(old_sink); it1 != it2; it1++) ve.push_back(*it1);
+	PEEI pei;
+	for(pei = gr.in_edges(old_sink), it1 = pei.first, it2 = pei.second; it1 != it2; it1++) ve.push_back(*it1);
 
 	for(int i = 0; i < ve.size(); i++)
 	{
@@ -1132,13 +1140,14 @@ int scallop::balance_vertex(int v)
 	if(gr.degree(v) <= 0) return 0;
 
 	edge_iterator it1, it2;
+	PEEI pei;
 	double w1 = 0, w2 = 0;
-	for(tie(it1, it2) = gr.in_edges(v); it1 != it2; it1++)
+	for(pei = gr.in_edges(v), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		double w = gr.get_edge_weight(*it1);
 		w1 += w;
 	}
-	for(tie(it1, it2) = gr.out_edges(v); it1 != it2; it1++)
+	for(pei = gr.out_edges(v), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		double w = gr.get_edge_weight(*it1);
 		w2 += w;
@@ -1161,7 +1170,7 @@ int scallop::balance_vertex(int v)
 	double r2 = ww / w2;
 
 	double m1 = 0, m2 = 0;
-	for(tie(it1, it2) = gr.in_edges(v); it1 != it2; it1++)
+	for(pei = gr.in_edges(v), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		double wx = gr.get_edge_weight(*it1);
 		double wy = wx * r1;
@@ -1172,7 +1181,7 @@ int scallop::balance_vertex(int v)
 		}
 		gr.set_edge_weight(*it1, wy);
 	}
-	for(tie(it1, it2) = gr.out_edges(v); it1 != it2; it1++)
+	for(pei = gr.out_edges(v), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		double wx = gr.get_edge_weight(*it1);
 		double wy = wx * r2;
@@ -1203,13 +1212,14 @@ int scallop::balance_vertex(int v)
 double scallop::compute_balance_ratio(int v)
 {
 	edge_iterator it1, it2;
+	PEEI pei;
 	double w1 = 0, w2 = 0;
-	for(tie(it1, it2) = gr.in_edges(v); it1 != it2; it1++)
+	for(pei = gr.in_edges(v), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		double w = gr.get_edge_weight(*it1);
 		w1 += w;
 	}
-	for(tie(it1, it2) = gr.out_edges(v); it1 != it2; it1++)
+	for(pei = gr.out_edges(v), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		double w = gr.get_edge_weight(*it1);
 		w2 += w;
@@ -1375,14 +1385,15 @@ int scallop::compute_smallest_edge(int x, double &ratio)
 	int e = -1;
 	ratio = DBL_MAX;
 	edge_iterator it1, it2;
+	PEEI pei;
 	double sum1 = 0;
 	double sum2 = 0;
-	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
+	for(pei = gr.in_edges(x), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		double w = gr.get_edge_weight(*it1);
 		sum1 += w;
 	}
-	for(tie(it1, it2) = gr.out_edges(x); it1 != it2; it1++)
+	for(pei = gr.out_edges(x), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		double w = gr.get_edge_weight(*it1);
 		sum2 += w;
@@ -1390,7 +1401,7 @@ int scallop::compute_smallest_edge(int x, double &ratio)
 
 	assert(sum1 >= SMIN);
 	assert(sum2 >= SMIN);
-	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
+	for(pei = gr.in_edges(x), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		double w = gr.get_edge_weight(*it1);
 		double r = w * 1.0 / sum1;
@@ -1398,7 +1409,7 @@ int scallop::compute_smallest_edge(int x, double &ratio)
 		ratio = r;
 		e = e2i[*it1];
 	}
-	for(tie(it1, it2) = gr.out_edges(x); it1 != it2; it1++)
+	for(pei = gr.out_edges(x), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		double w = gr.get_edge_weight(*it1);
 		double r = w * 1.0 / sum2;

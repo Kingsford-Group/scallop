@@ -103,7 +103,8 @@ int sgraph_compare::add_inner_edges(splice_graph &gt, splice_graph &gr, int type
 int sgraph_compare::add_existing_edges(splice_graph &gt, splice_graph &gr, int type)
 {
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = gt.edges(); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = gt.edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
 		double w = gt.get_edge_weight(e);
@@ -157,7 +158,8 @@ int sgraph_compare::compare_boundary_edges()
 	int tp = 0, fp = 0, fn = 0;
 
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr3.out_edges(0); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = gr3.out_edges(0), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		double w = gr3.get_edge_weight(*it1);
 		edge_info ei = gr3.get_edge_info(*it1);
@@ -185,7 +187,7 @@ int sgraph_compare::compare_boundary_edges()
 		}
 	}
 
-	for(tie(it1, it2) = gr3.in_edges(gr3.num_vertices() - 1); it1 != it2; it1++)
+	for(pei = gr3.in_edges(gr3.num_vertices() - 1), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		double w = gr3.get_edge_weight(*it1);
 		edge_info ei = gr3.get_edge_info(*it1);
@@ -301,7 +303,8 @@ bool sgraph_compare::verify_unique_5end_edge(splice_graph &gr, edge_descriptor e
 		if(i < t && pp != p) break;
 
 		edge_iterator it1, it2;
-		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
+		PEEI pei;
+		for(pei = gr.in_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			if((*it1)->source() != 0) continue;
 			int type2 = gr.get_edge_info(*it1).type;
@@ -320,7 +323,8 @@ bool sgraph_compare::verify_unique_5end_edge(splice_graph &gr, edge_descriptor e
 		if(pp != p) break;
 
 		edge_iterator it1, it2;
-		for(tie(it1, it2) = gr.in_edges(i); it1 != it2; it1++)
+		PEEI pei;
+		for(pei = gr.in_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			if((*it1)->source() != 0) continue;
 			int type2 = gr.get_edge_info(*it1).type;
@@ -347,7 +351,8 @@ bool sgraph_compare::verify_unique_3end_edge(splice_graph &gr, edge_descriptor e
 		if(i < s && pp != p) break;
 
 		edge_iterator it1, it2;
-		for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
+		PEEI pei;
+		for(pei = gr.out_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			if((*it1)->target() != gr.num_vertices() - 1) continue;
 			int type2 = gr.get_edge_info(*it1).type;
@@ -366,7 +371,8 @@ bool sgraph_compare::verify_unique_3end_edge(splice_graph &gr, edge_descriptor e
 		if(pp != p) break;
 
 		edge_iterator it1, it2;
-		for(tie(it1, it2) = gr.out_edges(i); it1 != it2; it1++)
+		PEEI pei;
+		for(pei = gr.out_edges(i), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			if((*it1)->target() != gr.num_vertices() - 1) continue;
 			int type2 = gr.get_edge_info(*it1).type;
@@ -421,7 +427,8 @@ int sgraph_compare::draw(splice_graph &gr, const string &file)
 
 	// draw reference edges
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = gr.edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
 		edge_info ei = gr.get_edge_info(e);
@@ -446,7 +453,7 @@ int sgraph_compare::draw(splice_graph &gr, const string &file)
 	}
 
 	// draw evaluated edges
-	for(tie(it1, it2) = gr.edges(); it1 != it2; it1++)
+	for(pei = gr.edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
 		edge_info ei = gr.get_edge_info(e);

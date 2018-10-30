@@ -7,6 +7,7 @@ See LICENSE for licensing.
 #include "hyper_set.h"
 #include "config.h"
 #include <algorithm>
+#include <cstdio>
 
 int hyper_set::clear()
 {
@@ -218,8 +219,9 @@ MPII hyper_set::get_routes(int x, directed_graph &gr, MEI &e2i)
 {
 	MPII mpi;
 	edge_iterator it1, it2;
+	PEEI pei;
 	vector<PI> v;
-	for(tie(it1, it2) = gr.in_edges(x); it1 != it2; it1++)
+	for(pei = gr.in_edges(x), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		assert(e2i.find(*it1) != e2i.end());
 		int e = e2i[*it1];

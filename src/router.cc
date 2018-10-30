@@ -148,13 +148,14 @@ int router::build_indices()
 	u2e.clear();
 
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = gr.in_edges(root); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = gr.in_edges(root), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		int e = e2i[*it1];
 		e2u.insert(PI(e, e2u.size()));
 		u2e.push_back(e);
 	}
-	for(tie(it1, it2) = gr.out_edges(root); it1 != it2; it1++)
+	for(pei = gr.out_edges(root), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		int e = e2i[*it1];
 		e2u.insert(PI(e, e2u.size()));
@@ -355,7 +356,8 @@ PI router::filter_cycle_hyper_edge()
 
 	set<PI> spi;
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = ug.edges(); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = ug.edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		int s = (*it1)->source();
 		int t = (*it1)->target();
@@ -593,7 +595,8 @@ int router::decompose0_clp()
 	// edge list of ug
 	VE ve;
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = ug.edges(); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = ug.edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
 		ve.push_back(e);
@@ -741,7 +744,8 @@ int router::decompose1_clp()
 	// edge list of ug
 	VE ve;
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = ug.edges(); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = ug.edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
 		ve.push_back(e);
@@ -907,7 +911,8 @@ int router::decompose2_clp()
 	// edge list of ug
 	VE ve;
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = ug.edges(); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = ug.edges(), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		edge_descriptor e = (*it1);
 		ve.push_back(e);

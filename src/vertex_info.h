@@ -7,7 +7,7 @@ See LICENSE for licensing.
 #ifndef __VERTEX_INFO__
 #define __VERTEX_INFO__
 
-#include <cstdint>
+#include <stdint.h>
 
 class vertex_info
 {
