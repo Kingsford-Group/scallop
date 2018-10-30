@@ -7,6 +7,7 @@ See LICENSE for licensing.
 #include <cassert>
 #include <cstdio>
 #include <cmath>
+#include <climits>
 
 #include "bundle_base.h"
 
@@ -14,7 +15,7 @@ bundle_base::bundle_base()
 {
 	tid = -1;
 	chrm = "";
-	lpos = INT32_MAX;
+	lpos = 1 << 30;
 	rpos = 0;
 	strand = '.';
 	num_long_reads = 0;
@@ -93,7 +94,7 @@ int bundle_base::clear()
 {
 	tid = -1;
 	chrm = "";
-	lpos = INT32_MAX;
+	lpos = 1 << 30;
 	rpos = 0;
 	strand = '.';
 	hits.clear();
