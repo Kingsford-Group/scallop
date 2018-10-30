@@ -9,7 +9,7 @@ See LICENSE for licensing.
 #include <climits>
 #include <cstdio>
 #include <cassert>
-#include <tuple>
+//#include <tuple>
 #include <algorithm>
 
 using namespace std;
@@ -156,8 +156,9 @@ int graph_base::get_edge_indices(VE &i2e, MEI &e2i)
 	i2e.clear();
 	e2i.clear();
 	int index = 0;
-	edge_iterator it1, it2;
-	for(tie(it1, it2) = edges(); it1 != it2; it1++)
+	PEEI pei = edges();
+	edge_iterator it1 = pei.first, it2 = pei.second;
+	for(; it1 != it2; it1++)
 	{
 		e2i.insert(PEI(*it1, index));
 		i2e.push_back(*it1);
@@ -176,8 +177,9 @@ bool graph_base::bfs(const vector<int> &vs, int t, const set<edge_descriptor> &f
 		int x = open[p];
 		if(x == t) return true;
 		p++;
-		edge_iterator it1, it2;
-		for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
+		PEEI pei = out_edges(x);
+		edge_iterator it1 = pei.first, it2 = pei.second;
+		for(; it1 != it2; it1++)
 		{
 			if(fb.find(*it1) != fb.end()) continue;
 			int y = (*it1)->target();
@@ -205,8 +207,9 @@ int graph_base::bfs(int s, vector<int> &v, vector<int> &b)
 	{
 		int x = open[p];
 		p++;
-		edge_iterator it1, it2;
-		for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
+		PEEI pei = out_edges(x);
+		edge_iterator it1 = pei.first, it2 = pei.second;
+		for(; it1 != it2; it1++)
 		{
 			int y = (*it1)->target();
 			if(closed.find(y) != closed.end()) continue;
@@ -232,8 +235,9 @@ int graph_base::bfs(int s, set<edge_descriptor> &ss)
 	{
 		int x = open[p];
 		p++;
-		edge_iterator it1, it2;
-		for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
+		PEEI pei = out_edges(x);
+		edge_iterator it1 = pei.first, it2 = pei.second;
+		for(; it1 != it2; it1++)
 		{
 			int y = (*it1)->target();
 			ss.insert(*it1);

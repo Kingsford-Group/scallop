@@ -10,7 +10,7 @@ See LICENSE for licensing.
 #include <climits>
 #include <cstdio>
 #include <cassert>
-#include <tuple>
+//#include <tuple>
 #include <algorithm>
 
 using namespace std;
@@ -195,9 +195,10 @@ int undirected_graph::draw(const string &file, const MIS &mis, const MES &mes, d
 
 			string s;
 			char buf[1024];
+			PEEI pei;
 			edge_iterator oi1, oi2;
 			int cnt = 0;
-			for(tie(oi1, oi2) = out_edges(i); oi1 != oi2; oi1++)
+			for(pei = out_edges(i), oi1 = pei.first, oi2 = pei.second; oi1 != oi2; oi1++)
 			{
 				if((*oi1)->target() != j) continue;
 				cnt++;

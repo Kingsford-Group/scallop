@@ -10,7 +10,7 @@ See LICENSE for licensing.
 #include <climits>
 #include <cstdio>
 #include <cassert>
-#include <tuple>
+//#include <tuple>
 #include <algorithm>
 #include <iostream>
 
@@ -62,24 +62,25 @@ int directed_graph::exchange(int x, int y, int z)
 	assert(y >= 0 && y < num_vertices());
 	assert(z >= 0 && z < num_vertices());
 
-	edge_iterator it1, it2;
 	set<edge_descriptor> m;
-	for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
+	PEEI pei;
+	edge_iterator it1, it2;
+	for(pei = out_edges(x), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		if(check_path((*it1)->target(), y) == false) continue;
 		m.insert(*it1);
 	}
-	for(tie(it1, it2) = in_edges(y); it1 != it2; it1++)
+	for(pei = in_edges(y), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		if(check_path(x, (*it1)->source()) == false) continue;
 		m.insert(*it1);
 	}
-	for(tie(it1, it2) = out_edges(y); it1 != it2; it1++)
+	for(pei = out_edges(y), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		if(check_path((*it1)->target(), z) == false) continue;
 		m.insert(*it1);
 	}
-	for(tie(it1, it2) = in_edges(z); it1 != it2; it1++)
+	for(pei = in_edges(z), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		if(check_path(y, (*it1)->source()) == false) continue;
 		m.insert(*it1);
@@ -190,7 +191,8 @@ bool directed_graph::bfs_reverse(const vector<int> &t, int s, const set<edge_des
 		if(x == s) return true;
 		p++;
 		edge_iterator it1, it2;
-		for(tie(it1, it2) = in_edges(x); it1 != it2; it1++)
+		PEEI pei;
+		for(pei = in_edges(x), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			if(fb.find(*it1) != fb.end()) continue;
 			int y = (*it1)->source();
@@ -219,7 +221,8 @@ int directed_graph::bfs_reverse(int t, vector<int> &v, vector<int> &b)
 		int x = open[p];
 		p++;
 		edge_iterator it1, it2;
-		for(tie(it1, it2) = in_edges(x); it1 != it2; it1++)
+		PEEI pei;
+		for(pei = in_edges(x), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			int y = (*it1)->source();
 
@@ -247,7 +250,8 @@ int directed_graph::bfs_reverse(int t, set<edge_descriptor> &ss)
 		int x = open[p];
 		p++;
 		edge_iterator it1, it2;
-		for(tie(it1, it2) = in_edges(x); it1 != it2; it1++)
+		PEEI pei;
+		for(pei = in_edges(x), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			ss.insert(*it1);
 			int y = (*it1)->source();
@@ -332,7 +336,8 @@ vector<int> directed_graph::topological_sort_reverse()
 		v.push_back(x);
 
 		edge_iterator it1, it2;
-		for(tie(it1, it2) = in_edges(x); it1 != it2; it1++)
+		PEEI pei;
+		for(pei = in_edges(x), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			int t = (*it1)->target();
 			vd[t]--;
@@ -364,7 +369,8 @@ vector<int> directed_graph::topological_sort()
 		v.push_back(x);
 
 		edge_iterator it1, it2;
-		for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
+		PEEI pei;
+		for(pei = out_edges(x), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			int t = (*it1)->target();
 			vd[t]--;
@@ -406,7 +412,8 @@ vector<int> directed_graph::topological_sort0()
 		vb[k] = true;
 
 		edge_iterator it1, it2;
-		for(tie(it1, it2) = out_edges(k); it1 != it2; it1++)
+		PEEI pei;
+		for(pei = out_edges(k), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			int t = (*it1)->target();
 			vd[t]--;
@@ -429,7 +436,8 @@ int directed_graph::compute_in_partner(int x)
 	set<edge_descriptor> se;
 	set<int> sv;
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = in_edges(x); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = in_edges(x), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		assert((*it1)->target() == x);
 		int s = (*it1)->source();
@@ -449,12 +457,12 @@ int directed_graph::compute_in_partner(int x)
 		}
 		assert(k != -1);
 
-		for(tie(it1, it2) = out_edges(k); it1 != it2; it1++)
+		for(pei = out_edges(k), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			if(se.find(*it1) == se.end()) return -1;
 		}
 
-		for(tie(it1, it2) = in_edges(k); it1 != it2; it1++)
+		for(pei = in_edges(k), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			assert(se.find(*it1) == se.end());
 			se.insert(*it1);
@@ -480,7 +488,8 @@ int directed_graph::compute_out_partner(int x)
 	set<edge_descriptor> se;
 	set<int> sv;
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = out_edges(x), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		assert((*it1)->source() == x);
 		int t = (*it1)->target();
@@ -500,12 +509,12 @@ int directed_graph::compute_out_partner(int x)
 		}
 		assert(k != -1);
 
-		for(tie(it1, it2) = in_edges(k); it1 != it2; it1++)
+		for(pei = in_edges(k), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			if(se.find(*it1) == se.end()) return -1;
 		}
 
-		for(tie(it1, it2) = out_edges(k); it1 != it2; it1++)
+		for(pei = out_edges(k), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			assert(se.find(*it1) == se.end());
 			se.insert(*it1);
@@ -533,7 +542,8 @@ int directed_graph::compute_out_equivalent_vertex(int x)
 	{
 		int a = q[k++];
 		edge_iterator it1, it2;
-		for(tie(it1, it2) = out_edges(a); it1 != it2; it1++)
+		PEEI pei;
+		for(pei = out_edges(a), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			int b = (*it1)->target();
 			if(s.find(b) != s.end()) continue;
@@ -552,12 +562,13 @@ int directed_graph::compute_out_equivalent_vertex(int x)
 
 	if(y == -1) return -1;
 
+	PEEI pei;
 	edge_iterator it1, it2;
 	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
 	{
 		int a = (*it);
 		if(a == x) continue;
-		for(tie(it1, it2) = in_edges(a); it1 != it2; it1++)
+		for(pei = in_edges(a), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			int b = (*it1)->source();
 			if(s.find(b) == s.end()) return -1;
@@ -581,7 +592,8 @@ int directed_graph::compute_in_equivalent_vertex(int x)
 	{
 		int a = q[k++];
 		edge_iterator it1, it2;
-		for(tie(it1, it2) = in_edges(a); it1 != it2; it1++)
+		PEEI pei;
+		for(pei = in_edges(a), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			int b = (*it1)->source();
 			if(s.find(b) != s.end()) continue;
@@ -600,12 +612,13 @@ int directed_graph::compute_in_equivalent_vertex(int x)
 
 	if(y == -1) return -1;
 
+	PEEI pei;
 	edge_iterator it1, it2;
 	for(set<int>::iterator it = s.begin(); it != s.end(); it++)
 	{
 		int a = (*it);
 		if(a == x) continue;
-		for(tie(it1, it2) = out_edges(a); it1 != it2; it1++)
+		for(pei = out_edges(a), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			int b = (*it1)->target();
 			if(s.find(b) == s.end()) return -1;
@@ -652,7 +665,8 @@ int directed_graph::check_nest(int x, int y, set<edge_descriptor> &se, const vec
 	se.clear();
 	set<int> sv;
 	edge_iterator it1, it2;
-	for(tie(it1, it2) = out_edges(x); it1 != it2; it1++)
+	PEEI pei;
+	for(pei = out_edges(x), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 	{
 		assert((*it1)->source() == x);
 		int t = (*it1)->target();
@@ -679,12 +693,12 @@ int directed_graph::check_nest(int x, int y, set<edge_descriptor> &se, const vec
 
 		cnt++;
 
-		for(tie(it1, it2) = in_edges(k); it1 != it2; it1++)
+		for(pei = in_edges(k), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			if(se.find(*it1) == se.end()) return -1;
 		}
 
-		for(tie(it1, it2) = out_edges(k); it1 != it2; it1++)
+		for(pei = out_edges(k), it1 = pei.first, it2 = pei.second; it1 != it2; it1++)
 		{
 			assert(se.find(*it1) == se.end());
 			int t = (*it1)->target();
@@ -758,9 +772,10 @@ int directed_graph::draw(const string &file, const MIS &mis, const MES &mes, dou
 
 			string s;
 			char buf[1024];
+			PEEI pei;
 			edge_iterator oi1, oi2;
 			int cnt = 0;
-			for(tie(oi1, oi2) = out_edges(i); oi1 != oi2; oi1++)
+			for(pei = out_edges(i), oi1 = pei.first, oi2 = pei.second; oi1 != oi2; oi1++)
 			{
 				if((*oi1)->target() != j) continue;
 				cnt++;
