@@ -1,8 +1,8 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.69])
-AC_INIT(scallop, 0.10.3, mingfu.shao@cs.cmu.edu)
+AC_PREREQ([2.63])
+AC_INIT(scallop, 0.10.3, shaomingfu@gmail.com)
 AM_INIT_AUTOMAKE()
 AC_CONFIG_SRCDIR([src/main.cc])
 AC_CONFIG_HEADERS([config.h])
@@ -53,7 +53,7 @@ AS_IF([test "x$enable_static" != xyes], AC_CHECK_LIB([CoinUtils], [_Z9CoinIsnand
 AC_CHECK_HEADERS([stdint.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_CHECK_HEADER_STDBOOL
+#AC_CHECK_HEADER_STDBOOL
 AC_C_INLINE
 AC_TYPE_INT32_T
 AC_TYPE_INT64_T
