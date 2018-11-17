@@ -64,7 +64,6 @@ public:
 	bool concordant;						// whether it is concordant
 	uint32_t* cigar;						// cigar, use samtools
 	vector<int64_t> spos;					// splice positions
-	bool is_long_read;						// whether this read is long read
 
 public:
 	int set_tags(bam1_t *b);
