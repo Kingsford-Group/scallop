@@ -83,8 +83,7 @@ int assembler::assemble()
 		if(uniquely_mapped_only == true && ht.nh != 1) continue;
 		if(library_type != UNSTRANDED && ht.strand == '+' && ht.xs == '-') continue;
 		if(library_type != UNSTRANDED && ht.strand == '-' && ht.xs == '+') continue;
-		//if(library_type != UNSTRANDED && ht.strand == '.' && ht.xs != '.') ht.strand = ht.xs;
-		if(library_type != UNSTRANDED && ht.strand == '.' && ht.xs != '.' && (ht.flag & 0x8) >= 1) ht.strand = ht.xs;
+		if(library_type != UNSTRANDED && ht.strand == '.' && ht.xs != '.') ht.strand = ht.xs;
 		if(library_type != UNSTRANDED && ht.strand == '+') bb1.add_hit(ht);
 		if(library_type != UNSTRANDED && ht.strand == '-') bb2.add_hit(ht);
 		if(library_type == UNSTRANDED && ht.xs == '.') bb1.add_hit(ht);
