@@ -17,6 +17,7 @@ using namespace std;
 //// parameters
 // for bam file and reads
 int min_flank_length = 3;
+int max_num_cigar = 7;
 int max_edit_distance = 10;
 int32_t min_bundle_gap = 50;
 int min_num_hits_in_bundle = 20;
@@ -141,6 +142,11 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--min_flank_length")
 		{
 			min_flank_length = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--max_num_cigar")
+		{
+			max_num_cigar = atoi(argv[i + 1]);
 			i++;
 		}
 		else if(string(argv[i]) == "--max_edit_distance")
@@ -365,6 +371,7 @@ int print_parameters()
 
 	// for bam file and reads
 	printf("min_flank_length = %d\n", min_flank_length);
+	printf("max_num_cigar = %d\n", max_num_cigar);
 	printf("max_edit_distance = %d\n", max_edit_distance);
 	printf("min_bundle_gap = %d\n", min_bundle_gap);
 	printf("min_num_hits_in_bundle = %d\n", min_num_hits_in_bundle);

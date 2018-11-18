@@ -87,7 +87,7 @@ hit::hit(bam1_t *b)
 	qlen = (int32_t)bam_cigar2qlen(n_cigar, bam_get_cigar(b));
 
 	// copy cigar
-	assert(n_cigar <= MAX_NUM_CIGAR);
+	assert(n_cigar <= max_num_cigar);
 	assert(n_cigar >= 1);
 
 	// allocate memery for cigar

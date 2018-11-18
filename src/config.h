@@ -15,8 +15,6 @@ See LICENSE for licensing.
 using namespace std;
 
 //// constants
-#define MAX_NUM_CIGAR 10000
-
 #define START_BOUNDARY 1
 #define END_BOUNDARY 2
 #define LEFT_SPLICE 3
@@ -44,6 +42,7 @@ using namespace std;
 //// parameters
 // for bam file and reads
 extern int min_flank_length;
+extern int max_num_cigar;
 extern int max_edit_distance;
 extern int32_t min_bundle_gap;
 extern int min_num_hits_in_bundle;

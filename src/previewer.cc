@@ -45,7 +45,7 @@ int previewer::preview()
 
 		if((p.flag & 0x4) >= 1) continue;										// read is not mapped
 		if((p.flag & 0x100) >= 1 && use_second_alignment == false) continue;	// qstrandary alignment
-		if(p.n_cigar > MAX_NUM_CIGAR) continue;									// ignore hits with more than 7 cigar types
+		if(p.n_cigar > max_num_cigar) continue;									// ignore hits with more than max-num-cigar types
 		if(p.qual < min_mapping_quality) continue;								// ignore hits with small quality
 		if(p.n_cigar < 1) continue;												// should never happen
 
