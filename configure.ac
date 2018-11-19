@@ -23,6 +23,7 @@ AC_ARG_WITH(boost, AS_HELP_STRING([--with-boost], [home directory for boost]), B
 AC_ARG_WITH(htslib, AS_HELP_STRING([--with-htslib], [home directory for htslib]), HTSLIB_HOME=$withval, HTSLIB_HOME=)
 AC_ARG_WITH(zlib, AS_HELP_STRING([--with-zlib], [home directory for zlib]), ZLIB_HOME=$withval, ZLIB_HOME=)
 AC_ARG_WITH(lapack, AS_HELP_STRING([--with-lapack], [home directory for lapack]), LAPACK_HOME=$withval, LAPACK_HOME=)
+AC_ARG_WITH(fortran, AS_HELP_STRING([--with-fortran], [home directory for fortran]), FORTRAN_HOME=$withval, FORTRAN_HOME=)
 
 # Assign CXXFLAGS
 AS_IF([test "x$CLP_HOME" != "x"], [AC_SUBST([CXXFLAGS], ["-I$CLP_HOME/include/coin $CXXFLAGS"])], [])
@@ -33,7 +34,8 @@ AS_IF([test "x$HTSLIB_HOME" != "x"], [AC_SUBST([CXXFLAGS], ["-I$HTSLIB_HOME/incl
 AC_ARG_ENABLE([static], [AS_HELP_STRING([--enable-static], [enable static linking])])
 
 # If statis is enabled, directly assign .a files to LIBS
-AS_IF([test "x$enable_static" = xyes], [AC_SUBST([LIBS], ["/usr/lib/gcc/x86_64-linux-gnu/4.8/libgfortran.a $LIBS"])])
+#AS_IF([test "x$enable_static" = xyes], [AC_SUBST([LIBS], ["/usr/lib/gcc/x86_64-linux-gnu/4.8/libgfortran.a $LIBS"])])
+AS_IF([test "x$enable_static" = xyes], AS_IF([test "x$FORTRAN_HOME" != "x"], [AC_SUBST([LIBS], ["$FORTRAN_HOME/libgfortran.a $LIBS"])]))
 AS_IF([test "x$enable_static" = xyes], AS_IF([test "x$ZLIB_HOME" != "x"], [AC_SUBST([LIBS], ["$ZLIB_HOME/libz.a $LIBS"])]))
 AS_IF([test "x$enable_static" = xyes], AS_IF([test "x$HTSLIB_HOME" != "x"], [AC_SUBST([LIBS], ["$HTSLIB_HOME/lib/libhts.a $LIBS"])]))
 AS_IF([test "x$enable_static" = xyes], AS_IF([test "x$LAPACK_HOME" != "x"], [AC_SUBST([LIBS], ["$LAPACK_HOME/libtmglib.a $LIBS"])]))
