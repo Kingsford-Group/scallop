@@ -66,6 +66,13 @@ public:
 	PI filter_small_hyper_edge();								// hyper-edge w.r.t. the smallest edge
 	PI filter_cycle_hyper_edge();								// hyper-edge w.r.t. any cycle
 
+	// thread
+	int thread();
+	int thread_isolate1(int k, vector<double> &vw);
+	int thread_isolate2(int k, vector<double> &vw);
+	bool thread_leaf(vector<double> &vw);
+	bool thread_turn(vector<double> &vw);
+
 	// print and stats
 	int print() const;
 	int stats();

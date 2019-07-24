@@ -123,21 +123,7 @@ int router::build()
 	}
 	if(type == UNSPLITTABLE_SINGLE || type == UNSPLITTABLE_MULTIPLE) 
 	{
-		extend_bipartite_graph_max();
-		decompose0_clp();
-
-		if(ratio <= 1.0)
-		{
-			decompose1_clp();
-			ratio = -1;
-		}
-		else
-		{
-			ratio = DBL_MAX;
-			build_bipartite_graph();
-			extend_bipartite_graph_all();
-			decompose2_clp();
-		}
+		thread();
 	}
 	return 0;
 }
@@ -184,6 +170,160 @@ int router::build_bipartite_graph()
 		double w = counts[i];
 		u2w.insert(PED(e, w));
 	}
+	return 0;
+}
+
+int router::thread()
+{
+	pe2w.clear();
+	vector<int> v1;
+	vector<double> vw;
+	vw.assign(u2e.size(), 0);
+	for(int k = 0; k < u2e.size(); k++)
+	{
+		int e = u2e[k];
+		if(ug.degree(k) == 0) v1.push_back(k);
+		vw[k] = gr.get_edge_weight(i2e[e]);
+	}
+
+	bool b;
+	while(true)
+	{
+		b = thread_leaf(vw);
+		if(b == true) continue;
+
+		b = thread_turn(vw);
+		if(b == false) break;
+	}
+
+	assert(ug.num_edges() == 0);
+
+	int n = gr.in_degree(root);
+	for(int i = 0; i < v1.size(); i++)
+	{
+		int k = v1[i];
+		if(k < n) thread_isolate1(k, vw);
+		else thread_isolate2(k, vw);
+	}
+
+	for(MPID::iterator it = pe2w.begin(); it != pe2w.end(); it++)
+	{
+		if(it->second < 1.0) it->second = 1.0;
+	}
+	return 0;
+}
+
+bool router::thread_leaf(vector<double> &vw)
+{
+	PEEI pei = ug.edges();
+	for(edge_iterator it = pei.first; it != pei.second; it++)
+	{
+		int s = (*it)->source();
+		int t = (*it)->target();
+
+		if(s >= t)
+		{
+			int a = s;
+			s = t;
+			t = a;
+		}
+
+		if(vw[s] < -0.5) continue;
+		if(vw[t] < -0.5) continue;
+
+		if(ug.degree(s) == 1 && vw[s] <= vw[t])
+		{
+			PPID pw(PI(u2e[s], u2e[t]), vw[s]);
+			pe2w.insert(pw);
+			ug.clear_vertex(s);
+			vw[s] = -1;
+			vw[t] -= vw[s];
+			return true;
+		}
+		if(ug.degree(t) == 1 && vw[t] <= vw[s])
+		{
+			PPID pw(PI(u2e[s], u2e[t]), vw[t]);
+			pe2w.insert(pw);
+			ug.clear_vertex(t);
+			vw[t] = -1;
+			vw[s] -= vw[t];
+			return true;
+		}
+	}
+	return false;
+}
+
+bool router::thread_turn(vector<double> &vw)
+{
+	int x = -1;
+	for(int k = 0; k < vw.size(); k++)
+	{
+		if(vw[k] < -0.5) continue;
+		if(ug.degree(k) <= 1) continue;
+		if(x != -1 && vw[k] > vw[x]) continue;
+		x = k;
+	}
+
+	if(x == -1) return false;
+
+	double sum = 0;
+	PEEI pei = ug.out_edges(x);
+	for(edge_iterator it = pei.first; it != pei.second; it++)
+	{
+		int s = (*it)->source();
+		int t = (*it)->target();
+		assert(s == x);
+		sum += u2w[*it];
+		assert(vw[t] >= vw[x]);
+	}
+
+	for(edge_iterator it = pei.first; it != pei.second; it++)
+	{
+		int t = (*it)->target();
+		double w = vw[x] * u2w[*it] / sum;
+		PI p = (x < t) ? PI(u2e[x], u2e[t]) : PI(u2e[t], u2e[x]);
+		PPID pw(p, w);
+		pe2w.insert(pw);
+		vw[t] -= w;
+	}
+
+	ug.clear_vertex(x);
+	return true;
+}
+
+int router::thread_isolate1(int k, vector<double> &vw)
+{
+	int x = -1;
+	double d = DBL_MAX;
+	for(int i = gr.in_degree(root); i < u2e.size(); i++)
+	{
+		if(fabs(vw[i] - vw[k]) > d) continue;
+		d = fabs(vw[i] - vw[k]);
+		x = i;
+	}
+	assert(x != -1);
+	double w = vw[x] < vw[k] ? vw[x] : vw[k];
+	vw[x] -= w;
+	PPID pw(PI(u2e[k], u2e[x]), w);
+	pe2w.insert(pw);
+	return 0;
+}
+
+int router::thread_isolate2(int k, vector<double> &vw)
+{
+	int x = -1;
+	double d = DBL_MAX;
+	for(int i = 0; i < gr.in_degree(root); i++)
+	{
+		if(fabs(vw[i] - vw[k]) > d) continue;
+		d = fabs(vw[i] - vw[k]);
+		x = i;
+	}
+	assert(x != -1);
+	double w = vw[x] < vw[k] ? vw[x] : vw[k];
+	vw[x] -= w;
+	PPID pw(PI(u2e[x], u2e[k]), w);
+	pe2w.insert(pw);
 	return 0;
 }
 
@@ -1109,6 +1249,11 @@ int router::print() const
 	}
 
 	for(int i = 0; i < eqns.size(); i++) eqns[i].print(i);
+
+	for(MPID::const_iterator it = pe2w.begin(); it != pe2w.end(); it++)
+	{
+		printf("decompose: (%d, %d), w = %.2lf\n", it->first.first, it->first.second, it->second);
+	}
 
 	printf("\n");
 	return 0;
