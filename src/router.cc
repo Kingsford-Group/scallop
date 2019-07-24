@@ -287,6 +287,7 @@ bool router::thread_turn(vector<double> &vw)
 		vw[t] -= w;
 	}
 
+	vw[x] = -1;
 	ug.clear_vertex(x);
 	return true;
 }
