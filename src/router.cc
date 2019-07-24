@@ -280,6 +280,7 @@ bool router::thread_turn(vector<double> &vw)
 	{
 		int t = (*it)->target();
 		double w = vw[x] * u2w[*it] / sum;
+		if(u2w[*it] == 1) w = 1;	// set to 1 for those with only 1 read supported
 		PI p = (x < t) ? PI(u2e[x], u2e[t]) : PI(u2e[t], u2e[x]);
 		PPID pw(p, w);
 		pe2w.insert(pw);
@@ -1230,19 +1231,21 @@ int router::decompose2_clp()
 	return 0;
 }
 
-int router::print() const
+int router::print()
 {
+	vector<double> vw = compute_balanced_weights();
+
 	printf("router %d, #routes = %lu, type = %d, degree = %d, ratio = %.2lf\n", root, routes.size(), type, degree, ratio);
 	printf("in-edges = ( ");
 	for(int i = 0; i < gr.in_degree(root); i++) printf("%d ", u2e[i]);
 	printf("), weights = ( ");
-	for(int i = 0; i < gr.in_degree(root); i++) printf("%.1lf ", gr.get_edge_weight(i2e[u2e[i]]));
+	for(int i = 0; i < gr.in_degree(root); i++) printf("%.1lf,%.1lf ", gr.get_edge_weight(i2e[u2e[i]]), vw[i]);
 	printf(")\n");
 
 	printf("out-edges = ( ");
 	for(int i = gr.in_degree(root); i < gr.degree(root); i++) printf("%d ", u2e[i]);
 	printf("), weights = ( ");
-	for(int i = gr.in_degree(root); i < gr.degree(root); i++) printf("%.1lf ", gr.get_edge_weight(i2e[u2e[i]]));
+	for(int i = gr.in_degree(root); i < gr.degree(root); i++) printf("%.1lf,%.1lf ", gr.get_edge_weight(i2e[u2e[i]]), vw[i]);
 	printf(")\n");
 
 	for(int i = 0; i < routes.size(); i++)

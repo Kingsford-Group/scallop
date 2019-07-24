@@ -74,7 +74,7 @@ public:
 	bool thread_turn(vector<double> &vw);
 
 	// print and stats
-	int print() const;
+	int print();
 	int stats();
 };
 
