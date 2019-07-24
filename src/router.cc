@@ -293,12 +293,10 @@ bool router::thread_turn(vector<double> &vw)
 
 int router::thread_isolate1(int k, vector<double> &vw)
 {
-	int x = -1;
-	double d = DBL_MAX;
-	for(int i = gr.in_degree(root); i < u2e.size(); i++)
+	int x = gr.in_degree(root);
+	for(int i = gr.in_degree(root) + 1; i < u2e.size(); i++)
 	{
-		if(fabs(vw[i] - vw[k]) > d) continue;
-		d = fabs(vw[i] - vw[k]);
+		if(vw[i] < vw[x]) continue;
 		x = i;
 	}
 	assert(x != -1);
@@ -311,12 +309,10 @@ int router::thread_isolate1(int k, vector<double> &vw)
 
 int router::thread_isolate2(int k, vector<double> &vw)
 {
-	int x = -1;
-	double d = DBL_MAX;
+	int x = 0;
 	for(int i = 0; i < gr.in_degree(root); i++)
 	{
-		if(fabs(vw[i] - vw[k]) > d) continue;
-		d = fabs(vw[i] - vw[k]);
+		if(vw[i] < vw[x]) continue;
 		x = i;
 	}
 	assert(x != -1);
