@@ -177,14 +177,13 @@ int router::thread()
 {
 	pe2w.clear();
 	vector<int> v1;
-	vector<double> vw;
-	vw.assign(u2e.size(), 0);
 	for(int k = 0; k < u2e.size(); k++)
 	{
 		int e = u2e[k];
 		if(ug.degree(k) == 0) v1.push_back(k);
-		vw[k] = gr.get_edge_weight(i2e[e]);
 	}
+
+	vector<double> vw = compute_balanced_weights();
 
 	bool b;
 	while(true)
@@ -1236,13 +1235,19 @@ int router::print() const
 	printf("router %d, #routes = %lu, type = %d, degree = %d, ratio = %.2lf\n", root, routes.size(), type, degree, ratio);
 	printf("in-edges = ( ");
 	for(int i = 0; i < gr.in_degree(root); i++) printf("%d ", u2e[i]);
-	printf("), out-edges = ( ");
+	printf("), weights = ( ");
+	for(int i = 0; i < gr.in_degree(root); i++) printf("%.1lf ", gr.get_edge_weight(i2e[u2e[i]]));
+	printf(")\n");
+
+	printf("out-edges = ( ");
 	for(int i = gr.in_degree(root); i < gr.degree(root); i++) printf("%d ", u2e[i]);
+	printf("), weights = ( ");
+	for(int i = gr.in_degree(root); i < gr.degree(root); i++) printf("%.1lf ", gr.get_edge_weight(i2e[u2e[i]]));
 	printf(")\n");
 
 	for(int i = 0; i < routes.size(); i++)
 	{
-		printf("route %d (%d, %d)\n", i, routes[i].first, routes[i].second);
+		printf("route %d (%d, %d), count = %d\n", i, routes[i].first, routes[i].second, counts[i]);
 	}
 
 	for(int i = 0; i < eqns.size(); i++) eqns[i].print(i);
