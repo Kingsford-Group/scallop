@@ -184,6 +184,8 @@ int router::thread()
 	}
 
 	vector<double> vw = compute_balanced_weights();
+	double weight_sum = 0;
+	for(int k = 0; k < vw.size(); k++) weight_sum += vw[k];
 
 	bool b;
 	while(true)
@@ -204,6 +206,16 @@ int router::thread()
 		if(k < n) thread_isolate1(k, vw);
 		else thread_isolate2(k, vw);
 	}
+	
+	double weight_remain = 0;
+	for(int k = 0; k < vw.size(); k++)
+	{
+		//printf("weight remain for edge %d = %.2lf, sum = %.2lf\n", u2e[k], vw[k], weight_sum);
+		if(vw[k] <= 0) continue;
+		weight_remain += vw[k];
+	}
+
+	ratio = weight_remain / weight_sum;
 
 	for(MPID::iterator it = pe2w.begin(); it != pe2w.end(); it++)
 	{
@@ -235,8 +247,8 @@ bool router::thread_leaf(vector<double> &vw)
 			PPID pw(PI(u2e[s], u2e[t]), vw[s]);
 			pe2w.insert(pw);
 			ug.clear_vertex(s);
-			vw[s] = -1;
 			vw[t] -= vw[s];
+			vw[s] = -1;
 			return true;
 		}
 		if(ug.degree(t) == 1 && vw[t] <= vw[s])
@@ -244,8 +256,8 @@ bool router::thread_leaf(vector<double> &vw)
 			PPID pw(PI(u2e[s], u2e[t]), vw[t]);
 			pe2w.insert(pw);
 			ug.clear_vertex(t);
-			vw[t] = -1;
 			vw[s] -= vw[t];
+			vw[t] = -1;
 			return true;
 		}
 	}
@@ -280,7 +292,7 @@ bool router::thread_turn(vector<double> &vw)
 	{
 		int t = (*it)->target();
 		double w = vw[x] * u2w[*it] / sum;
-		if(u2w[*it] == 1) w = 1;	// set to 1 for those with only 1 read supported
+		//;if(u2w[*it] == 1) w = 1;	// set to 1 for those with only 1 read supported
 		PI p = (x < t) ? PI(u2e[x], u2e[t]) : PI(u2e[t], u2e[x]);
 		PPID pw(p, w);
 		pe2w.insert(pw);
@@ -303,6 +315,7 @@ int router::thread_isolate1(int k, vector<double> &vw)
 	assert(x != -1);
 	double w = vw[x] < vw[k] ? vw[x] : vw[k];
 	vw[x] -= w;
+	vw[k] -= w;
 	PPID pw(PI(u2e[k], u2e[x]), w);
 	pe2w.insert(pw);
 	return 0;
@@ -319,6 +332,7 @@ int router::thread_isolate2(int k, vector<double> &vw)
 	assert(x != -1);
 	double w = vw[x] < vw[k] ? vw[x] : vw[k];
 	vw[x] -= w;
+	vw[k] -= w;
 	PPID pw(PI(u2e[x], u2e[k]), w);
 	pe2w.insert(pw);
 	return 0;

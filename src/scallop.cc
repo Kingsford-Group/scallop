@@ -306,8 +306,9 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree, double max_ratio
 		if(rt.degree > degree) continue;
 
 		rt.build();
+		rt.print();
 
-		if(rt.ratio < -0.5)
+		if(rt.ratio < 0.01)
 		{
 			if(verbose >= 2) printf("resolve unsplittable vertex, type = %d, degree = %d, vertex = %d, ratio = %.3lf, degree = (%d, %d)\n",
 					type, degree, i, rt.ratio, gr.in_degree(i), gr.out_degree(i));
