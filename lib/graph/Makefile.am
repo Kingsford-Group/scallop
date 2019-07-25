@@ -1,4 +1,4 @@
-lib_LIBRARIES = libgraph.a
+noinst_LIBRARIES = libgraph.a
 
 #libgraph_a_CPPFLAGS = -std=c++11
 

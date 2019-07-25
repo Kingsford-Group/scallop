@@ -1,4 +1,4 @@
-lib_LIBRARIES = libgtf.a
+noinst_LIBRARIES = libgtf.a
 
 UTILDIR = $(top_srcdir)/lib/util
 
