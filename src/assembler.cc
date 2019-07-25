@@ -52,8 +52,6 @@ int assembler::assemble()
 		hit ht(b1t);
 		ht.set_tags(b1t);
 		ht.set_strand();
-		ht.build_splice_positions();
-
 		//ht.print();
 
 		//if(ht.nh >= 2 && p.qual < min_mapping_quality) continue;

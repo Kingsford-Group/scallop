@@ -48,32 +48,25 @@ int bundle_base::add_hit(const hit &ht)
 	}
 	*/
 
-	// add intervals
-	vector<int64_t> vm;
-	vector<int64_t> vi;
-	vector<int64_t> vd;
-	ht.get_mid_intervals(vm, vi, vd);
-
-	//ht.print();
-	for(int k = 0; k < vm.size(); k++)
+	for(int k = 0; k < ht.itvm.size(); k++)
 	{
-		int32_t s = high32(vm[k]);
-		int32_t t = low32(vm[k]);
+		int32_t s = high32(ht.itvm[k]);
+		int32_t t = low32(ht.itvm[k]);
 		//printf(" add interval %d-%d\n", s, t);
 		mmap += make_pair(ROI(s, t), 1);
 	}
 
-	for(int k = 0; k < vi.size(); k++)
+	for(int k = 0; k < ht.itvi.size(); k++)
 	{
-		int32_t s = high32(vi[k]);
-		int32_t t = low32(vi[k]);
+		int32_t s = high32(ht.itvi[k]);
+		int32_t t = low32(ht.itvi[k]);
 		imap += make_pair(ROI(s, t), 1);
 	}
 
-	for(int k = 0; k < vd.size(); k++)
+	for(int k = 0; k < ht.itvd.size(); k++)
 	{
-		int32_t s = high32(vd[k]);
-		int32_t t = low32(vd[k]);
+		int32_t s = high32(ht.itvd[k]);
+		int32_t t = low32(ht.itvd[k]);
 		imap += make_pair(ROI(s, t), 1);
 	}
 

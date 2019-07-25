@@ -342,38 +342,6 @@ int bundle::locate_right_partial_exon(int32_t x)
 	return k;
 }
 
-int bundle::build_hyper_edges1()
-{
-	hs.clear();
-	for(int i = 0; i < hits.size(); i++)
-	{
-		hit &h = hits[i];
-		if((h.flag & 0x4) >= 1) continue;
-
-		vector<int64_t> v;
-		h.get_matched_intervals(v);
-		if(v.size() == 0) continue;
-
-		set<int> sp;
-		for(int k = 0; k < v.size(); k++)
-		{
-			int32_t p1 = high32(v[k]);
-			int32_t p2 = low32(v[k]);
-
-			int k1 = locate_left_partial_exon(p1);
-			int k2 = locate_right_partial_exon(p2);
-			if(k1 < 0 || k2 < 0) continue;
-
-			for(int j = k1; j <= k2; j++) sp.insert(j);
-		}
-
-		if(sp.size() <= 1) continue;
-		hs.add_node_list(sp);
-	}
-
-	return 0;
-}
-
 int bundle::build_hyper_edges2()
 {
 	//sort(hits.begin(), hits.end(), hit_compare_by_name);
@@ -413,14 +381,11 @@ int bundle::build_hyper_edges2()
 
 		if((h.flag & 0x4) >= 1) continue;
 
-		vector<int64_t> v;
-		h.get_matched_intervals(v);
-
 		vector<int> sp2;
-		for(int k = 0; k < v.size(); k++)
+		for(int k = 0; k < h.itvm.size(); k++)
 		{
-			int32_t p1 = high32(v[k]);
-			int32_t p2 = low32(v[k]);
+			int32_t p1 = high32(h.itvm[k]);
+			int32_t p2 = low32(h.itvm[k]);
 
 			int k1 = locate_left_partial_exon(p1);
 			int k2 = locate_right_partial_exon(p2);

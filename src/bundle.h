@@ -73,7 +73,6 @@ private:
 	bool remove_intron_contamination();
 
 	// super edges
-	int build_hyper_edges1();			// single end
 	int build_hyper_edges2();			// paired end
 	bool bridge_read(int x, int y, vector<int> &s);
 
