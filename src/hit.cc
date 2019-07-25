@@ -41,6 +41,7 @@ hit& hit::operator=(const hit &h)
 	hi = h.hi;
 	nm = h.nm;
 
+	if(cigar != NULL) delete[] cigar;
 	cigar = new uint32_t[h.n_cigar];
 	memcpy(cigar, h.cigar, 4 * h.n_cigar);
 	return *this;
