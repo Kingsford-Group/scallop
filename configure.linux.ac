@@ -21,7 +21,6 @@ AC_PROG_RANLIB
 AC_ARG_WITH(boost, AS_HELP_STRING([--with-boost], [home directory for boost]), BOOST_HOME=$withval, BOOST_HOME=)
 AC_ARG_WITH(htslib, AS_HELP_STRING([--with-htslib], [home directory for htslib]), HTSLIB_HOME=$withval, HTSLIB_HOME=)
 AC_ARG_WITH(zlib, AS_HELP_STRING([--with-zlib], [home directory for zlib]), ZLIB_HOME=$withval, ZLIB_HOME=)
-AC_ARG_WITH(lapack, AS_HELP_STRING([--with-lapack], [home directory for lapack]), LAPACK_HOME=$withval, LAPACK_HOME=)
 AC_ARG_WITH(fortran, AS_HELP_STRING([--with-fortran], [home directory for fortran]), FORTRAN_HOME=$withval, FORTRAN_HOME=)
 
 # Assign CXXFLAGS
