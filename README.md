@@ -34,6 +34,14 @@ Following we list the systems that have been tested whether the Scallop binary c
  Mac OS | 10.11 | El Capitan | [mac](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.4/scallop-0.10.4_macOS_10.10.tar.gz)
  Mac OS | 10.12 | Sierra | [mac](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.4/scallop-0.10.4_macOS_10.10.tar.gz)
 
+# Support
+
+Scallop is, and will continue to be, [freely and actively supported on a
+best-effort basis](https://oceangenomics.com/about/#open).
+
+If you need industrial-grade technical support, please consider the options at
+[oceangenomics.com/support](http://oceangenomics.com/support).
+
 
 # Installation
 Download the source code of Scallop from
