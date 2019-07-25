@@ -54,7 +54,7 @@ int scallop::assemble()
 		b = resolve_trivial_vertex(1, max_decompose_error_ratio[TRIVIAL_VERTEX]);
 		if(b == true) continue;
 
-		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 1, -0.5);
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, 1, 0.01);
 		if(b == true) continue;
 
 		b = resolve_smallest_edges(max_decompose_error_ratio[SMALLEST_EDGE]);
@@ -63,16 +63,16 @@ int scallop::assemble()
 		b = resolve_negligible_edges(true, max_decompose_error_ratio[NEGLIGIBLE_EDGE]);
 		if(b == true) continue;
 
-		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 1, -0.5);
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, 1, 0.01);
 		if(b == true) continue;
 
 		b = resolve_splittable_vertex(SPLITTABLE_HYPER, 1, max_decompose_error_ratio[SPLITTABLE_HYPER]);
 		if(b == true) continue;
 
-		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, INT_MAX, -0.5);
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, INT_MAX, 0.05);
 		if(b == true) continue;
 
-		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, INT_MAX, -0.5);
+		b = resolve_unsplittable_vertex(UNSPLITTABLE_MULTIPLE, INT_MAX, 0.05);
 		if(b == true) continue;
 
 		b = resolve_unsplittable_vertex(UNSPLITTABLE_SINGLE, INT_MAX, max_decompose_error_ratio[UNSPLITTABLE_SINGLE]);
@@ -306,8 +306,9 @@ bool scallop::resolve_unsplittable_vertex(int type, int degree, double max_ratio
 		if(rt.degree > degree) continue;
 
 		rt.build();
+		//rt.print();
 
-		if(rt.ratio < -0.5)
+		if(rt.ratio < 0.01)
 		{
 			if(verbose >= 2) printf("resolve unsplittable vertex, type = %d, degree = %d, vertex = %d, ratio = %.3lf, degree = (%d, %d)\n",
 					type, degree, i, rt.ratio, gr.in_degree(i), gr.out_degree(i));

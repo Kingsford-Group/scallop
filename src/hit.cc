@@ -40,10 +40,9 @@ hit& hit::operator=(const hit &h)
 	ts = h.ts;
 	hi = h.hi;
 	nm = h.nm;
-
-	if(cigar != NULL) delete[] cigar;
-	cigar = new uint32_t[h.n_cigar];
-	memcpy(cigar, h.cigar, 4 * h.n_cigar);
+	itvm = h.itvm;
+	itvi = h.itvi;
+	itvd = h.itvd;
 	return *this;
 }
 
@@ -59,17 +58,13 @@ hit::hit(const hit &h)
 	ts = h.ts;
 	hi = h.hi;
 	nm = h.nm;
-
-	//printf("call copy constructor\n");
-	cigar = new uint32_t[h.n_cigar];
-	memcpy(cigar, h.cigar, 4 * h.n_cigar);
-	//printf("n-cigar = %d, h.n_cigar = %d, size of cigar = %lu | %u\n", n_cigar, h.n_cigar, sizeof cigar, sizeof h.cigar);
+	itvm = h.itvm;
+	itvi = h.itvi;
+	itvd = h.itvd;
 }
 
 hit::~hit()
 {
-	assert(cigar != NULL);
-	delete[] cigar;
 }
 
 hit::hit(bam1_t *b)
@@ -77,9 +72,9 @@ hit::hit(bam1_t *b)
 {
 	// fetch query name
 	char buf[1024];
-	char *q = bam_get_qname(b);
-	int l = strlen(q);
-	memcpy(buf, q, l);
+	char *qs = bam_get_qname(b);
+	int l = strlen(qs);
+	memcpy(buf, qs, l);
 	buf[l] = '\0';
 	qname = string(buf);
 
@@ -87,13 +82,62 @@ hit::hit(bam1_t *b)
 	rpos = pos + (int32_t)bam_cigar2rlen(n_cigar, bam_get_cigar(b));
 	qlen = (int32_t)bam_cigar2qlen(n_cigar, bam_get_cigar(b));
 
-	// copy cigar
+	// get cigar
 	assert(n_cigar <= max_num_cigar);
 	assert(n_cigar >= 1);
+	uint32_t * cigar = bam_get_cigar(b);
 
-	// allocate memery for cigar
-	cigar = new uint32_t[n_cigar];
-	memcpy(cigar, bam_get_cigar(b), 4 * n_cigar);
+	// build splice positions
+	spos.clear();
+	int32_t p = pos;
+	int32_t q = 0;
+    for(int k = 0; k < n_cigar; k++)
+	{
+		if (bam_cigar_type(bam_cigar_op(cigar[k]))&2)
+			p += bam_cigar_oplen(cigar[k]);
+
+		if (bam_cigar_type(bam_cigar_op(cigar[k]))&1)
+			q += bam_cigar_oplen(cigar[k]);
+
+		if(k == 0 || k == n_cigar - 1) continue;
+		if(bam_cigar_op(cigar[k]) != BAM_CREF_SKIP) continue;
+		if(bam_cigar_op(cigar[k-1]) != BAM_CMATCH) continue;
+		if(bam_cigar_op(cigar[k+1]) != BAM_CMATCH) continue;
+		if(bam_cigar_oplen(cigar[k-1]) < min_flank_length) continue;
+		if(bam_cigar_oplen(cigar[k+1]) < min_flank_length) continue;
+
+		int32_t s = p - bam_cigar_oplen(cigar[k]);
+		spos.push_back(pack(s, p));
+	}
+
+	itvm.clear();
+	itvi.clear();
+	itvd.clear();
+	p = pos;
+    for(int k = 0; k < n_cigar; k++)
+	{
+		if (bam_cigar_type(bam_cigar_op(cigar[k]))&2)
+		{
+			p += bam_cigar_oplen(cigar[k]);
+		}
+
+		if(bam_cigar_op(cigar[k]) == BAM_CMATCH)
+		{
+			int32_t s = p - bam_cigar_oplen(cigar[k]);
+			itvm.push_back(pack(s, p));
+		}
+
+		if(bam_cigar_op(cigar[k]) == BAM_CINS)
+		{
+			itvi.push_back(pack(p - 1, p + 1));
+		}
+
+		if(bam_cigar_op(cigar[k]) == BAM_CDEL)
+		{
+			int32_t s = p - bam_cigar_oplen(cigar[k]);
+			itvd.push_back(pack(s, p));
+		}
+	}
 
 	//printf("call regular constructor\n");
 }
@@ -180,33 +224,6 @@ int hit::set_strand()
 	return 0;
 }
 
-int hit::build_splice_positions()
-{
-	spos.clear();
-	int32_t p = pos;
-	int32_t q = 0;
-	//uint8_t *seq = bam_get_seq(b);
-    for(int k = 0; k < n_cigar; k++)
-	{
-		if (bam_cigar_type(bam_cigar_op(cigar[k]))&2)
-			p += bam_cigar_oplen(cigar[k]);
-
-		if (bam_cigar_type(bam_cigar_op(cigar[k]))&1)
-			q += bam_cigar_oplen(cigar[k]);
-
-		if(k == 0 || k == n_cigar - 1) continue;
-		if(bam_cigar_op(cigar[k]) != BAM_CREF_SKIP) continue;
-		if(bam_cigar_op(cigar[k-1]) != BAM_CMATCH) continue;
-		if(bam_cigar_op(cigar[k+1]) != BAM_CMATCH) continue;
-		if(bam_cigar_oplen(cigar[k-1]) < min_flank_length) continue;
-		if(bam_cigar_oplen(cigar[k+1]) < min_flank_length) continue;
-
-		int32_t s = p - bam_cigar_oplen(cigar[k]);
-		spos.push_back(pack(s, p));
-	}
-	return 0;
-}
-
 bool hit::operator<(const hit &h) const
 {
 	if(qname < h.qname) return true;
@@ -218,17 +235,9 @@ bool hit::operator<(const hit &h) const
 
 int hit::print() const
 {
-	// get cigar string
-	ostringstream sstr;
-	for(int i = 0; i < n_cigar; i++)
-	{
-		sstr << bam_cigar_opchr(cigar[i]) << bam_cigar_oplen(cigar[i]);
-		//printf("cigar %d: op = %c, length = %3d\n", i, bam_cigar_opchr(cigar[i]), bam_cigar_oplen(cigar[i]));
-	}
-
 	// print basic information
-	printf("Hit %s: [%d-%d), mpos = %d, cigar = %s, flag = %d, quality = %d, strand = %c, xs = %c, ts = %c, isize = %d, qlen = %d, hi = %d\n", 
-			qname.c_str(), pos, rpos, mpos, sstr.str().c_str(), flag, qual, strand, xs, ts, isize, qlen, hi);
+	printf("Hit %s: [%d-%d), mpos = %d, flag = %d, quality = %d, strand = %c, xs = %c, ts = %c, isize = %d, qlen = %d, hi = %d\n", 
+			qname.c_str(), pos, rpos, mpos, flag, qual, strand, xs, ts, isize, qlen, hi);
 
 	printf(" start position (%d - )\n", pos);
 	for(int i = 0; i < spos.size(); i++)
@@ -243,63 +252,3 @@ int hit::print() const
 
 	return 0;
 }
-
-int hit::get_mid_intervals(vector<int64_t> &vm, vector<int64_t> &vi, vector<int64_t> &vd) const
-{
-	vm.clear();
-	vi.clear();
-	vd.clear();
-	int32_t p = pos;
-    for(int k = 0; k < n_cigar; k++)
-	{
-		if (bam_cigar_type(bam_cigar_op(cigar[k]))&2)
-		{
-			p += bam_cigar_oplen(cigar[k]);
-		}
-
-		if(bam_cigar_op(cigar[k]) == BAM_CMATCH)
-		{
-			int32_t s = p - bam_cigar_oplen(cigar[k]);
-			vm.push_back(pack(s, p));
-		}
-
-		if(bam_cigar_op(cigar[k]) == BAM_CINS)
-		{
-			vi.push_back(pack(p - 1, p + 1));
-		}
-
-		if(bam_cigar_op(cigar[k]) == BAM_CDEL)
-		{
-			int32_t s = p - bam_cigar_oplen(cigar[k]);
-			vd.push_back(pack(s, p));
-		}
-	}
-    return 0;
-}
-
-int hit::get_matched_intervals(vector<int64_t> &v) const
-{
-	vector<int64_t> vi, vd;
-	return get_mid_intervals(v, vi, vd);
-}
-
-/*
-inline bool hit_compare_by_name(const hit &x, const hit &y)
-{
-	if(x.qname < y.qname) return true;
-	if(x.qname > y.qname) return false;
-	return (x.pos < y.pos);
-}
-
-inline bool hit_compare_left(const hit &x, const hit &y)
-{
-	if(x.pos < y.pos) return true;
-	else return false;
-}
-
-inline bool hit_compare_right(const hit &x, const hit &y)
-{
-	if(x.rpos < y.rpos) return true;
-	return false;
-}
-*/

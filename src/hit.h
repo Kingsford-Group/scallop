@@ -62,16 +62,15 @@ public:
 	int32_t hi;								// HI aux in sam
 	int32_t nm;								// NM aux in sam
 	bool concordant;						// whether it is concordant
-	uint32_t* cigar;						// cigar, use samtools
 	vector<int64_t> spos;					// splice positions
+	vector<int64_t> itvm;					// matched interval
+	vector<int64_t> itvi;					// insert interval
+	vector<int64_t> itvd;					// delete interval
 
 public:
 	int set_tags(bam1_t *b);
 	int set_strand();
 	int set_concordance();
-	int build_splice_positions();
-	int get_mid_intervals(vector<int64_t> &vm, vector<int64_t> &vi, vector<int64_t> &vd) const;
-	int get_matched_intervals(vector<int64_t> &v) const;
 	int print() const;
 };
 
