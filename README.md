@@ -14,32 +14,31 @@ It is available at both [the bioinformatics chat](https://bioinformatics.chat/sc
 [iTunes](https://itunes.apple.com/us/podcast/the-bioinformatics-chat/id1227281398). 
 
 # Release
-Latest release of Scallop is [v0.10.3](https://github.com/Kingsford-Group/scallop/releases/tag/v0.10.3),
+Latest release of Scallop is [v0.10.4](https://github.com/Kingsford-Group/scallop/releases/tag/v0.10.4),
 including binary 
-(for both [linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.3/scallop-0.10.3_linux_x86_64.tar.gz)
-and [mac](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.3/scallop-0.10.3_macOS_10.14.tar.gz))
-and [source code](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.3/scallop-0.10.3.tar.gz).
+(for both [linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.4/scallop-0.10.4_linux_x86_64.tar.gz)
+and [mac](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.4/scallop-0.10.4_macOS_10.14.tar.gz))
+and [source code](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.4/scallop-0.10.4.tar.gz).
 
 Following we list the systems that have been tested whether the Scallop binary can run or not.
 
  Operation System | Version | Code Name | Scallop
  ---------------- | ------- | --------- | ----------
- Debian | 9		| Stretch | [linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.3/scallop-0.10.3_linux_x86_64.tar.gz)
- Ubuntu | 14.04 | Trusty Tahr | [linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.3/scallop-0.10.3_linux_x86_64.tar.gz)
- Ubuntu | 16.04 | Xenial Xerus | [linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.3/scallop-0.10.3_linux_x86_64.tar.gz)
+ Debian | 9		| Stretch | [linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.4/scallop-0.10.4_linux_x86_64.tar.gz)
+ Ubuntu | 14.04 | Trusty Tahr | [linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.4/scallop-0.10.4_linux_x86_64.tar.gz)
+ Ubuntu | 16.04 | Xenial Xerus | [linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.4/scallop-0.10.4_linux_x86_64.tar.gz)
  CentOS | 6.9   | | N/A
- CentOS | 7     | | [linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.3/scallop-0.10.3_linux_x86_64.tar.gz)
- Fedora | 24    | | [linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.3/scallop-0.10.3_linux_x86_64.tar.gz)
- Mac OS | 10.10 | Yosemite | [mac](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.3/scallop-0.10.3_macOS_10.10.tar.gz)
- Mac OS | 10.11 | El Capitan | [mac](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.3/scallop-0.10.3_macOS_10.10.tar.gz)
- Mac OS | 10.12 | Sierra | [mac](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.3/scallop-0.10.3_macOS_10.10.tar.gz)
-
+ CentOS | 7     | | [linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.4/scallop-0.10.4_linux_x86_64.tar.gz)
+ Fedora | 24    | | [linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.4/scallop-0.10.4_linux_x86_64.tar.gz)
+ Mac OS | 10.10 | Yosemite | [mac](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.4/scallop-0.10.4_macOS_10.10.tar.gz)
+ Mac OS | 10.11 | El Capitan | [mac](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.4/scallop-0.10.4_macOS_10.10.tar.gz)
+ Mac OS | 10.12 | Sierra | [mac](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.4/scallop-0.10.4_macOS_10.10.tar.gz)
 
 
 # Installation
 Download the source code of Scallop from
-[here](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.3/scallop-0.10.3.tar.gz).
-Scallop uses additional libraries of Boost, htslib and Clp. 
+[here](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.4/scallop-0.10.4.tar.gz).
+Scallop uses additional libraries of Boost and htslib (*NOTE:* from v0.10.4 Scallop does not require Clp). 
 If they have not been installed in your system, you first
 need to download and install them. You might also need to
 export the runtime library path to certain environmental
@@ -85,33 +84,11 @@ is an additional `lib` following the installation path):
 export LD_LIBRARY_PATH=/path/to/your/htslib/lib:$LD_LIBRARY_PATH
 ```
 
-## Install Clp
-If Clp has not been installed in your system, 
-download Clp [(license)](https://opensource.org/licenses/eclipse-1.0)
-from (https://projects.coin-or.org/Clp). 
-Use the following to install Clp
-```
-./configure --disable-bzlib --disable-zlib
-make
-make install
-```
-The default installation of Clp is the current directory, rather than `/usr/lib`.
-If you would install it to a different location, replace the above `configure` line with
-the following (by adding `--prefix=/path/to/your/Clp` to the end):
-```
-./configure --disable-bzlib --disable-zlib --prefix=/path/to/your/Clp
-```
-You need to export the runtime library path (note that there
-is an additional `lib` following the installation path):
-```
-export LD_LIBRARY_PATH=/path/to/your/Clp/lib:$LD_LIBRARY_PATH
-```
-
 ## Compile Scallop
 
 Use the following to compile Scallop:
 ```
-./configure --with-clp=/path/to/your/Clp --with-htslib=/path/to/your/htslib --with-boost=/path/to/your/boost
+./configure --with-htslib=/path/to/your/htslib --with-boost=/path/to/your/boost
 make
 ```
 If some of the dependencies are installed in the default system directory (for example, `/usr/lib`),
@@ -134,7 +111,7 @@ samtools sort input.bam > input.sort.bam
 
 The reconstructed transcripts shall be written as gtf format into `output.gtf`.
 
-Scallop support the following parameters. Please also refer
+Scallop support the following parameters. Please refer
 to the additional explanation below the table.
 
  Parameters | Default Value | Description
