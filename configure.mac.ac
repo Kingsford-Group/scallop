@@ -31,12 +31,10 @@ AS_IF([test "x$HTSLIB_HOME" != "x"], [AC_SUBST([CXXFLAGS], ["-I$HTSLIB_HOME/incl
 
 # Check whether static is enabled
 AC_ARG_ENABLE([static], [AS_HELP_STRING([--enable-static], [enable static linking])])
+AS_IF([test "x$enable_useclp" = "xyes"], [AC_SUBST([CXXFLAGS], ["-DUSECLP $CXXFLAGS"])])
 
 # Check whether enable USECLP
 AC_ARG_ENABLE([useclp], [AS_HELP_STRING([--enable-useclp], [use LP to decompose unsplitable vertices])])
-
-# Define USECLP
-AS_IF([test "x$enable_useclp" = "xyes"], [AC_SUBST([CXXFLAGS], ["-DUSECLP $CXXFLAGS"])])
 
 # If statis is enabled, directly assign .a files to LIBS
 AS_IF([test "x$enable_static" = "xyes"], [AC_SUBST([LIBS], ["-lz $LIBS"])])
