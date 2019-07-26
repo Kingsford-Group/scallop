@@ -46,7 +46,7 @@ If you need industrial-grade technical support, please consider the options at
 # Installation
 Download the source code of Scallop from
 [here](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.4/scallop-0.10.4.tar.gz).
-Scallop uses additional libraries of Boost and htslib (*NOTE:* from v0.10.4 Scallop does not require Clp). 
+Scallop uses additional libraries of Boost and htslib (*NOTE:* from v0.10.4 the dependence on Clp is optional). 
 If they have not been installed in your system, you first
 need to download and install them. You might also need to
 export the runtime library path to certain environmental
@@ -91,14 +91,47 @@ is an additional `lib` following the installation path):
 ```
 export LD_LIBRARY_PATH=/path/to/your/htslib/lib:$LD_LIBRARY_PATH
 ```
+## Install Clp (optional since v0.10.4)
+*NOTE:* Clp will be used to solve the linear programming instances
+created when decomposing unsplitable vertices. An alternative algorithm
+is provided in Scallop. Our testing shows that these two algorithms
+give very similar results.
+
+If Clp has not been installed in your system, 
+download Clp [(license)](https://opensource.org/licenses/eclipse-1.0)
+from (https://projects.coin-or.org/Clp). 
+Use the following to install Clp
+```
+./configure --disable-bzlib --disable-zlib
+make
+make install
+```
+The default installation of Clp is the current directory, rather than `/usr/lib`.
+If you would install it to a different location, replace the above `configure` line with
+the following (by adding `--prefix=/path/to/your/Clp` to the end):
+```
+./configure --disable-bzlib --disable-zlib --prefix=/path/to/your/Clp
+```
+You need to export the runtime library path (note that there
+is an additional `lib` following the installation path):
+```
+export LD_LIBRARY_PATH=/path/to/your/Clp/lib:$LD_LIBRARY_PATH
+```
 
 ## Compile Scallop
 
-Use the following to compile Scallop:
+Use the following to compile Scallop (without Clp; therefore the alternative algorithm for decomposing unsplitable vertices will be used; available
+for versions newer than v0.10.4):
 ```
 ./configure --with-htslib=/path/to/your/htslib --with-boost=/path/to/your/boost
 make
 ```
+Use the following to compile Scallop (with Clp; therefore an linear programming formulation will be used to decompose unsplitable vertices):
+```
+./configure --with-htslib=/path/to/your/htslib --with-boost=/path/to/your/boost --enable-useclp --with-clp=/path/to/your/Clp
+make
+```
+
 If some of the dependencies are installed in the default system directory (for example, `/usr/lib`),
 then the corresponding `--with-` option might not be necessary.
 The executable file `scallop` will appear at `src/scallop`.
