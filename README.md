@@ -94,7 +94,8 @@ export LD_LIBRARY_PATH=/path/to/your/htslib/lib:$LD_LIBRARY_PATH
 ## Install Clp (optional since v0.10.4)
 *NOTE:* Clp will be used to solve the linear programming instances
 created when decomposing unsplitable vertices. An alternative algorithm
-is provided in Scallop. Our testing shows that these two algorithms
+is provided in Scallop from version v0.10.4~(and hence since then the installation of Clp becomes optional).
+Our testing shows that these two algorithms
 give very similar results.
 
 If Clp has not been installed in your system, 
