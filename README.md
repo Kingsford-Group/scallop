@@ -1,3 +1,5 @@
+[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/scallop/README.html)
+
 # Overview
 Scallop is an accurate reference-based transcript assembler. Scallop features
 its high accuracy in assembling multi-exon transcripts as well as lowly
