@@ -85,7 +85,7 @@ int gtf::add_edges(splice_graph &gr)
 			assert(it != imap.end());		// make sure all input transcripts with >= 1 coverage 
 			while(true)
 			{
-				int uu = distance((SIMI)(imap.begin()), it) + 1;
+				int uu = std::distance((SIMI)(imap.begin()), it) + 1;
 				add_single_edge(u, uu, expr, gr);
 				u = uu;
 				if(upper(it->first) >= ge.second) break;
