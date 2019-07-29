@@ -46,6 +46,8 @@ hit& hit::operator=(const hit &h)
 	end_boundary = h.end_boundary;
 	phasing = h.phasing;
 
+	if(cigar != NULL) delete[] cigar;
+
 	cigar = new uint32_t[h.n_cigar];
 	memcpy(cigar, h.cigar, 4 * h.n_cigar);
 	return *this;
@@ -322,6 +324,7 @@ int hit::get_matched_intervals(vector<int64_t> &v) const
 	}
 	p2 = rpos;
 	v.push_back(pack(p1, p2));
+	return 0;
 }
 
 /*

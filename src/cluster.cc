@@ -186,6 +186,7 @@ bool cluster::verify_subset(int x, int y)
 
 		return true;
 	}
+	return false;
 }
 
 int cluster::print()

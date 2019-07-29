@@ -46,28 +46,43 @@ public:
 	double ratio;				// worst ratio
 	vector<equation> eqns;		// split results
 	MPID pe2w;					// decompose results (for pairs of edges)
-	MID se2w;					// decompose results (for single edges)
+
+#ifdef USECLP
+	MID se2w;
+#endif
 
 public:
 	int classify();												// compute status
 	int build();												// give solution
 
+	// init
 	int build_indices();										// build u2e and e2u
 	int build_bipartite_graph();								// build bipartite graph
+	vector<double> compute_balanced_weights();					// balanced weights
+
+	// decompose splitable vertex
+	int split();												// for splitable vertices
+
+	// decompose unsplitable vertex with greedy algorithm
+	int thread();												// for unsplitable vertices
+	int thread_isolate1(int k, vector<double> &vw);
+	int thread_isolate2(int k, vector<double> &vw);
+	bool thread_leaf(vector<double> &vw);
+	bool thread_turn(vector<double> &vw);
+
+#ifdef USECLP
+	// decompose unsplitable vertex with LP 
+	int lpsolve();
 	int extend_bipartite_graph_max();							// extended graph
 	int extend_bipartite_graph_all();							// extended graph
 	int build_maximum_spanning_tree();							// make ug a (maximum) spanning tree
-	int split();												// split
 	int decompose0_clp();										// solve LP with CLP
 	int decompose1_clp();										// solve LP with CLP
 	int decompose2_clp();										// solve LP with CLP
-	vector<double> compute_balanced_weights();					// balanced weights
-	PI filter_hyper_edge();										// try to filter hyper-edge
-	PI filter_small_hyper_edge();								// hyper-edge w.r.t. the smallest edge
-	PI filter_cycle_hyper_edge();								// hyper-edge w.r.t. any cycle
+#endif
 
 	// print and stats
-	int print() const;
+	int print();
 	int stats();
 };
 
