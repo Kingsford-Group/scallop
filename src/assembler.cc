@@ -16,7 +16,6 @@ See LICENSE for licensing.
 #include "sgraph_compare.h"
 #include "filter.h"
 #include "cluster.h"
-#include "quantifier.h"
 
 assembler::assembler()
 {
