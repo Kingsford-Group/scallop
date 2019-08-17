@@ -81,7 +81,7 @@ bool output_tex_files = false;
 string fixed_gene_name = "";
 int batch_bundle_size = 100;
 int verbose = 1;
-string version = "Scallop-LR-v0.9.2";
+string version = "v0.9.2";
 
 int parse_arguments(int argc, const char ** argv)
 {
@@ -495,7 +495,7 @@ int print_logo()
 int print_help()
 {
 	printf("\n");
-	printf("Usage: scallop -i <bam-file> -o <gtf-file> -c <ccs-header-file> [options]\n");
+	printf("Usage: scallop-lr -i <bam-file> -o <gtf-file> -c <ccs-header-file> [options]\n");
 	printf("\n");
 	printf("Options:\n");
 	printf(" %-42s  %s\n", "--help",  "print usage of Scallop and exit");
@@ -517,6 +517,6 @@ int print_help()
 
 int print_copyright()
 {
-	printf("Scallop %s (c) 2018 Mingfu Shao, Carl Kingsford, and Carnegie Mellon University\n", version.c_str());
+	printf("Scallop-LR %s (c) 2018 Mingfu Shao, Carl Kingsford, and Carnegie Mellon University\n", version.c_str());
 	return 0;
 }
