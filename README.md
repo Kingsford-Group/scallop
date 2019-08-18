@@ -2,7 +2,7 @@
 
 # Overview
 Scallop-LR is a reference-based transcript assembler for long-reads RNA-seq data.
-Its method has been described in the manuscript at (https://doi.org/10.1101/632703).
+Its method has been described in the manuscript at [bioRxiv](https://doi.org/10.1101/632703).
 The datasets and scripts used in the manuscript to illustrate its performance
 are available at (https://github.com/Kingsford-Group/lrassemblyanalysis).
 
@@ -60,7 +60,7 @@ export LD_LIBRARY_PATH=/path/to/your/htslib/lib:$LD_LIBRARY_PATH
 ## Install Clp (optional since v0.9.2)
 *NOTE:* Clp will be used to solve the linear programming instances
 created when decomposing unsplitable vertices. An alternative algorithm
-is provided in Scallop-LR from version v0.9.2~(and hence since then the installation of Clp becomes optional).
+is provided in Scallop-LR from version v0.9.2 (and hence since then the installation of Clp becomes optional).
 Our testing shows that these two algorithms
 give very similar results.
 
@@ -120,9 +120,9 @@ samtools sort input.bam > input.sort.bam
 The assembled transcripts shall be written as gtf format into `output.gtf`.
 
 `ccs-header-file` collects the header lines (i.e., lines started with `>`) of the `.fasta` files
-generated with PacBio SMRT pipeline. Scallop-LR uses these the information in the header lines
+generated with PacBio SMRT pipeline. Scallop-LR uses the information in the header lines
 to infer the start/end boundaries of the transcripts.
-A typical example of `ccs-header-file` looks like:
+A typical `ccs-header-file` looks like:
 
 ```
 >m151676_s1_p0/4994/28_2528_CCS strand=+;fiveseen=1;polyAseen=1;threeseen=1;fiveend=28;polyAend=2528;threeend=2552;primer=1;chimera=0
