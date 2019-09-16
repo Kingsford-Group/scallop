@@ -147,7 +147,6 @@ Please refer to the additional explanation below the table.
  --min_transcript_length_base      |100 | the minimum base length of a transcript
  --min_transcript_length_increase  | 50 | the minimum increased length of a transcript with each additional exon
  --min_mapping_quality        | 1 | ignore reads with mapping quality less than this value
- --max_num_cigar              | 10000 | ignore reads with CIGAR size larger than this value
  --min_bundle_gap             | 50 | the minimum distances required to start a new bundle
  --min_num_hits_in_bundle     | 1 | the minimum number of reads required in a bundle
  --min_flank_length           | 3 | the minimum match length required in each side for a spliced read
