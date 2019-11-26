@@ -43,6 +43,7 @@ int assembler::assemble()
 
 		bam1_core_t &p = b1t->core;
 
+		if(p.tid < 0) continue;
 		if((p.flag & 0x4) >= 1) continue;										// read is not mapped
 		if((p.flag & 0x100) >= 1 && use_second_alignment == false) continue;	// secondary alignment
 		if(p.n_cigar > max_num_cigar) continue;									// ignore hits with more than max-num-cigar types
