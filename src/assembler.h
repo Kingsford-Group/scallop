@@ -45,6 +45,7 @@ private:
 	int assign_RPKM();
 	int write();
 	int compare(splice_graph &gr, const string &ref, const string &tex = "");
+	bool determine_regional_graph(splice_graph &gr);
 };
 
 #endif

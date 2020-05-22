@@ -27,6 +27,7 @@ public:
 	int type;			// for various usage
 	char lstrand;		// left side strand
 	char rstrand;		// right side strand	
+	bool regional;		// if a vertex is regional
 };
 
 #endif

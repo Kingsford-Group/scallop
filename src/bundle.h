@@ -30,6 +30,7 @@ public:
 	vector<junction> junctions;		// splice junctions
 	vector<region> regions;			// regions
 	vector<partial_exon> pexons;	// partial exons
+	vector<bool> regional;			// if a pe is regional
 	split_interval_map pmap;		// partial exon map
 	splice_graph gr;				// splice graph
 	hyper_set hs;					// hyper edges

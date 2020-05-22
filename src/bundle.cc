@@ -287,10 +287,19 @@ int bundle::build_regions()
 int bundle::build_partial_exons()
 {
 	pexons.clear();
+	regional.clear();
 	for(int i = 0; i < regions.size(); i++)
 	{
 		region &r = regions[i];
-		pexons.insert(pexons.end(), r.pexons.begin(), r.pexons.end());
+		for(int k = 0; k < r.pexons.size(); k++)
+		{
+			partial_exon &pe = r.pexons[k];
+			pexons.push_back(pe);
+			if((pe.lpos != lpos || pe.rpos != rpos) && pe.ltype == START_BOUNDARY && pe.rtype == END_BOUNDARY) regional.push_back(true);
+			else regional.push_back(false);
+			//printf("regional = %s, ", regional.back() ? "TRUE" : "FALSE"); pe.print(k);
+		}
+		//pexons.insert(pexons.end(), r.pexons.begin(), r.pexons.end());
 	}
 	return 0;
 }
@@ -557,6 +566,7 @@ int bundle::build_splice_graph()
 		vi.rpos = r.rpos;
 		vi.length = length;
 		vi.stddev = r.dev;// < 1.0 ? 1.0 : r.dev;
+		vi.regional = regional[i];
 		gr.set_vertex_info(i + 1, vi);
 	}
 

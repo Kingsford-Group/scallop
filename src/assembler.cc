@@ -153,6 +153,9 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0)
 		splice_graph &gr = sg.subs[k];
 		hyper_set &hs = sg.hss[k];
 
+		if(determine_regional_graph(gr) == true) continue;
+		if(gr.num_edges() <= 0) continue;
+
 		gr.gid = gid;
 		scallop sc(gr, hs);
 		sc.assemble();
@@ -183,6 +186,17 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0)
 	if(ft.trs.size() >= 1) trsts.insert(trsts.end(), ft.trs.begin(), ft.trs.end());
 
 	return 0;
+}
+
+bool assembler::determine_regional_graph(splice_graph &gr)
+{
+	bool all_regional = true;
+	for(int i = 1; i < gr.num_vertices() - 1; i++)
+	{
+		if(gr.get_vertex_info(i).regional == false) all_regional = false;
+		if(all_regional == false) break;
+	}
+	return all_regional;
 }
 
 int assembler::assign_RPKM()
