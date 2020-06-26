@@ -88,6 +88,7 @@ extern int simulation_max_edge_weight;
 
 // input and output
 extern string algo;
+extern string gene_prefix;
 extern string input_file;
 extern string ref_file;
 extern string ref_file1;

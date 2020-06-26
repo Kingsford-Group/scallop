@@ -145,7 +145,7 @@ int assembler::assemble(const splice_graph &gr0, const hyper_set &hs0)
 	vector<transcript> gv;
 	for(int k = 0; k < sg.subs.size(); k++)
 	{
-		string gid = "gene." + tostring(index) + "." + tostring(k);
+		string gid = gene_prefix + tostring(index) + "." + tostring(k);
 		if(fixed_gene_name != "" && gid != fixed_gene_name) continue;
 
 		if(verbose >= 2 && (k == 0 || fixed_gene_name != "")) sg.print();
