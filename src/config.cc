@@ -65,6 +65,7 @@ int simulation_max_edge_weight = 0;
 
 // input and output
 string algo = "scallop";
+string gene_prefix = "gene.";
 string input_file;
 string ref_file;
 string ref_file1;
@@ -340,6 +341,13 @@ int parse_arguments(int argc, const char ** argv)
 		else if(string(argv[i]) == "--batch_bundle_size")
 		{
 			batch_bundle_size = atoi(argv[i + 1]);
+			i++;
+		}
+		else if(string(argv[i]) == "--gene-prefix")
+		{
+			string new_prefix = argv[i + 1];
+			if(!new_prefix.empty()) gene_prefix = std::move(new_prefix);
+			if(gene_prefix.back() != '.') gene_prefix += '.';
 			i++;
 		}
 	}
