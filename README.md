@@ -19,7 +19,7 @@ It is available at both [the bioinformatics chat](https://bioinformatics.chat/sc
 Latest release of Scallop is [v0.10.5](https://github.com/Kingsford-Group/scallop/releases/tag/v0.10.5),
 including binary 
 (for both [linux](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.5/scallop-0.10.5_linux_x86_64.tar.gz)
-and [mac](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.5/scallop-0.10.5_macOS_10.14.tar.gz))
+and [mac](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.5/scallop-0.10.5_macOS.tar.gz))
 and [source code](https://github.com/Kingsford-Group/scallop/releases/download/v0.10.5/scallop-0.10.5.tar.gz).
 
 Below  we list the systems that have been tested for whether the Scallop binary can run or not.
